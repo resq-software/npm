@@ -7,7 +7,23 @@
 		"coverage",
 		"lib",
 		"node_modules",
-		"pnpm-lock.yaml"
+		"pnpm-lock.yaml",
+		"src/styles"
 	],
-	"words": ["Farmingdale", "Odnis", "bunx", "codegen", "genai", "subdirs"]
+	"words": [
+		"Farmingdale",
+		"Odnis",
+		"vaul",
+		"cmdk",
+		"sonner",
+		"cva",
+		"clsx",
+		"oklch",
+		"shadcn",
+		"recharts",
+		"embla",
+		"tailwind",
+		"tsdown",
+		"resq"
+	]
 }
