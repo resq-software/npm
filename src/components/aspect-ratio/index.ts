@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./aspect-ratio";
+export * from "./aspect-ratio.js";

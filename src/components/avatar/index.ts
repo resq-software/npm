@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./avatar";
+export * from "./avatar.js";

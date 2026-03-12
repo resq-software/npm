@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./badge";
+export * from "./badge.js";

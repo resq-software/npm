@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./chart";
+export * from "./chart.js";

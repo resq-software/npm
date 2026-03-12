@@ -1,3 +1,6 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from "eslint-plugin-storybook";
+
 import comments from "@eslint-community/eslint-plugin-eslint-comments/configs";
 import eslint from "@eslint/js";
 import vitest from "@vitest/eslint-plugin";
@@ -32,10 +35,12 @@ export default tseslint.config(
 			tseslint.configs.strictTypeChecked,
 			tseslint.configs.stylisticTypeChecked,
 		],
-		files: ["**/*.{js,ts}"],
+		files: ["**/*.{js,jsx,ts,tsx}"],
 		languageOptions: {
 			parserOptions: {
-				projectService: { allowDefaultProject: ["*.config.*s"] },
+				projectService: {
+					allowDefaultProject: ["*.config.*s", ".storybook/*.ts"],
+				},
 			},
 		},
 		rules: {
@@ -45,11 +50,17 @@ export default tseslint.config(
 				"always",
 				{ enforceForIfStatements: true },
 			],
+			// eslint-plugin-n uses Node module resolution which can't resolve
+			// TypeScript source files (.tsx/.ts) or Storybook package aliases.
+			// TypeScript's own compiler handles module resolution for these files.
+			"n/no-missing-import": "off",
 			"no-useless-rename": "error",
 			"object-shorthand": "error",
 			"operator-assignment": "error",
 		},
 		settings: {
+			// Allow eslint-plugin-n to resolve TypeScript source files by extension.
+			n: { tryExtensions: [".js", ".jsx", ".ts", ".tsx", ".json", ".node"] },
 			perfectionist: { partitionByComment: true, type: "natural" },
 			vitest: { typecheck: true },
 		},
@@ -58,6 +69,52 @@ export default tseslint.config(
 		extends: [tseslint.configs.disableTypeChecked],
 		files: ["**/*.md/*.ts"],
 		rules: { "n/no-missing-import": "off" },
+	},
+	{
+		// Storybook config files run through allowDefaultProject — disable type-checked rules
+		// that produce false positives without full project context.
+		extends: [tseslint.configs.disableTypeChecked],
+		files: [".storybook/*.ts"],
+		rules: { "n/no-missing-import": "off" },
+	},
+	{
+		// Stories files use Storybook/Vite bundler resolution, not Node resolution.
+		// Type-safe rules produce false positives against Storybook's loosely-typed APIs.
+		files: ["**/*.stories.*"],
+		rules: {
+			"@typescript-eslint/no-confusing-void-expression": "off",
+			"@typescript-eslint/no-unsafe-argument": "off",
+			"@typescript-eslint/no-unsafe-assignment": "off",
+			"@typescript-eslint/no-unsafe-call": "off",
+			"n/no-missing-import": "off",
+		},
+	},
+	{
+		// Shadcn-generated components wrap third-party libs (recharts, embla-carousel, cmdk)
+		// that expose loosely-typed APIs. Disable unsafe-* rules rather than casting everything.
+		files: [
+			"src/components/carousel/carousel.tsx",
+			"src/components/chart/chart.tsx",
+			"src/components/combobox/combobox.tsx",
+			"src/components/sidebar/sidebar.tsx",
+		],
+		rules: {
+			"@typescript-eslint/consistent-indexed-object-style": "off",
+			"@typescript-eslint/consistent-type-definitions": "off",
+			"@typescript-eslint/no-non-null-assertion": "off",
+			"@typescript-eslint/no-unnecessary-condition": "off",
+			"@typescript-eslint/no-unnecessary-type-assertion": "off",
+			"@typescript-eslint/no-unsafe-argument": "off",
+			"@typescript-eslint/no-unsafe-assignment": "off",
+			"@typescript-eslint/no-unsafe-call": "off",
+			"@typescript-eslint/no-unsafe-member-access": "off",
+			"@typescript-eslint/no-unused-expressions": "off",
+			"@typescript-eslint/prefer-nullish-coalescing": "off",
+			"@typescript-eslint/restrict-template-expressions": "off",
+			"regexp/no-unused-capturing-group": "off",
+			"regexp/prefer-w": "off",
+			"regexp/use-ignore-case": "off",
+		},
 	},
 	{
 		extends: [vitest.configs.recommended],
@@ -79,4 +136,5 @@ export default tseslint.config(
 			],
 		},
 	},
+	storybook.configs["flat/recommended"],
 );

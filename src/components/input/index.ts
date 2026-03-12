@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./input";
+export * from "./input.js";

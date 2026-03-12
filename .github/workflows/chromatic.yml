@@ -1,0 +1,32 @@
+name: Chromatic
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  chromatic:
+    name: Chromatic
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Required: Chromatic uses git history to determine which stories changed.
+          fetch-depth: 0
+      - uses: ./.github/actions/prepare
+      - name: Build Storybook
+        run: pnpm build-storybook --quiet
+      - name: Run Chromatic
+        uses: chromatic-com/action@v3
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          storybookBuildDir: storybook-static
+          # Only snapshot stories whose files changed in this push/PR.
+          onlyChanged: true
+          # Auto-accept changes when merging into master (sets new baseline).
+          autoAcceptChanges: "master"

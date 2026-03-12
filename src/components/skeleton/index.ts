@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./skeleton";
+export * from "./skeleton.js";

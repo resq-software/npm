@@ -10,5 +10,6 @@ export default defineConfig({
 	],
 	external: ["react", "react-dom", "tailwindcss"],
 	outDir: "lib",
+	platform: "browser",
 	unbundle: true,
 });

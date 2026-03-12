@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./combobox";
+export * from "./combobox.js";

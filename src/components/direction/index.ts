@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./direction";
+export * from "./direction.js";

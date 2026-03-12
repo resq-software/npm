@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./collapsible";
+export * from "./collapsible.js";

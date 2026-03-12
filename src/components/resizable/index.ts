@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./resizable";
+export * from "./resizable.js";

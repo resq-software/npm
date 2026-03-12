@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./button-group";
+export * from "./button-group.js";

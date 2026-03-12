@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./slider";
+export * from "./slider.js";

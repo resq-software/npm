@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./label";
+export * from "./label.js";

@@ -1,7 +1,8 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Preview } from "@storybook/react";
+import type { Preview } from "@storybook/nextjs";
+
 import "../src/styles/globals.css";
 
 const preview: Preview = {

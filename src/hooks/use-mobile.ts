@@ -25,14 +25,14 @@ export function useIsMobile() {
 
 	React.useEffect(() => {
 		const mql = globalThis.matchMedia(
-			`(max-width: ${MOBILE_BREAKPOINT - 1}px)`,
+			`(max-width: ${String(MOBILE_BREAKPOINT - 1)}px)`,
 		);
 		const onChange = () => {
-			setIsMobile(globalThis.innerWidth < MOBILE_BREAKPOINT);
+			setIsMobile(mql.matches);
 		};
 		mql.addEventListener("change", onChange);
-		setIsMobile(globalThis.innerWidth < MOBILE_BREAKPOINT);
-		return () => mql.removeEventListener("change", onChange);
+		setIsMobile(mql.matches);
+		return () => { mql.removeEventListener("change", onChange); };
 	}, []);
 
 	return !!isMobile;
