@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/prepare
       - name: Build Storybook
-        run: pnpm build-storybook --quiet
+        run: bun build-storybook --quiet
       - name: Run Chromatic
         uses: chromatic-com/action@v3
         with:

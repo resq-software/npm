@@ -310,14 +310,13 @@
 	"scripts": {
 		"build": "tsdown",
 		"build-storybook": "storybook build",
-		"chromatic": "chromatic --build-script-name=build-storybook",
+		"chromatic": "bunx chromatic --build-script-name=build-storybook",
 		"dev": "tsdown --watch",
-		"docs": "pnpm dlx typedoc --entryPointStrategy Expand src",
+		"docs": "bunx typedoc --entryPointStrategy Expand src",
 		"format": "biome format --write .",
 		"lint": "biome check .",
 		"lint:knip": "knip",
 		"lint:md": "markdownlint \"**/*.md\" \".github/**/*.md\"",
-		"lint:packages": "pnpm dedupe --check",
 		"lint:spelling": "cspell \"**\" \".github/**/*\"",
 		"prepare": "husky",
 		"storybook": "storybook dev -p 6006",
@@ -325,8 +324,8 @@
 		"tsc": "tsc"
 	},
 	"lint-staged": {
-		"*.{ts,tsx,js,jsx,json}": "biome check --write --no-errors-on-unmatched",
-		"*.{md,css,yaml,yml,sh}": "biome format --write --no-errors-on-unmatched"
+		"*.{ts,tsx,js,jsx,json}": "./node_modules/.bin/biome check --write --no-errors-on-unmatched",
+		"*.{md,css,yaml,yml,sh}": "./node_modules/.bin/biome format --write --no-errors-on-unmatched"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.2.0",
@@ -384,7 +383,7 @@
 		"react-dom": ">=19",
 		"tailwindcss": ">=4"
 	},
-	"packageManager": "pnpm@10.18.0",
+	"packageManager": "bun@1.3.10",
 	"engines": {
 		"node": ">=20.19.0"
 	},

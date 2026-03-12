@@ -9,31 +9,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```sh
-pnpm build           # Build src/ → lib/ using tsdown
-pnpm dev             # Build in watch mode
-pnpm test            # Run Vitest tests
-pnpm tsc             # Type-check without emitting
-pnpm lint            # ESLint (run pnpm build first)
-pnpm lint:knip       # Detect unused files/exports
-pnpm lint:spelling   # cspell spell check
-pnpm format --write  # Auto-format with Prettier
-pnpm storybook       # Start Storybook on port 6006
-pnpm build-storybook # Build Storybook static output
+bun build           # Build src/ → lib/ using tsdown
+bun dev             # Build in watch mode
+bun test            # Run Vitest tests
+bun tsc             # Type-check without emitting
+bun lint            # Biome check
+bun lint:knip       # Detect unused files/exports
+bun lint:spelling   # cspell spell check
+bun format          # Auto-format with Biome
+bun storybook       # Start Storybook on port 6006
+bun build-storybook # Build Storybook static output
 ```
 
 Run a single test file:
 
 ```sh
-pnpm test src/components/button/button.test.tsx
+bun test src/components/button/button.test.tsx
 ```
 
 Run tests with coverage:
 
 ```sh
-pnpm test --coverage
+bun test --coverage
 ```
-
-**Important:** `pnpm build` must run before `pnpm lint` — some lint rules inspect built files.
 
 ## Architecture
 
@@ -76,11 +74,11 @@ All source files carry an Apache-2.0 license header (see existing files for form
 
 - Vitest, configured in `vitest.config.ts`.
 - `console-fail-test` is active: any `console.log/warn/error` call inside a test causes a failure — use mocks or suppress intentionally.
-- Stories (`.stories.tsx`) use Storybook 8 with `@storybook/react`.
+- Stories (`.stories.tsx`) use Storybook 10 with `@storybook/react`.
 
 ### Tooling notes
 
-- Package manager: **pnpm** — do not use npm or yarn.
-- Pre-commit hook (Husky + lint-staged): auto-formats all staged files with Prettier.
+- Package manager: **bun** — do not use npm, yarn, or pnpm.
+- Pre-commit hook (Husky + lint-staged): auto-formats all staged files with Biome.
 - `knip` tracks unused exports — remove dead code rather than suppressing.
-- `perfectionist` ESLint plugin enforces natural sort order on imports and object keys.
+- Linting and formatting handled by Biome (`biome.json`).
