@@ -1,14 +1,9 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
-import {
-	AlertTriangleIcon,
-	CheckCircleIcon,
-	ClockIcon,
-	RadioIcon,
-} from "lucide-react";
+import { AlertTriangleIcon, CheckCircleIcon, ClockIcon, RadioIcon } from "lucide-react";
 
 import { Badge } from "./badge";
 
@@ -16,14 +11,7 @@ const meta: Meta<typeof Badge> = {
 	argTypes: {
 		variant: {
 			control: "select",
-			options: [
-				"default",
-				"secondary",
-				"destructive",
-				"outline",
-				"ghost",
-				"link",
-			],
+			options: ["default", "secondary", "destructive", "outline", "ghost", "link"],
 		},
 	},
 	component: Badge,

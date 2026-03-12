@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { MapPinIcon } from "lucide-react";
 
@@ -47,21 +47,13 @@ export const Default: Story = {
 						<Label className="text-right" htmlFor="sheet-name">
 							Name
 						</Label>
-						<Input
-							className="col-span-3"
-							defaultValue="Alex Rivera"
-							id="sheet-name"
-						/>
+						<Input className="col-span-3" defaultValue="Alex Rivera" id="sheet-name" />
 					</div>
 					<div className="grid grid-cols-4 items-center gap-4">
 						<Label className="text-right" htmlFor="sheet-callsign">
 							Callsign
 						</Label>
-						<Input
-							className="col-span-3"
-							defaultValue="BRAVO-7"
-							id="sheet-callsign"
-						/>
+						<Input className="col-span-3" defaultValue="BRAVO-7" id="sheet-callsign" />
 					</div>
 				</div>
 				<SheetFooter>
@@ -145,10 +137,7 @@ export const MissionDetail: Story = {
 					<Separator />
 					<div>
 						<p className="text-muted-foreground mb-1">Latest update</p>
-						<p>
-							EAGLE-2 detected heat signature at Grid 4B-North. Ground team
-							dispatched.
-						</p>
+						<p>EAGLE-2 detected heat signature at Grid 4B-North. Ground team dispatched.</p>
 					</div>
 				</div>
 				<SheetFooter>

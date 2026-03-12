@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import {
 	AlignCenterIcon,
@@ -14,11 +14,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "../button";
-import {
-	ButtonGroup,
-	ButtonGroupSeparator,
-	ButtonGroupText,
-} from "./button-group";
+import { ButtonGroup, ButtonGroupSeparator, ButtonGroupText } from "./button-group";
 
 const meta: Meta<typeof ButtonGroup> = {
 	argTypes: {

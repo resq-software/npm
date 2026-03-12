@@ -17,7 +17,7 @@
 import { cva } from "class-variance-authority";
 import { ChevronDownIcon } from "lucide-react";
 import { NavigationMenu as NavigationMenuPrimitive } from "radix-ui";
-import * as React from "react";
+import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
@@ -64,10 +64,7 @@ function NavigationMenuList({
 }: React.ComponentProps<typeof NavigationMenuPrimitive.List>) {
 	return (
 		<NavigationMenuPrimitive.List
-			className={cn(
-				"gap-0 group flex flex-1 list-none items-center justify-center",
-				className,
-			)}
+			className={cn("gap-0 group flex flex-1 list-none items-center justify-center", className)}
 			data-slot="navigation-menu-list"
 			{...props}
 		/>
@@ -153,11 +150,7 @@ function NavigationMenuViewport({
 	...props
 }: React.ComponentProps<typeof NavigationMenuPrimitive.Viewport>) {
 	return (
-		<div
-			className={cn(
-				"absolute top-full left-0 isolate z-50 flex justify-center",
-			)}
-		>
+		<div className={cn("absolute top-full left-0 isolate z-50 flex justify-center")}>
 			<NavigationMenuPrimitive.Viewport
 				className={cn(
 					"bg-popover text-popover-foreground data-open:animate-in data-closed:animate-out data-closed:zoom-out-95 data-open:zoom-in-90 ring-foreground/10 rounded-lg shadow ring-1 duration-100 origin-top-center relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden md:w-[var(--radix-navigation-menu-viewport-width)]",

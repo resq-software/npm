@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import * as React from "react";
 
@@ -42,16 +42,8 @@ export const WithLabel: Story = {
 					<span className="font-medium">Drone altitude limit</span>
 					<span className="text-muted-foreground">{value[0]} km</span>
 				</div>
-				<Slider
-					max={12}
-					min={0}
-					onValueChange={setValue}
-					step={0.5}
-					value={value}
-				/>
-				<p className="text-xs text-muted-foreground">
-					Maximum 12 km for extended-range units.
-				</p>
+				<Slider max={12} min={0} onValueChange={setValue} step={0.5} value={value} />
+				<p className="text-xs text-muted-foreground">Maximum 12 km for extended-range units.</p>
 			</div>
 		);
 	},
@@ -68,13 +60,7 @@ export const RangeWithLabel: Story = {
 						{range[0]}–{range[1]} m
 					</span>
 				</div>
-				<Slider
-					max={150}
-					min={0}
-					onValueChange={setRange}
-					step={5}
-					value={range}
-				/>
+				<Slider max={150} min={0} onValueChange={setRange} step={5} value={range} />
 			</div>
 		);
 	},

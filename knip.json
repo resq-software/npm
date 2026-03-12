@@ -1,6 +1,7 @@
 {
 	"$schema": "https://unpkg.com/knip@5.64.1/schema.json",
 	"entry": ["src/**/*.test.*", "src/**/*.stories.*", "src/index.ts"],
+	"ignoreDependencies": ["@storybook/addon-docs", "tailwindcss", "tw-animate-css"],
 	"ignoreExportsUsedInFile": { "interface": true, "type": true },
 	"project": ["src/**/*.ts", "src/**/*.tsx"]
 }

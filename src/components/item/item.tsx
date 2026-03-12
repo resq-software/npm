@@ -16,7 +16,7 @@
 
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
-import * as React from "react";
+import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 import { Separator } from "../separator/separator.js";
@@ -35,10 +35,7 @@ function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function ItemSeparator({
-	className,
-	...props
-}: React.ComponentProps<typeof Separator>) {
+function ItemSeparator({ className, ...props }: React.ComponentProps<typeof Separator>) {
 	return (
 		<Separator
 			className={cn("my-2", className)}
@@ -77,8 +74,7 @@ function Item({
 	size = "default",
 	variant = "default",
 	...props
-}: React.ComponentProps<"div"> &
-	VariantProps<typeof itemVariants> & { asChild?: boolean }) {
+}: React.ComponentProps<"div"> & VariantProps<typeof itemVariants> & { asChild?: boolean }) {
 	const Comp = asChild ? Slot.Root : "div";
 	return (
 		<Comp
@@ -110,11 +106,7 @@ const itemMediaVariants = cva(
 
 function ItemActions({ className, ...props }: React.ComponentProps<"div">) {
 	return (
-		<div
-			className={cn("gap-2 flex items-center", className)}
-			data-slot="item-actions"
-			{...props}
-		/>
+		<div className={cn("gap-2 flex items-center", className)} data-slot="item-actions" {...props} />
 	);
 }
 
@@ -147,10 +139,7 @@ function ItemDescription({ className, ...props }: React.ComponentProps<"p">) {
 function ItemFooter({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
-			className={cn(
-				"gap-2 flex basis-full items-center justify-between",
-				className,
-			)}
+			className={cn("gap-2 flex basis-full items-center justify-between", className)}
 			data-slot="item-footer"
 			{...props}
 		/>
@@ -160,10 +149,7 @@ function ItemFooter({ className, ...props }: React.ComponentProps<"div">) {
 function ItemHeader({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
-			className={cn(
-				"gap-2 flex basis-full items-center justify-between",
-				className,
-			)}
+			className={cn("gap-2 flex basis-full items-center justify-between", className)}
 			data-slot="item-header"
 			{...props}
 		/>

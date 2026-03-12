@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { CalendarIcon, RadioIcon, ShieldIcon } from "lucide-react";
 
@@ -56,9 +56,7 @@ export const ResponderProfile: Story = {
 								On duty
 							</Badge>
 						</div>
-						<p className="text-xs text-muted-foreground">
-							BRAVO-1 · Ground team lead
-						</p>
+						<p className="text-xs text-muted-foreground">BRAVO-1 · Ground team lead</p>
 						<div className="flex flex-col gap-1 mt-2 text-xs text-muted-foreground">
 							<div className="flex items-center gap-1.5">
 								<ShieldIcon className="size-3" />

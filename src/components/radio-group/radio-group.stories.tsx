@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Label } from "../label";
 import { RadioGroup, RadioGroupItem } from "./radio-group";
@@ -62,11 +62,7 @@ export const Priority: Story = {
 					},
 				].map(({ description, label, value }) => (
 					<div className="flex items-start gap-2" key={value}>
-						<RadioGroupItem
-							className="mt-0.5"
-							id={`priority-${value}`}
-							value={value}
-						/>
+						<RadioGroupItem className="mt-0.5" id={`priority-${value}`} value={value} />
 						<div>
 							<Label className="font-medium" htmlFor={`priority-${value}`}>
 								{label}

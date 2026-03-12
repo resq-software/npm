@@ -18,7 +18,7 @@
 
 import { XIcon } from "lucide-react";
 import { Dialog as SheetPrimitive } from "radix-ui";
-import * as React from "react";
+import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 import { Button } from "../button/button.js";
@@ -27,9 +27,7 @@ function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
 	return <SheetPrimitive.Root data-slot="sheet" {...props} />;
 }
 
-function SheetClose({
-	...props
-}: React.ComponentProps<typeof SheetPrimitive.Close>) {
+function SheetClose({ ...props }: React.ComponentProps<typeof SheetPrimitive.Close>) {
 	return <SheetPrimitive.Close data-slot="sheet-close" {...props} />;
 }
 
@@ -58,11 +56,7 @@ function SheetContent({
 				{children}
 				{showCloseButton && (
 					<SheetPrimitive.Close asChild data-slot="sheet-close">
-						<Button
-							className="absolute top-3 right-3"
-							size="icon-sm"
-							variant="ghost"
-						>
+						<Button className="absolute top-3 right-3" size="icon-sm" variant="ghost">
 							<XIcon />
 							<span className="sr-only">Close</span>
 						</Button>
@@ -122,16 +116,11 @@ function SheetOverlay({
 	);
 }
 
-function SheetPortal({
-	...props
-}: React.ComponentProps<typeof SheetPrimitive.Portal>) {
+function SheetPortal({ ...props }: React.ComponentProps<typeof SheetPrimitive.Portal>) {
 	return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />;
 }
 
-function SheetTitle({
-	className,
-	...props
-}: React.ComponentProps<typeof SheetPrimitive.Title>) {
+function SheetTitle({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Title>) {
 	return (
 		<SheetPrimitive.Title
 			className={cn("text-foreground text-base font-medium", className)}
@@ -141,9 +130,7 @@ function SheetTitle({
 	);
 }
 
-function SheetTrigger({
-	...props
-}: React.ComponentProps<typeof SheetPrimitive.Trigger>) {
+function SheetTrigger({ ...props }: React.ComponentProps<typeof SheetPrimitive.Trigger>) {
 	return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />;
 }
 

@@ -1,14 +1,9 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
-import {
-	InputOTP,
-	InputOTPGroup,
-	InputOTPSeparator,
-	InputOTPSlot,
-} from "./input-otp";
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "./input-otp";
 
 const meta: Meta<typeof InputOTP> = {
 	component: InputOTP,
@@ -73,8 +68,7 @@ export const WithDescription: Story = {
 				</InputOTP>
 			</div>
 			<p className="text-xs text-muted-foreground">
-				Didn't receive a code?{" "}
-				<button className="underline underline-offset-2">Resend</button>
+				Didn't receive a code? <button className="underline underline-offset-2">Resend</button>
 			</p>
 		</div>
 	),

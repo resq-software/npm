@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import {
 	NavigationMenu,
@@ -31,21 +31,15 @@ export const Default: Story = {
 						<div className="grid gap-2 p-4 w-64">
 							<NavigationMenuLink className="flex flex-col gap-0.5" href="#">
 								<span className="font-medium text-sm">Active missions</span>
-								<span className="text-xs text-muted-foreground">
-									Monitor all live missions
-								</span>
+								<span className="text-xs text-muted-foreground">Monitor all live missions</span>
 							</NavigationMenuLink>
 							<NavigationMenuLink className="flex flex-col gap-0.5" href="#">
 								<span className="font-medium text-sm">Zone editor</span>
-								<span className="text-xs text-muted-foreground">
-									Manage search perimeters
-								</span>
+								<span className="text-xs text-muted-foreground">Manage search perimeters</span>
 							</NavigationMenuLink>
 							<NavigationMenuLink className="flex flex-col gap-0.5" href="#">
 								<span className="font-medium text-sm">Drone fleet</span>
-								<span className="text-xs text-muted-foreground">
-									Status and assignments
-								</span>
+								<span className="text-xs text-muted-foreground">Status and assignments</span>
 							</NavigationMenuLink>
 						</div>
 					</NavigationMenuContent>
@@ -56,15 +50,11 @@ export const Default: Story = {
 						<div className="grid gap-2 p-4 w-64">
 							<NavigationMenuLink className="flex flex-col gap-0.5" href="#">
 								<span className="font-medium text-sm">Responders</span>
-								<span className="text-xs text-muted-foreground">
-									Availability and assignments
-								</span>
+								<span className="text-xs text-muted-foreground">Availability and assignments</span>
 							</NavigationMenuLink>
 							<NavigationMenuLink className="flex flex-col gap-0.5" href="#">
 								<span className="font-medium text-sm">Certifications</span>
-								<span className="text-xs text-muted-foreground">
-									Training records
-								</span>
+								<span className="text-xs text-muted-foreground">Training records</span>
 							</NavigationMenuLink>
 						</div>
 					</NavigationMenuContent>

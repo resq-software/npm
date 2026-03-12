@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Badge } from "../badge";
 import {
@@ -45,10 +45,7 @@ const missions = [
 	},
 ];
 
-const statusVariant: Record<
-	string,
-	"default" | "destructive" | "outline" | "secondary"
-> = {
+const statusVariant: Record<string, "default" | "destructive" | "outline" | "secondary"> = {
 	Active: "default",
 	Closed: "outline",
 	Standby: "secondary",
@@ -84,9 +81,7 @@ export const Default: Story = {
 						<TableCell>{m.zone}</TableCell>
 						<TableCell className="text-right">{m.responders}</TableCell>
 						<TableCell>
-							<Badge variant={statusVariant[m.status] ?? "outline"}>
-								{m.status}
-							</Badge>
+							<Badge variant={statusVariant[m.status] ?? "outline"}>{m.status}</Badge>
 						</TableCell>
 					</TableRow>
 				))}
@@ -109,10 +104,7 @@ export const Empty: Story = {
 			</TableHeader>
 			<TableBody>
 				<TableRow>
-					<TableCell
-						className="h-24 text-center text-muted-foreground"
-						colSpan={5}
-					>
+					<TableCell className="h-24 text-center text-muted-foreground" colSpan={5}>
 						No missions found.
 					</TableCell>
 				</TableRow>

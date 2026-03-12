@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { FilterIcon, SlidersHorizontalIcon } from "lucide-react";
 
@@ -9,13 +9,7 @@ import { Button } from "../button";
 import { Checkbox } from "../checkbox";
 import { Input } from "../input";
 import { Label } from "../label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "../select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../select";
 import {
 	Popover,
 	PopoverContent,
@@ -43,9 +37,7 @@ export const Default: Story = {
 			<PopoverContent>
 				<PopoverHeader>
 					<PopoverTitle>Dimensions</PopoverTitle>
-					<PopoverDescription>
-						Set the dimensions for the layer.
-					</PopoverDescription>
+					<PopoverDescription>Set the dimensions for the layer.</PopoverDescription>
 				</PopoverHeader>
 				<div className="grid gap-2">
 					<div className="grid grid-cols-3 items-center gap-2">
@@ -92,16 +84,14 @@ export const FilterPopover: Story = {
 					</div>
 					<div className="flex flex-col gap-2">
 						<Label className="text-sm">Show only</Label>
-						{["Unassigned zones", "Critical priority", "Missing persons"].map(
-							(label) => (
-								<div className="flex items-center gap-2" key={label}>
-									<Checkbox id={label} />
-									<Label className="font-normal" htmlFor={label}>
-										{label}
-									</Label>
-								</div>
-							),
-						)}
+						{["Unassigned zones", "Critical priority", "Missing persons"].map((label) => (
+							<div className="flex items-center gap-2" key={label}>
+								<Checkbox id={label} />
+								<Label className="font-normal" htmlFor={label}>
+									{label}
+								</Label>
+							</div>
+						))}
 					</div>
 					<div className="flex gap-2">
 						<Button className="flex-1" size="sm">
@@ -131,16 +121,14 @@ export const SettingsPopover: Story = {
 					<PopoverDescription>Customize the mission table.</PopoverDescription>
 				</PopoverHeader>
 				<div className="flex flex-col gap-2">
-					{["Show zone codes", "Show responder count", "Compact rows"].map(
-						(label) => (
-							<div className="flex items-center gap-2" key={label}>
-								<Checkbox defaultChecked id={label} />
-								<Label className="font-normal" htmlFor={label}>
-									{label}
-								</Label>
-							</div>
-						),
-					)}
+					{["Show zone codes", "Show responder count", "Compact rows"].map((label) => (
+						<div className="flex items-center gap-2" key={label}>
+							<Checkbox defaultChecked id={label} />
+							<Label className="font-normal" htmlFor={label}>
+								{label}
+							</Label>
+						</div>
+					))}
 				</div>
 			</PopoverContent>
 		</Popover>

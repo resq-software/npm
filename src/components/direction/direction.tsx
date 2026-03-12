@@ -17,7 +17,7 @@
 "use client";
 
 import { Direction } from "radix-ui";
-import * as React from "react";
+import type * as React from "react";
 
 function DirectionProvider({
 	children,
@@ -27,9 +27,7 @@ function DirectionProvider({
 	direction?: React.ComponentProps<typeof Direction.DirectionProvider>["dir"];
 }) {
 	return (
-		<Direction.DirectionProvider dir={direction ?? dir}>
-			{children}
-		</Direction.DirectionProvider>
+		<Direction.DirectionProvider dir={direction ?? dir}>{children}</Direction.DirectionProvider>
 	);
 }
 

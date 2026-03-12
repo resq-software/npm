@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import {
-	ChevronLeftIcon,
-	ChevronRightIcon,
-	MoreHorizontalIcon,
-} from "lucide-react";
-import * as React from "react";
+import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react";
+import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 import { Button } from "../button/button.js";
@@ -35,16 +31,12 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
 			aria-label="pagination"
 			className={cn("mx-auto flex w-full justify-center", className)}
 			data-slot="pagination"
-			role="navigation"
 			{...props}
 		/>
 	);
 }
 
-function PaginationContent({
-	className,
-	...props
-}: React.ComponentProps<"ul">) {
+function PaginationContent({ className, ...props }: React.ComponentProps<"ul">) {
 	return (
 		<ul
 			className={cn("gap-0.5 flex items-center", className)}
@@ -54,10 +46,7 @@ function PaginationContent({
 	);
 }
 
-function PaginationEllipsis({
-	className,
-	...props
-}: React.ComponentProps<"span">) {
+function PaginationEllipsis({ className, ...props }: React.ComponentProps<"span">) {
 	return (
 		<span
 			aria-hidden
@@ -78,19 +67,9 @@ function PaginationItem({ ...props }: React.ComponentProps<"li">) {
 	return <li data-slot="pagination-item" {...props} />;
 }
 
-function PaginationLink({
-	className,
-	isActive,
-	size = "icon",
-	...props
-}: PaginationLinkProps) {
+function PaginationLink({ className, isActive, size = "icon", ...props }: PaginationLinkProps) {
 	return (
-		<Button
-			asChild
-			className={cn(className)}
-			size={size}
-			variant={isActive ? "outline" : "ghost"}
-		>
+		<Button asChild className={cn(className)} size={size} variant={isActive ? "outline" : "ghost"}>
 			<a
 				aria-current={isActive ? "page" : undefined}
 				data-active={isActive}

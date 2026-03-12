@@ -1,14 +1,9 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
-import {
-	FileSearchIcon,
-	InboxIcon,
-	RadioTowerIcon,
-	ShieldOffIcon,
-} from "lucide-react";
+import { FileSearchIcon, InboxIcon, RadioTowerIcon, ShieldOffIcon } from "lucide-react";
 
 import { Button } from "../button";
 import {
@@ -37,9 +32,7 @@ export const Default: Story = {
 					<InboxIcon />
 				</EmptyMedia>
 				<EmptyTitle>No messages</EmptyTitle>
-				<EmptyDescription>
-					You don't have any messages yet. Start a conversation.
-				</EmptyDescription>
+				<EmptyDescription>You don't have any messages yet. Start a conversation.</EmptyDescription>
 			</EmptyHeader>
 			<EmptyContent>
 				<Button size="sm">New message</Button>
@@ -57,8 +50,8 @@ export const NoMissions: Story = {
 				</EmptyMedia>
 				<EmptyTitle>No active missions</EmptyTitle>
 				<EmptyDescription>
-					There are no missions running right now. Launch a new mission when an
-					incident is reported.
+					There are no missions running right now. Launch a new mission when an incident is
+					reported.
 				</EmptyDescription>
 			</EmptyHeader>
 			<EmptyContent>
@@ -77,8 +70,7 @@ export const NoSearchResults: Story = {
 				</EmptyMedia>
 				<EmptyTitle>No results found</EmptyTitle>
 				<EmptyDescription>
-					Your search for "Grid 9Z" returned no results. Try a different zone or
-					clear the filters.
+					Your search for "Grid 9Z" returned no results. Try a different zone or clear the filters.
 				</EmptyDescription>
 			</EmptyHeader>
 			<EmptyContent>
@@ -99,8 +91,7 @@ export const NoPermission: Story = {
 				</EmptyMedia>
 				<EmptyTitle>Access restricted</EmptyTitle>
 				<EmptyDescription>
-					You don't have permission to view this section. Contact your team lead
-					to request access.
+					You don't have permission to view this section. Contact your team lead to request access.
 				</EmptyDescription>
 			</EmptyHeader>
 		</Empty>

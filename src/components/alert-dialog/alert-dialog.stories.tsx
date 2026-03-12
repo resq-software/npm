@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Button } from "../button";
 import {
@@ -35,8 +35,8 @@ export const Default: Story = {
 				<AlertDialogHeader>
 					<AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
 					<AlertDialogDescription>
-						This action cannot be undone. This will permanently delete your
-						account and remove your data from our servers.
+						This action cannot be undone. This will permanently delete your account and remove your
+						data from our servers.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
@@ -58,8 +58,8 @@ export const DeleteMission: Story = {
 				<AlertDialogHeader>
 					<AlertDialogTitle>End Mission Alpha?</AlertDialogTitle>
 					<AlertDialogDescription>
-						This will terminate all active drone operations and mark the mission
-						as closed. Responders will be notified. This cannot be undone.
+						This will terminate all active drone operations and mark the mission as closed.
+						Responders will be notified. This cannot be undone.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
@@ -83,8 +83,8 @@ export const Confirm: Story = {
 				<AlertDialogHeader>
 					<AlertDialogTitle>Publish incident report?</AlertDialogTitle>
 					<AlertDialogDescription>
-						Once published, this report will be visible to all team members and
-						logged in the incident register.
+						Once published, this report will be visible to all team members and logged in the
+						incident register.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>

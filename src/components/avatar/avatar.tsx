@@ -17,7 +17,7 @@
 "use client";
 
 import { Avatar as AvatarPrimitive } from "radix-ui";
-import * as React from "react";
+import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
@@ -86,10 +86,7 @@ function AvatarGroup({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function AvatarGroupCount({
-	className,
-	...props
-}: React.ComponentProps<"div">) {
+function AvatarGroupCount({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
 			className={cn(
@@ -102,27 +99,14 @@ function AvatarGroupCount({
 	);
 }
 
-function AvatarImage({
-	className,
-	...props
-}: React.ComponentProps<typeof AvatarPrimitive.Image>) {
+function AvatarImage({ className, ...props }: React.ComponentProps<typeof AvatarPrimitive.Image>) {
 	return (
 		<AvatarPrimitive.Image
-			className={cn(
-				"rounded-full aspect-square size-full object-cover",
-				className,
-			)}
+			className={cn("rounded-full aspect-square size-full object-cover", className)}
 			data-slot="avatar-image"
 			{...props}
 		/>
 	);
 }
 
-export {
-	Avatar,
-	AvatarBadge,
-	AvatarFallback,
-	AvatarGroup,
-	AvatarGroupCount,
-	AvatarImage,
-};
+export { Avatar, AvatarBadge, AvatarFallback, AvatarGroup, AvatarGroupCount, AvatarImage };

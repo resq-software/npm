@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Badge } from "../badge";
 import { Separator } from "../separator";
@@ -66,10 +66,7 @@ export const Horizontal: Story = {
 		<ScrollArea className="w-72 whitespace-nowrap rounded-md border">
 			<div className="flex gap-3 p-4">
 				{missions.map((mission) => (
-					<div
-						className="flex flex-col gap-1 rounded-md border p-3 w-40 shrink-0"
-						key={mission.id}
-					>
+					<div className="flex flex-col gap-1 rounded-md border p-3 w-40 shrink-0" key={mission.id}>
 						<p className="text-sm font-medium truncate">{mission.name}</p>
 						<p className="text-xs text-muted-foreground">{mission.zone}</p>
 						<Badge

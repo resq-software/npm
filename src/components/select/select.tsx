@@ -18,13 +18,11 @@
 
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { Select as SelectPrimitive } from "radix-ui";
-import * as React from "react";
+import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
-function Select({
-	...props
-}: React.ComponentProps<typeof SelectPrimitive.Root>) {
+function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
 	return <SelectPrimitive.Root data-slot="select" {...props} />;
 }
 
@@ -66,10 +64,7 @@ function SelectContent({
 	);
 }
 
-function SelectGroup({
-	className,
-	...props
-}: React.ComponentProps<typeof SelectPrimitive.Group>) {
+function SelectGroup({ className, ...props }: React.ComponentProps<typeof SelectPrimitive.Group>) {
 	return (
 		<SelectPrimitive.Group
 			className={cn("scroll-my-1 p-1", className)}
@@ -103,10 +98,7 @@ function SelectItem({
 	);
 }
 
-function SelectLabel({
-	className,
-	...props
-}: React.ComponentProps<typeof SelectPrimitive.Label>) {
+function SelectLabel({ className, ...props }: React.ComponentProps<typeof SelectPrimitive.Label>) {
 	return (
 		<SelectPrimitive.Label
 			className={cn("text-muted-foreground px-1.5 py-1 text-xs", className)}
@@ -191,9 +183,7 @@ function SelectTrigger({
 	);
 }
 
-function SelectValue({
-	...props
-}: React.ComponentProps<typeof SelectPrimitive.Value>) {
+function SelectValue({ ...props }: React.ComponentProps<typeof SelectPrimitive.Value>) {
 	return <SelectPrimitive.Value data-slot="select-value" {...props} />;
 }
 

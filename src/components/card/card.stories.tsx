@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { ActivityIcon, DrillIcon, MapPinIcon, UsersIcon } from "lucide-react";
 
@@ -36,9 +36,7 @@ export const Default: Story = {
 				<CardDescription>Search &amp; rescue — Zone 4B</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<p className="text-sm text-muted-foreground">
-					3 drones active · 12 responders deployed
-				</p>
+				<p className="text-sm text-muted-foreground">3 drones active · 12 responders deployed</p>
 			</CardContent>
 		</Card>
 	),
@@ -53,8 +51,8 @@ export const WithFooter: Story = {
 			</CardHeader>
 			<CardContent>
 				<p className="text-sm text-muted-foreground">
-					Structural collapse reported at 14:32. Two survivors located. Awaiting
-					heavy-lift equipment.
+					Structural collapse reported at 14:32. Two survivors located. Awaiting heavy-lift
+					equipment.
 				</p>
 			</CardContent>
 			<CardFooter className="flex gap-2">
@@ -78,9 +76,7 @@ export const WithAction: Story = {
 				</CardAction>
 			</CardHeader>
 			<CardContent>
-				<p className="text-sm text-muted-foreground">
-					Zone 4B · 2.4 km² covered
-				</p>
+				<p className="text-sm text-muted-foreground">Zone 4B · 2.4 km² covered</p>
 			</CardContent>
 		</Card>
 	),

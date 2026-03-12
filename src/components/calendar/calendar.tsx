@@ -16,18 +16,9 @@
 
 "use client";
 
-import {
-	ChevronDownIcon,
-	ChevronLeftIcon,
-	ChevronRightIcon,
-} from "lucide-react";
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import * as React from "react";
-import {
-	type DayButton,
-	DayPicker,
-	getDefaultClassNames,
-	type Locale,
-} from "react-day-picker";
+import { type DayButton, DayPicker, getDefaultClassNames, type Locale } from "react-day-picker";
 
 import { cn } from "../../lib/utils.js";
 import { Button, buttonVariants } from "../button/button.js";
@@ -81,18 +72,9 @@ function Calendar({
 						: "[&:first-child[data-selected=true]_button]:rounded-l-(--cell-radius)",
 					defaultClassNames.day,
 				),
-				disabled: cn(
-					"text-muted-foreground opacity-50",
-					defaultClassNames.disabled,
-				),
-				dropdown: cn(
-					"absolute bg-popover inset-0 opacity-0",
-					defaultClassNames.dropdown,
-				),
-				dropdown_root: cn(
-					"relative rounded-(--cell-radius)",
-					defaultClassNames.dropdown_root,
-				),
+				disabled: cn("text-muted-foreground opacity-50", defaultClassNames.disabled),
+				dropdown: cn("absolute bg-popover inset-0 opacity-0", defaultClassNames.dropdown),
+				dropdown_root: cn("relative rounded-(--cell-radius)", defaultClassNames.dropdown_root),
 				dropdowns: cn(
 					"w-full flex items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
 					defaultClassNames.dropdowns,
@@ -103,10 +85,7 @@ function Calendar({
 					"flex items-center justify-center h-(--cell-size) w-full px-(--cell-size)",
 					defaultClassNames.month_caption,
 				),
-				months: cn(
-					"flex gap-4 flex-col md:flex-row relative",
-					defaultClassNames.months,
-				),
+				months: cn("flex gap-4 flex-col md:flex-row relative", defaultClassNames.months),
 				nav: cn(
 					"flex items-center gap-1 w-full absolute top-0 inset-x-0 justify-between",
 					defaultClassNames.nav,
@@ -135,10 +114,7 @@ function Calendar({
 					"text-[0.8rem] select-none text-muted-foreground",
 					defaultClassNames.week_number,
 				),
-				week_number_header: cn(
-					"select-none w-(--cell-size)",
-					defaultClassNames.week_number_header,
-				),
+				week_number_header: cn("select-none w-(--cell-size)", defaultClassNames.week_number_header),
 				weekday: cn(
 					"text-muted-foreground rounded-(--cell-radius) flex-1 font-normal text-[0.8rem] select-none",
 					defaultClassNames.weekday,
@@ -149,36 +125,18 @@ function Calendar({
 			components={{
 				Chevron: ({ className, orientation, ...props }) => {
 					if (orientation === "left") {
-						return (
-							<ChevronLeftIcon className={cn("size-4", className)} {...props} />
-						);
+						return <ChevronLeftIcon className={cn("size-4", className)} {...props} />;
 					}
 
 					if (orientation === "right") {
-						return (
-							<ChevronRightIcon
-								className={cn("size-4", className)}
-								{...props}
-							/>
-						);
+						return <ChevronRightIcon className={cn("size-4", className)} {...props} />;
 					}
 
-					return (
-						<ChevronDownIcon className={cn("size-4", className)} {...props} />
-					);
+					return <ChevronDownIcon className={cn("size-4", className)} {...props} />;
 				},
-				DayButton: ({ ...props }) => (
-					<CalendarDayButton locale={locale} {...props} />
-				),
+				DayButton: ({ ...props }) => <CalendarDayButton locale={locale} {...props} />,
 				Root: ({ className, rootRef, ...props }) => {
-					return (
-						<div
-							className={cn(className)}
-							data-slot="calendar"
-							ref={rootRef}
-							{...props}
-						/>
-					);
+					return <div className={cn(className)} data-slot="calendar" ref={rootRef} {...props} />;
 				},
 				WeekNumber: ({ children, ...props }) => {
 					return (
@@ -192,8 +150,7 @@ function Calendar({
 				...components,
 			}}
 			formatters={{
-				formatMonthDropdown: (date) =>
-					date.toLocaleString(locale?.code, { month: "short" }),
+				formatMonthDropdown: (date) => date.toLocaleString(locale?.code, { month: "short" }),
 				...formatters,
 			}}
 			locale={locale}

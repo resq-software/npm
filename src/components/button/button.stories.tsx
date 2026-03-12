@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { DownloadIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { expect, userEvent, within } from "storybook/test";
@@ -17,14 +17,7 @@ const meta: Meta<typeof Button> = {
 		},
 		variant: {
 			control: "select",
-			options: [
-				"default",
-				"destructive",
-				"outline",
-				"secondary",
-				"ghost",
-				"link",
-			],
+			options: ["default", "destructive", "outline", "secondary", "ghost", "link"],
 		},
 	},
 	component: Button,

@@ -1,18 +1,12 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Button } from "../button";
 import { Input } from "../input";
 import { Label } from "../label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "../select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../select";
 import {
 	Dialog,
 	DialogContent,
@@ -50,21 +44,13 @@ export const Default: Story = {
 						<Label className="text-right" htmlFor="name">
 							Name
 						</Label>
-						<Input
-							className="col-span-3"
-							defaultValue="Alex Rivera"
-							id="name"
-						/>
+						<Input className="col-span-3" defaultValue="Alex Rivera" id="name" />
 					</div>
 					<div className="grid grid-cols-4 items-center gap-4">
 						<Label className="text-right" htmlFor="callsign">
 							Callsign
 						</Label>
-						<Input
-							className="col-span-3"
-							defaultValue="BRAVO-7"
-							id="callsign"
-						/>
+						<Input className="col-span-3" defaultValue="BRAVO-7" id="callsign" />
 					</div>
 				</div>
 				<DialogFooter>
@@ -85,8 +71,7 @@ export const CreateMission: Story = {
 				<DialogHeader>
 					<DialogTitle>Create mission</DialogTitle>
 					<DialogDescription>
-						Configure a new search &amp; rescue mission. You can update the
-						details after launch.
+						Configure a new search &amp; rescue mission. You can update the details after launch.
 					</DialogDescription>
 				</DialogHeader>
 				<div className="grid gap-4 py-4">
@@ -132,8 +117,8 @@ export const Destructive: Story = {
 				<DialogHeader>
 					<DialogTitle>Delete account</DialogTitle>
 					<DialogDescription>
-						This action is permanent and cannot be undone. All missions,
-						reports, and data associated with your account will be deleted.
+						This action is permanent and cannot be undone. All missions, reports, and data
+						associated with your account will be deleted.
 					</DialogDescription>
 				</DialogHeader>
 				<div className="grid gap-1.5 py-4">

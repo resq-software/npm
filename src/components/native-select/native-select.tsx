@@ -15,7 +15,7 @@
  */
 
 import { ChevronDownIcon } from "lucide-react";
-import * as React from "react";
+import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
@@ -23,11 +23,7 @@ type NativeSelectProps = Omit<React.ComponentProps<"select">, "size"> & {
 	size?: "default" | "sm";
 };
 
-function NativeSelect({
-	className,
-	size = "default",
-	...props
-}: NativeSelectProps) {
+function NativeSelect({ className, size = "default", ...props }: NativeSelectProps) {
 	return (
 		<div
 			className={cn(
@@ -52,17 +48,8 @@ function NativeSelect({
 	);
 }
 
-function NativeSelectOptGroup({
-	className,
-	...props
-}: React.ComponentProps<"optgroup">) {
-	return (
-		<optgroup
-			className={cn(className)}
-			data-slot="native-select-optgroup"
-			{...props}
-		/>
-	);
+function NativeSelectOptGroup({ className, ...props }: React.ComponentProps<"optgroup">) {
+	return <optgroup className={cn(className)} data-slot="native-select-optgroup" {...props} />;
 }
 
 function NativeSelectOption({ ...props }: React.ComponentProps<"option">) {

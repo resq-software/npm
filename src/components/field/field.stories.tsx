@@ -1,26 +1,13 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Button } from "../button";
 import { Input } from "../input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "../select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../select";
 import { Textarea } from "../textarea";
-import {
-	Field,
-	FieldDescription,
-	FieldError,
-	FieldGroup,
-	FieldLabel,
-	FieldTitle,
-} from "./field";
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldTitle } from "./field";
 
 const meta: Meta<typeof Field> = {
 	argTypes: {
@@ -104,9 +91,7 @@ export const FullForm: Story = {
 			<Field>
 				<FieldLabel htmlFor="bio">Bio</FieldLabel>
 				<Textarea id="bio" placeholder="Brief responder profile…" rows={3} />
-				<FieldDescription>
-					Optional. Visible to team commanders.
-				</FieldDescription>
+				<FieldDescription>Optional. Visible to team commanders.</FieldDescription>
 			</Field>
 			<Button className="w-full">Save profile</Button>
 		</FieldGroup>

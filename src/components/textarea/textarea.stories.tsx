@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import * as React from "react";
 
@@ -60,9 +60,7 @@ export const CharacterCount: Story = {
 				<Textarea
 					id="broadcast"
 					maxLength={max}
-					onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-						setValue(e.target.value)
-					}
+					onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setValue(e.target.value)}
 					placeholder="Enter message to broadcast to all responders…"
 					rows={3}
 					value={value}

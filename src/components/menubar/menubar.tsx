@@ -18,14 +18,11 @@
 
 import { CheckIcon, ChevronRightIcon } from "lucide-react";
 import { Menubar as MenubarPrimitive } from "radix-ui";
-import * as React from "react";
+import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
-function Menubar({
-	className,
-	...props
-}: React.ComponentProps<typeof MenubarPrimitive.Root>) {
+function Menubar({ className, ...props }: React.ComponentProps<typeof MenubarPrimitive.Root>) {
 	return (
 		<MenubarPrimitive.Root
 			className={cn(
@@ -88,9 +85,7 @@ function MenubarContent({
 	);
 }
 
-function MenubarGroup({
-	...props
-}: React.ComponentProps<typeof MenubarPrimitive.Group>) {
+function MenubarGroup({ ...props }: React.ComponentProps<typeof MenubarPrimitive.Group>) {
 	return <MenubarPrimitive.Group data-slot="menubar-group" {...props} />;
 }
 
@@ -126,10 +121,7 @@ function MenubarLabel({
 }) {
 	return (
 		<MenubarPrimitive.Label
-			className={cn(
-				"px-1.5 py-1 text-sm font-medium data-[inset]:pl-8",
-				className,
-			)}
+			className={cn("px-1.5 py-1 text-sm font-medium data-[inset]:pl-8", className)}
 			data-inset={inset}
 			data-slot="menubar-label"
 			{...props}
@@ -137,24 +129,16 @@ function MenubarLabel({
 	);
 }
 
-function MenubarMenu({
-	...props
-}: React.ComponentProps<typeof MenubarPrimitive.Menu>) {
+function MenubarMenu({ ...props }: React.ComponentProps<typeof MenubarPrimitive.Menu>) {
 	return <MenubarPrimitive.Menu data-slot="menubar-menu" {...props} />;
 }
 
-function MenubarPortal({
-	...props
-}: React.ComponentProps<typeof MenubarPrimitive.Portal>) {
+function MenubarPortal({ ...props }: React.ComponentProps<typeof MenubarPrimitive.Portal>) {
 	return <MenubarPrimitive.Portal data-slot="menubar-portal" {...props} />;
 }
 
-function MenubarRadioGroup({
-	...props
-}: React.ComponentProps<typeof MenubarPrimitive.RadioGroup>) {
-	return (
-		<MenubarPrimitive.RadioGroup data-slot="menubar-radio-group" {...props} />
-	);
+function MenubarRadioGroup({ ...props }: React.ComponentProps<typeof MenubarPrimitive.RadioGroup>) {
+	return <MenubarPrimitive.RadioGroup data-slot="menubar-radio-group" {...props} />;
 }
 
 function MenubarRadioItem({
@@ -194,10 +178,7 @@ function MenubarSeparator({
 	);
 }
 
-function MenubarShortcut({
-	className,
-	...props
-}: React.ComponentProps<"span">) {
+function MenubarShortcut({ className, ...props }: React.ComponentProps<"span">) {
 	return (
 		<span
 			className={cn(
@@ -210,9 +191,7 @@ function MenubarShortcut({
 	);
 }
 
-function MenubarSub({
-	...props
-}: React.ComponentProps<typeof MenubarPrimitive.Sub>) {
+function MenubarSub({ ...props }: React.ComponentProps<typeof MenubarPrimitive.Sub>) {
 	return <MenubarPrimitive.Sub data-slot="menubar-sub" {...props} />;
 }
 

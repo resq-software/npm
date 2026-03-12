@@ -16,7 +16,7 @@
 
 "use client";
 
-import * as React from "react";
+import type * as React from "react";
 import { Group, Panel, Separator } from "react-resizable-panels";
 
 import { cn } from "../../lib/utils.js";
@@ -37,9 +37,7 @@ function ResizableHandle({
 			data-slot="resizable-handle"
 			{...props}
 		>
-			{withHandle && (
-				<div className="bg-border h-6 w-1 rounded-lg z-10 flex shrink-0" />
-			)}
+			{withHandle && <div className="bg-border h-6 w-1 rounded-lg z-10 flex shrink-0" />}
 		</Separator>
 	);
 }
@@ -48,16 +46,10 @@ function ResizablePanel({ ...props }: React.ComponentProps<typeof Panel>) {
 	return <Panel data-slot="resizable-panel" {...props} />;
 }
 
-function ResizablePanelGroup({
-	className,
-	...props
-}: React.ComponentProps<typeof Group>) {
+function ResizablePanelGroup({ className, ...props }: React.ComponentProps<typeof Group>) {
 	return (
 		<Group
-			className={cn(
-				"flex h-full w-full data-[panel-group-direction=vertical]:flex-col",
-				className,
-			)}
+			className={cn("flex h-full w-full data-[panel-group-direction=vertical]:flex-col", className)}
 			data-slot="resizable-panel-group"
 			{...props}
 		/>

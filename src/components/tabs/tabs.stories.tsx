@@ -1,17 +1,10 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Button } from "../button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "../card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../card";
 import { Input } from "../input";
 import { Label } from "../label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
@@ -36,9 +29,7 @@ export const Default: Story = {
 				<Card>
 					<CardHeader>
 						<CardTitle>Account</CardTitle>
-						<CardDescription>
-							Make changes to your account here.
-						</CardDescription>
+						<CardDescription>Make changes to your account here.</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-2">
 						<div className="space-y-1">

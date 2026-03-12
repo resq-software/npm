@@ -26,13 +26,7 @@ import { cn } from "../../lib/utils.js";
 import { Button } from "../button/button.js";
 import { Input } from "../input/input.js";
 import { Separator } from "../separator/separator.js";
-import {
-	Sheet,
-	SheetContent,
-	SheetDescription,
-	SheetHeader,
-	SheetTitle,
-} from "../sheet/sheet.js";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "../sheet/sheet.js";
 import { Skeleton } from "../skeleton/skeleton.js";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../tooltip/tooltip.js";
 
@@ -213,10 +207,7 @@ function SidebarGroupAction({
 	);
 }
 
-function SidebarGroupContent({
-	className,
-	...props
-}: React.ComponentProps<"div">) {
+function SidebarGroupContent({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
 			className={cn("text-sm w-full", className)}
@@ -258,10 +249,7 @@ function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function SidebarInput({
-	className,
-	...props
-}: React.ComponentProps<typeof Input>) {
+function SidebarInput({ className, ...props }: React.ComponentProps<typeof Input>) {
 	return (
 		<Input
 			className={cn("bg-background h-8 w-full shadow-none", className)}
@@ -345,15 +333,12 @@ function SidebarProvider({
 	// Helper to toggle the sidebar.
 	const toggleSidebar = React.useCallback(() => {
 		isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
-	}, [isMobile, setOpen, setOpenMobile]);
+	}, [isMobile, setOpen]);
 
 	// Adds a keyboard shortcut to toggle the sidebar.
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
-			if (
-				event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
-				(event.metaKey || event.ctrlKey)
-			) {
+			if (event.key === SIDEBAR_KEYBOARD_SHORTCUT && (event.metaKey || event.ctrlKey)) {
 				event.preventDefault();
 				toggleSidebar();
 			}
@@ -379,7 +364,7 @@ function SidebarProvider({
 			state,
 			toggleSidebar,
 		}),
-		[state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+		[state, open, setOpen, isMobile, openMobile, toggleSidebar],
 	);
 
 	return (
@@ -430,10 +415,7 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
 	);
 }
 
-function SidebarSeparator({
-	className,
-	...props
-}: React.ComponentProps<typeof Separator>) {
+function SidebarSeparator({ className, ...props }: React.ComponentProps<typeof Separator>) {
 	return (
 		<Separator
 			className={cn("bg-sidebar-border mx-2 w-auto", className)}
@@ -444,11 +426,7 @@ function SidebarSeparator({
 	);
 }
 
-function SidebarTrigger({
-	className,
-	onClick,
-	...props
-}: React.ComponentProps<typeof Button>) {
+function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<typeof Button>) {
 	const { toggleSidebar } = useSidebar();
 
 	return (
@@ -527,10 +505,7 @@ function SidebarMenuAction({
 	);
 }
 
-function SidebarMenuBadge({
-	className,
-	...props
-}: React.ComponentProps<"div">) {
+function SidebarMenuBadge({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
 			className={cn(
@@ -614,12 +589,7 @@ function SidebarMenuSkeleton({
 			data-slot="sidebar-menu-skeleton"
 			{...props}
 		>
-			{showIcon && (
-				<Skeleton
-					className="size-4 rounded-md"
-					data-sidebar="menu-skeleton-icon"
-				/>
-			)}
+			{showIcon && <Skeleton className="size-4 rounded-md" data-sidebar="menu-skeleton-icon" />}
 			<Skeleton
 				className="h-4 max-w-(--skeleton-width) flex-1"
 				data-sidebar="menu-skeleton-text"
@@ -675,10 +645,7 @@ function SidebarMenuSubButton({
 	);
 }
 
-function SidebarMenuSubItem({
-	className,
-	...props
-}: React.ComponentProps<"li">) {
+function SidebarMenuSubItem({ className, ...props }: React.ComponentProps<"li">) {
 	return (
 		<li
 			className={cn("group/menu-sub-item relative", className)}

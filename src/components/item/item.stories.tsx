@@ -1,15 +1,9 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
-import {
-	DrillIcon,
-	FileTextIcon,
-	MapPinIcon,
-	MoreHorizontalIcon,
-	UsersIcon,
-} from "lucide-react";
+import { DrillIcon, FileTextIcon, MapPinIcon, MoreHorizontalIcon, UsersIcon } from "lucide-react";
 
 import { Badge } from "../badge";
 import { Button } from "../button";
@@ -104,9 +98,7 @@ export const MissionList: Story = {
 						<ItemDescription>{zone}</ItemDescription>
 					</ItemContent>
 					<ItemActions>
-						<Badge variant={status === "Active" ? "default" : "secondary"}>
-							{status}
-						</Badge>
+						<Badge variant={status === "Active" ? "default" : "secondary"}>{status}</Badge>
 					</ItemActions>
 				</Item>
 			))}

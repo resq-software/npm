@@ -19,8 +19,7 @@ const commands = [
 commands.forEach((cmd) => {
 	try {
 		execSync(cmd, { stdio: "inherit" });
-	} catch (err) {
-		console.error(`Failed to execute: ${cmd}`, err);
+	} catch (_err) {
 		process.exit(1);
 	}
 });

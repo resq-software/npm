@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Button } from "../button";
 import { Input } from "../input";
@@ -36,8 +36,8 @@ export const Default: Story = {
 				<DrawerHeader>
 					<DrawerTitle>End mission</DrawerTitle>
 					<DrawerDescription>
-						This will close all active drone operations and notify the team.
-						This action cannot be undone.
+						This will close all active drone operations and notify the team. This action cannot be
+						undone.
 					</DrawerDescription>
 				</DrawerHeader>
 				<DrawerFooter>
@@ -61,8 +61,7 @@ export const WithForm: Story = {
 				<DrawerHeader>
 					<DrawerTitle>Report incident</DrawerTitle>
 					<DrawerDescription>
-						Provide details about the incident. Your report will be logged
-						immediately.
+						Provide details about the incident. Your report will be logged immediately.
 					</DrawerDescription>
 				</DrawerHeader>
 				<div className="px-4 pb-4 grid gap-3">
@@ -72,10 +71,7 @@ export const WithForm: Story = {
 					</div>
 					<div className="grid gap-1.5">
 						<Label htmlFor="incident-desc">Description</Label>
-						<Input
-							id="incident-desc"
-							placeholder="Brief description of the incident"
-						/>
+						<Input id="incident-desc" placeholder="Brief description of the incident" />
 					</div>
 				</div>
 				<DrawerFooter>

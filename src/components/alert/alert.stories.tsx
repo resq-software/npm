@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import {
 	AlertCircleIcon,
@@ -31,8 +31,8 @@ export const Default: Story = {
 			<TerminalIcon className="size-4" />
 			<AlertTitle>System update available</AlertTitle>
 			<AlertDescription>
-				A new firmware version is available for your drone fleet. Update during
-				low-activity windows.
+				A new firmware version is available for your drone fleet. Update during low-activity
+				windows.
 			</AlertDescription>
 		</Alert>
 	),
@@ -44,8 +44,7 @@ export const Destructive: Story = {
 			<AlertCircleIcon className="size-4" />
 			<AlertTitle>Connection lost</AlertTitle>
 			<AlertDescription>
-				Drone EAGLE-3 has lost telemetry. Last known position: Grid 4B, 47.832°N
-				13.041°E.
+				Drone EAGLE-3 has lost telemetry. Last known position: Grid 4B, 47.832°N 13.041°E.
 			</AlertDescription>
 		</Alert>
 	),
@@ -57,9 +56,7 @@ export const AllVariants: Story = {
 			<Alert>
 				<InfoIcon className="size-4" />
 				<AlertTitle>Info</AlertTitle>
-				<AlertDescription>
-					3 responders are en route to Zone 5A.
-				</AlertDescription>
+				<AlertDescription>3 responders are en route to Zone 5A.</AlertDescription>
 			</Alert>
 			<Alert>
 				<CheckCircle2Icon className="size-4" />
@@ -71,9 +68,7 @@ export const AllVariants: Story = {
 			<Alert>
 				<TriangleAlertIcon className="size-4" />
 				<AlertTitle>Warning</AlertTitle>
-				<AlertDescription>
-					Drone battery at 15%. Return to base recommended.
-				</AlertDescription>
+				<AlertDescription>Drone battery at 15%. Return to base recommended.</AlertDescription>
 			</Alert>
 			<Alert variant="destructive">
 				<AlertCircleIcon className="size-4" />

@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 
@@ -66,10 +66,7 @@ export const Group: Story = {
 	render: () => (
 		<div className="flex -space-x-2">
 			{["JD", "KP", "MR", "SA", "TW"].map((initials) => (
-				<Avatar
-					className="size-8 border-2 border-background ring-1 ring-border"
-					key={initials}
-				>
+				<Avatar className="size-8 border-2 border-background ring-1 ring-border" key={initials}>
 					<AvatarFallback className="text-xs">{initials}</AvatarFallback>
 				</Avatar>
 			))}

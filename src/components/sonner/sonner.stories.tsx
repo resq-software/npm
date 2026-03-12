@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { toast } from "sonner";
 
@@ -22,10 +22,7 @@ export const Default: Story = {
 		<>
 			<Toaster />
 			<div className="flex flex-wrap gap-2">
-				<Button
-					onClick={() => toast("Mission status updated")}
-					variant="outline"
-				>
+				<Button onClick={() => toast("Mission status updated")} variant="outline">
 					Default
 				</Button>
 				<Button
@@ -34,22 +31,13 @@ export const Default: Story = {
 				>
 					Success
 				</Button>
-				<Button
-					onClick={() => toast.error("Drone EAGLE-3 connection lost")}
-					variant="outline"
-				>
+				<Button onClick={() => toast.error("Drone EAGLE-3 connection lost")} variant="outline">
 					Error
 				</Button>
-				<Button
-					onClick={() => toast.warning("Battery at 15% — return to base")}
-					variant="outline"
-				>
+				<Button onClick={() => toast.warning("Battery at 15% — return to base")} variant="outline">
 					Warning
 				</Button>
-				<Button
-					onClick={() => toast.info("3 responders en route to Zone 5A")}
-					variant="outline"
-				>
+				<Button onClick={() => toast.info("3 responders en route to Zone 5A")} variant="outline">
 					Info
 				</Button>
 			</div>
@@ -100,9 +88,7 @@ export const Promise: Story = {
 			<Button
 				onClick={() =>
 					toast.promise(
-						new Promise<void>((resolve: () => void) =>
-							setTimeout(() => resolve(), 2000),
-						),
+						new Promise<void>((resolve: () => void) => setTimeout(() => resolve(), 2000)),
 						{
 							error: "Failed to launch mission",
 							loading: "Launching mission…",

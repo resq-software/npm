@@ -18,7 +18,7 @@
 
 import { Command as CommandPrimitive } from "cmdk";
 import { CheckIcon, SearchIcon } from "lucide-react";
-import * as React from "react";
+import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 import {
@@ -30,10 +30,7 @@ import {
 } from "../dialog/dialog.js";
 import { InputGroup, InputGroupAddon } from "../input-group/input-group.js";
 
-function Command({
-	className,
-	...props
-}: React.ComponentProps<typeof CommandPrimitive>) {
+function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
 	return (
 		<CommandPrimitive
 			className={cn(
@@ -66,10 +63,7 @@ function CommandDialog({
 				<DialogDescription>{description}</DialogDescription>
 			</DialogHeader>
 			<DialogContent
-				className={cn(
-					"rounded-xl! top-1/3 translate-y-0 overflow-hidden p-0",
-					className,
-				)}
+				className={cn("rounded-xl! top-1/3 translate-y-0 overflow-hidden p-0", className)}
 				showCloseButton={showCloseButton}
 			>
 				{children}
@@ -150,10 +144,7 @@ function CommandItem({
 	);
 }
 
-function CommandList({
-	className,
-	...props
-}: React.ComponentProps<typeof CommandPrimitive.List>) {
+function CommandList({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.List>) {
 	return (
 		<CommandPrimitive.List
 			className={cn(
@@ -179,10 +170,7 @@ function CommandSeparator({
 	);
 }
 
-function CommandShortcut({
-	className,
-	...props
-}: React.ComponentProps<"span">) {
+function CommandShortcut({ className, ...props }: React.ComponentProps<"span">) {
 	return (
 		<span
 			className={cn(

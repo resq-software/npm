@@ -17,7 +17,7 @@
 "use client";
 
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
-import * as React from "react";
+import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 import { Button } from "../button/button.js";
@@ -103,10 +103,7 @@ function AlertDialogDescription({
 	);
 }
 
-function AlertDialogFooter({
-	className,
-	...props
-}: React.ComponentProps<"div">) {
+function AlertDialogFooter({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
 			className={cn(
@@ -119,10 +116,7 @@ function AlertDialogFooter({
 	);
 }
 
-function AlertDialogHeader({
-	className,
-	...props
-}: React.ComponentProps<"div">) {
+function AlertDialogHeader({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
 			className={cn(
@@ -135,10 +129,7 @@ function AlertDialogHeader({
 	);
 }
 
-function AlertDialogMedia({
-	className,
-	...props
-}: React.ComponentProps<"div">) {
+function AlertDialogMedia({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
 			className={cn(
@@ -170,9 +161,7 @@ function AlertDialogOverlay({
 function AlertDialogPortal({
 	...props
 }: Readonly<React.ComponentProps<typeof AlertDialogPrimitive.Portal>>) {
-	return (
-		<AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />
-	);
+	return <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />;
 }
 
 function AlertDialogTitle({
@@ -194,9 +183,7 @@ function AlertDialogTitle({
 function AlertDialogTrigger({
 	...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Trigger>) {
-	return (
-		<AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />
-	);
+	return <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />;
 }
 
 export {

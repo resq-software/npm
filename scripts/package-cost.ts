@@ -6,31 +6,20 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { PackageJson } from "type-fest";
 
-const isNotNull = <Value>(value: Value): value is Exclude<Value, null> =>
-	value !== null;
+const isNotNull = <Value>(value: Value): value is Exclude<Value, null> => value !== null;
 
 const packageJsonPath = join(process.cwd(), "package.json");
-const packageJson = JSON.parse(
-	readFileSync(packageJsonPath, "utf-8"),
-) as PackageJson;
+const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8")) as PackageJson;
 const dependencies = Object.keys(packageJson.dependencies || {});
 const devDependencies = Object.keys(packageJson.devDependencies || {});
-const allDependencies = [...dependencies, ...devDependencies] as [
-	string,
-	...string[],
-];
+const allDependencies = [...dependencies, ...devDependencies] as [string, ...string[]];
 const OUTPUT_DIR = `${process.cwd()}/out`;
 
-const getPackageSize = (
-	packageName: string,
-): { name: string; size: number } | null => {
+const getPackageSize = (packageName: string): { name: string; size: number } | null => {
 	try {
-		const result = execSync(
-			`npm view ${packageName} dist.unpackedSize --json`,
-			{
-				encoding: "utf-8",
-			},
-		);
+		const result = execSync(`npm view ${packageName} dist.unpackedSize --json`, {
+			encoding: "utf-8",
+		});
 		const size = JSON.parse(result) as number;
 		return {
 			name: packageName,
@@ -38,9 +27,7 @@ const getPackageSize = (
 		};
 	} catch (error) {
 		if (error instanceof Error) {
-			console.error(`Failed to get size for ${packageName}:`, error.message);
 		} else {
-			console.error(`Failed to get size for ${packageName}:`, error);
 		}
 		return null;
 	}
@@ -53,7 +40,4 @@ const packageSizes = allDependencies
 
 const sortedPackageSizes = packageSizes.sort((a, b) => b.size - a.size);
 
-writeFileSync(
-	`${OUTPUT_DIR}/package-sizes.json`,
-	JSON.stringify(sortedPackageSizes, null, 2),
-);
+writeFileSync(`${OUTPUT_DIR}/package-sizes.json`, JSON.stringify(sortedPackageSizes, null, 2));

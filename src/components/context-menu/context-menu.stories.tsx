@@ -1,15 +1,9 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
-import {
-	ClipboardListIcon,
-	CopyIcon,
-	EyeIcon,
-	PencilIcon,
-	Trash2Icon,
-} from "lucide-react";
+import { ClipboardListIcon, CopyIcon, EyeIcon, PencilIcon, Trash2Icon } from "lucide-react";
 
 import {
 	ContextMenu,

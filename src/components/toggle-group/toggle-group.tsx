@@ -16,7 +16,7 @@
 
 "use client";
 
-import { type VariantProps } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
 import { ToggleGroup as ToggleGroupPrimitive } from "radix-ui";
 import * as React from "react";
 
@@ -62,9 +62,7 @@ function ToggleGroup({
 			style={{ "--gap": spacing } as React.CSSProperties}
 			{...props}
 		>
-			<ToggleGroupContext.Provider
-				value={{ orientation, size, spacing, variant }}
-			>
+			<ToggleGroupContext.Provider value={{ orientation, size, spacing, variant }}>
 				{children}
 			</ToggleGroupContext.Provider>
 		</ToggleGroupPrimitive.Root>
@@ -77,8 +75,7 @@ function ToggleGroupItem({
 	size = "default",
 	variant = "default",
 	...props
-}: React.ComponentProps<typeof ToggleGroupPrimitive.Item> &
-	VariantProps<typeof toggleVariants>) {
+}: React.ComponentProps<typeof ToggleGroupPrimitive.Item> & VariantProps<typeof toggleVariants>) {
 	const context = React.useContext(ToggleGroupContext);
 
 	return (

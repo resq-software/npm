@@ -1,3 +1,14 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build
@@ -15,13 +26,13 @@ jobs:
       - uses: ./.github/actions/prepare
       - run: pnpm build-storybook
 
-  lint:
-    name: Lint
+  biome:
+    name: Biome
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/prepare
-      - run: pnpm lint
+      - run: pnpm biome ci .
 
   lint_knip:
     name: Lint Knip
@@ -69,14 +80,6 @@ jobs:
           fi
       - run: pnpm lint:spelling
 
-  prettier:
-    name: Prettier
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/prepare
-      - run: pnpm format --list-different
-
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -95,13 +98,3 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/prepare
       - run: pnpm tsc
-name: CI
-
-on:
-  pull_request:
-  push:
-    branches:
-      - master
-
-permissions:
-  contents: read

@@ -1,7 +1,7 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import {
 	ActivityIcon,
@@ -12,7 +12,7 @@ import {
 	SettingsIcon,
 	UsersIcon,
 } from "lucide-react";
-import * as React from "react";
+import type * as React from "react";
 
 import { Badge } from "../badge";
 import {
@@ -43,9 +43,7 @@ type Story = StoryObj<typeof Sidebar>;
 
 export const Default: Story = {
 	render: () => (
-		<SidebarProvider
-			style={{ "--sidebar-width": "220px" } as React.CSSProperties}
-		>
+		<SidebarProvider style={{ "--sidebar-width": "220px" } as React.CSSProperties}>
 			<Sidebar>
 				<SidebarHeader>
 					<div className="flex items-center gap-2 px-2 py-1">
