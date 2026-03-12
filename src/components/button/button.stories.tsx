@@ -3,8 +3,8 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs";
 
-import { expect, userEvent, within } from "@storybook/test";
 import { DownloadIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { expect, userEvent, within } from "storybook/test";
 
 import { Spinner } from "../spinner";
 import { Button } from "./button";

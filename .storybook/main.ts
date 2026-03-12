@@ -8,9 +8,7 @@ const config: StorybookConfig = {
 		"@github-ui/storybook-addon-performance-panel",
 		"@storybook/addon-docs",
 		"@storybook/addon-a11y",
-		"@storybook/addon-interactions",
 		"@chromatic-com/storybook",
-		"@storybook/experimental-addon-test",
 	],
 	docs: {
 		defaultName: "Docs",
