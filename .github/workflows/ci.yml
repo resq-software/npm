@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/prepare
-      - run: bun build
+      - run: bun run build
 
   storybook:
     name: Storybook
@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/prepare
-      - run: bun build-storybook
+      - run: bun run build-storybook
 
   biome:
     name: Biome
