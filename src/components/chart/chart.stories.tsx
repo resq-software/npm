@@ -54,7 +54,7 @@ const responseChartConfig: ChartConfig = {
 const meta: Meta<typeof ChartContainer> = {
 	component: ChartContainer,
 	tags: ["autodocs"],
-	title: "Components/Chart",
+	title: "Data/Chart",
 };
 
 export default meta;

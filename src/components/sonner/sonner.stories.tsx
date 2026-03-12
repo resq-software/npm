@@ -11,7 +11,7 @@ import { Toaster } from "./sonner";
 const meta: Meta<typeof Toaster> = {
 	component: Toaster,
 	tags: ["autodocs"],
-	title: "Components/Sonner",
+	title: "Feedback/Sonner",
 };
 
 export default meta;

@@ -1,0 +1,51 @@
+{/* Copyright 2026 ResQ */}
+{/* SPDX-License-Identifier: Apache-2.0 */}
+
+import { Meta } from "@storybook/blocks";
+
+<Meta title="Introduction" />
+
+# ResQ UI
+
+`@resq/ui` is the shared design system for the ResQ emergency operations platform — a collection of accessible, composable components built on [shadcn/ui](https://ui.shadcn.com), Radix UI primitives, and Tailwind CSS v4.
+
+## Design principles
+
+- **Accessible by default** — every component meets WCAG 2.1 AA standards via Radix UI primitives
+- **Composable** — components accept `asChild` and spread all HTML props for maximum flexibility
+- **Themeable** — design tokens as CSS custom properties on `:root`; dark mode via the `.dark` class
+- **Type-safe** — full TypeScript with exported variant types and `VariantProps` helpers
+
+## Getting started
+
+```sh
+pnpm add @resq/ui
+```
+
+Import the stylesheet in your app root:
+
+```ts
+import "@resq/ui/styles/globals.css";
+```
+
+Use components:
+
+```tsx
+import { Button } from "@resq/ui/button";
+
+export function LaunchMission() {
+	return <Button>Deploy EAGLE-3</Button>;
+}
+```
+
+## Component categories
+
+| Category       | Components                                                                    |
+| -------------- | ----------------------------------------------------------------------------- |
+| **Forms**      | Button, Input, Textarea, Select, Checkbox, Switch, Slider, Combobox, and more |
+| **Display**    | Badge, Avatar, Alert, Progress, Tooltip, Kbd, and more                        |
+| **Layout**     | Card, Accordion, Carousel, Resizable, ScrollArea                              |
+| **Navigation** | Breadcrumb, Tabs, Sidebar, Pagination, Menubar                                |
+| **Overlays**   | Dialog, Drawer, Sheet, Popover, Command                                       |
+| **Data**       | Table, Chart                                                                  |
+| **Feedback**   | Sonner (toasts), Empty states                                                 |

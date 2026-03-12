@@ -19,7 +19,7 @@ import {
 const meta: Meta<typeof AlertDialog> = {
 	component: AlertDialog,
 	tags: ["autodocs"],
-	title: "Components/AlertDialog",
+	title: "Overlays/Alert Dialog",
 };
 
 export default meta;

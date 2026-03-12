@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 const meta: Meta<typeof Avatar> = {
 	component: Avatar,
 	tags: ["autodocs"],
-	title: "Components/Avatar",
+	title: "Display/Avatar",
 };
 
 export default meta;

@@ -21,7 +21,7 @@ const missions = [
 const meta: Meta<typeof ScrollArea> = {
 	component: ScrollArea,
 	tags: ["autodocs"],
-	title: "Components/ScrollArea",
+	title: "Layout/Scroll Area",
 };
 
 export default meta;

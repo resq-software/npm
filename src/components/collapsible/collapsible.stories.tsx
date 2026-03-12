@@ -16,7 +16,7 @@ import {
 const meta: Meta<typeof Collapsible> = {
 	component: Collapsible,
 	tags: ["autodocs"],
-	title: "Components/Collapsible",
+	title: "Layout/Collapsible",
 };
 
 export default meta;

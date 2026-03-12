@@ -10,7 +10,7 @@ import { Label } from "./label";
 const meta: Meta<typeof Label> = {
 	component: Label,
 	tags: ["autodocs"],
-	title: "Components/Label",
+	title: "Forms/Label",
 };
 
 export default meta;

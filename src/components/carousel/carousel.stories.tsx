@@ -63,7 +63,7 @@ const meta: Meta<typeof Carousel> = {
 	},
 	component: Carousel,
 	tags: ["autodocs"],
-	title: "Components/Carousel",
+	title: "Layout/Carousel",
 };
 
 export default meta;

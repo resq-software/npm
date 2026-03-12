@@ -25,7 +25,7 @@ import {
 const meta: Meta<typeof Command> = {
 	component: Command,
 	tags: ["autodocs"],
-	title: "Components/Command",
+	title: "Overlays/Command",
 };
 
 export default meta;

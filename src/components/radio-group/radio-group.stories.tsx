@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "./radio-group";
 const meta: Meta<typeof RadioGroup> = {
 	component: RadioGroup,
 	tags: ["autodocs"],
-	title: "Components/RadioGroup",
+	title: "Forms/Radio Group",
 };
 
 export default meta;

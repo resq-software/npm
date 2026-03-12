@@ -7,16 +7,19 @@ const config: StorybookConfig = {
 	addons: [
 		"@github-ui/storybook-addon-performance-panel",
 		"@storybook/addon-docs",
+		"@storybook/addon-a11y",
+		"@storybook/addon-interactions",
+		"@chromatic-com/storybook",
+		"@storybook/experimental-addon-test",
 	],
 	docs: {
 		defaultName: "Docs",
-		docsMode: true,
 	},
 	framework: {
 		name: "@storybook/nextjs-vite",
 		options: {},
 	},
-	stories: ["../src/**/*.stories.@(ts|tsx)"],
+	stories: ["../src/**/*.mdx", "../src/**/*.stories.@(ts|tsx)"],
 	async viteFinal(config) {
 		const { mergeConfig } = await import("vite");
 		const tailwindcss = (await import("@tailwindcss/vite")).default;

@@ -11,7 +11,7 @@ const meta: Meta<typeof Progress> = {
 	},
 	component: Progress,
 	tags: ["autodocs"],
-	title: "Components/Progress",
+	title: "Display/Progress",
 };
 
 export default meta;

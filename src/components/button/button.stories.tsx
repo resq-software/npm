@@ -3,6 +3,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs";
 
+import { expect, userEvent, within } from "@storybook/test";
 import { DownloadIcon, PlusIcon, Trash2Icon } from "lucide-react";
 
 import { Spinner } from "../spinner";
@@ -28,7 +29,7 @@ const meta: Meta<typeof Button> = {
 	},
 	component: Button,
 	tags: ["autodocs"],
-	title: "Components/Button",
+	title: "Forms/Button",
 };
 
 export default meta;
@@ -60,6 +61,15 @@ export const Link: Story = {
 
 export const Disabled: Story = {
 	args: { children: "Unavailable", disabled: true },
+};
+
+export const Clickable: Story = {
+	play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+		const canvas = within(canvasElement);
+		const button = canvas.getByRole("button");
+		await userEvent.click(button);
+		await expect(button).toBeInTheDocument();
+	},
 };
 
 export const Loading: Story = {

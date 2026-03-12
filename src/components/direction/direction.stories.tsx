@@ -11,7 +11,7 @@ const meta: Meta<typeof DirectionProvider> = {
 	},
 	component: DirectionProvider,
 	tags: ["autodocs"],
-	title: "Components/Direction",
+	title: "Utilities/Direction",
 };
 
 export default meta;

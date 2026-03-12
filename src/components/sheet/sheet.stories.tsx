@@ -23,7 +23,7 @@ import {
 const meta: Meta<typeof Sheet> = {
 	component: Sheet,
 	tags: ["autodocs"],
-	title: "Components/Sheet",
+	title: "Overlays/Sheet",
 };
 
 export default meta;

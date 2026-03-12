@@ -13,7 +13,7 @@ import {
 const meta: Meta<typeof InputOTP> = {
 	component: InputOTP,
 	tags: ["autodocs"],
-	title: "Components/InputOTP",
+	title: "Forms/Input OTP",
 };
 
 export default meta;

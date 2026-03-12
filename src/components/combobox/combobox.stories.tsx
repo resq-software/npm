@@ -24,7 +24,7 @@ const zones = [
 const meta: Meta<typeof Combobox> = {
 	component: Combobox,
 	tags: ["autodocs"],
-	title: "Components/Combobox",
+	title: "Forms/Combobox",
 };
 
 export default meta;

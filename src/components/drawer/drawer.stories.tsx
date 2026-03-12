@@ -20,7 +20,7 @@ import {
 const meta: Meta<typeof Drawer> = {
 	component: Drawer,
 	tags: ["autodocs"],
-	title: "Components/Drawer",
+	title: "Overlays/Drawer",
 };
 
 export default meta;

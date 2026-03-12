@@ -14,7 +14,7 @@ const meta: Meta<typeof Toggle> = {
 	},
 	component: Toggle,
 	tags: ["autodocs"],
-	title: "Components/Toggle",
+	title: "Utilities/Toggle",
 };
 
 export default meta;

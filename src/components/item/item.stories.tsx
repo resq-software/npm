@@ -30,7 +30,7 @@ const meta: Meta<typeof Item> = {
 	},
 	component: Item,
 	tags: ["autodocs"],
-	title: "Components/Item",
+	title: "Display/Item",
 };
 
 export default meta;

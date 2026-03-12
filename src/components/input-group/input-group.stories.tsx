@@ -15,7 +15,7 @@ import {
 const meta: Meta<typeof InputGroup> = {
 	component: InputGroup,
 	tags: ["autodocs"],
-	title: "Components/InputGroup",
+	title: "Forms/Input Group",
 };
 
 export default meta;

@@ -12,7 +12,7 @@ const meta: Meta<typeof NativeSelect> = {
 	},
 	component: NativeSelect,
 	tags: ["autodocs"],
-	title: "Components/NativeSelect",
+	title: "Forms/Native Select",
 };
 
 export default meta;

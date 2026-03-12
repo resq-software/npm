@@ -19,7 +19,7 @@ const meta: Meta<typeof Alert> = {
 	},
 	component: Alert,
 	tags: ["autodocs"],
-	title: "Components/Alert",
+	title: "Display/Alert",
 };
 
 export default meta;

@@ -23,7 +23,7 @@ import {
 const meta: Meta<typeof Empty> = {
 	component: Empty,
 	tags: ["autodocs"],
-	title: "Components/Empty",
+	title: "Feedback/Empty",
 };
 
 export default meta;

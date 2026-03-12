@@ -8,7 +8,7 @@ import { Kbd, KbdGroup } from "./kbd";
 const meta: Meta<typeof Kbd> = {
 	component: Kbd,
 	tags: ["autodocs"],
-	title: "Components/Kbd",
+	title: "Display/Kbd",
 };
 
 export default meta;

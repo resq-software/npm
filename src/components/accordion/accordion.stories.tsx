@@ -16,7 +16,7 @@ const meta: Meta<typeof Accordion> = {
 	},
 	component: Accordion,
 	tags: ["autodocs"],
-	title: "Components/Accordion",
+	title: "Layout/Accordion",
 };
 
 export default meta;

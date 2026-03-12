@@ -31,7 +31,7 @@ const meta: Meta<typeof Field> = {
 	},
 	component: Field,
 	tags: ["autodocs"],
-	title: "Components/Field",
+	title: "Forms/Field",
 };
 
 export default meta;

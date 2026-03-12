@@ -3,13 +3,15 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs";
 
+import { expect, userEvent, within } from "@storybook/test";
+
 import { Label } from "../label";
 import { Checkbox } from "./checkbox";
 
 const meta: Meta<typeof Checkbox> = {
 	component: Checkbox,
 	tags: ["autodocs"],
-	title: "Components/Checkbox",
+	title: "Forms/Checkbox",
 };
 
 export default meta;
@@ -36,6 +38,16 @@ export const WithLabel: Story = {
 			<Label htmlFor="terms">Accept terms and conditions</Label>
 		</div>
 	),
+};
+
+export const Toggle: Story = {
+	play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+		const canvas = within(canvasElement);
+		const checkbox = canvas.getByRole("checkbox");
+		await expect(checkbox).not.toBeChecked();
+		await userEvent.click(checkbox);
+		await expect(checkbox).toBeChecked();
+	},
 };
 
 export const Form: Story = {

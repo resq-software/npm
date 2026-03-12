@@ -57,7 +57,7 @@ const statusVariant: Record<
 const meta: Meta<typeof Table> = {
 	component: Table,
 	tags: ["autodocs"],
-	title: "Components/Table",
+	title: "Data/Table",
 };
 
 export default meta;

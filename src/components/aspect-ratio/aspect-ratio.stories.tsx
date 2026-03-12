@@ -11,7 +11,7 @@ const meta: Meta<typeof AspectRatio> = {
 	},
 	component: AspectRatio,
 	tags: ["autodocs"],
-	title: "Components/AspectRatio",
+	title: "Layout/Aspect Ratio",
 };
 
 export default meta;

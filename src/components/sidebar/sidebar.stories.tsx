@@ -35,7 +35,7 @@ import {
 const meta: Meta<typeof Sidebar> = {
 	component: Sidebar,
 	tags: ["autodocs"],
-	title: "Components/Sidebar",
+	title: "Navigation/Sidebar",
 };
 
 export default meta;

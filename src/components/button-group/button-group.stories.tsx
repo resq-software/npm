@@ -26,7 +26,7 @@ const meta: Meta<typeof ButtonGroup> = {
 	},
 	component: ButtonGroup,
 	tags: ["autodocs"],
-	title: "Components/ButtonGroup",
+	title: "Forms/Button Group",
 };
 
 export default meta;

@@ -3,6 +3,8 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs";
 
+import { expect, userEvent, within } from "@storybook/test";
+
 import { Label } from "../label";
 import { Input } from "./input";
 
@@ -16,7 +18,7 @@ const meta: Meta<typeof Input> = {
 	},
 	component: Input,
 	tags: ["autodocs"],
-	title: "Components/Input",
+	title: "Forms/Input",
 };
 
 export default meta;
@@ -73,4 +75,13 @@ export const WithLabel: Story = {
 			<Input id="callsign" placeholder="e.g. BRAVO-7" />
 		</div>
 	),
+};
+
+export const Typing: Story = {
+	play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+		const canvas = within(canvasElement);
+		const input = canvas.getByRole("textbox");
+		await userEvent.type(input, "EAGLE-3");
+		await expect(input).toHaveValue("EAGLE-3");
+	},
 };

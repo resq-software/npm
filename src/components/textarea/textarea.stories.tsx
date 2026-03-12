@@ -11,7 +11,7 @@ import { Textarea } from "./textarea";
 const meta: Meta<typeof Textarea> = {
 	component: Textarea,
 	tags: ["autodocs"],
-	title: "Components/Textarea",
+	title: "Forms/Textarea",
 };
 
 export default meta;
