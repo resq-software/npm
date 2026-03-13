@@ -10,7 +10,6 @@ export default defineConfig({
 		},
 		environment: "jsdom",
 		exclude: ["lib", "node_modules"],
-		passWithNoTests: true,
 		setupFiles: ["console-fail-test/setup"],
 	},
 });
