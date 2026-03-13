@@ -308,6 +308,7 @@
 		"README.md"
 	],
 	"scripts": {
+		"copyright": "node --experimental-strip-types scripts/copyright.gen.ts",
 		"build": "tsdown",
 		"build-storybook": "storybook build",
 		"chromatic": "bunx chromatic --build-script-name=build-storybook",

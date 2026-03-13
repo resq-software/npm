@@ -1,1 +1,3 @@
+node --experimental-strip-types scripts/copyright.gen.ts
+git add -u
 ./node_modules/.bin/lint-staged

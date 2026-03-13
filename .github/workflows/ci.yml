@@ -40,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/prepare
-      - run: bun lint:knip
+      - run: bun run lint:knip
 
   lint_markdown:
     name: Lint Markdown

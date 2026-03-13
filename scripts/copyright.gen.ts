@@ -38,7 +38,7 @@ const FORMAT_TYPES = [
 	{ regex: /\.sh$/, header: "#", body: "", footer: "" },
 ] as const satisfies FormatType[];
 const COPYRIGHT = ` 
- Copyright ${new Date().getFullYear()} GDG on Campus Farmingdale State College
+ Copyright ${new Date().getFullYear()} ResQ Software
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -97,8 +97,17 @@ const updateContent = (content: string, format: FormatType): string => {
 		.map((l) => format.body + l)
 		.join("\n");
 	const footer = format.footer ? `\n${format.footer}` : "";
+	const block = `${header}${body}${footer}\n\n`;
 
-	return `${header}${body}${footer}\n\n${content}`;
+	// Preserve shebang on line 1
+	if (content.startsWith("#!")) {
+		const newlineIdx = content.indexOf("\n");
+		const shebang = content.slice(0, newlineIdx + 1);
+		const rest = content.slice(newlineIdx + 1);
+		return `${shebang}${block}${rest}`;
+	}
+
+	return `${block}${content}`;
 };
 
 (async () => {

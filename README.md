@@ -133,6 +133,26 @@ bun run test         # vitest
 bun run build        # production build → lib/
 ```
 
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center"><a href="https://linktr.ee/mikeodnis"><img src="https://avatars.githubusercontent.com/u/95197809?v=4?s=100" width="100px;" alt="Mike Odnis"/><br /><sub><b>Mike Odnis</b></sub></a><br /><a href="https://github.com/resq-software/ui/commits?author=WomB0ComB0" title="Code">💻</a> <a href="#content-WomB0ComB0" title="Content">🖋</a> <a href="https://github.com/resq-software/ui/commits?author=WomB0ComB0" title="Documentation">📖</a> <a href="#ideas-WomB0ComB0" title="Ideas, Planning, & Feedback">🤔</a> <a href="#infra-WomB0ComB0" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="#maintenance-WomB0ComB0" title="Maintenance">🚧</a> <a href="#projectManagement-WomB0ComB0" title="Project Management">📆</a> <a href="#tool-WomB0ComB0" title="Tools">🔧</a></td>
+    </tr>
+  </tbody>
+</table>
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=resq-software/ui&type=Date)](https://star-history.com/#resq-software/ui&Date)
+
 ## License
 
 [Apache-2.0](./LICENSE)

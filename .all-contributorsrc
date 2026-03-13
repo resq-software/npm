@@ -18,30 +18,14 @@
       "name": "Mike Odnis",
       "profile": "https://linktr.ee/mikeodnis"
     },
-    {
-      "login": "ElysiumOSS",
-      "name": "Elysium Open Source",
-      "avatar_url": "https://avatars.githubusercontent.com/u/155137850?v=4",
-      "profile": "https://github.com/ElysiumOSS",
-      "contributions": [
-        "code",
-        "content",
-        "doc",
-        "ideas",
-        "infra",
-        "maintenance",
-        "projectManagement",
-        "tool"
-      ]
-    }
   ],
   "contributorsPerLine": 7,
   "contributorsSortAlphabetically": true,
   "files": [
     "README.md"
   ],
-  "projectName": "package-template",
-  "projectOwner": "ElysiumOSS",
+  "projectName": "ui",
+  "projectOwner": "resq-software",
   "repoType": "github",
   "commitConvention": "angular"
 }
