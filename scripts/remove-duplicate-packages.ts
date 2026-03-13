@@ -7,9 +7,7 @@ import type { PackageJson } from "type-fest";
 const rootDir = join(__dirname, "..", "..");
 const packageJsonPath = join(rootDir, "package.json");
 
-const packageJson = JSON.parse(
-	readFileSync(packageJsonPath, "utf-8"),
-) as PackageJson;
+const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8")) as PackageJson;
 
 const dependencies =
 	packageJson.dependencies ||
@@ -49,9 +47,7 @@ const picked = {
 		writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 	} catch (error) {
 		if (error instanceof Error) {
-			console.error(error.message);
 		} else {
-			console.error(error);
 		}
 	} finally {
 		process.exit(0);

@@ -3,9 +3,7 @@
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-const currProject = Promise.resolve(async () =>
-	(await Bun.$`basename $(pwd)`.text()).trim(),
-);
+const currProject = Promise.resolve(async () => (await Bun.$`basename $(pwd)`.text()).trim());
 
 const dirs = ["packages", "apps", "examples", "integrations"];
 const outputPath = join(process.cwd(), "CHANGELOG.md");
@@ -47,12 +45,8 @@ function combineChangelogs(changelogs: Map<string, string>): string {
 
 try {
 	const changelogs = collectChangelogs();
-	const combined = changelogs.size
-		? combineChangelogs(changelogs)
-		: `${header.trim()}\n`;
+	const combined = changelogs.size ? combineChangelogs(changelogs) : `${header.trim()}\n`;
 	writeFileSync(outputPath, combined);
-	console.log(`Combined changelog written to ${outputPath}`);
-} catch (error) {
-	console.error("Error combining changelogs:", error);
+} catch (_error) {
 	process.exit(1);
 }

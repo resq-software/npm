@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./tabs";
+export * from "./tabs.js";

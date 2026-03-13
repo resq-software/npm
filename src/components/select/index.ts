@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./select";
+export * from "./select.js";

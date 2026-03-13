@@ -6,9 +6,11 @@ export default defineConfig({
 		coverage: {
 			all: true,
 			include: ["src"],
-			reporter: ["html", "lcov"],
+			reporter: ["html", "lcov", "text"],
 		},
+		environment: "jsdom",
 		exclude: ["lib", "node_modules"],
+		passWithNoTests: true,
 		setupFiles: ["console-fail-test/setup"],
 	},
 });

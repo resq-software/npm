@@ -75,9 +75,7 @@ const getSourceFilesToUpdate = async () => {
 		.filter((p) => !!p);
 
 	const existingPaths = (
-		await Promise.all(
-			paths.map(async (path) => ((await fileExists(path)) ? path : null)),
-		)
+		await Promise.all(paths.map(async (path) => ((await fileExists(path)) ? path : null)))
 	).filter((path) => path !== null) as string[];
 
 	const fileContents = await Promise.all(
@@ -90,9 +88,7 @@ const getSourceFilesToUpdate = async () => {
 			path: existingPaths[idx],
 			format: FORMAT_TYPES.find(({ regex }) => regex.test(existingPaths[idx])),
 		}))
-		.filter(
-			({ contents, format }) => format && !/Copyright \d\d\d\d/.test(contents),
-		);
+		.filter(({ contents, format }) => format && !/Copyright \d\d\d\d/.test(contents));
 };
 
 const updateContent = (content: string, format: FormatType): string => {
@@ -105,19 +101,12 @@ const updateContent = (content: string, format: FormatType): string => {
 	return `${header}${body}${footer}\n\n${content}`;
 };
 
-console.log("Checking copyright in sources...");
-
 (async () => {
 	const missing = await getSourceFilesToUpdate();
 	if (process.argv[2] === "--check") {
 		if (missing.length) {
-			console.error(
-				`Copyright header missing in ${missing.map(({ path }) => path).join(", ")}`,
-			);
-			console.error("Run `pnpm run format` at root to update");
 			process.exit(1);
 		}
-		console.log("Copyright headers okay");
 		process.exit(0);
 	}
 	writeFile;
@@ -127,9 +116,6 @@ console.log("Checking copyright in sources...");
 	});
 
 	await Promise.all(
-		updated.map(({ path, contents }) =>
-			writeFile(path, contents, { encoding: "utf-8" }),
-		),
+		updated.map(({ path, contents }) => writeFile(path, contents, { encoding: "utf-8" })),
 	);
-	console.log(`Updated copyright headers in ${updated.length} files`);
 })();

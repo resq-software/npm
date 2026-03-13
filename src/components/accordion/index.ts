@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./accordion";
+export * from "./accordion.js";

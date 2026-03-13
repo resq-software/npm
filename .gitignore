@@ -1,4 +1,43 @@
-/coverage
+# Build outputs
 /lib
+/storybook-static
+
+# Test artifacts
+/coverage
+
+# Dependencies
 /node_modules
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Editor — VS Code (keep checked-in configs)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+pnpm-debug.log*
+
+# Tooling caches
 .turbo/
+.eslintcache
+.prettiercache
+*.tsbuildinfo
+
+# TypeDoc
+/docs
+
+# Claude / Serena
+.claude/*
+!.claude/skills/
+.serena/cache/

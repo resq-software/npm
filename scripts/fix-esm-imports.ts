@@ -19,90 +19,72 @@ async function fixImports(dir: string): Promise<void> {
 			let content = await readFile(fullPath, "utf-8");
 
 			// Fix relative imports
-			content = content.replace(
-				/from ['"](\.[^'"]+)['"];/g,
-				(match, importPath) => {
-					// Skip adding .js to gql imports (GraphQL codegen files)
-					if (importPath.includes("/gql") || importPath === "./gql") {
-						return match;
-					}
-
-					if (!importPath.endsWith(".js")) {
-						// Check if this might be a directory import
-						const possibleDirPath = join(dir, importPath);
-						try {
-							// Try to check if index.js exists in the directory
-							if (
-								existsSync(possibleDirPath) &&
-								existsSync(join(possibleDirPath, "index.js"))
-							) {
-								return `from '${importPath}/index.js';`;
-							}
-						} catch (_e) {
-							// If we can't check, just add .js as before
-						}
-						return `from '${importPath}.js';`;
-					}
+			content = content.replace(/from ['"](\.[^'"]+)['"];/g, (match, importPath) => {
+				// Skip adding .js to gql imports (GraphQL codegen files)
+				if (importPath.includes("/gql") || importPath === "./gql") {
 					return match;
-				},
-			);
+				}
 
-			content = content.replace(
-				/export \* from ['"](\.[^'"]+)['"];/g,
-				(match, importPath) => {
-					// Skip adding .js to gql imports (GraphQL codegen files)
-					if (importPath.includes("/gql") || importPath === "./gql") {
-						return match;
-					}
-
-					if (!importPath.endsWith(".js")) {
-						// Check if this might be a directory import
-						const possibleDirPath = join(dir, importPath);
-						try {
-							// Try to check if index.js exists in the directory
-							if (
-								existsSync(possibleDirPath) &&
-								existsSync(join(possibleDirPath, "index.js"))
-							) {
-								return `export * from '${importPath}/index.js';`;
-							}
-						} catch (_e) {
-							// If we can't check, just add .js as before
+				if (!importPath.endsWith(".js")) {
+					// Check if this might be a directory import
+					const possibleDirPath = join(dir, importPath);
+					try {
+						// Try to check if index.js exists in the directory
+						if (existsSync(possibleDirPath) && existsSync(join(possibleDirPath, "index.js"))) {
+							return `from '${importPath}/index.js';`;
 						}
-						return `export * from '${importPath}.js';`;
+					} catch (_e) {
+						// If we can't check, just add .js as before
 					}
+					return `from '${importPath}.js';`;
+				}
+				return match;
+			});
+
+			content = content.replace(/export \* from ['"](\.[^'"]+)['"];/g, (match, importPath) => {
+				// Skip adding .js to gql imports (GraphQL codegen files)
+				if (importPath.includes("/gql") || importPath === "./gql") {
 					return match;
-				},
-			);
+				}
+
+				if (!importPath.endsWith(".js")) {
+					// Check if this might be a directory import
+					const possibleDirPath = join(dir, importPath);
+					try {
+						// Try to check if index.js exists in the directory
+						if (existsSync(possibleDirPath) && existsSync(join(possibleDirPath, "index.js"))) {
+							return `export * from '${importPath}/index.js';`;
+						}
+					} catch (_e) {
+						// If we can't check, just add .js as before
+					}
+					return `export * from '${importPath}.js';`;
+				}
+				return match;
+			});
 
 			// Also fix dynamic imports
-			content = content.replace(
-				/import\(['"](\.[^'"]+)['"]\)/g,
-				(match, importPath) => {
-					// Skip adding .js to gql imports (GraphQL codegen files)
-					if (importPath.includes("/gql") || importPath === "./gql") {
-						return match;
-					}
-
-					if (!importPath.endsWith(".js")) {
-						// Check if this might be a directory import
-						const possibleDirPath = join(dir, importPath);
-						try {
-							// Try to check if index.js exists in the directory
-							if (
-								existsSync(possibleDirPath) &&
-								existsSync(join(possibleDirPath, "index.js"))
-							) {
-								return `import('${importPath}/index.js')`;
-							}
-						} catch (_e) {
-							// If we can't check, just add .js as before
-						}
-						return `import('${importPath}.js')`;
-					}
+			content = content.replace(/import\(['"](\.[^'"]+)['"]\)/g, (match, importPath) => {
+				// Skip adding .js to gql imports (GraphQL codegen files)
+				if (importPath.includes("/gql") || importPath === "./gql") {
 					return match;
-				},
-			);
+				}
+
+				if (!importPath.endsWith(".js")) {
+					// Check if this might be a directory import
+					const possibleDirPath = join(dir, importPath);
+					try {
+						// Try to check if index.js exists in the directory
+						if (existsSync(possibleDirPath) && existsSync(join(possibleDirPath, "index.js"))) {
+							return `import('${importPath}/index.js')`;
+						}
+					} catch (_e) {
+						// If we can't check, just add .js as before
+					}
+					return `import('${importPath}.js')`;
+				}
+				return match;
+			});
 
 			await writeFile(fullPath, content);
 		}
@@ -110,4 +92,3 @@ async function fixImports(dir: string): Promise<void> {
 }
 
 await fixImports(distDir);
-console.log("Fixed ESM imports in dist/");

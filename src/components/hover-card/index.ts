@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./hover-card";
+export * from "./hover-card.js";

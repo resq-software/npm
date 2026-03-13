@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./dropdown-menu";
+export * from "./dropdown-menu.js";

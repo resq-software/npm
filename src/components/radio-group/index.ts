@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./radio-group";
+export * from "./radio-group.js";

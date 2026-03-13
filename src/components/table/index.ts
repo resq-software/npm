@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./table";
+export * from "./table.js";

@@ -1,4 +1,16 @@
 * text=auto eol=lf
+
+# Metadata
+.editorconfig text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
+.npmrc text eol=lf
+.nvmrc text eol=lf
+
+# Documentation
+*.md text eol=lf
+
+# Binaries — images
 *.png binary
 *.jpg binary
 *.jpeg binary
@@ -6,14 +18,17 @@
 *.svg binary
 *.webp binary
 *.ico binary
+
+# Binaries — archives / documents
 *.pdf binary
-*.mp4 binary
-*.mov binary
-*.mp3 binary
-*.wav binary
-*.ogg binary
 *.zip binary
 *.tar binary
 *.gz binary
 *.7z binary
-*.md text eol=lf
+
+# GitHub Actions lockfiles
+.github/workflows/*.lock.yml linguist-generated=true merge=ours
+
+# Lockfiles — collapse massive generated diffs on GitHub PRs
+pnpm-lock.yaml linguist-generated=true
+*-lock.json linguist-generated=true

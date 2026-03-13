@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./navigation-menu";
+export * from "./navigation-menu.js";

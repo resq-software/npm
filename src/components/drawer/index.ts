@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./drawer";
+export * from "./drawer.js";

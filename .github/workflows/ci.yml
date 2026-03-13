@@ -1,3 +1,14 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build
@@ -5,16 +16,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/prepare
-      - run: pnpm build
-      - run: node lib/index.js
+      - run: bun run build
 
-  lint:
-    name: Lint
+  storybook:
+    name: Storybook
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/prepare
-      - run: pnpm lint
+      - run: bun run build-storybook
+
+  biome:
+    name: Biome
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/prepare
+      - run: bunx biome ci .
 
   lint_knip:
     name: Lint Knip
@@ -22,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/prepare
-      - run: pnpm lint:knip
+      - run: bun lint:knip
 
   lint_markdown:
     name: Lint Markdown
@@ -30,15 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/prepare
-      - run: pnpm lint:md
-
-  lint_packages:
-    name: Lint Packages
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/prepare
-      - run: pnpm lint:packages
+      - run: bun lint:md
 
   lint_spelling:
     name: Lint Spelling
@@ -48,7 +58,7 @@ jobs:
       - uses: ./.github/actions/prepare
       - name: Run cspell and add unknown words
         run: |
-          npx cspell --no-progress . | tee cspell-output.txt
+          bunx cspell --no-progress . | tee cspell-output.txt
           awk -F' - Unknown word \(' '/Unknown word/ {print $2}' cspell-output.txt | sed 's/)//' | sort -u > cspell-unknown-words.txt
           if [ -s cspell-unknown-words.txt ]; then
             if [ ! -f cspell.json ]; then
@@ -60,15 +70,7 @@ jobs:
           else
             echo "No unknown words found by cspell."
           fi
-      - run: pnpm lint:spelling
-
-  prettier:
-    name: Prettier
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/prepare
-      - run: pnpm format --list-different
+      - run: bun lint:spelling
 
   test:
     name: Test
@@ -76,7 +78,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/prepare
-      - run: pnpm run test --coverage
+      - run: bun test --coverage
       - if: always()
         name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -87,14 +89,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/prepare
-      - run: pnpm tsc
-name: CI
-
-on:
-  pull_request:
-  push:
-    branches:
-      - master
-
-permissions:
-  contents: read
+      - run: bun tsc
