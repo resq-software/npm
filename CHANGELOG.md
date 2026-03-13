@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.1](https://github.com/resq-software/ui/compare/0.2.0...0.2.1) (2026-03-13)
+
+### Bug Fixes
+
+* **ci:** use chromaui/action@v15 — chromatic-com/action does not exist ([0d8a6be](https://github.com/resq-software/ui/commit/0d8a6be0accb21e1d7d4b581669d82f7466db69f))
+
 ## 0.2.0 (2026-03-13)
 
 ### Features

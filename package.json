@@ -1,6 +1,6 @@
 {
 	"name": "@resq-sw/ui",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "ResQ shared UI component library — shadcn-based design system for the ResQ platform",
 	"repository": {
 		"type": "git",
