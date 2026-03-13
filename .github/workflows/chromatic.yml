@@ -22,7 +22,7 @@ jobs:
       - name: Build Storybook
         run: bun run build-storybook --quiet
       - name: Run Chromatic
-        uses: chromatic-com/action@v3
+        uses: chromatic-com/action@v11
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           storybookBuildDir: storybook-static
