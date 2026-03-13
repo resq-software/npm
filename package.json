@@ -1,5 +1,5 @@
 {
-	"name": "@resq/ui",
+	"name": "@resq-sw/ui",
 	"version": "0.1.0",
 	"description": "ResQ shared UI component library — shadcn-based design system for the ResQ platform",
 	"repository": {
