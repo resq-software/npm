@@ -1,147 +1,110 @@
-# @resq-sw/ui Documentation
+# @resq-sw/ui
 
-A comprehensive, production-ready React component library for the ResQ platform, built on modern web standards with strict type safety and performance at its core.
+A production-ready, high-performance React component library built with Radix UI primitives, Tailwind CSS v4, and strict TypeScript safety.
 
----
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Features](#features)
-3. [Architecture](#architecture)
-4. [Quick Start](#quick-start)
-5. [Usage](#usage)
-6. [Configuration](#configuration)
-7. [API Overview](#api-overview)
-8. [Development](#development)
-9. [Contributing](#contributing)
-10. [Roadmap](#roadmap)
-11. [License](#license)
-
----
+![Version](https://img.shields.io/badge/version-0.2.3-blue)
+![License](https://img.shields.io/badge/license-Apache--2.0-blue)
+[![👪 All Contributors](https://img.shields.io/badge/%F0%9F%91%AA_all_contributors-1-21bb42.svg)](#contributors)
 
 ## Overview
 
-`@resq-sw/ui` is a centralized, high-performance UI library designed for ResQ-ecosystem front-end applications. By leveraging **shadcn/ui** primitives and **Radix UI** under the hood, we ensure accessibility and composability while maintaining strict **Tailwind CSS v4** styling.
-
----
+`@resq-sw/ui` is a centralized, high-performance UI library designed for ResQ-ecosystem front-end applications. By leveraging **Radix UI** primitives and **Tailwind CSS v4** styling, we provide a robust, accessible foundation for enterprise-grade interfaces.
 
 ## Features
 
-- **Tree-Shakeable:** Modular architecture allows importing only the components you need.
+- **Tree-Shakeable:** Modular architecture for minimal bundle sizes.
 - **Strictly Typed:** Full TypeScript support with explicit `.d.ts` definitions.
-- **React 19 Ready:** Optimized for the latest concurrent React features.
-- **Consistent Styling:** Unified design tokens via Tailwind CSS.
-- **Production-Ready:** Rigorous testing, Chromatic visual regression, and automated CI/CD.
-- **Developer Experience:** Includes custom scaffolding scripts and AI-assisted development tools.
-
----
+- **Accessibility First:** Built on Radix UI primitives to ensure WCAG 2.1 AA compliance.
+- **Consistent Styling:** Unified design tokens via Tailwind CSS v4 and the `oklch` color space.
+- **Developer-Focused:** Includes custom scaffolding scripts, AI-assisted development agents, and a reproducible Nix-based environment.
+- **Rigorous Quality:** Verified via Chromatic visual regression and automated CI/CD pipelines.
 
 ## Architecture
 
-The library is designed for modularity, using a clean subpath-export structure to ensure minimal bundle sizes.
-
 ```mermaid
-graph TD
-    A[App Implementation] --> B[Subpath Exports: @resq-sw/ui/component]
-    B --> C[Radix UI Primitives]
-    B --> D[Tailwind CSS v4 Classes]
-    B --> E[Utils / Hooks]
-    F[Chromatic / Storybook] -->|Visual Tests| B
-    G[GitHub Actions] -->|CI Pipeline| B
+c4Context
+    title Component Consumption Model
+    Person(user, "Developer")
+    System_Boundary(resq, "@resq-sw/ui") {
+        Component(subpath, "Subpath Exports")
+        Component(radix, "Radix UI Primitives")
+        Component(tw, "Tailwind CSS v4")
+        Component(utils, "Internal Hooks/Utils")
+    }
+    System(app, "App Implementation")
+    System_Ext(ci, "Chromatic / Storybook")
+
+    Rel(user, app, "Develops")
+    Rel(app, subpath, "Imports components")
+    Rel(subpath, radix, "Uses")
+    Rel(subpath, tw, "Styles")
+    Rel(subpath, utils, "Integrates")
+    Rel(ci, subpath, "Visual Testing")
 ```
 
----
-
-## Quick Start
-
-### 1. Installation
+## Installation
 
 ```bash
 bun add @resq-sw/ui
-# Peer dependencies
+# Required peer dependencies
 bun add react@^19 react-dom@^19 tailwindcss@^4
 ```
 
-### 2. Global Setup
+## Quick Start
 
-Include the global styles in your root layout/entry file:
+1. **Global Setup**: Include global styles in your root entry file:
+   ```tsx
+   import "@resq-sw/ui/styles/globals.css";
+   ```
 
-```tsx
-import "@resq-sw/ui/styles/globals.css";
-```
+2. **Basic Usage**:
+   ```tsx
+   import { Button } from "@resq-sw/ui/button";
+   import { Card } from "@resq-sw/ui/card";
 
-### 3. Usage Example
-
-```tsx
-import { Button } from "@resq-sw/ui/button";
-import { Card } from "@resq-sw/ui/card";
-
-export const App = () => (
-  <Card>
-    <Button onClick={() => alert("Ready!")}>Click Me</Button>
-  </Card>
-);
-```
-
----
+   export const App = () => (
+     <Card>
+       <Button onClick={() => alert("Ready!")}>Click Me</Button>
+     </Card>
+   );
+   ```
 
 ## Usage
 
-### Using the `cn` Utility
-Our library exports a standard tailwind-merge and clsx wrapper to handle conditional class name conflicts:
-
-```tsx
-import { cn } from "@resq-sw/ui/lib/utils";
-
-const MyComponent = ({ className, active }) => (
-  <div className={cn("base-styles", active && "bg-blue-500", className)} />
-);
+### Theming & Customization
+Our library uses CSS custom properties for tokens. To customize, override these in your `globals.css`:
+```css
+:root {
+  --color-primary: oklch(0.6 0.15 250);
+}
 ```
 
-### Mobile Hooks
-Leverage our internal hooks for responsive logic:
+### Accessibility Standards
+Components are built on Radix UI primitives, inheriting industry-standard ARIA attributes. We encourage:
+- Using semantic HTML tags (`<main>`, `<nav>`, etc.) wrapping our components.
+- Maintaining proper focus management with `asChild` composition.
 
-```tsx
-import { useIsMobile } from "@resq-sw/ui/hooks/use-mobile";
+## API Reference
 
-const Sidebar = () => {
-  const isMobile = useIsMobile();
-  return isMobile ? <MobileNav /> : <DesktopNav />;
-};
-```
-
----
-
-## Configuration
-
-### Tailwind Integration
-Ensure your `tailwind.config.ts` incorporates the plugin or base styles provided in the package if customizing the theme.
-
-### TypeScript
-This project uses `tsconfig.json` with strict mode enabled. When consuming in your project, ensure `moduleResolution` is set to `bundler` or `node16` to correctly resolve subpath exports.
-
----
-
-## API Overview
-
-The library features 50+ components, categorized into common interface groups:
+The library exposes components via subpath exports. Key categories include:
 
 | Category | Key Components |
 | :--- | :--- |
-| **Input** | `Button`, `Input`, `Select`, `Checkbox`, `RadioGroup`, `Textarea` |
+| **Input** | `Button`, `Input`, `Select`, `Checkbox`, `Combobox` |
 | **Layout** | `Card`, `Accordion`, `Sidebar`, `Separator`, `Resizable` |
 | **Feedback** | `Alert`, `Spinner`, `Progress`, `Skeleton`, `Sonner` |
 | **Overlay** | `Dialog`, `Drawer`, `Popover`, `Tooltip`, `ContextMenu` |
 
-*Consult the individual `src/components/[name]/index.ts` files for specific prop interfaces.*
+*Full documentation available in the `src/components/[name]/index.ts` files.*
 
----
+## Configuration
+
+- **Tailwind:** Ensure your `tailwind.config.ts` points to the `@resq-sw/ui` globals.
+- **TypeScript:** Set `moduleResolution` to `bundler` or `node16` for optimal subpath resolution.
 
 ## Development
 
-### Environment Setup
-We utilize [Nix](https://nixos.org/) for development environment parity.
+We use **Nix** for a reproducible development environment:
 
 ```bash
 git clone https://github.com/resq-software/ui.git
@@ -149,33 +112,16 @@ cd ui
 nix develop
 ```
 
-### Workflow Scripts
-- `bun storybook`: Runs Storybook for component preview.
-- `bun test`: Executes Vitest suites.
-- `bun lint`: Runs Biome for code consistency.
-- `bun tsc`: Validates type safety across the library.
-
----
+- **Preview:** `bun storybook`
+- **Test:** `bun test`
+- **Lint:** `bun lint` (Biome)
 
 ## Contributing
 
-We strictly follow Conventional Commits. Please refer to `.github/CONTRIBUTING.md` for the full guidelines.
-
-1. **Branching**: Use `feat/`, `fix/`, `docs/`, or `chore/` prefixes.
-2. **Issue Templates**: Use the provided YAML templates for bugs and feature requests.
-3. **Commit Hooks**: Husky is configured to run linting and tests automatically before pushes.
-
----
-
-## Roadmap
-
-- [ ] **Phase 1**: Complete migration of legacy components.
-- [ ] **Phase 2**: Enhance charting library integration (d3/recharts).
-- [ ] **Phase 3**: Support for custom theme generation utility.
-- [ ] **Phase 4**: Expanded support for RTL languages (Direction API).
-
----
+1. **Commit Convention**: We follow Conventional Commits (e.g., `feat: ...`, `fix: ...`).
+2. **Issues**: Use the provided YAML templates for bug reports or feature requests.
+3. **Hooks**: Pre-commit hooks via Husky/Biome ensure formatting parity.
 
 ## License
 
-This project is licensed under the Apache-2.0 License. See the [LICENSE.md](./LICENSE.md) file for details.
+This project is licensed under the Apache-2.0 License. See [LICENSE.md](./LICENSE.md) for details.
