@@ -17,7 +17,7 @@
  */
 
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -54,9 +54,7 @@ test("stages a GitHub Packages manifest from an npm tarball", () => {
 
 		const stagedPackageDir = prepareGithubPackage(packageDir);
 
-		const packageJson = JSON.parse(
-			readFileSync(join(packageDir, "package.json"), "utf8"),
-		);
+		const packageJson = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8"));
 
 		assert.equal(packageJson.name, "@resq-software/ui");
 		assert.equal(packageJson.version, "1.2.3");
