@@ -1,402 +1,402 @@
 {
-  "name": "@resq-sw/ui",
-  "version": "0.6.1",
-  "description": "ResQ shared UI component library — shadcn-based design system for the ResQ platform",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/resq-software/ui.git"
-  },
-  "license": "Apache-2.0",
-  "author": {
-    "name": "ResQ Software"
-  },
-  "type": "module",
-  "exports": {
-    ".": {
-      "types": "./lib/index.d.ts",
-      "import": "./lib/index.js",
-      "default": "./lib/index.js"
-    },
-    "./accordion": {
-      "types": "./lib/components/accordion/index.d.ts",
-      "import": "./lib/components/accordion/index.js",
-      "default": "./lib/components/accordion/index.js"
-    },
-    "./alert": {
-      "types": "./lib/components/alert/index.d.ts",
-      "import": "./lib/components/alert/index.js",
-      "default": "./lib/components/alert/index.js"
-    },
-    "./alert-dialog": {
-      "types": "./lib/components/alert-dialog/index.d.ts",
-      "import": "./lib/components/alert-dialog/index.js",
-      "default": "./lib/components/alert-dialog/index.js"
-    },
-    "./aspect-ratio": {
-      "types": "./lib/components/aspect-ratio/index.d.ts",
-      "import": "./lib/components/aspect-ratio/index.js",
-      "default": "./lib/components/aspect-ratio/index.js"
-    },
-    "./avatar": {
-      "types": "./lib/components/avatar/index.d.ts",
-      "import": "./lib/components/avatar/index.js",
-      "default": "./lib/components/avatar/index.js"
-    },
-    "./badge": {
-      "types": "./lib/components/badge/index.d.ts",
-      "import": "./lib/components/badge/index.js",
-      "default": "./lib/components/badge/index.js"
-    },
-    "./breadcrumb": {
-      "types": "./lib/components/breadcrumb/index.d.ts",
-      "import": "./lib/components/breadcrumb/index.js",
-      "default": "./lib/components/breadcrumb/index.js"
-    },
-    "./button": {
-      "types": "./lib/components/button/index.d.ts",
-      "import": "./lib/components/button/index.js",
-      "default": "./lib/components/button/index.js"
-    },
-    "./button-group": {
-      "types": "./lib/components/button-group/index.d.ts",
-      "import": "./lib/components/button-group/index.js",
-      "default": "./lib/components/button-group/index.js"
-    },
-    "./calendar": {
-      "types": "./lib/components/calendar/index.d.ts",
-      "import": "./lib/components/calendar/index.js",
-      "default": "./lib/components/calendar/index.js"
-    },
-    "./card": {
-      "types": "./lib/components/card/index.d.ts",
-      "import": "./lib/components/card/index.js",
-      "default": "./lib/components/card/index.js"
-    },
-    "./carousel": {
-      "types": "./lib/components/carousel/index.d.ts",
-      "import": "./lib/components/carousel/index.js",
-      "default": "./lib/components/carousel/index.js"
-    },
-    "./chart": {
-      "types": "./lib/components/chart/index.d.ts",
-      "import": "./lib/components/chart/index.js",
-      "default": "./lib/components/chart/index.js"
-    },
-    "./checkbox": {
-      "types": "./lib/components/checkbox/index.d.ts",
-      "import": "./lib/components/checkbox/index.js",
-      "default": "./lib/components/checkbox/index.js"
-    },
-    "./collapsible": {
-      "types": "./lib/components/collapsible/index.d.ts",
-      "import": "./lib/components/collapsible/index.js",
-      "default": "./lib/components/collapsible/index.js"
-    },
-    "./combobox": {
-      "types": "./lib/components/combobox/index.d.ts",
-      "import": "./lib/components/combobox/index.js",
-      "default": "./lib/components/combobox/index.js"
-    },
-    "./command": {
-      "types": "./lib/components/command/index.d.ts",
-      "import": "./lib/components/command/index.js",
-      "default": "./lib/components/command/index.js"
-    },
-    "./context-menu": {
-      "types": "./lib/components/context-menu/index.d.ts",
-      "import": "./lib/components/context-menu/index.js",
-      "default": "./lib/components/context-menu/index.js"
-    },
-    "./dialog": {
-      "types": "./lib/components/dialog/index.d.ts",
-      "import": "./lib/components/dialog/index.js",
-      "default": "./lib/components/dialog/index.js"
-    },
-    "./direction": {
-      "types": "./lib/components/direction/index.d.ts",
-      "import": "./lib/components/direction/index.js",
-      "default": "./lib/components/direction/index.js"
-    },
-    "./drawer": {
-      "types": "./lib/components/drawer/index.d.ts",
-      "import": "./lib/components/drawer/index.js",
-      "default": "./lib/components/drawer/index.js"
-    },
-    "./dropdown-menu": {
-      "types": "./lib/components/dropdown-menu/index.d.ts",
-      "import": "./lib/components/dropdown-menu/index.js",
-      "default": "./lib/components/dropdown-menu/index.js"
-    },
-    "./empty": {
-      "types": "./lib/components/empty/index.d.ts",
-      "import": "./lib/components/empty/index.js",
-      "default": "./lib/components/empty/index.js"
-    },
-    "./field": {
-      "types": "./lib/components/field/index.d.ts",
-      "import": "./lib/components/field/index.js",
-      "default": "./lib/components/field/index.js"
-    },
-    "./hover-card": {
-      "types": "./lib/components/hover-card/index.d.ts",
-      "import": "./lib/components/hover-card/index.js",
-      "default": "./lib/components/hover-card/index.js"
-    },
-    "./input": {
-      "types": "./lib/components/input/index.d.ts",
-      "import": "./lib/components/input/index.js",
-      "default": "./lib/components/input/index.js"
-    },
-    "./input-group": {
-      "types": "./lib/components/input-group/index.d.ts",
-      "import": "./lib/components/input-group/index.js",
-      "default": "./lib/components/input-group/index.js"
-    },
-    "./input-otp": {
-      "types": "./lib/components/input-otp/index.d.ts",
-      "import": "./lib/components/input-otp/index.js",
-      "default": "./lib/components/input-otp/index.js"
-    },
-    "./item": {
-      "types": "./lib/components/item/index.d.ts",
-      "import": "./lib/components/item/index.js",
-      "default": "./lib/components/item/index.js"
-    },
-    "./kbd": {
-      "types": "./lib/components/kbd/index.d.ts",
-      "import": "./lib/components/kbd/index.js",
-      "default": "./lib/components/kbd/index.js"
-    },
-    "./label": {
-      "types": "./lib/components/label/index.d.ts",
-      "import": "./lib/components/label/index.js",
-      "default": "./lib/components/label/index.js"
-    },
-    "./menubar": {
-      "types": "./lib/components/menubar/index.d.ts",
-      "import": "./lib/components/menubar/index.js",
-      "default": "./lib/components/menubar/index.js"
-    },
-    "./native-select": {
-      "types": "./lib/components/native-select/index.d.ts",
-      "import": "./lib/components/native-select/index.js",
-      "default": "./lib/components/native-select/index.js"
-    },
-    "./navigation-menu": {
-      "types": "./lib/components/navigation-menu/index.d.ts",
-      "import": "./lib/components/navigation-menu/index.js",
-      "default": "./lib/components/navigation-menu/index.js"
-    },
-    "./pagination": {
-      "types": "./lib/components/pagination/index.d.ts",
-      "import": "./lib/components/pagination/index.js",
-      "default": "./lib/components/pagination/index.js"
-    },
-    "./popover": {
-      "types": "./lib/components/popover/index.d.ts",
-      "import": "./lib/components/popover/index.js",
-      "default": "./lib/components/popover/index.js"
-    },
-    "./progress": {
-      "types": "./lib/components/progress/index.d.ts",
-      "import": "./lib/components/progress/index.js",
-      "default": "./lib/components/progress/index.js"
-    },
-    "./radio-group": {
-      "types": "./lib/components/radio-group/index.d.ts",
-      "import": "./lib/components/radio-group/index.js",
-      "default": "./lib/components/radio-group/index.js"
-    },
-    "./resizable": {
-      "types": "./lib/components/resizable/index.d.ts",
-      "import": "./lib/components/resizable/index.js",
-      "default": "./lib/components/resizable/index.js"
-    },
-    "./scroll-area": {
-      "types": "./lib/components/scroll-area/index.d.ts",
-      "import": "./lib/components/scroll-area/index.js",
-      "default": "./lib/components/scroll-area/index.js"
-    },
-    "./select": {
-      "types": "./lib/components/select/index.d.ts",
-      "import": "./lib/components/select/index.js",
-      "default": "./lib/components/select/index.js"
-    },
-    "./separator": {
-      "types": "./lib/components/separator/index.d.ts",
-      "import": "./lib/components/separator/index.js",
-      "default": "./lib/components/separator/index.js"
-    },
-    "./sheet": {
-      "types": "./lib/components/sheet/index.d.ts",
-      "import": "./lib/components/sheet/index.js",
-      "default": "./lib/components/sheet/index.js"
-    },
-    "./sidebar": {
-      "types": "./lib/components/sidebar/index.d.ts",
-      "import": "./lib/components/sidebar/index.js",
-      "default": "./lib/components/sidebar/index.js"
-    },
-    "./skeleton": {
-      "types": "./lib/components/skeleton/index.d.ts",
-      "import": "./lib/components/skeleton/index.js",
-      "default": "./lib/components/skeleton/index.js"
-    },
-    "./slider": {
-      "types": "./lib/components/slider/index.d.ts",
-      "import": "./lib/components/slider/index.js",
-      "default": "./lib/components/slider/index.js"
-    },
-    "./sonner": {
-      "types": "./lib/components/sonner/index.d.ts",
-      "import": "./lib/components/sonner/index.js",
-      "default": "./lib/components/sonner/index.js"
-    },
-    "./spinner": {
-      "types": "./lib/components/spinner/index.d.ts",
-      "import": "./lib/components/spinner/index.js",
-      "default": "./lib/components/spinner/index.js"
-    },
-    "./switch": {
-      "types": "./lib/components/switch/index.d.ts",
-      "import": "./lib/components/switch/index.js",
-      "default": "./lib/components/switch/index.js"
-    },
-    "./table": {
-      "types": "./lib/components/table/index.d.ts",
-      "import": "./lib/components/table/index.js",
-      "default": "./lib/components/table/index.js"
-    },
-    "./tabs": {
-      "types": "./lib/components/tabs/index.d.ts",
-      "import": "./lib/components/tabs/index.js",
-      "default": "./lib/components/tabs/index.js"
-    },
-    "./textarea": {
-      "types": "./lib/components/textarea/index.d.ts",
-      "import": "./lib/components/textarea/index.js",
-      "default": "./lib/components/textarea/index.js"
-    },
-    "./toggle": {
-      "types": "./lib/components/toggle/index.d.ts",
-      "import": "./lib/components/toggle/index.js",
-      "default": "./lib/components/toggle/index.js"
-    },
-    "./toggle-group": {
-      "types": "./lib/components/toggle-group/index.d.ts",
-      "import": "./lib/components/toggle-group/index.js",
-      "default": "./lib/components/toggle-group/index.js"
-    },
-    "./tooltip": {
-      "types": "./lib/components/tooltip/index.d.ts",
-      "import": "./lib/components/tooltip/index.js",
-      "default": "./lib/components/tooltip/index.js"
-    },
-    "./styles/globals.css": "./src/styles/globals.css",
-    "./lib/utils": {
-      "types": "./lib/lib/utils.d.ts",
-      "import": "./lib/lib/utils.js",
-      "default": "./lib/lib/utils.js"
-    }
-  },
-  "main": "lib/index.js",
-  "module": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "files": [
-    "lib",
-    "src/styles/globals.css",
-    "README.md"
-  ],
-  "scripts": {
-    "copyright": "node --experimental-strip-types scripts/copyright.gen.ts",
-    "build": "tsdown",
-    "build-storybook": "storybook build",
-    "chromatic": "bunx chromatic --build-script-name=build-storybook",
-    "dev": "tsdown --watch",
-    "docs": "bunx typedoc --entryPointStrategy Expand src",
-    "format": "biome format --write .",
-    "lint": "biome check .",
-    "lint:knip": "knip",
-    "lint:md": "markdownlint \"**/*.md\" \".github/**/*.md\"",
-    "lint:spelling": "cspell \"**\" \".github/**/*\"",
-    "prepare": "husky",
-    "storybook": "storybook dev -p 6006",
-    "test": "vitest",
-    "tsc": "tsc"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx,json}": "./node_modules/.bin/biome check --write --no-errors-on-unmatched",
-    "*.{md,css,yaml,yml,sh}": "./node_modules/.bin/biome format --write --no-errors-on-unmatched"
-  },
-  "dependencies": {
-    "@base-ui/react": "^1.2.0",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "cmdk": "^1.1.1",
-    "embla-carousel-react": "^8.6.0",
-    "input-otp": "^1.4.2",
-    "lucide-react": "^0.577.0",
-    "next-themes": "^0.4.6",
-    "radix-ui": "^1.4.3",
-    "react-day-picker": "^9.13.2",
-    "react-resizable-panels": "^4.6.2",
-    "recharts": "3.8.0",
-    "sonner": "^2.0.7",
-    "tailwind-merge": "^3.4.0",
-    "tw-animate-css": "^1.4.0",
-    "vaul": "^1.1.2"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.4.6",
-    "@chromatic-com/storybook": "^5.0.1",
-    "@github-ui/storybook-addon-performance-panel": "^1.1.4",
-    "@release-it/conventional-changelog": "10.0.6",
-    "@storybook/addon-a11y": "^10.2.17",
-    "@storybook/addon-docs": "^10.2.17",
-    "@storybook/addon-links": "^10.2.17",
-    "@storybook/nextjs-vite": "10.2.17",
-    "@storybook/react": "^10.2.17",
-    "@tailwindcss/vite": "^4.2.1",
-    "@types/node": "24.6.2",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitest/coverage-v8": "3.2.4",
-    "chromatic": "^15.2.0",
-    "console-fail-test": "0.6.1",
-    "cspell": "9.7.0",
-    "husky": "9.1.7",
-    "jsdom": "^28.1.0",
-    "knip": "5.86.0",
-    "lint-staged": "16.4.0",
-    "markdownlint": "0.40.0",
-    "markdownlint-cli": "0.48.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "release-it": "19.2.4",
-    "storybook": "^10.2.17",
-    "tailwindcss": "^4.1.18",
-    "tsdown": "0.21.2",
-    "typescript": "5.9.3",
-    "vite": "^7.0.0",
-    "vitest": "3.2.4"
-  },
-  "peerDependencies": {
-    "react": ">=19",
-    "react-dom": ">=19",
-    "tailwindcss": ">=4"
-  },
-  "packageManager": "bun@1.3.10",
-  "engines": {
-    "node": ">=20.19.0"
-  },
-  "publishConfig": {
-    "access": "public",
-    "provenance": true,
-    "registry": "https://registry.npmjs.org/"
-  },
-  "release-it": {
-    "git": {
-      "requireCleanWorkingDir": false
-    }
-  }
+	"name": "@resq-sw/ui",
+	"version": "0.6.1",
+	"description": "ResQ shared UI component library — shadcn-based design system for the ResQ platform",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/resq-software/ui.git"
+	},
+	"license": "Apache-2.0",
+	"author": {
+		"name": "ResQ Software"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./lib/index.d.ts",
+			"import": "./lib/index.js",
+			"default": "./lib/index.js"
+		},
+		"./accordion": {
+			"types": "./lib/components/accordion/index.d.ts",
+			"import": "./lib/components/accordion/index.js",
+			"default": "./lib/components/accordion/index.js"
+		},
+		"./alert": {
+			"types": "./lib/components/alert/index.d.ts",
+			"import": "./lib/components/alert/index.js",
+			"default": "./lib/components/alert/index.js"
+		},
+		"./alert-dialog": {
+			"types": "./lib/components/alert-dialog/index.d.ts",
+			"import": "./lib/components/alert-dialog/index.js",
+			"default": "./lib/components/alert-dialog/index.js"
+		},
+		"./aspect-ratio": {
+			"types": "./lib/components/aspect-ratio/index.d.ts",
+			"import": "./lib/components/aspect-ratio/index.js",
+			"default": "./lib/components/aspect-ratio/index.js"
+		},
+		"./avatar": {
+			"types": "./lib/components/avatar/index.d.ts",
+			"import": "./lib/components/avatar/index.js",
+			"default": "./lib/components/avatar/index.js"
+		},
+		"./badge": {
+			"types": "./lib/components/badge/index.d.ts",
+			"import": "./lib/components/badge/index.js",
+			"default": "./lib/components/badge/index.js"
+		},
+		"./breadcrumb": {
+			"types": "./lib/components/breadcrumb/index.d.ts",
+			"import": "./lib/components/breadcrumb/index.js",
+			"default": "./lib/components/breadcrumb/index.js"
+		},
+		"./button": {
+			"types": "./lib/components/button/index.d.ts",
+			"import": "./lib/components/button/index.js",
+			"default": "./lib/components/button/index.js"
+		},
+		"./button-group": {
+			"types": "./lib/components/button-group/index.d.ts",
+			"import": "./lib/components/button-group/index.js",
+			"default": "./lib/components/button-group/index.js"
+		},
+		"./calendar": {
+			"types": "./lib/components/calendar/index.d.ts",
+			"import": "./lib/components/calendar/index.js",
+			"default": "./lib/components/calendar/index.js"
+		},
+		"./card": {
+			"types": "./lib/components/card/index.d.ts",
+			"import": "./lib/components/card/index.js",
+			"default": "./lib/components/card/index.js"
+		},
+		"./carousel": {
+			"types": "./lib/components/carousel/index.d.ts",
+			"import": "./lib/components/carousel/index.js",
+			"default": "./lib/components/carousel/index.js"
+		},
+		"./chart": {
+			"types": "./lib/components/chart/index.d.ts",
+			"import": "./lib/components/chart/index.js",
+			"default": "./lib/components/chart/index.js"
+		},
+		"./checkbox": {
+			"types": "./lib/components/checkbox/index.d.ts",
+			"import": "./lib/components/checkbox/index.js",
+			"default": "./lib/components/checkbox/index.js"
+		},
+		"./collapsible": {
+			"types": "./lib/components/collapsible/index.d.ts",
+			"import": "./lib/components/collapsible/index.js",
+			"default": "./lib/components/collapsible/index.js"
+		},
+		"./combobox": {
+			"types": "./lib/components/combobox/index.d.ts",
+			"import": "./lib/components/combobox/index.js",
+			"default": "./lib/components/combobox/index.js"
+		},
+		"./command": {
+			"types": "./lib/components/command/index.d.ts",
+			"import": "./lib/components/command/index.js",
+			"default": "./lib/components/command/index.js"
+		},
+		"./context-menu": {
+			"types": "./lib/components/context-menu/index.d.ts",
+			"import": "./lib/components/context-menu/index.js",
+			"default": "./lib/components/context-menu/index.js"
+		},
+		"./dialog": {
+			"types": "./lib/components/dialog/index.d.ts",
+			"import": "./lib/components/dialog/index.js",
+			"default": "./lib/components/dialog/index.js"
+		},
+		"./direction": {
+			"types": "./lib/components/direction/index.d.ts",
+			"import": "./lib/components/direction/index.js",
+			"default": "./lib/components/direction/index.js"
+		},
+		"./drawer": {
+			"types": "./lib/components/drawer/index.d.ts",
+			"import": "./lib/components/drawer/index.js",
+			"default": "./lib/components/drawer/index.js"
+		},
+		"./dropdown-menu": {
+			"types": "./lib/components/dropdown-menu/index.d.ts",
+			"import": "./lib/components/dropdown-menu/index.js",
+			"default": "./lib/components/dropdown-menu/index.js"
+		},
+		"./empty": {
+			"types": "./lib/components/empty/index.d.ts",
+			"import": "./lib/components/empty/index.js",
+			"default": "./lib/components/empty/index.js"
+		},
+		"./field": {
+			"types": "./lib/components/field/index.d.ts",
+			"import": "./lib/components/field/index.js",
+			"default": "./lib/components/field/index.js"
+		},
+		"./hover-card": {
+			"types": "./lib/components/hover-card/index.d.ts",
+			"import": "./lib/components/hover-card/index.js",
+			"default": "./lib/components/hover-card/index.js"
+		},
+		"./input": {
+			"types": "./lib/components/input/index.d.ts",
+			"import": "./lib/components/input/index.js",
+			"default": "./lib/components/input/index.js"
+		},
+		"./input-group": {
+			"types": "./lib/components/input-group/index.d.ts",
+			"import": "./lib/components/input-group/index.js",
+			"default": "./lib/components/input-group/index.js"
+		},
+		"./input-otp": {
+			"types": "./lib/components/input-otp/index.d.ts",
+			"import": "./lib/components/input-otp/index.js",
+			"default": "./lib/components/input-otp/index.js"
+		},
+		"./item": {
+			"types": "./lib/components/item/index.d.ts",
+			"import": "./lib/components/item/index.js",
+			"default": "./lib/components/item/index.js"
+		},
+		"./kbd": {
+			"types": "./lib/components/kbd/index.d.ts",
+			"import": "./lib/components/kbd/index.js",
+			"default": "./lib/components/kbd/index.js"
+		},
+		"./label": {
+			"types": "./lib/components/label/index.d.ts",
+			"import": "./lib/components/label/index.js",
+			"default": "./lib/components/label/index.js"
+		},
+		"./menubar": {
+			"types": "./lib/components/menubar/index.d.ts",
+			"import": "./lib/components/menubar/index.js",
+			"default": "./lib/components/menubar/index.js"
+		},
+		"./native-select": {
+			"types": "./lib/components/native-select/index.d.ts",
+			"import": "./lib/components/native-select/index.js",
+			"default": "./lib/components/native-select/index.js"
+		},
+		"./navigation-menu": {
+			"types": "./lib/components/navigation-menu/index.d.ts",
+			"import": "./lib/components/navigation-menu/index.js",
+			"default": "./lib/components/navigation-menu/index.js"
+		},
+		"./pagination": {
+			"types": "./lib/components/pagination/index.d.ts",
+			"import": "./lib/components/pagination/index.js",
+			"default": "./lib/components/pagination/index.js"
+		},
+		"./popover": {
+			"types": "./lib/components/popover/index.d.ts",
+			"import": "./lib/components/popover/index.js",
+			"default": "./lib/components/popover/index.js"
+		},
+		"./progress": {
+			"types": "./lib/components/progress/index.d.ts",
+			"import": "./lib/components/progress/index.js",
+			"default": "./lib/components/progress/index.js"
+		},
+		"./radio-group": {
+			"types": "./lib/components/radio-group/index.d.ts",
+			"import": "./lib/components/radio-group/index.js",
+			"default": "./lib/components/radio-group/index.js"
+		},
+		"./resizable": {
+			"types": "./lib/components/resizable/index.d.ts",
+			"import": "./lib/components/resizable/index.js",
+			"default": "./lib/components/resizable/index.js"
+		},
+		"./scroll-area": {
+			"types": "./lib/components/scroll-area/index.d.ts",
+			"import": "./lib/components/scroll-area/index.js",
+			"default": "./lib/components/scroll-area/index.js"
+		},
+		"./select": {
+			"types": "./lib/components/select/index.d.ts",
+			"import": "./lib/components/select/index.js",
+			"default": "./lib/components/select/index.js"
+		},
+		"./separator": {
+			"types": "./lib/components/separator/index.d.ts",
+			"import": "./lib/components/separator/index.js",
+			"default": "./lib/components/separator/index.js"
+		},
+		"./sheet": {
+			"types": "./lib/components/sheet/index.d.ts",
+			"import": "./lib/components/sheet/index.js",
+			"default": "./lib/components/sheet/index.js"
+		},
+		"./sidebar": {
+			"types": "./lib/components/sidebar/index.d.ts",
+			"import": "./lib/components/sidebar/index.js",
+			"default": "./lib/components/sidebar/index.js"
+		},
+		"./skeleton": {
+			"types": "./lib/components/skeleton/index.d.ts",
+			"import": "./lib/components/skeleton/index.js",
+			"default": "./lib/components/skeleton/index.js"
+		},
+		"./slider": {
+			"types": "./lib/components/slider/index.d.ts",
+			"import": "./lib/components/slider/index.js",
+			"default": "./lib/components/slider/index.js"
+		},
+		"./sonner": {
+			"types": "./lib/components/sonner/index.d.ts",
+			"import": "./lib/components/sonner/index.js",
+			"default": "./lib/components/sonner/index.js"
+		},
+		"./spinner": {
+			"types": "./lib/components/spinner/index.d.ts",
+			"import": "./lib/components/spinner/index.js",
+			"default": "./lib/components/spinner/index.js"
+		},
+		"./switch": {
+			"types": "./lib/components/switch/index.d.ts",
+			"import": "./lib/components/switch/index.js",
+			"default": "./lib/components/switch/index.js"
+		},
+		"./table": {
+			"types": "./lib/components/table/index.d.ts",
+			"import": "./lib/components/table/index.js",
+			"default": "./lib/components/table/index.js"
+		},
+		"./tabs": {
+			"types": "./lib/components/tabs/index.d.ts",
+			"import": "./lib/components/tabs/index.js",
+			"default": "./lib/components/tabs/index.js"
+		},
+		"./textarea": {
+			"types": "./lib/components/textarea/index.d.ts",
+			"import": "./lib/components/textarea/index.js",
+			"default": "./lib/components/textarea/index.js"
+		},
+		"./toggle": {
+			"types": "./lib/components/toggle/index.d.ts",
+			"import": "./lib/components/toggle/index.js",
+			"default": "./lib/components/toggle/index.js"
+		},
+		"./toggle-group": {
+			"types": "./lib/components/toggle-group/index.d.ts",
+			"import": "./lib/components/toggle-group/index.js",
+			"default": "./lib/components/toggle-group/index.js"
+		},
+		"./tooltip": {
+			"types": "./lib/components/tooltip/index.d.ts",
+			"import": "./lib/components/tooltip/index.js",
+			"default": "./lib/components/tooltip/index.js"
+		},
+		"./styles/globals.css": "./src/styles/globals.css",
+		"./lib/utils": {
+			"types": "./lib/lib/utils.d.ts",
+			"import": "./lib/lib/utils.js",
+			"default": "./lib/lib/utils.js"
+		}
+	},
+	"main": "lib/index.js",
+	"module": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"files": [
+		"lib",
+		"src/styles/globals.css",
+		"README.md"
+	],
+	"scripts": {
+		"copyright": "node --experimental-strip-types scripts/copyright.gen.ts",
+		"build": "tsdown",
+		"build-storybook": "storybook build",
+		"chromatic": "bunx chromatic --build-script-name=build-storybook",
+		"dev": "tsdown --watch",
+		"docs": "bunx typedoc --entryPointStrategy Expand src",
+		"format": "biome format --write .",
+		"lint": "biome check .",
+		"lint:knip": "knip",
+		"lint:md": "markdownlint \"**/*.md\" \".github/**/*.md\"",
+		"lint:spelling": "cspell \"**\" \".github/**/*\"",
+		"prepare": "husky",
+		"storybook": "storybook dev -p 6006",
+		"test": "vitest",
+		"tsc": "tsc"
+	},
+	"lint-staged": {
+		"*.{ts,tsx,js,jsx,json}": "./node_modules/.bin/biome check --write --no-errors-on-unmatched",
+		"*.{md,css,yaml,yml,sh}": "./node_modules/.bin/biome format --write --no-errors-on-unmatched"
+	},
+	"dependencies": {
+		"@base-ui/react": "^1.2.0",
+		"class-variance-authority": "^0.7.1",
+		"clsx": "^2.1.1",
+		"cmdk": "^1.1.1",
+		"embla-carousel-react": "^8.6.0",
+		"input-otp": "^1.4.2",
+		"lucide-react": "^0.577.0",
+		"next-themes": "^0.4.6",
+		"radix-ui": "^1.4.3",
+		"react-day-picker": "^9.13.2",
+		"react-resizable-panels": "^4.6.2",
+		"recharts": "3.8.0",
+		"sonner": "^2.0.7",
+		"tailwind-merge": "^3.4.0",
+		"tw-animate-css": "^1.4.0",
+		"vaul": "^1.1.2"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.6",
+		"@chromatic-com/storybook": "^5.0.1",
+		"@github-ui/storybook-addon-performance-panel": "^1.1.4",
+		"@release-it/conventional-changelog": "10.0.6",
+		"@storybook/addon-a11y": "^10.2.17",
+		"@storybook/addon-docs": "^10.2.17",
+		"@storybook/addon-links": "^10.2.17",
+		"@storybook/nextjs-vite": "10.2.17",
+		"@storybook/react": "^10.2.17",
+		"@tailwindcss/vite": "^4.2.1",
+		"@types/node": "24.6.2",
+		"@types/react": "^19.2.14",
+		"@types/react-dom": "^19.2.3",
+		"@vitest/coverage-v8": "3.2.4",
+		"chromatic": "^15.2.0",
+		"console-fail-test": "0.6.1",
+		"cspell": "9.7.0",
+		"husky": "9.1.7",
+		"jsdom": "^28.1.0",
+		"knip": "5.86.0",
+		"lint-staged": "16.4.0",
+		"markdownlint": "0.40.0",
+		"markdownlint-cli": "0.48.0",
+		"react": "^19.2.4",
+		"react-dom": "^19.2.4",
+		"release-it": "19.2.4",
+		"storybook": "^10.2.17",
+		"tailwindcss": "^4.1.18",
+		"tsdown": "0.21.2",
+		"typescript": "5.9.3",
+		"vite": "^7.0.0",
+		"vitest": "3.2.4"
+	},
+	"peerDependencies": {
+		"react": ">=19",
+		"react-dom": ">=19",
+		"tailwindcss": ">=4"
+	},
+	"packageManager": "bun@1.3.10",
+	"engines": {
+		"node": ">=20.19.0"
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true,
+		"registry": "https://registry.npmjs.org/"
+	},
+	"release-it": {
+		"git": {
+			"requireCleanWorkingDir": false
+		}
+	}
 }

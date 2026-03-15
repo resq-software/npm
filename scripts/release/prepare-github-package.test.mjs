@@ -47,6 +47,9 @@ describe("prepareGithubPackage", () => {
 							provenance: true,
 							registry: "https://registry.npmjs.org/",
 						},
+						scripts: {
+							prepare: "husky",
+						},
 					},
 					null,
 					2,
@@ -65,8 +68,11 @@ describe("prepareGithubPackage", () => {
 			});
 			expect(packageJson.main).toBe("lib/index.js");
 			expect(packageJson.publishConfig).toEqual({
+				access: "public",
+				provenance: true,
 				registry: "https://npm.pkg.github.com",
 			});
+			expect(packageJson.scripts?.prepare).toBeUndefined();
 			expect(stagedPackageDir).toBe(packageDir);
 		} finally {
 			rmSync(tempDir, { force: true, recursive: true });

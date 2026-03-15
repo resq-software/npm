@@ -33,8 +33,12 @@ export function prepareGithubPackage(packageDirArg) {
 
 	packageJson.name = "@resq-software/ui";
 	packageJson.publishConfig = {
+		...(packageJson.publishConfig ?? {}),
 		registry: "https://npm.pkg.github.com",
 	};
+	if (packageJson.scripts) {
+		delete packageJson.scripts.prepare;
+	}
 
 	writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, "\t")}\n`);
 

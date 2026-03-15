@@ -1,4 +1,7 @@
 {
+	"hooks": {
+		"after:bump": "bunx biome format --write package.json"
+	},
 	"git": {
 		"commitMessage": "chore: release v${version}",
 		"requireCommits": true
