@@ -3,12 +3,18 @@
 
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ChartContainer } from "./chart";
 
 describe("ChartContainer", () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
 	it("uses telemetry-style chart shell styling", () => {
+		vi.spyOn(console, "warn").mockImplementation(() => {});
+
 		const html = renderToStaticMarkup(
 			React.createElement(
 				ChartContainer,

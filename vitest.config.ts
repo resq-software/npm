@@ -27,7 +27,7 @@ export default defineConfig({
 			reporter: ["html", "lcov", "text"],
 		},
 		environment: "jsdom",
-		exclude: ["lib", "node_modules"],
+		exclude: [".worktrees", "lib", "node_modules"],
 		setupFiles: ["console-fail-test/setup"],
 	},
 });

@@ -26,7 +26,5 @@ jobs:
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           storybookBuildDir: storybook-static
-          # Only snapshot stories whose files changed in this push/PR.
-          onlyChanged: true
           # Auto-accept changes when merging into master (sets new baseline).
           autoAcceptChanges: "master"

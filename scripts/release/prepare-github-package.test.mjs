@@ -16,58 +16,60 @@
  *
  */
 
-import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import test from "node:test";
+import { describe, expect, it } from "vitest";
+
 import { prepareGithubPackage } from "./prepare-github-package.mjs";
 
-test("stages a GitHub Packages manifest from an npm tarball", () => {
-	const tempDir = mkdtempSync(join(tmpdir(), "resq-ui-gh-package-"));
+describe("prepareGithubPackage", () => {
+	it("stages a GitHub Packages manifest from an npm tarball", () => {
+		const tempDir = mkdtempSync(join(tmpdir(), "resq-ui-gh-package-"));
 
-	try {
-		const packageDir = join(tempDir, "staged", "package");
+		try {
+			const packageDir = join(tempDir, "staged", "package");
 
-		mkdirSync(packageDir, { recursive: true });
-		writeFileSync(
-			join(packageDir, "package.json"),
-			`${JSON.stringify(
-				{
-					name: "@resq-sw/ui",
-					version: "1.2.3",
-					repository: {
-						type: "git",
-						url: "git+https://github.com/resq-software/ui.git",
+			mkdirSync(packageDir, { recursive: true });
+			writeFileSync(
+				join(packageDir, "package.json"),
+				`${JSON.stringify(
+					{
+						name: "@resq-sw/ui",
+						version: "1.2.3",
+						repository: {
+							type: "git",
+							url: "git+https://github.com/resq-software/ui.git",
+						},
+						main: "lib/index.js",
+						publishConfig: {
+							access: "public",
+							provenance: true,
+							registry: "https://registry.npmjs.org/",
+						},
 					},
-					main: "lib/index.js",
-					publishConfig: {
-						access: "public",
-						provenance: true,
-						registry: "https://registry.npmjs.org/",
-					},
-				},
-				null,
-				2,
-			)}\n`,
-		);
+					null,
+					2,
+				)}\n`,
+			);
 
-		const stagedPackageDir = prepareGithubPackage(packageDir);
+			const stagedPackageDir = prepareGithubPackage(packageDir);
 
-		const packageJson = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8"));
+			const packageJson = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8"));
 
-		assert.equal(packageJson.name, "@resq-software/ui");
-		assert.equal(packageJson.version, "1.2.3");
-		assert.deepEqual(packageJson.repository, {
-			type: "git",
-			url: "git+https://github.com/resq-software/ui.git",
-		});
-		assert.equal(packageJson.main, "lib/index.js");
-		assert.deepEqual(packageJson.publishConfig, {
-			registry: "https://npm.pkg.github.com",
-		});
-		assert.equal(stagedPackageDir, packageDir);
-	} finally {
-		rmSync(tempDir, { force: true, recursive: true });
-	}
+			expect(packageJson.name).toBe("@resq-software/ui");
+			expect(packageJson.version).toBe("1.2.3");
+			expect(packageJson.repository).toEqual({
+				type: "git",
+				url: "git+https://github.com/resq-software/ui.git",
+			});
+			expect(packageJson.main).toBe("lib/index.js");
+			expect(packageJson.publishConfig).toEqual({
+				registry: "https://npm.pkg.github.com",
+			});
+			expect(stagedPackageDir).toBe(packageDir);
+		} finally {
+			rmSync(tempDir, { force: true, recursive: true });
+		}
+	});
 });
