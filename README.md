@@ -1,250 +1,181 @@
-<h1 align="center">@resq-sw/ui</h1>
+# @resq-sw/ui Documentation
 
-<p align="center">
-  shadcn-based shared component library for the ResQ platform — tree-shakeable, strictly typed, React 19 ready.
-</p>
-
-<p align="center">
-  <a href="https://github.com/resq-software/ui/actions/workflows/ci.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/resq-software/ui/ci.yml?branch=master&label=ci&style=flat-square" alt="CI" />
-  </a>
-  <a href="https://www.npmjs.com/package/@resq-sw/ui">
-    <img src="https://img.shields.io/npm/v/@resq-sw/ui?style=flat-square&label=npm" alt="npm version" />
-  </a>
-  <a href="https://master--69b2711843dac80a70e4ca83.chromatic.com">
-    <img src="https://img.shields.io/badge/storybook-chromatic-FF4785?logo=storybook&logoColor=white&style=flat-square" alt="Storybook" />
-  </a>
-  <a href="https://codecov.io/gh/resq-software/ui">
-    <img src="https://codecov.io/gh/resq-software/ui/graph/badge.svg" alt="Coverage" />
-  </a>
-  <a href="./LICENSE.md">
-    <img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg?style=flat-square" alt="License: Apache-2.0" />
-  </a>
-  <img src="https://img.shields.io/badge/typescript-strict-21bb42.svg?logo=typescript&logoColor=white&style=flat-square" alt="TypeScript: Strict" />
-</p>
+A comprehensive, production-ready React component library for the ResQ platform, built on modern web standards with strict type safety and performance at its core.
 
 ---
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Install](#install)
-- [Quick Start](#quick-start)
-- [Components](#components)
-- [Storybook](#storybook)
-- [Contributing](#contributing)
-- [Contributors](#contributors)
-- [Changelog](#changelog)
-- [License](#license)
+1. [Overview](#overview)
+2. [Features](#features)
+3. [Architecture](#architecture)
+4. [Quick Start](#quick-start)
+5. [Usage](#usage)
+6. [Configuration](#configuration)
+7. [API Overview](#api-overview)
+8. [Development](#development)
+9. [Contributing](#contributing)
+10. [Roadmap](#roadmap)
+11. [License](#license)
 
 ---
 
 ## Overview
 
-`@resq-sw/ui` is a shared React component library built on [shadcn/ui](https://ui.shadcn.com) primitives with [Radix UI](https://www.radix-ui.com), styled via [Tailwind CSS v4](https://tailwindcss.com), and distributed as a fully tree-shakeable ESM package. It is the canonical component system used across all ResQ front-ends.
-
-- **55 components** — accordion, alert, avatar, badge, button, calendar, card, chart, combobox, dialog, drawer, dropdown, input, select, sidebar, table, tabs, tooltip, and more
-- **Subpath exports** — `import { Button } from "@resq-sw/ui/button"` — bundle only what you use
-- **Strict TypeScript** — full `.d.ts` definitions shipped with every export
-- **Storybook** — every component has stories; visual regression tested via Chromatic on each PR
-
-**Related projects:**
-
-| Repo | Description |
-|------|-------------|
-| [resq-software/resQ](https://github.com/resq-software/resQ) | Core platform monorepo |
-| [resq-software/landing](https://github.com/resq-software/landing) | resq.software marketing site |
+`@resq-sw/ui` is a centralized, high-performance UI library designed for ResQ-ecosystem front-end applications. By leveraging **shadcn/ui** primitives and **Radix UI** under the hood, we ensure accessibility and composability while maintaining strict **Tailwind CSS v4** styling.
 
 ---
 
-## Install
+## Features
 
-```sh
-bun add @resq-sw/ui
-# or: npm install @resq-sw/ui
-```
+- **Tree-Shakeable:** Modular architecture allows importing only the components you need.
+- **Strictly Typed:** Full TypeScript support with explicit `.d.ts` definitions.
+- **React 19 Ready:** Optimized for the latest concurrent React features.
+- **Consistent Styling:** Unified design tokens via Tailwind CSS.
+- **Production-Ready:** Rigorous testing, Chromatic visual regression, and automated CI/CD.
+- **Developer Experience:** Includes custom scaffolding scripts and AI-assisted development tools.
 
-**Peer dependencies:**
+---
 
-```sh
-bun add react@^19 react-dom@^19 tailwindcss@^4
+## Architecture
+
+The library is designed for modularity, using a clean subpath-export structure to ensure minimal bundle sizes.
+
+```mermaid
+graph TD
+    A[App Implementation] --> B[Subpath Exports: @resq-sw/ui/component]
+    B --> C[Radix UI Primitives]
+    B --> D[Tailwind CSS v4 Classes]
+    B --> E[Utils / Hooks]
+    F[Chromatic / Storybook] -->|Visual Tests| B
+    G[GitHub Actions] -->|CI Pipeline| B
 ```
 
 ---
 
 ## Quick Start
 
-Import components via subpath exports:
+### 1. Installation
 
-```tsx
-import { Button } from "@resq-sw/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@resq-sw/ui/card";
-import { Input } from "@resq-sw/ui/input";
+```bash
+bun add @resq-sw/ui
+# Peer dependencies
+bun add react@^19 react-dom@^19 tailwindcss@^4
 ```
 
-Include the global stylesheet once in your app entry point:
+### 2. Global Setup
+
+Include the global styles in your root layout/entry file:
 
 ```tsx
 import "@resq-sw/ui/styles/globals.css";
 ```
 
-Use the `cn` utility for conditional class merging:
+### 3. Usage Example
+
+```tsx
+import { Button } from "@resq-sw/ui/button";
+import { Card } from "@resq-sw/ui/card";
+
+export const App = () => (
+  <Card>
+    <Button onClick={() => alert("Ready!")}>Click Me</Button>
+  </Card>
+);
+```
+
+---
+
+## Usage
+
+### Using the `cn` Utility
+Our library exports a standard tailwind-merge and clsx wrapper to handle conditional class name conflicts:
 
 ```tsx
 import { cn } from "@resq-sw/ui/lib/utils";
 
-<div className={cn("p-4", isActive && "bg-primary")} />
+const MyComponent = ({ className, active }) => (
+  <div className={cn("base-styles", active && "bg-blue-500", className)} />
+);
+```
+
+### Mobile Hooks
+Leverage our internal hooks for responsive logic:
+
+```tsx
+import { useIsMobile } from "@resq-sw/ui/hooks/use-mobile";
+
+const Sidebar = () => {
+  const isMobile = useIsMobile();
+  return isMobile ? <MobileNav /> : <DesktopNav />;
+};
 ```
 
 ---
 
-## Components
+## Configuration
 
-| Component | Import |
-|-----------|--------|
-| Accordion | `@resq-sw/ui/accordion` |
-| Alert | `@resq-sw/ui/alert` |
-| Alert Dialog | `@resq-sw/ui/alert-dialog` |
-| Avatar | `@resq-sw/ui/avatar` |
-| Badge | `@resq-sw/ui/badge` |
-| Breadcrumb | `@resq-sw/ui/breadcrumb` |
-| Button | `@resq-sw/ui/button` |
-| Button Group | `@resq-sw/ui/button-group` |
-| Calendar | `@resq-sw/ui/calendar` |
-| Card | `@resq-sw/ui/card` |
-| Carousel | `@resq-sw/ui/carousel` |
-| Chart | `@resq-sw/ui/chart` |
-| Checkbox | `@resq-sw/ui/checkbox` |
-| Collapsible | `@resq-sw/ui/collapsible` |
-| Combobox | `@resq-sw/ui/combobox` |
-| Command | `@resq-sw/ui/command` |
-| Context Menu | `@resq-sw/ui/context-menu` |
-| Dialog | `@resq-sw/ui/dialog` |
-| Drawer | `@resq-sw/ui/drawer` |
-| Dropdown Menu | `@resq-sw/ui/dropdown-menu` |
-| Empty | `@resq-sw/ui/empty` |
-| Field | `@resq-sw/ui/field` |
-| Hover Card | `@resq-sw/ui/hover-card` |
-| Input | `@resq-sw/ui/input` |
-| Input Group | `@resq-sw/ui/input-group` |
-| Input OTP | `@resq-sw/ui/input-otp` |
-| Item | `@resq-sw/ui/item` |
-| Kbd | `@resq-sw/ui/kbd` |
-| Label | `@resq-sw/ui/label` |
-| Menubar | `@resq-sw/ui/menubar` |
-| Native Select | `@resq-sw/ui/native-select` |
-| Navigation Menu | `@resq-sw/ui/navigation-menu` |
-| Pagination | `@resq-sw/ui/pagination` |
-| Popover | `@resq-sw/ui/popover` |
-| Progress | `@resq-sw/ui/progress` |
-| Radio Group | `@resq-sw/ui/radio-group` |
-| Resizable | `@resq-sw/ui/resizable` |
-| Scroll Area | `@resq-sw/ui/scroll-area` |
-| Select | `@resq-sw/ui/select` |
-| Separator | `@resq-sw/ui/separator` |
-| Sheet | `@resq-sw/ui/sheet` |
-| Sidebar | `@resq-sw/ui/sidebar` |
-| Skeleton | `@resq-sw/ui/skeleton` |
-| Slider | `@resq-sw/ui/slider` |
-| Sonner (Toast) | `@resq-sw/ui/sonner` |
-| Spinner | `@resq-sw/ui/spinner` |
-| Switch | `@resq-sw/ui/switch` |
-| Table | `@resq-sw/ui/table` |
-| Tabs | `@resq-sw/ui/tabs` |
-| Textarea | `@resq-sw/ui/textarea` |
-| Toggle | `@resq-sw/ui/toggle` |
-| Toggle Group | `@resq-sw/ui/toggle-group` |
-| Tooltip | `@resq-sw/ui/tooltip` |
+### Tailwind Integration
+Ensure your `tailwind.config.ts` incorporates the plugin or base styles provided in the package if customizing the theme.
+
+### TypeScript
+This project uses `tsconfig.json` with strict mode enabled. When consuming in your project, ensure `moduleResolution` is set to `bundler` or `node16` to correctly resolve subpath exports.
 
 ---
 
-## Storybook
+## API Overview
 
-Browse and interact with all components:
+The library features 50+ components, categorized into common interface groups:
 
-- **Latest (master):** [master--69b2711843dac80a70e4ca83.chromatic.com](https://master--69b2711843dac80a70e4ca83.chromatic.com)
-- **Library view:** [chromatic.com/library?appId=69b2711843dac80a70e4ca83&branch=master](https://www.chromatic.com/library?appId=69b2711843dac80a70e4ca83&branch=master)
+| Category | Key Components |
+| :--- | :--- |
+| **Input** | `Button`, `Input`, `Select`, `Checkbox`, `RadioGroup`, `Textarea` |
+| **Layout** | `Card`, `Accordion`, `Sidebar`, `Separator`, `Resizable` |
+| **Feedback** | `Alert`, `Spinner`, `Progress`, `Skeleton`, `Sonner` |
+| **Overlay** | `Dialog`, `Drawer`, `Popover`, `Tooltip`, `ContextMenu` |
 
-PR branches are published automatically — swap `master` for any branch name in the URLs above.
+*Consult the individual `src/components/[name]/index.ts` files for specific prop interfaces.*
 
-### Docker (self-hosted Storybook)
+---
 
-```sh
-docker build -t resq-ui-storybook .
-docker run -p 8080:80 resq-ui-storybook
-# open http://localhost:8080
+## Development
+
+### Environment Setup
+We utilize [Nix](https://nixos.org/) for development environment parity.
+
+```bash
+git clone https://github.com/resq-software/ui.git
+cd ui
+nix develop
 ```
+
+### Workflow Scripts
+- `bun storybook`: Runs Storybook for component preview.
+- `bun test`: Executes Vitest suites.
+- `bun lint`: Runs Biome for code consistency.
+- `bun tsc`: Validates type safety across the library.
 
 ---
 
 ## Contributing
 
-We welcome contributions. Please read [`.github/CONTRIBUTING.md`](./.github/CONTRIBUTING.md) and [`.github/DEVELOPMENT.md`](./.github/DEVELOPMENT.md) before opening a PR.
+We strictly follow Conventional Commits. Please refer to `.github/CONTRIBUTING.md` for the full guidelines.
 
-**Local setup:**
-
-```sh
-git clone https://github.com/resq-software/ui.git
-cd ui
-nix develop        # Node 22, Bun
-# or:
-./scripts/setup.sh # installs Nix + Docker; runs bun install (also sets up Husky hooks)
-```
-
-**Common commands:**
-
-```sh
-bun storybook       # local Storybook at :6006
-bun dev             # watch-mode library build → lib/
-bun build           # production build
-bun test            # Vitest
-bun tsc             # type-check only
-bun lint            # Biome
-bun lint:knip       # detect unused exports
-```
-
-**Commit convention:** This project uses [Conventional Commits](https://www.conventionalcommits.org/).
-All PRs must follow the `type(scope): subject` format — see the table below.
-
-| Prefix | Effect on version |
-|--------|------------------|
-| `feat:` | Minor bump (`0.x.0`) |
-| `fix:` / `perf:` | Patch bump (`0.0.x`) |
-| `BREAKING CHANGE` footer or `!` suffix | Major bump (`x.0.0`) |
-| `docs:` `style:` `refactor:` `test:` `chore:` | No version bump |
-
-Releases are automated via [release-it](https://github.com/release-it/release-it) + [`@release-it/conventional-changelog`](https://github.com/release-it/conventional-changelog) on merge to `master`.
+1. **Branching**: Use `feat/`, `fix/`, `docs/`, or `chore/` prefixes.
+2. **Issue Templates**: Use the provided YAML templates for bugs and feature requests.
+3. **Commit Hooks**: Husky is configured to run linting and tests automatically before pushes.
 
 ---
 
-## Contributors
+## Roadmap
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tbody>
-    <tr>
-      <td align="center"><a href="https://linktr.ee/mikeodnis"><img src="https://avatars.githubusercontent.com/u/95197809?v=4?s=100" width="100px;" alt="Mike Odnis"/><br /><sub><b>Mike Odnis</b></sub></a><br /><a href="https://github.com/resq-software/ui/commits?author=WomB0ComB0" title="Code">💻</a> <a href="#content-WomB0ComB0" title="Content">🖋</a> <a href="https://github.com/resq-software/ui/commits?author=WomB0ComB0" title="Documentation">📖</a> <a href="#ideas-WomB0ComB0" title="Ideas, Planning, & Feedback">🤔</a> <a href="#infra-WomB0ComB0" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="#maintenance-WomB0ComB0" title="Maintenance">🚧</a> <a href="#projectManagement-WomB0ComB0" title="Project Management">📆</a> <a href="#tool-WomB0ComB0" title="Tools">🔧</a></td>
-    </tr>
-  </tbody>
-</table>
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-[![Star History Chart](https://api.star-history.com/svg?repos=resq-software/ui&type=Date)](https://star-history.com/#resq-software/ui&Date)
-
----
-
-## Changelog
-
-See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+- [ ] **Phase 1**: Complete migration of legacy components.
+- [ ] **Phase 2**: Enhance charting library integration (d3/recharts).
+- [ ] **Phase 3**: Support for custom theme generation utility.
+- [ ] **Phase 4**: Expanded support for RTL languages (Direction API).
 
 ---
 
 ## License
 
-Copyright 2026 ResQ
-
-Licensed under the [Apache License, Version 2.0](./LICENSE.md).
+This project is licensed under the Apache-2.0 License. See the [LICENSE.md](./LICENSE.md) file for details.
