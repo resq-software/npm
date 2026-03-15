@@ -130,7 +130,10 @@ function Carousel({
 		>
 			<div
 				aria-roledescription="carousel"
-				className={cn("relative", className)}
+				className={cn(
+					"relative rounded-[10px] border border-border bg-card p-4 shadow-md",
+					className,
+				)}
 				data-slot="carousel"
 				onKeyDownCapture={handleKeyDown}
 				role="region"
@@ -146,7 +149,7 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
 	const { carouselRef, orientation } = useCarousel();
 
 	return (
-		<div className="overflow-hidden" data-slot="carousel-content" ref={carouselRef}>
+		<div className="overflow-hidden rounded-[8px]" data-slot="carousel-content" ref={carouselRef}>
 			<div
 				className={cn("flex", orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col", className)}
 				{...props}
@@ -184,10 +187,10 @@ function CarouselNext({
 	return (
 		<Button
 			className={cn(
-				"rounded-full absolute touch-manipulation",
+				"rounded-full absolute touch-manipulation shadow-md",
 				orientation === "horizontal"
-					? "top-1/2 -right-12 -translate-y-1/2"
-					: "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
+					? "top-1/2 -right-4 -translate-y-1/2"
+					: "-bottom-4 left-1/2 -translate-x-1/2 rotate-90",
 				className,
 			)}
 			data-slot="carousel-next"
@@ -214,10 +217,10 @@ function CarouselPrevious({
 	return (
 		<Button
 			className={cn(
-				"rounded-full absolute touch-manipulation",
+				"rounded-full absolute touch-manipulation shadow-md",
 				orientation === "horizontal"
-					? "top-1/2 -left-12 -translate-y-1/2"
-					: "-top-12 left-1/2 -translate-x-1/2 rotate-90",
+					? "top-1/2 -left-4 -translate-y-1/2"
+					: "-top-4 left-1/2 -translate-x-1/2 rotate-90",
 				className,
 			)}
 			data-slot="carousel-previous"

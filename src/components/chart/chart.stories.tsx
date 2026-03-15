@@ -34,13 +34,13 @@ const responseData = [
 ];
 
 const missionChartConfig: ChartConfig = {
-	missions: { color: "var(--chart-1)", label: "Missions started" },
-	resolved: { color: "var(--chart-2)", label: "Resolved" },
+	missions: { color: "var(--chart-1)", label: "MISSIONS STARTED" },
+	resolved: { color: "var(--chart-2)", label: "RESOLVED" },
 };
 
 const responseChartConfig: ChartConfig = {
-	resolution: { color: "var(--chart-2)", label: "Avg. resolution (min)" },
-	response: { color: "var(--chart-1)", label: "Avg. response (min)" },
+	resolution: { color: "var(--chart-2)", label: "AVG. RESOLUTION" },
+	response: { color: "var(--chart-1)", label: "AVG. RESPONSE" },
 };
 
 const meta: Meta<typeof ChartContainer> = {

@@ -24,7 +24,7 @@ import * as RechartsPrimitive from "recharts";
 import { cn } from "../../lib/utils.js";
 
 // Format: { THEME_NAME: CSS_SELECTOR }
-const THEMES = { dark: ".dark", light: "" } as const;
+const THEMES = { dark: "", light: ".light" } as const;
 
 const SAFE_KEY_RE = /^[a-zA-Z0-9_-]+$/;
 // Allowlist: permit only named colors, hex, rgb/hsl/oklch values, and CSS variables.
@@ -83,7 +83,7 @@ function ChartContainer({
 		<ChartContext.Provider value={{ config }}>
 			<div
 				className={cn(
-					"[&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border flex aspect-video justify-center text-xs [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
+					"bg-card border border-border rounded-[10px] p-4 shadow-md [&_.recharts-cartesian-axis-tick_text]:fill-hint [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/70 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border-hover [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border/70 [&_.recharts-radial-bar-background-sector]:fill-surface [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-surface [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border-hover flex aspect-video justify-center text-xs [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
 					className,
 				)}
 				data-chart={chartId}
@@ -174,7 +174,14 @@ function ChartTooltipContent({
 
 		if (labelFormatter) {
 			return (
-				<div className={cn("font-medium", labelClassName)}>{labelFormatter(value, payload)}</div>
+				<div
+					className={cn(
+						"font-mono text-[10px] font-medium uppercase tracking-[0.14em]",
+						labelClassName,
+					)}
+				>
+					{labelFormatter(value, payload)}
+				</div>
 			);
 		}
 
@@ -182,7 +189,16 @@ function ChartTooltipContent({
 			return null;
 		}
 
-		return <div className={cn("font-medium", labelClassName)}>{value}</div>;
+		return (
+			<div
+				className={cn(
+					"font-mono text-[10px] font-medium uppercase tracking-[0.14em]",
+					labelClassName,
+				)}
+			>
+				{value}
+			</div>
+		);
 	}, [label, labelFormatter, payload, hideLabel, labelClassName, config, labelKey]);
 
 	if (!active || !payload?.length) {
@@ -194,7 +210,7 @@ function ChartTooltipContent({
 	return (
 		<div
 			className={cn(
-				"border-border/50 bg-background gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl grid min-w-[8rem] items-start",
+				"border-border bg-card gap-2 rounded-[8px] border px-3 py-2 text-xs shadow-xl grid min-w-[9rem] items-start",
 				className,
 			)}
 		>
@@ -251,7 +267,7 @@ function ChartTooltipContent({
 										>
 											<div className="grid gap-1.5">
 												{nestLabel ? tooltipLabel : null}
-												<span className="text-muted-foreground">
+												<span className="text-hint font-mono text-[10px] uppercase tracking-[0.12em]">
 													{itemConfig?.label || item.name}
 												</span>
 											</div>
@@ -293,7 +309,7 @@ function ChartLegendContent({
 	return (
 		<div
 			className={cn(
-				"flex items-center justify-center gap-4",
+				"text-hint font-mono text-[10px] font-medium uppercase tracking-[0.14em] flex items-center justify-center gap-4",
 				verticalAlign === "top" ? "pb-3" : "pt-3",
 				className,
 			)}

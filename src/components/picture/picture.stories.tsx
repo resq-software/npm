@@ -72,6 +72,7 @@ export const Hero: Story = {
 		rounded: "none",
 	},
 	parameters: {
+		backgrounds: { default: "dark" },
 		layout: "fullscreen",
 	},
 };

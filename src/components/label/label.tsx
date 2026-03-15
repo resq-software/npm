@@ -25,7 +25,7 @@ function Label({ className, ...props }: React.ComponentProps<typeof LabelPrimiti
 	return (
 		<LabelPrimitive.Root
 			className={cn(
-				"gap-2 text-sm leading-none font-medium group-data-[disabled=true]:opacity-50 peer-disabled:opacity-50 flex items-center select-none group-data-[disabled=true]:pointer-events-none peer-disabled:cursor-not-allowed",
+				"text-hint gap-2 font-mono text-[10px] leading-none font-medium uppercase tracking-[0.18em] group-data-[disabled=true]:opacity-50 peer-disabled:opacity-50 flex items-center select-none group-data-[disabled=true]:pointer-events-none peer-disabled:cursor-not-allowed",
 				className,
 			)}
 			data-slot="label"
