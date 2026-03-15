@@ -44,7 +44,7 @@ function DialogContent({
 			<DialogOverlay />
 			<DialogPrimitive.Content
 				className={cn(
-					"bg-background data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 ring-foreground/10 grid max-w-[calc(100%-2rem)] gap-4 rounded-xl p-4 text-sm ring-1 duration-100 sm:max-w-sm fixed top-1/2 left-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 outline-none",
+					"bg-card text-card-foreground data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 grid max-w-[calc(100%-2rem)] gap-4 rounded-[10px] border border-border p-5 text-sm shadow-xl duration-100 sm:max-w-sm fixed top-1/2 left-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 outline-none",
 					className,
 				)}
 				data-slot="dialog-content"
@@ -71,7 +71,7 @@ function DialogDescription({
 	return (
 		<DialogPrimitive.Description
 			className={cn(
-				"text-muted-foreground *:[a]:hover:text-foreground text-sm *:[a]:underline *:[a]:underline-offset-3",
+				"text-muted-foreground *:[a]:hover:text-foreground text-sm leading-relaxed *:[a]:underline *:[a]:underline-offset-3",
 				className,
 			)}
 			data-slot="dialog-description"
@@ -91,7 +91,7 @@ function DialogFooter({
 	return (
 		<div
 			className={cn(
-				"bg-muted/50 -mx-4 -mb-4 rounded-b-xl border-t p-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+				"bg-surface -mx-5 -mb-5 rounded-b-[10px] border-t border-border p-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
 				className,
 			)}
 			data-slot="dialog-footer"
@@ -120,7 +120,7 @@ function DialogOverlay({
 	return (
 		<DialogPrimitive.Overlay
 			className={cn(
-				"data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs fixed inset-0 isolate z-50",
+				"data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 bg-background/70 duration-100 supports-backdrop-filter:backdrop-blur-xs fixed inset-0 isolate z-50",
 				className,
 			)}
 			data-slot="dialog-overlay"
@@ -136,7 +136,7 @@ function DialogPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.
 function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
 	return (
 		<DialogPrimitive.Title
-			className={cn("text-base leading-none font-medium", className)}
+			className={cn("font-display text-lg leading-tight font-bold tracking-[-0.03em]", className)}
 			data-slot="dialog-title"
 			{...props}
 		/>

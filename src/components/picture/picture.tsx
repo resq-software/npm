@@ -43,20 +43,20 @@ function useEventCallback<Args extends unknown[], R>(fn: (...args: Args) => R) {
 
 const defaultRootElement = "img" as const;
 
-const pictureVariants = cva("", {
+const pictureVariants = cva("border border-border bg-surface", {
 	variants: {
 		variant: {
 			responsive: "w-full h-auto object-contain",
 			fixed: "w-auto h-auto object-none",
 			cover: "w-full h-full object-cover",
 			contain: "w-full h-full object-contain",
-			thumbnail: "w-24 h-24 rounded-lg object-cover",
-			avatar: "w-12 h-12 rounded-full object-cover",
-			hero: "w-full h-[60vh] object-cover",
-			card: "w-full h-48 rounded-lg object-cover",
+			thumbnail: "w-24 h-24 rounded-[6px] object-cover shadow-md",
+			avatar: "w-12 h-12 rounded-full object-cover shadow-sm",
+			hero: "w-full h-[60vh] rounded-[10px] object-cover shadow-lg",
+			card: "w-full h-48 rounded-[10px] object-cover shadow-md",
 		},
 		isLoading: {
-			true: "animate-pulse bg-muted",
+			true: "animate-pulse bg-surface",
 			false: "",
 		},
 		rounded: {
@@ -224,7 +224,7 @@ export const PictureInternal = <
 	};
 
 	return (
-		<picture className={cn("block", picture?.className)}>
+		<picture className={cn("block overflow-hidden", picture?.className)}>
 			{source && <source srcSet={source.srcSet} sizes={source.sizes} media={source.media} />}
 			<Component {...(imgProps as any)} />
 		</picture>

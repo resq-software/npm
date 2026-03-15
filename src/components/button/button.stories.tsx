@@ -17,7 +17,7 @@ const meta: Meta<typeof Button> = {
 		},
 		variant: {
 			control: "select",
-			options: ["default", "destructive", "outline", "secondary", "ghost", "link"],
+			options: ["default", "destructive", "outline", "secondary", "urgent", "ghost", "link"],
 		},
 	},
 	component: Button,
@@ -41,7 +41,11 @@ export const Outline: Story = {
 };
 
 export const Secondary: Story = {
-	args: { children: "Export report", variant: "secondary" },
+	args: { children: "System action", variant: "secondary" },
+};
+
+export const Urgent: Story = {
+	args: { children: "Dispatch now", variant: "urgent" },
 };
 
 export const Ghost: Story = {
@@ -107,6 +111,7 @@ export const AllVariants: Story = {
 			<Button variant="destructive">Destructive</Button>
 			<Button variant="outline">Outline</Button>
 			<Button variant="secondary">Secondary</Button>
+			<Button variant="urgent">Urgent</Button>
 			<Button variant="ghost">Ghost</Button>
 			<Button variant="link">Link</Button>
 		</div>

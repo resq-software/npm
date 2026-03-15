@@ -23,19 +23,19 @@ export default meta;
 type Story = StoryObj<typeof Badge>;
 
 export const Default: Story = {
-	args: { children: "Badge", variant: "default" },
+	args: { children: "Live", variant: "default" },
 };
 
 export const Secondary: Story = {
-	args: { children: "Secondary", variant: "secondary" },
+	args: { children: "Syncing", variant: "secondary" },
 };
 
 export const Destructive: Story = {
-	args: { children: "Destructive", variant: "destructive" },
+	args: { children: "Critical", variant: "destructive" },
 };
 
 export const Outline: Story = {
-	args: { children: "Outline", variant: "outline" },
+	args: { children: "Standby", variant: "outline" },
 };
 
 export const AllVariants: Story = {

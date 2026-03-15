@@ -29,14 +29,14 @@ function Progress({
 	return (
 		<ProgressPrimitive.Root
 			className={cn(
-				"bg-muted h-1 rounded-full relative flex w-full items-center overflow-x-hidden",
+				"bg-surface border border-border h-2 rounded-full relative flex w-full items-center overflow-x-hidden",
 				className,
 			)}
 			data-slot="progress"
 			{...props}
 		>
 			<ProgressPrimitive.Indicator
-				className="bg-primary size-full flex-1 transition-all"
+				className="bg-primary size-full flex-1 rounded-full shadow-[0_0_18px_color-mix(in_oklab,var(--color-primary)_40%,transparent)] transition-all"
 				data-slot="progress-indicator"
 				style={{ transform: `translateX(-${String(100 - (value ?? 0))}%)` }}
 			/>

@@ -33,8 +33,10 @@ export const WithLabel: Story = {
 	render: () => (
 		<div className="grid gap-1.5 w-72">
 			<div className="flex justify-between text-sm">
-				<span className="font-medium">Zone coverage</span>
-				<span className="text-muted-foreground">68%</span>
+				<span className="font-mono text-[10px] uppercase tracking-[0.14em] text-hint">
+					Zone coverage
+				</span>
+				<span className="font-mono text-[10px] uppercase tracking-[0.14em] text-hint">68%</span>
 			</div>
 			<Progress value={68} />
 		</div>
@@ -52,8 +54,12 @@ export const MultipleSteps: Story = {
 			].map(({ label, value }) => (
 				<div className="grid gap-1.5" key={label}>
 					<div className="flex justify-between text-sm">
-						<span>{label}</span>
-						<span className="text-muted-foreground">{value}%</span>
+						<span className="font-mono text-[10px] uppercase tracking-[0.14em] text-hint">
+							{label}
+						</span>
+						<span className="font-mono text-[10px] uppercase tracking-[0.14em] text-hint">
+							{value}%
+						</span>
 					</div>
 					<Progress value={value} />
 				</div>

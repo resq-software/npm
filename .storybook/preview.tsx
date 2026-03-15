@@ -9,14 +9,10 @@ import "../src/styles/globals.css";
 const preview: Preview = {
 	decorators: [
 		(Story, context) => {
-			const theme = context.globals.theme || "light";
+			const theme = context.globals.theme || "dark";
 			useEffect(() => {
 				const html = document.documentElement;
-				if (theme === "dark") {
-					html.classList.add("dark");
-				} else {
-					html.classList.remove("dark");
-				}
+				html.classList.toggle("light", theme === "light");
 			}, [theme]);
 
 			return React.createElement(Story);
@@ -25,12 +21,12 @@ const preview: Preview = {
 	globalTypes: {
 		theme: {
 			description: "Global theme for components",
-			defaultValue: "light",
+			defaultValue: "dark",
 			toolbar: {
 				icon: "circlehollow",
 				items: [
-					{ value: "light", icon: "circlehollow", title: "Light" },
 					{ value: "dark", icon: "circle", title: "Dark" },
+					{ value: "light", icon: "circlehollow", title: "Light" },
 				],
 				showName: true,
 			},
@@ -39,10 +35,10 @@ const preview: Preview = {
 	parameters: {
 		layout: "centered",
 		backgrounds: {
-			default: "light",
+			default: "dark",
 			values: [
-				{ name: "light", value: "#ffffff" },
-				{ name: "dark", value: "#09090b" },
+				{ name: "dark", value: "#0B0D14" },
+				{ name: "light", value: "#FAFAFA" },
 			],
 		},
 		controls: {

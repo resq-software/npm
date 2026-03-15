@@ -34,14 +34,14 @@ function NativeSelect({ className, size = "default", ...props }: NativeSelectPro
 			data-slot="native-select-wrapper"
 		>
 			<select
-				className="border-input placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 h-8 w-full min-w-0 appearance-none rounded-lg border bg-transparent py-1 pr-8 pl-2.5 text-sm transition-colors select-none focus-visible:ring-[3px] aria-invalid:ring-[3px] data-[size=sm]:h-7 data-[size=sm]:rounded-[min(var(--radius-md),10px)] data-[size=sm]:py-0.5 outline-none disabled:pointer-events-none disabled:cursor-not-allowed"
+				className="border-border placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground bg-surface hover:border-border-hover focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 aria-invalid:border-destructive h-9 w-full min-w-0 appearance-none rounded-[6px] border py-2 pr-8 pl-3 text-sm text-foreground transition-colors select-none focus-visible:ring-[3px] aria-invalid:ring-[3px] data-[size=sm]:h-7 data-[size=sm]:rounded-[6px] data-[size=sm]:py-1 outline-none disabled:pointer-events-none disabled:cursor-not-allowed"
 				data-size={size}
 				data-slot="native-select"
 				{...props}
 			/>
 			<ChevronDownIcon
 				aria-hidden="true"
-				className="text-muted-foreground top-1/2 right-2.5 size-4 -translate-y-1/2 pointer-events-none absolute select-none"
+				className="text-hint top-1/2 right-2.5 size-4 -translate-y-1/2 pointer-events-none absolute select-none"
 				data-slot="native-select-icon"
 			/>
 		</div>

@@ -6,9 +6,12 @@ import { describe, expect, it } from "vitest";
 import { buttonVariants } from "./button";
 
 describe("buttonVariants", () => {
-	it("generates default variant classes", () => {
+	it("uses mono uppercase styling for the default button", () => {
 		const classes = buttonVariants();
+
 		expect(classes).toContain("bg-primary");
+		expect(classes).toContain("font-mono");
+		expect(classes).toContain("uppercase");
 	});
 
 	it("generates destructive variant classes", () => {
@@ -16,9 +19,11 @@ describe("buttonVariants", () => {
 		expect(classes).toContain("bg-destructive");
 	});
 
-	it("generates outline variant classes", () => {
+	it("uses a branded primary border for the outline button", () => {
 		const classes = buttonVariants({ variant: "outline" });
-		expect(classes).toContain("border");
+
+		expect(classes).toContain("border-primary");
+		expect(classes).toContain("text-primary");
 	});
 
 	it("generates size classes for sm", () => {

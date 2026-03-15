@@ -19,31 +19,20 @@ type Story = StoryObj<typeof Calendar>;
 export const Default: Story = {
 	render: () => {
 		const [date, setDate] = React.useState<Date | undefined>(new Date());
-		return (
-			<Calendar className="rounded-md border" mode="single" onSelect={setDate} selected={date} />
-		);
+		return <Calendar mode="single" onSelect={setDate} selected={date} />;
 	},
 };
 
 export const Multiple: Story = {
 	render: () => {
 		const [dates, setDates] = React.useState<Date[] | undefined>();
-		return (
-			<Calendar
-				className="rounded-md border"
-				mode="multiple"
-				onSelect={setDates}
-				selected={dates}
-			/>
-		);
+		return <Calendar mode="multiple" onSelect={setDates} selected={dates} />;
 	},
 };
 
 export const Range: Story = {
 	render: () => {
 		const [range, setRange] = React.useState<undefined | { from: Date | undefined; to?: Date }>();
-		return (
-			<Calendar className="rounded-md border" mode="range" onSelect={setRange} selected={range} />
-		);
+		return <Calendar mode="range" onSelect={setRange} selected={range} />;
 	},
 };
