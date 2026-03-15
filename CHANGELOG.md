@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.0](https://github.com/resq-software/ui/compare/0.2.3...0.6.0) (2026-03-15)
+
+### Features
+
+* **theme:** apply ResQ brand guide across UI library ([9211fbe](https://github.com/resq-software/ui/commit/9211fbef945a249bd2ae789c2aad5b4f341b64fa))
+
+### Bug Fixes
+
+* **ci:** publish release artifact to GitHub Packages ([11bab47](https://github.com/resq-software/ui/commit/11bab47b6a460a75223d55fa28be373877797a26))
+* **ci:** resolve lint failures ([1786c4e](https://github.com/resq-software/ui/commit/1786c4ec373d3f3705c39506cece72499387d64a))
+* **ci:** stabilize release and chromatic workflows ([465fe94](https://github.com/resq-software/ui/commit/465fe9482c07779849757245a72b3816e8072187))
+* **docs:** restore readme lint checks ([9e00736](https://github.com/resq-software/ui/commit/9e00736ad3ffae3825744c36eef6213f52ba05b6))
+
 ## [0.2.3](https://github.com/resq-software/ui/compare/0.2.1...0.2.3) (2026-03-15)
 
 ### Bug Fixes
