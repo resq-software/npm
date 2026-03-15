@@ -22,7 +22,7 @@ jobs:
       - run: bun run build
       - name: Set up npm auth
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-      - uses: JoshuaKGoldberg/release-it-action@v0.3.2
+      - uses: JoshuaKGoldberg/release-it-action@v0.4.0
         with:
           npm-token: ${{ secrets.NPM_TOKEN }}
         env:
