@@ -22,6 +22,50 @@ jobs:
       - run: bun run build
       - name: Set up npm auth
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+      - name: Sync package version from npm when registry is ahead
+        env:
+          PACKAGE_NAME: "@resq-sw/ui"
+        run: |
+          REGISTRY_VERSION=$(npm view "$PACKAGE_NAME" version 2>/dev/null || true)
+          if [ -z "$REGISTRY_VERSION" ]; then
+            echo "Package not found on npm yet; keeping package.json version unchanged."
+            exit 0
+          fi
+
+          REGISTRY_VERSION="$REGISTRY_VERSION" node <<'EOF'
+          const fs = require("fs");
+          const packageJsonPath = "package.json";
+          const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+          const registryVersion = process.env.REGISTRY_VERSION.trim();
+
+          const parseVersion = (version) =>
+            version.split(".").map((part) => Number.parseInt(part, 10));
+
+          const compareVersions = (left, right) => {
+            const a = parseVersion(left);
+            const b = parseVersion(right);
+
+            for (let index = 0; index < Math.max(a.length, b.length); index += 1) {
+              const difference = (a[index] ?? 0) - (b[index] ?? 0);
+              if (difference !== 0) {
+                return difference;
+              }
+            }
+
+            return 0;
+          };
+
+          if (compareVersions(registryVersion, packageJson.version) > 0) {
+            packageJson.version = registryVersion;
+            fs.writeFileSync(
+              packageJsonPath,
+              `${JSON.stringify(packageJson, null, 2)}\n`,
+            );
+            console.log(`Synced package.json version to ${registryVersion} from npm.`);
+          } else {
+            console.log(`package.json version ${packageJson.version} is current with npm.`);
+          }
+          EOF
       - uses: JoshuaKGoldberg/release-it-action@v0.4.0
         with:
           npm-token: ${{ secrets.NPM_TOKEN }}

@@ -1,4 +1,7 @@
 .github/CODE_OF_CONDUCT.md
+.github/agents/
+.github/commands/
+.github/skills/
 CHANGELOG.md
 lib/
 node_modules/

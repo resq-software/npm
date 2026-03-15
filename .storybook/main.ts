@@ -7,8 +7,8 @@ const config: StorybookConfig = {
 	addons: [
 		"@github-ui/storybook-addon-performance-panel",
 		"@storybook/addon-a11y",
+		"@storybook/addon-docs",
 		"@storybook/addon-links",
-		"storybook-dark-mode",
 		"@chromatic-com/storybook",
 	],
 	docs: {

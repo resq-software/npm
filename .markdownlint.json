@@ -1,5 +1,6 @@
 {
 	"extends": "markdownlint/style/prettier",
 	"first-line-h1": false,
+	"MD060": false,
 	"no-inline-html": false
 }
