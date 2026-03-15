@@ -19,8 +19,8 @@ updates:
           - "minor"
           - "patch"
 
-  # npm — Friday
-  - package-ecosystem: "npm"
+  # Bun — Friday
+  - package-ecosystem: "bun"
     directory: "/"
     schedule:
       interval: "weekly"
@@ -33,7 +33,7 @@ updates:
       prefix: "chore"
       include: "scope"
     groups:
-      npm-minor-patch:
+      bun-minor-patch:
         update-types:
           - "minor"
           - "patch"
