@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.3](https://github.com/resq-software/ui/compare/0.2.1...0.2.3) (2026-03-15)
+
+### Bug Fixes
+
+* **ci:** align Dependabot and release-it ([a9ec193](https://github.com/resq-software/ui/commit/a9ec1937cd464c860be8a2e29556dc25259e9dc6))
+* **ci:** grant contents:write to contributors workflow so it can commit ([5965b64](https://github.com/resq-software/ui/commit/5965b642fad149582e718f825857171b68d80407))
+* **ci:** refresh bun lockfile ([3238a95](https://github.com/resq-software/ui/commit/3238a95bb5253007fa8e2c27da60419a60e6b8e5))
+* **ci:** restore bun.lock, remove package-lock.json — bun install was failing to resolve storybook versions ([b548302](https://github.com/resq-software/ui/commit/b54830296e6be44d43bb558316f5ca9de81fe504))
+* **ci:** restore docs addon and harden release ([a06e971](https://github.com/resq-software/ui/commit/a06e97158ec0f79ca4538411f324d05817048343))
+* **ci:** skip copyright gen in CI, fix trailing comma in .all-contributorsrc ([e513065](https://github.com/resq-software/ui/commit/e513065e88d08732a4532f099251939bd80c9a0d))
+* **ci:** sync release metadata and storybook pin ([2baac5d](https://github.com/resq-software/ui/commit/2baac5d339c6bfcc73d477fddcbf65955d704950))
+* **storybook:** remove addon-essentials and addon-interactions ([4bf1c00](https://github.com/resq-software/ui/commit/4bf1c00f2c7fa1a8d275f457094558be74c1df0e))
+
 ## [0.2.1](https://github.com/resq-software/ui/compare/0.2.0...0.2.1) (2026-03-13)
 
 ### Bug Fixes
