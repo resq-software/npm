@@ -6,9 +6,7 @@ import type { StorybookConfig } from "@storybook/nextjs-vite";
 const config: StorybookConfig = {
 	addons: [
 		"@github-ui/storybook-addon-performance-panel",
-		"@storybook/addon-essentials",
 		"@storybook/addon-a11y",
-		"@storybook/addon-interactions",
 		"@storybook/addon-links",
 		"storybook-dark-mode",
 		"@chromatic-com/storybook",
