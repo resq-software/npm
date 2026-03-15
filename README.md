@@ -1,38 +1,78 @@
 <h1 align="center">@resq-sw/ui</h1>
 
 <p align="center">
-  shadcn-based design system for the ResQ platform
+  shadcn-based shared component library for the ResQ platform — tree-shakeable, strictly typed, React 19 ready.
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@resq-sw/ui" target="_blank"><img alt="📦 npm version" src="https://img.shields.io/npm/v/@resq-sw/ui?color=21bb42&label=%F0%9F%93%A6%20npm" /></a>
-  <a href="https://master--69b2711843dac80a70e4ca83.chromatic.com" target="_blank"><img alt="Storybook" src="https://img.shields.io/badge/storybook-chromatic-FF4785?logo=storybook&logoColor=white" /></a>
-  <a href="https://github.com/resq-software/ui/blob/master/LICENSE" target="_blank"><img alt="📝 License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-21bb42.svg" /></a>
-  <img alt="💪 TypeScript: Strict" src="https://img.shields.io/badge/typescript-strict-21bb42.svg?logo=typescript&logoColor=white" />
+  <a href="https://github.com/resq-software/ui/actions/workflows/ci.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/resq-software/ui/ci.yml?branch=master&label=ci&style=flat-square" alt="CI" />
+  </a>
+  <a href="https://www.npmjs.com/package/@resq-sw/ui">
+    <img src="https://img.shields.io/npm/v/@resq-sw/ui?style=flat-square&label=npm" alt="npm version" />
+  </a>
+  <a href="https://master--69b2711843dac80a70e4ca83.chromatic.com">
+    <img src="https://img.shields.io/badge/storybook-chromatic-FF4785?logo=storybook&logoColor=white&style=flat-square" alt="Storybook" />
+  </a>
+  <a href="https://codecov.io/gh/resq-software/ui">
+    <img src="https://codecov.io/gh/resq-software/ui/graph/badge.svg" alt="Coverage" />
+  </a>
+  <a href="./LICENSE.md">
+    <img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg?style=flat-square" alt="License: Apache-2.0" />
+  </a>
+  <img src="https://img.shields.io/badge/typescript-strict-21bb42.svg?logo=typescript&logoColor=white&style=flat-square" alt="TypeScript: Strict" />
 </p>
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Install](#install)
+- [Quick Start](#quick-start)
+- [Components](#components)
+- [Storybook](#storybook)
+- [Contributing](#contributing)
+- [Contributors](#contributors)
+- [Changelog](#changelog)
+- [License](#license)
+
+---
 
 ## Overview
 
-`@resq-sw/ui` is a shared React component library built on [shadcn/ui](https://ui.shadcn.com) primitives with [Radix UI](https://www.radix-ui.com), styled via [Tailwind CSS v4](https://tailwindcss.com), and distributed as a fully tree-shakeable ESM package.
+`@resq-sw/ui` is a shared React component library built on [shadcn/ui](https://ui.shadcn.com) primitives with [Radix UI](https://www.radix-ui.com), styled via [Tailwind CSS v4](https://tailwindcss.com), and distributed as a fully tree-shakeable ESM package. It is the canonical component system used across all ResQ front-ends.
 
 - **55 components** — accordion, alert, avatar, badge, button, calendar, card, chart, combobox, dialog, drawer, dropdown, input, select, sidebar, table, tabs, tooltip, and more
-- **Tree-shakeable subpath exports** — import only what you use
-- **Strict TypeScript** — full type definitions included
-- **Storybook** — visual testing via Chromatic on every PR
+- **Subpath exports** — `import { Button } from "@resq-sw/ui/button"` — bundle only what you use
+- **Strict TypeScript** — full `.d.ts` definitions shipped with every export
+- **Storybook** — every component has stories; visual regression tested via Chromatic on each PR
+
+**Related projects:**
+
+| Repo | Description |
+|------|-------------|
+| [resq-software/resQ](https://github.com/resq-software/resQ) | Core platform monorepo |
+| [resq-software/landing](https://github.com/resq-software/landing) | resq.software marketing site |
+
+---
 
 ## Install
 
 ```sh
 bun add @resq-sw/ui
+# or: npm install @resq-sw/ui
 ```
 
-Peer dependencies:
+**Peer dependencies:**
 
 ```sh
 bun add react@^19 react-dom@^19 tailwindcss@^4
 ```
 
-## Usage
+---
+
+## Quick Start
 
 Import components via subpath exports:
 
@@ -42,22 +82,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@resq-sw/ui/card";
 import { Input } from "@resq-sw/ui/input";
 ```
 
-Include the global stylesheet in your app entry point:
+Include the global stylesheet once in your app entry point:
 
 ```tsx
 import "@resq-sw/ui/styles/globals.css";
 ```
 
-Or use the `cn` utility directly:
+Use the `cn` utility for conditional class merging:
 
 ```tsx
 import { cn } from "@resq-sw/ui/lib/utils";
+
+<div className={cn("p-4", isActive && "bg-primary")} />
 ```
+
+---
 
 ## Components
 
 | Component | Import |
-|---|---|
+|-----------|--------|
 | Accordion | `@resq-sw/ui/accordion` |
 | Alert | `@resq-sw/ui/alert` |
 | Alert Dialog | `@resq-sw/ui/alert-dialog` |
@@ -112,26 +156,66 @@ import { cn } from "@resq-sw/ui/lib/utils";
 | Toggle Group | `@resq-sw/ui/toggle-group` |
 | Tooltip | `@resq-sw/ui/tooltip` |
 
+---
+
 ## Storybook
 
 Browse and interact with all components:
 
 - **Latest (master):** [master--69b2711843dac80a70e4ca83.chromatic.com](https://master--69b2711843dac80a70e4ca83.chromatic.com)
-- **Component library:** [chromatic.com/library?appId=69b2711843dac80a70e4ca83&branch=master](https://www.chromatic.com/library?appId=69b2711843dac80a70e4ca83&branch=master)
+- **Library view:** [chromatic.com/library?appId=69b2711843dac80a70e4ca83&branch=master](https://www.chromatic.com/library?appId=69b2711843dac80a70e4ca83&branch=master)
 
 PR branches are published automatically — swap `master` for any branch name in the URLs above.
 
-## Development
-
-See [`.github/CONTRIBUTING.md`](./.github/CONTRIBUTING.md) and [`.github/DEVELOPMENT.md`](./.github/DEVELOPMENT.md).
+### Docker (self-hosted Storybook)
 
 ```sh
-bun install
-bun run dev          # watch mode build
-bun run storybook    # local storybook at :6006
-bun run test         # vitest
-bun run build        # production build → lib/
+docker build -t resq-ui-storybook .
+docker run -p 8080:80 resq-ui-storybook
+# open http://localhost:8080
 ```
+
+---
+
+## Contributing
+
+We welcome contributions. Please read [`.github/CONTRIBUTING.md`](./.github/CONTRIBUTING.md) and [`.github/DEVELOPMENT.md`](./.github/DEVELOPMENT.md) before opening a PR.
+
+**Local setup:**
+
+```sh
+git clone https://github.com/resq-software/ui.git
+cd ui
+nix develop        # Node 22, Bun
+# or:
+./scripts/setup.sh # installs Nix + Docker; runs bun install (also sets up Husky hooks)
+```
+
+**Common commands:**
+
+```sh
+bun storybook       # local Storybook at :6006
+bun dev             # watch-mode library build → lib/
+bun build           # production build
+bun test            # Vitest
+bun tsc             # type-check only
+bun lint            # Biome
+bun lint:knip       # detect unused exports
+```
+
+**Commit convention:** This project uses [Conventional Commits](https://www.conventionalcommits.org/).
+All PRs must follow the `type(scope): subject` format — see the table below.
+
+| Prefix | Effect on version |
+|--------|------------------|
+| `feat:` | Minor bump (`0.x.0`) |
+| `fix:` / `perf:` | Patch bump (`0.0.x`) |
+| `BREAKING CHANGE` footer or `!` suffix | Major bump (`x.0.0`) |
+| `docs:` `style:` `refactor:` `test:` `chore:` | No version bump |
+
+Releases are automated via [release-it](https://github.com/release-it/release-it) + [`@release-it/conventional-changelog`](https://github.com/release-it/conventional-changelog) on merge to `master`.
+
+---
 
 ## Contributors
 
@@ -149,10 +233,18 @@ bun run build        # production build → lib/
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-## Star History
-
 [![Star History Chart](https://api.star-history.com/svg?repos=resq-software/ui&type=Date)](https://star-history.com/#resq-software/ui&Date)
+
+---
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+
+---
 
 ## License
 
-[Apache-2.0](./LICENSE)
+Copyright 2026 ResQ
+
+Licensed under the [Apache License, Version 2.0](./LICENSE.md).

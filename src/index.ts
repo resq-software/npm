@@ -36,6 +36,7 @@ export * from "./components/menubar/index.js";
 export * from "./components/native-select/index.js";
 export * from "./components/navigation-menu/index.js";
 export * from "./components/pagination/index.js";
+export * from "./components/picture/index.js";
 export * from "./components/popover/index.js";
 export * from "./components/progress/index.js";
 export * from "./components/radio-group/index.js";

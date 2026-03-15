@@ -2,7 +2,7 @@
 	"$schema": "https://typedoc-plugin-markdown.org/schema.json",
 	"plugin": ["typedoc-plugin-markdown", "typedoc-github-wiki-theme"],
 	"entryPoints": ["src/*"],
-	"tsconfig": "tsconfig.app.json",
+	"tsconfig": "tsconfig.json",
 	"out": "./docs",
 	"exclude": [
 		"**/*.cy.ts",
