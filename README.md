@@ -4,7 +4,7 @@ A production-ready, high-performance React component library built with Radix UI
 
 [![Version](https://img.shields.io/badge/version-0.2.3-blue)](https://www.npmjs.com/package/@resq-sw/ui)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](./LICENSE.md)
-[![👪 All Contributors](https://img.shields.io/badge/%F0%9F%91%AA_all_contributors-1-21bb42.svg)](#contributors)
+[![👪 All Contributors](https://img.shields.io/badge/%F0%9F%91%AA_all_contributors-1-21bb42.svg)](https://github.com/resq-software/ui/graphs/contributors)
 
 ## Overview
 

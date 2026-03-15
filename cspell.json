@@ -41,6 +41,7 @@
 		"subdirs",
 		"tailwind",
 		"tsdown",
-		"vaul"
+		"vaul",
+		"WCAG"
 	]
 }
