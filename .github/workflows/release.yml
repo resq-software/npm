@@ -72,6 +72,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - id: stage_github_package
+        name: Stage GitHub Packages publish artifact
+        run: |
+          PACK_FILENAME=$(npm pack --json --ignore-scripts | node -e 'const fs = require("node:fs"); const payload = JSON.parse(fs.readFileSync(0, "utf8")); process.stdout.write(payload[0].filename);')
+          STAGING_DIR="$RUNNER_TEMP/resq-ui-github-package"
+
+          rm -rf "$STAGING_DIR"
+          mkdir -p "$STAGING_DIR"
+          tar -xzf "$PACK_FILENAME" -C "$STAGING_DIR"
+
+          STAGED_PACKAGE_DIR=$(node scripts/release/prepare-github-package.mjs "$STAGING_DIR/package")
+          echo "staged_package_dir=$STAGED_PACKAGE_DIR" >> "$GITHUB_OUTPUT"
+      - name: Set up GitHub Packages auth
+        run: |
+          echo "@resq-software:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+      - name: Publish package to GitHub Packages
+        run: npm publish "${{ steps.stage_github_package.outputs.staged_package_dir }}" --registry https://npm.pkg.github.com
 
 name: Release
 
@@ -83,3 +101,4 @@ on:
 permissions:
   contents: write
   id-token: write
+  packages: write
