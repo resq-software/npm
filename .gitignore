@@ -41,3 +41,6 @@ pnpm-debug.log*
 .claude/*
 !.claude/skills/
 .serena/cache/
+
+# Local worktrees
+/.worktrees
