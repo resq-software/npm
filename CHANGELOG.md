@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.2](https://github.com/resq-software/ui/compare/0.6.1...0.6.2) (2026-03-15)
+
+### Bug Fixes
+
+* **ci:** harden UI release pipeline ([2b586b7](https://github.com/resq-software/ui/commit/2b586b74287a30357e95b29bd7a0c590eedb0b84))
+
 ## [0.6.1](https://github.com/resq-software/ui/compare/0.6.0...0.6.1) (2026-03-15)
 
 ### Bug Fixes
