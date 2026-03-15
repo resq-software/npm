@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.1](https://github.com/resq-software/ui/compare/0.6.0...0.6.1) (2026-03-15)
+
+### Bug Fixes
+
+* **ci:** align release and chromatic config ([e8aeffb](https://github.com/resq-software/ui/commit/e8aeffbfe87ed4cf1bdfa15f420cfbc66cac212f))
+
 ## [0.6.0](https://github.com/resq-software/ui/compare/0.2.3...0.6.0) (2026-03-15)
 
 ### Features
