@@ -1,5 +1,18 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+
 concurrency:
   group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+  packages: write
 
 jobs:
   release:
@@ -91,15 +104,3 @@ jobs:
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
       - name: Publish package to GitHub Packages
         run: npm publish "${{ steps.stage_github_package.outputs.staged_package_dir }}" --ignore-scripts --registry https://npm.pkg.github.com
-
-name: Release
-
-on:
-  push:
-    branches:
-      - master
-
-permissions:
-  contents: write
-  id-token: write
-  packages: write
