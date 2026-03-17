@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.0](https://github.com/resq-software/ui/compare/0.6.2...0.8.0) (2026-03-17)
+
+### Features
+
+* WCAG AA contrast compliance, performance guards, and design token overhaul ([33468a2](https://github.com/resq-software/ui/commit/33468a27507edb70f8a8b750f5a94f0f771fc3f7))
+
 ## [0.6.2](https://github.com/resq-software/ui/compare/0.6.1...0.6.2) (2026-03-15)
 
 ### Bug Fixes
