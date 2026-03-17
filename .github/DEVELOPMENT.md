@@ -1,97 +1,107 @@
 # Development
 
-After [forking the repo from GitHub](https://help.github.com/articles/fork-a-repo) and [installing pnpm](https://pnpm.io/installation):
+After [forking the repo from GitHub](https://help.github.com/articles/fork-a-repo):
 
 ```shell
-git clone https://github.com/(your-name-here)/package-template
-cd package-template
-pnpm install
+git clone https://github.com/(your-name-here)/ui
+cd ui
+bun install
 ```
 
 > This repository includes a list of suggested VS Code extensions.
 > It's a good idea to use [VS Code](https://code.visualstudio.com) and accept its suggestion to install them, as they'll help with development.
+
+Alternatively, use **Nix** for a fully reproducible environment:
+
+```shell
+nix develop
+```
 
 ## Building
 
 Run [**tsdown**](https://tsdown.dev) locally to build source files from `src/` into output files in `lib/`:
 
 ```shell
-pnpm build
+bun build
 ```
 
-Add `--watch` to run the builder in a watch mode that continuously cleans and recreates `lib/` as you save files:
+Run in watch mode for continuous rebuilds:
 
 ```shell
-pnpm build --watch
+bun dev
 ```
 
 ## Formatting
 
-[Prettier](https://prettier.io) is used to format code.
-It should be applied automatically when you save files in VS Code or make a Git commit.
+[Biome](https://biomejs.dev) is used for formatting and linting.
+It runs automatically on staged files via a Husky pre-commit hook.
 
-To manually reformat all files, you can run:
+To manually format all files:
 
 ```shell
-pnpm format --write
+bun format
 ```
 
 ## Linting
 
-This package includes several forms of linting to enforce consistent code quality and styling.
-Each should be shown in VS Code, and can be run manually on the command-line:
+Several linting tools are configured:
 
-- `pnpm lint` ([ESLint](https://eslint.org) with [typescript-eslint](https://typescript-eslint.io)): Lints JavaScript and TypeScript source files
-- `pnpm lint:knip` ([knip](https://github.com/webpro/knip)): Detects unused files, dependencies, and code exports
-- `pnpm lint:md` ([Markdownlint](https://github.com/DavidAnson/markdownlint)): Checks Markdown source files
-- `pnpm lint:packages` ([pnpm dedupe --check](https://pnpm.io/cli/dedupe)): Checks for unnecessarily duplicated packages in the `pnpm-lock.yml` file
-- `pnpm lint:spelling` ([cspell](https://cspell.org)): Spell checks across all source files
-
-Read the individual documentation for each linter to understand how it can be configured and used best.
-
-For example, ESLint can be run with `--fix` to auto-fix some lint rule complaints:
-
-```shell
-pnpm run lint --fix
-```
-
-Note that you'll need to run `pnpm build` before `pnpm lint` so that lint rules which check the file system can pick up on any built files.
+- `bun lint` ([Biome](https://biomejs.dev)): Lints and formats JavaScript/TypeScript source files
+- `bun lint:knip` ([knip](https://github.com/webpro/knip)): Detects unused files, dependencies, and code exports
+- `bun lint:spelling` ([cspell](https://cspell.org)): Spell checks across all source files
 
 ## Testing
 
-[Vitest](https://vitest.dev) is used for tests.
-You can run it locally on the command-line:
+[Vitest](https://vitest.dev) is used for tests:
 
 ```shell
-pnpm run test
+bun test
 ```
 
-Add the `--coverage` flag to compute test coverage and place reports in the `coverage/` directory:
+With coverage:
 
 ```shell
-pnpm run test --coverage
+bun test --coverage
 ```
 
-Note that [console-fail-test](https://github.com/JoshuaKGoldberg/console-fail-test) is enabled for all test runs.
-Calls to `console.log`, `console.warn`, and other console methods will cause a test to fail.
+> [console-fail-test](https://github.com/JoshuaKGoldberg/console-fail-test) is enabled for all test runs. Calls to `console.log`, `console.warn`, and other console methods will cause a test to fail.
+
+### Test categories
+
+- **Unit tests** (`*.test.ts`) — component styling and behavior
+- **Performance regression tests** (`*.perf.test.ts`) — GPU-friendly transitions, DOM budgets, data-slot tracking
+- **Source-level guards** (`perf-guards.test.ts`, `quality-guards.test.ts`) — scan all component files for anti-patterns
+- **Export surface** (`export-surface.test.ts`) — snapshot of public API to catch accidental removals
 
 ### Debugging Tests
 
 This repository includes a [VS Code launch configuration](https://code.visualstudio.com/docs/editor/debugging) for debugging unit tests.
 To launch it, open a test file, then run _Debug Current Test File_ from the VS Code Debug panel (or press F5).
 
-## Type Checking
+## Storybook
 
-You should be able to see suggestions from [TypeScript](https://typescriptlang.org) in your editor for all open files.
-
-However, it can be useful to run the TypeScript command-line (`tsc`) to type check all files in `src/`:
+Preview components locally:
 
 ```shell
-pnpm tsc
+bun storybook
 ```
 
-Add `--watch` to keep the type checker running in a watch mode that updates the display as you save files:
+Build a static Storybook:
 
 ```shell
-pnpm tsc --watch
+bun build-storybook
+```
+
+The Storybook UI uses the ResQ dark theme by default with a toolbar toggle for light mode.
+
+## Type Checking
+
+```shell
+bun tsc
+```
+
+Add `--watch` for continuous type checking:
+
+```shell
+bun tsc --watch
 ```

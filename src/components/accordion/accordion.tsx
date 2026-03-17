@@ -22,7 +22,10 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
-function Accordion({ className, ...props }: React.ComponentProps<typeof AccordionPrimitive.Root>) {
+function Accordion({
+	className,
+	...props
+}: Readonly<React.ComponentProps<typeof AccordionPrimitive.Root>>) {
 	return (
 		<AccordionPrimitive.Root
 			className={cn("flex w-full flex-col", className)}
@@ -36,7 +39,7 @@ function AccordionContent({
 	children,
 	className,
 	...props
-}: React.ComponentProps<typeof AccordionPrimitive.Content>) {
+}: Readonly<React.ComponentProps<typeof AccordionPrimitive.Content>>) {
 	return (
 		<AccordionPrimitive.Content
 			className="data-open:animate-accordion-down data-closed:animate-accordion-up text-sm overflow-hidden"
@@ -58,7 +61,7 @@ function AccordionContent({
 function AccordionItem({
 	className,
 	...props
-}: React.ComponentProps<typeof AccordionPrimitive.Item>) {
+}: Readonly<React.ComponentProps<typeof AccordionPrimitive.Item>>) {
 	return (
 		<AccordionPrimitive.Item
 			className={cn("not-last:border-b not-last:border-border", className)}
@@ -72,12 +75,12 @@ function AccordionTrigger({
 	children,
 	className,
 	...props
-}: React.ComponentProps<typeof AccordionPrimitive.Trigger>) {
+}: Readonly<React.ComponentProps<typeof AccordionPrimitive.Trigger>>) {
 	return (
 		<AccordionPrimitive.Header className="flex">
 			<AccordionPrimitive.Trigger
 				className={cn(
-					"focus-visible:ring-ring/50 focus-visible:border-ring **:data-[slot=accordion-trigger-icon]:text-hint rounded-[6px] px-3 py-3 text-left text-sm text-foreground hover:bg-card focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 items-start justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50",
+					"focus-visible:ring-ring/50 focus-visible:border-ring **:data-[slot=accordion-trigger-icon]:text-hint rounded-lg px-3 py-3 text-left text-sm text-foreground hover:bg-card focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 items-start justify-between border border-transparent transition-colors outline-none disabled:pointer-events-none disabled:opacity-50",
 					className,
 				)}
 				data-slot="accordion-trigger"

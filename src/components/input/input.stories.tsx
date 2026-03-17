@@ -29,7 +29,7 @@ export const Default: Story = {
 };
 
 export const Small: Story = {
-	args: { placeholder: "Small input", size: "sm" },
+	args: { className: "h-7 text-xs", placeholder: "Small input" },
 };
 
 export const Email: Story = {

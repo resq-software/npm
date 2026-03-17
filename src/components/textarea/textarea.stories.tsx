@@ -50,25 +50,27 @@ export const WithLabel: Story = {
 	),
 };
 
+function CharacterCountDemo() {
+	const max = 280;
+	const [value, setValue] = React.useState("");
+	return (
+		<div className="grid gap-1.5 w-80">
+			<Label htmlFor="broadcast">Broadcast message</Label>
+			<Textarea
+				id="broadcast"
+				maxLength={max}
+				onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setValue(e.target.value)}
+				placeholder="Enter message to broadcast to all responders…"
+				rows={3}
+				value={value}
+			/>
+			<p className="text-xs text-muted-foreground text-right">
+				{value.length}/{max}
+			</p>
+		</div>
+	);
+}
+
 export const CharacterCount: Story = {
-	render: () => {
-		const max = 280;
-		const [value, setValue] = React.useState("");
-		return (
-			<div className="grid gap-1.5 w-80">
-				<Label htmlFor="broadcast">Broadcast message</Label>
-				<Textarea
-					id="broadcast"
-					maxLength={max}
-					onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setValue(e.target.value)}
-					placeholder="Enter message to broadcast to all responders…"
-					rows={3}
-					value={value}
-				/>
-				<p className="text-xs text-muted-foreground text-right">
-					{value.length}/{max}
-				</p>
-			</div>
-		);
-	},
+	render: () => <CharacterCountDemo />,
 };

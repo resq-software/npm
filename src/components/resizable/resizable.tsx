@@ -25,9 +25,11 @@ function ResizableHandle({
 	className,
 	withHandle,
 	...props
-}: React.ComponentProps<typeof Separator> & {
-	withHandle?: boolean;
-}) {
+}: Readonly<
+	React.ComponentProps<typeof Separator> & {
+		withHandle?: boolean;
+	}
+>) {
 	return (
 		<Separator
 			className={cn(
@@ -42,11 +44,14 @@ function ResizableHandle({
 	);
 }
 
-function ResizablePanel({ ...props }: React.ComponentProps<typeof Panel>) {
+function ResizablePanel({ ...props }: Readonly<React.ComponentProps<typeof Panel>>) {
 	return <Panel data-slot="resizable-panel" {...props} />;
 }
 
-function ResizablePanelGroup({ className, ...props }: React.ComponentProps<typeof Group>) {
+function ResizablePanelGroup({
+	className,
+	...props
+}: Readonly<React.ComponentProps<typeof Group>>) {
 	return (
 		<Group
 			className={cn("flex h-full w-full data-[panel-group-direction=vertical]:flex-col", className)}

@@ -20,13 +20,13 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
-function Breadcrumb({ className, ...props }: React.ComponentProps<"nav">) {
+function Breadcrumb({ className, ...props }: Readonly<React.ComponentProps<"nav">>) {
 	return (
 		<nav aria-label="breadcrumb" className={cn(className)} data-slot="breadcrumb" {...props} />
 	);
 }
 
-function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<"span">) {
+function BreadcrumbEllipsis({ className, ...props }: Readonly<React.ComponentProps<"span">>) {
 	return (
 		<span
 			aria-hidden="true"
@@ -41,7 +41,7 @@ function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<"span"
 	);
 }
 
-function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
+function BreadcrumbItem({ className, ...props }: Readonly<React.ComponentProps<"li">>) {
 	return (
 		<li
 			className={cn("gap-1 inline-flex items-center", className)}
@@ -55,9 +55,11 @@ function BreadcrumbLink({
 	asChild,
 	className,
 	...props
-}: React.ComponentProps<"a"> & {
-	asChild?: boolean;
-}) {
+}: Readonly<
+	React.ComponentProps<"a"> & {
+		asChild?: boolean;
+	}
+>) {
 	const Comp = asChild ? Slot.Root : "a";
 
 	return (
@@ -69,7 +71,7 @@ function BreadcrumbLink({
 	);
 }
 
-function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
+function BreadcrumbList({ className, ...props }: Readonly<React.ComponentProps<"ol">>) {
 	return (
 		<ol
 			className={cn(
@@ -82,7 +84,7 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
 	);
 }
 
-function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
+function BreadcrumbPage({ className, ...props }: Readonly<React.ComponentProps<"span">>) {
 	return (
 		<span
 			aria-current="page"
@@ -95,7 +97,11 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
 	);
 }
 
-function BreadcrumbSeparator({ children, className, ...props }: React.ComponentProps<"li">) {
+function BreadcrumbSeparator({
+	children,
+	className,
+	...props
+}: Readonly<React.ComponentProps<"li">>) {
 	return (
 		<li
 			aria-hidden="true"

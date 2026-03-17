@@ -20,7 +20,7 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+function Table({ className, ...props }: Readonly<React.ComponentProps<"table">>) {
 	return (
 		<div className="relative w-full overflow-x-auto" data-slot="table-container">
 			<table
@@ -32,7 +32,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
 	);
 }
 
-function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
+function TableBody({ className, ...props }: Readonly<React.ComponentProps<"tbody">>) {
 	return (
 		<tbody
 			className={cn("[&_tr:last-child]:border-0", className)}
@@ -42,7 +42,7 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
 	);
 }
 
-function TableCaption({ className, ...props }: React.ComponentProps<"caption">) {
+function TableCaption({ className, ...props }: Readonly<React.ComponentProps<"caption">>) {
 	return (
 		<caption
 			className={cn("text-muted-foreground mt-4 text-sm", className)}
@@ -52,7 +52,7 @@ function TableCaption({ className, ...props }: React.ComponentProps<"caption">) 
 	);
 }
 
-function TableCell({ className, ...props }: React.ComponentProps<"td">) {
+function TableCell({ className, ...props }: Readonly<React.ComponentProps<"td">>) {
 	return (
 		<td
 			className={cn("p-3 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0", className)}
@@ -62,7 +62,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
 	);
 }
 
-function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
+function TableFooter({ className, ...props }: Readonly<React.ComponentProps<"tfoot">>) {
 	return (
 		<tfoot
 			className={cn(
@@ -75,7 +75,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
 	);
 }
 
-function TableHead({ className, ...props }: React.ComponentProps<"th">) {
+function TableHead({ className, ...props }: Readonly<React.ComponentProps<"th">>) {
 	return (
 		<th
 			className={cn(
@@ -88,11 +88,11 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
 	);
 }
 
-function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
+function TableHeader({ className, ...props }: Readonly<React.ComponentProps<"thead">>) {
 	return <thead className={cn("[&_tr]:border-b", className)} data-slot="table-header" {...props} />;
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+function TableRow({ className, ...props }: Readonly<React.ComponentProps<"tr">>) {
 	return (
 		<tr
 			className={cn(

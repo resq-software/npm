@@ -7,34 +7,54 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 # ResQ UI
 
-`@resq/ui` is the shared design system for the ResQ emergency operations platform — a collection of accessible, composable components built on [shadcn/ui](https://ui.shadcn.com), Radix UI primitives, and Tailwind CSS v4.
+`@resq-sw/ui` is the shared design system for the ResQ emergency operations platform — a collection of accessible, composable components built on [shadcn/ui](https://ui.shadcn.com), Radix UI primitives, and Tailwind CSS v4.
 
 ## Design principles
 
+- **Dark-first** — dark theme is the default; light mode is an explicit opt-in via the `.light` class
 - **Accessible by default** — every component meets WCAG 2.1 AA standards via Radix UI primitives
 - **Composable** — components accept `asChild` and spread all HTML props for maximum flexibility
-- **Themeable** — design tokens as CSS custom properties on `:root`; dark mode via the `.dark` class
+- **Themeable** — design tokens as CSS custom properties using the `oklch` color space for perceptually uniform, vibrant colors
 - **Type-safe** — full TypeScript with exported variant types and `VariantProps` helpers
+- **Performance-tested** — 687+ regression tests covering frame timing, layout stability, DOM budgets, and accessibility
 
 ## Getting started
 
 ```sh
-bun add @resq/ui
+bun add @resq-sw/ui
 ```
 
 Import the stylesheet in your app root:
 
 ```ts
-import "@resq/ui/styles/globals.css";
+import "@resq-sw/ui/styles/globals.css";
 ```
 
 Use components:
 
 ```tsx
-import { Button } from "@resq/ui/button";
+import { Button } from "@resq-sw/ui/button";
 
 export function LaunchMission() {
 	return <Button>Deploy EAGLE-3</Button>;
+}
+```
+
+## Theming
+
+The library ships dark by default. To enable light mode, add the `.light` class to a parent element:
+
+```tsx
+<div className="light">
+	<Button>Light mode button</Button>
+</div>
+```
+
+To customize tokens, override the CSS custom properties:
+
+```css
+:root {
+	--primary: oklch(62% 0.19 25);
 }
 ```
 
@@ -49,3 +69,11 @@ export function LaunchMission() {
 | **Overlays**   | Dialog, Drawer, Sheet, Popover, Command                                       |
 | **Data**       | Table, Chart                                                                  |
 | **Feedback**   | Sonner (toasts), Empty states                                                 |
+
+## Typography
+
+| Font       | Role                                      | CSS class      |
+| ---------- | ----------------------------------------- | -------------- |
+| **Syne**   | Display headings, card titles, stat values | `font-display` |
+| **DM Sans**| Body copy, UI text, descriptions           | `font-sans`    |
+| **DM Mono**| Labels, buttons, badges, data, code        | `font-mono`    |

@@ -25,7 +25,7 @@ function ScrollArea({
 	children,
 	className,
 	...props
-}: React.ComponentProps<typeof ScrollAreaPrimitive.Root>) {
+}: Readonly<React.ComponentProps<typeof ScrollAreaPrimitive.Root>>) {
 	return (
 		<ScrollAreaPrimitive.Root
 			className={cn("relative", className)}
@@ -48,7 +48,7 @@ function ScrollBar({
 	className,
 	orientation = "vertical",
 	...props
-}: React.ComponentProps<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>) {
+}: Readonly<React.ComponentProps<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>>) {
 	return (
 		<ScrollAreaPrimitive.ScrollAreaScrollbar
 			className={cn(

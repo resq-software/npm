@@ -24,9 +24,8 @@ export const Default: Story = {
 			<div className="flex items-center justify-between">
 				<h4 className="text-sm font-semibold">Mission Alpha — active responders</h4>
 				<CollapsibleTrigger asChild>
-					<Button size="icon-sm" variant="ghost">
+					<Button aria-label="Toggle responders" size="icon-sm" variant="ghost">
 						<ChevronsUpDownIcon />
-						<span className="sr-only">Toggle</span>
 					</Button>
 				</CollapsibleTrigger>
 			</div>
@@ -49,9 +48,8 @@ export const OpenByDefault: Story = {
 					<Badge variant="default">3 active</Badge>
 				</div>
 				<CollapsibleTrigger asChild>
-					<Button size="icon-sm" variant="ghost">
+					<Button aria-label="Toggle drone fleet status" size="icon-sm" variant="ghost">
 						<ChevronsUpDownIcon />
-						<span className="sr-only">Toggle</span>
 					</Button>
 				</CollapsibleTrigger>
 			</div>

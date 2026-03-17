@@ -67,36 +67,34 @@ export const Default: Story = {
 	render: () => (
 		<Carousel className="w-full max-w-xs">
 			<CarouselContent>
-				{missions.map((mission) => (
-					<CarouselItem key={mission.id}>
-						<div className="p-1">
-							<Card>
-								<CardHeader className="pb-2">
-									<div className="flex items-center justify-between">
-										<CardTitle className="text-sm">{mission.name}</CardTitle>
-										<Badge
-											variant={
-												mission.status === "Active"
-													? "default"
-													: mission.status === "Standby"
-														? "secondary"
-														: "outline"
-											}
-										>
-											{mission.status}
-										</Badge>
-									</div>
-									<CardDescription>{mission.zone}</CardDescription>
-								</CardHeader>
-								<CardContent>
-									<p className="text-sm text-muted-foreground">
-										{mission.responders} responders deployed
-									</p>
-								</CardContent>
-							</Card>
-						</div>
-					</CarouselItem>
-				))}
+				{missions.map((mission) => {
+					const badgeVariant =
+						mission.status === "Active"
+							? "default"
+							: mission.status === "Standby"
+								? "secondary"
+								: "outline";
+					return (
+						<CarouselItem key={mission.id}>
+							<div className="p-1">
+								<Card>
+									<CardHeader className="pb-2">
+										<div className="flex items-center justify-between">
+											<CardTitle className="text-sm">{mission.name}</CardTitle>
+											<Badge variant={badgeVariant}>{mission.status}</Badge>
+										</div>
+										<CardDescription>{mission.zone}</CardDescription>
+									</CardHeader>
+									<CardContent>
+										<p className="text-sm text-muted-foreground">
+											{mission.responders} responders deployed
+										</p>
+									</CardContent>
+								</Card>
+							</div>
+						</CarouselItem>
+					);
+				})}
 			</CarouselContent>
 			<CarouselPrevious />
 			<CarouselNext />
@@ -109,7 +107,7 @@ export const Numeric: Story = {
 		<Carousel className="w-full max-w-xs">
 			<CarouselContent>
 				{Array.from({ length: 5 }).map((_, index) => (
-					<CarouselItem key={index}>
+					<CarouselItem key={`item-${Number(index)}`}>
 						<div className="p-1">
 							<Card>
 								<CardContent className="flex aspect-square items-center justify-center p-6">
@@ -131,7 +129,7 @@ export const Vertical: Story = {
 		<Carousel className="w-full max-w-xs" orientation="vertical">
 			<CarouselContent className="-mt-1 h-48">
 				{Array.from({ length: 5 }).map((_, index) => (
-					<CarouselItem className="pt-1 md:basis-1/2" key={index}>
+					<CarouselItem className="pt-1 md:basis-1/2" key={`item-${Number(index)}`}>
 						<div className="p-1">
 							<Card>
 								<CardContent className="flex items-center justify-center p-6">

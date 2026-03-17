@@ -21,11 +21,11 @@ import type * as React from "react";
 import { cn } from "../../lib/utils.js";
 import { Separator } from "../separator/separator.js";
 
-function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
+function ItemGroup({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(
-				"gap-4 has-[[data-size=sm]]:gap-2.5 has-[[data-size=xs]]:gap-2 group/item-group flex w-full flex-col",
+				"gap-4 has-data-[size=sm]:gap-2.5 has-data-[size=xs]:gap-2 group/item-group flex w-full flex-col",
 				className,
 			)}
 			data-slot="item-group"
@@ -35,7 +35,7 @@ function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function ItemSeparator({ className, ...props }: React.ComponentProps<typeof Separator>) {
+function ItemSeparator({ className, ...props }: Readonly<React.ComponentProps<typeof Separator>>) {
 	return (
 		<Separator
 			className={cn("my-2", className)}
@@ -47,7 +47,7 @@ function ItemSeparator({ className, ...props }: React.ComponentProps<typeof Sepa
 }
 
 const itemVariants = cva(
-	"[a]:hover:bg-card rounded-[6px] border text-sm w-full group/item focus-visible:border-ring focus-visible:ring-ring/50 flex items-center flex-wrap outline-none transition-colors duration-100 focus-visible:ring-[3px] [a]:transition-colors",
+	"[a]:hover:bg-card rounded-lg border text-sm w-full group/item focus-visible:border-ring focus-visible:ring-ring/50 flex items-center flex-wrap outline-none transition-colors duration-100 focus-visible:ring-[3px] [a]:transition-colors",
 	{
 		defaultVariants: {
 			size: "default",
@@ -74,7 +74,9 @@ function Item({
 	size = "default",
 	variant = "default",
 	...props
-}: React.ComponentProps<"div"> & VariantProps<typeof itemVariants> & { asChild?: boolean }) {
+}: Readonly<
+	React.ComponentProps<"div"> & VariantProps<typeof itemVariants> & { asChild?: boolean }
+>) {
 	const Comp = asChild ? Slot.Root : "div";
 	return (
 		<Comp
@@ -82,6 +84,7 @@ function Item({
 			data-size={size}
 			data-slot="item"
 			data-variant={variant}
+			role="listitem"
 			{...props}
 		/>
 	);
@@ -104,13 +107,13 @@ const itemMediaVariants = cva(
 	},
 );
 
-function ItemActions({ className, ...props }: React.ComponentProps<"div">) {
+function ItemActions({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div className={cn("gap-2 flex items-center", className)} data-slot="item-actions" {...props} />
 	);
 }
 
-function ItemContent({ className, ...props }: React.ComponentProps<"div">) {
+function ItemContent({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(
@@ -123,7 +126,7 @@ function ItemContent({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function ItemDescription({ className, ...props }: React.ComponentProps<"p">) {
+function ItemDescription({ className, ...props }: Readonly<React.ComponentProps<"p">>) {
 	return (
 		<p
 			className={cn(
@@ -136,7 +139,7 @@ function ItemDescription({ className, ...props }: React.ComponentProps<"p">) {
 	);
 }
 
-function ItemFooter({ className, ...props }: React.ComponentProps<"div">) {
+function ItemFooter({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn("gap-2 flex basis-full items-center justify-between", className)}
@@ -146,7 +149,7 @@ function ItemFooter({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function ItemHeader({ className, ...props }: React.ComponentProps<"div">) {
+function ItemHeader({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn("gap-2 flex basis-full items-center justify-between", className)}
@@ -160,7 +163,7 @@ function ItemMedia({
 	className,
 	variant = "default",
 	...props
-}: React.ComponentProps<"div"> & VariantProps<typeof itemMediaVariants>) {
+}: Readonly<React.ComponentProps<"div"> & VariantProps<typeof itemMediaVariants>>) {
 	return (
 		<div
 			className={cn(itemMediaVariants({ className, variant }))}
@@ -171,7 +174,7 @@ function ItemMedia({
 	);
 }
 
-function ItemTitle({ className, ...props }: React.ComponentProps<"div">) {
+function ItemTitle({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(

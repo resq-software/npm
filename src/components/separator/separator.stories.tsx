@@ -56,7 +56,7 @@ export const InLayout: Story = {
 			<Separator className="my-3" />
 			<div className="flex justify-between">
 				<span className="text-muted-foreground">Status</span>
-				<span className="font-medium text-green-600">Active</span>
+				<span className="font-medium text-success-text">Active</span>
 			</div>
 		</div>
 	),

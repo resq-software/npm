@@ -25,7 +25,7 @@ function Progress({
 	className,
 	value,
 	...props
-}: React.ComponentProps<typeof ProgressPrimitive.Root>) {
+}: Readonly<React.ComponentProps<typeof ProgressPrimitive.Root>>) {
 	return (
 		<ProgressPrimitive.Root
 			className={cn(
@@ -36,7 +36,7 @@ function Progress({
 			{...props}
 		>
 			<ProgressPrimitive.Indicator
-				className="bg-primary size-full flex-1 rounded-full shadow-[0_0_18px_color-mix(in_oklab,var(--color-primary)_40%,transparent)] transition-all"
+				className="bg-primary size-full flex-1 rounded-full shadow-[0_0_18px_color-mix(in_oklab,var(--color-primary)_40%,transparent)] transition-transform"
 				data-slot="progress-indicator"
 				style={{ transform: `translateX(-${String(100 - (value ?? 0))}%)` }}
 			/>

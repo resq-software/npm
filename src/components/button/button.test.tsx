@@ -23,7 +23,7 @@ describe("buttonVariants", () => {
 		const classes = buttonVariants({ variant: "outline" });
 
 		expect(classes).toContain("border-primary");
-		expect(classes).toContain("text-primary");
+		expect(classes).toContain("text-primary-text");
 	});
 
 	it("generates size classes for sm", () => {

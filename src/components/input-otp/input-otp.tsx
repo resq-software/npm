@@ -26,9 +26,11 @@ function InputOTP({
 	className,
 	containerClassName,
 	...props
-}: React.ComponentProps<typeof OTPInput> & {
-	containerClassName?: string;
-}) {
+}: Readonly<
+	React.ComponentProps<typeof OTPInput> & {
+		containerClassName?: string;
+	}
+>) {
 	return (
 		<OTPInput
 			className={cn("disabled:cursor-not-allowed", className)}
@@ -43,11 +45,11 @@ function InputOTP({
 	);
 }
 
-function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
+function InputOTPGroup({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(
-				"has-aria-invalid:ring-destructive/20 has-aria-invalid:border-destructive rounded-[6px] has-aria-invalid:ring-[3px] flex items-center",
+				"has-aria-invalid:ring-destructive/20 has-aria-invalid:border-destructive rounded-lg has-aria-invalid:ring-[3px] flex items-center",
 				className,
 			)}
 			data-slot="input-otp-group"
@@ -56,7 +58,7 @@ function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function InputOTPSeparator({ ...props }: React.ComponentProps<"div">) {
+function InputOTPSeparator({ ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className="[&_svg:not([class*='size-'])]:size-4 flex items-center"
@@ -73,16 +75,18 @@ function InputOTPSlot({
 	className,
 	index,
 	...props
-}: React.ComponentProps<"div"> & {
-	index: number;
-}) {
+}: Readonly<
+	React.ComponentProps<"div"> & {
+		index: number;
+	}
+>) {
 	const inputOTPContext = React.useContext(OTPInputContext);
 	const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index] ?? {};
 
 	return (
 		<div
 			className={cn(
-				"bg-surface border-border data-[active=true]:border-ring data-[active=true]:ring-ring/50 data-[active=true]:aria-invalid:ring-destructive/20 aria-invalid:border-destructive data-[active=true]:aria-invalid:border-destructive size-9 border-y border-r text-sm transition-all outline-none first:rounded-l-[6px] first:border-l last:rounded-r-[6px] data-[active=true]:ring-[3px] relative flex items-center justify-center data-[active=true]:z-10",
+				"bg-surface border-border data-[active=true]:border-ring data-[active=true]:ring-ring/50 data-[active=true]:aria-invalid:ring-destructive/20 aria-invalid:border-destructive data-[active=true]:aria-invalid:border-destructive size-9 border-y border-r text-sm transition-colors outline-none first:rounded-l-[6px] first:border-l last:rounded-r-[6px] data-[active=true]:ring-[3px] relative flex items-center justify-center data-[active=true]:z-10",
 				className,
 			)}
 			data-active={isActive}

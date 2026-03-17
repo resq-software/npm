@@ -72,18 +72,20 @@ function ChartContainer({
 	config,
 	id,
 	...props
-}: React.ComponentProps<"div"> & {
-	children: React.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>["children"];
-	config: ChartConfig;
-}) {
+}: Readonly<
+	React.ComponentProps<"div"> & {
+		children: React.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>["children"];
+		config: ChartConfig;
+	}
+>) {
 	const uniqueId = React.useId();
 	const chartId = `chart-${id || uniqueId.replaceAll(/:/g, "")}`;
 
 	return (
-		<ChartContext.Provider value={{ config }}>
+		<ChartContext.Provider value={React.useMemo(() => ({ config }), [config])}>
 			<div
 				className={cn(
-					"bg-card border border-border rounded-[10px] p-4 shadow-md [&_.recharts-cartesian-axis-tick_text]:fill-hint [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/70 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border-hover [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border/70 [&_.recharts-radial-bar-background-sector]:fill-surface [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-surface [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border-hover flex aspect-video justify-center text-xs [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
+					"bg-card border border-border rounded-lg p-4 shadow-md [&_.recharts-cartesian-axis-tick_text]:fill-hint [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/70 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border-hover [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border/70 [&_.recharts-radial-bar-background-sector]:fill-surface [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-surface [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border-hover flex aspect-video justify-center text-xs [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
 					className,
 				)}
 				data-chart={chartId}
@@ -210,7 +212,7 @@ function ChartTooltipContent({
 	return (
 		<div
 			className={cn(
-				"border-border bg-card gap-2 rounded-[8px] border px-3 py-2 text-xs shadow-xl grid min-w-[9rem] items-start",
+				"border-border bg-card gap-2 rounded-lg border px-3 py-2 text-xs shadow-xl grid min-w-36 items-start",
 				className,
 			)}
 		>
@@ -295,7 +297,7 @@ function ChartLegendContent({
 	nameKey,
 	payload,
 	verticalAlign = "bottom",
-}: Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> &
+}: Partial<Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign">> &
 	React.ComponentProps<"div"> & {
 		hideIcon?: boolean;
 		nameKey?: string;

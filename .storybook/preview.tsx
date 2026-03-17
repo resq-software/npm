@@ -28,7 +28,6 @@ const preview: Preview = {
 					{ value: "dark", icon: "circle", title: "Dark" },
 					{ value: "light", icon: "circlehollow", title: "Light" },
 				],
-				showName: true,
 			},
 		},
 	},
@@ -37,8 +36,8 @@ const preview: Preview = {
 		backgrounds: {
 			default: "dark",
 			values: [
-				{ name: "dark", value: "#0B0D14" },
-				{ name: "light", value: "#FAFAFA" },
+				{ name: "dark", value: "oklch(16.04% 0.0152 272.20)" },
+				{ name: "light", value: "oklch(98.51% 0 0)" },
 			],
 		},
 		controls: {

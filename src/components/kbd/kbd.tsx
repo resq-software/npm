@@ -16,11 +16,11 @@
 
 import { cn } from "../../lib/utils.js";
 
-function Kbd({ className, ...props }: React.ComponentProps<"kbd">) {
+function Kbd({ className, ...props }: Readonly<React.ComponentProps<"kbd">>) {
 	return (
 		<kbd
 			className={cn(
-				"bg-surface text-mono [[data-slot=tooltip-content]_&]:bg-background/20 [[data-slot=tooltip-content]_&]:text-foreground h-5 w-fit min-w-5 gap-1 rounded-[3px] border border-border px-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] [&_svg:not([class*='size-'])]:size-3 pointer-events-none inline-flex items-center justify-center select-none",
+				"bg-surface text-mono in-data-[slot=tooltip-content]:bg-background/20 in-data-[slot=tooltip-content]:text-foreground h-5 w-fit min-w-5 gap-1 rounded-sm border border-border px-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] [&_svg:not([class*='size-'])]:size-3 pointer-events-none inline-flex items-center justify-center select-none",
 				className,
 			)}
 			data-slot="kbd"
@@ -29,7 +29,7 @@ function Kbd({ className, ...props }: React.ComponentProps<"kbd">) {
 	);
 }
 
-function KbdGroup({ className, ...props }: React.ComponentProps<"div">) {
+function KbdGroup({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<kbd
 			className={cn("gap-1 inline-flex items-center", className)}

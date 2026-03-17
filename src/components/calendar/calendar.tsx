@@ -33,16 +33,18 @@ function Calendar({
 	locale,
 	showOutsideDays = true,
 	...props
-}: React.ComponentProps<typeof DayPicker> & {
-	buttonVariant?: React.ComponentProps<typeof Button>["variant"];
-}) {
+}: Readonly<
+	React.ComponentProps<typeof DayPicker> & {
+		buttonVariant?: React.ComponentProps<typeof Button>["variant"];
+	}
+>) {
 	const defaultClassNames = getDefaultClassNames();
 
 	return (
 		<DayPicker
 			captionLayout={captionLayout}
 			className={cn(
-				"p-3 [--cell-radius:6px] [--cell-size:--spacing(8)] bg-card border border-border rounded-[10px] shadow-md group/calendar in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
+				"p-3 [--cell-radius:6px] [--cell-size:--spacing(8)] bg-card border border-border rounded-lg shadow-md group/calendar in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
 				String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
 				String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
 				className,
@@ -163,7 +165,7 @@ function CalendarDayButton({
 	locale,
 	modifiers,
 	...props
-}: React.ComponentProps<typeof DayButton> & { locale?: Partial<Locale> }) {
+}: Readonly<React.ComponentProps<typeof DayButton> & { locale?: Partial<Locale> }>) {
 	const defaultClassNames = getDefaultClassNames();
 
 	const ref = React.useRef<HTMLButtonElement>(null);

@@ -16,7 +16,7 @@
 
 import { cn } from "../../lib/utils.js";
 
-function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
+function Skeleton({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn("bg-muted rounded-md animate-pulse", className)}

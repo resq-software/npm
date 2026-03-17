@@ -34,7 +34,7 @@ function NativeSelect({ className, size = "default", ...props }: NativeSelectPro
 			data-slot="native-select-wrapper"
 		>
 			<select
-				className="border-border placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground bg-surface hover:border-border-hover focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 aria-invalid:border-destructive h-9 w-full min-w-0 appearance-none rounded-[6px] border py-2 pr-8 pl-3 text-sm text-foreground transition-colors select-none focus-visible:ring-[3px] aria-invalid:ring-[3px] data-[size=sm]:h-7 data-[size=sm]:rounded-[6px] data-[size=sm]:py-1 outline-none disabled:pointer-events-none disabled:cursor-not-allowed"
+				className="border-border placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground bg-surface hover:border-border-hover focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 aria-invalid:border-destructive h-9 w-full min-w-0 appearance-none rounded-lg border py-2 pr-8 pl-3 text-sm text-foreground transition-colors select-none focus-visible:ring-[3px] aria-invalid:ring-[3px] data-[size=sm]:h-7 data-[size=sm]:rounded-lg data-[size=sm]:py-1 outline-none disabled:pointer-events-none disabled:cursor-not-allowed"
 				data-size={size}
 				data-slot="native-select"
 				{...props}
@@ -48,11 +48,11 @@ function NativeSelect({ className, size = "default", ...props }: NativeSelectPro
 	);
 }
 
-function NativeSelectOptGroup({ className, ...props }: React.ComponentProps<"optgroup">) {
+function NativeSelectOptGroup({ className, ...props }: Readonly<React.ComponentProps<"optgroup">>) {
 	return <optgroup className={cn(className)} data-slot="native-select-optgroup" {...props} />;
 }
 
-function NativeSelectOption({ ...props }: React.ComponentProps<"option">) {
+function NativeSelectOption({ ...props }: Readonly<React.ComponentProps<"option">>) {
 	return <option data-slot="native-select-option" {...props} />;
 }
 

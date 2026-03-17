@@ -47,8 +47,8 @@ export const AvatarSkeleton: Story = {
 export const ListSkeleton: Story = {
 	render: () => (
 		<div className="flex flex-col gap-4 w-80">
-			{Array.from({ length: 5 }).map((_, i) => (
-				<div className="flex items-center gap-3" key={i}>
+			{Array.from({ length: 5 }, (_, i) => `skeleton-list-${String(i)}`).map((id) => (
+				<div className="flex items-center gap-3" key={id}>
 					<Skeleton className="size-8 rounded-full shrink-0" />
 					<div className="flex flex-col gap-1.5 flex-1">
 						<Skeleton className="h-4 w-3/4" />
@@ -70,8 +70,8 @@ export const TableSkeleton: Story = {
 				<Skeleton className="h-4 w-20" />
 				<Skeleton className="h-4 w-16 ml-auto" />
 			</div>
-			{Array.from({ length: 4 }).map((_, i) => (
-				<div className="flex gap-4" key={i}>
+			{Array.from({ length: 4 }, (_, i) => `skeleton-table-${String(i)}`).map((id) => (
+				<div className="flex gap-4" key={id}>
 					<Skeleton className="h-4 w-20" />
 					<Skeleton className="h-4 w-36" />
 					<Skeleton className="h-4 w-16" />

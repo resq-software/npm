@@ -22,7 +22,7 @@ type Story = StoryObj<typeof Toggle>;
 
 export const Default: Story = {
 	render: (args) => (
-		<Toggle {...args}>
+		<Toggle aria-label="Toggle bold" {...args}>
 			<BoldIcon />
 		</Toggle>
 	),
@@ -31,7 +31,7 @@ export const Default: Story = {
 export const Outline: Story = {
 	args: { variant: "outline" },
 	render: (args) => (
-		<Toggle {...args}>
+		<Toggle aria-label="Toggle bold" {...args}>
 			<BoldIcon />
 		</Toggle>
 	),
@@ -49,7 +49,7 @@ export const WithText: Story = {
 export const Disabled: Story = {
 	args: { disabled: true },
 	render: (args) => (
-		<Toggle {...args}>
+		<Toggle aria-label="Toggle bold" {...args}>
 			<BoldIcon />
 		</Toggle>
 	),

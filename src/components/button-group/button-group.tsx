@@ -41,7 +41,7 @@ function ButtonGroup({
 	className,
 	orientation,
 	...props
-}: React.ComponentProps<"div"> & VariantProps<typeof buttonGroupVariants>) {
+}: Readonly<React.ComponentProps<"div"> & VariantProps<typeof buttonGroupVariants>>) {
 	return (
 		<div
 			className={cn(buttonGroupVariants({ orientation }), className)}
@@ -57,7 +57,7 @@ function ButtonGroupSeparator({
 	className,
 	orientation = "vertical",
 	...props
-}: React.ComponentProps<typeof Separator>) {
+}: Readonly<React.ComponentProps<typeof Separator>>) {
 	return (
 		<Separator
 			className={cn(
@@ -75,15 +75,17 @@ function ButtonGroupText({
 	asChild = false,
 	className,
 	...props
-}: React.ComponentProps<"div"> & {
-	asChild?: boolean;
-}) {
+}: Readonly<
+	React.ComponentProps<"div"> & {
+		asChild?: boolean;
+	}
+>) {
 	const Comp = asChild ? Slot.Root : "div";
 
 	return (
 		<Comp
 			className={cn(
-				"bg-surface text-hint gap-2 rounded-[6px] border border-border px-3 font-mono text-[10px] font-medium uppercase tracking-[0.14em] [&_svg:not([class*='size-'])]:size-4 flex items-center [&_svg]:pointer-events-none",
+				"bg-surface text-hint gap-2 rounded-lg border border-border px-3 font-mono text-[10px] font-medium uppercase tracking-[0.14em] [&_svg:not([class*='size-'])]:size-4 flex items-center [&_svg]:pointer-events-none",
 				className,
 			)}
 			{...props}

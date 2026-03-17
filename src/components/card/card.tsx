@@ -22,11 +22,11 @@ function Card({
 	className,
 	size = "default",
 	...props
-}: React.ComponentProps<"div"> & { size?: "default" | "sm" }) {
+}: Readonly<React.ComponentProps<"div"> & { size?: "default" | "sm" }>) {
 	return (
 		<div
 			className={cn(
-				"bg-card text-card-foreground gap-4 overflow-hidden rounded-[6px] border border-border py-4 text-sm shadow-none has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-[6px] *:[img:last-child]:rounded-b-[6px] group/card flex flex-col",
+				"bg-card text-card-foreground gap-4 overflow-hidden rounded-lg border border-border py-4 text-sm shadow-none has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-[6px] *:[img:last-child]:rounded-b-[6px] group/card flex flex-col",
 				className,
 			)}
 			data-size={size}
@@ -36,7 +36,7 @@ function Card({
 	);
 }
 
-function CardAction({ className, ...props }: React.ComponentProps<"div">) {
+function CardAction({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn("col-start-2 row-span-2 row-start-1 self-start justify-self-end", className)}
@@ -46,7 +46,7 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function CardContent({ className, ...props }: React.ComponentProps<"div">) {
+function CardContent({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn("px-4 group-data-[size=sm]/card:px-3", className)}
@@ -56,7 +56,7 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
+function CardDescription({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn("text-muted-foreground text-sm", className)}
@@ -66,7 +66,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+function CardFooter({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(
@@ -79,7 +79,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
+function CardHeader({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(
@@ -92,7 +92,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+function CardTitle({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(

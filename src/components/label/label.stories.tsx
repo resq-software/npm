@@ -35,7 +35,7 @@ export const Required: Story = {
 			<Label htmlFor="zone">
 				Zone
 				<span aria-hidden className="text-destructive ml-0.5">
-					*
+					{"*"}
 				</span>
 			</Label>
 			<Input id="zone" placeholder="e.g. Grid 4B" required />

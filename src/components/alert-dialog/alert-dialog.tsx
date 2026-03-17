@@ -68,15 +68,17 @@ function AlertDialogContent({
 	className,
 	size = "default",
 	...props
-}: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
-	size?: "default" | "sm";
-}) {
+}: Readonly<
+	React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
+		size?: "default" | "sm";
+	}
+>) {
 	return (
 		<AlertDialogPortal>
 			<AlertDialogOverlay />
 			<AlertDialogPrimitive.Content
 				className={cn(
-					"data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 bg-background ring-foreground/10 gap-4 rounded-xl p-4 ring-1 duration-100 data-[size=default]:max-w-xs data-[size=sm]:max-w-xs data-[size=default]:sm:max-w-sm group/alert-dialog-content fixed top-1/2 left-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 outline-none",
+					"data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 bg-background ring-foreground/10 gap-4 rounded-lg p-4 ring-1 duration-100 data-[size=default]:max-w-xs data-[size=sm]:max-w-xs data-[size=default]:sm:max-w-sm group/alert-dialog-content fixed top-1/2 left-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 outline-none",
 					className,
 				)}
 				data-size={size}
@@ -90,7 +92,7 @@ function AlertDialogContent({
 function AlertDialogDescription({
 	className,
 	...props
-}: React.ComponentProps<typeof AlertDialogPrimitive.Description>) {
+}: Readonly<React.ComponentProps<typeof AlertDialogPrimitive.Description>>) {
 	return (
 		<AlertDialogPrimitive.Description
 			className={cn(
@@ -103,11 +105,11 @@ function AlertDialogDescription({
 	);
 }
 
-function AlertDialogFooter({ className, ...props }: React.ComponentProps<"div">) {
+function AlertDialogFooter({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(
-				"bg-muted/50 -mx-4 -mb-4 rounded-b-xl border-t p-4 flex flex-col-reverse gap-2 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2 sm:flex-row sm:justify-end",
+				"bg-muted/50 -mx-4 -mb-4 rounded-b-[6px] border-t p-4 flex flex-col-reverse gap-2 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2 sm:flex-row sm:justify-end",
 				className,
 			)}
 			data-slot="alert-dialog-footer"
@@ -116,7 +118,7 @@ function AlertDialogFooter({ className, ...props }: React.ComponentProps<"div">)
 	);
 }
 
-function AlertDialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+function AlertDialogHeader({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(
@@ -129,7 +131,7 @@ function AlertDialogHeader({ className, ...props }: React.ComponentProps<"div">)
 	);
 }
 
-function AlertDialogMedia({ className, ...props }: React.ComponentProps<"div">) {
+function AlertDialogMedia({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(
@@ -145,7 +147,7 @@ function AlertDialogMedia({ className, ...props }: React.ComponentProps<"div">) 
 function AlertDialogOverlay({
 	className,
 	...props
-}: React.ComponentProps<typeof AlertDialogPrimitive.Overlay>) {
+}: Readonly<React.ComponentProps<typeof AlertDialogPrimitive.Overlay>>) {
 	return (
 		<AlertDialogPrimitive.Overlay
 			className={cn(
@@ -167,7 +169,7 @@ function AlertDialogPortal({
 function AlertDialogTitle({
 	className,
 	...props
-}: React.ComponentProps<typeof AlertDialogPrimitive.Title>) {
+}: Readonly<React.ComponentProps<typeof AlertDialogPrimitive.Title>>) {
 	return (
 		<AlertDialogPrimitive.Title
 			className={cn(
@@ -182,7 +184,7 @@ function AlertDialogTitle({
 
 function AlertDialogTrigger({
 	...props
-}: React.ComponentProps<typeof AlertDialogPrimitive.Trigger>) {
+}: Readonly<React.ComponentProps<typeof AlertDialogPrimitive.Trigger>>) {
 	return <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />;
 }
 

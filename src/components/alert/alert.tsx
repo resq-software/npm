@@ -29,7 +29,7 @@ const alertVariants = cva(
 			variant: {
 				default: "bg-card text-card-foreground",
 				destructive:
-					"text-destructive bg-card *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current",
+					"text-destructive-text bg-card *:data-[slot=alert-description]:text-destructive-text *:[svg]:text-current",
 			},
 		},
 	},
@@ -39,7 +39,7 @@ function Alert({
 	className,
 	variant,
 	...props
-}: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
+}: Readonly<React.ComponentProps<"div"> & VariantProps<typeof alertVariants>>) {
 	return (
 		<div
 			className={cn(alertVariants({ variant }), className)}
@@ -50,13 +50,13 @@ function Alert({
 	);
 }
 
-function AlertAction({ className, ...props }: React.ComponentProps<"div">) {
+function AlertAction({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div className={cn("absolute top-2 right-2", className)} data-slot="alert-action" {...props} />
 	);
 }
 
-function AlertDescription({ className, ...props }: React.ComponentProps<"div">) {
+function AlertDescription({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(
@@ -69,7 +69,7 @@ function AlertDescription({ className, ...props }: React.ComponentProps<"div">) 
 	);
 }
 
-function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
+function AlertTitle({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(

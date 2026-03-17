@@ -33,35 +33,39 @@ export const Disabled: Story = {
 	args: { className: "w-64", defaultValue: [40], disabled: true, max: 100 },
 };
 
-export const WithLabel: Story = {
-	render: () => {
-		const [value, setValue] = React.useState([5]);
-		return (
-			<div className="grid gap-3 w-72">
-				<div className="flex justify-between text-sm">
-					<span className="font-medium">Drone altitude limit</span>
-					<span className="text-muted-foreground">{value[0]} km</span>
-				</div>
-				<Slider max={12} min={0} onValueChange={setValue} step={0.5} value={value} />
-				<p className="text-xs text-muted-foreground">Maximum 12 km for extended-range units.</p>
+function WithLabelDemo() {
+	const [value, setValue] = React.useState([5]);
+	return (
+		<div className="grid gap-3 w-72">
+			<div className="flex justify-between text-sm">
+				<span className="font-medium">Drone altitude limit</span>
+				<span className="text-muted-foreground">{value[0]} km</span>
 			</div>
-		);
-	},
+			<Slider max={12} min={0} onValueChange={setValue} step={0.5} value={value} />
+			<p className="text-xs text-muted-foreground">Maximum 12 km for extended-range units.</p>
+		</div>
+	);
+}
+
+export const WithLabel: Story = {
+	render: () => <WithLabelDemo />,
 };
 
-export const RangeWithLabel: Story = {
-	render: () => {
-		const [range, setRange] = React.useState([20, 80]);
-		return (
-			<div className="grid gap-3 w-72">
-				<div className="flex justify-between text-sm">
-					<span className="font-medium">Altitude range</span>
-					<span className="text-muted-foreground">
-						{range[0]}–{range[1]} m
-					</span>
-				</div>
-				<Slider max={150} min={0} onValueChange={setRange} step={5} value={range} />
+function RangeWithLabelDemo() {
+	const [range, setRange] = React.useState([20, 80]);
+	return (
+		<div className="grid gap-3 w-72">
+			<div className="flex justify-between text-sm">
+				<span className="font-medium">Altitude range</span>
+				<span className="text-muted-foreground">
+					{range[0]}–{range[1]} m
+				</span>
 			</div>
-		);
-	},
+			<Slider max={150} min={0} onValueChange={setRange} step={5} value={range} />
+		</div>
+	);
+}
+
+export const RangeWithLabel: Story = {
+	render: () => <RangeWithLabelDemo />,
 };

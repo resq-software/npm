@@ -50,10 +50,10 @@ const pictureVariants = cva("border border-border bg-surface", {
 			fixed: "w-auto h-auto object-none",
 			cover: "w-full h-full object-cover",
 			contain: "w-full h-full object-contain",
-			thumbnail: "w-24 h-24 rounded-[6px] object-cover shadow-md",
+			thumbnail: "w-24 h-24 rounded-lg object-cover shadow-md",
 			avatar: "w-12 h-12 rounded-full object-cover shadow-sm",
-			hero: "w-full h-[60vh] rounded-[10px] object-cover shadow-lg",
-			card: "w-full h-48 rounded-[10px] object-cover shadow-md",
+			hero: "w-full h-[60vh] rounded-lg object-cover shadow-lg",
+			card: "w-full h-48 rounded-lg object-cover shadow-md",
 		},
 		isLoading: {
 			true: "animate-pulse bg-surface",
@@ -64,7 +64,7 @@ const pictureVariants = cva("border border-border bg-surface", {
 			sm: "rounded-sm",
 			md: "rounded-md",
 			lg: "rounded-lg",
-			xl: "rounded-xl",
+			xl: "rounded-lg",
 			full: "rounded-full",
 		},
 		shadow: {
@@ -77,7 +77,7 @@ const pictureVariants = cva("border border-border bg-surface", {
 		transition: {
 			none: "",
 			hover: "transition-transform duration-200 hover:scale-105",
-			zoom: "transition-all duration-300 hover:scale-110",
+			zoom: "transition-transform duration-300 hover:scale-110",
 			fade: "transition-opacity duration-200 hover:opacity-80",
 		},
 	},

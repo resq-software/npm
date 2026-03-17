@@ -21,11 +21,11 @@ import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "../../lib/utils.js";
 
-function Drawer({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
+function Drawer({ ...props }: Readonly<React.ComponentProps<typeof DrawerPrimitive.Root>>) {
 	return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
 }
 
-function DrawerClose({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Close>) {
+function DrawerClose({ ...props }: Readonly<React.ComponentProps<typeof DrawerPrimitive.Close>>) {
 	return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />;
 }
 
@@ -33,13 +33,13 @@ function DrawerContent({
 	children,
 	className,
 	...props
-}: React.ComponentProps<typeof DrawerPrimitive.Content>) {
+}: Readonly<React.ComponentProps<typeof DrawerPrimitive.Content>>) {
 	return (
 		<DrawerPortal data-slot="drawer-portal">
 			<DrawerOverlay />
 			<DrawerPrimitive.Content
 				className={cn(
-					"bg-card text-card-foreground flex h-auto flex-col text-sm data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:max-h-[80vh] data-[vaul-drawer-direction=bottom]:rounded-t-[10px] data-[vaul-drawer-direction=bottom]:border-t data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=left]:rounded-r-[10px] data-[vaul-drawer-direction=left]:border-r data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:rounded-l-[10px] data-[vaul-drawer-direction=right]:border-l data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-[10px] data-[vaul-drawer-direction=top]:border-b data-[vaul-drawer-direction=left]:sm:max-w-sm data-[vaul-drawer-direction=right]:sm:max-w-sm group/drawer-content fixed z-50 border-border shadow-xl",
+					"bg-card text-card-foreground flex h-auto flex-col text-sm data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:max-h-[80vh] data-[vaul-drawer-direction=bottom]:rounded-t-[6px] data-[vaul-drawer-direction=bottom]:border-t data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=left]:rounded-r-[6px] data-[vaul-drawer-direction=left]:border-r data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:rounded-l-[6px] data-[vaul-drawer-direction=right]:border-l data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-[6px] data-[vaul-drawer-direction=top]:border-b data-[vaul-drawer-direction=left]:sm:max-w-sm data-[vaul-drawer-direction=right]:sm:max-w-sm group/drawer-content fixed z-50 border-border shadow-xl",
 					className,
 				)}
 				data-slot="drawer-content"
@@ -55,7 +55,7 @@ function DrawerContent({
 function DrawerDescription({
 	className,
 	...props
-}: React.ComponentProps<typeof DrawerPrimitive.Description>) {
+}: Readonly<React.ComponentProps<typeof DrawerPrimitive.Description>>) {
 	return (
 		<DrawerPrimitive.Description
 			className={cn("text-muted-foreground text-sm leading-relaxed", className)}
@@ -65,7 +65,7 @@ function DrawerDescription({
 	);
 }
 
-function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
+function DrawerFooter({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn("gap-2 p-5 mt-auto border-t border-border bg-surface flex flex-col", className)}
@@ -75,7 +75,7 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
+function DrawerHeader({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(
@@ -91,7 +91,7 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
 function DrawerOverlay({
 	className,
 	...props
-}: React.ComponentProps<typeof DrawerPrimitive.Overlay>) {
+}: Readonly<React.ComponentProps<typeof DrawerPrimitive.Overlay>>) {
 	return (
 		<DrawerPrimitive.Overlay
 			className={cn(
@@ -104,11 +104,14 @@ function DrawerOverlay({
 	);
 }
 
-function DrawerPortal({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Portal>) {
+function DrawerPortal({ ...props }: Readonly<React.ComponentProps<typeof DrawerPrimitive.Portal>>) {
 	return <DrawerPrimitive.Portal data-slot="drawer-portal" {...props} />;
 }
 
-function DrawerTitle({ className, ...props }: React.ComponentProps<typeof DrawerPrimitive.Title>) {
+function DrawerTitle({
+	className,
+	...props
+}: Readonly<React.ComponentProps<typeof DrawerPrimitive.Title>>) {
 	return (
 		<DrawerPrimitive.Title
 			className={cn("font-display text-lg font-bold tracking-[-0.03em]", className)}
@@ -118,7 +121,9 @@ function DrawerTitle({ className, ...props }: React.ComponentProps<typeof Drawer
 	);
 }
 
-function DrawerTrigger({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
+function DrawerTrigger({
+	...props
+}: Readonly<React.ComponentProps<typeof DrawerPrimitive.Trigger>>) {
 	return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />;
 }
 

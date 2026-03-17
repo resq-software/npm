@@ -16,23 +16,29 @@ const meta: Meta<typeof Calendar> = {
 export default meta;
 type Story = StoryObj<typeof Calendar>;
 
+function DefaultDemo() {
+	const [date, setDate] = React.useState<Date | undefined>(new Date());
+	return <Calendar mode="single" onSelect={setDate} selected={date} />;
+}
+
 export const Default: Story = {
-	render: () => {
-		const [date, setDate] = React.useState<Date | undefined>(new Date());
-		return <Calendar mode="single" onSelect={setDate} selected={date} />;
-	},
+	render: () => <DefaultDemo />,
 };
+
+function MultipleDemo() {
+	const [dates, setDates] = React.useState<Date[] | undefined>();
+	return <Calendar mode="multiple" onSelect={setDates} selected={dates} />;
+}
 
 export const Multiple: Story = {
-	render: () => {
-		const [dates, setDates] = React.useState<Date[] | undefined>();
-		return <Calendar mode="multiple" onSelect={setDates} selected={dates} />;
-	},
+	render: () => <MultipleDemo />,
 };
 
+function RangeDemo() {
+	const [range, setRange] = React.useState<undefined | { from: Date | undefined; to?: Date }>();
+	return <Calendar mode="range" onSelect={setRange} selected={range} />;
+}
+
 export const Range: Story = {
-	render: () => {
-		const [range, setRange] = React.useState<undefined | { from: Date | undefined; to?: Date }>();
-		return <Calendar mode="range" onSelect={setRange} selected={range} />;
-	},
+	render: () => <RangeDemo />,
 };

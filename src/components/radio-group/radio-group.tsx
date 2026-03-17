@@ -25,7 +25,7 @@ import { cn } from "../../lib/utils.js";
 function RadioGroup({
 	className,
 	...props
-}: React.ComponentProps<typeof RadioGroupPrimitive.Root>) {
+}: Readonly<React.ComponentProps<typeof RadioGroupPrimitive.Root>>) {
 	return (
 		<RadioGroupPrimitive.Root
 			className={cn("grid gap-2 w-full", className)}
@@ -38,7 +38,7 @@ function RadioGroup({
 function RadioGroupItem({
 	className,
 	...props
-}: React.ComponentProps<typeof RadioGroupPrimitive.Item>) {
+}: Readonly<React.ComponentProps<typeof RadioGroupPrimitive.Item>>) {
 	return (
 		<RadioGroupPrimitive.Item
 			className={cn(

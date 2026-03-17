@@ -25,13 +25,13 @@ export const Default: Story = {
 	args: { type: "multiple" },
 	render: (args) => (
 		<ToggleGroup {...args}>
-			<ToggleGroupItem value="bold">
+			<ToggleGroupItem aria-label="Toggle bold" value="bold">
 				<BoldIcon />
 			</ToggleGroupItem>
-			<ToggleGroupItem value="italic">
+			<ToggleGroupItem aria-label="Toggle italic" value="italic">
 				<ItalicIcon />
 			</ToggleGroupItem>
-			<ToggleGroupItem value="underline">
+			<ToggleGroupItem aria-label="Toggle underline" value="underline">
 				<UnderlineIcon />
 			</ToggleGroupItem>
 		</ToggleGroup>
@@ -42,13 +42,13 @@ export const Outline: Story = {
 	args: { type: "single", variant: "outline" },
 	render: (args) => (
 		<ToggleGroup {...args}>
-			<ToggleGroupItem value="bold">
+			<ToggleGroupItem aria-label="Toggle bold" value="bold">
 				<BoldIcon />
 			</ToggleGroupItem>
-			<ToggleGroupItem value="italic">
+			<ToggleGroupItem aria-label="Toggle italic" value="italic">
 				<ItalicIcon />
 			</ToggleGroupItem>
-			<ToggleGroupItem value="underline">
+			<ToggleGroupItem aria-label="Toggle underline" value="underline">
 				<UnderlineIcon />
 			</ToggleGroupItem>
 		</ToggleGroup>
@@ -59,13 +59,13 @@ export const Vertical: Story = {
 	args: { orientation: "vertical", type: "multiple" },
 	render: (args) => (
 		<ToggleGroup {...args}>
-			<ToggleGroupItem value="bold">
+			<ToggleGroupItem aria-label="Toggle bold" value="bold">
 				<BoldIcon />
 			</ToggleGroupItem>
-			<ToggleGroupItem value="italic">
+			<ToggleGroupItem aria-label="Toggle italic" value="italic">
 				<ItalicIcon />
 			</ToggleGroupItem>
-			<ToggleGroupItem value="underline">
+			<ToggleGroupItem aria-label="Toggle underline" value="underline">
 				<UnderlineIcon />
 			</ToggleGroupItem>
 		</ToggleGroup>

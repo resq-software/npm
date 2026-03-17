@@ -81,7 +81,8 @@ export const WithAction: Story = {
 	),
 };
 
-export const Promise: Story = {
+export const AsyncToast: Story = {
+	name: "Promise",
 	render: () => (
 		<>
 			<Toaster />

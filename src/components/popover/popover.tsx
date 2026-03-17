@@ -21,11 +21,13 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
-function Popover({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Root>) {
+function Popover({ ...props }: Readonly<React.ComponentProps<typeof PopoverPrimitive.Root>>) {
 	return <PopoverPrimitive.Root data-slot="popover" {...props} />;
 }
 
-function PopoverAnchor({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Anchor>) {
+function PopoverAnchor({
+	...props
+}: Readonly<React.ComponentProps<typeof PopoverPrimitive.Anchor>>) {
 	return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />;
 }
 
@@ -34,7 +36,7 @@ function PopoverContent({
 	className,
 	sideOffset = 4,
 	...props
-}: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+}: Readonly<React.ComponentProps<typeof PopoverPrimitive.Content>>) {
 	return (
 		<PopoverPrimitive.Portal>
 			<PopoverPrimitive.Content
@@ -51,7 +53,7 @@ function PopoverContent({
 	);
 }
 
-function PopoverDescription({ className, ...props }: React.ComponentProps<"p">) {
+function PopoverDescription({ className, ...props }: Readonly<React.ComponentProps<"p">>) {
 	return (
 		<p
 			className={cn("text-muted-foreground", className)}
@@ -61,7 +63,7 @@ function PopoverDescription({ className, ...props }: React.ComponentProps<"p">) 
 	);
 }
 
-function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
+function PopoverHeader({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn("flex flex-col gap-0.5 text-sm", className)}
@@ -71,11 +73,13 @@ function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function PopoverTitle({ className, ...props }: React.ComponentProps<"h2">) {
+function PopoverTitle({ className, ...props }: Readonly<React.ComponentProps<"h2">>) {
 	return <div className={cn("font-medium", className)} data-slot="popover-title" {...props} />;
 }
 
-function PopoverTrigger({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
+function PopoverTrigger({
+	...props
+}: Readonly<React.ComponentProps<typeof PopoverPrimitive.Trigger>>) {
 	return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />;
 }
 

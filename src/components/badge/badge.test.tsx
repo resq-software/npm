@@ -18,6 +18,6 @@ describe("badgeVariants", () => {
 		const classes = badgeVariants({ variant: "destructive" });
 
 		expect(classes).toContain("bg-destructive/10");
-		expect(classes).toContain("text-destructive");
+		expect(classes).toContain("text-destructive-text");
 	});
 });

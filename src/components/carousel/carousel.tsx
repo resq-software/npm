@@ -117,23 +117,23 @@ function Carousel({
 
 	return (
 		<CarouselContext.Provider
-			value={{
-				api,
-				canScrollNext,
-				canScrollPrev,
-				carouselRef,
-				opts,
-				orientation: orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
-				scrollNext,
-				scrollPrev,
-			}}
+			value={React.useMemo(
+				() => ({
+					api,
+					canScrollNext,
+					canScrollPrev,
+					carouselRef,
+					opts,
+					orientation: orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
+					scrollNext,
+					scrollPrev,
+				}),
+				[api, canScrollNext, canScrollPrev, carouselRef, opts, orientation, scrollNext, scrollPrev],
+			)}
 		>
 			<div
 				aria-roledescription="carousel"
-				className={cn(
-					"relative rounded-[10px] border border-border bg-card p-4 shadow-md",
-					className,
-				)}
+				className={cn("relative rounded-lg border border-border bg-card p-4 shadow-md", className)}
 				data-slot="carousel"
 				onKeyDownCapture={handleKeyDown}
 				role="region"
@@ -145,11 +145,11 @@ function Carousel({
 	);
 }
 
-function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
+function CarouselContent({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	const { carouselRef, orientation } = useCarousel();
 
 	return (
-		<div className="overflow-hidden rounded-[8px]" data-slot="carousel-content" ref={carouselRef}>
+		<div className="overflow-hidden rounded-lg" data-slot="carousel-content" ref={carouselRef}>
 			<div
 				className={cn("flex", orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col", className)}
 				{...props}
@@ -158,7 +158,7 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
+function CarouselItem({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	const { orientation } = useCarousel();
 
 	return (
@@ -181,7 +181,7 @@ function CarouselNext({
 	size = "icon-sm",
 	variant = "outline",
 	...props
-}: React.ComponentProps<typeof Button>) {
+}: Readonly<React.ComponentProps<typeof Button>>) {
 	const { canScrollNext, orientation, scrollNext } = useCarousel();
 
 	return (
@@ -211,7 +211,7 @@ function CarouselPrevious({
 	size = "icon-sm",
 	variant = "outline",
 	...props
-}: React.ComponentProps<typeof Button>) {
+}: Readonly<React.ComponentProps<typeof Button>>) {
 	const { canScrollPrev, orientation, scrollPrev } = useCarousel();
 
 	return (

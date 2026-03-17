@@ -23,11 +23,11 @@ import { cn } from "../../lib/utils.js";
 import { Label } from "../label/label.js";
 import { Separator } from "../separator/separator.js";
 
-function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
+function FieldGroup({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(
-				"gap-5 data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-4 group/field-group @container/field-group flex w-full flex-col",
+				"gap-5 data-[slot=checkbox-group]:gap-3 *:data-[slot=field-group]:gap-4 group/field-group @container/field-group flex w-full flex-col",
 				className,
 			)}
 			data-slot="field-group"
@@ -40,7 +40,7 @@ function FieldLegend({
 	className,
 	variant = "legend",
 	...props
-}: React.ComponentProps<"legend"> & { variant?: "label" | "legend" }) {
+}: Readonly<React.ComponentProps<"legend"> & { variant?: "label" | "legend" }>) {
 	return (
 		<legend
 			className={cn(
@@ -54,7 +54,7 @@ function FieldLegend({
 	);
 }
 
-function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
+function FieldSet({ className, ...props }: Readonly<React.ComponentProps<"fieldset">>) {
 	return (
 		<fieldset
 			className={cn(
@@ -67,26 +67,29 @@ function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
 	);
 }
 
-const fieldVariants = cva("data-[invalid=true]:text-destructive gap-2 group/field flex w-full", {
-	defaultVariants: {
-		orientation: "vertical",
-	},
-	variants: {
-		orientation: {
-			horizontal:
-				"flex-row items-center [&>[data-slot=field-label]]:flex-auto has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
-			responsive:
-				"flex-col [&>*]:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:[&>*]:w-auto @md/field-group:[&>[data-slot=field-label]]:flex-auto @md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
-			vertical: "flex-col [&>*]:w-full [&>.sr-only]:w-auto",
+const fieldVariants = cva(
+	"data-[invalid=true]:text-destructive-text gap-2 group/field flex w-full",
+	{
+		defaultVariants: {
+			orientation: "vertical",
+		},
+		variants: {
+			orientation: {
+				horizontal:
+					"flex-row items-center [&>[data-slot=field-label]]:flex-auto has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
+				responsive:
+					"flex-col [&>*]:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:[&>*]:w-auto @md/field-group:[&>[data-slot=field-label]]:flex-auto @md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
+				vertical: "flex-col [&>*]:w-full [&>.sr-only]:w-auto",
+			},
 		},
 	},
-});
+);
 
 function Field({
 	className,
 	orientation = "vertical",
 	...props
-}: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>) {
+}: Readonly<React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>>) {
 	return (
 		<div
 			className={cn(fieldVariants({ orientation }), className)}
@@ -98,7 +101,7 @@ function Field({
 	);
 }
 
-function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
+function FieldContent({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn("gap-0.5 group/field-content flex flex-1 flex-col leading-snug", className)}
@@ -108,11 +111,11 @@ function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
+function FieldDescription({ className, ...props }: Readonly<React.ComponentProps<"p">>) {
 	return (
 		<p
 			className={cn(
-				"text-muted-foreground text-left text-sm [[data-variant=legend]+&]:-mt-1.5 leading-relaxed font-normal group-has-[[data-orientation=horizontal]]/field:text-balance",
+				"text-muted-foreground text-left text-sm [[data-variant=legend]+&]:-mt-1.5 leading-relaxed font-normal group-has-data-[orientation=horizontal]/field:text-balance",
 				"last:mt-0 nth-last-2:-mt-1",
 				"[&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4",
 				className,
@@ -148,7 +151,10 @@ function FieldError({
 
 		return (
 			<ul className="ml-4 flex list-disc flex-col gap-1">
-				{uniqueErrors.map((error, index) => error?.message && <li key={index}>{error.message}</li>)}
+				{uniqueErrors.map(
+					(error, index) =>
+						error?.message && <li key={`error-${Number(index)}`}>{error.message}</li>,
+				)}
 			</ul>
 		);
 	}, [children, errors]);
@@ -159,7 +165,7 @@ function FieldError({
 
 	return (
 		<div
-			className={cn("text-destructive text-sm leading-relaxed font-normal", className)}
+			className={cn("text-destructive-text text-sm leading-relaxed font-normal", className)}
 			data-slot="field-error"
 			role="alert"
 			{...props}
@@ -169,11 +175,11 @@ function FieldError({
 	);
 }
 
-function FieldLabel({ className, ...props }: React.ComponentProps<typeof Label>) {
+function FieldLabel({ className, ...props }: Readonly<React.ComponentProps<typeof Label>>) {
 	return (
 		<Label
 			className={cn(
-				"has-data-checked:bg-primary/5 has-data-checked:border-primary/30 gap-2 group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:rounded-[6px] has-[>[data-slot=field]]:border has-[>[data-slot=field]]:border-border has-[>[data-slot=field]]:bg-surface [&>*]:data-[slot=field]:p-3 group/field-label peer/field-label flex w-fit leading-snug",
+				"has-data-checked:bg-primary/5 has-data-checked:border-primary/30 gap-2 group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:rounded-lg has-[>[data-slot=field]]:border has-[>[data-slot=field]]:border-border has-[>[data-slot=field]]:bg-surface *:data-[slot=field]:p-3 group/field-label peer/field-label flex w-fit leading-snug",
 				"has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col",
 				className,
 			)}
@@ -187,9 +193,11 @@ function FieldSeparator({
 	children,
 	className,
 	...props
-}: React.ComponentProps<"div"> & {
-	children?: React.ReactNode;
-}) {
+}: Readonly<
+	React.ComponentProps<"div"> & {
+		children?: React.ReactNode;
+	}
+>) {
 	return (
 		<div
 			className={cn(
@@ -213,7 +221,7 @@ function FieldSeparator({
 	);
 }
 
-function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
+function FieldTitle({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(

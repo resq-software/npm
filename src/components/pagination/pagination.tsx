@@ -25,7 +25,7 @@ type PaginationLinkProps = Pick<React.ComponentProps<typeof Button>, "size"> &
 		isActive?: boolean;
 	};
 
-function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
+function Pagination({ className, ...props }: Readonly<React.ComponentProps<"nav">>) {
 	return (
 		<nav
 			aria-label="pagination"
@@ -36,7 +36,7 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
 	);
 }
 
-function PaginationContent({ className, ...props }: React.ComponentProps<"ul">) {
+function PaginationContent({ className, ...props }: Readonly<React.ComponentProps<"ul">>) {
 	return (
 		<ul
 			className={cn("gap-0.5 flex items-center", className)}
@@ -46,7 +46,7 @@ function PaginationContent({ className, ...props }: React.ComponentProps<"ul">) 
 	);
 }
 
-function PaginationEllipsis({ className, ...props }: React.ComponentProps<"span">) {
+function PaginationEllipsis({ className, ...props }: Readonly<React.ComponentProps<"span">>) {
 	return (
 		<span
 			aria-hidden
@@ -63,7 +63,7 @@ function PaginationEllipsis({ className, ...props }: React.ComponentProps<"span"
 	);
 }
 
-function PaginationItem({ ...props }: React.ComponentProps<"li">) {
+function PaginationItem({ ...props }: Readonly<React.ComponentProps<"li">>) {
 	return <li data-slot="pagination-item" {...props} />;
 }
 
@@ -84,7 +84,7 @@ function PaginationNext({
 	className,
 	text = "Next",
 	...props
-}: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
+}: Readonly<React.ComponentProps<typeof PaginationLink> & { text?: string }>) {
 	return (
 		<PaginationLink
 			aria-label="Go to next page"
@@ -102,7 +102,7 @@ function PaginationPrevious({
 	className,
 	text = "Previous",
 	...props
-}: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
+}: Readonly<React.ComponentProps<typeof PaginationLink> & { text?: string }>) {
 	return (
 		<PaginationLink
 			aria-label="Go to previous page"

@@ -18,11 +18,11 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
-function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
+function Textarea({ className, ...props }: Readonly<React.ComponentProps<"textarea">>) {
 	return (
 		<textarea
 			className={cn(
-				"bg-surface border-border focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 aria-invalid:border-destructive disabled:bg-card rounded-[6px] border px-3 py-2.5 text-sm text-foreground transition-colors focus-visible:ring-[3px] aria-invalid:ring-[3px] placeholder:text-muted-foreground flex field-sizing-content min-h-20 w-full outline-none disabled:cursor-not-allowed disabled:opacity-50",
+				"bg-surface border-border focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 aria-invalid:border-destructive disabled:bg-card rounded-lg border px-3 py-2.5 text-sm text-foreground transition-colors focus-visible:ring-[3px] aria-invalid:ring-[3px] placeholder:text-muted-foreground flex field-sizing-content min-h-20 w-full outline-none disabled:cursor-not-allowed disabled:opacity-50",
 				className,
 			)}
 			data-slot="textarea"

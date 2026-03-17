@@ -68,7 +68,10 @@ export const WithDescription: Story = {
 				</InputOTP>
 			</div>
 			<p className="text-xs text-muted-foreground">
-				Didn't receive a code? <button className="underline underline-offset-2">Resend</button>
+				Didn't receive a code?{" "}
+				<button className="underline underline-offset-2" type="button">
+					Resend
+				</button>
 			</p>
 		</div>
 	),

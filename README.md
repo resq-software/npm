@@ -2,9 +2,8 @@
 
 A production-ready, high-performance React component library built with Radix UI primitives, Tailwind CSS v4, and strict TypeScript safety.
 
-[![Version](https://img.shields.io/badge/version-0.2.3-blue)](https://www.npmjs.com/package/@resq-sw/ui)
+[![Version](https://img.shields.io/badge/version-0.6.2-blue)](https://www.npmjs.com/package/@resq-sw/ui)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](./LICENSE.md)
-[![👪 All Contributors](https://img.shields.io/badge/%F0%9F%91%AA_all_contributors-1-21bb42.svg)](https://github.com/resq-software/ui/graphs/contributors)
 
 ## Overview
 
@@ -12,12 +11,14 @@ A production-ready, high-performance React component library built with Radix UI
 
 ## Features
 
--   **Tree-Shakeable:** Modular architecture for minimal bundle sizes.
--   **Strictly Typed:** Full TypeScript support with explicit `.d.ts` definitions.
--   **Accessibility First:** Built on Radix UI primitives to ensure WCAG 2.1 AA compliance.
--   **Consistent Styling:** Unified design tokens via Tailwind CSS v4 and the `oklch` color space.
--   **Developer-Focused:** Includes custom scaffolding scripts, AI-assisted development agents, and a reproducible Nix-based environment.
--   **Rigorous Quality:** Verified via Chromatic visual regression and automated CI/CD pipelines.
+- **Dark-First Design:** Dark theme by default, light mode as explicit opt-in via `.light` class.
+- **oklch Color System:** Perceptually uniform colors for vibrant, consistent theming across dark and light modes.
+- **Tree-Shakeable:** Modular architecture with per-component subpath exports for minimal bundle sizes.
+- **Strictly Typed:** Full TypeScript support with explicit `.d.ts` definitions.
+- **Accessibility First:** Built on Radix UI primitives to ensure WCAG 2.1 AA compliance.
+- **Performance-Tested:** 687+ regression tests covering frame timing, layout stability, DOM budgets, and GPU-friendly transitions.
+- **Developer-Focused:** Includes custom scaffolding scripts, AI-assisted development agents, and a reproducible Nix-based environment.
+- **Rigorous Quality:** Verified via Chromatic visual regression and automated CI/CD pipelines.
 
 ## Architecture
 
@@ -52,12 +53,12 @@ bun add react@^19 react-dom@^19 tailwindcss@^4
 
 ## Quick Start
 
-1.  **Global Setup**: Include global styles in your root entry file:
+1. **Global Setup**: Include global styles in your root entry file:
     ```tsx
     import "@resq-sw/ui/styles/globals.css";
     ```
 
-2.  **Basic Usage**:
+2. **Basic Usage**:
     ```tsx
     import { Button } from "@resq-sw/ui/button";
     import { Card } from "@resq-sw/ui/card";
@@ -69,20 +70,36 @@ bun add react@^19 react-dom@^19 tailwindcss@^4
     );
     ```
 
-## Usage
+## Theming
 
-### Theming & Customization
-The library uses CSS custom properties for tokens. To customize, override these in your `globals.css`:
+### Dark-first approach
+
+The library renders in dark mode by default. To enable light mode, add the `.light` class to a parent element:
+
+```tsx
+<div className="light">
+  {/* All children render in light mode */}
+</div>
+```
+
+### Customizing tokens
+
+All design tokens are CSS custom properties using the `oklch` color space. Override them in your `globals.css`:
+
 ```css
 :root {
-  --color-primary: oklch(0.6 0.15 250);
+  --primary: oklch(62% 0.19 25);
+  --background: oklch(16% 0.02 270);
 }
 ```
 
-### Accessibility Standards
-Components are built on Radix UI primitives, inheriting industry-standard ARIA attributes. We encourage:
-- Using semantic HTML tags (`<main>`, `<nav>`, etc.) wrapping our components.
-- Maintaining proper focus management with `asChild` composition.
+### Typography
+
+| Font | Role | CSS class |
+| :--- | :--- | :--- |
+| **Syne** | Display headings, card titles, stat values | `font-display` |
+| **DM Sans** | Body copy, UI text, descriptions | `font-sans` (default) |
+| **DM Mono** | Labels, buttons, badges, data, code | `font-mono` |
 
 ## API Reference
 
@@ -99,8 +116,8 @@ Full documentation available in the `src/components/[name]/index.ts` files.
 
 ## Configuration
 
--   **Tailwind:** Ensure your `tailwind.config.ts` points to the `@resq-sw/ui` globals.
--   **TypeScript:** Set `moduleResolution` to `bundler` or `node16` for optimal subpath resolution.
+- **Tailwind:** Ensure your `tailwind.config.ts` points to the `@resq-sw/ui` globals.
+- **TypeScript:** Set `moduleResolution` to `bundler` or `node16` for optimal subpath resolution.
 
 ## Development
 
@@ -112,15 +129,19 @@ cd ui
 nix develop
 ```
 
--   **Preview:** `bun storybook`
--   **Test:** `bun test`
--   **Lint:** `bun lint` (Biome)
+- **Preview:** `bun storybook`
+- **Test:** `bun test`
+- **Lint:** `bun lint` (Biome)
+- **Build:** `bun build`
+- **Type-check:** `bun tsc`
 
 ## Contributing
 
-1.  **Commit Convention**: We follow Conventional Commits (e.g., `feat: ...`, `fix: ...`).
-2.  **Issues**: Use the provided YAML templates for bug reports or feature requests.
-3.  **Hooks**: Pre-commit hooks via Husky/Biome ensure formatting parity.
+1. **Commit Convention**: We follow Conventional Commits (e.g., `feat: ...`, `fix: ...`).
+2. **Issues**: Use the provided templates for bug reports or feature requests.
+3. **Hooks**: Pre-commit hooks via Husky/Biome ensure formatting parity.
+
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) and [DEVELOPMENT.md](.github/DEVELOPMENT.md) for full details.
 
 ## License
 

@@ -25,9 +25,11 @@ function Avatar({
 	className,
 	size = "default",
 	...props
-}: React.ComponentProps<typeof AvatarPrimitive.Root> & {
-	size?: "default" | "lg" | "sm";
-}) {
+}: Readonly<
+	React.ComponentProps<typeof AvatarPrimitive.Root> & {
+		size?: "default" | "lg" | "sm";
+	}
+>) {
 	return (
 		<AvatarPrimitive.Root
 			className={cn(
@@ -41,7 +43,7 @@ function Avatar({
 	);
 }
 
-function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
+function AvatarBadge({ className, ...props }: Readonly<React.ComponentProps<"span">>) {
 	return (
 		<span
 			className={cn(
@@ -60,7 +62,7 @@ function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
 function AvatarFallback({
 	className,
 	...props
-}: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
+}: Readonly<React.ComponentProps<typeof AvatarPrimitive.Fallback>>) {
 	return (
 		<AvatarPrimitive.Fallback
 			className={cn(
@@ -73,7 +75,7 @@ function AvatarFallback({
 	);
 }
 
-function AvatarGroup({ className, ...props }: React.ComponentProps<"div">) {
+function AvatarGroup({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(
@@ -86,7 +88,7 @@ function AvatarGroup({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function AvatarGroupCount({ className, ...props }: React.ComponentProps<"div">) {
+function AvatarGroupCount({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(
@@ -99,7 +101,10 @@ function AvatarGroupCount({ className, ...props }: React.ComponentProps<"div">) 
 	);
 }
 
-function AvatarImage({ className, ...props }: React.ComponentProps<typeof AvatarPrimitive.Image>) {
+function AvatarImage({
+	className,
+	...props
+}: Readonly<React.ComponentProps<typeof AvatarPrimitive.Image>>) {
 	return (
 		<AvatarPrimitive.Image
 			className={cn("rounded-full aspect-square size-full object-cover", className)}

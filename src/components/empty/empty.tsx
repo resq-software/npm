@@ -18,11 +18,11 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "../../lib/utils.js";
 
-function Empty({ className, ...props }: React.ComponentProps<"div">) {
+function Empty({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(
-				"bg-surface/70 gap-4 rounded-[6px] border border-dashed border-border p-6 flex w-full min-w-0 flex-1 flex-col items-center justify-center text-center text-balance",
+				"bg-surface/70 gap-4 rounded-lg border border-dashed border-border p-6 flex w-full min-w-0 flex-1 flex-col items-center justify-center text-center text-balance",
 				className,
 			)}
 			data-slot="empty"
@@ -31,7 +31,7 @@ function Empty({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function EmptyHeader({ className, ...props }: React.ComponentProps<"div">) {
+function EmptyHeader({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn("gap-2 flex max-w-sm flex-col items-center", className)}
@@ -50,13 +50,13 @@ const emptyMediaVariants = cva(
 		variants: {
 			variant: {
 				default: "bg-transparent",
-				icon: "bg-card text-primary flex size-9 shrink-0 items-center justify-center rounded-[6px] border border-border [&_svg:not([class*='size-'])]:size-4",
+				icon: "bg-card text-primary flex size-9 shrink-0 items-center justify-center rounded-lg border border-border [&_svg:not([class*='size-'])]:size-4",
 			},
 		},
 	},
 );
 
-function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
+function EmptyContent({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn(
@@ -69,7 +69,7 @@ function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
+function EmptyDescription({ className, ...props }: Readonly<React.ComponentProps<"p">>) {
 	return (
 		<div
 			className={cn(
@@ -86,7 +86,7 @@ function EmptyMedia({
 	className,
 	variant = "default",
 	...props
-}: React.ComponentProps<"div"> & VariantProps<typeof emptyMediaVariants>) {
+}: Readonly<React.ComponentProps<"div"> & VariantProps<typeof emptyMediaVariants>>) {
 	return (
 		<div
 			className={cn(emptyMediaVariants({ className, variant }))}
@@ -97,7 +97,7 @@ function EmptyMedia({
 	);
 }
 
-function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
+function EmptyTitle({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
 			className={cn("font-display text-lg font-bold tracking-[-0.03em]", className)}

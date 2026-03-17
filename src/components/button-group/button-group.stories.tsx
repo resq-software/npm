@@ -31,13 +31,13 @@ type Story = StoryObj<typeof ButtonGroup>;
 export const Default: Story = {
 	render: () => (
 		<ButtonGroup>
-			<Button variant="outline">
+			<Button aria-label="Bold" variant="outline">
 				<BoldIcon />
 			</Button>
-			<Button variant="outline">
+			<Button aria-label="Italic" variant="outline">
 				<ItalicIcon />
 			</Button>
-			<Button variant="outline">
+			<Button aria-label="Underline" variant="outline">
 				<UnderlineIcon />
 			</Button>
 		</ButtonGroup>
@@ -47,13 +47,13 @@ export const Default: Story = {
 export const TextAlignment: Story = {
 	render: () => (
 		<ButtonGroup>
-			<Button variant="outline">
+			<Button aria-label="Align left" variant="outline">
 				<AlignLeftIcon />
 			</Button>
-			<Button data-active variant="outline">
+			<Button aria-label="Align center" data-active variant="outline">
 				<AlignCenterIcon />
 			</Button>
-			<Button variant="outline">
+			<Button aria-label="Align right" variant="outline">
 				<AlignRightIcon />
 			</Button>
 		</ButtonGroup>
@@ -73,14 +73,14 @@ export const Vertical: Story = {
 export const WithSeparator: Story = {
 	render: () => (
 		<ButtonGroup>
-			<Button variant="outline">
+			<Button aria-label="Bold" variant="outline">
 				<BoldIcon />
 			</Button>
-			<Button variant="outline">
+			<Button aria-label="Italic" variant="outline">
 				<ItalicIcon />
 			</Button>
 			<ButtonGroupSeparator />
-			<Button variant="outline">
+			<Button aria-label="List" variant="outline">
 				<ListIcon />
 			</Button>
 		</ButtonGroup>
