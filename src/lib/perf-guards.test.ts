@@ -21,7 +21,7 @@ import { describe, it } from "vitest";
 
 import { collectSourceViolations, formatViolationReport } from "./perf-test-utils";
 
-const ROOT = new URL("../", import.meta.url).pathname;
+const ROOT = `${import.meta.dirname}/../`;
 
 const componentFiles = globSync("components/**/*.tsx", {
 	cwd: ROOT,
@@ -32,6 +32,12 @@ const componentFiles = globSync("components/**/*.tsx", {
 }));
 
 describe("Performance regression guards", () => {
+	it("discovers component files", () => {
+		if (componentFiles.length === 0) {
+			throw new Error("globSync found 0 component files — check cwd resolution");
+		}
+	});
+
 	for (const { abs, rel } of componentFiles) {
 		it(`${rel} — no blocking violations`, () => {
 			const src = readFileSync(abs, "utf-8");
