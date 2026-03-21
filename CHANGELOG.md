@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.1](https://github.com/resq-software/ui/compare/0.8.0...0.8.1) (2026-03-21)
+
+### Bug Fixes
+
+* **ci:** pin actions to SHA hashes and add permissions ([f99ae32](https://github.com/resq-software/ui/commit/f99ae32891bbf0ba0bd4eb0f1a2b66d52894eb91))
+
 ## [0.8.0](https://github.com/resq-software/ui/compare/0.6.2...0.8.0) (2026-03-17)
 
 ### Features
