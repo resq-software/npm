@@ -17,7 +17,7 @@
  *
  */
 
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -25,11 +25,14 @@ export function prepareGithubPackage(packageDirArg) {
 	const packageDir = resolve(packageDirArg);
 	const packageJsonPath = join(packageDir, "package.json");
 
-	if (!existsSync(packageJsonPath)) {
+	let raw;
+	try {
+		raw = readFileSync(packageJsonPath, "utf8");
+	} catch {
 		throw new Error(`Staged package manifest not found: ${packageJsonPath}`);
 	}
 
-	const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+	const packageJson = JSON.parse(raw);
 
 	packageJson.name = "@resq-software/ui";
 	packageJson.publishConfig = {
