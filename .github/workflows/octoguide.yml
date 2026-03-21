@@ -39,7 +39,7 @@ jobs:
     if: ${{ !endsWith(github.actor, '[bot]') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: JoshuaKGoldberg/octoguide@0.21.10
+      - uses: JoshuaKGoldberg/octoguide@479137ed78108797794dac51ff4b50f966c22c42 # 0.21.10
         with:
           config: strict
           github-token: ${{ secrets.GITHUB_TOKEN }}

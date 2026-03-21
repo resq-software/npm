@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
           ref: master
@@ -79,7 +79,7 @@ jobs:
             console.log(`package.json version ${packageJson.version} is current with npm.`);
           }
           EOF
-      - uses: JoshuaKGoldberg/release-it-action@v0.4.0
+      - uses: JoshuaKGoldberg/release-it-action@8ee87d0d30f97b452ef5d8aa9f4d0490eed439aa # v0.4.0
         with:
           npm-token: ${{ secrets.NPM_TOKEN }}
         env:
