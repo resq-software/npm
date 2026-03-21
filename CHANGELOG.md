@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.2](https://github.com/resq-software/ui/compare/0.8.1...0.8.2) (2026-03-21)
+
+### Bug Fixes
+
+* **release:** resolve TOCTOU race condition in prepare-github-package ([6967fc2](https://github.com/resq-software/ui/commit/6967fc2ea8e57055e0dd2ef59f149fc764745245))
+
 ## [0.8.1](https://github.com/resq-software/ui/compare/0.8.0...0.8.1) (2026-03-21)
 
 ### Bug Fixes
