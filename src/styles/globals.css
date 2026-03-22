@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;700&family=Syne:wght@600;700;800&display=swap");
+/*
+ * Required font families (consumers must load these themselves,
+ * e.g. via next/font/google or a <link> tag):
+ *   - DM Sans  (300, 400, 500, 700)
+ *   - DM Mono  (400, 500)
+ *   - Syne     (600, 700, 800)
+ */
 @import "tailwindcss";
 @source "../";
 @import "tw-animate-css";
