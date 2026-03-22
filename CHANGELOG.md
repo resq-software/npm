@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.3](https://github.com/resq-software/ui/compare/0.8.2...0.8.3) (2026-03-22)
+
+### Bug Fixes
+
+* **css:** remove Google Fonts [@import](https://github.com/import) from globals.css ([dc3c047](https://github.com/resq-software/ui/commit/dc3c047b08b84904106d92c2856b432eb6b0001e))
+
 ## [0.8.2](https://github.com/resq-software/ui/compare/0.8.1...0.8.2) (2026-03-21)
 
 ### Bug Fixes
