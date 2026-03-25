@@ -1,6 +1,0 @@
-# Skip copyright gen in CI — headers are added locally before committing
-if [ -z "$CI" ]; then
-  node --experimental-strip-types scripts/copyright.gen.ts
-  git add -u
-fi
-./node_modules/.bin/lint-staged

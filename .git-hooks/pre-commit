@@ -19,8 +19,7 @@ set -euo pipefail
 #
 # Runs checks before allowing a commit.
 # Delegates to resq CLI if available; otherwise runs inline checks.
-# Includes large file guard, secret scanning, OSV audit, Biome formatting,
-# and copyright header generation.
+# Includes large file guard, secret scanning, OSV audit, and Biome formatting.
 #
 # Usage:
 #   .git-hooks/pre-commit
@@ -149,11 +148,5 @@ if [ -n "$STAGED_JS" ] && command -v bunx >/dev/null 2>&1; then
     echo "✅ Biome applied"
 fi
 
-# ── Copyright header generation ───────────────────────────────────────────────
-if [ -z "${CI:-}" ] && command -v node >/dev/null 2>&1 && [ -f "$PROJECT_ROOT/scripts/copyright.gen.ts" ]; then
-    echo "📄 Updating copyright headers..."
-    node --experimental-strip-types "$PROJECT_ROOT/scripts/copyright.gen.ts" 2>/dev/null || true
-    git add -u 2>/dev/null || true
-fi
 
 echo "✅ Pre-commit checks passed"
