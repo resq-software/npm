@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.9.0](https://github.com/resq-software/ui/compare/0.8.3...0.9.0) (2026-03-25)
+
+### Features
+
+* **icons:** add icon gallery stories, MDX conventions page, and docs dark mode ([59cffcb](https://github.com/resq-software/ui/commit/59cffcb04d35eeea875bd739293d7d4defe72d53))
+
 ## [0.8.3](https://github.com/resq-software/ui/compare/0.8.2...0.8.3) (2026-03-22)
 
 ### Bug Fixes
