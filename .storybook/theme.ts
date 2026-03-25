@@ -3,49 +3,58 @@
 
 import { create } from "storybook/theming";
 
-export const resqDark = create({
-	base: "dark",
-
-	// Brand
+const shared = {
 	brandTitle: "ResQ UI",
 	brandUrl: "https://github.com/resq-software/ui",
+	appBorderRadius: 6,
+	inputBorderRadius: 6,
+	gridCellSize: 12,
+	fontBase: '"DM Sans", ui-sans-serif, system-ui, sans-serif',
+	fontCode: '"DM Mono", ui-monospace, "SFMono-Regular", monospace',
+} as const;
 
-	// Colors — match globals.css dark theme (oklch source values)
+export const resqDark = create({
+	...shared,
+	base: "dark",
 	colorPrimary: "#e24b4a",
 	colorSecondary: "#3b8fe8",
-
-	// UI
 	appBg: "#0b0d14",
 	appContentBg: "#111520",
 	appPreviewBg: "#0b0d14",
 	appBorderColor: "#1e2438",
-	appBorderRadius: 6,
-
-	// Text
 	textColor: "#f0f2fa",
 	textInverseColor: "#0b0d14",
 	textMutedColor: "#6d7b9c",
-
-	// Toolbar & tabs
 	barTextColor: "#8a9bb8",
 	barSelectedColor: "#3b8fe8",
 	barHoverColor: "#f0f2fa",
 	barBg: "#111520",
-
-	// Inputs
 	inputBg: "#171c2b",
 	inputBorder: "#1e2438",
 	inputTextColor: "#f0f2fa",
-	inputBorderRadius: 6,
-
-	// Fonts
-	fontBase: '"DM Sans", ui-sans-serif, system-ui, sans-serif',
-	fontCode: '"DM Mono", ui-monospace, "SFMono-Regular", monospace',
-
-	// Booleans
 	booleanBg: "#171c2b",
 	booleanSelectedBg: "#3b8fe8",
+});
 
-	// Grid
-	gridCellSize: 12,
+export const resqLight = create({
+	...shared,
+	base: "light",
+	colorPrimary: "#e24b4a",
+	colorSecondary: "#3b8fe8",
+	appBg: "#f9fafb",
+	appContentBg: "#ffffff",
+	appPreviewBg: "#f9fafb",
+	appBorderColor: "#d8dce6",
+	textColor: "#0b0d14",
+	textInverseColor: "#f0f2fa",
+	textMutedColor: "#596680",
+	barTextColor: "#596680",
+	barSelectedColor: "#3b8fe8",
+	barHoverColor: "#0b0d14",
+	barBg: "#ffffff",
+	inputBg: "#f0f2f5",
+	inputBorder: "#d8dce6",
+	inputTextColor: "#0b0d14",
+	booleanBg: "#f0f2f5",
+	booleanSelectedBg: "#3b8fe8",
 });

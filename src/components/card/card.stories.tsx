@@ -1,9 +1,8 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+import { ActivityIcon, MapPinIcon, UsersIcon, WrenchIcon } from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { ActivityIcon, DrillIcon, MapPinIcon, UsersIcon } from "lucide-react";
 
 import { Badge } from "../badge";
 import { Button } from "../button";
@@ -95,7 +94,7 @@ export const Stats: Story = {
 				{ delta: "On duty", icon: UsersIcon, label: "Responders", value: "84" },
 				{
 					delta: "2 returning",
-					icon: DrillIcon,
+					icon: WrenchIcon,
 					label: "Drones deployed",
 					value: "7",
 				},

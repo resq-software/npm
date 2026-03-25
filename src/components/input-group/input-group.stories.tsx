@@ -1,9 +1,8 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+import { LockIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { LockIcon, SearchIcon } from "lucide-react";
 
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "./input-group";
 
@@ -20,7 +19,7 @@ export const Default: Story = {
 	render: () => (
 		<InputGroup className="w-72">
 			<InputGroupAddon>
-				<SearchIcon className="size-4" />
+				<MagnifyingGlassIcon className="size-4" />
 			</InputGroupAddon>
 			<InputGroupInput placeholder="Search missions…" />
 		</InputGroup>

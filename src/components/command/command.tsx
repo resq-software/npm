@@ -16,8 +16,8 @@
 
 "use client";
 
+import { CheckIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { Command as CommandPrimitive } from "cmdk";
-import { CheckIcon, SearchIcon } from "lucide-react";
 import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
@@ -119,7 +119,7 @@ function CommandInput({
 					{...props}
 				/>
 				<InputGroupAddon>
-					<SearchIcon className="size-4 shrink-0 opacity-50" />
+					<MagnifyingGlassIcon className="size-4 shrink-0 opacity-50" weight="light" />
 				</InputGroupAddon>
 			</InputGroup>
 		</div>
@@ -141,7 +141,10 @@ function CommandItem({
 			{...props}
 		>
 			{children}
-			<CheckIcon className="ml-auto opacity-0 group-has-data-[slot=command-shortcut]/command-item:hidden group-data-[checked=true]/command-item:opacity-100" />
+			<CheckIcon
+				className="ml-auto opacity-0 group-has-data-[slot=command-shortcut]/command-item:hidden group-data-[checked=true]/command-item:opacity-100"
+				weight="light"
+			/>
 		</CommandPrimitive.Item>
 	);
 }

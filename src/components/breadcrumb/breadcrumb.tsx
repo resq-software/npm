@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChevronRightIcon, MoreHorizontalIcon } from "lucide-react";
+import { CaretRightIcon, DotsThreeIcon } from "@phosphor-icons/react";
 import { Slot } from "radix-ui";
 import type * as React from "react";
 
@@ -35,7 +35,7 @@ function BreadcrumbEllipsis({ className, ...props }: Readonly<React.ComponentPro
 			role="presentation"
 			{...props}
 		>
-			<MoreHorizontalIcon />
+			<DotsThreeIcon weight="light" />
 			<span className="sr-only">More</span>
 		</span>
 	);
@@ -110,7 +110,7 @@ function BreadcrumbSeparator({
 			role="presentation"
 			{...props}
 		>
-			{children ?? <ChevronRightIcon />}
+			{children ?? <CaretRightIcon weight="light" />}
 		</li>
 	);
 }

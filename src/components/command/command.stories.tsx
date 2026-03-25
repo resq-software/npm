@@ -1,9 +1,8 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+import { ActivityIcon, GearIcon, MapPinIcon, RadioIcon, UsersIcon } from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { ActivityIcon, MapPinIcon, RadioIcon, SettingsIcon, UsersIcon } from "lucide-react";
 
 import {
 	Command,
@@ -54,7 +53,7 @@ export const Default: Story = {
 						<CommandShortcut>⌘R</CommandShortcut>
 					</CommandItem>
 					<CommandItem>
-						<SettingsIcon />
+						<GearIcon />
 						Settings
 						<CommandShortcut>⌘,</CommandShortcut>
 					</CommandItem>

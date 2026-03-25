@@ -1,9 +1,8 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+import { ClipboardTextIcon, CopyIcon, EyeIcon, PencilIcon, TrashIcon } from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { ClipboardListIcon, CopyIcon, EyeIcon, PencilIcon, Trash2Icon } from "lucide-react";
 
 import {
 	ContextMenu,
@@ -48,12 +47,12 @@ export const Default: Story = {
 					Duplicate
 				</ContextMenuItem>
 				<ContextMenuItem>
-					<ClipboardListIcon />
+					<ClipboardTextIcon />
 					Export report
 				</ContextMenuItem>
 				<ContextMenuSeparator />
 				<ContextMenuItem variant="destructive">
-					<Trash2Icon />
+					<TrashIcon />
 					Delete mission
 					<ContextMenuShortcut>⌘⌫</ContextMenuShortcut>
 				</ContextMenuItem>

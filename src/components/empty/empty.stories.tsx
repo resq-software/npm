@@ -1,9 +1,13 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+import {
+	BroadcastIcon,
+	FileSearchIcon,
+	ShieldSlashIcon,
+	TrayArrowDownIcon,
+} from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { FileSearchIcon, InboxIcon, RadioTowerIcon, ShieldOffIcon } from "lucide-react";
 
 import { Button } from "../button";
 import {
@@ -29,7 +33,7 @@ export const Default: Story = {
 		<Empty>
 			<EmptyHeader>
 				<EmptyMedia variant="icon">
-					<InboxIcon />
+					<TrayArrowDownIcon />
 				</EmptyMedia>
 				<EmptyTitle>No messages</EmptyTitle>
 				<EmptyDescription>You don't have any messages yet. Start a conversation.</EmptyDescription>
@@ -46,7 +50,7 @@ export const NoMissions: Story = {
 		<Empty>
 			<EmptyHeader>
 				<EmptyMedia variant="icon">
-					<RadioTowerIcon />
+					<BroadcastIcon />
 				</EmptyMedia>
 				<EmptyTitle>No active missions</EmptyTitle>
 				<EmptyDescription>
@@ -87,7 +91,7 @@ export const NoPermission: Story = {
 		<Empty>
 			<EmptyHeader>
 				<EmptyMedia variant="icon">
-					<ShieldOffIcon />
+					<ShieldSlashIcon />
 				</EmptyMedia>
 				<EmptyTitle>Access restricted</EmptyTitle>
 				<EmptyDescription>

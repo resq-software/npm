@@ -1,9 +1,8 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+import { HouseIcon } from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { HomeIcon } from "lucide-react";
 
 import {
 	Breadcrumb,
@@ -30,7 +29,7 @@ export const Default: Story = {
 			<BreadcrumbList>
 				<BreadcrumbItem>
 					<BreadcrumbLink href="#">
-						<HomeIcon className="size-3.5" />
+						<HouseIcon className="size-3.5" />
 						Home
 					</BreadcrumbLink>
 				</BreadcrumbItem>

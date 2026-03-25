@@ -1,15 +1,14 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/react";
-
 import {
-	AlertCircleIcon,
-	CheckCircle2Icon,
+	CheckCircleIcon,
 	InfoIcon,
 	TerminalIcon,
-	TriangleAlertIcon,
-} from "lucide-react";
+	WarningCircleIcon,
+	WarningIcon,
+} from "@phosphor-icons/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Alert, AlertDescription, AlertTitle } from "./alert";
 
@@ -41,7 +40,7 @@ export const Default: Story = {
 export const Destructive: Story = {
 	render: () => (
 		<Alert className="w-96" variant="destructive">
-			<AlertCircleIcon className="size-4" />
+			<WarningCircleIcon className="size-4" />
 			<AlertTitle>Connection lost</AlertTitle>
 			<AlertDescription>
 				Drone EAGLE-3 has lost telemetry. Last known position: Grid 4B, 47.832°N 13.041°E.
@@ -59,19 +58,19 @@ export const AllVariants: Story = {
 				<AlertDescription>3 responders are en route to Zone 5A.</AlertDescription>
 			</Alert>
 			<Alert>
-				<CheckCircle2Icon className="size-4" />
+				<CheckCircleIcon className="size-4" />
 				<AlertTitle>Success</AlertTitle>
 				<AlertDescription>
 					Mission Bravo completed successfully. All personnel accounted for.
 				</AlertDescription>
 			</Alert>
 			<Alert>
-				<TriangleAlertIcon className="size-4" />
+				<WarningIcon className="size-4" />
 				<AlertTitle>Warning</AlertTitle>
 				<AlertDescription>Drone battery at 15%. Return to base recommended.</AlertDescription>
 			</Alert>
 			<Alert variant="destructive">
-				<AlertCircleIcon className="size-4" />
+				<WarningCircleIcon className="size-4" />
 				<AlertTitle>Critical</AlertTitle>
 				<AlertDescription>
 					Emergency beacon detected in Grid 7C. Immediate response required.

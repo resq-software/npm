@@ -16,7 +16,7 @@
 
 "use client";
 
-import { CheckIcon, ChevronRightIcon } from "lucide-react";
+import { CaretRightIcon, CheckIcon } from "@phosphor-icons/react";
 import { Menubar as MenubarPrimitive } from "radix-ui";
 import type * as React from "react";
 
@@ -56,7 +56,7 @@ function MenubarCheckboxItem({
 		>
 			<span className="left-1.5 size-4 [&_svg:not([class*='size-'])]:size-4 pointer-events-none absolute flex items-center justify-center">
 				<MenubarPrimitive.ItemIndicator>
-					<CheckIcon />
+					<CheckIcon weight="light" />
 				</MenubarPrimitive.ItemIndicator>
 			</span>
 			{children}
@@ -168,7 +168,7 @@ function MenubarRadioItem({
 		>
 			<span className="left-1.5 size-4 [&_svg:not([class*='size-'])]:size-4 pointer-events-none absolute flex items-center justify-center">
 				<MenubarPrimitive.ItemIndicator>
-					<CheckIcon />
+					<CheckIcon weight="light" />
 				</MenubarPrimitive.ItemIndicator>
 			</span>
 			{children}
@@ -243,7 +243,7 @@ function MenubarSubTrigger({
 			{...props}
 		>
 			{children}
-			<ChevronRightIcon className="ml-auto size-4" />
+			<CaretRightIcon className="ml-auto size-4" weight="light" />
 		</MenubarPrimitive.SubTrigger>
 	);
 }

@@ -16,8 +16,8 @@
 
 "use client";
 
+import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react";
 import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "../../lib/utils.js";
@@ -200,7 +200,7 @@ function CarouselNext({
 			variant={variant}
 			{...props}
 		>
-			<ChevronRightIcon />
+			<CaretRightIcon weight="light" />
 			<span className="sr-only">Next slide</span>
 		</Button>
 	);
@@ -230,7 +230,7 @@ function CarouselPrevious({
 			variant={variant}
 			{...props}
 		>
-			<ChevronLeftIcon />
+			<CaretLeftIcon weight="light" />
 			<span className="sr-only">Previous slide</span>
 		</Button>
 	);

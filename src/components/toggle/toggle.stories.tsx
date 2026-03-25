@@ -1,9 +1,8 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+import { TextBolderIcon } from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { BoldIcon } from "lucide-react";
 
 import { Toggle } from "./toggle";
 
@@ -23,7 +22,7 @@ type Story = StoryObj<typeof Toggle>;
 export const Default: Story = {
 	render: (args) => (
 		<Toggle aria-label="Toggle bold" {...args}>
-			<BoldIcon />
+			<TextBolderIcon />
 		</Toggle>
 	),
 };
@@ -32,7 +31,7 @@ export const Outline: Story = {
 	args: { variant: "outline" },
 	render: (args) => (
 		<Toggle aria-label="Toggle bold" {...args}>
-			<BoldIcon />
+			<TextBolderIcon />
 		</Toggle>
 	),
 };
@@ -40,7 +39,7 @@ export const Outline: Story = {
 export const WithText: Story = {
 	render: () => (
 		<Toggle>
-			<BoldIcon />
+			<TextBolderIcon />
 			Bold
 		</Toggle>
 	),
@@ -50,7 +49,7 @@ export const Disabled: Story = {
 	args: { disabled: true },
 	render: (args) => (
 		<Toggle aria-label="Toggle bold" {...args}>
-			<BoldIcon />
+			<TextBolderIcon />
 		</Toggle>
 	),
 };

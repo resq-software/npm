@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react";
+import { CaretLeftIcon, CaretRightIcon, DotsThreeIcon } from "@phosphor-icons/react";
 import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
@@ -57,7 +57,7 @@ function PaginationEllipsis({ className, ...props }: Readonly<React.ComponentPro
 			data-slot="pagination-ellipsis"
 			{...props}
 		>
-			<MoreHorizontalIcon />
+			<DotsThreeIcon weight="light" />
 			<span className="sr-only">More pages</span>
 		</span>
 	);
@@ -93,7 +93,7 @@ function PaginationNext({
 			{...props}
 		>
 			<span className="hidden sm:block">{text}</span>
-			<ChevronRightIcon data-icon="inline-end" />
+			<CaretRightIcon data-icon="inline-end" weight="light" />
 		</PaginationLink>
 	);
 }
@@ -110,7 +110,7 @@ function PaginationPrevious({
 			size="default"
 			{...props}
 		>
-			<ChevronLeftIcon data-icon="inline-start" />
+			<CaretLeftIcon data-icon="inline-start" weight="light" />
 			<span className="hidden sm:block">{text}</span>
 		</PaginationLink>
 	);

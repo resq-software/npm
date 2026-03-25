@@ -1,9 +1,8 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+import { FunnelIcon, SlidersHorizontalIcon } from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { FilterIcon, SlidersHorizontalIcon } from "lucide-react";
 
 import { Button } from "../button";
 import { Checkbox } from "../checkbox";
@@ -59,7 +58,7 @@ export const FilterPopover: Story = {
 		<Popover>
 			<PopoverTrigger asChild>
 				<Button variant="outline">
-					<FilterIcon />
+					<FunnelIcon />
 					Filters
 				</Button>
 			</PopoverTrigger>

@@ -1,9 +1,14 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+import {
+	DotsThreeIcon,
+	FileTextIcon,
+	MapPinIcon,
+	UsersIcon,
+	WrenchIcon,
+} from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { DrillIcon, FileTextIcon, MapPinIcon, MoreHorizontalIcon, UsersIcon } from "lucide-react";
 
 import { Badge } from "../badge";
 import { Button } from "../button";
@@ -42,7 +47,7 @@ export const Default: Story = {
 			</ItemContent>
 			<ItemActions>
 				<Button aria-label="More options" size="icon-sm" variant="ghost">
-					<MoreHorizontalIcon />
+					<DotsThreeIcon />
 				</Button>
 			</ItemActions>
 		</Item>
@@ -77,7 +82,7 @@ export const MissionList: Story = {
 					zone: "Grid 4B",
 				},
 				{
-					icon: DrillIcon,
+					icon: WrenchIcon,
 					name: "Mission Bravo",
 					status: "Standby",
 					zone: "Grid 2A",

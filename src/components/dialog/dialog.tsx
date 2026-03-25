@@ -16,7 +16,7 @@
 
 "use client";
 
-import { XIcon } from "lucide-react";
+import { XIcon } from "@phosphor-icons/react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import type * as React from "react";
 
@@ -56,7 +56,7 @@ function DialogContent({
 				{showCloseButton && (
 					<DialogPrimitive.Close asChild data-slot="dialog-close">
 						<Button className="absolute top-2 right-2" size="icon-sm" variant="ghost">
-							<XIcon />
+							<XIcon weight="light" />
 							<span className="sr-only">Close</span>
 						</Button>
 					</DialogPrimitive.Close>

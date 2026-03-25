@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChevronDownIcon } from "lucide-react";
+import { CaretDownIcon } from "@phosphor-icons/react";
 import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
@@ -39,10 +39,11 @@ function NativeSelect({ className, size = "default", ...props }: NativeSelectPro
 				data-slot="native-select"
 				{...props}
 			/>
-			<ChevronDownIcon
+			<CaretDownIcon
 				aria-hidden="true"
 				className="text-hint top-1/2 right-2.5 size-4 -translate-y-1/2 pointer-events-none absolute select-none"
 				data-slot="native-select-icon"
+				weight="light"
 			/>
 		</div>
 	);

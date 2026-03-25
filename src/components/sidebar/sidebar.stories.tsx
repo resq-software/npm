@@ -1,17 +1,16 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/react";
-
 import {
 	ActivityIcon,
-	DrillIcon,
 	FileTextIcon,
+	GearIcon,
 	MapPinIcon,
 	RadioIcon,
-	SettingsIcon,
 	UsersIcon,
-} from "lucide-react";
+	WrenchIcon,
+} from "@phosphor-icons/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import type * as React from "react";
 
 import { Badge } from "../badge";
@@ -71,7 +70,7 @@ export const Default: Story = {
 								</SidebarMenuItem>
 								<SidebarMenuItem>
 									<SidebarMenuButton>
-										<DrillIcon />
+										<WrenchIcon />
 										Drone fleet
 									</SidebarMenuButton>
 								</SidebarMenuItem>
@@ -103,7 +102,7 @@ export const Default: Story = {
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton>
-								<SettingsIcon />
+								<GearIcon />
 								Settings
 							</SidebarMenuButton>
 						</SidebarMenuItem>
@@ -120,7 +119,7 @@ export const Default: Story = {
 						<ActivityIcon className="size-3" />4 active missions
 					</Badge>
 					<Badge variant="secondary">
-						<DrillIcon className="size-3" />3 drones airborne
+						<WrenchIcon className="size-3" />3 drones airborne
 					</Badge>
 				</div>
 			</main>

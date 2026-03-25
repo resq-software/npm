@@ -1,9 +1,8 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+import { TextBolderIcon, TextItalicIcon, TextUnderlineIcon } from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { BoldIcon, ItalicIcon, UnderlineIcon } from "lucide-react";
 
 import { ToggleGroup, ToggleGroupItem } from "./toggle-group";
 
@@ -26,13 +25,13 @@ export const Default: Story = {
 	render: (args) => (
 		<ToggleGroup {...args}>
 			<ToggleGroupItem aria-label="Toggle bold" value="bold">
-				<BoldIcon />
+				<TextBolderIcon />
 			</ToggleGroupItem>
 			<ToggleGroupItem aria-label="Toggle italic" value="italic">
-				<ItalicIcon />
+				<TextItalicIcon />
 			</ToggleGroupItem>
 			<ToggleGroupItem aria-label="Toggle underline" value="underline">
-				<UnderlineIcon />
+				<TextUnderlineIcon />
 			</ToggleGroupItem>
 		</ToggleGroup>
 	),
@@ -43,13 +42,13 @@ export const Outline: Story = {
 	render: (args) => (
 		<ToggleGroup {...args}>
 			<ToggleGroupItem aria-label="Toggle bold" value="bold">
-				<BoldIcon />
+				<TextBolderIcon />
 			</ToggleGroupItem>
 			<ToggleGroupItem aria-label="Toggle italic" value="italic">
-				<ItalicIcon />
+				<TextItalicIcon />
 			</ToggleGroupItem>
 			<ToggleGroupItem aria-label="Toggle underline" value="underline">
-				<UnderlineIcon />
+				<TextUnderlineIcon />
 			</ToggleGroupItem>
 		</ToggleGroup>
 	),
@@ -60,13 +59,13 @@ export const Vertical: Story = {
 	render: (args) => (
 		<ToggleGroup {...args}>
 			<ToggleGroupItem aria-label="Toggle bold" value="bold">
-				<BoldIcon />
+				<TextBolderIcon />
 			</ToggleGroupItem>
 			<ToggleGroupItem aria-label="Toggle italic" value="italic">
-				<ItalicIcon />
+				<TextItalicIcon />
 			</ToggleGroupItem>
 			<ToggleGroupItem aria-label="Toggle underline" value="underline">
-				<UnderlineIcon />
+				<TextUnderlineIcon />
 			</ToggleGroupItem>
 		</ToggleGroup>
 	),

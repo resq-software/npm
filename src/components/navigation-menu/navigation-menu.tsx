@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import { CaretDownIcon } from "@phosphor-icons/react";
 import { cva } from "class-variance-authority";
-import { ChevronDownIcon } from "lucide-react";
 import { NavigationMenu as NavigationMenuPrimitive } from "radix-ui";
 import type * as React from "react";
 
@@ -139,9 +139,10 @@ function NavigationMenuTrigger({
 			{...props}
 		>
 			{children}{" "}
-			<ChevronDownIcon
+			<CaretDownIcon
 				aria-hidden="true"
 				className="relative top-px ml-1 size-3 transition duration-300 group-data-open/navigation-menu-trigger:rotate-180 group-data-popup-open/navigation-menu-trigger:rotate-180"
+				weight="light"
 			/>
 		</NavigationMenuPrimitive.Trigger>
 	);

@@ -1,9 +1,8 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+import { CheckCircleIcon, ClockIcon, RadioIcon, WarningIcon } from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { AlertTriangleIcon, CheckCircleIcon, ClockIcon, RadioIcon } from "lucide-react";
 
 import { Badge } from "./badge";
 
@@ -67,7 +66,7 @@ export const StatusBadges: Story = {
 				Resolved
 			</Badge>
 			<Badge variant="destructive">
-				<AlertTriangleIcon className="size-3" />
+				<WarningIcon className="size-3" />
 				Critical
 			</Badge>
 		</div>

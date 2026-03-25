@@ -1,16 +1,15 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/react";
-
 import {
 	BellIcon,
-	ChevronRightIcon,
-	ClipboardListIcon,
-	LogOutIcon,
-	SettingsIcon,
+	CaretRightIcon,
+	ClipboardTextIcon,
+	GearIcon,
+	SignOutIcon,
 	UserIcon,
-} from "lucide-react";
+} from "@phosphor-icons/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Button } from "../button";
 import {
@@ -49,7 +48,7 @@ export const Default: Story = {
 						<DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
 					</DropdownMenuItem>
 					<DropdownMenuItem>
-						<SettingsIcon />
+						<GearIcon />
 						Settings
 						<DropdownMenuShortcut>⌘,</DropdownMenuShortcut>
 					</DropdownMenuItem>
@@ -60,7 +59,7 @@ export const Default: Story = {
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem variant="destructive">
-					<LogOutIcon />
+					<SignOutIcon />
 					Log out
 					<DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
 				</DropdownMenuItem>
@@ -79,7 +78,7 @@ export const MissionActions: Story = {
 				<DropdownMenuLabel>Mission Alpha</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem>
-					<ClipboardListIcon />
+					<ClipboardTextIcon />
 					View report
 				</DropdownMenuItem>
 				<DropdownMenuItem>
@@ -87,12 +86,12 @@ export const MissionActions: Story = {
 					Reassign commander
 				</DropdownMenuItem>
 				<DropdownMenuItem>
-					<ChevronRightIcon />
+					<CaretRightIcon />
 					Extend zone
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem variant="destructive">
-					<LogOutIcon />
+					<SignOutIcon />
 					End mission
 				</DropdownMenuItem>
 			</DropdownMenuContent>

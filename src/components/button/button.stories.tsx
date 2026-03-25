@@ -1,9 +1,8 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+import { DownloadIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { DownloadIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { expect, userEvent, within } from "storybook/test";
 
 import { Spinner } from "../spinner";
@@ -99,7 +98,7 @@ export const WithTrailingIcon: Story = {
 export const IconOnly: Story = {
 	render: () => (
 		<Button aria-label="Delete" size="icon" variant="outline">
-			<Trash2Icon />
+			<TrashIcon />
 		</Button>
 	),
 };
@@ -128,7 +127,7 @@ export const AllSizes: Story = {
 				<DownloadIcon />
 			</Button>
 			<Button aria-label="Delete" size="icon-sm">
-				<Trash2Icon />
+				<TrashIcon />
 			</Button>
 		</div>
 	),

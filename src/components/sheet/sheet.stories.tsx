@@ -1,9 +1,8 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+import { MapPinIcon } from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { MapPinIcon } from "lucide-react";
 
 import { Badge } from "../badge";
 import { Button } from "../button";

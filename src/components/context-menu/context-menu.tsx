@@ -16,7 +16,7 @@
 
 "use client";
 
-import { CheckIcon, ChevronRightIcon } from "lucide-react";
+import { CaretRightIcon, CheckIcon } from "@phosphor-icons/react";
 import { ContextMenu as ContextMenuPrimitive } from "radix-ui";
 import type * as React from "react";
 
@@ -46,7 +46,7 @@ function ContextMenuCheckboxItem({
 		>
 			<span className="absolute right-2 pointer-events-none">
 				<ContextMenuPrimitive.ItemIndicator>
-					<CheckIcon />
+					<CheckIcon weight="light" />
 				</ContextMenuPrimitive.ItemIndicator>
 			</span>
 			{children}
@@ -157,7 +157,7 @@ function ContextMenuRadioItem({
 		>
 			<span className="absolute right-2 pointer-events-none">
 				<ContextMenuPrimitive.ItemIndicator>
-					<CheckIcon />
+					<CheckIcon weight="light" />
 				</ContextMenuPrimitive.ItemIndicator>
 			</span>
 			{children}
@@ -234,7 +234,7 @@ function ContextMenuSubTrigger({
 			{...props}
 		>
 			{children}
-			<ChevronRightIcon className="ml-auto" />
+			<CaretRightIcon className="ml-auto" weight="light" />
 		</ContextMenuPrimitive.SubTrigger>
 	);
 }

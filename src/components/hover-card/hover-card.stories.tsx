@@ -1,9 +1,8 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+import { CalendarIcon, RadioIcon, ShieldCheckIcon } from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { CalendarIcon, RadioIcon, ShieldIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "../avatar";
 import { Badge } from "../badge";
@@ -59,7 +58,7 @@ export const ResponderProfile: Story = {
 						<p className="text-xs text-muted-foreground">BRAVO-1 · Ground team lead</p>
 						<div className="flex flex-col gap-1 mt-2 text-xs text-muted-foreground">
 							<div className="flex items-center gap-1.5">
-								<ShieldIcon className="size-3" />
+								<ShieldCheckIcon className="size-3" />
 								Certified paramedic · K9 handler
 							</div>
 							<div className="flex items-center gap-1.5">

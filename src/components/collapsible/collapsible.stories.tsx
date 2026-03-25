@@ -1,9 +1,8 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+import { CaretUpDownIcon } from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import { ChevronsUpDownIcon } from "lucide-react";
 
 import { Badge } from "../badge";
 import { Button } from "../button";
@@ -25,7 +24,7 @@ export const Default: Story = {
 				<h4 className="text-sm font-semibold">Mission Alpha — active responders</h4>
 				<CollapsibleTrigger asChild>
 					<Button aria-label="Toggle responders" size="icon-sm" variant="ghost">
-						<ChevronsUpDownIcon />
+						<CaretUpDownIcon />
 					</Button>
 				</CollapsibleTrigger>
 			</div>
@@ -49,7 +48,7 @@ export const OpenByDefault: Story = {
 				</div>
 				<CollapsibleTrigger asChild>
 					<Button aria-label="Toggle drone fleet status" size="icon-sm" variant="ghost">
-						<ChevronsUpDownIcon />
+						<CaretUpDownIcon />
 					</Button>
 				</CollapsibleTrigger>
 			</div>

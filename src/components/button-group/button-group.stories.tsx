@@ -1,17 +1,16 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Meta, StoryObj } from "@storybook/react";
-
 import {
-	AlignCenterIcon,
-	AlignLeftIcon,
-	AlignRightIcon,
-	BoldIcon,
-	ItalicIcon,
 	ListIcon,
-	UnderlineIcon,
-} from "lucide-react";
+	TextAlignCenterIcon,
+	TextAlignLeftIcon,
+	TextAlignRightIcon,
+	TextBIcon,
+	TextItalicIcon,
+	TextUnderlineIcon,
+} from "@phosphor-icons/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Button } from "../button";
 import { ButtonGroup, ButtonGroupSeparator, ButtonGroupText } from "./button-group";
@@ -32,13 +31,13 @@ export const Default: Story = {
 	render: () => (
 		<ButtonGroup>
 			<Button aria-label="Bold" variant="outline">
-				<BoldIcon />
+				<TextBIcon />
 			</Button>
 			<Button aria-label="Italic" variant="outline">
-				<ItalicIcon />
+				<TextItalicIcon />
 			</Button>
 			<Button aria-label="Underline" variant="outline">
-				<UnderlineIcon />
+				<TextUnderlineIcon />
 			</Button>
 		</ButtonGroup>
 	),
@@ -48,13 +47,13 @@ export const TextAlignment: Story = {
 	render: () => (
 		<ButtonGroup>
 			<Button aria-label="Align left" variant="outline">
-				<AlignLeftIcon />
+				<TextAlignLeftIcon />
 			</Button>
 			<Button aria-label="Align center" data-active variant="outline">
-				<AlignCenterIcon />
+				<TextAlignCenterIcon />
 			</Button>
 			<Button aria-label="Align right" variant="outline">
-				<AlignRightIcon />
+				<TextAlignRightIcon />
 			</Button>
 		</ButtonGroup>
 	),
@@ -74,10 +73,10 @@ export const WithSeparator: Story = {
 	render: () => (
 		<ButtonGroup>
 			<Button aria-label="Bold" variant="outline">
-				<BoldIcon />
+				<TextBIcon />
 			</Button>
 			<Button aria-label="Italic" variant="outline">
-				<ItalicIcon />
+				<TextItalicIcon />
 			</Button>
 			<ButtonGroupSeparator />
 			<Button aria-label="List" variant="outline">

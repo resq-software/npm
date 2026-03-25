@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Loader2Icon } from "lucide-react";
+import { SpinnerGapIcon } from "@phosphor-icons/react";
 
 import { cn } from "../../lib/utils.js";
 
 function Spinner({ className, ...props }: Readonly<React.ComponentProps<"svg">>) {
 	return (
-		<Loader2Icon
+		<SpinnerGapIcon
+			weight="light"
 			aria-label="Loading"
 			className={cn("size-4 animate-spin", className)}
 			role="status"

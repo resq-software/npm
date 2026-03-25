@@ -16,8 +16,8 @@
 
 "use client";
 
+import { SidebarSimpleIcon } from "@phosphor-icons/react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { PanelLeftIcon } from "lucide-react";
 import { Slot } from "radix-ui";
 import * as React from "react";
 
@@ -453,7 +453,7 @@ function SidebarTrigger({
 			variant="ghost"
 			{...props}
 		>
-			<PanelLeftIcon />
+			<SidebarSimpleIcon weight="light" />
 			<span className="sr-only">Toggle Sidebar</span>
 		</Button>
 	);
