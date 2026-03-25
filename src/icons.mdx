@@ -1,0 +1,55 @@
+{/* Copyright 2026 ResQ */}
+{/* SPDX-License-Identifier: Apache-2.0 */}
+
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Foundation/Icons/Conventions" />
+
+# Icons
+
+`@resq-sw/ui` uses [Phosphor Icons](https://phosphoricons.com) (`@phosphor-icons/react`) for all iconography.
+
+## Default weight
+
+All icons inside library components use `weight="light"` (1.5px stroke) for a refined, minimal aesthetic. This is intentional — it differentiates ResQ from the default shadcn look.
+
+## Usage
+
+Icons are **not exported** from `@resq-sw/ui`. Consumers import directly from Phosphor:
+
+```tsx
+import { CheckIcon, CaretDownIcon } from "@phosphor-icons/react";
+
+<CheckIcon className="size-4" weight="light" />
+```
+
+## Weight system
+
+Phosphor provides six weights per icon — use them intentionally:
+
+- **`thin`** (1px) — Decorative, background elements
+- **`light`** (1.5px) — **Library default** — UI chrome, navigation
+- **`regular`** (2px) — Fallback when more visual weight is needed
+- **`bold`** (3px) — Emphasis, active states
+- **`fill`** (solid) — Selected/active indicators, toggles
+- **`duotone`** (two-tone) — Decorative illustrations, empty states
+
+See the **Weights** story for a visual comparison.
+
+## Sizing
+
+Use Tailwind size utilities, not the `size` prop:
+
+```tsx
+{/* Correct */}
+<CheckIcon className="size-4" weight="light" />
+
+{/* Avoid */}
+<CheckIcon size={16} weight="light" />
+```
+
+Common sizes: `size-3` (12px), `size-3.5` (14px), `size-4` (16px), `size-5` (20px), `size-6` (24px).
+
+## Adding new icons
+
+When introducing a new Phosphor icon to the codebase, add it to the gallery story in `src/components/icons/icons.stories.tsx` to keep the reference current.
