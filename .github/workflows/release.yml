@@ -33,9 +33,11 @@ jobs:
           git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
       - uses: ./.github/actions/prepare
       - run: bun run build
+        working-directory: packages/ui
       - name: Set up npm auth
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
       - name: Sync package version from npm when registry is ahead
+        working-directory: packages/ui
         env:
           PACKAGE_NAME: "@resq-sw/ui"
         run: |
@@ -82,12 +84,14 @@ jobs:
       - uses: JoshuaKGoldberg/release-it-action@8ee87d0d30f97b452ef5d8aa9f4d0490eed439aa # v0.4.0
         with:
           npm-token: ${{ secrets.NPM_TOKEN }}
+          directory: packages/ui
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HUSKY: 0
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - id: stage_github_package
         name: Stage GitHub Packages publish artifact
+        working-directory: packages/ui
         run: |
           PACK_FILENAME=$(npm pack --json --ignore-scripts | node -e 'const fs = require("node:fs"); const payload = JSON.parse(fs.readFileSync(0, "utf8")); process.stdout.write(payload[0].filename);')
           STAGING_DIR="$RUNNER_TEMP/resq-ui-github-package"
@@ -103,6 +107,7 @@ jobs:
           echo "@resq-software:registry=https://npm.pkg.github.com" >> ~/.npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
       - name: Publish package to GitHub Packages
+        working-directory: packages/ui
         run: |
           VERSION=$(node -e "process.stdout.write(require('./package.json').version)")
           EXISTING=$(npm view "@resq-software/npm@${VERSION}" version --registry https://npm.pkg.github.com 2>/dev/null || true)

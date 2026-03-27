@@ -21,6 +21,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: ./.github/actions/prepare
       - run: bun run build
+        working-directory: packages/ui
 
   storybook:
     name: Storybook
@@ -29,6 +30,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: ./.github/actions/prepare
       - run: bun run build-storybook
+        working-directory: packages/ui
 
   biome:
     name: Biome
@@ -37,6 +39,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: ./.github/actions/prepare
       - run: bunx biome ci .
+        working-directory: packages/ui
 
   lint_knip:
     name: Lint Knip
@@ -45,6 +48,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: ./.github/actions/prepare
       - run: bun run lint:knip
+        working-directory: packages/ui
 
   lint_markdown:
     name: Lint Markdown
@@ -53,6 +57,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: ./.github/actions/prepare
       - run: bun lint:md
+        working-directory: packages/ui
 
   lint_spelling:
     name: Lint Spelling
@@ -61,6 +66,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: ./.github/actions/prepare
       - run: bun lint:spelling
+        working-directory: packages/ui
 
   test:
     name: Test
@@ -69,6 +75,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: ./.github/actions/prepare
       - run: bun test --coverage
+        working-directory: packages/ui
       - if: always()
         name: Upload coverage to Codecov
         uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad # v5
@@ -80,3 +87,4 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: ./.github/actions/prepare
       - run: bun tsc
+        working-directory: packages/ui

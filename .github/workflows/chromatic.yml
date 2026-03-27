@@ -25,10 +25,11 @@ jobs:
       - uses: ./.github/actions/prepare
       - name: Build Storybook
         run: bun run build-storybook --quiet
+        working-directory: packages/ui
       - name: Run Chromatic
         uses: chromaui/action@0794e6939fe40ce46a88963f818092afc427da5b # v15
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-          storybookBuildDir: storybook-static
+          storybookBuildDir: packages/ui/storybook-static
           # Auto-accept changes when merging into master (sets new baseline).
           autoAcceptChanges: "master"
