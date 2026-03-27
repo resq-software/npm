@@ -1,166 +1,272 @@
-# @resq-sw/ui
+# ResQ npm Packages
 
-A production-ready, high-performance React component library built with Radix UI primitives, Tailwind CSS v4, and strict TypeScript safety.
-
-[![Version](https://img.shields.io/npm/v/@resq-sw/ui)](https://www.npmjs.com/package/@resq-sw/ui)
+[![@resq-sw/ui](https://img.shields.io/npm/v/@resq-sw/ui?label=%40resq-sw%2Fui)](https://www.npmjs.com/package/@resq-sw/ui)
+[![@resq-sw/dsa](https://img.shields.io/npm/v/@resq-sw/dsa?label=%40resq-sw%2Fdsa)](https://www.npmjs.com/package/@resq-sw/dsa)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](./LICENSE.md)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/resq-software/ui/ci.yml)](https://github.com/resq-software/ui/actions)
 
-## Overview
+Bun workspace for all ResQ packages published to npm under the `@resq-sw` scope.
 
-`@resq-sw/ui` is a centralized, high-performance UI library designed for ResQ-ecosystem front-end applications. By leveraging **Radix UI** primitives and **Tailwind CSS v4** styling, we provide a robust, accessible foundation for enterprise-grade interfaces.
+## Packages
 
-This project is a **shadcn-based design system**, refined for high-density, performance-critical environments.
+| Package | Description | Version |
+| :--- | :--- | :--- |
+| [`@resq-sw/ui`](https://www.npmjs.com/package/@resq-sw/ui) | React component library (Radix + Tailwind) | [![npm](https://img.shields.io/npm/v/@resq-sw/ui)](https://www.npmjs.com/package/@resq-sw/ui) |
+| [`@resq-sw/dsa`](https://www.npmjs.com/package/@resq-sw/dsa) | Data structures and algorithms (zero deps) | [![npm](https://img.shields.io/npm/v/@resq-sw/dsa)](https://www.npmjs.com/package/@resq-sw/dsa) |
 
-## Features
+---
 
-- **Dark-First Design:** Dark theme by default, light mode as explicit opt-in via `.light` class.
-- **oklch Color System:** Perceptually uniform colors for vibrant, consistent theming across dark and light modes.
-- **Tree-Shakeable:** Modular architecture with per-component subpath exports for minimal bundle sizes.
-- **Strictly Typed:** Full TypeScript support with explicit `.d.ts` definitions and strict null checks.
-- **Accessibility First:** Built on Radix UI primitives to ensure WCAG 2.1 AA compliance.
-- **Performance-Tested:** Verified frame timing, layout stability, DOM budgets, and GPU-friendly transitions.
-- **Developer-Focused:** Includes custom scaffolding scripts, AI-assisted development agents, and a reproducible Nix-based environment.
-- **Modern Stack:** Built on React 19, Tailwind CSS v4, and Bun.
+## @resq-sw/dsa
 
-## Architecture
+Production-grade data structures and algorithms with zero runtime dependencies. TypeScript-first with full type exports.
 
-```mermaid
-C4Context
-    title Component Consumption Model
-    Person(user, "Developer")
-    System_Boundary(resq, "resq_sw_ui") {
-        Component(subpath, "Subpath Exports")
-        Component(radix, "Radix UI Primitives")
-        Component(tw, "Tailwind CSS v4")
-        Component(utils, "Internal Hooks/Utils")
-    }
-    System(app, "App Implementation")
-    System_Ext(ci, "Chromatic / Storybook")
-
-    Rel(user, app, "Develops")
-    Rel(app, subpath, "Imports components")
-    Rel(subpath, radix, "Uses")
-    Rel(subpath, tw, "Styles")
-    Rel(subpath, utils, "Integrates")
-    Rel(ci, subpath, "Visual Testing")
-```
-
-### Component Conventions
-
-- **Variant Management:** Uses `class-variance-authority` (`cva`) for all component states.
-- **Composition:** Uses `Slot.Root` from Radix UI for the `asChild` pattern.
-- **Styling Hooks:** Root elements include `data-slot="<component-name>"` for easy CSS targeting.
-- **Merging:** Utility `cn()` (clsx + tailwind-merge) for clean className overriding.
-- **Immutability:** Components are defined as plain `function` declarations for better debugging and consistent behavior.
-
-## Installation
+### Installation
 
 ```bash
-bun add @resq-sw/ui
-# Required peer dependencies
-bun add react@^19 react-dom@^19 tailwindcss@^4
+npm install @resq-sw/dsa
+# or
+bun add @resq-sw/dsa
 ```
 
-## Quick Start
+### Usage
 
-1. **Global Setup**: Include global styles in your root entry file (e.g., `main.tsx` or `layout.tsx`):
-    ```tsx
-    import "@resq-sw/ui/styles/globals.css";
-    ```
+#### BloomFilter
 
-2. **Basic Usage**:
-    ```tsx
-    import { Button } from "@resq-sw/ui/button";
-    import { Card } from "@resq-sw/ui/card";
+Probabilistic set membership testing with configurable false-positive rate.
 
-    export const App = () => (
-      <Card>
-        <Button onClick={() => alert("Ready!")}>Click Me</Button>
-      </Card>
-    );
-    ```
+```ts
+import { BloomFilter } from "@resq-sw/dsa";
 
-## Theming & Style Guide
+const filter = new BloomFilter({ expectedItems: 1000, falsePositiveRate: 0.01 });
+filter.add("drone-001");
+filter.has("drone-001"); // true
+filter.has("drone-999"); // false (probably)
+```
 
-### Color System (oklch)
+#### CountMinSketch
 
-All design tokens use the `oklch` color space for perceptually uniform lightness and predictable chroma control.
+Frequency estimation for streaming data with bounded error.
 
-#### Dark Default Tokens
+```ts
+import { CountMinSketch } from "@resq-sw/dsa";
 
-| Token              | oklch                                  | Role                    |
-| :----------------- | :------------------------------------- | :---------------------- |
-| `background`       | `oklch(16.04% 0.0152 272.20)`         | Page background         |
-| `surface`          | `oklch(19.72% 0.0231 268.80)`         | Elevated surface        |
-| `card`             | `oklch(22.90% 0.0302 269.75)`         | Card background         |
-| `border`           | `oklch(26.45% 0.0386 270.81)`         | Default borders         |
-| `foreground`       | `oklch(96.19% 0.0109 274.89)`         | Primary text            |
-| `primary`          | `oklch(58.50% 0.1877 24.72)`          | ResQ Red                |
+const sketch = new CountMinSketch({ width: 1024, depth: 5 });
+sketch.add("event-type-A");
+sketch.add("event-type-A");
+sketch.estimate("event-type-A"); // >= 2
+```
 
-#### Light Mode Opt-In
+#### Graph (BFS, Dijkstra, A*)
 
-Add the `.light` class to a parent element to enable the light theme:
+Weighted directed/undirected graph with pathfinding algorithms.
+
+```ts
+import { Graph } from "@resq-sw/dsa";
+
+const graph = new Graph<string>({ directed: true });
+graph.addVertex("A");
+graph.addVertex("B");
+graph.addVertex("C");
+graph.addEdge("A", "B", 1);
+graph.addEdge("B", "C", 2);
+
+graph.bfs("A");                // breadth-first traversal
+graph.dijkstra("A", "C");     // shortest path (Dijkstra)
+graph.aStar("A", "C", heuristic); // shortest path (A*)
+```
+
+#### BoundedHeap
+
+Fixed-capacity min/max heap for top-K selection.
+
+```ts
+import { BoundedHeap } from "@resq-sw/dsa";
+
+const heap = new BoundedHeap<{ id: string; score: number }>({
+  capacity: 10,
+  compare: (a, b) => a.score - b.score,
+});
+heap.push({ id: "item-1", score: 0.95 });
+heap.peek(); // highest-scored item
+```
+
+#### Trie and rabinKarp
+
+Prefix tree for autocomplete and string search.
+
+```ts
+import { Trie, rabinKarp } from "@resq-sw/dsa";
+
+const trie = new Trie();
+trie.insert("rescue");
+trie.insert("respond");
+trie.search("res"); // ["rescue", "respond"]
+
+// Rabin-Karp string matching
+const matches = rabinKarp("hello world hello", "hello");
+```
+
+#### RabinKarp and quickSearch
+
+Advanced pattern matching with statistics.
+
+```ts
+import { RabinKarp, quickSearch } from "@resq-sw/dsa";
+
+const rk = new RabinKarp({ pattern: "drone" });
+const results = rk.searchAll("drone alpha drone beta");
+
+// Quick single-pattern search
+const found = quickSearch("payload data payload", "payload");
+```
+
+#### PriorityQueue
+
+Configurable priority queue with factory helpers.
+
+```ts
+import {
+  PriorityQueue,
+  createMinHeap,
+  createDeadlineQueue,
+  createPriorityLevelQueue,
+} from "@resq-sw/dsa";
+
+// Min-heap by numeric value
+const minHeap = createMinHeap<number>();
+minHeap.enqueue(5);
+minHeap.enqueue(1);
+minHeap.dequeue(); // 1
+
+// Deadline-based queue (earliest deadline first)
+const deadlines = createDeadlineQueue();
+deadlines.enqueue({ id: "task-1", deadline: Date.now() + 5000, priority: 1 });
+
+// Priority level queue
+const levels = createPriorityLevelQueue();
+levels.enqueue({ id: "critical", priority: 0 });
+levels.enqueue({ id: "normal", priority: 5 });
+```
+
+#### Distance
+
+Distance calculations across multiple formulas: geospatial, mathematical, and set-based.
+
+```ts
+import { Distance } from "@resq-sw/dsa";
+
+// Haversine (great-circle distance)
+const nyc = { lat: 40.7128, lng: -74.006 };
+const london = { lat: 51.5074, lng: -0.1278 };
+Distance.haversine(nyc, london); // ~5570 km
+
+// Euclidean
+Distance.euclidean({ lat: 0, lng: 0 }, { lat: 3, lng: 4 }); // 5
+
+// Cosine similarity distance
+Distance.cosine({ lat: 1, lng: 0 }, { lat: 0, lng: 1 }); // 1 (orthogonal)
+
+// Jaccard set dissimilarity
+Distance.jaccard(new Set([1, 2, 3]), new Set([2, 3, 4])); // 0.5
+
+// 3D with altitude
+Distance.threed(
+  { lat: 40.7128, lng: -74.006, alt: 100 },
+  { lat: 51.5074, lng: -0.1278, alt: 200 },
+);
+
+// Generic calculate method
+Distance.calculate("vincenty", nyc, london);
+Distance.calculate("manhattan", nyc, london);
+Distance.calculate("chebyshev", nyc, london);
+Distance.calculate("hamming", nyc, london);
+Distance.calculate("sorensen-dice", new Set([1, 2]), new Set([2, 3]));
+```
+
+Supported formulas: `euclidean`, `haversine`, `vincenty`, `manhattan`, `chebyshev`, `minkowski`, `threed`, `cosine`, `hamming`, `jaccard`, `sorensen-dice`.
+
+### Optional Effect Schemas
+
+For runtime validation using [Effect](https://effect.website/), import from the `/schemas` subpath. Effect is an optional peer dependency and not required for core usage.
+
+```ts
+import { /* schema exports */ } from "@resq-sw/dsa/schemas";
+```
+
+---
+
+## @resq-sw/ui
+
+A production-ready React component library built with Radix UI primitives, Tailwind CSS v4, and strict TypeScript safety. Dark-first design with oklch color system, tree-shakeable subpath exports, and WCAG 2.1 AA accessibility.
+
+See the full documentation in [`packages/ui/README.md`](packages/ui/README.md).
+
+### Quick Start
+
+```bash
+bun add @resq-sw/ui react react-dom tailwindcss
+```
 
 ```tsx
-<div className="light">
-  {/* All children render in light mode */}
-</div>
+import "@resq-sw/ui/styles/globals.css";
+import { Button } from "@resq-sw/ui/button";
+import { Card } from "@resq-sw/ui/card";
+
+export const App = () => (
+  <Card>
+    <Button onClick={() => alert("Ready!")}>Click Me</Button>
+  </Card>
+);
 ```
 
-### Typography
-
-| Font | Role | CSS class |
-| :--- | :--- | :--- |
-| **Syne** | Display headings, card titles, stat values | `font-display` |
-| **DM Sans** | Body copy, UI text, descriptions | `font-sans` |
-| **DM Mono** | Labels, buttons, badges, data, code | `font-mono` |
-
-## API Reference
-
-Components are exposed via subpath exports for optimal tree-shaking.
-
-| Category | Components |
-| :--- | :--- |
-| **Inputs** | `Button`, `Input`, `Select`, `Checkbox`, `Combobox`, `Toggle`, `ToggleGroup`, `RadioGroup`, `Slider`, `Switch`, `InputOTP`, `NativeSelect` |
-| **Layout** | `Card`, `Accordion`, `Separator`, `Resizable`, `ScrollArea`, `Sidebar`, `AspectRatio`, `Breadcrumb` |
-| **Feedback** | `Alert`, `Spinner`, `Progress`, `Skeleton`, `Sonner`, `Badge`, `Kbd`, `Empty` |
-| **Overlay** | `Dialog`, `Drawer`, `Popover`, `Tooltip`, `ContextMenu`, `DropdownMenu`, `HoverCard`, `AlertDialog`, `Sheet`, `Menubar` |
-| **Data** | `Table`, `Calendar`, `Carousel`, `Chart`, `Pagination`, `Avatar` |
-| **Utils** | `cn`, `useIsMobile`, `Direction` |
+---
 
 ## Development
 
-We use **Nix** and **Bun** for a reproducible, high-speed development workflow.
+### Prerequisites
+
+- [Bun](https://bun.sh/) >= 1.x
+- Node.js >= 20.19.0
+
+### Workspace Setup
 
 ```bash
-git clone https://github.com/resq-software/ui.git
-cd ui
-nix develop
+git clone https://github.com/resq-software/npm.git
+cd npm
+bun install
 ```
 
-### Common Commands
+### Commands
 
-- `bun storybook`: Start development environment (port 6006)
-- `bun test`: Run Vitest test suite
-- `bun lint`: Run Biome checks (linting & formatting)
-- `bun lint:spelling`: Run cspell spell checker
-- `bun lint:knip`: Detect unused files and exports
-- `bun tsc`: Run TypeScript type-checks
-- `bun build`: Build project for production (emits to `lib/`)
+```bash
+bun install                      # Install all workspace dependencies
+bun test                         # Run all workspace tests
+bun --filter @resq-sw/dsa test   # Test DSA package only
+bun --filter @resq-sw/ui test    # Test UI package only
+bun --filter @resq-sw/ui build   # Build UI package
+bun --filter @resq-sw/dsa build  # Build DSA package
+```
 
-### Testing Strategy
+### Package-Specific Development
 
-- **Unit/Component Testing:** Vitest with JSDOM.
-- **Visual Regression:** Chromatic integration with Storybook.
-- **Quality Guards:** `console-fail-test` ensures no unhandled logs or errors in tests.
-- **Performance:** Performance panel integrated into Storybook for monitoring frame rates.
+Each package has its own scripts. Navigate to the package directory or use `bun --filter`:
+
+```bash
+# UI: Start Storybook
+bun --filter @resq-sw/ui storybook
+
+# UI: Lint with Biome
+bun --filter @resq-sw/ui lint
+
+# DSA: Type-check
+bun --filter @resq-sw/dsa build
+```
 
 ## Contributing
 
-1. **Commit Convention**: We follow [Conventional Commits](https://www.conventionalcommits.org/).
+1. **Commit Convention**: Follow [Conventional Commits](https://www.conventionalcommits.org/).
 2. **Quality Standards**: All code must pass linting, type-checking, and tests before submission.
 3. **Branching**: Branch from `main` and submit a Pull Request.
+4. **Testing**: Run `bun test` from the workspace root before finalizing.
 
 See [CONTRIBUTING.md](.github/CONTRIBUTING.md) and [DEVELOPMENT.md](.github/DEVELOPMENT.md) for full details.
 
@@ -168,4 +274,4 @@ See [CONTRIBUTING.md](.github/CONTRIBUTING.md) and [DEVELOPMENT.md](.github/DEVE
 
 This project is licensed under the Apache-2.0 License. See [LICENSE.md](./LICENSE.md) for details.
 
-Copyright © 2026 ResQ Software
+Copyright 2026 ResQ Software

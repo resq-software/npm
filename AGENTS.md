@@ -1,84 +1,65 @@
-# CLAUDE.md
+# ResQ npm Packages — Agent Guide
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Mission
 
-## Project
+Registry workspace for all ResQ npm packages published under the `@resq-sw` scope. Contains the shared UI component library and standalone DSA utilities.
 
-`@resq/ui` is a shared UI component library for the ResQ platform — a shadcn-based design system built on Radix UI primitives, Tailwind CSS v4, and `class-variance-authority` for variant management.
+## Stack
+
+- **Runtime:** Bun 1.x
+- **Language:** TypeScript (strict mode)
+- **Testing:** Vitest
+- **Build:** tsc (dsa), tsdown (ui)
+- **Linting:** Biome
+- **Visual Testing:** Chromatic (ui only)
+
+## Repo Map
+
+- `packages/ui/` — `@resq-sw/ui`: React component library (Radix + Tailwind)
+- `packages/dsa/` — `@resq-sw/dsa`: Data structures and algorithms (zero deps)
 
 ## Commands
 
-```sh
-bun build           # Build src/ → lib/ using tsdown
-bun dev             # Build in watch mode
-bun test            # Run Vitest tests
-bun tsc             # Type-check without emitting
-bun lint            # Biome check
-bun lint:knip       # Detect unused files/exports
-bun lint:spelling   # cspell spell check
-bun format          # Auto-format with Biome
-bun storybook       # Start Storybook on port 6006
-bun build-storybook # Build Storybook static output
+```bash
+bun install                      # Install all workspace dependencies
+bun test                         # Run all workspace tests
+bun --filter @resq-sw/dsa test   # Test DSA package only
+bun --filter @resq-sw/ui test    # Test UI package only
+bun --filter @resq-sw/dsa build  # Build DSA package
+bun --filter @resq-sw/ui build   # Build UI package
+bun --filter @resq-sw/ui storybook  # Start Storybook dev server
+bun --filter @resq-sw/ui lint    # Lint UI package with Biome
 ```
 
-Run a single test file:
+## Rules
 
-```sh
-bun test src/components/button/button.test.tsx
-```
+- `@resq-sw/dsa` must have zero runtime dependencies (Effect is a peer dep for optional schemas only).
+- `@resq-sw/ui` uses Radix UI for interaction logic and Tailwind CSS v4 for styling.
+- All packages must be tree-shakeable.
+- Zero `any` — strict typing throughout.
+- Each package has its own build and test scripts.
+- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/).
+- Package manager is **bun** — do not use npm, yarn, or pnpm.
 
-Run tests with coverage:
+## Safety
 
-```sh
-bun test --coverage
-```
+- Don't add runtime dependencies to `@resq-sw/dsa` — it must stay zero-dep.
+- Don't publish without running the full test suite (`bun test`).
+- Lockfile (`bun.lock`) must be committed with dependency changes.
+- Don't commit secrets, private keys, or `.env` files.
+- `console-fail-test` is active in UI tests: any `console.log/warn/error` call inside a test causes failure.
 
-## Architecture
+## Workflow
 
-### Component structure
+1. Run `bun install` from workspace root after dependency changes.
+2. Make changes in the relevant `packages/` directory.
+3. Run `bun test` before finalizing.
+4. Each package builds independently (`bun --filter <pkg> build`).
+5. Summarize: files changed, behavior change, tests run.
 
-Each component lives in `src/components/<name>/` with two files:
+## References
 
-- `<name>.tsx` — the component implementation
-- `index.ts` — re-exports everything from the `.tsx` file
-
-Every component is individually exported via the `exports` map in `package.json` (e.g., `@resq/ui/button`) and also aggregated in `src/index.ts`.
-
-### Component conventions
-
-- Use `class-variance-authority` (`cva`) for variant definitions; export the variants object alongside the component.
-- Use `radix-ui`'s `Slot.Root` for the `asChild` pattern.
-- Apply `data-slot="<component-name>"` to root elements for CSS targeting.
-- Use `cn()` from `src/lib/utils.ts` (wraps clsx + tailwind-merge) for className merging.
-- Accept `React.ComponentProps<"element">` spread to stay composable.
-- Components are plain functions (not arrow functions), e.g. `function Button(...)`.
-
-### Styling
-
-- Tailwind CSS v4 — config is entirely in `src/styles/globals.css` via `@import "tailwindcss"`.
-- Design tokens are CSS custom properties on `:root` and `.dark` using the `oklch` color space.
-- Dark mode via the `.dark` class variant: `@custom-variant dark (&:is(.dark *))`.
-- `tw-animate-css` provides animation utilities.
-
-### Exports
-
-- **Main barrel:** `src/index.ts` re-exports all components plus `useIsMobile` and `cn`.
-- **Per-component:** each directory's `index.ts` is the per-path export entry.
-- **CSS:** `src/styles/globals.css` is exported as `@resq/ui/styles/globals.css` and must be imported by consumers.
-
-### File headers
-
-All source files carry an Apache-2.0 license header (see existing files for format). New files should include it.
-
-### Testing
-
-- Vitest, configured in `vitest.config.ts`.
-- `console-fail-test` is active: any `console.log/warn/error` call inside a test causes a failure — use mocks or suppress intentionally.
-- Stories (`.stories.tsx`) use Storybook 10 with `@storybook/react`.
-
-### Tooling notes
-
-- Package manager: **bun** — do not use npm, yarn, or pnpm.
-- Pre-commit hook (Husky + lint-staged): auto-formats all staged files with Biome.
-- `knip` tracks unused exports — remove dead code rather than suppressing.
-- Linting and formatting handled by Biome (`biome.json`).
+- [UI Package README](packages/ui/README.md)
+- [DSA Package](packages/dsa/)
+- [Contributing Guide](.github/CONTRIBUTING.md)
+- [Development Guide](.github/DEVELOPMENT.md)
