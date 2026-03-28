@@ -2,9 +2,11 @@ name: Chromatic
 
 on:
   pull_request:
+    paths: ['packages/ui/**']
   push:
     branches:
       - master
+    paths: ['packages/ui/**']
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
