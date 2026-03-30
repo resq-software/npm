@@ -81,14 +81,13 @@ jobs:
             console.log(`package.json version ${packageJson.version} is current with npm.`);
           }
           EOF
-      - uses: JoshuaKGoldberg/release-it-action@8ee87d0d30f97b452ef5d8aa9f4d0490eed439aa # v0.4.0
-        with:
-          npm-token: ${{ secrets.NPM_TOKEN }}
-          directory: packages/ui
+      - name: Run release-it
+        working-directory: packages/ui
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HUSKY: 0
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: bunx release-it --ci
       - id: stage_github_package
         name: Stage GitHub Packages publish artifact
         working-directory: packages/ui
