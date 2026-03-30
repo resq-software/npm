@@ -29,7 +29,7 @@ jobs:
         run: bun run build-storybook --quiet
         working-directory: packages/ui
       - name: Run Chromatic
-        uses: chromaui/action@0794e6939fe40ce46a88963f818092afc427da5b # v15
+        uses: chromaui/action@f191a0224b10e1a38b2091cefb7b7a2337009116 # v15
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           storybookBuildDir: packages/ui/storybook-static
