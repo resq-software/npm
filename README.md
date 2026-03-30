@@ -1,10 +1,19 @@
 # ResQ npm Packages
 
-[![@resq-sw/ui](https://img.shields.io/npm/v/@resq-sw/ui?label=%40resq-sw%2Fui)](https://www.npmjs.com/package/@resq-sw/ui)
-[![@resq-sw/dsa](https://img.shields.io/npm/v/@resq-sw/dsa?label=%40resq-sw%2Fdsa)](https://www.npmjs.com/package/@resq-sw/dsa)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](./LICENSE.md)
+[![CI](https://img.shields.io/github/actions/workflow/status/resq-software/npm/ci.yml?branch=master&label=ci&style=flat-square)](https://github.com/resq-software/npm/actions)
+[![@resq-sw/dsa](https://img.shields.io/npm/v/%40resq-sw%2Fdsa?style=flat-square&label=%40resq-sw%2Fdsa)](https://www.npmjs.com/package/@resq-sw/dsa)
+[![@resq-sw/ui](https://img.shields.io/npm/v/%40resq-sw%2Fui?style=flat-square&label=%40resq-sw%2Fui)](https://www.npmjs.com/package/@resq-sw/ui)
+[![Storybook](https://img.shields.io/badge/storybook-chromatic-FF4785?style=flat-square)](https://master--69b2711843dac80a70e4ca83.chromatic.com)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](LICENSE)
 
-Bun workspace for all ResQ packages published to npm under the `@resq-sw` scope.
+> A shared React component library and DSA utilities for the ResQ platform, built on shadcn/ui and Radix UI.
+
+## Packages
+
+| Package | Install | Version |
+|---------|---------|---------|
+| `@resq-sw/dsa` | `npm install @resq-sw/dsa` | [![npm](https://img.shields.io/npm/v/%40resq-sw%2Fdsa?style=flat-square)](https://www.npmjs.com/package/@resq-sw/dsa) |
+| `@resq-sw/ui` | `npm install @resq-sw/ui` | [![npm](https://img.shields.io/npm/v/%40resq-sw%2Fui?style=flat-square)](https://www.npmjs.com/package/@resq-sw/ui) |
 
 ## Packages
 
