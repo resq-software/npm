@@ -3,7 +3,6 @@
 
 import type { Icon, IconWeight } from "@phosphor-icons/react";
 import {
-	ActivityIcon,
 	AirplaneTiltIcon,
 	ArrowLeftIcon,
 	ArrowRightIcon,
@@ -21,6 +20,7 @@ import {
 	CaretUpDownIcon,
 	CaretUpIcon,
 	CellSignalFullIcon,
+	ChartLineIcon,
 	ChatTextIcon,
 	CheckCircleIcon,
 	CheckIcon,
@@ -40,7 +40,6 @@ import {
 	EyeIcon,
 	FileCodeIcon,
 	FileImageIcon,
-	FileSearchIcon,
 	FileTextIcon,
 	FirstAidKitIcon,
 	FlameIcon,
@@ -76,7 +75,7 @@ import {
 	StarIcon,
 	TargetIcon,
 	TerminalIcon,
-	TextBolderIcon,
+	TextBIcon,
 	TextItalicIcon,
 	TextUnderlineIcon,
 	TrashIcon,
@@ -163,7 +162,7 @@ const icons: IconEntry[] = [
 	{ component: TruckIcon, name: "TruckIcon", tags: ["emergency"] },
 
 	// Content & data
-	{ component: ActivityIcon, name: "ActivityIcon", tags: ["content"] },
+	{ component: ChartLineIcon, name: "ChartLineIcon", tags: ["content"] },
 	{ component: BookOpenIcon, name: "BookOpenIcon", tags: ["content"] },
 	{ component: CalendarIcon, name: "CalendarIcon", tags: ["content"] },
 	{ component: CircleIcon, name: "CircleIcon", tags: ["content"] },
@@ -174,7 +173,6 @@ const icons: IconEntry[] = [
 	{ component: DotsThreeIcon, name: "DotsThreeIcon", tags: ["content"] },
 	{ component: FileCodeIcon, name: "FileCodeIcon", tags: ["content"] },
 	{ component: FileImageIcon, name: "FileImageIcon", tags: ["content"] },
-	{ component: FileSearchIcon, name: "FileSearchIcon", tags: ["content"] },
 	{ component: FileTextIcon, name: "FileTextIcon", tags: ["content"] },
 	{ component: LinkIcon, name: "LinkIcon", tags: ["content"] },
 	{ component: LinkBreakIcon, name: "LinkBreakIcon", tags: ["content"] },
@@ -206,7 +204,7 @@ const icons: IconEntry[] = [
 	{ component: WrenchIcon, name: "WrenchIcon", tags: ["settings"] },
 
 	// Text formatting
-	{ component: TextBolderIcon, name: "TextBolderIcon", tags: ["formatting"] },
+	{ component: TextBIcon, name: "TextBIcon", tags: ["formatting"] },
 	{ component: TextItalicIcon, name: "TextItalicIcon", tags: ["formatting"] },
 	{ component: TextUnderlineIcon, name: "TextUnderlineIcon", tags: ["formatting"] },
 ];
@@ -408,7 +406,7 @@ function IconGallery() {
 						padding: "3rem",
 					}}
 				>
-					<FileSearchIcon className="size-8" weight="light" />
+					<FileTextIcon className="size-8" weight="light" />
 					<span style={{ fontSize: "0.875rem" }}>No icons match "{search}"</span>
 				</div>
 			)}
@@ -638,8 +636,8 @@ const pairings: { icons: { component: Icon; weight?: IconWeight }[]; label: stri
 		icons: [
 			{ component: SpinnerGapIcon },
 			{ component: ClockIcon },
-			{ component: ActivityIcon },
 			{ component: PulseIcon },
+			{ component: ArrowsClockwiseIcon },
 		],
 		label: "Loading & activity",
 	},

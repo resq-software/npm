@@ -92,6 +92,7 @@ export {
 // ── Content & data ────────────────────────────────────────────────────────────
 export {
 	BookOpenIcon,
+	ChartLineIcon,
 	CalendarIcon,
 	CircleIcon,
 	ClipboardTextIcon,
