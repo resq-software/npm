@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.27.0](https://github.com/resq-software/npm/compare/0.26.0...0.27.0) (2026-04-03)
+
+### Features
+
+* **icons:** add 66 align, arrow, lifestyle & media icons (loop iteration 9) ([8fc9f5c](https://github.com/resq-software/npm/commit/8fc9f5c2d9439606f58ccd35ba43803fc6fff735))
+
 ## [0.26.0](https://github.com/resq-software/npm/compare/0.25.1...0.26.0) (2026-04-03)
 
 ### Features
