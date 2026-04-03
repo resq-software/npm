@@ -110,7 +110,7 @@ jobs:
         working-directory: packages/ui
         run: |
           VERSION=$(node -e "process.stdout.write(require('./package.json').version)")
-          EXISTING=$(npm view "@resq-software/npm@${VERSION}" version --registry https://npm.pkg.github.com 2>/dev/null || true)
+          EXISTING=$(npm view "@resq-software/ui@${VERSION}" version --registry https://npm.pkg.github.com 2>/dev/null || true)
           if [ "$EXISTING" = "$VERSION" ]; then
             echo "Version ${VERSION} already published to GitHub Packages — skipping."
           else

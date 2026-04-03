@@ -1,5 +1,5 @@
 {
-	"name": "@resq-sw/npm",
+	"name": "resq-sw-workspace",
 	"private": true,
 	"workspaces": ["packages/*"],
 	"scripts": {

@@ -45,5 +45,8 @@
     "url": "git+https://github.com/resq-software/npm.git",
     "directory": "packages/dsa"
   },
-  "keywords": ["dsa", "bloom-filter", "graph", "trie", "priority-queue", "distance"]
+  "keywords": ["dsa", "bloom-filter", "graph", "trie", "priority-queue", "distance"],
+  "engines": {
+    "node": ">=20.19.0"
+  }
 }

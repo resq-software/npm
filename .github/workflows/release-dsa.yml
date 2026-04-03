@@ -26,4 +26,4 @@ jobs:
         working-directory: packages/dsa
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          npm publish --access public
+          bunx npm publish --access public
