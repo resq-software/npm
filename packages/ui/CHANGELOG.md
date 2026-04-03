@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.28.0](https://github.com/resq-software/npm/compare/0.27.0...0.28.0) (2026-04-03)
+
+### Features
+
+* **icons:** add 72 arrow, comms, emergency & data icons (loop iteration 10) ([000147f](https://github.com/resq-software/npm/commit/000147f0072123bae861e4faf20b76c0cc86af53))
+
 ## [0.27.0](https://github.com/resq-software/npm/compare/0.26.0...0.27.0) (2026-04-03)
 
 ### Features
