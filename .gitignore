@@ -1,5 +1,6 @@
-# Build outputs
-lib/
+# Build outputs (per-package, not src/lib/)
+**/lib/
+!**/src/lib/
 storybook-static/
 .next/
 
