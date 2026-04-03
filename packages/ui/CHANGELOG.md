@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.20.1](https://github.com/resq-software/npm/compare/0.20.0...0.20.1) (2026-04-03)
+
+### Bug Fixes
+
+* **ci:** correct snapshot key to bun format; add British spellings to cspell ([aac289d](https://github.com/resq-software/npm/commit/aac289db1a31d56221448097da45740b684485a9))
+
 ## [0.20.0](https://github.com/resq-software/npm/compare/0.18.2...0.20.0) (2026-04-03)
 
 ### Features
