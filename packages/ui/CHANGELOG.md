@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.30.0](https://github.com/resq-software/npm/compare/0.29.0...0.30.0) (2026-04-03)
+
+### Features
+
+* **icons:** add 99 arrow, battery, emergency & status icons (loop 12) ([4b11fb5](https://github.com/resq-software/npm/commit/4b11fb538331257459c4606dcf8e7f3c13ab6286))
+
 ## [0.29.0](https://github.com/resq-software/npm/compare/0.28.1...0.29.0) (2026-04-03)
 
 ### Features
