@@ -21,11 +21,15 @@
 export type { Icon, IconProps, IconWeight } from "@phosphor-icons/react";
 
 // ── Navigation & chrome ───────────────────────────────────────────────────────
-// UI shell controls, directional arrows, overflow menus
+// UI shell controls, directional arrows, overflow menus, view toggles
 export {
+	ArrowDownIcon,
 	ArrowLeftIcon,
 	ArrowRightIcon,
 	ArrowSquareOutIcon,
+	ArrowsInIcon,
+	ArrowsOutIcon,
+	ArrowUpIcon,
 	CaretDownIcon,
 	CaretLeftIcon,
 	CaretRightIcon,
@@ -35,14 +39,17 @@ export {
 	DotsThreeVerticalIcon,
 	HouseIcon,
 	ListIcon,
+	RowsIcon,
 	SidebarSimpleIcon,
 	SignOutIcon,
+	SquaresFourIcon,
 } from "@phosphor-icons/react";
 
 // ── Actions ───────────────────────────────────────────────────────────────────
 // Verbs: things users do to content or the system
 export {
 	ArrowClockwiseIcon,
+	ArrowCounterClockwiseIcon,
 	ArrowsClockwiseIcon,
 	CheckIcon,
 	ClipboardIcon,
@@ -56,6 +63,8 @@ export {
 	PencilIcon,
 	PlayIcon,
 	PlusIcon,
+	SortAscendingIcon,
+	SortDescendingIcon,
 	ToggleLeftIcon,
 	ToggleRightIcon,
 	TrashIcon,
@@ -69,9 +78,13 @@ export {
 export {
 	CheckCircleIcon,
 	CircleIcon,
+	HourglassIcon,
+	HourglassMediumIcon,
 	InfoIcon,
 	MinusIcon,
+	ProhibitIcon,
 	PulseIcon,
+	QuestionIcon,
 	SpinnerGapIcon,
 	SquareIcon,
 	WarningCircleIcon,
@@ -81,27 +94,38 @@ export {
 } from "@phosphor-icons/react";
 
 // ── Communication ─────────────────────────────────────────────────────────────
-// Messaging, alerts, voice, sharing
+// Messaging, alerts, voice, video, sharing
 export {
 	BellIcon,
+	BellRingingIcon,
+	BellSlashIcon,
 	BroadcastIcon,
 	ChatTextIcon,
 	EnvelopeIcon,
+	HeadsetIcon,
+	MegaphoneIcon,
 	MicrophoneIcon,
 	PaperPlaneTiltIcon,
 	PhoneIcon,
 	RadioIcon,
 	ShareNetworkIcon,
+	VideoCameraIcon,
+	VideoCameraSlashIcon,
 } from "@phosphor-icons/react";
 
 // ── Emergency & field ops ─────────────────────────────────────────────────────
-// ResQ domain: incident response, fleet, dispatch, triage
+// ResQ domain: incident response, fleet, dispatch, triage, weather
 export {
 	AirplaneTiltIcon,
 	AmbulanceIcon,
+	BinocularsIcon,
+	CloudLightningIcon,
+	CloudRainIcon,
+	CompassIcon,
 	CrosshairIcon,
 	DropIcon,
 	FirstAidKitIcon,
+	FlagIcon,
 	FlameIcon,
 	HeartbeatIcon,
 	LightningIcon,
@@ -110,6 +134,7 @@ export {
 	PersonSimpleRunIcon,
 	SirenIcon,
 	TargetIcon,
+	ThermometerIcon,
 	TimerIcon,
 	TruckIcon,
 	WindIcon,
@@ -139,7 +164,10 @@ export {
 	BookOpenIcon,
 	BrainIcon,
 	CalendarIcon,
+	ChartBarHorizontalIcon,
+	ChartBarIcon,
 	ChartLineIcon,
+	ChartPieIcon,
 	ClipboardTextIcon,
 	ClockIcon,
 	CurrencyCircleDollarIcon,
@@ -147,12 +175,15 @@ export {
 	FileCodeIcon,
 	FileImageIcon,
 	FileTextIcon,
+	FolderIcon,
+	FolderOpenIcon,
 	GlobeIcon,
 	LinkBreakIcon,
 	LinkIcon,
 	MapTrifoldIcon,
 	PackageIcon,
 	StarIcon,
+	TagIcon,
 	TrayArrowDownIcon,
 	UserIcon,
 	UsersIcon,
@@ -179,6 +210,7 @@ export {
 	NetworkIcon,
 	PuzzlePieceIcon,
 	SlidersHorizontalIcon,
+	StackIcon,
 	TerminalIcon,
 	TerminalWindowIcon,
 	WifiHighIcon,
