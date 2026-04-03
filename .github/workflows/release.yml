@@ -85,6 +85,7 @@ jobs:
         working-directory: packages/ui
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_HOOKS_SKIP: 1
           HUSKY: 0
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: bunx release-it --ci
