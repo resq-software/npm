@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.25.1](https://github.com/resq-software/npm/compare/0.25.0...0.25.1) (2026-04-03)
+
+### Bug Fixes
+
+* **ci:** update export surface snapshot and anchor lib/ in root .gitignore ([d7ddae0](https://github.com/resq-software/npm/commit/d7ddae0b42e5499a4f760d1bf085bdc060dbc5f2))
+
 ## [0.25.0](https://github.com/resq-software/npm/compare/0.24.0...0.25.0) (2026-04-03)
 
 ### Features
