@@ -2,26 +2,27 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * ResQ icon system — powered by @phosphor-icons/react.
+ * ResQ icon system — server-component-safe variant.
  *
- * All icons follow the Phosphor naming convention (`*Icon` suffix).
- * The `weight` prop controls stroke weight: "thin" | "light" | "regular" | "bold" | "fill" | "duotone".
- * Default weight is "light" (matches the ResQ design system baseline).
+ * Mirrors `@resq-sw/ui/icons` but imports from `@phosphor-icons/react/ssr`,
+ * which uses SSRBase instead of IconBase and therefore does NOT call
+ * React.createContext() at module initialisation time.
  *
- * Re-exported types:
- * - `Icon`       — the base ForwardRefExoticComponent type for all icons
- * - `IconProps`  — props accepted by every icon (weight, size, color, className, …)
- * - `IconWeight` — the union of allowed weight strings
+ * Use this subpath in React Server Components (Next.js App Router, etc.)
+ * where the CSR variant causes "createContext is not a function" errors
+ * during static page-data collection.
  *
- * Server Components: import from `@resq-sw/ui/icons/ssr` instead to avoid
- * the React.createContext call at module-init time.
+ * Usage:
+ *   import { ArrowLeftIcon } from "@resq-sw/ui/icons/ssr";
+ *
+ * Note: context-based theming via <IconContext.Provider> is unavailable in
+ * SSRBase icons. Pass weight, size, and color as props directly.
  */
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 export type { Icon, IconProps, IconWeight } from "@phosphor-icons/react";
 
 // ── Navigation & chrome ───────────────────────────────────────────────────────
-// UI shell controls, directional arrows, overflow menus
 export {
 	ArrowLeftIcon,
 	ArrowRightIcon,
@@ -37,10 +38,9 @@ export {
 	ListIcon,
 	SidebarSimpleIcon,
 	SignOutIcon,
-} from "@phosphor-icons/react";
+} from "@phosphor-icons/react/ssr";
 
 // ── Actions ───────────────────────────────────────────────────────────────────
-// Verbs: things users do to content or the system
 export {
 	ArrowClockwiseIcon,
 	ArrowsClockwiseIcon,
@@ -62,10 +62,9 @@ export {
 	UploadIcon,
 	UploadSimpleIcon,
 	XIcon,
-} from "@phosphor-icons/react";
+} from "@phosphor-icons/react/ssr";
 
 // ── Status & feedback ─────────────────────────────────────────────────────────
-// State indicators, severity levels, loading states
 export {
 	CheckCircleIcon,
 	CircleIcon,
@@ -78,10 +77,9 @@ export {
 	WarningDiamondIcon,
 	WarningIcon,
 	XCircleIcon,
-} from "@phosphor-icons/react";
+} from "@phosphor-icons/react/ssr";
 
 // ── Communication ─────────────────────────────────────────────────────────────
-// Messaging, alerts, voice, sharing
 export {
 	BellIcon,
 	BroadcastIcon,
@@ -92,10 +90,9 @@ export {
 	PhoneIcon,
 	RadioIcon,
 	ShareNetworkIcon,
-} from "@phosphor-icons/react";
+} from "@phosphor-icons/react/ssr";
 
 // ── Emergency & field ops ─────────────────────────────────────────────────────
-// ResQ domain: incident response, fleet, dispatch, triage
 export {
 	AirplaneTiltIcon,
 	AmbulanceIcon,
@@ -113,10 +110,9 @@ export {
 	TimerIcon,
 	TruckIcon,
 	WindIcon,
-} from "@phosphor-icons/react";
+} from "@phosphor-icons/react/ssr";
 
 // ── Identity & security ───────────────────────────────────────────────────────
-// Authentication, verification, access control, trust signals
 export {
 	FingerprintIcon,
 	IdentificationCardIcon,
@@ -131,10 +127,9 @@ export {
 	ShieldPlusIcon,
 	ShieldSlashIcon,
 	ShieldWarningIcon,
-} from "@phosphor-icons/react";
+} from "@phosphor-icons/react/ssr";
 
 // ── Data, content & files ─────────────────────────────────────────────────────
-// Records, analytics, documents, links, people, geography
 export {
 	BookOpenIcon,
 	BrainIcon,
@@ -157,10 +152,9 @@ export {
 	UserIcon,
 	UsersIcon,
 	WalletIcon,
-} from "@phosphor-icons/react";
+} from "@phosphor-icons/react/ssr";
 
 // ── Infrastructure & dev ──────────────────────────────────────────────────────
-// Systems, connectivity, tooling, developer workflow
 export {
 	BatteryFullIcon,
 	CellSignalFullIcon,
@@ -184,11 +178,11 @@ export {
 	WifiHighIcon,
 	WifiSlashIcon,
 	WrenchIcon,
-} from "@phosphor-icons/react";
+} from "@phosphor-icons/react/ssr";
 
 // ── Text formatting ───────────────────────────────────────────────────────────
 export {
 	TextBIcon,
 	TextItalicIcon,
 	TextUnderlineIcon,
-} from "@phosphor-icons/react";
+} from "@phosphor-icons/react/ssr";

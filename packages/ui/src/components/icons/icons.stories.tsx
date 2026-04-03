@@ -4,6 +4,8 @@
 import type { Icon, IconWeight } from "@phosphor-icons/react";
 import {
 	AirplaneTiltIcon,
+	AmbulanceIcon,
+	ArrowClockwiseIcon,
 	ArrowLeftIcon,
 	ArrowRightIcon,
 	ArrowSquareOutIcon,
@@ -25,47 +27,78 @@ import {
 	CheckCircleIcon,
 	CheckIcon,
 	CircleIcon,
+	ClipboardIcon,
 	ClipboardTextIcon,
 	ClockIcon,
+	CloudIcon,
+	CodeIcon,
 	CopyIcon,
 	CornersOutIcon,
 	CrosshairIcon,
+	CubeIcon,
 	CurrencyCircleDollarIcon,
 	DatabaseIcon,
 	DesktopIcon,
 	DotsThreeIcon,
+	DotsThreeVerticalIcon,
 	DownloadIcon,
 	DropIcon,
 	EnvelopeIcon,
 	EyeIcon,
+	EyeSlashIcon,
 	FileCodeIcon,
 	FileImageIcon,
 	FileTextIcon,
+	FingerprintIcon,
 	FirstAidKitIcon,
 	FlameIcon,
 	FunnelIcon,
 	GearIcon,
+	GearSixIcon,
 	GitBranchIcon,
+	GitCommitIcon,
+	GitForkIcon,
+	GitMergeIcon,
+	GithubLogoIcon,
 	GlobeIcon,
+	HardDrivesIcon,
+	HeartbeatIcon,
 	HouseIcon,
+	IdentificationCardIcon,
 	InfoIcon,
+	KeyIcon,
 	LightningIcon,
 	LinkBreakIcon,
 	LinkIcon,
 	ListIcon,
 	LockIcon,
+	LockOpenIcon,
 	MagnifyingGlassIcon,
 	MapPinIcon,
+	MapTrifoldIcon,
+	MicrophoneIcon,
 	MinusIcon,
+	NavigationArrowIcon,
+	NetworkIcon,
 	PackageIcon,
 	PaperPlaneTiltIcon,
 	PencilIcon,
+	PersonSimpleRunIcon,
+	PhoneIcon,
 	PlayIcon,
 	PlusIcon,
 	PulseIcon,
+	PuzzlePieceIcon,
+	QrCodeIcon,
 	RadioIcon,
+	SealCheckIcon,
+	ShareNetworkIcon,
 	ShieldCheckIcon,
+	ShieldChevronIcon,
+	ShieldIcon,
+	ShieldPlusIcon,
 	ShieldSlashIcon,
+	ShieldWarningIcon,
 	SidebarSimpleIcon,
 	SignOutIcon,
 	SirenIcon,
@@ -75,20 +108,27 @@ import {
 	StarIcon,
 	TargetIcon,
 	TerminalIcon,
+	TerminalWindowIcon,
 	TextBIcon,
 	TextItalicIcon,
 	TextUnderlineIcon,
+	TimerIcon,
+	ToggleLeftIcon,
+	ToggleRightIcon,
 	TrashIcon,
 	TrayArrowDownIcon,
 	TruckIcon,
+	UploadIcon,
 	UploadSimpleIcon,
 	UserIcon,
 	UsersIcon,
 	WalletIcon,
 	WarningCircleIcon,
+	WarningDiamondIcon,
 	WarningIcon,
 	WifiHighIcon,
 	WifiSlashIcon,
+	WindIcon,
 	WrenchIcon,
 	XCircleIcon,
 	XIcon,
@@ -97,48 +137,60 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 
 // ---------------------------------------------------------------------------
-// Icon registry — categorized for browsing
+// Icon registry — categorised for browsing
 // ---------------------------------------------------------------------------
 
 type IconEntry = { component: Icon; name: string; tags: string[] };
 
 const icons: IconEntry[] = [
-	// Navigation & direction
-	{ component: ArrowLeftIcon, name: "ArrowLeftIcon", tags: ["navigation"] },
-	{ component: ArrowRightIcon, name: "ArrowRightIcon", tags: ["navigation"] },
-	{ component: CaretDownIcon, name: "CaretDownIcon", tags: ["navigation"] },
-	{ component: CaretLeftIcon, name: "CaretLeftIcon", tags: ["navigation"] },
-	{ component: CaretRightIcon, name: "CaretRightIcon", tags: ["navigation"] },
-	{ component: CaretUpIcon, name: "CaretUpIcon", tags: ["navigation"] },
-	{ component: CaretUpDownIcon, name: "CaretUpDownIcon", tags: ["navigation"] },
-	{ component: HouseIcon, name: "HouseIcon", tags: ["navigation"] },
-	{ component: ListIcon, name: "ListIcon", tags: ["navigation"] },
-	{ component: SidebarSimpleIcon, name: "SidebarSimpleIcon", tags: ["navigation"] },
-	{ component: SignOutIcon, name: "SignOutIcon", tags: ["navigation"] },
+	// Navigation & chrome
+	{ component: ArrowLeftIcon, name: "ArrowLeftIcon", tags: ["nav"] },
+	{ component: ArrowRightIcon, name: "ArrowRightIcon", tags: ["nav"] },
+	{ component: ArrowSquareOutIcon, name: "ArrowSquareOutIcon", tags: ["nav"] },
+	{ component: CaretDownIcon, name: "CaretDownIcon", tags: ["nav"] },
+	{ component: CaretLeftIcon, name: "CaretLeftIcon", tags: ["nav"] },
+	{ component: CaretRightIcon, name: "CaretRightIcon", tags: ["nav"] },
+	{ component: CaretUpDownIcon, name: "CaretUpDownIcon", tags: ["nav"] },
+	{ component: CaretUpIcon, name: "CaretUpIcon", tags: ["nav"] },
+	{ component: DotsThreeIcon, name: "DotsThreeIcon", tags: ["nav"] },
+	{ component: DotsThreeVerticalIcon, name: "DotsThreeVerticalIcon", tags: ["nav"] },
+	{ component: HouseIcon, name: "HouseIcon", tags: ["nav"] },
+	{ component: ListIcon, name: "ListIcon", tags: ["nav"] },
+	{ component: SidebarSimpleIcon, name: "SidebarSimpleIcon", tags: ["nav"] },
+	{ component: SignOutIcon, name: "SignOutIcon", tags: ["nav"] },
 
 	// Actions
+	{ component: ArrowClockwiseIcon, name: "ArrowClockwiseIcon", tags: ["action"] },
 	{ component: ArrowsClockwiseIcon, name: "ArrowsClockwiseIcon", tags: ["action"] },
-	{ component: ArrowSquareOutIcon, name: "ArrowSquareOutIcon", tags: ["action"] },
 	{ component: CheckIcon, name: "CheckIcon", tags: ["action"] },
+	{ component: ClipboardIcon, name: "ClipboardIcon", tags: ["action"] },
 	{ component: CopyIcon, name: "CopyIcon", tags: ["action"] },
 	{ component: CornersOutIcon, name: "CornersOutIcon", tags: ["action"] },
 	{ component: DownloadIcon, name: "DownloadIcon", tags: ["action"] },
 	{ component: EyeIcon, name: "EyeIcon", tags: ["action"] },
+	{ component: EyeSlashIcon, name: "EyeSlashIcon", tags: ["action"] },
 	{ component: FunnelIcon, name: "FunnelIcon", tags: ["action"] },
 	{ component: MagnifyingGlassIcon, name: "MagnifyingGlassIcon", tags: ["action"] },
 	{ component: PencilIcon, name: "PencilIcon", tags: ["action"] },
 	{ component: PlayIcon, name: "PlayIcon", tags: ["action"] },
 	{ component: PlusIcon, name: "PlusIcon", tags: ["action"] },
+	{ component: ToggleLeftIcon, name: "ToggleLeftIcon", tags: ["action"] },
+	{ component: ToggleRightIcon, name: "ToggleRightIcon", tags: ["action"] },
 	{ component: TrashIcon, name: "TrashIcon", tags: ["action"] },
+	{ component: UploadIcon, name: "UploadIcon", tags: ["action"] },
 	{ component: UploadSimpleIcon, name: "UploadSimpleIcon", tags: ["action"] },
 	{ component: XIcon, name: "XIcon", tags: ["action"] },
 
 	// Status & feedback
 	{ component: CheckCircleIcon, name: "CheckCircleIcon", tags: ["status"] },
+	{ component: CircleIcon, name: "CircleIcon", tags: ["status"] },
 	{ component: InfoIcon, name: "InfoIcon", tags: ["status"] },
+	{ component: MinusIcon, name: "MinusIcon", tags: ["status"] },
 	{ component: PulseIcon, name: "PulseIcon", tags: ["status"] },
 	{ component: SpinnerGapIcon, name: "SpinnerGapIcon", tags: ["status"] },
+	{ component: SquareIcon, name: "SquareIcon", tags: ["status"] },
 	{ component: WarningCircleIcon, name: "WarningCircleIcon", tags: ["status"] },
+	{ component: WarningDiamondIcon, name: "WarningDiamondIcon", tags: ["status"] },
 	{ component: WarningIcon, name: "WarningIcon", tags: ["status"] },
 	{ component: XCircleIcon, name: "XCircleIcon", tags: ["status"] },
 
@@ -147,61 +199,91 @@ const icons: IconEntry[] = [
 	{ component: BroadcastIcon, name: "BroadcastIcon", tags: ["comms"] },
 	{ component: ChatTextIcon, name: "ChatTextIcon", tags: ["comms"] },
 	{ component: EnvelopeIcon, name: "EnvelopeIcon", tags: ["comms"] },
+	{ component: MicrophoneIcon, name: "MicrophoneIcon", tags: ["comms"] },
 	{ component: PaperPlaneTiltIcon, name: "PaperPlaneTiltIcon", tags: ["comms"] },
+	{ component: PhoneIcon, name: "PhoneIcon", tags: ["comms"] },
+	{ component: RadioIcon, name: "RadioIcon", tags: ["comms"] },
+	{ component: ShareNetworkIcon, name: "ShareNetworkIcon", tags: ["comms"] },
 
-	// Emergency & operations
+	// Emergency & field ops
 	{ component: AirplaneTiltIcon, name: "AirplaneTiltIcon", tags: ["emergency"] },
+	{ component: AmbulanceIcon, name: "AmbulanceIcon", tags: ["emergency"] },
 	{ component: CrosshairIcon, name: "CrosshairIcon", tags: ["emergency"] },
 	{ component: DropIcon, name: "DropIcon", tags: ["emergency"] },
 	{ component: FirstAidKitIcon, name: "FirstAidKitIcon", tags: ["emergency"] },
 	{ component: FlameIcon, name: "FlameIcon", tags: ["emergency"] },
+	{ component: HeartbeatIcon, name: "HeartbeatIcon", tags: ["emergency"] },
 	{ component: LightningIcon, name: "LightningIcon", tags: ["emergency"] },
 	{ component: MapPinIcon, name: "MapPinIcon", tags: ["emergency"] },
+	{ component: NavigationArrowIcon, name: "NavigationArrowIcon", tags: ["emergency"] },
+	{ component: PersonSimpleRunIcon, name: "PersonSimpleRunIcon", tags: ["emergency"] },
 	{ component: SirenIcon, name: "SirenIcon", tags: ["emergency"] },
 	{ component: TargetIcon, name: "TargetIcon", tags: ["emergency"] },
+	{ component: TimerIcon, name: "TimerIcon", tags: ["emergency"] },
 	{ component: TruckIcon, name: "TruckIcon", tags: ["emergency"] },
+	{ component: WindIcon, name: "WindIcon", tags: ["emergency"] },
 
-	// Content & data
-	{ component: ChartLineIcon, name: "ChartLineIcon", tags: ["content"] },
-	{ component: BookOpenIcon, name: "BookOpenIcon", tags: ["content"] },
-	{ component: CalendarIcon, name: "CalendarIcon", tags: ["content"] },
-	{ component: CircleIcon, name: "CircleIcon", tags: ["content"] },
-	{ component: ClipboardTextIcon, name: "ClipboardTextIcon", tags: ["content"] },
-	{ component: ClockIcon, name: "ClockIcon", tags: ["content"] },
-	{ component: CurrencyCircleDollarIcon, name: "CurrencyCircleDollarIcon", tags: ["content"] },
-	{ component: DatabaseIcon, name: "DatabaseIcon", tags: ["content"] },
-	{ component: DotsThreeIcon, name: "DotsThreeIcon", tags: ["content"] },
-	{ component: FileCodeIcon, name: "FileCodeIcon", tags: ["content"] },
-	{ component: FileImageIcon, name: "FileImageIcon", tags: ["content"] },
-	{ component: FileTextIcon, name: "FileTextIcon", tags: ["content"] },
-	{ component: LinkIcon, name: "LinkIcon", tags: ["content"] },
-	{ component: LinkBreakIcon, name: "LinkBreakIcon", tags: ["content"] },
-	{ component: MinusIcon, name: "MinusIcon", tags: ["content"] },
-	{ component: PackageIcon, name: "PackageIcon", tags: ["content"] },
-	{ component: RadioIcon, name: "RadioIcon", tags: ["content"] },
-	{ component: SquareIcon, name: "SquareIcon", tags: ["content"] },
-	{ component: StarIcon, name: "StarIcon", tags: ["content"] },
-	{ component: TrayArrowDownIcon, name: "TrayArrowDownIcon", tags: ["content"] },
-	{ component: UserIcon, name: "UserIcon", tags: ["content"] },
-	{ component: UsersIcon, name: "UsersIcon", tags: ["content"] },
-	{ component: WalletIcon, name: "WalletIcon", tags: ["content"] },
+	// Identity & security
+	{ component: FingerprintIcon, name: "FingerprintIcon", tags: ["security"] },
+	{ component: IdentificationCardIcon, name: "IdentificationCardIcon", tags: ["security"] },
+	{ component: KeyIcon, name: "KeyIcon", tags: ["security"] },
+	{ component: LockIcon, name: "LockIcon", tags: ["security"] },
+	{ component: LockOpenIcon, name: "LockOpenIcon", tags: ["security"] },
+	{ component: QrCodeIcon, name: "QrCodeIcon", tags: ["security"] },
+	{ component: SealCheckIcon, name: "SealCheckIcon", tags: ["security"] },
+	{ component: ShieldCheckIcon, name: "ShieldCheckIcon", tags: ["security"] },
+	{ component: ShieldChevronIcon, name: "ShieldChevronIcon", tags: ["security"] },
+	{ component: ShieldIcon, name: "ShieldIcon", tags: ["security"] },
+	{ component: ShieldPlusIcon, name: "ShieldPlusIcon", tags: ["security"] },
+	{ component: ShieldSlashIcon, name: "ShieldSlashIcon", tags: ["security"] },
+	{ component: ShieldWarningIcon, name: "ShieldWarningIcon", tags: ["security"] },
 
-	// Settings & security
-	{ component: BatteryFullIcon, name: "BatteryFullIcon", tags: ["settings"] },
-	{ component: BrainIcon, name: "BrainIcon", tags: ["settings"] },
-	{ component: CellSignalFullIcon, name: "CellSignalFullIcon", tags: ["settings"] },
-	{ component: DesktopIcon, name: "DesktopIcon", tags: ["settings"] },
-	{ component: GearIcon, name: "GearIcon", tags: ["settings"] },
-	{ component: GitBranchIcon, name: "GitBranchIcon", tags: ["settings"] },
-	{ component: GlobeIcon, name: "GlobeIcon", tags: ["settings"] },
-	{ component: LockIcon, name: "LockIcon", tags: ["settings"] },
-	{ component: ShieldCheckIcon, name: "ShieldCheckIcon", tags: ["settings"] },
-	{ component: ShieldSlashIcon, name: "ShieldSlashIcon", tags: ["settings"] },
-	{ component: SlidersHorizontalIcon, name: "SlidersHorizontalIcon", tags: ["settings"] },
-	{ component: TerminalIcon, name: "TerminalIcon", tags: ["settings"] },
-	{ component: WifiHighIcon, name: "WifiHighIcon", tags: ["settings"] },
-	{ component: WifiSlashIcon, name: "WifiSlashIcon", tags: ["settings"] },
-	{ component: WrenchIcon, name: "WrenchIcon", tags: ["settings"] },
+	// Data, content & files
+	{ component: BookOpenIcon, name: "BookOpenIcon", tags: ["data"] },
+	{ component: BrainIcon, name: "BrainIcon", tags: ["data"] },
+	{ component: CalendarIcon, name: "CalendarIcon", tags: ["data"] },
+	{ component: ChartLineIcon, name: "ChartLineIcon", tags: ["data"] },
+	{ component: ClipboardTextIcon, name: "ClipboardTextIcon", tags: ["data"] },
+	{ component: ClockIcon, name: "ClockIcon", tags: ["data"] },
+	{ component: CurrencyCircleDollarIcon, name: "CurrencyCircleDollarIcon", tags: ["data"] },
+	{ component: DatabaseIcon, name: "DatabaseIcon", tags: ["data"] },
+	{ component: FileCodeIcon, name: "FileCodeIcon", tags: ["data"] },
+	{ component: FileImageIcon, name: "FileImageIcon", tags: ["data"] },
+	{ component: FileTextIcon, name: "FileTextIcon", tags: ["data"] },
+	{ component: GlobeIcon, name: "GlobeIcon", tags: ["data"] },
+	{ component: LinkBreakIcon, name: "LinkBreakIcon", tags: ["data"] },
+	{ component: LinkIcon, name: "LinkIcon", tags: ["data"] },
+	{ component: MapTrifoldIcon, name: "MapTrifoldIcon", tags: ["data"] },
+	{ component: PackageIcon, name: "PackageIcon", tags: ["data"] },
+	{ component: StarIcon, name: "StarIcon", tags: ["data"] },
+	{ component: TrayArrowDownIcon, name: "TrayArrowDownIcon", tags: ["data"] },
+	{ component: UserIcon, name: "UserIcon", tags: ["data"] },
+	{ component: UsersIcon, name: "UsersIcon", tags: ["data"] },
+	{ component: WalletIcon, name: "WalletIcon", tags: ["data"] },
+
+	// Infrastructure & dev
+	{ component: BatteryFullIcon, name: "BatteryFullIcon", tags: ["infra"] },
+	{ component: CellSignalFullIcon, name: "CellSignalFullIcon", tags: ["infra"] },
+	{ component: CloudIcon, name: "CloudIcon", tags: ["infra"] },
+	{ component: CodeIcon, name: "CodeIcon", tags: ["infra"] },
+	{ component: CubeIcon, name: "CubeIcon", tags: ["infra"] },
+	{ component: DesktopIcon, name: "DesktopIcon", tags: ["infra"] },
+	{ component: GearIcon, name: "GearIcon", tags: ["infra"] },
+	{ component: GearSixIcon, name: "GearSixIcon", tags: ["infra"] },
+	{ component: GitBranchIcon, name: "GitBranchIcon", tags: ["infra"] },
+	{ component: GitCommitIcon, name: "GitCommitIcon", tags: ["infra"] },
+	{ component: GitForkIcon, name: "GitForkIcon", tags: ["infra"] },
+	{ component: GitMergeIcon, name: "GitMergeIcon", tags: ["infra"] },
+	{ component: GithubLogoIcon, name: "GithubLogoIcon", tags: ["infra"] },
+	{ component: HardDrivesIcon, name: "HardDrivesIcon", tags: ["infra"] },
+	{ component: NetworkIcon, name: "NetworkIcon", tags: ["infra"] },
+	{ component: PuzzlePieceIcon, name: "PuzzlePieceIcon", tags: ["infra"] },
+	{ component: SlidersHorizontalIcon, name: "SlidersHorizontalIcon", tags: ["infra"] },
+	{ component: TerminalIcon, name: "TerminalIcon", tags: ["infra"] },
+	{ component: TerminalWindowIcon, name: "TerminalWindowIcon", tags: ["infra"] },
+	{ component: WifiHighIcon, name: "WifiHighIcon", tags: ["infra"] },
+	{ component: WifiSlashIcon, name: "WifiSlashIcon", tags: ["infra"] },
+	{ component: WrenchIcon, name: "WrenchIcon", tags: ["infra"] },
 
 	// Text formatting
 	{ component: TextBIcon, name: "TextBIcon", tags: ["formatting"] },
@@ -211,13 +293,14 @@ const icons: IconEntry[] = [
 
 const categories = [
 	{ label: "All", value: "all" },
-	{ label: "Navigation", value: "navigation" },
+	{ label: "Navigation", value: "nav" },
 	{ label: "Actions", value: "action" },
 	{ label: "Status", value: "status" },
 	{ label: "Comms", value: "comms" },
 	{ label: "Emergency", value: "emergency" },
-	{ label: "Content", value: "content" },
-	{ label: "Settings", value: "settings" },
+	{ label: "Security", value: "security" },
+	{ label: "Data", value: "data" },
+	{ label: "Infra", value: "infra" },
 	{ label: "Formatting", value: "formatting" },
 ] as const;
 
@@ -292,7 +375,7 @@ function IconGallery() {
 	});
 
 	function handleCopy(name: string) {
-		void navigator.clipboard.writeText(`import { ${name} } from "@phosphor-icons/react";`);
+		void navigator.clipboard.writeText(`import { ${name} } from "@resq-sw/ui/icons";`);
 		setCopied(name);
 		setTimeout(() => setCopied(null), 1500);
 	}
@@ -644,21 +727,31 @@ const pairings: { icons: { component: Icon; weight?: IconWeight }[]; label: stri
 	{
 		icons: [
 			{ component: SirenIcon },
+			{ component: AmbulanceIcon },
 			{ component: FirstAidKitIcon },
-			{ component: FlameIcon },
-			{ component: CrosshairIcon },
-			{ component: TruckIcon },
+			{ component: HeartbeatIcon },
+			{ component: TimerIcon },
 		],
-		label: "Emergency ops",
+		label: "Emergency response",
 	},
 	{
 		icons: [
 			{ component: AirplaneTiltIcon },
+			{ component: TruckIcon },
 			{ component: MapPinIcon },
-			{ component: TargetIcon },
+			{ component: NavigationArrowIcon },
+			{ component: PersonSimpleRunIcon },
+		],
+		label: "Fleet & tracking",
+	},
+	{
+		icons: [
+			{ component: PhoneIcon },
+			{ component: RadioIcon },
+			{ component: MicrophoneIcon },
 			{ component: BroadcastIcon },
 		],
-		label: "Fleet & location",
+		label: "Voice & radio comms",
 	},
 	{
 		icons: [
@@ -668,15 +761,6 @@ const pairings: { icons: { component: Icon; weight?: IconWeight }[]; label: stri
 			{ component: BatteryFullIcon },
 		],
 		label: "Connectivity & power",
-	},
-	{
-		icons: [
-			{ component: BellIcon },
-			{ component: ChatTextIcon },
-			{ component: EnvelopeIcon },
-			{ component: PaperPlaneTiltIcon },
-		],
-		label: "Communication",
 	},
 ];
 
@@ -805,6 +889,33 @@ export const Animated: Story = {
 						}}
 					>
 						notification dot
+					</code>
+				</div>
+
+				{/* Heartbeat (emergency) */}
+				<div
+					style={{ alignItems: "center", display: "flex", flexDirection: "column", gap: "0.75rem" }}
+				>
+					<HeartbeatIcon
+						className="size-6"
+						style={{
+							color: "var(--color-destructive)",
+							animation: "pulse 1s ease-in-out infinite",
+						}}
+						weight="light"
+					/>
+					<span style={labelStyle}>vital sign</span>
+					<code
+						style={{
+							background: "var(--color-surface)",
+							borderRadius: "var(--radius)",
+							color: "var(--color-mono)",
+							fontFamily: "var(--font-data)",
+							fontSize: "0.5625rem",
+							padding: "0.25rem 0.5rem",
+						}}
+					>
+						animate-pulse + color
 					</code>
 				</div>
 			</div>

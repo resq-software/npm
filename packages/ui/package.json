@@ -1,6 +1,6 @@
 {
 	"name": "@resq-sw/ui",
-	"version": "0.18.2",
+	"version": "0.19.0",
 	"description": "ResQ shared UI component library — shadcn-based design system for the ResQ platform",
 	"repository": {
 		"type": "git",
@@ -302,6 +302,11 @@
 			"types": "./lib/components/icons/index.d.ts",
 			"import": "./lib/components/icons/index.js",
 			"default": "./lib/components/icons/index.js"
+		},
+		"./icons/ssr": {
+			"types": "./lib/components/icons/ssr.d.ts",
+			"import": "./lib/components/icons/ssr.js",
+			"default": "./lib/components/icons/ssr.js"
 		}
 	},
 	"main": "lib/index.js",
