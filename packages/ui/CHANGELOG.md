@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.31.0](https://github.com/resq-software/npm/compare/0.30.0...0.31.0) (2026-04-03)
+
+### Features
+
+* **icons:** add 79 currency, device, battery & misc icons (loop 13) ([38640d8](https://github.com/resq-software/npm/commit/38640d882dcaaaed0821487ce5af32cea9da5443))
+
 ## [0.30.0](https://github.com/resq-software/npm/compare/0.29.0...0.30.0) (2026-04-03)
 
 ### Features
