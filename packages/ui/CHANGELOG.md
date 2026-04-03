@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.22.0](https://github.com/resq-software/npm/compare/0.21.0...0.22.0) (2026-04-03)
+
+### Features
+
+* **icons:** add 31 hazmat, rescue & personnel icons (loop iteration 4) ([376913a](https://github.com/resq-software/npm/commit/376913a352c57837856b6e4f477cc31e6c1bff3a))
+
 ## [0.21.0](https://github.com/resq-software/npm/compare/0.20.1...0.21.0) (2026-04-03)
 
 ### Features
