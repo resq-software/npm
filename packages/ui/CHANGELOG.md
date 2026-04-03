@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.26.0](https://github.com/resq-software/npm/compare/0.25.1...0.26.0) (2026-04-03)
+
+### Features
+
+* **icons:** add 62 nav, status, comms, files & dev icons (loop iteration 8) ([31b63e3](https://github.com/resq-software/npm/commit/31b63e3b0dec50cc8cc2f057e2064ac57112e3a5))
+
 ## [0.25.1](https://github.com/resq-software/npm/compare/0.25.0...0.25.1) (2026-04-03)
 
 ### Bug Fixes
