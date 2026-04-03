@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.20.0](https://github.com/resq-software/npm/compare/0.18.2...0.20.0) (2026-04-03)
+
+### Features
+
+* **icons:** domain-driven icon overhaul + SSR subpath ([ef253e5](https://github.com/resq-software/npm/commit/ef253e5b34edd6c65a23e581533f745c29a153a1))
+
 ## [0.18.2](https://github.com/resq-software/npm/compare/0.18.1...0.18.2) (2026-04-03)
 
 ## [0.18.1](https://github.com/resq-software/npm/compare/0.18.0...0.18.1) (2026-04-03)
