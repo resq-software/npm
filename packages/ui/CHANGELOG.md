@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.28.1](https://github.com/resq-software/npm/compare/0.28.0...0.28.1) (2026-04-03)
+
+### Bug Fixes
+
+* **ci:** add Bandaids to cspell dictionary, update export surface snapshot ([73d702f](https://github.com/resq-software/npm/commit/73d702f27b0ebb46f3f5fa6efcae44f88277c812))
+
 ## [0.28.0](https://github.com/resq-software/npm/compare/0.27.0...0.28.0) (2026-04-03)
 
 ### Features
