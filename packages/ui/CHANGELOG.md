@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.18.0](https://github.com/resq-software/npm/compare/0.9.0...0.18.0) (2026-04-03)
+
+### Features
+
+* add @resq-sw/dsa package — zero-dependency DSA library ([e0e303c](https://github.com/resq-software/npm/commit/e0e303c9d87b8633844fe1a0f72d4d25cb8853d8))
+* **icons:** add @resq-sw/ui/icons subpath export ([89ed7cc](https://github.com/resq-software/npm/commit/89ed7cc8b2b4136b012fcbf69657a9d891735b22))
+
+### Bug Fixes
+
+* **ci:** add DSA CI and release workflows, scope existing workflows to UI ([534d726](https://github.com/resq-software/npm/commit/534d7266d2cb98c8f7f06842847da5b345fe69ef))
+* **ci:** add root biome.json to prevent nested-config error ([ab425b4](https://github.com/resq-software/npm/commit/ab425b44bae06b0b0acd17fb498649238acfc51d))
+* **ci:** anchor lib/ in .gitignore; align snapshot key for bun test ([4c8ad33](https://github.com/resq-software/npm/commit/4c8ad336a7d8372960a077eda66f677aeb20722a))
+* **ci:** commit updated lockfile for @jsheaven/perf dependency ([39faa69](https://github.com/resq-software/npm/commit/39faa69cf7fa93b8287342cd7f2daa7457cb391f))
+* **ci:** disable organizeImports assist; biome-ignore unsupported for assists ([c70152e](https://github.com/resq-software/npm/commit/c70152eb99dd257012fcb4587d397a61df1dc0a7))
+* **ci:** fix biome formatting and suppress organizeImports for icon barrel ([0195359](https://github.com/resq-software/npm/commit/0195359f96a70a80a50dd8b41f7cbac6ec7e2485))
+* **ci:** replace release-it-action with bunx release-it ([#17](https://github.com/resq-software/npm/issues/17)) ([ff29cda](https://github.com/resq-software/npm/commit/ff29cdab3447f06438d2ed0e6e8c14d685d91a03))
+* **ci:** resolve all failing CI checks ([c289ae7](https://github.com/resq-software/npm/commit/c289ae717c2be9762969f83f3bb45ee2929f919f))
+* **ci:** skip git hooks in release workflow ([2c3d5d4](https://github.com/resq-software/npm/commit/2c3d5d4c31301804a78ecb4f56d24a18fa5e1f38))
+* **ci:** update biome schema to 2.4.9; downgrade noExplicitAny to warn ([943fca1](https://github.com/resq-software/npm/commit/943fca1fa525b705c49f191167d465c0e6c25178))
+* **icons:** replace non-existent Phosphor icons in stories + barrel ([bb25b25](https://github.com/resq-software/npm/commit/bb25b25f8892a9d0ce3830a8933b053275ecf397))
+* **security:** pin oven-sh/setup-bun to SHA hash in CI workflows ([a0fa4da](https://github.com/resq-software/npm/commit/a0fa4da62518c358926b6edb02c5763260c6693b))
+* **spelling:** add gltf to cspell words list ([76423ce](https://github.com/resq-software/npm/commit/76423ce09cfec4704025234388924d5300cab466))
+* **test:** correct bun snapshot key format ([4e86893](https://github.com/resq-software/npm/commit/4e86893d3c6a527c87adcfc1739b5081033e66f0))
+* **test:** use Bun snapshot header format for CI compatibility ([f3b1100](https://github.com/resq-software/npm/commit/f3b1100425861b045cc761b5bfb7ce18efe1a440))
+
 ## [0.9.0](https://github.com/resq-software/npm/compare/0.8.3...0.9.0) (2026-03-25)
 
 ### Features
