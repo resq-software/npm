@@ -14,6 +14,7 @@
  * - `IconWeight` — the union of allowed weight strings
  */
 
+// biome-ignore assist/source/organizeImports: icons organized by semantic category
 // ── Types ─────────────────────────────────────────────────────────────────────
 export type { Icon, IconProps, IconWeight } from "@phosphor-icons/react";
 
