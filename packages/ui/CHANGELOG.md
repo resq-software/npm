@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.24.0](https://github.com/resq-software/npm/compare/0.23.0...0.24.0) (2026-04-03)
+
+### Features
+
+* **icons:** add 46 media, buildings, notes & power icons (loop iteration 6) ([99e3008](https://github.com/resq-software/npm/commit/99e3008d824c59e1fb0586fcf3ee6b86d91e8a36))
+
 ## [0.23.0](https://github.com/resq-software/npm/compare/0.22.0...0.23.0) (2026-04-03)
 
 ### Features
