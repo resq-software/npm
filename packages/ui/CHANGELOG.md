@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.18.1](https://github.com/resq-software/npm/compare/0.18.0...0.18.1) (2026-04-03)
+
+### Bug Fixes
+
+* audit corrections — GitHub Packages name, DSA publish, root name, engines ([#18](https://github.com/resq-software/npm/issues/18)) ([30852d0](https://github.com/resq-software/npm/commit/30852d03114c0f4f6e060c110205924add440739)), closes [#10](https://github.com/resq-software/npm/issues/10)
+
 ## [0.18.0](https://github.com/resq-software/npm/compare/0.9.0...0.18.0) (2026-04-03)
 
 ### Features
