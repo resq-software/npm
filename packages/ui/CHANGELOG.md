@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.25.0](https://github.com/resq-software/npm/compare/0.24.0...0.25.0) (2026-04-03)
+
+### Features
+
+* **icons:** add 54 weather, medical, text-format & dev icons (loop iteration 7) ([d8f37fb](https://github.com/resq-software/npm/commit/d8f37fb0833bfe190a57fd30cf73b3a851ea1dd2))
+
 ## [0.24.0](https://github.com/resq-software/npm/compare/0.23.0...0.24.0) (2026-04-03)
 
 ### Features
