@@ -1,6 +1,6 @@
-// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Export surface barrel exports all expected public symbols 1`] = `
+exports[`Export surface > barrel exports all expected public symbols 1`] = `
 [
   "Accordion",
   "AccordionContent",
