@@ -21,6 +21,18 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
+/**
+ * Rewrites a staged package manifest for GitHub Packages.
+ *
+ * Automatically maps `@resq-sw/<name>` → `@resq-software/<name>` so that the
+ * scope matches the GitHub organisation, sets the registry to GitHub Packages,
+ * and strips the `prepare` lifecycle script.
+ *
+ * @param {string} packageDirArg — absolute or relative path to the extracted
+ *   tarball's `package/` directory.
+ * @returns {string} The resolved absolute path to the same directory (for
+ *   downstream steps to consume as an output).
+ */
 export function prepareGithubPackage(packageDirArg) {
 	const packageDir = resolve(packageDirArg);
 	const packageJsonPath = join(packageDir, "package.json");
@@ -34,7 +46,14 @@ export function prepareGithubPackage(packageDirArg) {
 
 	const packageJson = JSON.parse(raw);
 
-	packageJson.name = "@resq-software/ui";
+	const match = packageJson.name.match(/^@resq-sw\/(.+)$/);
+	if (!match) {
+		throw new Error(
+			`Package name "${packageJson.name}" does not match @resq-sw/* — cannot map to GitHub Packages scope`,
+		);
+	}
+	packageJson.name = `@resq-software/${match[1]}`;
+
 	packageJson.publishConfig = {
 		...(packageJson.publishConfig ?? {}),
 		registry: "https://npm.pkg.github.com",

@@ -2,11 +2,11 @@ name: CI
 
 on:
   pull_request:
-    paths: ['packages/ui/**']
+    paths: ['packages/**']
   push:
     branches:
       - master
-    paths: ['packages/ui/**']
+    paths: ['packages/**']
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -16,17 +16,99 @@ permissions:
   contents: read
 
 jobs:
+  detect:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.detect.outputs.packages }}
+      ui: ${{ steps.detect.outputs.ui }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+      - id: detect
+        name: Detect changed packages
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            BASE="${{ github.event.before }}"
+          else
+            BASE="${{ github.event.pull_request.base.sha }}"
+          fi
+
+          # Fallback for initial commit or force-push where before is null
+          if [ "$BASE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BASE" 2>/dev/null; then
+            BASE="HEAD~1"
+          fi
+
+          PACKAGES='[]'
+          for dir in packages/*/; do
+            [ ! -d "$dir" ] && continue
+            pkg=$(basename "$dir")
+            pkg_json="${dir}package.json"
+            [ ! -f "$pkg_json" ] && continue
+
+            if git diff --name-only "$BASE" HEAD -- "$dir" | grep -q .; then
+              has_build=$(node -e "const p=require('./$pkg_json'); process.stdout.write(p.scripts?.build ? '1' : '0')")
+              has_test=$(node -e "const p=require('./$pkg_json'); process.stdout.write(p.scripts?.test ? '1' : '0')")
+              if [ "$has_build" = "1" ] && [ "$has_test" = "1" ]; then
+                PACKAGES=$(echo "$PACKAGES" | node -e "
+                  const p = JSON.parse(require('fs').readFileSync(0, 'utf8'));
+                  p.push('$pkg');
+                  process.stdout.write(JSON.stringify(p));
+                ")
+              fi
+            fi
+          done
+
+          echo "packages=$PACKAGES" >> "$GITHUB_OUTPUT"
+
+          if echo "$PACKAGES" | node -e "process.exit(JSON.parse(require('fs').readFileSync(0,'utf8')).includes('ui') ? 0 : 1)"; then
+            echo "ui=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ui=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "Changed packages: $PACKAGES"
+
   build:
-    name: Build
+    name: Build (${{ matrix.package }})
+    needs: detect
+    if: needs.detect.outputs.packages != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.detect.outputs.packages) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: ./.github/actions/prepare
       - run: bun run build
-        working-directory: packages/ui
+        working-directory: packages/${{ matrix.package }}
+
+  test:
+    name: Test (${{ matrix.package }})
+    needs: detect
+    if: needs.detect.outputs.packages != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.detect.outputs.packages) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: ./.github/actions/prepare
+      - run: bun test
+        working-directory: packages/${{ matrix.package }}
+      - if: always() && matrix.package == 'ui'
+        name: Upload coverage to Codecov
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v5
+
+  # ── UI-specific jobs ──────────────────────────────────────────────────────
 
   storybook:
     name: Storybook
+    needs: detect
+    if: needs.detect.outputs.ui == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -36,6 +118,8 @@ jobs:
 
   biome:
     name: Biome
+    needs: detect
+    if: needs.detect.outputs.ui == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -45,6 +129,8 @@ jobs:
 
   lint_knip:
     name: Lint Knip
+    needs: detect
+    if: needs.detect.outputs.ui == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -54,6 +140,8 @@ jobs:
 
   lint_markdown:
     name: Lint Markdown
+    needs: detect
+    if: needs.detect.outputs.ui == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -63,6 +151,8 @@ jobs:
 
   lint_spelling:
     name: Lint Spelling
+    needs: detect
+    if: needs.detect.outputs.ui == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -70,20 +160,10 @@ jobs:
       - run: bun lint:spelling
         working-directory: packages/ui
 
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: ./.github/actions/prepare
-      - run: bun test --coverage
-        working-directory: packages/ui
-      - if: always()
-        name: Upload coverage to Codecov
-        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v5
-
   type_check:
     name: Type Check
+    needs: detect
+    if: needs.detect.outputs.ui == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6

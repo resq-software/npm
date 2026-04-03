@@ -89,32 +89,8 @@ jobs:
           HUSKY: 0
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: bunx release-it --ci
-      - id: stage_github_package
-        name: Stage GitHub Packages publish artifact
-        working-directory: packages/ui
-        run: |
-          PACK_FILENAME=$(npm pack --json --ignore-scripts | node -e 'const fs = require("node:fs"); const payload = JSON.parse(fs.readFileSync(0, "utf8")); process.stdout.write(payload[0].filename);')
-          STAGING_DIR="$RUNNER_TEMP/resq-ui-github-package"
-
-          rm -rf "$STAGING_DIR"
-          mkdir -p "$STAGING_DIR"
-          tar -xzf "$PACK_FILENAME" -C "$STAGING_DIR"
-
-          STAGED_PACKAGE_DIR=$(node scripts/release/prepare-github-package.mjs "$STAGING_DIR/package")
-          echo "staged_package_dir=$STAGED_PACKAGE_DIR" >> "$GITHUB_OUTPUT"
-      - name: Set up GitHub Packages auth
-        run: |
-          echo "@resq-software:registry=https://npm.pkg.github.com" >> ~/.npmrc
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
-      - name: Publish package to GitHub Packages
-        env:
-          STAGED_DIR: ${{ steps.stage_github_package.outputs.staged_package_dir }}
-        run: |
-          VERSION=$(node -e "process.stdout.write(require('$STAGED_DIR/package.json').version)")
-          echo "Publishing @resq-software/ui@${VERSION} to GitHub Packages"
-          EXISTING=$(npm view "@resq-software/ui@${VERSION}" version --registry https://npm.pkg.github.com 2>/dev/null || true)
-          if [ "$EXISTING" = "$VERSION" ]; then
-            echo "Version ${VERSION} already published to GitHub Packages — skipping."
-          else
-            npm publish "$STAGED_DIR" --ignore-scripts --registry https://npm.pkg.github.com
-          fi
+      - name: Publish to GitHub Packages
+        uses: ./.github/actions/publish-github-packages
+        with:
+          package-dir: packages/ui
+          github-token: ${{ secrets.GITHUB_TOKEN }}
