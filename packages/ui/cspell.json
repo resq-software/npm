@@ -10,10 +10,16 @@
 		"cspell-unknown-words.txt",
 		"lib",
 		"node_modules",
+		"src/assets/lqip.json",
+		"src/assets/models/*.gltf",
+		"src/assets/models/*.glb",
 		"src/styles"
 	],
 	"words": [
 		"autodocs",
+		"lqip",
+		"Sketchfab",
+		"webp",
 		"bunx",
 		"callsign",
 		"clsx",
