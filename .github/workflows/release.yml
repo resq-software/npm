@@ -107,12 +107,14 @@ jobs:
           echo "@resq-software:registry=https://npm.pkg.github.com" >> ~/.npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
       - name: Publish package to GitHub Packages
-        working-directory: packages/ui
+        env:
+          STAGED_DIR: ${{ steps.stage_github_package.outputs.staged_package_dir }}
         run: |
-          VERSION=$(node -e "process.stdout.write(require('./package.json').version)")
+          VERSION=$(node -e "process.stdout.write(require('$STAGED_DIR/package.json').version)")
+          echo "Publishing @resq-software/ui@${VERSION} to GitHub Packages"
           EXISTING=$(npm view "@resq-software/ui@${VERSION}" version --registry https://npm.pkg.github.com 2>/dev/null || true)
           if [ "$EXISTING" = "$VERSION" ]; then
             echo "Version ${VERSION} already published to GitHub Packages — skipping."
           else
-            npm publish "${{ steps.stage_github_package.outputs.staged_package_dir }}" --ignore-scripts --registry https://npm.pkg.github.com
+            npm publish "$STAGED_DIR" --ignore-scripts --registry https://npm.pkg.github.com
           fi
