@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.21.0](https://github.com/resq-software/npm/compare/0.20.1...0.21.0) (2026-04-03)
+
+### Features
+
+* **icons:** add 25 domain-relevant icons (loop iteration 3) ([9faf324](https://github.com/resq-software/npm/commit/9faf3240c1848497aa09ab28a2f965fb8a810c87))
+
 ## [0.20.1](https://github.com/resq-software/npm/compare/0.20.0...0.20.1) (2026-04-03)
 
 ### Bug Fixes
