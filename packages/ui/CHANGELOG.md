@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.23.0](https://github.com/resq-software/npm/compare/0.22.0...0.23.0) (2026-04-03)
+
+### Features
+
+* **icons:** add 46 fleet, medical, schedule & personnel icons (loop iteration 5) ([0980d06](https://github.com/resq-software/npm/commit/0980d0692f73eba3b6d3067c14de64a0a9f90667))
+
 ## [0.22.0](https://github.com/resq-software/npm/compare/0.21.0...0.22.0) (2026-04-03)
 
 ### Features
