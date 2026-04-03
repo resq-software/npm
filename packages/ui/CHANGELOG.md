@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.32.0](https://github.com/resq-software/npm/compare/0.31.0...0.32.0) (2026-04-03)
+
+### Features
+
+* **icons:** add 146 D-G icons across all categories (loop 14) ([bea14eb](https://github.com/resq-software/npm/commit/bea14ebafe2c401beb2adee0054dd82439324869))
+
 ## [0.31.0](https://github.com/resq-software/npm/compare/0.30.0...0.31.0) (2026-04-03)
 
 ### Features
