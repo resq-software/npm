@@ -1,0 +1,64 @@
+name: Release (Package)
+
+on:
+  push:
+    tags:
+      - '@resq-sw/*@v*'
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Package directory name (e.g. dsa)
+        required: true
+
+concurrency:
+  group: release-package-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: ./.github/actions/prepare
+
+      - name: Resolve package from tag
+        id: resolve
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            PKG_DIR="packages/${{ github.event.inputs.package }}"
+          else
+            TAG="${{ github.ref_name }}"
+            # @resq-sw/dsa@v1.0.0 → dsa
+            PKG_NAME=$(echo "$TAG" | sed -E 's/@resq-sw\/([^@]+)@v.*/\1/')
+            PKG_DIR="packages/$PKG_NAME"
+          fi
+
+          if [ ! -f "$PKG_DIR/package.json" ]; then
+            echo "::error::Package not found at $PKG_DIR"
+            exit 1
+          fi
+
+          FULL_NAME=$(node -e "process.stdout.write(require('./$PKG_DIR/package.json').name)")
+          echo "dir=$PKG_DIR" >> "$GITHUB_OUTPUT"
+          echo "Releasing $FULL_NAME from $PKG_DIR"
+
+      - name: Build
+        working-directory: ${{ steps.resolve.outputs.dir }}
+        run: bun run build
+
+      - name: Publish to npm
+        working-directory: ${{ steps.resolve.outputs.dir }}
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          bunx npm publish --access public
+
+      - name: Publish to GitHub Packages
+        uses: ./.github/actions/publish-github-packages
+        with:
+          package-dir: ${{ steps.resolve.outputs.dir }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}

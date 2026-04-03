@@ -1,0 +1,56 @@
+name: Publish to GitHub Packages
+description: >
+  Pack, rewrite scope (@resq-sw → @resq-software), and publish a workspace
+  package to GitHub Packages.  Works for any package under packages/.
+
+inputs:
+  package-dir:
+    description: Package directory relative to repo root (e.g. packages/dsa)
+    required: true
+  github-token:
+    description: GitHub token with packages:write permission
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Stage and rewrite for GitHub Packages
+      id: stage
+      working-directory: ${{ inputs.package-dir }}
+      shell: bash
+      run: |
+        PACK_FILENAME=$(npm pack --json --ignore-scripts | node -e '
+          const fs = require("node:fs");
+          const payload = JSON.parse(fs.readFileSync(0, "utf8"));
+          process.stdout.write(payload[0].filename);
+        ')
+        PKG_NAME=$(node -e "process.stdout.write(require('./package.json').name.replace('@resq-sw/', ''))")
+        STAGING_DIR="$RUNNER_TEMP/resq-${PKG_NAME}-github-package"
+
+        rm -rf "$STAGING_DIR"
+        mkdir -p "$STAGING_DIR"
+        tar -xzf "$PACK_FILENAME" -C "$STAGING_DIR"
+
+        STAGED_DIR=$(node "$GITHUB_WORKSPACE/scripts/release/prepare-github-package.mjs" "$STAGING_DIR/package")
+        echo "staged_dir=$STAGED_DIR" >> "$GITHUB_OUTPUT"
+
+    - name: Authenticate to GitHub Packages
+      shell: bash
+      run: |
+        echo "@resq-software:registry=https://npm.pkg.github.com" >> ~/.npmrc
+        echo "//npm.pkg.github.com/:_authToken=${{ inputs.github-token }}" >> ~/.npmrc
+
+    - name: Publish to GitHub Packages
+      shell: bash
+      env:
+        STAGED_DIR: ${{ steps.stage.outputs.staged_dir }}
+      run: |
+        NAME=$(node -e "process.stdout.write(require('$STAGED_DIR/package.json').name)")
+        VERSION=$(node -e "process.stdout.write(require('$STAGED_DIR/package.json').version)")
+        echo "Publishing ${NAME}@${VERSION} to GitHub Packages"
+        EXISTING=$(npm view "${NAME}@${VERSION}" version --registry https://npm.pkg.github.com 2>/dev/null || true)
+        if [ "$EXISTING" = "$VERSION" ]; then
+          echo "Version ${VERSION} already published to GitHub Packages — skipping."
+        else
+          npm publish "$STAGED_DIR" --ignore-scripts --registry https://npm.pkg.github.com
+        fi
