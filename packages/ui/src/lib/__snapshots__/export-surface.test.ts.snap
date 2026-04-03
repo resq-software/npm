@@ -1,6 +1,6 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
-exports[`Export surface > barrel exports all expected public symbols`] = `
+exports[`Export surface barrel exports all expected public symbols 1`] = `
 [
   "Accordion",
   "AccordionContent",
