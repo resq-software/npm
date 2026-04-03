@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.29.0](https://github.com/resq-software/npm/compare/0.28.1...0.29.0) (2026-04-03)
+
+### Features
+
+* **icons:** add 80 arrow, chat, brand, field & data icons (loop iteration 11) ([d4dc5c3](https://github.com/resq-software/npm/commit/d4dc5c3fd5a04b0a2bf8ff5670d827459ef7a91d))
+
 ## [0.28.1](https://github.com/resq-software/npm/compare/0.28.0...0.28.1) (2026-04-03)
 
 ### Bug Fixes
