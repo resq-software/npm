@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.35.1](https://github.com/resq-software/npm/compare/0.35.0...0.35.1) (2026-04-04)
+
+### Bug Fixes
+
+* **ci:** update snapshot key to bun format; add brand-name words to cspell ([ad4de55](https://github.com/resq-software/npm/commit/ad4de5595a674988239c7834e9e7b5035a9b3357))
+
 ## [0.35.0](https://github.com/resq-software/npm/compare/0.34.0...0.35.0) (2026-04-04)
 
 ### Features
