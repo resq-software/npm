@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.35.2](https://github.com/resq-software/npm/compare/0.35.1...0.35.2) (2026-04-04)
+
+### Bug Fixes
+
+* **icons:** add missing imports for 36 icons to stories file ([4f2a8b1](https://github.com/resq-software/npm/commit/4f2a8b1785b89678995a20d815f5319556d2f4d1))
+
 ## [0.35.1](https://github.com/resq-software/npm/compare/0.35.0...0.35.1) (2026-04-04)
 
 ### Bug Fixes
