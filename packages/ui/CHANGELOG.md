@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.35.3](https://github.com/resq-software/npm/compare/0.35.2...0.35.3) (2026-04-04)
+
 ## [0.35.2](https://github.com/resq-software/npm/compare/0.35.1...0.35.2) (2026-04-04)
 
 ### Bug Fixes
