@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.34.0](https://github.com/resq-software/npm/compare/0.33.0...0.34.0) (2026-04-04)
+
+### Features
+
+* **icons:** add 164 M-P icons across all categories (loop 16) ([e5e1f6f](https://github.com/resq-software/npm/commit/e5e1f6f9418eb549924d31ee0fbcf0b7f6f6b029))
+
 ## [0.33.0](https://github.com/resq-software/npm/compare/0.32.0...0.33.0) (2026-04-04)
 
 ### Features
