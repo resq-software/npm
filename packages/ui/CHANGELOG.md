@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.33.0](https://github.com/resq-software/npm/compare/0.32.0...0.33.0) (2026-04-04)
+
+### Features
+
+* **icons:** add 103 H-L icons across all categories (loop 15) ([de262e3](https://github.com/resq-software/npm/commit/de262e330a63f6fa49e1a741f418f6a3dc4d27a8))
+
 ## [0.32.0](https://github.com/resq-software/npm/compare/0.31.0...0.32.0) (2026-04-03)
 
 ### Features
