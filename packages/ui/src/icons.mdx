@@ -15,13 +15,19 @@ All icons inside library components use `weight="light"` (1.5px stroke) for a re
 
 ## Usage
 
-Icons are **not exported** from `@resq-sw/ui`. Consumers import directly from Phosphor:
+All 1512 Phosphor icons are re-exported from `@resq-sw/ui/icons` (CSR) and `@resq-sw/ui/icons/ssr` (RSC / Next.js App Router):
 
 ```tsx
-import { CheckIcon, CaretDownIcon } from "@phosphor-icons/react";
+// CSR — client components, vanilla React
+import { CheckIcon, CaretDownIcon } from "@resq-sw/ui/icons";
+
+// SSR — React Server Components, Next.js App Router
+import { CheckIcon, CaretDownIcon } from "@resq-sw/ui/icons/ssr";
 
 <CheckIcon className="size-4" weight="light" />
 ```
+
+You can also import directly from Phosphor if you prefer — both are valid.
 
 ## Weight system
 
@@ -52,4 +58,8 @@ Common sizes: `size-3` (12px), `size-3.5` (14px), `size-4` (16px), `size-5` (20p
 
 ## Adding new icons
 
-When introducing a new Phosphor icon to the codebase, add it to the gallery story in `src/components/icons/icons.stories.tsx` to keep the reference current.
+The barrel already covers the full Phosphor set (1512 icons, `@phosphor-icons/react` v2.1.10). When Phosphor releases new icons, add them in three places:
+
+1. **`src/components/icons/index.ts`** — CSR barrel (imports from `@phosphor-icons/react`)
+2. **`src/components/icons/ssr.ts`** — SSR mirror (same icons, imports from `@phosphor-icons/react/ssr`)
+3. **`src/components/icons/icons.stories.tsx`** — import block + registry entry with appropriate tags
