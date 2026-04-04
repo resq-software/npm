@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.35.0](https://github.com/resq-software/npm/compare/0.34.0...0.35.0) (2026-04-04)
+
+### Features
+
+* **icons:** add 267 remaining icons completing full barrel coverage (loop 17) ([e7f4537](https://github.com/resq-software/npm/commit/e7f453748cccfaa074d40316568ed651fcb7d9a5))
+
 ## [0.34.0](https://github.com/resq-software/npm/compare/0.33.0...0.34.0) (2026-04-04)
 
 ### Features
