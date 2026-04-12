@@ -55,8 +55,8 @@ describe('platform detection', () => {
   beforeEach(() => {
     originalUA = navigator.userAgent;
     originalMSStream = (globalThis.window as any).MSStream;
-    originalMaxTouchPoints = navigator.maxTouchPoints;
-    originalMatchMedia = globalThis.window.matchMedia;
+    originalMaxTouchPoints = navigator.maxTouchPoints ?? 0;
+    originalMatchMedia = globalThis.window?.matchMedia;
 
     // Default: no MSStream, no touch
     (globalThis.window as any).MSStream = undefined;
@@ -65,7 +65,9 @@ describe('platform detection', () => {
       writable: true,
       configurable: true,
     });
-    globalThis.window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as any;
+    if (globalThis.window) {
+      globalThis.window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as any;
+    }
   });
 
   afterEach(() => {
@@ -76,7 +78,9 @@ describe('platform detection', () => {
       writable: true,
       configurable: true,
     });
-    globalThis.window.matchMedia = originalMatchMedia;
+    if (globalThis.window) {
+      globalThis.window.matchMedia = originalMatchMedia;
+    }
   });
 
   describe('isIOS', () => {

@@ -135,77 +135,59 @@ describe('formatMonthYear', () => {
 });
 
 describe('formatRelativeTime', () => {
-  let dateSpy: ReturnType<typeof vi.spyOn>;
-
   beforeEach(() => {
-    // Fix "now" to 2023-06-15T12:00:00Z
-    dateSpy = vi.spyOn(Date.prototype, 'getTime');
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   test('returns "Just now" for very recent dates', () => {
-    const now = new Date();
-    const recent = new Date(now.getTime() - 5_000); // 5 seconds ago
+    const now = new Date('2023-06-15T12:00:00Z');
     vi.setSystemTime(now);
+    const recent = new Date(now.getTime() - 5_000); // 5 seconds ago
     expect(formatRelativeTime(recent)).toBe('Just now');
-    vi.useRealTimers();
   });
 
   test('returns minutes ago', () => {
-    const now = new Date('2023-06-15T12:00:00Z');
-    vi.setSystemTime(now);
+    vi.setSystemTime(new Date('2023-06-15T12:00:00Z'));
     const fiveMinAgo = new Date('2023-06-15T11:55:00Z');
     expect(formatRelativeTime(fiveMinAgo)).toBe('5 minutes ago');
-    vi.useRealTimers();
   });
 
   test('returns singular minute', () => {
-    const now = new Date('2023-06-15T12:00:00Z');
-    vi.setSystemTime(now);
+    vi.setSystemTime(new Date('2023-06-15T12:00:00Z'));
     const oneMinAgo = new Date('2023-06-15T11:59:00Z');
     expect(formatRelativeTime(oneMinAgo)).toBe('1 minute ago');
-    vi.useRealTimers();
   });
 
   test('returns hours ago', () => {
-    const now = new Date('2023-06-15T12:00:00Z');
-    vi.setSystemTime(now);
+    vi.setSystemTime(new Date('2023-06-15T12:00:00Z'));
     const threeHrsAgo = new Date('2023-06-15T09:00:00Z');
     expect(formatRelativeTime(threeHrsAgo)).toBe('3 hours ago');
-    vi.useRealTimers();
   });
 
   test('returns singular hour', () => {
-    const now = new Date('2023-06-15T12:00:00Z');
-    vi.setSystemTime(now);
+    vi.setSystemTime(new Date('2023-06-15T12:00:00Z'));
     const oneHrAgo = new Date('2023-06-15T11:00:00Z');
     expect(formatRelativeTime(oneHrAgo)).toBe('1 hour ago');
-    vi.useRealTimers();
   });
 
   test('returns days ago', () => {
-    const now = new Date('2023-06-15T12:00:00Z');
-    vi.setSystemTime(now);
+    vi.setSystemTime(new Date('2023-06-15T12:00:00Z'));
     const twoDaysAgo = new Date('2023-06-13T12:00:00Z');
     expect(formatRelativeTime(twoDaysAgo)).toBe('2 days ago');
-    vi.useRealTimers();
   });
 
   test('returns singular day', () => {
-    const now = new Date('2023-06-15T12:00:00Z');
-    vi.setSystemTime(now);
+    vi.setSystemTime(new Date('2023-06-15T12:00:00Z'));
     const oneDayAgo = new Date('2023-06-14T12:00:00Z');
     expect(formatRelativeTime(oneDayAgo)).toBe('1 day ago');
-    vi.useRealTimers();
   });
 
   test('accepts a string date', () => {
-    const now = new Date('2023-06-15T12:00:00Z');
-    vi.setSystemTime(now);
+    vi.setSystemTime(new Date('2023-06-15T12:00:00Z'));
     expect(formatRelativeTime('2023-06-15T11:00:00Z')).toBe('1 hour ago');
-    vi.useRealTimers();
   });
 });
