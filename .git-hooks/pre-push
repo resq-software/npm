@@ -57,7 +57,7 @@ fi
 # ALLOWED_PATTERN is the regular expression for valid branch names.
 ALLOWED_PATTERN="^(feat|fix|docs|chore|refactor|test|ci|perf|release)/.*$"
 # SKIP_BRANCHES is the regular expression for branches exempt from naming checks.
-SKIP_BRANCHES="^(main|master|dev|develop|staging|production)$"
+SKIP_BRANCHES="^(main|master|dev|develop|staging|production|changeset-release/.*)$"
 
 if [ -n "$BRANCH" ]; then
     if ! echo "$BRANCH" | grep -qE "$SKIP_BRANCHES"; then
