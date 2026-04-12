@@ -2,11 +2,8 @@ name: CI
 
 on:
   pull_request:
-    paths: ['packages/**']
   push:
-    branches:
-      - master
-    paths: ['packages/**']
+    branches: [master]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -16,11 +13,14 @@ permissions:
   contents: read
 
 jobs:
+  # ── Detect which packages changed ─────────────────────────────────────
+
   detect:
     name: Detect changes
     runs-on: ubuntu-latest
     outputs:
       packages: ${{ steps.detect.outputs.packages }}
+      any: ${{ steps.detect.outputs.any }}
       ui: ${{ steps.detect.outputs.ui }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -35,32 +35,72 @@ jobs:
             BASE="${{ github.event.pull_request.base.sha }}"
           fi
 
-          # Fallback for initial commit or force-push where before is null
           if [ "$BASE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BASE" 2>/dev/null; then
             BASE="HEAD~1"
           fi
 
-          PACKAGES='[]'
+          # Dependency graph: when a package changes, include its dependents
+          declare -A DEPENDENTS
+          DEPENDENTS[logger]="helpers"
+          DEPENDENTS[helpers]=""
+          DEPENDENTS[dsa]=""
+          DEPENDENTS[http]=""
+          DEPENDENTS[security]=""
+          DEPENDENTS[rate-limiting]=""
+          DEPENDENTS[decorators]=""
+          DEPENDENTS[ui]=""
+
+          CHANGED=()
           for dir in packages/*/; do
             [ ! -d "$dir" ] && continue
             pkg=$(basename "$dir")
-            pkg_json="${dir}package.json"
-            [ ! -f "$pkg_json" ] && continue
-
+            [ ! -f "${dir}package.json" ] && continue
             if git diff --name-only "$BASE" HEAD -- "$dir" | grep -q .; then
-              has_build=$(node -e "const p=require('./$pkg_json'); process.stdout.write(p.scripts?.build ? '1' : '0')")
-              has_test=$(node -e "const p=require('./$pkg_json'); process.stdout.write(p.scripts?.test ? '1' : '0')")
-              if [ "$has_build" = "1" ] && [ "$has_test" = "1" ]; then
-                PACKAGES=$(echo "$PACKAGES" | node -e "
-                  const p = JSON.parse(require('fs').readFileSync(0, 'utf8'));
-                  p.push('$pkg');
-                  process.stdout.write(JSON.stringify(p));
-                ")
-              fi
+              CHANGED+=("$pkg")
+            fi
+          done
+
+          # Also trigger all packages if root configs changed
+          if git diff --name-only "$BASE" HEAD -- 'biome.json' 'tsconfig*.json' 'package.json' 'bun.lock' | grep -q .; then
+            for dir in packages/*/; do
+              pkg=$(basename "$dir")
+              [ -f "${dir}package.json" ] && CHANGED+=("$pkg")
+            done
+          fi
+
+          # Add dependents of changed packages
+          FULL=()
+          for pkg in "${CHANGED[@]}"; do
+            FULL+=("$pkg")
+            deps="${DEPENDENTS[$pkg]:-}"
+            if [ -n "$deps" ]; then
+              for dep in $deps; do
+                FULL+=("$dep")
+              done
+            fi
+          done
+
+          # Deduplicate and filter to packages with build+test scripts
+          PACKAGES='[]'
+          declare -A SEEN
+          for pkg in "${FULL[@]}"; do
+            [ -n "${SEEN[$pkg]:-}" ] && continue
+            SEEN[$pkg]=1
+            pkg_json="packages/$pkg/package.json"
+            [ ! -f "$pkg_json" ] && continue
+            has_build=$(node -e "const p=require('./$pkg_json'); process.stdout.write(p.scripts?.build ? '1' : '0')")
+            has_test=$(node -e "const p=require('./$pkg_json'); process.stdout.write(p.scripts?.test ? '1' : '0')")
+            if [ "$has_build" = "1" ] && [ "$has_test" = "1" ]; then
+              PACKAGES=$(echo "$PACKAGES" | node -e "
+                const p = JSON.parse(require('fs').readFileSync(0, 'utf8'));
+                p.push('$pkg');
+                process.stdout.write(JSON.stringify(p));
+              ")
             fi
           done
 
           echo "packages=$PACKAGES" >> "$GITHUB_OUTPUT"
+          echo "any=$( [ "$PACKAGES" != '[]' ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
 
           if echo "$PACKAGES" | node -e "process.exit(JSON.parse(require('fs').readFileSync(0,'utf8')).includes('ui') ? 0 : 1)"; then
             echo "ui=true" >> "$GITHUB_OUTPUT"
@@ -70,10 +110,26 @@ jobs:
 
           echo "Changed packages: $PACKAGES"
 
+  # ── Workspace-wide lint ───────────────────────────────────────────────
+
+  lint:
+    name: Lint
+    needs: detect
+    if: needs.detect.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: ./.github/actions/prepare
+      - name: Biome
+        run: bunx biome ci .
+        working-directory: packages/ui
+
+  # ── Build all changed packages ────────────────────────────────────────
+
   build:
     name: Build (${{ matrix.package }})
     needs: detect
-    if: needs.detect.outputs.packages != '[]'
+    if: needs.detect.outputs.any == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -82,13 +138,22 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: ./.github/actions/prepare
-      - run: bun run build
-        working-directory: packages/${{ matrix.package }}
+      - name: Build workspace
+        run: bun run build
+      - name: Verify package build
+        run: |
+          if [ ! -d "packages/${{ matrix.package }}/lib" ]; then
+            echo "❌ Build output missing: packages/${{ matrix.package }}/lib"
+            exit 1
+          fi
+          echo "✅ Build output OK"
+
+  # ── Test all changed packages ─────────────────────────────────────────
 
   test:
     name: Test (${{ matrix.package }})
     needs: detect
-    if: needs.detect.outputs.packages != '[]'
+    if: needs.detect.outputs.any == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -99,13 +164,57 @@ jobs:
       - uses: ./.github/actions/prepare
       - name: Build workspace dependencies
         run: bun run build
-      - run: bun run test
+      - name: Run tests
+        run: bun run test
         working-directory: packages/${{ matrix.package }}
       - if: always() && matrix.package == 'ui'
         name: Upload coverage to Codecov
         uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v5
 
-  # ── UI-specific jobs ──────────────────────────────────────────────────────
+  # ── Type-check all changed packages ───────────────────────────────────
+
+  typecheck:
+    name: Type Check (${{ matrix.package }})
+    needs: detect
+    if: needs.detect.outputs.any == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.detect.outputs.packages) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: ./.github/actions/prepare
+      - name: Build workspace dependencies
+        run: bun run build
+      - name: Type check
+        run: bunx tsc --noEmit
+        working-directory: packages/${{ matrix.package }}
+
+  # ── Changeset status (PR only) ────────────────────────────────────────
+
+  changeset:
+    name: Changeset
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/prepare
+      - name: Check for changeset
+        run: |
+          STATUS=$(bunx changeset status --since origin/${{ github.event.pull_request.base.ref }} 2>&1) || true
+          echo "$STATUS"
+          if echo "$STATUS" | grep -q "No changesets present"; then
+            echo ""
+            echo "⚠️  No changeset found. If this PR changes package behavior, run:"
+            echo "   bun changeset"
+            echo ""
+            echo "Skip this check if the PR is docs/ci/test only."
+          fi
+
+  # ── UI-specific jobs ──────────────────────────────────────────────────
 
   storybook:
     name: Storybook
@@ -118,19 +227,8 @@ jobs:
       - run: bun run build-storybook
         working-directory: packages/ui
 
-  biome:
-    name: Biome
-    needs: detect
-    if: needs.detect.outputs.ui == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: ./.github/actions/prepare
-      - run: bunx biome ci .
-        working-directory: packages/ui
-
-  lint_knip:
-    name: Lint Knip
+  knip:
+    name: Unused exports
     needs: detect
     if: needs.detect.outputs.ui == 'true'
     runs-on: ubuntu-latest
@@ -140,8 +238,8 @@ jobs:
       - run: bun run lint:knip
         working-directory: packages/ui
 
-  lint_markdown:
-    name: Lint Markdown
+  markdown:
+    name: Markdown
     needs: detect
     if: needs.detect.outputs.ui == 'true'
     runs-on: ubuntu-latest
@@ -151,8 +249,8 @@ jobs:
       - run: bun lint:md
         working-directory: packages/ui
 
-  lint_spelling:
-    name: Lint Spelling
+  spelling:
+    name: Spelling
     needs: detect
     if: needs.detect.outputs.ui == 'true'
     runs-on: ubuntu-latest
@@ -160,15 +258,4 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: ./.github/actions/prepare
       - run: bun lint:spelling
-        working-directory: packages/ui
-
-  type_check:
-    name: Type Check
-    needs: detect
-    if: needs.detect.outputs.ui == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: ./.github/actions/prepare
-      - run: bun tsc
         working-directory: packages/ui

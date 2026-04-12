@@ -1,5 +1,5 @@
 name: Prepare
-description: Prepares the repo for a typical CI job
+description: Prepares the repo for a typical CI job — installs Bun and dependencies with caching
 
 runs:
   using: composite
@@ -7,5 +7,18 @@ runs:
     - uses: oven-sh/setup-bun@v2
       with:
         bun-version: latest
+
+    - name: Cache bun dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.bun/install/cache
+          node_modules
+          packages/*/node_modules
+          examples/*/node_modules
+        key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+        restore-keys: |
+          bun-${{ runner.os }}-
+
     - run: bun install --frozen-lockfile
       shell: bash
