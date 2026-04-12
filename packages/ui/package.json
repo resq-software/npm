@@ -383,7 +383,7 @@
 		"tailwindcss": "^4.1.18",
 		"tinyglobby": "^0.2.16",
 		"tsdown": "0.21.7",
-		"typescript": "5.9.3",
+		"typescript": "6.0.2",
 		"vite": "^8.0.8",
 		"vitest": "3.2.4"
 	},
