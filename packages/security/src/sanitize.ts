@@ -282,11 +282,16 @@ export const validateUserInputEffect = (
 
   result = result.replaceAll(/\s+/g, ' ');
 
-  result = result
-    .replaceAll(/javascript:/gi, '')
-    .replaceAll(/data:/gi, '')
-    .replaceAll(/vbscript:/gi, '')
-    .replaceAll(/on\w+=/gi, '');
+  // Loop until stable to prevent bypass via nested patterns (e.g. "javascrjavascript:ipt:")
+  let prevScheme: string;
+  do {
+    prevScheme = result;
+    result = result
+      .replaceAll(/javascript:/gi, '')
+      .replaceAll(/data:/gi, '')
+      .replaceAll(/vbscript:/gi, '')
+      .replaceAll(/on\w+=/gi, '');
+  } while (result !== prevScheme);
 
   return Exit.succeed(result.slice(0, maxLength));
 };

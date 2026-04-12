@@ -23,9 +23,8 @@
  * Detects script injection, event handlers, and dangerous URIs
  */
 const XSS_PATTERNS = [
-  // Script tags
-  /<script\b[^>]*>[\s\S]*?<\/script>/gi,
-  /<script\b[^>]*>/gi,
+  // Script tags (opening only — avoids ReDoS from greedy cross-tag matching)
+  /<script\b/gi,
   // Event handlers
   /\bon\w+\s*=/gi,
   // JavaScript URIs
@@ -37,17 +36,13 @@ const XSS_PATTERNS = [
   /expression\s*\(/gi,
   // VBScript
   /vbscript\s*:/gi,
-  // SVG with script
-  /<svg[^>]*\s+on\w+=/gi,
-  // Math with script
-  /<math[^>]*\s+on\w+=/gi,
   // Iframe injection
-  /<iframe\b[^>]*>/gi,
+  /<iframe\b/gi,
   // Object/embed injection
-  /<object\b[^>]*>/gi,
-  /<embed\b[^>]*>/gi,
+  /<object\b/gi,
+  /<embed\b/gi,
   // Style-based attacks
-  /<style\b[^>]*>[\s\S]*?<\/style>/gi,
+  /<style\b/gi,
   // Document manipulation
   /document\s*\.\s*(cookie|domain|write|location)/gi,
   // Window manipulation
@@ -186,9 +181,11 @@ export type ThreatType =
  */
 export function containsXSSPatterns(input: string): ThreatFinding[] {
   const findings: ThreatFinding[] = [];
+  // Limit input length to prevent ReDoS on crafted payloads
+  const bounded = input.length > 100_000 ? input.slice(0, 100_000) : input;
 
   for (const pattern of XSS_PATTERNS) {
-    const match = input.match(pattern);
+    const match = bounded.match(pattern);
     if (match) {
       findings.push({
         type: 'xss',
@@ -207,9 +204,10 @@ export function containsXSSPatterns(input: string): ThreatFinding[] {
  */
 export function containsSQLInjection(input: string): ThreatFinding[] {
   const findings: ThreatFinding[] = [];
+  const bounded = input.length > 100_000 ? input.slice(0, 100_000) : input;
 
   for (const pattern of SQL_INJECTION_PATTERNS) {
-    const match = input.match(pattern);
+    const match = bounded.match(pattern);
     if (match) {
       findings.push({
         type: 'sql_injection',
@@ -253,14 +251,16 @@ export function containsCommandInjection(input: string): ThreatFinding[] {
 
   // Only check for the most dangerous patterns, not all shell chars
   const dangerousPatterns = [
-    /\$\([^)]+\)/g, // Command substitution
-    /`[^`]+`/g, // Backtick command substitution
+    /\$\([^)]{1,200}\)/g, // Command substitution (bounded)
+    /`[^`]{1,200}`/g, // Backtick command substitution (bounded)
     /;\s*(rm|del|cat|wget|curl|nc)\b/gi, // Chained dangerous commands
     /\|\s*(sh|bash|cmd)\b/gi, // Piped to shell
   ];
 
+  const bounded = input.length > 100_000 ? input.slice(0, 100_000) : input;
+
   for (const pattern of dangerousPatterns) {
-    const match = input.match(pattern);
+    const match = bounded.match(pattern);
     if (match) {
       findings.push({
         type: 'command_injection',
@@ -475,8 +475,9 @@ export function validateSafeName(input: string): boolean {
  * Validates email addresses with additional security checks
  */
 export function validateSafeEmail(input: string): boolean {
-  // Standard format check
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Standard format check — bounded length to prevent ReDoS
+  if (input.length > 254) return false;
+  const emailPattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
   if (!emailPattern.test(input)) {
     return false;
   }

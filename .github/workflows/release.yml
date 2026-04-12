@@ -38,7 +38,7 @@ jobs:
 
       - name: Run Changesets
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@6a0a831ff30acef54f2c6aa1cbbc1096b066edaf # v1
         with:
           title: "[Release] Version Packages"
           commit: "chore: version packages"
