@@ -48,7 +48,6 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @resq-sw/ui to GitHub Packages
-        if: steps.changesets.outputs.published == 'true'
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/ui
@@ -56,7 +55,6 @@ jobs:
         continue-on-error: true
 
       - name: Publish @resq-sw/dsa to GitHub Packages
-        if: steps.changesets.outputs.published == 'true'
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/dsa
@@ -64,7 +62,6 @@ jobs:
         continue-on-error: true
 
       - name: Publish @resq-sw/helpers to GitHub Packages
-        if: steps.changesets.outputs.published == 'true'
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/helpers
@@ -72,7 +69,6 @@ jobs:
         continue-on-error: true
 
       - name: Publish @resq-sw/http to GitHub Packages
-        if: steps.changesets.outputs.published == 'true'
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/http
@@ -80,7 +76,6 @@ jobs:
         continue-on-error: true
 
       - name: Publish @resq-sw/logger to GitHub Packages
-        if: steps.changesets.outputs.published == 'true'
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/logger
@@ -88,7 +83,6 @@ jobs:
         continue-on-error: true
 
       - name: Publish @resq-sw/decorators to GitHub Packages
-        if: steps.changesets.outputs.published == 'true'
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/decorators
@@ -96,7 +90,6 @@ jobs:
         continue-on-error: true
 
       - name: Publish @resq-sw/rate-limiting to GitHub Packages
-        if: steps.changesets.outputs.published == 'true'
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/rate-limiting
@@ -104,7 +97,6 @@ jobs:
         continue-on-error: true
 
       - name: Publish @resq-sw/security to GitHub Packages
-        if: steps.changesets.outputs.published == 'true'
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/security
