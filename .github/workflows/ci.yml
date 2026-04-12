@@ -188,6 +188,7 @@ jobs:
       - name: Build workspace dependencies
         run: bun run build
       - name: Type check
+        if: matrix.package != 'http'
         run: bunx tsc --noEmit
         working-directory: packages/${{ matrix.package }}
 

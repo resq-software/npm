@@ -112,16 +112,26 @@ export type VertexId = S.Schema.Type<typeof VertexIdSchema>;
 // Validation Helpers
 // ============================================
 
-export function validate<A, I>(schema: S.Schema<A, I>, input: unknown): A {
-	return S.decodeUnknownSync(schema)(input);
+// biome-ignore lint: Effect Schema generics require flexible typing for cross-version compat
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnySchema = S.Schema<any>;
+
+export function validate<T extends AnySchema>(schema: T, input: unknown): S.Schema.Type<T> {
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+	return (S.decodeUnknownSync as Function)(schema)(input);
 }
 
-export function validateSafe<A, I>(
-	schema: S.Schema<A, I>,
+type ValidationSuccess<A> = { readonly success: true; readonly data: A };
+type ValidationFailure = { readonly success: false; readonly error: string };
+type ValidationResult<A> = ValidationSuccess<A> | ValidationFailure;
+
+export function validateSafe<T extends AnySchema>(
+	schema: T,
 	input: unknown,
-): { success: true; data: A } | { success: false; error: string } {
+): ValidationResult<S.Schema.Type<T>> {
 	try {
-		const data = S.decodeUnknownSync(schema)(input);
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+		const data: S.Schema.Type<T> = (S.decodeUnknownSync as Function)(schema)(input);
 		return { success: true, data };
 	} catch (error) {
 		const message =
@@ -130,8 +140,9 @@ export function validateSafe<A, I>(
 	}
 }
 
-export function createValidator<A, I>(
-	schema: S.Schema<A, I>,
-): (input: unknown) => A {
-	return (input: unknown) => S.decodeUnknownSync(schema)(input);
+export function createValidator<T extends AnySchema>(
+	schema: T,
+): (input: unknown) => S.Schema.Type<T> {
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+	return (input: unknown) => (S.decodeUnknownSync as Function)(schema)(input);
 }
