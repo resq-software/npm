@@ -1,10 +1,17 @@
 # ResQ npm Packages
 
 [![CI](https://img.shields.io/github/actions/workflow/status/resq-software/npm/ci.yml?branch=master&label=ci&style=flat-square)](https://github.com/resq-software/npm/actions)
-[![@resq-sw/ui](https://img.shields.io/npm/v/%40resq-sw%2Fui?style=flat-square&label=%40resq-sw%2Fui)](https://www.npmjs.com/package/@resq-sw/ui)
-[![@resq-sw/dsa](https://img.shields.io/npm/v/%40resq-sw%2Fdsa?style=flat-square&label=%40resq-sw%2Fdsa)](https://www.npmjs.com/package/@resq-sw/dsa)
 [![Storybook](https://img.shields.io/badge/storybook-chromatic-FF4785?style=flat-square)](https://master--69b2711843dac80a70e4ca83.chromatic.com)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](LICENSE)
+
+[![@resq-sw/ui](https://img.shields.io/npm/v/%40resq-sw%2Fui?style=flat-square&label=%40resq-sw%2Fui)](https://www.npmjs.com/package/@resq-sw/ui)
+[![@resq-sw/dsa](https://img.shields.io/npm/v/%40resq-sw%2Fdsa?style=flat-square&label=%40resq-sw%2Fdsa)](https://www.npmjs.com/package/@resq-sw/dsa)
+[![@resq-sw/helpers](https://img.shields.io/npm/v/%40resq-sw%2Fhelpers?style=flat-square&label=%40resq-sw%2Fhelpers)](https://www.npmjs.com/package/@resq-sw/helpers)
+[![@resq-sw/http](https://img.shields.io/npm/v/%40resq-sw%2Fhttp?style=flat-square&label=%40resq-sw%2Fhttp)](https://www.npmjs.com/package/@resq-sw/http)
+[![@resq-sw/logger](https://img.shields.io/npm/v/%40resq-sw%2Flogger?style=flat-square&label=%40resq-sw%2Flogger)](https://www.npmjs.com/package/@resq-sw/logger)
+[![@resq-sw/decorators](https://img.shields.io/npm/v/%40resq-sw%2Fdecorators?style=flat-square&label=%40resq-sw%2Fdecorators)](https://www.npmjs.com/package/@resq-sw/decorators)
+[![@resq-sw/security](https://img.shields.io/npm/v/%40resq-sw%2Fsecurity?style=flat-square&label=%40resq-sw%2Fsecurity)](https://www.npmjs.com/package/@resq-sw/security)
+[![@resq-sw/rate-limiting](https://img.shields.io/npm/v/%40resq-sw%2Frate-limiting?style=flat-square&label=%40resq-sw%2Frate-limiting)](https://www.npmjs.com/package/@resq-sw/rate-limiting)
 
 Registry workspace for all ResQ npm packages published under the `@resq-sw` scope. Provides the shared UI component library, zero-dependency data structures, and standalone server/client utilities for the ResQ autonomous disaster response platform.
 
