@@ -1,6 +1,6 @@
 {
   "name": "@resq-sw/security",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Security utilities: encryption, input validation, schemas, and PII sanitization",
   "license": "Apache-2.0",
   "type": "module",
@@ -28,7 +28,10 @@
   },
   "main": "lib/index.mjs",
   "types": "lib/index.d.mts",
-  "files": ["lib", "README.md"],
+  "files": [
+    "lib",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsdown",
     "test": "vitest run"
@@ -57,7 +60,14 @@
     "url": "git+https://github.com/resq-software/npm.git",
     "directory": "packages/security"
   },
-  "keywords": ["security", "encryption", "validation", "sanitize", "xss", "pii"],
+  "keywords": [
+    "security",
+    "encryption",
+    "validation",
+    "sanitize",
+    "xss",
+    "pii"
+  ],
   "engines": {
     "node": ">=20.19.0"
   }

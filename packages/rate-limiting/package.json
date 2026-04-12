@@ -1,6 +1,6 @@
 {
   "name": "@resq-sw/rate-limiting",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Rate limiting algorithms, throttle/debounce utilities, and HTTP middleware",
   "license": "Apache-2.0",
   "type": "module",
@@ -13,7 +13,10 @@
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "files": ["lib", "README.md"],
+  "files": [
+    "lib",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsdown",
     "test": "vitest run"
@@ -52,7 +55,15 @@
     "url": "git+https://github.com/resq-software/npm.git",
     "directory": "packages/rate-limiting"
   },
-  "keywords": ["rate-limiting", "throttle", "debounce", "sliding-window", "token-bucket", "leaky-bucket", "middleware"],
+  "keywords": [
+    "rate-limiting",
+    "throttle",
+    "debounce",
+    "sliding-window",
+    "token-bucket",
+    "leaky-bucket",
+    "middleware"
+  ],
   "engines": {
     "node": ">=20.19.0"
   }

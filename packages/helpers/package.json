@@ -1,6 +1,6 @@
 {
   "name": "@resq-sw/helpers",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Functional utilities, type guards, result types, performance measurement, and async task execution",
   "license": "Apache-2.0",
   "type": "module",
@@ -23,7 +23,10 @@
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "files": ["lib", "README.md"],
+  "files": [
+    "lib",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsdown",
     "test": "vitest run"
@@ -48,7 +51,13 @@
     "url": "git+https://github.com/resq-software/npm.git",
     "directory": "packages/helpers"
   },
-  "keywords": ["helpers", "utilities", "result-type", "type-guards", "task-queue"],
+  "keywords": [
+    "helpers",
+    "utilities",
+    "result-type",
+    "type-guards",
+    "task-queue"
+  ],
   "engines": {
     "node": ">=20.19.0"
   }

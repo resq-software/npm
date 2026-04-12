@@ -1,6 +1,6 @@
 {
   "name": "@resq-sw/http",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Effect-based HTTP client with retry, timeout, and schema validation",
   "license": "Apache-2.0",
   "type": "module",
@@ -18,7 +18,10 @@
   },
   "main": "lib/index.mjs",
   "types": "lib/index.d.mts",
-  "files": ["lib", "README.md"],
+  "files": [
+    "lib",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsdown",
     "test": "vitest run"
@@ -50,7 +53,13 @@
     "url": "git+https://github.com/resq-software/npm.git",
     "directory": "packages/http"
   },
-  "keywords": ["http", "fetch", "effect", "retry", "schema-validation"],
+  "keywords": [
+    "http",
+    "fetch",
+    "effect",
+    "retry",
+    "schema-validation"
+  ],
   "engines": {
     "node": ">=20.19.0"
   }

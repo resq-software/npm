@@ -1,6 +1,6 @@
 {
   "name": "@resq-sw/logger",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Structured logging with log levels for Node.js and Bun",
   "license": "Apache-2.0",
   "type": "module",
@@ -13,7 +13,10 @@
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "files": ["lib", "README.md"],
+  "files": [
+    "lib",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsdown",
     "test": "vitest run"
@@ -33,7 +36,11 @@
     "url": "git+https://github.com/resq-software/npm.git",
     "directory": "packages/logger"
   },
-  "keywords": ["logger", "logging", "structured-logging"],
+  "keywords": [
+    "logger",
+    "logging",
+    "structured-logging"
+  ],
   "engines": {
     "node": ">=20.19.0"
   }

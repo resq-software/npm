@@ -1,6 +1,6 @@
 {
   "name": "@resq-sw/decorators",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "TypeScript method and class decorators for caching, rate limiting, control flow, and observability",
   "license": "Apache-2.0",
   "type": "module",
@@ -13,7 +13,10 @@
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "files": ["lib", "README.md"],
+  "files": [
+    "lib",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsdown",
     "test": "vitest run"
@@ -33,7 +36,14 @@
     "url": "git+https://github.com/resq-software/npm.git",
     "directory": "packages/decorators"
   },
-  "keywords": ["decorators", "memoize", "throttle", "debounce", "rate-limit", "typescript"],
+  "keywords": [
+    "decorators",
+    "memoize",
+    "throttle",
+    "debounce",
+    "rate-limit",
+    "typescript"
+  ],
   "engines": {
     "node": ">=20.19.0"
   }
