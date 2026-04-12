@@ -14,12 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# asset-sync.sh - Synchronize shared assets from @resq/ui to consuming repos.
+# asset-sync.sh - Synchronize shared design assets to consuming repos.
 #
 # This script is designed to be placed in any repo at any directory depth.
-# It resolves the UI repo's assets directory relative to its own location
-# by searching upward for the wrk/ workspace root, then syncing from
-# the ui/src/assets/ source of truth.
+# It resolves the npm repo's design/assets/ directory relative to its own
+# location by searching upward for the wrk/ workspace root, then syncing
+# from the design/assets/ source of truth.
 #
 # Usage:
 #   ./asset-sync.sh                    # Sync assets to this repo's public/assets/
@@ -51,11 +51,11 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Resolve the wrk/ workspace root by walking up from SCRIPT_DIR.
-find_wrk_root() {
+# Resolve the workspace root by walking up from SCRIPT_DIR looking for design/assets/.
+find_workspace_root() {
     local dir="$SCRIPT_DIR"
     while [[ "$dir" != "/" ]]; do
-        if [[ -d "$dir/ui/src/assets" ]]; then
+        if [[ -d "$dir/design/assets" ]]; then
             echo "$dir"
             return 0
         fi
@@ -64,13 +64,13 @@ find_wrk_root() {
     return 1
 }
 
-WRK_ROOT="$(find_wrk_root)" || {
-    echo "Error: Could not find wrk/ workspace root (looking for ui/src/assets/)."
-    echo "Ensure this script is somewhere inside the wrk/ workspace."
+WORKSPACE_ROOT="$(find_workspace_root)" || {
+    echo "Error: Could not find workspace root (looking for design/assets/)."
+    echo "Ensure this script is somewhere inside the npm workspace."
     exit 1
 }
 
-SOURCE_DIR="$WRK_ROOT/ui/src/assets"
+SOURCE_DIR="$WORKSPACE_ROOT/design/assets"
 
 # Default target: public/assets/ relative to the repo root (where this script lives).
 if [[ -z "$TARGET_DIR" ]]; then
