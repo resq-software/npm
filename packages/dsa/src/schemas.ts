@@ -29,18 +29,18 @@ import { Schema as S } from "effect";
 
 export const TrieOptionsSchema = S.Struct({
 	caseInsensitive: S.optional(S.Boolean),
-	maxResults: S.optional(S.Number.pipe(S.int(), S.greaterThan(0))),
+	maxResults: S.optional(S.Int.check(S.isGreaterThan(0))),
 });
 export type TrieOptions = S.Schema.Type<typeof TrieOptionsSchema>;
 
 export const TrieInsertSchema = S.Struct({
-	word: S.String.pipe(S.minLength(1)),
+	word: S.String.check(S.isMinLength(1)),
 });
 export type TrieInsert = S.Schema.Type<typeof TrieInsertSchema>;
 
 export const TrieSearchSchema = S.Struct({
 	prefix: S.String,
-	limit: S.optional(S.Number.pipe(S.int(), S.greaterThan(0))),
+	limit: S.optional(S.Int.check(S.isGreaterThan(0))),
 });
 export type TrieSearch = S.Schema.Type<typeof TrieSearchSchema>;
 
@@ -49,15 +49,15 @@ export type TrieSearch = S.Schema.Type<typeof TrieSearchSchema>;
 // ============================================
 
 export const PriorityQueueOptionsSchema = S.Struct({
-	initialCapacity: S.optional(S.Number.pipe(S.int(), S.greaterThan(0))),
+	initialCapacity: S.optional(S.Int.check(S.isGreaterThan(0))),
 });
 export type PriorityQueueOptions = S.Schema.Type<
 	typeof PriorityQueueOptionsSchema
 >;
 
 export const PriorityItemSchema = S.Struct({
-	id: S.String.pipe(S.minLength(1)),
-	priority: S.optional(S.Number.pipe(S.int(), S.greaterThanOrEqualTo(0))).pipe(
+	id: S.String.check(S.isMinLength(1)),
+	priority: S.optional(S.Int.check(S.isGreaterThanOrEqualTo(0))).pipe(
 		S.withDecodingDefault(() => 3),
 	),
 	dueDate: S.String,
@@ -70,20 +70,20 @@ export type PriorityItemInput = S.Schema.Type<typeof PriorityItemSchema>;
 
 export const RabinKarpOptionsSchema = S.Struct({
 	caseInsensitive: S.optional(S.Boolean),
-	maxMatches: S.optional(S.Number.pipe(S.int(), S.greaterThan(0))),
+	maxMatches: S.optional(S.Int.check(S.isGreaterThan(0))),
 	includeLineInfo: S.optional(S.Boolean),
 });
 export type RabinKarpOptions = S.Schema.Type<typeof RabinKarpOptionsSchema>;
 
 export const RabinKarpSearchSchema = S.Struct({
-	text: S.String.pipe(S.minLength(1)),
-	pattern: S.String.pipe(S.minLength(1)),
+	text: S.String.check(S.isMinLength(1)),
+	pattern: S.String.check(S.isMinLength(1)),
 });
 export type RabinKarpSearch = S.Schema.Type<typeof RabinKarpSearchSchema>;
 
 export const RabinKarpMultiSearchSchema = S.Struct({
-	text: S.String.pipe(S.minLength(1)),
-	patterns: S.NonEmptyArray(S.String.pipe(S.minLength(1))),
+	text: S.String.check(S.isMinLength(1)),
+	patterns: S.NonEmptyArray(S.String.check(S.isMinLength(1))),
 });
 export type RabinKarpMultiSearch = S.Schema.Type<
 	typeof RabinKarpMultiSearchSchema
@@ -99,13 +99,13 @@ export const GraphOptionsSchema = S.Struct({
 export type GraphOptions = S.Schema.Type<typeof GraphOptionsSchema>;
 
 export const GraphEdgeSchema = S.Struct({
-	source: S.String.pipe(S.minLength(1)),
-	target: S.String.pipe(S.minLength(1)),
+	source: S.String.check(S.isMinLength(1)),
+	target: S.String.check(S.isMinLength(1)),
 	weight: S.optional(S.Finite),
 });
 export type GraphEdge = S.Schema.Type<typeof GraphEdgeSchema>;
 
-export const VertexIdSchema = S.String.pipe(S.minLength(1));
+export const VertexIdSchema = S.String.check(S.isMinLength(1));
 export type VertexId = S.Schema.Type<typeof VertexIdSchema>;
 
 // ============================================

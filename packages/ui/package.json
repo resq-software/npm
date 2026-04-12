@@ -359,7 +359,6 @@
 		"@biomejs/biome": "^2.4.11",
 		"@chromatic-com/storybook": "^5.0.1",
 		"@github-ui/storybook-addon-performance-panel": "^1.1.4",
-		"@release-it/conventional-changelog": "10.0.6",
 		"@storybook/addon-a11y": "^10.3.5",
 		"@storybook/addon-docs": "^10.3.5",
 		"@storybook/addon-links": "^10.3.5",
@@ -380,7 +379,6 @@
 		"markdownlint-cli": "0.48.0",
 		"react": "^19.2.5",
 		"react-dom": "^19.2.5",
-		"release-it": "19.2.4",
 		"storybook": "^10.3.5",
 		"tailwindcss": "^4.1.18",
 		"tinyglobby": "^0.2.16",
@@ -401,10 +399,5 @@
 		"access": "public",
 		"provenance": true,
 		"registry": "https://registry.npmjs.org/"
-	},
-	"release-it": {
-		"git": {
-			"requireCleanWorkingDir": false
-		}
 	}
 }

@@ -23,3 +23,7 @@ export type {
 export { RabinKarp, quickSearch } from "./rabin-karp.js";
 export type { PatternMatch, RabinKarpOptions, SearchStats } from "./rabin-karp.js";
 export { Distance } from "./distance.js";
+export { Queue } from "./queue.js";
+export type { QueueNode } from "./queue.js";
+export { LRUCache } from "./lru-cache.js";
+export type { LRUCacheOptions } from "./lru-cache.js";

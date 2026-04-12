@@ -1,0 +1,59 @@
+{
+  "name": "@resq-sw/rate-limiting",
+  "version": "0.1.0",
+  "description": "Rate limiting algorithms, throttle/debounce utilities, and HTTP middleware",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "default": "./lib/index.js"
+    }
+  },
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": ["lib", "README.md"],
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "effect": ">=3.0.0",
+    "@upstash/redis": ">=1.0.0",
+    "@upstash/ratelimit": ">=2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "effect": {
+      "optional": true
+    },
+    "@upstash/redis": {
+      "optional": true
+    },
+    "@upstash/ratelimit": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@upstash/ratelimit": "^2.0.5",
+    "@upstash/redis": "^1.36.3",
+    "effect": "4.0.0-beta.43",
+    "tsdown": "^0.21.7",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/resq-software/npm.git",
+    "directory": "packages/rate-limiting"
+  },
+  "keywords": ["rate-limiting", "throttle", "debounce", "sliding-window", "token-bucket", "leaky-bucket", "middleware"],
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

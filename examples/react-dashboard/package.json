@@ -1,0 +1,29 @@
+{
+  "name": "example-react-dashboard",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@resq-sw/dsa": "workspace:*",
+    "@resq-sw/helpers": "workspace:*",
+    "@resq-sw/http": "workspace:*",
+    "@resq-sw/logger": "workspace:*",
+    "@resq-sw/rate-limiting": "workspace:*",
+    "@resq-sw/security": "workspace:*",
+    "@resq-sw/ui": "workspace:*",
+    "effect": "4.0.0-beta.43",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwindcss": "^4.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react-swc": "^4.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^7.0.0"
+  }
+}

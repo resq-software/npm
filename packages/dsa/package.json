@@ -20,18 +20,21 @@
   "types": "lib/index.d.ts",
   "files": ["lib", "README.md"],
   "scripts": {
-    "build": "tsc",
+    "build": "tsdown",
     "test": "vitest run"
   },
   "peerDependencies": {
     "effect": ">=3.0.0"
   },
   "peerDependenciesMeta": {
-    "effect": { "optional": true }
+    "effect": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@jsheaven/perf": "^1.1.1",
-    "effect": "^3.0.0",
+    "effect": "4.0.0-beta.43",
+    "tsdown": "^0.21.7",
     "typescript": "5.9.3",
     "vitest": "3.2.4"
   },

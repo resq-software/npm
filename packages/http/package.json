@@ -1,0 +1,57 @@
+{
+  "name": "@resq-sw/http",
+  "version": "0.1.0",
+  "description": "Effect-based HTTP client with retry, timeout, and schema validation",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.mts",
+      "import": "./lib/index.mjs",
+      "default": "./lib/index.mjs"
+    },
+    "./security": {
+      "types": "./lib/security.d.mts",
+      "import": "./lib/security.mjs",
+      "default": "./lib/security.mjs"
+    }
+  },
+  "main": "lib/index.mjs",
+  "types": "lib/index.d.mts",
+  "files": ["lib", "README.md"],
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "effect": ">=3.0.0",
+    "@effect/platform": ">=0.60.0",
+    "@effect/platform-bun": ">=0.40.0"
+  },
+  "peerDependenciesMeta": {
+    "@effect/platform-bun": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@effect/platform-bun": "4.0.0-beta.43",
+    "effect": "4.0.0-beta.43",
+    "tsdown": "^0.21.7",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/resq-software/npm.git",
+    "directory": "packages/http"
+  },
+  "keywords": ["http", "fetch", "effect", "retry", "schema-validation"],
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

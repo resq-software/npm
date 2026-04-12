@@ -1,0 +1,64 @@
+{
+  "name": "@resq-sw/security",
+  "version": "0.1.0",
+  "description": "Security utilities: encryption, input validation, schemas, and PII sanitization",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.mts",
+      "import": "./lib/index.mjs",
+      "default": "./lib/index.mjs"
+    },
+    "./sanitize": {
+      "types": "./lib/sanitize.d.mts",
+      "import": "./lib/sanitize.mjs",
+      "default": "./lib/sanitize.mjs"
+    },
+    "./validators": {
+      "types": "./lib/validators.d.mts",
+      "import": "./lib/validators.mjs",
+      "default": "./lib/validators.mjs"
+    },
+    "./crypto": {
+      "types": "./lib/crypto.d.mts",
+      "import": "./lib/crypto.mjs",
+      "default": "./lib/crypto.mjs"
+    }
+  },
+  "main": "lib/index.mjs",
+  "types": "lib/index.d.mts",
+  "files": ["lib", "README.md"],
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "effect": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "effect": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "effect": "4.0.0-beta.43",
+    "tsdown": "^0.21.7",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/resq-software/npm.git",
+    "directory": "packages/security"
+  },
+  "keywords": ["security", "encryption", "validation", "sanitize", "xss", "pii"],
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

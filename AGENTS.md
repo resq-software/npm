@@ -1,65 +1,58 @@
-# ResQ npm Packages — Agent Guide
+# AGENTS.md
 
-## Mission
-
-Registry workspace for all ResQ npm packages published under the `@resq-sw` scope. Contains the shared UI component library and standalone DSA utilities.
-
-## Stack
-
-- **Runtime:** Bun 1.x
-- **Language:** TypeScript (strict mode)
-- **Testing:** Vitest
-- **Build:** tsc (dsa), tsdown (ui)
-- **Linting:** Biome
-- **Visual Testing:** Chromatic (ui only)
-
-## Repo Map
-
-- `packages/ui/` — `@resq-sw/ui`: React component library (Radix + Tailwind)
-- `packages/dsa/` — `@resq-sw/dsa`: Data structures and algorithms (zero deps)
-
-## Commands
+## Dev Environment
 
 ```bash
-bun install                      # Install all workspace dependencies
-bun test                         # Run all workspace tests
-bun --filter @resq-sw/dsa test   # Test DSA package only
-bun --filter @resq-sw/ui test    # Test UI package only
-bun --filter @resq-sw/dsa build  # Build DSA package
-bun --filter @resq-sw/ui build   # Build UI package
-bun --filter @resq-sw/ui storybook  # Start Storybook dev server
-bun --filter @resq-sw/ui lint    # Lint UI package with Biome
+bun install && bun run build
 ```
 
-## Rules
+## Testing
 
-- `@resq-sw/dsa` must have zero runtime dependencies (Effect is a peer dep for optional schemas only).
-- `@resq-sw/ui` uses Radix UI for interaction logic and Tailwind CSS v4 for styling.
-- All packages must be tree-shakeable.
-- Zero `any` — strict typing throughout.
-- Each package has its own build and test scripts.
-- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/).
+```bash
+bun test                             # All packages
+bun --filter @resq-sw/<pkg> test     # Single package
+```
+
+## Architecture
+
+| Package | Purpose | Deps |
+|---------|---------|------|
+| `@resq-sw/ui` | React component library (Radix + Tailwind v4, 57 components) | radix-ui, tailwindcss |
+| `@resq-sw/dsa` | Data structures and algorithms (graph, heap, trie, bloom, etc.) | **zero deps** |
+| `@resq-sw/helpers` | Utilities, type guards, result types, formatting | @resq-sw/logger |
+| `@resq-sw/http` | Effect-based HTTP client with retry, timeout, schema validation | effect |
+| `@resq-sw/logger` | Structured logging with levels and decorators | **zero deps** |
+| `@resq-sw/decorators` | TypeScript method/class decorators (memoize, throttle, bind, etc.) | **zero deps** |
+| `@resq-sw/security` | Encryption, input validation, PII sanitization | effect (peer) |
+| `@resq-sw/rate-limiting` | Token bucket, leaky bucket, sliding window, throttle/debounce | effect, @upstash/ratelimit (peers) |
+
+## Key Rules
+
+- `@resq-sw/dsa` must have **zero runtime deps**. Effect is a peer dep for optional schemas only.
+- `@resq-sw/ui` uses **dark-first oklch color system** with WCAG AA contrast.
+- All packages must be **tree-shakeable** with subpath exports.
+- **Zero `any`** — strict TypeScript throughout.
 - Package manager is **bun** — do not use npm, yarn, or pnpm.
+- `console-fail-test` is active in UI tests: any `console.log/warn/error` inside a test fails it.
 
-## Safety
+## Commits & Changesets
 
-- Don't add runtime dependencies to `@resq-sw/dsa` — it must stay zero-dep.
-- Don't publish without running the full test suite (`bun test`).
-- Lockfile (`bun.lock`) must be committed with dependency changes.
-- Don't commit secrets, private keys, or `.env` files.
-- `console-fail-test` is active in UI tests: any `console.log/warn/error` call inside a test causes failure.
+**Commits:** Conventional format (`feat:`, `fix:`, `chore:`, `perf:`, `refactor:`).
 
-## Workflow
+**Changesets:** Every PR that changes package behavior must include a changeset file in `.changeset/`. Since the CLI is interactive, create the file directly:
 
-1. Run `bun install` from workspace root after dependency changes.
-2. Make changes in the relevant `packages/` directory.
-3. Run `bun test` before finalizing.
-4. Each package builds independently (`bun --filter <pkg> build`).
-5. Summarize: files changed, behavior change, tests run.
+```md
+---
+"@resq-sw/dsa": minor
+---
+
+Add LRU cache data structure with configurable capacity
+```
+
+Bump types: `patch` (bug fix), `minor` (new feature), `major` (breaking change). See [CLAUDE.md](CLAUDE.md#changesets) for full rules and examples.
 
 ## References
 
-- [UI Package README](packages/ui/README.md)
-- [DSA Package](packages/dsa/)
 - [Contributing Guide](.github/CONTRIBUTING.md)
 - [Development Guide](.github/DEVELOPMENT.md)
+- [Style Guide](design/STYLE_GUIDE.md)
