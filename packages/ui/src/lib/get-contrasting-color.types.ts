@@ -22,7 +22,7 @@
  * @property {number} b - Blue channel (0-255)
  */
 export type RGB = {
-  r: number;
-  g: number;
-  b: number;
+	r: number;
+	g: number;
+	b: number;
 } | null;
