@@ -12,32 +12,97 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Area labels
-"area:components":
-  - changed-files:
-    - any-glob-to-any-file: src/components/**/*
+# ── Package scope labels ────────────────────────────────────────────────
 
-"area:styles":
+"pkg:ui":
   - changed-files:
-    - any-glob-to-any-file: src/styles/**/*
+    - any-glob-to-any-file: packages/ui/**/*
 
-"area:stories":
+"pkg:dsa":
   - changed-files:
-    - any-glob-to-any-file: src/**/*.stories.ts
-    - any-glob-to-any-file: src/**/*.stories.tsx
-    - any-glob-to-any-file: .storybook/**/*
+    - any-glob-to-any-file: packages/dsa/**/*
 
-"area:tests":
+"pkg:helpers":
   - changed-files:
-    - any-glob-to-any-file: src/**/*.test.ts
-    - any-glob-to-any-file: src/**/*.test.tsx
+    - any-glob-to-any-file: packages/helpers/**/*
 
-# Governance & CI
-"A-DevOps":
+"pkg:http":
   - changed-files:
-    - any-glob-to-any-file: .github/**/*
+    - any-glob-to-any-file: packages/http/**/*
+
+"pkg:logger":
+  - changed-files:
+    - any-glob-to-any-file: packages/logger/**/*
+
+"pkg:decorators":
+  - changed-files:
+    - any-glob-to-any-file: packages/decorators/**/*
+
+"pkg:security":
+  - changed-files:
+    - any-glob-to-any-file: packages/security/**/*
+
+"pkg:rate-limiting":
+  - changed-files:
+    - any-glob-to-any-file: packages/rate-limiting/**/*
+
+# ── Area labels ─────────────────────────────────────────────────────────
+
+"A-CI":
+  - changed-files:
+    - any-glob-to-any-file:
+      - .github/workflows/**/*
+      - .github/actions/**/*
+      - .git-hooks/**/*
+
+"A-Build":
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/*/tsdown.config.ts
+      - packages/*/tsconfig.json
+
+"A-Storybook":
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/ui/src/**/*.stories.ts
+      - packages/ui/src/**/*.stories.tsx
+      - packages/ui/.storybook/**/*
+
+"A-Examples":
+  - changed-files:
+    - any-glob-to-any-file: examples/**/*
+
+"A-Effect":
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/dsa/src/schemas.ts
+      - packages/http/src/fetcher.ts
+      - packages/rate-limiting/src/**/*
+      - packages/security/src/**/*
+
+# ── Category labels ─────────────────────────────────────────────────────
 
 "C-Documentation":
   - changed-files:
-    - any-glob-to-any-file: "**/*.md"
-    - any-glob-to-any-file: docs/**/*
+    - any-glob-to-any-file:
+      - "**/*.md"
+      - docs/**/*
+
+"C-Design":
+  - changed-files:
+    - any-glob-to-any-file: design/**/*
+
+"C-Testing":
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/*/tests/**/*
+      - packages/*/src/**/*.test.ts
+      - packages/*/src/**/*.test.tsx
+      - packages/*/vitest.config.ts
+
+"C-Chore":
+  - changed-files:
+    - any-glob-to-any-file:
+      - .changeset/**/*
+      - package.json
+      - bun.lock
