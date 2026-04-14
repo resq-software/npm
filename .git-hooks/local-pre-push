@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Repo-specific pre-push — runs alongside the canonical ResQ pre-push hook.
+set -euo pipefail
+
+if command -v bunx >/dev/null 2>&1; then
+    echo "  TS/JS: bunx biome check"
+    if ! bunx biome check --no-errors-on-unmatched .; then
+        echo "❌ Biome check failed. Run: bunx biome check --apply ."
+        exit 1
+    fi
+fi

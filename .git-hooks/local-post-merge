@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Automatic bun install when bun.lockb changes on merge.
+# Override: export SKIP_BUN_INSTALL=1
+set -euo pipefail
+
+CHANGED=$(git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD 2>/dev/null || true)
+if echo "$CHANGED" | grep -q "^bun\.lockb\?$"; then
+    if [ -n "${SKIP_BUN_INSTALL:-}" ]; then
+        echo "📦 bun lockfile changed after merge — skipping install (SKIP_BUN_INSTALL set)"
+    elif command -v bun >/dev/null 2>&1; then
+        echo "📦 bun lockfile changed after merge — running bun install..."
+        bun install --frozen-lockfile || bun install
+    fi
+fi
