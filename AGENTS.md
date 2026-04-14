@@ -56,3 +56,17 @@ Bump types: `patch` (bug fix), `minor` (new feature), `major` (breaking change).
 - [Contributing Guide](.github/CONTRIBUTING.md)
 - [Development Guide](.github/DEVELOPMENT.md)
 - [Style Guide](design/STYLE_GUIDE.md)
+
+## Git hooks
+
+Canonical hooks from [`resq-software/dev`](https://github.com/resq-software/dev).
+Install:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/resq-software/dev/main/scripts/install-hooks.sh | sh
+```
+
+Contract: [dev/AGENTS.md#git-hooks](https://github.com/resq-software/dev/blob/main/AGENTS.md#git-hooks). Repo-specific logic lives in `.git-hooks/local-*`:
+
+- `local-pre-push` — `bunx biome check` lint gate
+- `local-post-checkout` / `local-post-merge` — auto `bun install` on lockfile change (override with `SKIP_BUN_INSTALL=1`)
