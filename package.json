@@ -4,6 +4,7 @@
 	"workspaces": ["packages/*", "examples/*"],
 	"scripts": {
 		"prepare": "git config core.hooksPath .git-hooks",
+		"ws": "bun scripts/ws.ts",
 		"changeset": "changeset",
 		"changeset:version": "changeset version",
 		"changeset:status": "changeset status",
