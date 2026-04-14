@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-# Automatic bun install when bun.lockb changes on branch switch.
-# Override: export SKIP_BUN_INSTALL=1
+# Notify (do not auto-mutate) when bun lockfile changes on branch switch.
+# Set BUN_INSTALL_AFTER_MERGE=1 to auto-run `bun install --frozen-lockfile`.
+# Set SKIP_BUN_INSTALL=1 to silence everything.
 set -euo pipefail
+
+[ -n "${SKIP_BUN_INSTALL:-}" ] && exit 0
 
 PREV_HEAD="${1:-}"
 NEW_HEAD="${2:-}"
@@ -11,11 +14,14 @@ IS_BRANCH_CHECKOUT="${3:-}"
 [ "$PREV_HEAD" = "$NEW_HEAD" ] && exit 0
 
 CHANGED=$(git diff --name-only "$PREV_HEAD" "$NEW_HEAD" 2>/dev/null || true)
-if echo "$CHANGED" | grep -q "^bun\.lockb\?$"; then
-    if [ -n "${SKIP_BUN_INSTALL:-}" ]; then
-        echo "📦 bun lockfile changed — skipping install (SKIP_BUN_INSTALL set)"
-    elif command -v bun >/dev/null 2>&1; then
-        echo "📦 bun lockfile changed — running bun install..."
-        bun install --frozen-lockfile || bun install
-    fi
-fi
+case "$CHANGED" in
+    *bun.lock*)
+        echo "📦 bun lockfile changed."
+        if [ "${BUN_INSTALL_AFTER_MERGE:-0}" = "1" ] && command -v bun >/dev/null 2>&1; then
+            echo "   Running bun install --frozen-lockfile (BUN_INSTALL_AFTER_MERGE=1)..."
+            bun install --frozen-lockfile
+        else
+            echo "   Run 'bun install' to sync; set BUN_INSTALL_AFTER_MERGE=1 to auto-run."
+        fi
+        ;;
+esac
