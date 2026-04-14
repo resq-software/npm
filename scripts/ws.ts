@@ -35,6 +35,7 @@ const ALIASES: Record<string, string> = {
   b: "build",
   l: "lint",
   d: "dev",
+  i: "install",
 };
 
 const [command, ...targets] = process.argv.slice(2);
@@ -45,6 +46,7 @@ if (!resolved || resolved === "help") {
   bun ws <command> [packages...]
 
   Commands:
+    install, i       Install all workspace dependencies
     test, t          Run tests
     build, b         Build packages
     typecheck, tc    Type-check with tsc --noEmit
@@ -61,6 +63,8 @@ if (!resolved || resolved === "help") {
     bun ws build
     bun ws tc security
     bun ws dev
+    bun ws install
+    bun ws i
 `);
   process.exit(0);
 }
@@ -72,6 +76,11 @@ if (resolved === "list") {
     ).json();
     console.log(`  ${json.name.padEnd(25)} v${json.version}`);
   }
+  process.exit(0);
+}
+
+if (resolved === "install") {
+  await $`bun install`.cwd(ROOT);
   process.exit(0);
 }
 
