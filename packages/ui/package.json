@@ -373,7 +373,7 @@
 		"console-fail-test": "0.6.1",
 		"cspell": "10.0.0",
 		"jsdom": "^28.1.0",
-		"knip": "6.4.0",
+		"knip": "6.4.1",
 		"lint-staged": "16.4.0",
 		"markdownlint": "0.40.0",
 		"markdownlint-cli": "0.48.0",
@@ -383,7 +383,7 @@
 		"tailwindcss": "^4.1.18",
 		"tinyglobby": "^0.2.16",
 		"tsdown": "0.21.7",
-		"typescript": "6.0.2",
+		"typescript": "6.0.3",
 		"vite": "^8.0.8",
 		"vitest": "3.2.4"
 	},

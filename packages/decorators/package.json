@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "tsdown": "^0.21.7",
-    "typescript": "6.0.2",
+    "typescript": "6.0.3",
     "vitest": "3.2.4"
   },
   "publishConfig": {
