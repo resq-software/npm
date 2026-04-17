@@ -23,6 +23,9 @@
 		"@changesets/cli": "^2.30.0"
 	},
 	"overrides": {
-		"effect": "4.0.0-beta.43"
+		"effect": "4.0.0-beta.43",
+		"vite": "^8.0.8",
+		"defu": ">=6.1.5",
+		"next": ">=16.2.3"
 	}
 }

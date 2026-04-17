@@ -36,9 +36,11 @@ runs:
 
     - name: Authenticate to GitHub Packages
       shell: bash
+      env:
+        GH_PKG_TOKEN: ${{ inputs.github-token }}
       run: |
         echo "@resq-software:registry=https://npm.pkg.github.com" >> ~/.npmrc
-        echo "//npm.pkg.github.com/:_authToken=${{ inputs.github-token }}" >> ~/.npmrc
+        echo "//npm.pkg.github.com/:_authToken=$GH_PKG_TOKEN" >> ~/.npmrc
 
     - name: Publish to GitHub Packages
       shell: bash

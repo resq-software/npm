@@ -28,13 +28,16 @@ jobs:
 
       - name: Resolve package from tag
         id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_PACKAGE: ${{ github.event.inputs.package }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            PKG_DIR="packages/${{ github.event.inputs.package }}"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            PKG_DIR="packages/$INPUT_PACKAGE"
           else
-            TAG="${{ github.ref_name }}"
             # @resq-sw/dsa@v1.0.0 → dsa
-            PKG_NAME=$(echo "$TAG" | sed -E 's/@resq-sw\/([^@]+)@v.*/\1/')
+            PKG_NAME=$(echo "$REF_NAME" | sed -E 's/@resq-sw\/([^@]+)@v.*/\1/')
             PKG_DIR="packages/$PKG_NAME"
           fi
 

@@ -31,7 +31,11 @@ const server = Bun.serve({
     };
     const httpsRedirect = shouldRedirectToHttps(url.protocol, req.url, headers);
     if (httpsRedirect) {
-      return Response.redirect(httpsRedirect, 301);
+      // Validate redirect stays on the same host to prevent open-redirect attacks
+      const redirectUrl = new URL(httpsRedirect);
+      if (redirectUrl.hostname === url.hostname) {
+        return Response.redirect(httpsRedirect, 301);
+      }
     }
 
     log.info(`${req.method} ${url.pathname}`, { requestId });

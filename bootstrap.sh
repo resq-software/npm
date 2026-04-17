@@ -5,5 +5,5 @@
 # Canonical onboarding — delegates to resq-software/dev.
 # See https://github.com/resq-software/dev for the full installer.
 set -eu
-export REPO=npm
-exec sh -c "$(curl -fsSL https://raw.githubusercontent.com/resq-software/dev/main/install.sh)"
+export REPO="${REPO:-npm}"
+exec curl -fsSL https://raw.githubusercontent.com/resq-software/dev/main/install.sh | sh -s -- "$@"
