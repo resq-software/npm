@@ -69,7 +69,7 @@
       "version": "0.1.0",
       "devDependencies": {
         "@jsheaven/perf": "^1.1.1",
-        "effect": "4.0.0-beta.43",
+        "effect": "4.0.0-beta.50",
         "tsdown": "^0.21.7",
         "typescript": "6.0.2",
         "vitest": "3.2.4",
@@ -100,9 +100,9 @@
       "name": "@resq-sw/http",
       "version": "0.1.1",
       "devDependencies": {
-        "@effect/platform-bun": "4.0.0-beta.43",
+        "@effect/platform-bun": "4.0.0-beta.50",
         "@types/node": "^25.6.0",
-        "effect": "4.0.0-beta.43",
+        "effect": "4.0.0-beta.50",
         "tsdown": "^0.21.7",
         "typescript": "6.0.2",
         "vitest": "3.2.4",
@@ -132,7 +132,7 @@
       "devDependencies": {
         "@upstash/ratelimit": "^2.0.5",
         "@upstash/redis": "^1.36.3",
-        "effect": "4.0.0-beta.43",
+        "effect": "4.0.0-beta.50",
         "tsdown": "^0.21.7",
         "typescript": "6.0.2",
         "vitest": "3.2.4",
@@ -153,7 +153,7 @@
       "version": "0.1.1",
       "devDependencies": {
         "@types/node": "^25.6.0",
-        "effect": "4.0.0-beta.43",
+        "effect": "4.0.0-beta.50",
         "tsdown": "^0.21.7",
         "typescript": "6.0.2",
         "vitest": "3.2.4",
@@ -227,7 +227,7 @@
   },
   "overrides": {
     "defu": ">=6.1.5",
-    "effect": "4.0.0-beta.43",
+    "effect": "4.0.0-beta.50",
     "next": ">=16.2.3",
     "vite": "^8.0.8",
   },
@@ -506,7 +506,7 @@
 
     "@effect/platform": ["@effect/platform@0.96.0", "", { "dependencies": { "find-my-way-ts": "^0.1.6", "msgpackr": "^1.11.4", "multipasta": "^0.2.7" }, "peerDependencies": { "effect": "^3.21.0" } }, "sha512-U7PLhkVzg7zzrgFvyWATOzD6reL87KG/fcdOxgLWBQ/J5CCU6qdPAVG+0o6o+IxcsLoqGwxs+rFxaFzrdtDV1A=="],
 
-    "@effect/platform-bun": ["@effect/platform-bun@4.0.0-beta.43", "", { "dependencies": { "@effect/platform-node-shared": "^4.0.0-beta.43" }, "peerDependencies": { "effect": "^4.0.0-beta.43" } }, "sha512-nMZ9JsD6CzJNQ+5pDUFbPw7PSZdQdTQ092MbYrocVtvlf6qEFU/hji3ITvRIOX7eabyQ8AUyp55qFPQUeq+GIA=="],
+    "@effect/platform-bun": ["@effect/platform-bun@4.0.0-beta.50", "", { "dependencies": { "@effect/platform-node-shared": "^4.0.0-beta.50" }, "peerDependencies": { "effect": "^4.0.0-beta.50" } }, "sha512-KnDleO9PMr++HoLl/VmzR3hNcOG3Hz5+xAtO5ec5SzN7QwedPbPWBZYR88tv5GTeKLgBvPTAjoTt2kbbNh5Jzw=="],
 
     "@effect/platform-node-shared": ["@effect/platform-node-shared@4.0.0-beta.50", "", { "dependencies": { "@types/ws": "^8.18.1", "ws": "^8.20.0" }, "peerDependencies": { "effect": "^4.0.0-beta.50" } }, "sha512-aFHifdtDae0ih4d2m6j7cdEWLZcn/g8nmxn1XU2PwLezb5oAyu5ljibayYRIvJNTbmJXRk9sKjbl2NC0xQMTYg=="],
 
@@ -1346,7 +1346,7 @@
 
     "eastasianwidth": ["eastasianwidth@0.2.0", "", {}, "sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA=="],
 
-    "effect": ["effect@4.0.0-beta.43", "", { "dependencies": { "@standard-schema/spec": "^1.1.0", "fast-check": "^4.5.3", "find-my-way-ts": "^0.1.6", "ini": "^6.0.0", "kubernetes-types": "^1.30.0", "msgpackr": "^1.11.8", "multipasta": "^0.2.7", "toml": "^3.0.0", "uuid": "^13.0.0", "yaml": "^2.8.2" } }, "sha512-AJYyDimIwJOn87uUz/JzmgDc5GfjxJbXvEbTvNzMa+M3Uer344bLo/O5mMRkqc1vBleA+Ygs4+dbE3QsqOkKTQ=="],
+    "effect": ["effect@4.0.0-beta.50", "", { "dependencies": { "@standard-schema/spec": "^1.1.0", "fast-check": "^4.6.0", "find-my-way-ts": "^0.1.6", "ini": "^6.0.0", "kubernetes-types": "^1.30.0", "msgpackr": "^1.11.9", "multipasta": "^0.2.7", "toml": "^4.1.1", "uuid": "^13.0.0", "yaml": "^2.8.3" } }, "sha512-UsENighZms6LWDSnF/05F9JinDAewV3sGXHAt9M7+dL3VnoFZIwduFxXvmFc7QJm7iV1s7rB98hv1SD3ALA9qg=="],
 
     "electron-to-chromium": ["electron-to-chromium@1.5.339", "", {}, "sha512-Is+0BBHJ4NrdpAYiperrmp53pLywG/yV/6lIMTAnhxvzj/Cmn5Q/ogSHC6AKe7X+8kPLxxFk0cs5oc/3j/fxIg=="],
 
@@ -1934,7 +1934,7 @@
 
     "to-regex-range": ["to-regex-range@5.0.1", "", { "dependencies": { "is-number": "^7.0.0" } }, "sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ=="],
 
-    "toml": ["toml@3.0.0", "", {}, "sha512-y/mWCZinnvxjTKYhJ+pYxwD0mRLVvOtdS2Awbgxln6iEnt4rk0yBxeSBHkGJcPucRiG0e55mwWp+g/05rsrd6w=="],
+    "toml": ["toml@4.1.1", "", {}, "sha512-EBJnVBr3dTXdA89WVFoAIPUqkBjxPMwRqsfuo1r240tKFHXv3zgca4+NJib/h6TyvGF7vOawz0jGuryJCdNHrw=="],
 
     "tough-cookie": ["tough-cookie@6.0.1", "", { "dependencies": { "tldts": "^7.0.5" } }, "sha512-LktZQb3IeoUWB9lqR5EWTHgW/VTITCXg4D21M+lvybRVdylLrRMnqaIONLVb5mav8vM19m44HIcGq4qASeu2Qw=="],
 
