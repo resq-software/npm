@@ -21,6 +21,7 @@
  *              and inputs. Provides type-safe validation at runtime.
  */
 
+import { Effect } from "effect";
 import { Schema as S } from "effect";
 
 // ============================================
@@ -58,7 +59,7 @@ export type PriorityQueueOptions = S.Schema.Type<
 export const PriorityItemSchema = S.Struct({
 	id: S.String.check(S.isMinLength(1)),
 	priority: S.optional(S.Int.check(S.isGreaterThanOrEqualTo(0))).pipe(
-		S.withDecodingDefault(() => 3),
+		S.withDecodingDefault(Effect.succeed(3)),
 	),
 	dueDate: S.String,
 });
