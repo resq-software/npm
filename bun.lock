@@ -51,7 +51,7 @@
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "@vitejs/plugin-react-swc": "^4.0.0",
-        "typescript": "^6.0.2",
+        "typescript": "^6.0.3",
         "vite": "^8.0.8",
       },
     },
@@ -60,7 +60,7 @@
       "version": "0.1.1",
       "devDependencies": {
         "tsdown": "^0.21.7",
-        "typescript": "6.0.2",
+        "typescript": "6.0.3",
         "vitest": "3.2.4",
       },
     },
@@ -71,7 +71,7 @@
         "@jsheaven/perf": "^1.1.1",
         "effect": "4.0.0-beta.50",
         "tsdown": "^0.21.7",
-        "typescript": "6.0.2",
+        "typescript": "6.0.3",
         "vitest": "3.2.4",
       },
       "peerDependencies": {
@@ -92,7 +92,7 @@
         "@types/node": "^25.6.0",
         "jsdom": "^29.0.2",
         "tsdown": "^0.21.7",
-        "typescript": "6.0.2",
+        "typescript": "6.0.3",
         "vitest": "3.2.4",
       },
     },
@@ -104,7 +104,7 @@
         "@types/node": "^25.6.0",
         "effect": "4.0.0-beta.50",
         "tsdown": "^0.21.7",
-        "typescript": "6.0.2",
+        "typescript": "6.0.3",
         "vitest": "3.2.4",
       },
       "peerDependencies": {
@@ -122,7 +122,7 @@
       "devDependencies": {
         "@types/node": "^25.6.0",
         "tsdown": "^0.21.7",
-        "typescript": "6.0.2",
+        "typescript": "6.0.3",
         "vitest": "3.2.4",
       },
     },
@@ -134,7 +134,7 @@
         "@upstash/redis": "^1.36.3",
         "effect": "4.0.0-beta.50",
         "tsdown": "^0.21.7",
-        "typescript": "6.0.2",
+        "typescript": "6.0.3",
         "vitest": "3.2.4",
       },
       "peerDependencies": {
@@ -155,7 +155,7 @@
         "@types/node": "^25.6.0",
         "effect": "4.0.0-beta.50",
         "tsdown": "^0.21.7",
-        "typescript": "6.0.2",
+        "typescript": "6.0.3",
         "vitest": "3.2.4",
       },
       "peerDependencies": {
@@ -204,7 +204,7 @@
         "console-fail-test": "0.6.1",
         "cspell": "10.0.0",
         "jsdom": "^28.1.0",
-        "knip": "6.4.0",
+        "knip": "6.4.1",
         "lint-staged": "16.4.0",
         "markdownlint": "0.40.0",
         "markdownlint-cli": "0.48.0",
@@ -214,7 +214,7 @@
         "tailwindcss": "^4.1.18",
         "tinyglobby": "^0.2.16",
         "tsdown": "0.21.7",
-        "typescript": "6.0.2",
+        "typescript": "6.0.3",
         "vite": "^8.0.8",
         "vitest": "3.2.4",
       },
@@ -1558,7 +1558,7 @@
 
     "kleur": ["kleur@4.1.5", "", {}, "sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ=="],
 
-    "knip": ["knip@6.4.0", "", { "dependencies": { "@nodelib/fs.walk": "^1.2.3", "fast-glob": "^3.3.3", "formatly": "^0.3.0", "get-tsconfig": "4.13.7", "jiti": "^2.6.0", "minimist": "^1.2.8", "oxc-parser": "^0.121.0", "oxc-resolver": "^11.19.1", "picocolors": "^1.1.1", "picomatch": "^4.0.1", "smol-toml": "^1.6.1", "strip-json-comments": "5.0.3", "unbash": "^2.2.0", "yaml": "^2.8.2", "zod": "^4.1.11" }, "bin": { "knip": "bin/knip.js", "knip-bun": "bin/knip-bun.js" } }, "sha512-SAEeggehgkPdoLZWVEcFKzPw+vNlnrUBDqcX8cOcHGydRInSn5pnn9LN3dDJ8SkDHKXR7xYzNq3HtRJaYmxOHg=="],
+    "knip": ["knip@6.4.1", "", { "dependencies": { "@nodelib/fs.walk": "^1.2.3", "fast-glob": "^3.3.3", "formatly": "^0.3.0", "get-tsconfig": "4.13.7", "jiti": "^2.6.0", "minimist": "^1.2.8", "oxc-parser": "^0.121.0", "oxc-resolver": "^11.19.1", "picocolors": "^1.1.1", "picomatch": "^4.0.1", "smol-toml": "^1.6.1", "strip-json-comments": "5.0.3", "unbash": "^2.2.0", "yaml": "^2.8.2", "zod": "^4.1.11" }, "bin": { "knip": "bin/knip.js", "knip-bun": "bin/knip-bun.js" } }, "sha512-Ry+ywmDFSZvKp/jx7LxMgsZWRTs931alV84e60lh0Stf6kSRYqSIUTkviyyDFRcSO3yY1Kpbi83OirN+4lA2Xw=="],
 
     "kubernetes-types": ["kubernetes-types@1.30.0", "", {}, "sha512-Dew1okvhM/SQcIa2rcgujNndZwU8VnSapDgdxlYoB84ZlpAD43U6KLAFqYo17ykSFGHNPrg0qry0bP+GJd9v7Q=="],
 
@@ -1954,7 +1954,7 @@
 
     "tw-animate-css": ["tw-animate-css@1.4.0", "", {}, "sha512-7bziOlRqH0hJx80h/3mbicLW7o8qLsH5+RaLR2t+OHM3D0JlWGODQKQ4cxbK7WlvmUxpcj6Kgu6EKqjrGFe3QQ=="],
 
-    "typescript": ["typescript@6.0.2", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-bGdAIrZ0wiGDo5l8c++HWtbaNCWTS4UTv7RaTH/ThVIgjkveJt83m74bBHMJkuCbslY8ixgLBVZJIOiQlQTjfQ=="],
+    "typescript": ["typescript@6.0.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw=="],
 
     "uc.micro": ["uc.micro@2.1.0", "", {}, "sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A=="],
 
