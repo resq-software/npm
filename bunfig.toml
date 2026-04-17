@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Prevent `bun test` from using bun's built-in test runner on vitest files.
-# All tests in this workspace use vitest — run via `bun run test` which
-# delegates to each package's "test" script.
+# Redirect `bun test` away from vitest test files.
+# Most packages use vitest (run via `bun run test`); a few DSA complexity
+# benchmarks use bun:test natively. This prevents the built-in runner from
+# picking up vitest files that require jsdom, fake timers, or TS decorators.
 [test]
 root = "nonexistent-dir"
