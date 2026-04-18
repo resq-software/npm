@@ -26,13 +26,18 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+          persist-credentials: false
       - id: detect
         name: Detect changed packages
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_BEFORE: ${{ github.event.before }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            BASE="${{ github.event.before }}"
+          if [ "$EVENT_NAME" = "push" ]; then
+            BASE="$EVENT_BEFORE"
           else
-            BASE="${{ github.event.pull_request.base.sha }}"
+            BASE="$PR_BASE_SHA"
           fi
 
           if [ "$BASE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BASE" 2>/dev/null; then
@@ -119,6 +124,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/prepare
       - name: Biome
         run: bunx biome ci .
@@ -137,13 +144,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/prepare
       - name: Build workspace
         run: bun run build
       - name: Verify package build
+        env:
+          PKG: ${{ matrix.package }}
         run: |
-          if [ ! -d "packages/${{ matrix.package }}/lib" ]; then
-            echo "❌ Build output missing: packages/${{ matrix.package }}/lib"
+          if [ ! -d "packages/$PKG/lib" ]; then
+            echo "❌ Build output missing: packages/$PKG/lib"
             exit 1
           fi
           echo "✅ Build output OK"
@@ -161,6 +172,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/prepare
       - name: Build workspace dependencies
         run: bun run build
@@ -184,6 +197,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/prepare
       - name: Build workspace dependencies
         run: bun run build
@@ -201,10 +216,13 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: ./.github/actions/prepare
       - name: Check for changeset
+        env:
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
-          STATUS=$(bunx changeset status --since origin/${{ github.event.pull_request.base.ref }} 2>&1) || true
+          STATUS=$(bunx changeset status --since "origin/$PR_BASE_REF" 2>&1) || true
           echo "$STATUS"
           if echo "$STATUS" | grep -q "No changesets present"; then
             echo ""
@@ -223,6 +241,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/prepare
       - run: bun run build-storybook
         working-directory: packages/ui
@@ -234,6 +254,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/prepare
       - run: bun run lint:knip
         working-directory: packages/ui
@@ -245,6 +267,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/prepare
       - run: bun lint:md
         working-directory: packages/ui
@@ -256,6 +280,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: 22

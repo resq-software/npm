@@ -21,8 +21,9 @@ permissions:
 
 jobs:
   scan:
-    uses: resq-software/.github/.github/workflows/security-scan.yml@main
+    uses: resq-software/.github/.github/workflows/security-scan.yml@f4b51a620aa1bf89c0bce4f434b36f92ff7d517d # main
     with:
       languages: '["javascript-typescript","actions"]'
       enable-semgrep: true
-    secrets: inherit
+    secrets:
+      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}

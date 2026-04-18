@@ -24,6 +24,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: master
+          # zizmor: ignore[artipacked] -- changesets/action needs credentials to push version bumps
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up git user

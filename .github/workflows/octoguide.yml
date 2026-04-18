@@ -24,7 +24,7 @@ on:
       - created
       - deleted
       - edited
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] -- needs write access; guarded by same-repo check below
     types:
       - edited
       - opened
@@ -36,7 +36,7 @@ permissions:
 
 jobs:
   octoguide:
-    if: ${{ !endsWith(github.actor, '[bot]') }}
+    if: ${{ !endsWith(github.actor, '[bot]') && (github.event_name != 'pull_request_target' || github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
     steps:
       - uses: JoshuaKGoldberg/octoguide@e2c774d098e6b38c428bcd90dcca254389544aef # 0.21.10
