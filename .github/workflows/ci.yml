@@ -262,3 +262,36 @@ jobs:
       - uses: ./.github/actions/prepare
       - run: bun lint:spelling
         working-directory: packages/ui
+
+  # ── Gate for branch protection ────────────────────────────────────────
+  # Single status-check context consumed by the org ruleset
+  # `default-branch-baseline` (id 15191038). Passes iff every real job
+  # succeeded or was legitimately skipped (detect-based filtering or the
+  # changeset PR-only gate). Needs all 10 upstream jobs.
+
+  required:
+    name: required
+    needs:
+      - detect
+      - lint
+      - build
+      - test
+      - typecheck
+      - changeset
+      - storybook
+      - knip
+      - markdown
+      - spelling
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Aggregate upstream results
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          set -eu
+          echo "$RESULTS" | jq -r 'to_entries[] | "\(.key)=\(.value.result)"'
+          if echo "$RESULTS" | jq -e 'to_entries[] | select(.value.result != "success" and .value.result != "skipped")' >/dev/null; then
+            echo "::error::One or more upstream jobs failed or were cancelled"
+            exit 1
+          fi
