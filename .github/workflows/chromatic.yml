@@ -24,6 +24,7 @@ jobs:
         with:
           # Required: Chromatic uses git history to determine which stories changed.
           fetch-depth: 0
+          persist-credentials: false
       - uses: ./.github/actions/prepare
       - name: Build Storybook
         run: bun run build-storybook --quiet
