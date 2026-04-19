@@ -1,3 +1,19 @@
+<!--
+  Copyright 2026 ResQ Systems, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
 <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 640"><defs><mask id="imagine-text-gaps-qd6uo1" maskUnits="userSpaceOnUse"><rect x="0" y="0" width="1200" height="640" fill="white"/><rect x="180" y="64.88868713378906" width="94.36677551269531" height="18.815082550048828" fill="black" rx="2"/><rect x="1080" y="54.88869094848633" width="48.30721664428711" height="18.815082550048828" fill="black" rx="2"/><rect x="140" y="504.888671875" width="87.78682708740234" height="18.815082550048828" fill="black" rx="2"/><rect x="52" y="488.5915222167969" width="175.1326446533203" height="74.37164306640625" fill="black" rx="2"/><rect x="54.000003814697266" y="569.0368041992188" width="309.7994384765625" height="20.666967391967773" fill="black" rx="2"/><rect x="19.66850471496582" y="5.888687610626221" width="61.46708679199219" height="18.815082550048828" fill="black" rx="2"/><rect x="134.96717834472656" y="5.888687610626221" width="54.887149810791016" height="18.815082550048828" fill="black" rx="2"/><rect x="242.10009765625" y="5.888687610626221" width="74.626953125" height="18.815082550048828" fill="black" rx="2"/><rect x="52" y="22.888689041137695" width="94.36676025390625" height="18.815082550048828" fill="black" rx="2"/></mask></defs>
 <title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">ResQ OG banner v5 — high contrast</title>
 <desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Dark banner with bold logo mark, visible coordination mesh, punchy data UI</desc>

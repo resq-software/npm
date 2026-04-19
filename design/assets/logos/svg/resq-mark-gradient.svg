@@ -1,3 +1,19 @@
+<!--
+  Copyright 2026 ResQ Systems, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
 <svg width="519" height="519" viewBox="0 0 519 519" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M259.037 390.497C331.641 390.497 390.497 331.641 390.497 259.037C390.497 186.434 331.641 127.578 259.037 127.578C186.434 127.578 127.578 186.434 127.578 259.037C127.578 331.641 186.434 390.497 259.037 390.497Z" stroke="#D5E5F7" stroke-width="6.075"/>
 <path d="M259.038 452.767C366.031 452.767 452.767 366.031 452.767 259.037C452.767 152.044 366.031 65.3077 259.038 65.3077C152.044 65.3077 65.3078 152.044 65.3078 259.037C65.3078 366.031 152.044 452.767 259.038 452.767Z" stroke="#D5E5F7" stroke-width="6.075"/>
