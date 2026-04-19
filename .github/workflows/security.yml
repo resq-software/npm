@@ -25,5 +25,5 @@ jobs:
     with:
       languages: '["javascript-typescript","actions"]'
       enable-semgrep: true
-    secrets:
-      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+    # zizmor: ignore[excessive-permissions] -- called workflow doesn't declare secret inputs; inherit required
+    secrets: inherit
