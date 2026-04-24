@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@jsheaven/perf": "^1.1.1",
-    "effect": "4.0.0-beta.50",
+    "effect": "4.0.0-beta.57",
     "tsdown": "^0.21.7",
     "typescript": "6.0.3",
     "vitest": "4.1.4"
