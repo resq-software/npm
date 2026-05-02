@@ -30,6 +30,7 @@ jobs:
         run: bun run build-storybook --quiet
         working-directory: packages/ui
       - name: Run Chromatic
+        if: github.actor != 'dependabot[bot]'
         uses: chromaui/action@cad40970f69e7a6a5bef4ddfe42c01309ba17cb1 # v15
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
