@@ -26,5 +26,4 @@ jobs:
       languages: '["javascript-typescript","actions"]'
       enable-semgrep: true
       enable-osv: false
-    # zizmor: ignore[excessive-permissions] -- called workflow doesn't declare secret inputs; inherit required
-    secrets: inherit
+    secrets: inherit # zizmor: ignore[secrets-inherit]
