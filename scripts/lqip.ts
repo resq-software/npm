@@ -35,7 +35,7 @@
 import { Glob, file as bunFile } from 'bun';
 import { existsSync } from 'node:fs';
 import { cpus } from 'node:os';
-import { basename, resolve } from 'node:path';
+import { basename, resolve, relative } from 'node:path';
 import { Worker } from 'node:worker_threads';
 
 // ── Types ───────────────────────────────────────────────────────────────
@@ -56,6 +56,7 @@ interface LqipEntry {
 /** Message sent to a worker. */
 interface WorkerTask {
 	filePath: string;
+	storePath: string;
 	width: number;
 	height: number;
 }
@@ -74,7 +75,7 @@ interface WorkerError {
 
 type WorkerMessage = WorkerResult | WorkerError;
 
-const IMAGE_EXTENSIONS = ['*.png', '*.jpg', '*.jpeg', '*.webp'] as const;
+const IMAGE_EXTENSIONS = ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.webp'] as const;
 
 // ── Worker Pool ─────────────────────────────────────────────────────────
 
@@ -84,18 +85,17 @@ const IMAGE_EXTENSIONS = ['*.png', '*.jpg', '*.jpeg', '*.webp'] as const;
  */
 class WorkerPool {
 	private workers: Worker[] = [];
+	private idleWorkers: Worker[] = [];
 	private queue: Array<{
 		task: WorkerTask;
 		resolve: (msg: WorkerMessage) => void;
 	}> = [];
-	private active = 0;
-	private readonly maxWorkers: number;
 
 	constructor(workerPath: string, poolSize: number) {
-		this.maxWorkers = poolSize;
 		for (let i = 0; i < poolSize; i++) {
 			const w = new Worker(workerPath);
 			this.workers.push(w);
+			this.idleWorkers.push(w);
 		}
 	}
 
@@ -109,14 +109,13 @@ class WorkerPool {
 
 	/** Try to dispatch queued tasks to idle workers. */
 	private drain(): void {
-		while (this.queue.length > 0 && this.active < this.maxWorkers) {
+		while (this.queue.length > 0 && this.idleWorkers.length > 0) {
 			const job = this.queue.shift()!;
-			const worker = this.workers[this.active % this.maxWorkers];
-			this.active++;
+			const worker = this.idleWorkers.pop()!;
 
 			const handler = (msg: WorkerMessage) => {
 				worker.off('message', handler);
-				this.active--;
+				this.idleWorkers.push(worker);
 				job.resolve(msg);
 				this.drain();
 			};
@@ -130,6 +129,7 @@ class WorkerPool {
 	async shutdown(): Promise<void> {
 		await Promise.all(this.workers.map((w) => w.terminate()));
 		this.workers = [];
+		this.idleWorkers = [];
 	}
 }
 
@@ -158,8 +158,19 @@ async function loadExistingLqip(outPath: string): Promise<LqipEntry[]> {
 	try {
 		const raw = await bunFile(outPath).text();
 		const data: unknown = JSON.parse(raw);
-		if (!Array.isArray(data)) return [];
-		return data as LqipEntry[];
+		if (Array.isArray(data)) return data as LqipEntry[];
+		
+		const entries: LqipEntry[] = [];
+		if (data && typeof data === 'object') {
+			for (const obj of Object.values(data)) {
+				if (obj && typeof obj === 'object') {
+					for (const entry of Object.values(obj)) {
+						entries.push(entry as LqipEntry);
+					}
+				}
+			}
+		}
+		return entries;
 	} catch {
 		console.error(`⚠ Could not parse existing LQIP file: ${outPath}`);
 		return [];
@@ -232,6 +243,43 @@ function chunk<T>(arr: T[], size: number): T[][] {
 	return out;
 }
 
+/** Write LqipEntry array to disk as a 2D object for dot-notation access */
+async function writeLqipFile(entries: LqipEntry[], outPath: string) {
+	// Sort to ensure stable output
+	const sorted = [...entries].sort((a, b) => a.path.localeCompare(b.path));
+	
+	const outObj: Record<string, Record<string, LqipEntry>> = {};
+	const camelMap = new Map<string, string>();
+	
+	for (const entry of sorted) {
+		const parts = entry.path.split('/');
+		const filename = parts[parts.length - 1];
+		
+		// Convert filename (e.g. icon-dark-32x32.png) to camelCase (e.g. iconDark32x32Png)
+		let camelName = filename
+			.replace(/[-_\.]([a-z0-9])/gi, g => g[1].toUpperCase())
+			.replace(/[^a-zA-Z0-9]/g, '');
+			
+		// Valid identifiers can't start with a number
+		if (/^[0-9]/.test(camelName)) {
+			camelName = 'img' + camelName;
+		}
+		
+		const dimKey = 'x' + entry.width;
+		
+		if (camelMap.has(camelName) && camelMap.get(camelName) !== entry.path) {
+			console.error(`COLLISION DETECTED: ${camelName} -> ${camelMap.get(camelName)} AND ${entry.path}`);
+		}
+		camelMap.set(camelName, entry.path);
+		
+		if (!outObj[camelName]) outObj[camelName] = {};
+		outObj[camelName][dimKey] = entry;
+	}
+	
+	const json = JSON.stringify(outObj, null, '\t');
+	await Bun.write(outPath, json);
+}
+
 // ── CLI ─────────────────────────────────────────────────────────────────
 
 if (import.meta.main) {
@@ -286,16 +334,24 @@ if (import.meta.main) {
 		process.exit(1);
 	}
 
+	const designDir = resolve('design');
+	const imagesMap = images.map(absPath => ({
+		absolutePath: absPath,
+		storePath: './' + relative(designDir, absPath).replace(/\\/g, '/')
+	}));
+	const storePaths = imagesMap.map(img => img.storePath);
+	const storeToAbs = new Map(imagesMap.map(img => [img.storePath, img.absolutePath]));
+
 	// ── Sync mode: diff existing data against disk ────────────────────────
-	let imagesToProcess: string[];
+	let imagesToProcess: { filePath: string, storePath: string }[];
 	let retainedEntries: LqipEntry[] = [];
 
 	if (syncMode) {
 		const existing = await loadExistingLqip(outPath);
-		const { retained, stale, newPaths } = syncLqip(existing, images, w, h);
+		const { retained, stale, newPaths } = syncLqip(existing, storePaths, w, h);
 
 		retainedEntries = retained;
-		imagesToProcess = newPaths;
+		imagesToProcess = newPaths.map(sp => ({ filePath: storeToAbs.get(sp)!, storePath: sp }));
 
 		if (stale.length > 0) {
 			console.error(`\n🗑  Pruning ${stale.length} stale entries:`);
@@ -311,18 +367,16 @@ if (import.meta.main) {
 
 		if (newPaths.length === 0) {
 			// Nothing new to process — just write the retained set (stale removed)
-			const results = retained.sort((a, b) => a.src.localeCompare(b.src));
-			const json = JSON.stringify(results, null, '\t');
-			await Bun.write(outPath, json);
+			await writeLqipFile(retained, outPath);
 
 			const elapsed = ((performance.now() - start) / 1000).toFixed(2);
 			console.error(
-				`\nDone in ${elapsed}s — ${results.length} entries (no new images to process)`,
+				`\nDone in ${elapsed}s — ${retained.length} entries (no new images to process)`,
 			);
 			process.exit(0);
 		}
 	} else {
-		imagesToProcess = images;
+		imagesToProcess = imagesMap.map(img => ({ filePath: img.absolutePath, storePath: img.storePath }));
 	}
 
 	// ── Process images ────────────────────────────────────────────────────
@@ -343,7 +397,7 @@ if (import.meta.main) {
 
 	for (const batch of batches) {
 		const batchResults = await Promise.all(
-			batch.map((img) => pool.submit({ filePath: img, width: w, height: h })),
+			batch.map((img) => pool.submit({ filePath: img.filePath, storePath: img.storePath, width: w, height: h })),
 		);
 
 		for (const msg of batchResults) {
@@ -367,16 +421,11 @@ if (import.meta.main) {
 	// Merge retained (sync mode) with newly generated entries
 	const results = [...retainedEntries, ...newResults];
 
-	// Sort results by src for stable output
-	results.sort((a, b) => a.src.localeCompare(b.src));
-
-	const json = JSON.stringify(results, null, '\t');
-
 	if (outPath) {
-		await Bun.write(outPath, json);
+		await writeLqipFile(results, outPath);
 		console.error(`Wrote ${results.length} entries → ${outPath}`);
 	} else {
-		console.log(json);
+		console.log(JSON.stringify(results, null, '\t'));
 	}
 
 	const elapsed = ((performance.now() - start) / 1000).toFixed(2);
