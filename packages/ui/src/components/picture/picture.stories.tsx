@@ -86,3 +86,46 @@ export const Card: Story = {
 		shadow: "lg",
 	},
 };
+
+/**
+ * Demonstrates LQIP with a raw base64 data-URL string.
+ * The placeholder is shown as a blurred background until the full image loads.
+ */
+export const WithLqipString: Story = {
+	args: {
+		src: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+		alt: "Workspace with LQIP",
+		variant: "hero",
+		rounded: "lg",
+		lqip: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+	},
+	parameters: {
+		layout: "fullscreen",
+	},
+};
+
+/**
+ * Demonstrates LQIP with an `LqipEntry` object, mirroring how consumers
+ * use the registry via dot-notation:
+ *
+ * ```tsx
+ * import lqip from "@resq-sw/design/assets/lqip.json";
+ * <Picture lqip={lqip.resqMarkColorPng.x16} />
+ * ```
+ */
+export const WithLqipEntry: Story = {
+	args: {
+		src: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+		alt: "Code with LQIP entry",
+		variant: "card",
+		rounded: "lg",
+		shadow: "md",
+		lqip: {
+			lqip: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+			path: "./assets/icons/png/example.png",
+			src: "example",
+			width: 16,
+			height: 16,
+		},
+	},
+};

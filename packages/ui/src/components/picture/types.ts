@@ -15,4 +15,25 @@
  */
 
 export type Overwrite<T, U> = Omit<T, keyof U> & U;
-export type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
+export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+/** A single entry from the LQIP registry (design/assets/lqip.json). */
+export interface LqipEntry {
+	/** Base64 data-URL of the low-quality placeholder. */
+	readonly lqip: string;
+	/** Relative path to the source image. */
+	readonly path: string;
+	/** Stem of the filename (no extension, no directory). */
+	readonly src: string;
+	/** Placeholder width in pixels. */
+	readonly width: number;
+	/** Placeholder height in pixels. */
+	readonly height: number;
+}
+
+/**
+ * Accepted value for the Picture `lqip` prop.
+ * - `string` — a raw base64 data-URL.
+ * - `LqipEntry` — an entry from the registry (the `lqip` field is extracted automatically).
+ */
+export type LqipValue = string | LqipEntry;

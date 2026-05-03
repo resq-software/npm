@@ -27,7 +27,14 @@ import {
 	useState,
 } from "react";
 import { cn } from "../../lib/utils.js";
-import type { DistributiveOmit, Overwrite } from "./types.js";
+import type { DistributiveOmit, LqipValue, Overwrite } from "./types.js";
+
+/** Resolve an LqipValue to a raw base64 data-URL string. */
+function resolveLqip(value: LqipValue | undefined): string | undefined {
+	if (value == null) return undefined;
+	if (typeof value === "string") return value;
+	return value.lqip;
+}
 
 function useEventCallback<Args extends unknown[], R>(fn: (...args: Args) => R) {
 	const ref = useRef<(...args: Args) => R>(() => {
@@ -93,6 +100,7 @@ const pictureVariants = cva("border border-border bg-surface", {
 namespace Picture {
 	export interface BaseRootElementProps {
 		className?: string;
+		style?: React.CSSProperties;
 		onLoad?: React.ReactEventHandler<HTMLImageElement>;
 		onError?: React.ReactEventHandler<HTMLImageElement>;
 	}
@@ -104,6 +112,21 @@ namespace Picture {
 		 * Image source URL
 		 */
 		src?: string;
+
+		/**
+		 * Low-Quality Image Placeholder (LQIP).
+		 * Accepts a raw base64 data-URL string **or** an `LqipEntry` object
+		 * from the LQIP registry (`design/assets/lqip.json`).
+		 *
+		 * @example
+		 * // Raw string
+		 * <Picture lqip="data:image/png;base64,..." />
+		 *
+		 * // Registry entry (dot-notation)
+		 * import lqip from "@resq-sw/design/assets/lqip.json";
+		 * <Picture lqip={lqip.resqMarkColorPng.x16} />
+		 */
+		lqip?: LqipValue;
 
 		/**
 		 * Alternative text for accessibility
@@ -170,18 +193,21 @@ export const PictureInternal = <
 	className,
 	onLoad,
 	onError,
+	lqip,
+	style,
 	...rest
 }: Picture.Props<TRootElement>) => {
 	const [isLoading, setIsLoading] = useState<boolean>(true);
+	const resolvedLqip = resolveLqip(lqip);
 
 	const handleLoad = useEventCallback((e: SyntheticEvent<HTMLImageElement>) => {
-		(onLoad as any)?.(e);
+		if (onLoad) (onLoad as React.ReactEventHandler<HTMLImageElement>)(e);
 		if (e.defaultPrevented) return;
 		setIsLoading(false);
 	});
 
 	const handleError = useEventCallback((e: SyntheticEvent<HTMLImageElement>) => {
-		(onError as any)?.(e);
+		if (onError) (onError as React.ReactEventHandler<HTMLImageElement>)(e);
 		if (e.defaultPrevented) return;
 		setIsLoading(false);
 		console.warn("Image failed to load:", src);
@@ -202,15 +228,29 @@ export const PictureInternal = <
 			cn(
 				pictureVariants({
 					variant,
-					isLoading,
+					isLoading: isLoading && !resolvedLqip,
 					rounded,
 					shadow,
 					transition,
 					className,
 				}),
 			),
-		[className, variant, isLoading, rounded, shadow, transition],
+		[className, variant, isLoading, resolvedLqip, rounded, shadow, transition],
 	);
+
+	const imgStyle = useMemo(() => {
+		const baseStyle = style as React.CSSProperties | undefined;
+		if (isLoading && resolvedLqip) {
+			return {
+				...baseStyle,
+				backgroundImage: `url("${resolvedLqip}")`,
+				backgroundSize: "cover",
+				backgroundPosition: "center",
+				backgroundRepeat: "no-repeat",
+			};
+		}
+		return baseStyle;
+	}, [isLoading, resolvedLqip, style]);
 
 	const imgProps = {
 		...defaultProps,
@@ -218,15 +258,18 @@ export const PictureInternal = <
 		src,
 		srcSet,
 		sizes,
+		style: imgStyle,
 		className: imgClassName,
 		"aria-busy": isLoading,
 		"aria-label": alt,
-	};
+	} as unknown as React.ComponentProps<TRootElement>;
+
+	const Comp = Component as React.ElementType;
 
 	return (
 		<picture className={cn("block overflow-hidden", picture?.className)}>
 			{source && <source srcSet={source.srcSet} sizes={source.sizes} media={source.media} />}
-			<Component {...(imgProps as any)} />
+			<Comp {...imgProps} />
 		</picture>
 	);
 };

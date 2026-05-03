@@ -46,7 +46,7 @@ parentPort.on('message', async (task: WorkerTask) => {
 			ok: true,
 			entry: {
 				lqip: `data:image/${format};base64,${lqipBuf.toString('base64')}`,
-				path: task.filePath,
+				path: task.storePath,
 				src: basename(task.filePath).replace(/\.[^.]+$/, ''),
 				width: task.width,
 				height: task.height,
