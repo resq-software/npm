@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { AsyncMethod } from '../types.js';
-import { ThrottleAsyncExecutor } from './throttle-async-executor.js';
+import type { AsyncMethod } from "../types.js";
+import { ThrottleAsyncExecutor } from "./throttle-async-executor.js";
 
 /**
  * Wraps an async method to limit concurrent executions.
@@ -52,12 +52,12 @@ import { ThrottleAsyncExecutor } from './throttle-async-executor.js';
  * ```
  */
 export function throttleAsyncFn<D = any, A extends any[] = any[]>(
-  originalMethod: AsyncMethod<D, A>,
-  parallelCalls = 1,
+	originalMethod: AsyncMethod<D, A>,
+	parallelCalls = 1,
 ): AsyncMethod<D, A> {
-  const executor = new ThrottleAsyncExecutor(originalMethod, parallelCalls);
+	const executor = new ThrottleAsyncExecutor(originalMethod, parallelCalls);
 
-  return function (this: any, ...args: A): Promise<D> {
-    return executor.exec(this, args);
-  };
+	return function (this: any, ...args: A): Promise<D> {
+		return executor.exec(this, args);
+	};
 }

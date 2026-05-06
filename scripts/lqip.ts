@@ -32,11 +32,11 @@
  *   bun scripts/lqip.ts design/assets/images/png 15x15 --concurrency 4 --batch 8
  */
 
-import { Glob, file as bunFile } from 'bun';
-import { existsSync } from 'node:fs';
-import { cpus } from 'node:os';
-import { basename, resolve, relative } from 'node:path';
-import { Worker } from 'node:worker_threads';
+import { Glob, file as bunFile } from "bun";
+import { existsSync } from "node:fs";
+import { cpus } from "node:os";
+import { basename, resolve, relative } from "node:path";
+import { Worker } from "node:worker_threads";
 
 // ── Types ───────────────────────────────────────────────────────────────
 
@@ -75,7 +75,7 @@ interface WorkerError {
 
 type WorkerMessage = WorkerResult | WorkerError;
 
-const IMAGE_EXTENSIONS = ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.webp'] as const;
+const IMAGE_EXTENSIONS = ["**/*.png", "**/*.jpg", "**/*.jpeg", "**/*.webp"] as const;
 
 // ── Worker Pool ─────────────────────────────────────────────────────────
 
@@ -114,13 +114,13 @@ class WorkerPool {
 			const worker = this.idleWorkers.pop()!;
 
 			const handler = (msg: WorkerMessage) => {
-				worker.off('message', handler);
+				worker.off("message", handler);
 				this.idleWorkers.push(worker);
 				job.resolve(msg);
 				this.drain();
 			};
 
-			worker.on('message', handler);
+			worker.on("message", handler);
 			worker.postMessage(job.task);
 		}
 	}
@@ -159,11 +159,11 @@ async function loadExistingLqip(outPath: string): Promise<LqipEntry[]> {
 		const raw = await bunFile(outPath).text();
 		const data: unknown = JSON.parse(raw);
 		if (Array.isArray(data)) return data as LqipEntry[];
-		
+
 		const entries: LqipEntry[] = [];
-		if (data && typeof data === 'object') {
+		if (data && typeof data === "object") {
 			for (const obj of Object.values(data)) {
-				if (obj && typeof obj === 'object') {
+				if (obj && typeof obj === "object") {
 					for (const entry of Object.values(obj)) {
 						entries.push(entry as LqipEntry);
 					}
@@ -247,36 +247,38 @@ function chunk<T>(arr: T[], size: number): T[][] {
 async function writeLqipFile(entries: LqipEntry[], outPath: string) {
 	// Sort to ensure stable output
 	const sorted = [...entries].sort((a, b) => a.path.localeCompare(b.path));
-	
+
 	const outObj: Record<string, Record<string, LqipEntry>> = {};
 	const camelMap = new Map<string, string>();
-	
+
 	for (const entry of sorted) {
-		const parts = entry.path.split('/');
+		const parts = entry.path.split("/");
 		const filename = parts[parts.length - 1];
-		
+
 		// Convert filename (e.g. icon-dark-32x32.png) to camelCase (e.g. iconDark32x32Png)
 		let camelName = filename
-			.replace(/[-_\.]([a-z0-9])/gi, g => g[1].toUpperCase())
-			.replace(/[^a-zA-Z0-9]/g, '');
-			
+			.replace(/[-_.]([a-z0-9])/gi, (g) => g[1].toUpperCase())
+			.replace(/[^a-zA-Z0-9]/g, "");
+
 		// Valid identifiers can't start with a number
 		if (/^[0-9]/.test(camelName)) {
-			camelName = 'img' + camelName;
+			camelName = `img${camelName}`;
 		}
-		
-		const dimKey = 'x' + entry.width;
-		
+
+		const dimKey = `x${entry.width}`;
+
 		if (camelMap.has(camelName) && camelMap.get(camelName) !== entry.path) {
-			console.error(`COLLISION DETECTED: ${camelName} -> ${camelMap.get(camelName)} AND ${entry.path}`);
+			console.error(
+				`COLLISION DETECTED: ${camelName} -> ${camelMap.get(camelName)} AND ${entry.path}`,
+			);
 		}
 		camelMap.set(camelName, entry.path);
-		
+
 		if (!outObj[camelName]) outObj[camelName] = {};
 		outObj[camelName][dimKey] = entry;
 	}
-	
-	const json = JSON.stringify(outObj, null, '\t');
+
+	const json = JSON.stringify(outObj, null, "\t");
 	await Bun.write(outPath, json);
 }
 
@@ -300,29 +302,29 @@ if (import.meta.main) {
 		return true;
 	}
 
-	const outPath = flag('--out', '');
-	const concurrency = Number(flag('--concurrency', String(cpus().length)));
-	const batchSize = Number(flag('--batch', '32'));
-	const syncMode = boolFlag('--sync');
+	const outPath = flag("--out", "");
+	const concurrency = Number(flag("--concurrency", String(cpus().length)));
+	const batchSize = Number(flag("--batch", "32"));
+	const syncMode = boolFlag("--sync");
 
 	const [directory, dimensions] = args;
 
 	if (!directory || !dimensions) {
 		console.error(
-			'Usage: bun scripts/lqip.ts <directory> <width>x<height> [--out <file>] [--concurrency <n>] [--batch <n>] [--sync]',
+			"Usage: bun scripts/lqip.ts <directory> <width>x<height> [--out <file>] [--concurrency <n>] [--batch <n>] [--sync]",
 		);
 		process.exit(1);
 	}
 
 	if (syncMode && !outPath) {
-		console.error('--sync requires --out <file> to read/write the existing LQIP data');
+		console.error("--sync requires --out <file> to read/write the existing LQIP data");
 		process.exit(1);
 	}
 
-	const [w, h] = dimensions.split('x').map(Number);
+	const [w, h] = dimensions.split("x").map(Number);
 
 	if (!w || !h || Number.isNaN(w) || Number.isNaN(h)) {
-		console.error('Dimensions must be <width>x<height>, e.g. 15x15');
+		console.error("Dimensions must be <width>x<height>, e.g. 15x15");
 		process.exit(1);
 	}
 
@@ -334,16 +336,16 @@ if (import.meta.main) {
 		process.exit(1);
 	}
 
-	const designDir = resolve('design');
-	const imagesMap = images.map(absPath => ({
+	const designDir = resolve("design");
+	const imagesMap = images.map((absPath) => ({
 		absolutePath: absPath,
-		storePath: './' + relative(designDir, absPath).replace(/\\/g, '/')
+		storePath: `./${relative(designDir, absPath).replace(/\\/g, "/")}`,
 	}));
-	const storePaths = imagesMap.map(img => img.storePath);
-	const storeToAbs = new Map(imagesMap.map(img => [img.storePath, img.absolutePath]));
+	const storePaths = imagesMap.map((img) => img.storePath);
+	const storeToAbs = new Map(imagesMap.map((img) => [img.storePath, img.absolutePath]));
 
 	// ── Sync mode: diff existing data against disk ────────────────────────
-	let imagesToProcess: { filePath: string, storePath: string }[];
+	let imagesToProcess: { filePath: string; storePath: string }[];
 	let retainedEntries: LqipEntry[] = [];
 
 	if (syncMode) {
@@ -351,7 +353,7 @@ if (import.meta.main) {
 		const { retained, stale, newPaths } = syncLqip(existing, storePaths, w, h);
 
 		retainedEntries = retained;
-		imagesToProcess = newPaths.map(sp => ({ filePath: storeToAbs.get(sp)!, storePath: sp }));
+		imagesToProcess = newPaths.map((sp) => ({ filePath: storeToAbs.get(sp)!, storePath: sp }));
 
 		if (stale.length > 0) {
 			console.error(`\n🗑  Pruning ${stale.length} stale entries:`);
@@ -376,7 +378,10 @@ if (import.meta.main) {
 			process.exit(0);
 		}
 	} else {
-		imagesToProcess = imagesMap.map(img => ({ filePath: img.absolutePath, storePath: img.storePath }));
+		imagesToProcess = imagesMap.map((img) => ({
+			filePath: img.absolutePath,
+			storePath: img.storePath,
+		}));
 	}
 
 	// ── Process images ────────────────────────────────────────────────────
@@ -385,7 +390,7 @@ if (import.meta.main) {
 		`\nProcessing ${imagesToProcess.length} images (pool: ${poolSize} workers, batch: ${batchSize})`,
 	);
 
-	const workerPath = new URL('./lqip.worker.ts', import.meta.url).pathname;
+	const workerPath = new URL("./lqip.worker.ts", import.meta.url).pathname;
 	const pool = new WorkerPool(workerPath, poolSize);
 
 	const newResults: LqipEntry[] = [];
@@ -397,7 +402,9 @@ if (import.meta.main) {
 
 	for (const batch of batches) {
 		const batchResults = await Promise.all(
-			batch.map((img) => pool.submit({ filePath: img.filePath, storePath: img.storePath, width: w, height: h })),
+			batch.map((img) =>
+				pool.submit({ filePath: img.filePath, storePath: img.storePath, width: w, height: h }),
+			),
 		);
 
 		for (const msg of batchResults) {
@@ -425,7 +432,7 @@ if (import.meta.main) {
 		await writeLqipFile(results, outPath);
 		console.error(`Wrote ${results.length} entries → ${outPath}`);
 	} else {
-		console.log(JSON.stringify(results, null, '\t'));
+		console.log(JSON.stringify(results, null, "\t"));
 	}
 
 	const elapsed = ((performance.now() - start) / 1000).toFixed(2);
@@ -438,4 +445,3 @@ if (import.meta.main) {
 
 export { WorkerPool, discoverImages, loadExistingLqip, syncLqip };
 export type { LqipEntry, SyncResult, WorkerMessage, WorkerTask };
-

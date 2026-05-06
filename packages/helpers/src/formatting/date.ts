@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DateFormatOptions } from './date.types.js';
+import type { DateFormatOptions } from "./date.types.js";
 
 /**
  * Formats a date string to a consistent format to prevent hydration mismatches.
@@ -30,29 +30,29 @@ import type { DateFormatOptions } from './date.types.js';
  * ```
  */
 export function formatDate(
-  date: string | Date,
-  options = {
-    month: 'short',
-    year: 'numeric',
-  } as DateFormatOptions,
+	date: string | Date,
+	options = {
+		month: "short",
+		year: "numeric",
+	} as DateFormatOptions,
 ): string {
-  try {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
+	try {
+		const dateObj = typeof date === "string" ? new Date(date) : date;
 
-    if (Number.isNaN(dateObj.getTime())) {
-      return 'Invalid date';
-    }
+		if (Number.isNaN(dateObj.getTime())) {
+			return "Invalid date";
+		}
 
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      ...options,
-      timeZone: 'UTC',
-    });
+		const formatter = new Intl.DateTimeFormat("en-US", {
+			...options,
+			timeZone: "UTC",
+		});
 
-    return formatter.format(dateObj);
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return 'Invalid date';
-  }
+		return formatter.format(dateObj);
+	} catch (error) {
+		console.error("Error formatting date:", error);
+		return "Invalid date";
+	}
 }
 
 /**
@@ -72,22 +72,22 @@ export function formatDate(
  * ```
  */
 export function formatDatePeriod(
-  startDate: string | Date,
-  endDate?: string | Date | null,
-  isCurrent: boolean = false,
+	startDate: string | Date,
+	endDate?: string | Date | null,
+	isCurrent: boolean = false,
 ): string {
-  const formattedStart = formatDate(startDate, { month: 'short', year: 'numeric' });
+	const formattedStart = formatDate(startDate, { month: "short", year: "numeric" });
 
-  if (isCurrent) {
-    return `${formattedStart} - Present`;
-  }
+	if (isCurrent) {
+		return `${formattedStart} - Present`;
+	}
 
-  if (endDate) {
-    const formattedEnd = formatDate(endDate, { month: 'short', year: 'numeric' });
-    return `${formattedStart} - ${formattedEnd}`;
-  }
+	if (endDate) {
+		const formattedEnd = formatDate(endDate, { month: "short", year: "numeric" });
+		return `${formattedStart} - ${formattedEnd}`;
+	}
 
-  return `${formattedStart} - Present`;
+	return `${formattedStart} - Present`;
 }
 
 /**
@@ -102,13 +102,13 @@ export function formatDatePeriod(
  * ```
  */
 export function formatDateTime(date: string | Date): string {
-  return formatDate(date, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+	return formatDate(date, {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+	});
 }
 
 /**
@@ -123,11 +123,11 @@ export function formatDateTime(date: string | Date): string {
  * ```
  */
 export function formatDateOnly(date: string | Date): string {
-  return formatDate(date, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+	return formatDate(date, {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
 }
 
 /**
@@ -142,10 +142,10 @@ export function formatDateOnly(date: string | Date): string {
  * ```
  */
 export function formatMonthYear(date: string | Date): string {
-  return formatDate(date, {
-    month: 'short',
-    year: 'numeric',
-  });
+	return formatDate(date, {
+		month: "short",
+		year: "numeric",
+	});
 }
 
 /**
@@ -155,17 +155,17 @@ export function formatMonthYear(date: string | Date): string {
  * @returns {string} The relative time string.
  */
 export function formatRelativeTime(date: Date | string): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
-  const now = new Date();
-  const diff = now.getTime() - d.getTime();
+	const d = typeof date === "string" ? new Date(date) : date;
+	const now = new Date();
+	const diff = now.getTime() - d.getTime();
 
-  const seconds = Math.floor(diff / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
+	const seconds = Math.floor(diff / 1000);
+	const minutes = Math.floor(seconds / 60);
+	const hours = Math.floor(minutes / 60);
+	const days = Math.floor(hours / 24);
 
-  if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-  if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-  if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-  return 'Just now';
+	if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
+	if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+	if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+	return "Just now";
 }

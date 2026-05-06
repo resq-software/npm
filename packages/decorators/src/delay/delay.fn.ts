@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Method } from '../types.js';
+import type { Method } from "../types.js";
 
 /**
  * Wraps a method to delay its execution by the specified time.
@@ -43,12 +43,12 @@ import type { Method } from '../types.js';
  * ```
  */
 export function delayFn<D = unknown, A extends unknown[] = unknown[]>(
-  originalMethod: Method<D, A>,
-  delayMs: number,
+	originalMethod: Method<D, A>,
+	delayMs: number,
 ): Method<void, A> {
-  return function (this: unknown, ...args: A): void {
-    setTimeout(() => {
-      originalMethod.apply(this, args);
-    }, delayMs);
-  };
+	return function (this: unknown, ...args: A): void {
+		setTimeout(() => {
+			originalMethod.apply(this, args);
+		}, delayMs);
+	};
 }

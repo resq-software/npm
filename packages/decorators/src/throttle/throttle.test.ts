@@ -14,56 +14,56 @@
  * limitations under the License.
  */
 
-import { describe, expect, test } from 'vitest';
-import { throttleFn } from './throttle.fn.js';
+import { describe, expect, test } from "vitest";
+import { throttleFn } from "./throttle.fn.js";
 
-describe('throttle', () => {
-  describe('throttleFn', () => {
-    test('executes first call immediately', () => {
-      let callCount = 0;
-      const fn = throttleFn(() => {
-        callCount++;
-      }, 1000);
+describe("throttle", () => {
+	describe("throttleFn", () => {
+		test("executes first call immediately", () => {
+			let callCount = 0;
+			const fn = throttleFn(() => {
+				callCount++;
+			}, 1000);
 
-      fn();
-      expect(callCount).toBe(1);
-    });
+			fn();
+			expect(callCount).toBe(1);
+		});
 
-    test('drops subsequent calls within throttle window', () => {
-      let callCount = 0;
-      const fn = throttleFn(() => {
-        callCount++;
-      }, 1000);
+		test("drops subsequent calls within throttle window", () => {
+			let callCount = 0;
+			const fn = throttleFn(() => {
+				callCount++;
+			}, 1000);
 
-      fn();
-      fn();
-      fn();
-      expect(callCount).toBe(1);
-    });
+			fn();
+			fn();
+			fn();
+			expect(callCount).toBe(1);
+		});
 
-    test('allows call after throttle window expires', async () => {
-      let callCount = 0;
-      const fn = throttleFn(() => {
-        callCount++;
-      }, 30);
+		test("allows call after throttle window expires", async () => {
+			let callCount = 0;
+			const fn = throttleFn(() => {
+				callCount++;
+			}, 30);
 
-      fn();
-      expect(callCount).toBe(1);
+			fn();
+			expect(callCount).toBe(1);
 
-      await new Promise((r) => setTimeout(r, 60));
-      fn();
-      expect(callCount).toBe(2);
-    });
+			await new Promise((r) => setTimeout(r, 60));
+			fn();
+			expect(callCount).toBe(2);
+		});
 
-    test('preserves arguments', () => {
-      const received: number[] = [];
-      const fn = throttleFn((x: number) => {
-        received.push(x);
-      }, 1000);
+		test("preserves arguments", () => {
+			const received: number[] = [];
+			const fn = throttleFn((x: number) => {
+				received.push(x);
+			}, 1000);
 
-      fn(42);
-      fn(99); // Should be dropped
-      expect(received).toEqual([42]);
-    });
-  });
+			fn(42);
+			fn(99); // Should be dropped
+			expect(received).toEqual([42]);
+		});
+	});
 });

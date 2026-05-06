@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { isNumber, isString, TaskExec } from '../_utils.js';
-import type { AsyncMethod } from '../types.js';
-import type { AsyncMemoizeConfig } from './memoize-async.types.js';
+import { isNumber, isString, TaskExec } from "../_utils.js";
+import type { AsyncMethod } from "../types.js";
+import type { AsyncMemoizeConfig } from "./memoize-async.types.js";
 
 /**
  * Wraps an async method to cache its results and deduplicate concurrent calls.
@@ -78,79 +78,79 @@ import type { AsyncMemoizeConfig } from './memoize-async.types.js';
  * ```
  */
 export function memoizeAsyncFn<D = any, A extends any[] = any[]>(
-  originalMethod: AsyncMethod<D, A>,
+	originalMethod: AsyncMethod<D, A>,
 ): AsyncMethod<D, A>;
 export function memoizeAsyncFn<D = any, A extends any[] = any[]>(
-  originalMethod: AsyncMethod<D, A>,
-  config: AsyncMemoizeConfig<any, D>,
+	originalMethod: AsyncMethod<D, A>,
+	config: AsyncMemoizeConfig<any, D>,
 ): AsyncMethod<D, A>;
 export function memoizeAsyncFn<D = any, A extends any[] = any[]>(
-  originalMethod: AsyncMethod<D, A>,
-  expirationTimeMs: number,
+	originalMethod: AsyncMethod<D, A>,
+	expirationTimeMs: number,
 ): AsyncMethod<D, A>;
 
 export function memoizeAsyncFn<D = any, A extends any[] = any[]>(
-  originalMethod: AsyncMethod<D, A>,
-  input?: AsyncMemoizeConfig<any, D> | number,
+	originalMethod: AsyncMethod<D, A>,
+	input?: AsyncMemoizeConfig<any, D> | number,
 ): AsyncMethod<D, A> {
-  const defaultConfig: AsyncMemoizeConfig<any, D> = {
-    cache: new Map<string, D>(),
-  };
-  const runner = new TaskExec();
-  const promCache = new Map<string, Promise<D>>();
-  let resolvedConfig = {
-    ...defaultConfig,
-  } as AsyncMemoizeConfig<any, D>;
+	const defaultConfig: AsyncMemoizeConfig<any, D> = {
+		cache: new Map<string, D>(),
+	};
+	const runner = new TaskExec();
+	const promCache = new Map<string, Promise<D>>();
+	let resolvedConfig = {
+		...defaultConfig,
+	} as AsyncMemoizeConfig<any, D>;
 
-  if (isNumber(input)) {
-    resolvedConfig.expirationTimeMs = input;
-  } else {
-    resolvedConfig = {
-      ...resolvedConfig,
-      ...input,
-    };
-  }
+	if (isNumber(input)) {
+		resolvedConfig.expirationTimeMs = input;
+	} else {
+		resolvedConfig = {
+			...resolvedConfig,
+			...input,
+		};
+	}
 
-  return async function (this: any, ...args: A): Promise<D> {
-    const keyResolver = isString(resolvedConfig.keyResolver)
-      ? this[resolvedConfig.keyResolver].bind(this)
-      : resolvedConfig.keyResolver;
+	return async function (this: any, ...args: A): Promise<D> {
+		const keyResolver = isString(resolvedConfig.keyResolver)
+			? this[resolvedConfig.keyResolver].bind(this)
+			: resolvedConfig.keyResolver;
 
-    let key;
+		let key: string;
 
-    if (keyResolver) {
-      key = keyResolver(...args);
-    } else {
-      key = JSON.stringify(args);
-    }
+		if (keyResolver) {
+			key = keyResolver(...args);
+		} else {
+			key = JSON.stringify(args);
+		}
 
-    if (promCache.has(key)) {
-      return promCache.get(key) as Promise<D>;
-    }
+		if (promCache.has(key)) {
+			return promCache.get(key) as Promise<D>;
+		}
 
-    const prom = (async (): Promise<D> => {
-      const inCache = (await resolvedConfig.cache?.has(key)) ?? false;
+		const prom = (async (): Promise<D> => {
+			const inCache = (await resolvedConfig.cache?.has(key)) ?? false;
 
-      if (inCache) {
-        return (await resolvedConfig.cache?.get(key)) as D;
-      }
+			if (inCache) {
+				return (await resolvedConfig.cache?.get(key)) as D;
+			}
 
-      const data = await originalMethod.apply(this, args);
-      await resolvedConfig.cache?.set(key, data);
+			const data = await originalMethod.apply(this, args);
+			await resolvedConfig.cache?.set(key, data);
 
-      if (resolvedConfig.expirationTimeMs !== undefined) {
-        runner.exec(() => {
-          resolvedConfig.cache?.delete(key);
-        }, resolvedConfig.expirationTimeMs);
-      }
+			if (resolvedConfig.expirationTimeMs !== undefined) {
+				runner.exec(() => {
+					resolvedConfig.cache?.delete(key);
+				}, resolvedConfig.expirationTimeMs);
+			}
 
-      return data;
-    })().finally(() => {
-      promCache.delete(key);
-    });
+			return data;
+		})().finally(() => {
+			promCache.delete(key);
+		});
 
-    promCache.set(key, prom);
+		promCache.set(key, prom);
 
-    return prom;
-  };
+		return prom;
+	};
 }

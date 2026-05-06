@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from './debounce.fn.js';
+export * from "./debounce.fn.js";

@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export * from './exec-time.fn.js';
-export * from './exec-time.js';
-export * from './exec-time.types.js';
+export * from "./exec-time.fn.js";
+export * from "./exec-time.js";
+export * from "./exec-time.types.js";

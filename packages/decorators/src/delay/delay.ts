@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Decorator, Method } from '../types.js';
-import { delayFn } from './delay.fn.js';
+import type { Decorator, Method } from "../types.js";
+import { delayFn } from "./delay.fn.js";
 
 /**
  * Decorator that delays the execution of a method by the specified time.
@@ -46,16 +46,16 @@ import { delayFn } from './delay.fn.js';
  * ```
  */
 export function delay<T = unknown>(delayMs: number): Decorator<T> {
-  return (
-    _target: T,
-    _propertyName: keyof T,
-    descriptor: TypedPropertyDescriptor<Method<unknown>>,
-  ): TypedPropertyDescriptor<Method<unknown>> => {
-    if (descriptor.value) {
-      descriptor.value = delayFn(descriptor.value, delayMs);
+	return (
+		_target: T,
+		_propertyName: keyof T,
+		descriptor: TypedPropertyDescriptor<Method<unknown>>,
+	): TypedPropertyDescriptor<Method<unknown>> => {
+		if (descriptor.value) {
+			descriptor.value = delayFn(descriptor.value, delayMs);
 
-      return descriptor;
-    }
-    throw new Error('@delay is applicable only on a methods.');
-  };
+			return descriptor;
+		}
+		throw new Error("@delay is applicable only on a methods.");
+	};
 }

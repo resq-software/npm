@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Method } from '../types.js';
+import type { Method } from "../types.js";
 
 /**
  * Wraps a method to throttle its execution to once per time period.
@@ -52,18 +52,18 @@ import type { Method } from '../types.js';
  * ```
  */
 export function throttleFn<D = any, A extends any[] = any[]>(
-  originalMethod: Method<D, A>,
-  delayMs: number,
+	originalMethod: Method<D, A>,
+	delayMs: number,
 ): Method<void, A> {
-  let throttling = false;
-  return function (this: any, ...args: A): void {
-    if (!throttling) {
-      throttling = true;
-      originalMethod.apply(this, args);
+	let throttling = false;
+	return function (this: any, ...args: A): void {
+		if (!throttling) {
+			throttling = true;
+			originalMethod.apply(this, args);
 
-      setTimeout(() => {
-        throttling = false;
-      }, delayMs);
-    }
-  };
+			setTimeout(() => {
+				throttling = false;
+			}, delayMs);
+		}
+	};
 }

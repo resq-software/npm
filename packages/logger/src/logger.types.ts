@@ -19,10 +19,10 @@
  * @interface
  */
 export interface LogData {
-  /**
-   * Any key-value pairs to include in the log
-   */
-  [key: string]: unknown;
+	/**
+	 * Any key-value pairs to include in the log
+	 */
+	[key: string]: unknown;
 }
 
 /**
@@ -30,26 +30,26 @@ export interface LogData {
  * @interface
  */
 export interface LoggerOptions {
-  /**
-   * The minimum level of messages to log
-   */
-  minLevel?: import('./logger.js').LogLevel;
-  /**
-   * Whether to include timestamps in log messages
-   */
-  includeTimestamp?: boolean;
-  /**
-   * Whether to colorize log output
-   */
-  colorize?: boolean;
-  /**
-   * Whether to write logs to a file (server-side only)
-   */
-  logToFile?: boolean;
-  /**
-   * Path to the log file if logToFile is enabled
-   */
-  filePath?: string;
+	/**
+	 * The minimum level of messages to log
+	 */
+	minLevel?: import("./logger.js").LogLevel;
+	/**
+	 * Whether to include timestamps in log messages
+	 */
+	includeTimestamp?: boolean;
+	/**
+	 * Whether to colorize log output
+	 */
+	colorize?: boolean;
+	/**
+	 * Whether to write logs to a file (server-side only)
+	 */
+	logToFile?: boolean;
+	/**
+	 * Path to the log file if logToFile is enabled
+	 */
+	filePath?: string;
 }
 
 /**
@@ -57,39 +57,39 @@ export interface LoggerOptions {
  * @typedef ColorKey
  */
 export type ColorKey =
-  | 'reset'
-  | 'red'
-  | 'yellow'
-  | 'blue'
-  | 'green'
-  | 'gray'
-  | 'bold'
-  | 'magenta'
-  | 'cyan'
-  | 'white';
+	| "reset"
+	| "red"
+	| "yellow"
+	| "blue"
+	| "green"
+	| "gray"
+	| "bold"
+	| "magenta"
+	| "cyan"
+	| "white";
 
 /**
  * Log level strings for type safety
  */
-export type LogLevelString = 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'action' | 'success';
+export type LogLevelString = "error" | "warn" | "info" | "debug" | "trace" | "action" | "success";
 
 /**
  * Structured log entry for transport/storage
  * @interface
  */
 export interface LogEntry {
-  /** ISO timestamp of the log */
-  timestamp: string;
-  /** Log level */
-  level: LogLevelString;
-  /** Logger context/category */
-  context: string;
-  /** Log message */
-  message: string;
-  /** Optional structured data */
-  data?: LogData;
-  /** Environment (client/server) */
-  environment: 'client' | 'server';
+	/** ISO timestamp of the log */
+	timestamp: string;
+	/** Log level */
+	level: LogLevelString;
+	/** Logger context/category */
+	context: string;
+	/** Log message */
+	message: string;
+	/** Optional structured data */
+	data?: LogData;
+	/** Environment (client/server) */
+	environment: "client" | "server";
 }
 
 /**
@@ -97,10 +97,10 @@ export interface LogEntry {
  * @interface
  */
 export interface LogTransport {
-  /** Transport name for identification */
-  name: string;
-  /** Method to write a log entry */
-  write(entry: LogEntry): void | Promise<void>;
+	/** Transport name for identification */
+	name: string;
+	/** Method to write a log entry */
+	write(entry: LogEntry): void | Promise<void>;
 }
 
 /**
@@ -108,14 +108,14 @@ export interface LogTransport {
  * @interface
  */
 export interface LogMethodOptions {
-  /** Whether to log method arguments (default: true) */
-  logArgs?: boolean;
-  /** Whether to log return value (default: false) */
-  logResult?: boolean;
-  /** Custom message prefix */
-  message?: string;
-  /** Log level to use (default: 'debug') */
-  level?: LogLevelString;
+	/** Whether to log method arguments (default: true) */
+	logArgs?: boolean;
+	/** Whether to log return value (default: false) */
+	logResult?: boolean;
+	/** Custom message prefix */
+	message?: string;
+	/** Log level to use (default: 'debug') */
+	level?: LogLevelString;
 }
 
 /**
@@ -123,12 +123,12 @@ export interface LogMethodOptions {
  * @interface
  */
 export interface LogTimingOptions {
-  /** Custom label for timing logs */
-  label?: string;
-  /** Threshold in ms - only log if execution exceeds this (default: 0) */
-  threshold?: number;
-  /** Log level to use (default: 'info') */
-  level?: LogLevelString;
+	/** Custom label for timing logs */
+	label?: string;
+	/** Threshold in ms - only log if execution exceeds this (default: 0) */
+	threshold?: number;
+	/** Log level to use (default: 'info') */
+	level?: LogLevelString;
 }
 
 /**
@@ -136,12 +136,12 @@ export interface LogTimingOptions {
  * @interface
  */
 export interface LogErrorOptions {
-  /** Whether to rethrow the error after logging (default: true) */
-  rethrow?: boolean;
-  /** Custom error message prefix */
-  message?: string;
-  /** Whether to log the stack trace (default: true) */
-  includeStack?: boolean;
+	/** Whether to rethrow the error after logging (default: true) */
+	rethrow?: boolean;
+	/** Custom error message prefix */
+	message?: string;
+	/** Whether to log the stack trace (default: true) */
+	includeStack?: boolean;
 }
 
 /**
@@ -149,10 +149,10 @@ export interface LogErrorOptions {
  * @interface
  */
 export interface LogClassOptions {
-  /** Methods to exclude from logging */
-  exclude?: string[];
-  /** Whether to log all method calls (default: true) */
-  logCalls?: boolean;
-  /** Whether to time all method calls (default: false) */
-  timing?: boolean;
+	/** Methods to exclude from logging */
+	exclude?: string[];
+	/** Whether to log all method calls (default: true) */
+	logCalls?: boolean;
+	/** Whether to time all method calls (default: false) */
+	timing?: boolean;
 }

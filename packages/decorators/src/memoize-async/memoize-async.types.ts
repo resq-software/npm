@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Cache, KeyResolver, Memoizable } from '../memoize/memoize.types.js';
+import type { Cache, KeyResolver, Memoizable } from "../memoize/memoize.types.js";
 
 /**
  * Type for the @memoizeAsync decorator function.
@@ -49,14 +49,14 @@ export type AsyncMemoizable<T, D> = Memoizable<T, Promise<D>>;
  * ```
  */
 export interface AsyncCache<D> {
-  /** Store a value in the cache asynchronously */
-  set: (key: string, value: D) => Promise<void>;
-  /** Retrieve a value from the cache asynchronously */
-  get: (key: string) => Promise<D> | Promise<null>;
-  /** Remove a value from the cache asynchronously */
-  delete: (key: string) => Promise<void>;
-  /** Check if a key exists in the cache asynchronously */
-  has: (key: string) => Promise<boolean>;
+	/** Store a value in the cache asynchronously */
+	set: (key: string, value: D) => Promise<void>;
+	/** Retrieve a value from the cache asynchronously */
+	get: (key: string) => Promise<D> | Promise<null>;
+	/** Remove a value from the cache asynchronously */
+	delete: (key: string) => Promise<void>;
+	/** Check if a key exists in the cache asynchronously */
+	has: (key: string) => Promise<boolean>;
 }
 
 /**
@@ -79,10 +79,10 @@ export interface AsyncCache<D> {
  * ```
  */
 export interface AsyncMemoizeConfig<T, D> {
-  /** Custom cache implementation (sync or async) */
-  cache?: Cache<D> | AsyncCache<D>;
-  /** Function or method name for generating cache keys */
-  keyResolver?: KeyResolver | keyof T;
-  /** Time in milliseconds after which cached values expire */
-  expirationTimeMs?: number;
+	/** Custom cache implementation (sync or async) */
+	cache?: Cache<D> | AsyncCache<D>;
+	/** Function or method name for generating cache keys */
+	keyResolver?: KeyResolver | keyof T;
+	/** Time in milliseconds after which cached values expire */
+	expirationTimeMs?: number;
 }

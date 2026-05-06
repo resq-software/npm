@@ -19,13 +19,13 @@
  * These decorators integrate with the Logger class to provide declarative logging.
  */
 
-import { Logger } from './logger.js';
+import { Logger } from "./logger.js";
 import type {
-  LogClassOptions,
-  LogErrorOptions,
-  LogMethodOptions,
-  LogTimingOptions,
-} from './logger.types.js';
+	LogClassOptions,
+	LogErrorOptions,
+	LogMethodOptions,
+	LogTimingOptions,
+} from "./logger.types.js";
 
 /**
  * Decorator that logs method entry and exit.
@@ -45,61 +45,61 @@ import type {
  * ```
  */
 export function Log(options: LogMethodOptions = {}): MethodDecorator {
-  const { logArgs = true, logResult = false, message, level = 'debug' } = options;
+	const { logArgs = true, logResult = false, message, level = "debug" } = options;
 
-  return (
-    target: object,
-    propertyKey: string | symbol,
-    descriptor: PropertyDescriptor,
-  ): PropertyDescriptor => {
-    const originalMethod = descriptor.value;
-    const methodName = String(propertyKey);
-    const className = target.constructor.name;
+	return (
+		target: object,
+		propertyKey: string | symbol,
+		descriptor: PropertyDescriptor,
+	): PropertyDescriptor => {
+		const originalMethod = descriptor.value;
+		const methodName = String(propertyKey);
+		const className = target.constructor.name;
 
-    descriptor.value = function (...args: unknown[]) {
-      const logger = Logger.getLogger(`[${className}]`);
-      const prefix = message || `${methodName}`;
+		descriptor.value = function (...args: unknown[]) {
+			const logger = Logger.getLogger(`[${className}]`);
+			const prefix = message || `${methodName}`;
 
-      // Log method entry
-      if (logArgs && args.length > 0) {
-        logger[level](`${prefix} called`, { arguments: args });
-      } else {
-        logger[level](`${prefix} called`);
-      }
+			// Log method entry
+			if (logArgs && args.length > 0) {
+				logger[level](`${prefix} called`, { arguments: args });
+			} else {
+				logger[level](`${prefix} called`);
+			}
 
-      // Execute the original method
-      const result = originalMethod.apply(this, args);
+			// Execute the original method
+			const result = originalMethod.apply(this, args);
 
-      // Handle async methods
-      if (result instanceof Promise) {
-        return result.then(
-          (value: unknown) => {
-            if (logResult) {
-              logger[level](`${prefix} returned`, { result: value });
-            } else {
-              logger[level](`${prefix} completed`);
-            }
-            return value;
-          },
-          (error: unknown) => {
-            logger.error(`${prefix} failed`, error);
-            throw error;
-          },
-        );
-      }
+			// Handle async methods
+			if (result instanceof Promise) {
+				return result.then(
+					(value: unknown) => {
+						if (logResult) {
+							logger[level](`${prefix} returned`, { result: value });
+						} else {
+							logger[level](`${prefix} completed`);
+						}
+						return value;
+					},
+					(error: unknown) => {
+						logger.error(`${prefix} failed`, error);
+						throw error;
+					},
+				);
+			}
 
-      // Log sync method result
-      if (logResult) {
-        logger[level](`${prefix} returned`, { result });
-      } else {
-        logger[level](`${prefix} completed`);
-      }
+			// Log sync method result
+			if (logResult) {
+				logger[level](`${prefix} returned`, { result });
+			} else {
+				logger[level](`${prefix} completed`);
+			}
 
-      return result;
-    };
+			return result;
+		};
 
-    return descriptor;
-  };
+		return descriptor;
+	};
 }
 
 /**
@@ -120,46 +120,46 @@ export function Log(options: LogMethodOptions = {}): MethodDecorator {
  * ```
  */
 export function LogTiming(options: LogTimingOptions = {}): MethodDecorator {
-  const { label, threshold = 0, level = 'info' } = options;
+	const { label, threshold = 0, level = "info" } = options;
 
-  return (
-    target: object,
-    propertyKey: string | symbol,
-    descriptor: PropertyDescriptor,
-  ): PropertyDescriptor => {
-    const originalMethod = descriptor.value;
-    const methodName = String(propertyKey);
-    const className = target.constructor.name;
+	return (
+		target: object,
+		propertyKey: string | symbol,
+		descriptor: PropertyDescriptor,
+	): PropertyDescriptor => {
+		const originalMethod = descriptor.value;
+		const methodName = String(propertyKey);
+		const className = target.constructor.name;
 
-    descriptor.value = function (...args: unknown[]) {
-      const logger = Logger.getLogger(`[${className}]`);
-      const timerLabel = label || `${className}.${methodName}`;
-      const startTime = performance.now();
+		descriptor.value = function (...args: unknown[]) {
+			const logger = Logger.getLogger(`[${className}]`);
+			const timerLabel = label || `${className}.${methodName}`;
+			const startTime = performance.now();
 
-      // Execute the original method
-      const result = originalMethod.apply(this, args);
+			// Execute the original method
+			const result = originalMethod.apply(this, args);
 
-      // Handle async methods
-      if (result instanceof Promise) {
-        return result.finally(() => {
-          const duration = performance.now() - startTime;
-          if (duration >= threshold) {
-            logger[level](`${timerLabel} completed in ${duration.toFixed(2)}ms`);
-          }
-        });
-      }
+			// Handle async methods
+			if (result instanceof Promise) {
+				return result.finally(() => {
+					const duration = performance.now() - startTime;
+					if (duration >= threshold) {
+						logger[level](`${timerLabel} completed in ${duration.toFixed(2)}ms`);
+					}
+				});
+			}
 
-      // Log sync method timing
-      const duration = performance.now() - startTime;
-      if (duration >= threshold) {
-        logger[level](`${timerLabel} completed in ${duration.toFixed(2)}ms`);
-      }
+			// Log sync method timing
+			const duration = performance.now() - startTime;
+			if (duration >= threshold) {
+				logger[level](`${timerLabel} completed in ${duration.toFixed(2)}ms`);
+			}
 
-      return result;
-    };
+			return result;
+		};
 
-    return descriptor;
-  };
+		return descriptor;
+	};
 }
 
 /**
@@ -180,51 +180,51 @@ export function LogTiming(options: LogTimingOptions = {}): MethodDecorator {
  * ```
  */
 export function LogError(options: LogErrorOptions = {}): MethodDecorator {
-  const { rethrow = true, message, includeStack = true } = options;
+	const { rethrow = true, message, includeStack = true } = options;
 
-  return (
-    target: object,
-    propertyKey: string | symbol,
-    descriptor: PropertyDescriptor,
-  ): PropertyDescriptor => {
-    const originalMethod = descriptor.value;
-    const methodName = String(propertyKey);
-    const className = target.constructor.name;
+	return (
+		target: object,
+		propertyKey: string | symbol,
+		descriptor: PropertyDescriptor,
+	): PropertyDescriptor => {
+		const originalMethod = descriptor.value;
+		const methodName = String(propertyKey);
+		const className = target.constructor.name;
 
-    descriptor.value = function (...args: unknown[]) {
-      const logger = Logger.getLogger(`[${className}]`);
-      const errorPrefix = message || `${methodName} error`;
+		descriptor.value = function (...args: unknown[]) {
+			const logger = Logger.getLogger(`[${className}]`);
+			const errorPrefix = message || `${methodName} error`;
 
-      try {
-        const result = originalMethod.apply(this, args);
+			try {
+				const result = originalMethod.apply(this, args);
 
-        // Handle async methods
-        if (result instanceof Promise) {
-          return result.catch((error: unknown) => {
-            const errorData: Record<string, unknown> = { method: methodName };
-            if (error instanceof Error && includeStack) {
-              errorData['stack'] = error.stack;
-            }
-            logger.error(errorPrefix, error, errorData);
-            if (rethrow) throw error;
-            return undefined;
-          });
-        }
+				// Handle async methods
+				if (result instanceof Promise) {
+					return result.catch((error: unknown) => {
+						const errorData: Record<string, unknown> = { method: methodName };
+						if (error instanceof Error && includeStack) {
+							errorData.stack = error.stack;
+						}
+						logger.error(errorPrefix, error, errorData);
+						if (rethrow) throw error;
+						return undefined;
+					});
+				}
 
-        return result;
-      } catch (error) {
-        const errorData: Record<string, unknown> = { method: methodName };
-        if (error instanceof Error && includeStack) {
-          errorData['stack'] = error.stack;
-        }
-        logger.error(errorPrefix, error, errorData);
-        if (rethrow) throw error;
-        return undefined;
-      }
-    };
+				return result;
+			} catch (error) {
+				const errorData: Record<string, unknown> = { method: methodName };
+				if (error instanceof Error && includeStack) {
+					errorData.stack = error.stack;
+				}
+				logger.error(errorPrefix, error, errorData);
+				if (rethrow) throw error;
+				return undefined;
+			}
+		};
 
-    return descriptor;
-  };
+		return descriptor;
+	};
 }
 
 /**
@@ -244,73 +244,73 @@ export function LogError(options: LogErrorOptions = {}): MethodDecorator {
  * ```
  */
 export function LogClass(
-  options: LogClassOptions = {},
+	options: LogClassOptions = {},
 ): <T extends new (...args: unknown[]) => object>(target: T) => T {
-  const { exclude = [], logCalls = true, timing = false } = options;
+	const { exclude = [], logCalls = true, timing = false } = options;
 
-  return <T extends new (...args: unknown[]) => object>(target: T): T => {
-    const className = target.name;
-    const prototype = target.prototype;
+	return <T extends new (...args: unknown[]) => object>(target: T): T => {
+		const className = target.name;
+		const prototype = target.prototype;
 
-    // Only apply decorators if prototype exists
-    if (prototype) {
-      // Get all method names from the prototype
-      const methodNames = Object.getOwnPropertyNames(prototype).filter(
-        (name) =>
-          name !== 'constructor' &&
-          typeof prototype[name] === 'function' &&
-          !exclude.includes(name),
-      );
+		// Only apply decorators if prototype exists
+		if (prototype) {
+			// Get all method names from the prototype
+			const methodNames = Object.getOwnPropertyNames(prototype).filter(
+				(name) =>
+					name !== "constructor" &&
+					typeof prototype[name] === "function" &&
+					!exclude.includes(name),
+			);
 
-      // Apply decorators to each method
-      for (const methodName of methodNames) {
-        const descriptor = Object.getOwnPropertyDescriptor(prototype, methodName);
-        if (!descriptor) continue;
+			// Apply decorators to each method
+			for (const methodName of methodNames) {
+				const descriptor = Object.getOwnPropertyDescriptor(prototype, methodName);
+				if (!descriptor) continue;
 
-        const originalMethod = descriptor.value;
+				const originalMethod = descriptor.value;
 
-        descriptor.value = function (...args: unknown[]) {
-          const logger = Logger.getLogger(`[${className}]`);
-          const startTime = timing ? performance.now() : 0;
+				descriptor.value = function (...args: unknown[]) {
+					const logger = Logger.getLogger(`[${className}]`);
+					const startTime = timing ? performance.now() : 0;
 
-          if (logCalls) {
-            logger.debug(`${methodName} called`, { arguments: args });
-          }
+					if (logCalls) {
+						logger.debug(`${methodName} called`, { arguments: args });
+					}
 
-          const result = originalMethod.apply(this, args);
+					const result = originalMethod.apply(this, args);
 
-          if (result instanceof Promise) {
-            return result.then(
-              (value: unknown) => {
-                if (timing) {
-                  const duration = performance.now() - startTime;
-                  logger.debug(`${methodName} completed in ${duration.toFixed(2)}ms`);
-                } else if (logCalls) {
-                  logger.debug(`${methodName} completed`);
-                }
-                return value;
-              },
-              (error: unknown) => {
-                logger.error(`${methodName} failed`, error);
-                throw error;
-              },
-            );
-          }
+					if (result instanceof Promise) {
+						return result.then(
+							(value: unknown) => {
+								if (timing) {
+									const duration = performance.now() - startTime;
+									logger.debug(`${methodName} completed in ${duration.toFixed(2)}ms`);
+								} else if (logCalls) {
+									logger.debug(`${methodName} completed`);
+								}
+								return value;
+							},
+							(error: unknown) => {
+								logger.error(`${methodName} failed`, error);
+								throw error;
+							},
+						);
+					}
 
-          if (timing) {
-            const duration = performance.now() - startTime;
-            logger.debug(`${methodName} completed in ${duration.toFixed(2)}ms`);
-          } else if (logCalls) {
-            logger.debug(`${methodName} completed`);
-          }
+					if (timing) {
+						const duration = performance.now() - startTime;
+						logger.debug(`${methodName} completed in ${duration.toFixed(2)}ms`);
+					} else if (logCalls) {
+						logger.debug(`${methodName} completed`);
+					}
 
-          return result;
-        };
+					return result;
+				};
 
-        Object.defineProperty(prototype, methodName, descriptor);
-      }
-    }
+				Object.defineProperty(prototype, methodName, descriptor);
+			}
+		}
 
-    return target;
-  };
+		return target;
+	};
 }

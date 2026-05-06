@@ -41,8 +41,8 @@
  * @license MIT
  */
 
-import { isFunction } from '../_utils.js';
-import type { ObserverCallback } from './index.js';
+import { isFunction } from "../_utils.js";
+import type { ObserverCallback } from "./index.js";
 
 /**
  * Creates a property decorator factory that observes property changes.
@@ -52,23 +52,23 @@ import type { ObserverCallback } from './index.js';
  * @returns {PropertyDecorator} The property decorator
  */
 function factory<T>(cb?: ObserverCallback<T>): PropertyDecorator {
-  return (target: object, propertyKey: string | symbol) => {
-    let value: T;
-    const { name } = target.constructor;
-    Object.defineProperty(target, propertyKey, {
-      set(newValue: T) {
-        value = newValue;
-        if (cb) {
-          cb(newValue);
-        } else {
-          console.log(`setting property ${name}#${String(propertyKey)} = ${newValue}`);
-        }
-      },
-      get() {
-        return value;
-      },
-    });
-  };
+	return (target: object, propertyKey: string | symbol) => {
+		let value: T;
+		const { name } = target.constructor;
+		Object.defineProperty(target, propertyKey, {
+			set(newValue: T) {
+				value = newValue;
+				if (cb) {
+					cb(newValue);
+				} else {
+					console.log(`setting property ${name}#${String(propertyKey)} = ${newValue}`);
+				}
+			},
+			get() {
+				return value;
+			},
+		});
+	};
 }
 
 /**
@@ -132,15 +132,15 @@ export function observe<T>(cb: ObserverCallback<T>): PropertyDecorator;
  * @throws {TypeError} When used with incorrect parameters
  */
 export function observe<T>(
-  targetOrCb: object | ObserverCallback<T>,
-  propertyKey?: string | symbol,
+	targetOrCb: object | ObserverCallback<T>,
+	propertyKey?: string | symbol,
 ) {
-  if (propertyKey && !isFunction(targetOrCb)) {
-    const decorator = factory();
-    return decorator(targetOrCb, propertyKey);
-  }
-  if (isFunction(targetOrCb)) {
-    return factory(targetOrCb as ObserverCallback<T>);
-  }
-  throw new TypeError('@observe not used with correct parameters!');
+	if (propertyKey && !isFunction(targetOrCb)) {
+		const decorator = factory();
+		return decorator(targetOrCb, propertyKey);
+	}
+	if (isFunction(targetOrCb)) {
+		return factory(targetOrCb as ObserverCallback<T>);
+	}
+	throw new TypeError("@observe not used with correct parameters!");
 }

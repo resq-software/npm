@@ -46,8 +46,8 @@
  * @license MIT
  */
 
-import type { AsyncMethod, Decorator } from '../types.js';
-import { throttleAsyncFn } from './throttle-async.fn.js';
+import type { AsyncMethod, Decorator } from "../types.js";
+import { throttleAsyncFn } from "./throttle-async.fn.js";
 
 /**
  * Decorator that limits concurrent async method calls.
@@ -80,17 +80,17 @@ import { throttleAsyncFn } from './throttle-async.fn.js';
  * ```
  */
 export function throttleAsync<T = any, D = any>(parallelCalls?: number): Decorator<T> {
-  return (
-    target: T,
-    propertyName: keyof T,
-    descriptor: TypedPropertyDescriptor<AsyncMethod<any>>,
-  ): TypedPropertyDescriptor<AsyncMethod<D>> => {
-    if (descriptor.value) {
-      descriptor.value = throttleAsyncFn(descriptor.value, parallelCalls);
+	return (
+		_target: T,
+		_propertyName: keyof T,
+		descriptor: TypedPropertyDescriptor<AsyncMethod<any>>,
+	): TypedPropertyDescriptor<AsyncMethod<D>> => {
+		if (descriptor.value) {
+			descriptor.value = throttleAsyncFn(descriptor.value, parallelCalls);
 
-      return descriptor;
-    }
+			return descriptor;
+		}
 
-    throw new Error('@throttleAsync is applicable only on a methods.');
-  };
+		throw new Error("@throttleAsync is applicable only on a methods.");
+	};
 }

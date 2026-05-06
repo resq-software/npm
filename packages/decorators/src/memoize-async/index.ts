@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-export * from './memoize-async.fn.js';
-export * from './memoize-async.js';
-export * from './memoize-async.types.js';
-
+export * from "./memoize-async.fn.js";
+export * from "./memoize-async.js";
+export * from "./memoize-async.types.js";

@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from './throttle.js';
+export * from "./throttle.js";

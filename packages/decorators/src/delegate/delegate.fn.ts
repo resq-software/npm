@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { AsyncMethod } from '../types.js';
+import type { AsyncMethod } from "../types.js";
 
 /*
  * Copyright 2026 ResQ
@@ -75,23 +75,23 @@ import type { AsyncMethod } from '../types.js';
  * ```
  */
 export function delegateFn<D = any, A extends any[] = any[]>(
-  originalMethod: AsyncMethod<D, A>,
-  keyResolver?: (...args: A) => string,
+	originalMethod: AsyncMethod<D, A>,
+	keyResolver?: (...args: A) => string,
 ): AsyncMethod<D, A> {
-  const delegatedKeysMap = new Map<string, Promise<D>>();
-  const keyGenerator: (...args: unknown[]) => string =
-    keyResolver ?? ((...args) => JSON.stringify(args));
+	const delegatedKeysMap = new Map<string, Promise<D>>();
+	const keyGenerator: (...args: unknown[]) => string =
+		keyResolver ?? ((...args) => JSON.stringify(args));
 
-  return function (this: any, ...args: A): Promise<D> {
-    const key = keyGenerator(...args);
+	return function (this: any, ...args: A): Promise<D> {
+		const key = keyGenerator(...args);
 
-    if (!delegatedKeysMap.has(key)) {
-      delegatedKeysMap.set(
-        key,
-        originalMethod.apply(this, args).finally(() => delegatedKeysMap.delete(key)),
-      );
-    }
+		if (!delegatedKeysMap.has(key)) {
+			delegatedKeysMap.set(
+				key,
+				originalMethod.apply(this, args).finally(() => delegatedKeysMap.delete(key)),
+			);
+		}
 
-    return delegatedKeysMap.get(key) as Promise<D>;
-  };
+		return delegatedKeysMap.get(key) as Promise<D>;
+	};
 }

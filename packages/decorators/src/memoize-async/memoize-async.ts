@@ -39,9 +39,9 @@
  * @license MIT
  */
 
-import type { AsyncMethod } from '../types.js';
-import { memoizeAsyncFn } from './memoize-async.fn.js';
-import type { AsyncMemoizable, AsyncMemoizeConfig } from './memoize-async.types.js';
+import type { AsyncMethod } from "../types.js";
+import { memoizeAsyncFn } from "./memoize-async.fn.js";
+import type { AsyncMemoizable, AsyncMemoizeConfig } from "./memoize-async.types.js";
 
 /**
  * Decorator that caches async method results based on their arguments.
@@ -104,23 +104,26 @@ import type { AsyncMemoizable, AsyncMemoizeConfig } from './memoize-async.types.
  */
 export function memoizeAsync<T = any, D = any>(): AsyncMemoizable<T, D>;
 export function memoizeAsync<T = any, D = any>(
-  config: AsyncMemoizeConfig<T, D>,
+	config: AsyncMemoizeConfig<T, D>,
 ): AsyncMemoizable<T, D>;
 export function memoizeAsync<T = any, D = any>(expirationTimeMs: number): AsyncMemoizable<T, D>;
 export function memoizeAsync<T = any, D = any>(
-  input?: AsyncMemoizeConfig<T, D> | number,
+	input?: AsyncMemoizeConfig<T, D> | number,
 ): AsyncMemoizable<T, D> {
-  return (
-    target: T,
-    propertyName: keyof T,
-    descriptor: TypedPropertyDescriptor<AsyncMethod<D>>,
-  ): TypedPropertyDescriptor<AsyncMethod<D>> => {
-    if (descriptor.value) {
-      descriptor.value = input === undefined ? memoizeAsyncFn(descriptor.value) : memoizeAsyncFn(descriptor.value, input as any);
+	return (
+		_target: T,
+		_propertyName: keyof T,
+		descriptor: TypedPropertyDescriptor<AsyncMethod<D>>,
+	): TypedPropertyDescriptor<AsyncMethod<D>> => {
+		if (descriptor.value) {
+			descriptor.value =
+				input === undefined
+					? memoizeAsyncFn(descriptor.value)
+					: memoizeAsyncFn(descriptor.value, input as any);
 
-      return descriptor;
-    }
+			return descriptor;
+		}
 
-    throw new Error('@memoizeAsync is applicable only on a methods.');
-  };
+		throw new Error("@memoizeAsync is applicable only on a methods.");
+	};
 }

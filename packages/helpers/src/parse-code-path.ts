@@ -50,10 +50,10 @@
  * @version 1.0.0
  */
 export const parseCodePath = <C, T>(context: C, entity: T): string => {
-  const entityName = extractEntityName(entity);
-  const filePath = getFilePath();
+	const entityName = extractEntityName(entity);
+	const filePath = getFilePath();
 
-  return `location: ${filePath} @${entityName}: ${context}`;
+	return `location: ${filePath} @${entityName}: ${context}`;
 };
 
 /**
@@ -80,22 +80,22 @@ export const parseCodePath = <C, T>(context: C, entity: T): string => {
  * @version 1.0.0
  */
 function extractEntityName<T>(entity: T): string {
-  if (typeof entity === 'function') {
-    return entity.name || 'AnonymousFunction';
-  }
-  if (typeof entity === 'object' && entity !== null) {
-    const entityConstructor = entity.constructor;
-    if (typeof entityConstructor === 'function' && entityConstructor.name) {
-      return entityConstructor.name;
-    }
-  }
-  if (typeof entity === 'string') {
-    return entity;
-  }
-  if (typeof entity === 'symbol') {
-    return entity.toString();
-  }
-  return 'UnknownEntity';
+	if (typeof entity === "function") {
+		return entity.name || "AnonymousFunction";
+	}
+	if (typeof entity === "object" && entity !== null) {
+		const entityConstructor = entity.constructor;
+		if (typeof entityConstructor === "function" && entityConstructor.name) {
+			return entityConstructor.name;
+		}
+	}
+	if (typeof entity === "string") {
+		return entity;
+	}
+	if (typeof entity === "symbol") {
+		return entity.toString();
+	}
+	return "UnknownEntity";
 }
 
 /**
@@ -115,27 +115,27 @@ function extractEntityName<T>(entity: T): string {
  * @version 1.0.0
  */
 function getFilePath(): string {
-  try {
-    if (typeof __filename !== 'undefined') {
-      return __filename;
-    }
-    const stack = new Error('Stack trace for file path extraction').stack;
-    if (stack) {
-      const stackLine = stack.split('\n')[2]; // Get caller's line
-      if (stackLine) {
-        const match =
-          /https?:\/\/[^)]+/.exec(stackLine) ||
-          /file:\/\/[^)]+/.exec(stackLine) ||
-          /at\s+(.+):\d+:\d+/.exec(stackLine);
-        if (match) {
-          return match[1] || match[0];
-        }
-      }
-    }
-    return process?.cwd?.() || 'unknown-location';
-  } catch {
-    return 'unknown-location';
-  }
+	try {
+		if (typeof __filename !== "undefined") {
+			return __filename;
+		}
+		const stack = new Error("Stack trace for file path extraction").stack;
+		if (stack) {
+			const stackLine = stack.split("\n")[2]; // Get caller's line
+			if (stackLine) {
+				const match =
+					/https?:\/\/[^)]+/.exec(stackLine) ||
+					/file:\/\/[^)]+/.exec(stackLine) ||
+					/at\s+(.+):\d+:\d+/.exec(stackLine);
+				if (match) {
+					return match[1] || match[0];
+				}
+			}
+		}
+		return process?.cwd?.() || "unknown-location";
+	} catch {
+		return "unknown-location";
+	}
 }
 
 /**
@@ -164,36 +164,36 @@ function getFilePath(): string {
  * @version 1.0.0
  */
 export const parseCodePathDetailed = <C, T>(
-  context: C,
-  entity: T,
-  options: {
-    includeLineNumber?: boolean;
-    includeTimestamp?: boolean;
-    customPrefix?: string;
-  } = {},
+	context: C,
+	entity: T,
+	options: {
+		includeLineNumber?: boolean;
+		includeTimestamp?: boolean;
+		customPrefix?: string;
+	} = {},
 ): string => {
-  const entityName = extractEntityName(entity);
-  const filePath = getFilePath();
-  const prefix = options.customPrefix || 'location';
+	const entityName = extractEntityName(entity);
+	const filePath = getFilePath();
+	const prefix = options.customPrefix || "location";
 
-  let locationInfo = `${prefix}: ${filePath}`;
+	let locationInfo = `${prefix}: ${filePath}`;
 
-  if (options.includeLineNumber) {
-    try {
-      const stack = new Error('Stack trace for line number extraction').stack;
-      const callerLine = stack?.split('\n')[2];
-      const lineMatch = callerLine?.match(/:(\d+):\d+/);
-      if (lineMatch) {
-        locationInfo += `:${lineMatch[1]}`;
-      }
-    } catch {
-      // Ignore errors in line number extraction
-    }
-  }
+	if (options.includeLineNumber) {
+		try {
+			const stack = new Error("Stack trace for line number extraction").stack;
+			const callerLine = stack?.split("\n")[2];
+			const lineMatch = callerLine?.match(/:(\d+):\d+/);
+			if (lineMatch) {
+				locationInfo += `:${lineMatch[1]}`;
+			}
+		} catch {
+			// Ignore errors in line number extraction
+		}
+	}
 
-  if (options.includeTimestamp) {
-    locationInfo += ` [${new Date().toISOString()}]`;
-  }
+	if (options.includeTimestamp) {
+		locationInfo += ` [${new Date().toISOString()}]`;
+	}
 
-  return `${locationInfo} @${entityName}: ${context}`;
+	return `${locationInfo} @${entityName}: ${context}`;
 };

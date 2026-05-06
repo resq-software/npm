@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Method } from '../types.js';
+import type { Method } from "../types.js";
 
 /**
  * Wraps a method to debounce its execution.
@@ -50,16 +50,16 @@ import type { Method } from '../types.js';
  * ```
  */
 export function debounceFn<D = unknown, A extends unknown[] = unknown[]>(
-  originalMethod: Method<D, A>,
-  delayMs: number,
+	originalMethod: Method<D, A>,
+	delayMs: number,
 ): Method<void, A> {
-  let handler: ReturnType<typeof setTimeout> | undefined;
+	let handler: ReturnType<typeof setTimeout> | undefined;
 
-  return function (this: unknown, ...args: A): void {
-    clearTimeout(handler);
+	return function (this: unknown, ...args: A): void {
+		clearTimeout(handler);
 
-    handler = setTimeout(() => {
-      originalMethod.apply(this, args);
-    }, delayMs);
-  };
+		handler = setTimeout(() => {
+			originalMethod.apply(this, args);
+		}, delayMs);
+	};
 }

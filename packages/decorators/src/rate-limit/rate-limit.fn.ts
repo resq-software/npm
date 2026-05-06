@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Method } from '../types.js';
-import type { RateLimitConfigs, RateLimitCounter } from './rate-limit.types.js';
-import { SimpleRateLimitCounter } from './simple-rate-limit-counter.js';
+import type { Method } from "../types.js";
+import type { RateLimitConfigs, RateLimitCounter } from "./rate-limit.types.js";
+import { SimpleRateLimitCounter } from "./simple-rate-limit-counter.js";
 
 /**
  * Creates a rate-limited version of a method.
@@ -54,28 +54,28 @@ import { SimpleRateLimitCounter } from './simple-rate-limit-counter.js';
  * ```
  */
 export function rateLimitFn<D = unknown, A extends unknown[] = unknown[]>(
-  originalMethod: Method<D, A>,
-  config: RateLimitConfigs,
+	originalMethod: Method<D, A>,
+	config: RateLimitConfigs,
 ): Method<D | undefined, A> {
-  const counter: RateLimitCounter = config.rateLimitCounter ?? new SimpleRateLimitCounter();
+	const counter: RateLimitCounter = config.rateLimitCounter ?? new SimpleRateLimitCounter();
 
-  return function (this: unknown, ...args: A): D | undefined {
-    const key = typeof config.keyResolver === 'function' ? config.keyResolver(...args) : 'default';
+	return function (this: unknown, ...args: A): D | undefined {
+		const key = typeof config.keyResolver === "function" ? config.keyResolver(...args) : "default";
 
-    const currentCount = counter.getCount(key);
+		const currentCount = counter.getCount(key);
 
-    if (currentCount >= config.allowedCalls) {
-      config.exceedHandler?.();
-      return undefined;
-    }
+		if (currentCount >= config.allowedCalls) {
+			config.exceedHandler?.();
+			return undefined;
+		}
 
-    counter.inc(key);
+		counter.inc(key);
 
-    // Schedule decrement after time span
-    setTimeout(() => {
-      counter.dec(key);
-    }, config.timeSpanMs);
+		// Schedule decrement after time span
+		setTimeout(() => {
+			counter.dec(key);
+		}, config.timeSpanMs);
 
-    return originalMethod.apply(this, args);
-  };
+		return originalMethod.apply(this, args);
+	};
 }

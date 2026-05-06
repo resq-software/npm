@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from './delay.js';
+export * from "./delay.js";

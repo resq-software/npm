@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import type { Method } from '../types.js';
+import type { Method } from "../types.js";
 
 /**
  * Creates a bound version of a method.
@@ -41,8 +41,8 @@ import type { Method } from '../types.js';
  * ```
  */
 export function bindFn<D = unknown, A extends unknown[] = unknown[]>(
-  originalMethod: Method<D, A>,
-  context: unknown,
+	originalMethod: Method<D, A>,
+	context: unknown,
 ): Method<D, A> {
-  return originalMethod.bind(context);
+	return originalMethod.bind(context);
 }

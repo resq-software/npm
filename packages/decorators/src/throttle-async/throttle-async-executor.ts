@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Queue } from '../_utils.js';
-import type { AsyncMethod } from '../types.js';
+import { Queue } from "../_utils.js";
+import type { AsyncMethod } from "../types.js";
 
 /**
  * Manages the queue and execution of throttled async method calls.
@@ -45,85 +45,85 @@ import type { AsyncMethod } from '../types.js';
  * ```
  */
 export class ThrottleAsyncExecutor<D> {
-  /**
-   * Number of calls currently executing.
-   * @private
-   * @type {number}
-   */
-  private onGoingCallsCount = 0;
+	/**
+	 * Number of calls currently executing.
+	 * @private
+	 * @type {number}
+	 */
+	private onGoingCallsCount = 0;
 
-  /**
-   * Queue of pending calls waiting to execute.
-   * @private
-   * @type {Queue<CallArgs<D>>}
-   */
-  private readonly callsToRun = new Queue<CallArgs<D>>();
+	/**
+	 * Queue of pending calls waiting to execute.
+	 * @private
+	 * @type {Queue<CallArgs<D>>}
+	 */
+	private readonly callsToRun = new Queue<CallArgs<D>>();
 
-  /**
-   * Creates a new ThrottleAsyncExecutor instance.
-   *
-   * @param {AsyncMethod<D>} fun - The async method to throttle
-   * @param {number} parallelCalls - Maximum number of concurrent calls allowed
-   */
-  constructor(
-    private readonly fun: AsyncMethod<D>,
-    private readonly parallelCalls: number,
-  ) {}
+	/**
+	 * Creates a new ThrottleAsyncExecutor instance.
+	 *
+	 * @param {AsyncMethod<D>} fun - The async method to throttle
+	 * @param {number} parallelCalls - Maximum number of concurrent calls allowed
+	 */
+	constructor(
+		private readonly fun: AsyncMethod<D>,
+		private readonly parallelCalls: number,
+	) {}
 
-  /**
-   * Queues a method call for execution.
-   *
-   * @param {any} context - The `this` context for the method call
-   * @param {any[]} args - The arguments to pass to the method
-   * @returns {Promise<D>} A promise that resolves with the method result
-   *
-   * @example
-   * ```typescript
-   * const executor = new ThrottleAsyncExecutor(myAsyncMethod, 2);
-   *
-   * // Queue a call
-   * const result = await executor.exec(this, ['arg1', 'arg2']);
-   * ```
-   */
-  exec(context: unknown, args: unknown[]): Promise<D> {
-    const callArgs: CallArgs<D> = { context, args, resolve: null!, reject: null! };
-    this.callsToRun.enqueue(callArgs);
+	/**
+	 * Queues a method call for execution.
+	 *
+	 * @param {any} context - The `this` context for the method call
+	 * @param {any[]} args - The arguments to pass to the method
+	 * @returns {Promise<D>} A promise that resolves with the method result
+	 *
+	 * @example
+	 * ```typescript
+	 * const executor = new ThrottleAsyncExecutor(myAsyncMethod, 2);
+	 *
+	 * // Queue a call
+	 * const result = await executor.exec(this, ['arg1', 'arg2']);
+	 * ```
+	 */
+	exec(context: unknown, args: unknown[]): Promise<D> {
+		const callArgs: CallArgs<D> = { context, args, resolve: null!, reject: null! };
+		this.callsToRun.enqueue(callArgs);
 
-    const proms = new Promise<D>((resolve, reject) => {
-      callArgs.resolve = resolve;
-      callArgs.reject = reject;
-    });
+		const proms = new Promise<D>((resolve, reject) => {
+			callArgs.resolve = resolve;
+			callArgs.reject = reject;
+		});
 
-    this.tryCall();
+		this.tryCall();
 
-    (proms as unknown as { hell: unknown }).hell = args[0];
+		(proms as unknown as { hell: unknown }).hell = args[0];
 
-    return proms;
-  }
+		return proms;
+	}
 
-  /**
-   * Attempts to execute the next queued call if capacity allows.
-   *
-   * @private
-   * @returns {void}
-   */
-  private tryCall(): void {
-    if (this.callsToRun.getSize() > 0 && this.onGoingCallsCount < this.parallelCalls) {
-      const callArgs = this.callsToRun.dequeue();
-      if (callArgs) {
-        const { context, args, resolve, reject } = callArgs;
-        this.onGoingCallsCount += 1;
-        this.fun
-          .apply(context, args)
-          .then(resolve)
-          .catch(reject)
-          .finally(() => {
-            this.onGoingCallsCount -= 1;
-            this.tryCall();
-          });
-      }
-    }
-  }
+	/**
+	 * Attempts to execute the next queued call if capacity allows.
+	 *
+	 * @private
+	 * @returns {void}
+	 */
+	private tryCall(): void {
+		if (this.callsToRun.getSize() > 0 && this.onGoingCallsCount < this.parallelCalls) {
+			const callArgs = this.callsToRun.dequeue();
+			if (callArgs) {
+				const { context, args, resolve, reject } = callArgs;
+				this.onGoingCallsCount += 1;
+				this.fun
+					.apply(context, args)
+					.then(resolve)
+					.catch(reject)
+					.finally(() => {
+						this.onGoingCallsCount -= 1;
+						this.tryCall();
+					});
+			}
+		}
+	}
 }
 
 /**
@@ -137,8 +137,8 @@ export class ThrottleAsyncExecutor<D> {
  * @property {(reason?: unknown) => void} reject - Promise reject function
  */
 interface CallArgs<T> {
-  context: unknown;
-  args: unknown[];
-  resolve: (value: T | PromiseLike<T>) => void;
-  reject: (reason?: unknown) => void;
+	context: unknown;
+	args: unknown[];
+	resolve: (value: T | PromiseLike<T>) => void;
+	reject: (reason?: unknown) => void;
 }

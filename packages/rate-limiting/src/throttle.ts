@@ -24,7 +24,7 @@
  * @compliance NIST 800-53 SC-5 (Denial of Service Protection)
  */
 
-import { Schema as S } from 'effect';
+import { Schema as S } from "effect";
 
 // ============================================
 // Effect Schema Definitions
@@ -34,10 +34,10 @@ import { Schema as S } from 'effect';
  * Throttle Options Schema
  */
 const ThrottleOptionsSchema = S.Struct({
-  /** Whether to call the function on the leading edge */
-  leading: S.optional(S.Boolean),
-  /** Whether to call the function on the trailing edge */
-  trailing: S.optional(S.Boolean),
+	/** Whether to call the function on the leading edge */
+	leading: S.optional(S.Boolean),
+	/** Whether to call the function on the trailing edge */
+	trailing: S.optional(S.Boolean),
 });
 
 export type ThrottleOptions = typeof ThrottleOptionsSchema.Type;
@@ -46,10 +46,10 @@ export type ThrottleOptions = typeof ThrottleOptionsSchema.Type;
  * Debounce Options Schema
  */
 const DebounceOptionsSchema = S.Struct({
-  /** Whether to call the function on the leading edge */
-  leading: S.optional(S.Boolean),
-  /** Maximum time to wait before forcing execution */
-  maxWait: S.optional(S.Number),
+	/** Whether to call the function on the leading edge */
+	leading: S.optional(S.Boolean),
+	/** Maximum time to wait before forcing execution */
+	maxWait: S.optional(S.Number),
 });
 
 export type DebounceOptions = typeof DebounceOptionsSchema.Type;
@@ -58,9 +58,9 @@ export type DebounceOptions = typeof DebounceOptionsSchema.Type;
  * Rate Limiter Stats Schema
  */
 const RateLimiterStatsSchema = S.Struct({
-  availableTokens: S.Number,
-  queueSize: S.Number,
-  capacity: S.Number,
+	availableTokens: S.Number,
+	queueSize: S.Number,
+	capacity: S.Number,
 });
 
 export type RateLimiterStats = typeof RateLimiterStatsSchema.Type;
@@ -69,8 +69,8 @@ export type RateLimiterStats = typeof RateLimiterStatsSchema.Type;
  * Keyed Stats Schema
  */
 const KeyedStatsSchema = S.Struct({
-  activeKeys: S.Number,
-  keys: S.Array(S.String),
+	activeKeys: S.Number,
+	keys: S.Array(S.String),
 });
 
 export type KeyedStats = typeof KeyedStatsSchema.Type;
@@ -104,54 +104,54 @@ type AnyFunction = (...args: never[]) => unknown;
  * ```
  */
 export function throttle<T extends AnyFunction>(
-  func: T,
-  wait: number,
-  options: ThrottleOptions = {},
+	func: T,
+	wait: number,
+	options: ThrottleOptions = {},
 ): ((...args: Parameters<T>) => ReturnType<T> | undefined) & { cancel: () => void } {
-  let timeout: ReturnType<typeof setTimeout> | null = null;
-  let previous = 0;
-  let result: ReturnType<T> | undefined;
+	let timeout: ReturnType<typeof setTimeout> | null = null;
+	let previous = 0;
+	let result: ReturnType<T> | undefined;
 
-  const { leading = true, trailing = true } = options;
+	const { leading = true, trailing = true } = options;
 
-  const later = (context: unknown, args: Parameters<T>) => {
-    previous = leading === false ? 0 : Date.now();
-    timeout = null;
-    result = func.apply(context, args) as ReturnType<T>;
-  };
+	const later = (context: unknown, args: Parameters<T>) => {
+		previous = leading === false ? 0 : Date.now();
+		timeout = null;
+		result = func.apply(context, args) as ReturnType<T>;
+	};
 
-  const throttled = function (this: unknown, ...args: Parameters<T>): ReturnType<T> | undefined {
-    const now = Date.now();
+	const throttled = function (this: unknown, ...args: Parameters<T>): ReturnType<T> | undefined {
+		const now = Date.now();
 
-    if (!previous && leading === false) {
-      previous = now;
-    }
+		if (!previous && leading === false) {
+			previous = now;
+		}
 
-    const remaining = wait - (now - previous);
+		const remaining = wait - (now - previous);
 
-    if (remaining <= 0 || remaining > wait) {
-      if (timeout) {
-        clearTimeout(timeout);
-        timeout = null;
-      }
-      previous = now;
-      result = func.apply(this, args) as ReturnType<T>;
-    } else if (!timeout && trailing) {
-      timeout = setTimeout(() => later(this, args), remaining);
-    }
+		if (remaining <= 0 || remaining > wait) {
+			if (timeout) {
+				clearTimeout(timeout);
+				timeout = null;
+			}
+			previous = now;
+			result = func.apply(this, args) as ReturnType<T>;
+		} else if (!timeout && trailing) {
+			timeout = setTimeout(() => later(this, args), remaining);
+		}
 
-    return result;
-  } as ((...args: Parameters<T>) => ReturnType<T> | undefined) & { cancel: () => void };
+		return result;
+	} as ((...args: Parameters<T>) => ReturnType<T> | undefined) & { cancel: () => void };
 
-  throttled.cancel = () => {
-    if (timeout) {
-      clearTimeout(timeout);
-      timeout = null;
-    }
-    previous = 0;
-  };
+	throttled.cancel = () => {
+		if (timeout) {
+			clearTimeout(timeout);
+			timeout = null;
+		}
+		previous = 0;
+	};
 
-  return throttled;
+	return throttled;
 }
 
 // ============================================
@@ -175,74 +175,74 @@ export function throttle<T extends AnyFunction>(
  * ```
  */
 export function debounce<T extends AnyFunction>(
-  func: T,
-  wait: number,
-  options: DebounceOptions = {},
+	func: T,
+	wait: number,
+	options: DebounceOptions = {},
 ): ((...args: Parameters<T>) => void) & { cancel: () => void; flush: () => void } {
-  let timeout: ReturnType<typeof setTimeout> | null = null;
-  let lastCallTime = 0;
-  let lastInvokeTime = 0;
+	let timeout: ReturnType<typeof setTimeout> | null = null;
+	let lastCallTime = 0;
+	let lastInvokeTime = 0;
 
-  const { leading = false, maxWait } = options;
+	const { leading = false, maxWait } = options;
 
-  const invokeFunc = (context: unknown, args: Parameters<T>) => {
-    lastInvokeTime = Date.now();
-    func.apply(context, args);
-  };
+	const invokeFunc = (context: unknown, args: Parameters<T>) => {
+		lastInvokeTime = Date.now();
+		func.apply(context, args);
+	};
 
-  const shouldInvoke = (time: number) => {
-    const timeSinceLastCall = time - lastCallTime;
-    const timeSinceLastInvoke = time - lastInvokeTime;
+	const shouldInvoke = (time: number) => {
+		const timeSinceLastCall = time - lastCallTime;
+		const timeSinceLastInvoke = time - lastInvokeTime;
 
-    return (
-      lastCallTime === 0 ||
-      timeSinceLastCall >= wait ||
-      timeSinceLastCall < 0 ||
-      (maxWait !== undefined && timeSinceLastInvoke >= maxWait)
-    );
-  };
+		return (
+			lastCallTime === 0 ||
+			timeSinceLastCall >= wait ||
+			timeSinceLastCall < 0 ||
+			(maxWait !== undefined && timeSinceLastInvoke >= maxWait)
+		);
+	};
 
-  const timerExpired = function (this: unknown, args: Parameters<T>) {
-    timeout = null;
-    invokeFunc(this, args);
-  };
+	const timerExpired = function (this: unknown, args: Parameters<T>) {
+		timeout = null;
+		invokeFunc(this, args);
+	};
 
-  const debounced = function (this: unknown, ...args: Parameters<T>): void {
-    const time = Date.now();
-    const isInvoking = shouldInvoke(time);
+	const debounced = function (this: unknown, ...args: Parameters<T>): void {
+		const time = Date.now();
+		const isInvoking = shouldInvoke(time);
 
-    lastCallTime = time;
+		lastCallTime = time;
 
-    if (isInvoking && timeout === null && leading) {
-      invokeFunc(this, args);
-      timeout = setTimeout(() => timerExpired.call(this, args), wait);
-      return;
-    }
+		if (isInvoking && timeout === null && leading) {
+			invokeFunc(this, args);
+			timeout = setTimeout(() => timerExpired.call(this, args), wait);
+			return;
+		}
 
-    if (timeout) {
-      clearTimeout(timeout);
-    }
+		if (timeout) {
+			clearTimeout(timeout);
+		}
 
-    timeout = setTimeout(() => timerExpired.call(this, args), wait);
-  } as ((...args: Parameters<T>) => void) & { cancel: () => void; flush: () => void };
+		timeout = setTimeout(() => timerExpired.call(this, args), wait);
+	} as ((...args: Parameters<T>) => void) & { cancel: () => void; flush: () => void };
 
-  debounced.cancel = () => {
-    if (timeout) {
-      clearTimeout(timeout);
-      timeout = null;
-    }
-    lastCallTime = 0;
-    lastInvokeTime = 0;
-  };
+	debounced.cancel = () => {
+		if (timeout) {
+			clearTimeout(timeout);
+			timeout = null;
+		}
+		lastCallTime = 0;
+		lastInvokeTime = 0;
+	};
 
-  debounced.flush = () => {
-    if (timeout) {
-      clearTimeout(timeout);
-      timeout = null;
-    }
-  };
+	debounced.flush = () => {
+		if (timeout) {
+			clearTimeout(timeout);
+			timeout = null;
+		}
+	};
 
-  return debounced;
+	return debounced;
 }
 
 // ============================================
@@ -254,64 +254,64 @@ export function debounce<T extends AnyFunction>(
  * Useful for throttling per-endpoint or per-user
  */
 export class KeyedThrottle<T extends AnyFunction> {
-  private throttles = new Map<
-    string,
-    ((...args: Parameters<T>) => ReturnType<T> | undefined) & { cancel: () => void }
-  >();
-  private readonly func: T;
-  private readonly wait: number;
-  private readonly options: ThrottleOptions;
+	private throttles = new Map<
+		string,
+		((...args: Parameters<T>) => ReturnType<T> | undefined) & { cancel: () => void }
+	>();
+	private readonly func: T;
+	private readonly wait: number;
+	private readonly options: ThrottleOptions;
 
-  constructor(func: T, wait: number, options: ThrottleOptions = {}) {
-    this.func = func;
-    this.wait = wait;
-    this.options = options;
-  }
+	constructor(func: T, wait: number, options: ThrottleOptions = {}) {
+		this.func = func;
+		this.wait = wait;
+		this.options = options;
+	}
 
-  /**
-   * Execute function with throttling per key
-   */
-  public execute(key: string, ...args: Parameters<T>): ReturnType<T> | undefined {
-    let throttled = this.throttles.get(key);
+	/**
+	 * Execute function with throttling per key
+	 */
+	public execute(key: string, ...args: Parameters<T>): ReturnType<T> | undefined {
+		let throttled = this.throttles.get(key);
 
-    if (!throttled) {
-      throttled = throttle(this.func, this.wait, this.options);
-      this.throttles.set(key, throttled);
-    }
+		if (!throttled) {
+			throttled = throttle(this.func, this.wait, this.options);
+			this.throttles.set(key, throttled);
+		}
 
-    return throttled(...args);
-  }
+		return throttled(...args);
+	}
 
-  /**
-   * Cancel throttle for specific key
-   */
-  public cancel(key: string): void {
-    const throttled = this.throttles.get(key);
-    if (throttled) {
-      throttled.cancel();
-    }
-    this.throttles.delete(key);
-  }
+	/**
+	 * Cancel throttle for specific key
+	 */
+	public cancel(key: string): void {
+		const throttled = this.throttles.get(key);
+		if (throttled) {
+			throttled.cancel();
+		}
+		this.throttles.delete(key);
+	}
 
-  /**
-   * Cancel all throttles
-   */
-  public cancelAll(): void {
-    for (const throttled of this.throttles.values()) {
-      throttled.cancel();
-    }
-    this.throttles.clear();
-  }
+	/**
+	 * Cancel all throttles
+	 */
+	public cancelAll(): void {
+		for (const throttled of this.throttles.values()) {
+			throttled.cancel();
+		}
+		this.throttles.clear();
+	}
 
-  /**
-   * Get stats
-   */
-  public getStats(): KeyedStats {
-    return {
-      activeKeys: this.throttles.size,
-      keys: Array.from(this.throttles.keys()),
-    };
-  }
+	/**
+	 * Get stats
+	 */
+	public getStats(): KeyedStats {
+		return {
+			activeKeys: this.throttles.size,
+			keys: Array.from(this.throttles.keys()),
+		};
+	}
 }
 
 // ============================================
@@ -323,74 +323,74 @@ export class KeyedThrottle<T extends AnyFunction> {
  * Useful for debouncing per-endpoint or per-user
  */
 export class KeyedDebounce<T extends AnyFunction> {
-  private debounces = new Map<
-    string,
-    ((...args: Parameters<T>) => void) & { cancel: () => void; flush: () => void }
-  >();
-  private readonly func: T;
-  private readonly wait: number;
-  private readonly options: DebounceOptions;
+	private debounces = new Map<
+		string,
+		((...args: Parameters<T>) => void) & { cancel: () => void; flush: () => void }
+	>();
+	private readonly func: T;
+	private readonly wait: number;
+	private readonly options: DebounceOptions;
 
-  constructor(func: T, wait: number, options: DebounceOptions = {}) {
-    this.func = func;
-    this.wait = wait;
-    this.options = options;
-  }
+	constructor(func: T, wait: number, options: DebounceOptions = {}) {
+		this.func = func;
+		this.wait = wait;
+		this.options = options;
+	}
 
-  /**
-   * Execute function with debouncing per key
-   */
-  public execute(key: string, ...args: Parameters<T>): void {
-    let debounced = this.debounces.get(key);
+	/**
+	 * Execute function with debouncing per key
+	 */
+	public execute(key: string, ...args: Parameters<T>): void {
+		let debounced = this.debounces.get(key);
 
-    if (!debounced) {
-      debounced = debounce(this.func, this.wait, this.options);
-      this.debounces.set(key, debounced);
-    }
+		if (!debounced) {
+			debounced = debounce(this.func, this.wait, this.options);
+			this.debounces.set(key, debounced);
+		}
 
-    debounced(...args);
-  }
+		debounced(...args);
+	}
 
-  /**
-   * Cancel debounce for specific key
-   */
-  public cancel(key: string): void {
-    const debounced = this.debounces.get(key);
-    if (debounced) {
-      debounced.cancel();
-    }
-    this.debounces.delete(key);
-  }
+	/**
+	 * Cancel debounce for specific key
+	 */
+	public cancel(key: string): void {
+		const debounced = this.debounces.get(key);
+		if (debounced) {
+			debounced.cancel();
+		}
+		this.debounces.delete(key);
+	}
 
-  /**
-   * Flush debounce for specific key (execute immediately)
-   */
-  public flush(key: string): void {
-    const debounced = this.debounces.get(key);
-    if (debounced) {
-      debounced.flush();
-    }
-  }
+	/**
+	 * Flush debounce for specific key (execute immediately)
+	 */
+	public flush(key: string): void {
+		const debounced = this.debounces.get(key);
+		if (debounced) {
+			debounced.flush();
+		}
+	}
 
-  /**
-   * Cancel all debounces
-   */
-  public cancelAll(): void {
-    for (const debounced of this.debounces.values()) {
-      debounced.cancel();
-    }
-    this.debounces.clear();
-  }
+	/**
+	 * Cancel all debounces
+	 */
+	public cancelAll(): void {
+		for (const debounced of this.debounces.values()) {
+			debounced.cancel();
+		}
+		this.debounces.clear();
+	}
 
-  /**
-   * Get stats
-   */
-  public getStats(): KeyedStats {
-    return {
-      activeKeys: this.debounces.size,
-      keys: Array.from(this.debounces.keys()),
-    };
-  }
+	/**
+	 * Get stats
+	 */
+	public getStats(): KeyedStats {
+		return {
+			activeKeys: this.debounces.size,
+			keys: Array.from(this.debounces.keys()),
+		};
+	}
 }
 
 // ============================================
@@ -411,110 +411,110 @@ export class KeyedDebounce<T extends AnyFunction> {
  * ```
  */
 export class TokenBucketLimiter {
-  private tokens: number;
-  private lastRefill: number;
-  private readonly capacity: number;
-  private readonly refillRate: number;
-  private readonly refillInterval: number;
-  private queue: Array<() => void> = [];
+	private tokens: number;
+	private lastRefill: number;
+	private readonly capacity: number;
+	private readonly refillRate: number;
+	private readonly refillInterval: number;
+	private queue: Array<() => void> = [];
 
-  /**
-   * @param capacity Maximum number of tokens (requests)
-   * @param windowMs Time window in milliseconds
-   */
-  constructor(capacity: number, windowMs: number) {
-    this.capacity = capacity;
-    this.tokens = capacity;
-    this.lastRefill = Date.now();
-    this.refillRate = capacity;
-    this.refillInterval = windowMs;
-  }
+	/**
+	 * @param capacity Maximum number of tokens (requests)
+	 * @param windowMs Time window in milliseconds
+	 */
+	constructor(capacity: number, windowMs: number) {
+		this.capacity = capacity;
+		this.tokens = capacity;
+		this.lastRefill = Date.now();
+		this.refillRate = capacity;
+		this.refillInterval = windowMs;
+	}
 
-  /**
-   * Refill tokens based on elapsed time
-   */
-  private refill(): void {
-    const now = Date.now();
-    const elapsed = now - this.lastRefill;
-    const tokensToAdd = (elapsed / this.refillInterval) * this.refillRate;
+	/**
+	 * Refill tokens based on elapsed time
+	 */
+	private refill(): void {
+		const now = Date.now();
+		const elapsed = now - this.lastRefill;
+		const tokensToAdd = (elapsed / this.refillInterval) * this.refillRate;
 
-    if (tokensToAdd > 0) {
-      this.tokens = Math.min(this.capacity, this.tokens + tokensToAdd);
-      this.lastRefill = now;
-    }
-  }
+		if (tokensToAdd > 0) {
+			this.tokens = Math.min(this.capacity, this.tokens + tokensToAdd);
+			this.lastRefill = now;
+		}
+	}
 
-  /**
-   * Acquire a token (wait if none available)
-   */
-  public async acquire(): Promise<void> {
-    this.refill();
+	/**
+	 * Acquire a token (wait if none available)
+	 */
+	public async acquire(): Promise<void> {
+		this.refill();
 
-    if (this.tokens >= 1) {
-      this.tokens -= 1;
-      return Promise.resolve();
-    }
+		if (this.tokens >= 1) {
+			this.tokens -= 1;
+			return Promise.resolve();
+		}
 
-    // Wait for token to become available
-    return new Promise<void>((resolve) => {
-      this.queue.push(resolve);
-      this.scheduleNextRelease();
-    });
-  }
+		// Wait for token to become available
+		return new Promise<void>((resolve) => {
+			this.queue.push(resolve);
+			this.scheduleNextRelease();
+		});
+	}
 
-  /**
-   * Try to acquire a token without waiting
-   */
-  public tryAcquire(): boolean {
-    this.refill();
+	/**
+	 * Try to acquire a token without waiting
+	 */
+	public tryAcquire(): boolean {
+		this.refill();
 
-    if (this.tokens >= 1) {
-      this.tokens -= 1;
-      return true;
-    }
+		if (this.tokens >= 1) {
+			this.tokens -= 1;
+			return true;
+		}
 
-    return false;
-  }
+		return false;
+	}
 
-  /**
-   * Schedule next token release
-   */
-  private scheduleNextRelease(): void {
-    if (this.queue.length === 0) return;
+	/**
+	 * Schedule next token release
+	 */
+	private scheduleNextRelease(): void {
+		if (this.queue.length === 0) return;
 
-    const waitTime = this.refillInterval / this.refillRate;
+		const waitTime = this.refillInterval / this.refillRate;
 
-    setTimeout(() => {
-      this.refill();
-      const resolve = this.queue.shift();
-      if (resolve && this.tokens >= 1) {
-        this.tokens -= 1;
-        resolve();
-      }
-      this.scheduleNextRelease();
-    }, waitTime);
-  }
+		setTimeout(() => {
+			this.refill();
+			const resolve = this.queue.shift();
+			if (resolve && this.tokens >= 1) {
+				this.tokens -= 1;
+				resolve();
+			}
+			this.scheduleNextRelease();
+		}, waitTime);
+	}
 
-  /**
-   * Get rate limiter stats
-   */
-  public getStats(): RateLimiterStats {
-    this.refill();
-    return {
-      availableTokens: Math.floor(this.tokens),
-      queueSize: this.queue.length,
-      capacity: this.capacity,
-    };
-  }
+	/**
+	 * Get rate limiter stats
+	 */
+	public getStats(): RateLimiterStats {
+		this.refill();
+		return {
+			availableTokens: Math.floor(this.tokens),
+			queueSize: this.queue.length,
+			capacity: this.capacity,
+		};
+	}
 
-  /**
-   * Reset the rate limiter
-   */
-  public reset(): void {
-    this.tokens = this.capacity;
-    this.lastRefill = Date.now();
-    this.queue = [];
-  }
+	/**
+	 * Reset the rate limiter
+	 */
+	public reset(): void {
+		this.tokens = this.capacity;
+		this.lastRefill = Date.now();
+		this.queue = [];
+	}
 }
 
 // ============================================
@@ -526,92 +526,92 @@ export class TokenBucketLimiter {
  * Provides smoother rate limiting than token bucket
  */
 export class LeakyBucketLimiter {
-  private queue: Array<{ resolve: () => void; timestamp: number }> = [];
-  private readonly capacity: number;
-  private readonly leakRate: number; // requests per second
-  private processing = false;
+	private queue: Array<{ resolve: () => void; timestamp: number }> = [];
+	private readonly capacity: number;
+	private readonly leakRate: number; // requests per second
+	private processing = false;
 
-  /**
-   * @param capacity Maximum queue size
-   * @param requestsPerSecond How many requests to process per second
-   */
-  constructor(capacity: number, requestsPerSecond: number) {
-    this.capacity = capacity;
-    this.leakRate = 1000 / requestsPerSecond; // ms between requests
-  }
+	/**
+	 * @param capacity Maximum queue size
+	 * @param requestsPerSecond How many requests to process per second
+	 */
+	constructor(capacity: number, requestsPerSecond: number) {
+		this.capacity = capacity;
+		this.leakRate = 1000 / requestsPerSecond; // ms between requests
+	}
 
-  /**
-   * Add a request to the bucket
-   */
-  public async acquire(): Promise<void> {
-    if (this.queue.length >= this.capacity) {
-      throw new Error('Rate limit exceeded: queue full');
-    }
+	/**
+	 * Add a request to the bucket
+	 */
+	public async acquire(): Promise<void> {
+		if (this.queue.length >= this.capacity) {
+			throw new Error("Rate limit exceeded: queue full");
+		}
 
-    return new Promise<void>((resolve) => {
-      this.queue.push({ resolve, timestamp: Date.now() });
-      this.processQueue();
-    });
-  }
+		return new Promise<void>((resolve) => {
+			this.queue.push({ resolve, timestamp: Date.now() });
+			this.processQueue();
+		});
+	}
 
-  /**
-   * Try to acquire without blocking
-   */
-  public tryAcquire(): boolean {
-    if (this.queue.length >= this.capacity) {
-      return false;
-    }
+	/**
+	 * Try to acquire without blocking
+	 */
+	public tryAcquire(): boolean {
+		if (this.queue.length >= this.capacity) {
+			return false;
+		}
 
-    // Check if we can process immediately
-    if (!this.processing && this.queue.length === 0) {
-      return true;
-    }
+		// Check if we can process immediately
+		if (!this.processing && this.queue.length === 0) {
+			return true;
+		}
 
-    return false;
-  }
+		return false;
+	}
 
-  /**
-   * Process the queue at the leak rate
-   */
-  private processQueue(): void {
-    if (this.processing || this.queue.length === 0) return;
+	/**
+	 * Process the queue at the leak rate
+	 */
+	private processQueue(): void {
+		if (this.processing || this.queue.length === 0) return;
 
-    this.processing = true;
+		this.processing = true;
 
-    const processNext = () => {
-      const item = this.queue.shift();
-      if (item) {
-        item.resolve();
-      }
+		const processNext = () => {
+			const item = this.queue.shift();
+			if (item) {
+				item.resolve();
+			}
 
-      if (this.queue.length > 0) {
-        setTimeout(processNext, this.leakRate);
-      } else {
-        this.processing = false;
-      }
-    };
+			if (this.queue.length > 0) {
+				setTimeout(processNext, this.leakRate);
+			} else {
+				this.processing = false;
+			}
+		};
 
-    processNext();
-  }
+		processNext();
+	}
 
-  /**
-   * Get stats
-   */
-  public getStats(): RateLimiterStats {
-    return {
-      availableTokens: this.capacity - this.queue.length,
-      queueSize: this.queue.length,
-      capacity: this.capacity,
-    };
-  }
+	/**
+	 * Get stats
+	 */
+	public getStats(): RateLimiterStats {
+		return {
+			availableTokens: this.capacity - this.queue.length,
+			queueSize: this.queue.length,
+			capacity: this.capacity,
+		};
+	}
 
-  /**
-   * Clear the queue
-   */
-  public reset(): void {
-    this.queue = [];
-    this.processing = false;
-  }
+	/**
+	 * Clear the queue
+	 */
+	public reset(): void {
+		this.queue = [];
+		this.processing = false;
+	}
 }
 
 // ============================================
@@ -622,89 +622,89 @@ export class LeakyBucketLimiter {
  * Sliding window counter for accurate rate limiting
  */
 export class SlidingWindowCounter {
-  private counters = new Map<string, { current: number; previous: number; windowStart: number }>();
-  private readonly windowMs: number;
-  private readonly maxRequests: number;
+	private counters = new Map<string, { current: number; previous: number; windowStart: number }>();
+	private readonly windowMs: number;
+	private readonly maxRequests: number;
 
-  constructor(windowMs: number, maxRequests: number) {
-    this.windowMs = windowMs;
-    this.maxRequests = maxRequests;
+	constructor(windowMs: number, maxRequests: number) {
+		this.windowMs = windowMs;
+		this.maxRequests = maxRequests;
 
-    // Cleanup old entries periodically
-    setInterval(() => this.cleanup(), windowMs);
-  }
+		// Cleanup old entries periodically
+		setInterval(() => this.cleanup(), windowMs);
+	}
 
-  /**
-   * Check and increment counter for a key
-   */
-  public check(key: string): { allowed: boolean; remaining: number; resetAt: number } {
-    const now = Date.now();
-    const windowStart = Math.floor(now / this.windowMs) * this.windowMs;
-    const previousWindowStart = windowStart - this.windowMs;
+	/**
+	 * Check and increment counter for a key
+	 */
+	public check(key: string): { allowed: boolean; remaining: number; resetAt: number } {
+		const now = Date.now();
+		const windowStart = Math.floor(now / this.windowMs) * this.windowMs;
+		const previousWindowStart = windowStart - this.windowMs;
 
-    let counter = this.counters.get(key);
+		let counter = this.counters.get(key);
 
-    if (!counter) {
-      counter = { current: 0, previous: 0, windowStart };
-      this.counters.set(key, counter);
-    }
+		if (!counter) {
+			counter = { current: 0, previous: 0, windowStart };
+			this.counters.set(key, counter);
+		}
 
-    // Roll over to new window if needed
-    if (counter.windowStart < previousWindowStart) {
-      counter.previous = 0;
-      counter.current = 0;
-      counter.windowStart = windowStart;
-    } else if (counter.windowStart < windowStart) {
-      counter.previous = counter.current;
-      counter.current = 0;
-      counter.windowStart = windowStart;
-    }
+		// Roll over to new window if needed
+		if (counter.windowStart < previousWindowStart) {
+			counter.previous = 0;
+			counter.current = 0;
+			counter.windowStart = windowStart;
+		} else if (counter.windowStart < windowStart) {
+			counter.previous = counter.current;
+			counter.current = 0;
+			counter.windowStart = windowStart;
+		}
 
-    // Calculate weighted count
-    const windowPosition = (now - windowStart) / this.windowMs;
-    const weightedCount = counter.previous * (1 - windowPosition) + counter.current;
+		// Calculate weighted count
+		const windowPosition = (now - windowStart) / this.windowMs;
+		const weightedCount = counter.previous * (1 - windowPosition) + counter.current;
 
-    const allowed = weightedCount < this.maxRequests;
+		const allowed = weightedCount < this.maxRequests;
 
-    if (allowed) {
-      counter.current++;
-    }
+		if (allowed) {
+			counter.current++;
+		}
 
-    return {
-      allowed,
-      remaining: Math.max(0, Math.floor(this.maxRequests - weightedCount - (allowed ? 1 : 0))),
-      resetAt: windowStart + this.windowMs,
-    };
-  }
+		return {
+			allowed,
+			remaining: Math.max(0, Math.floor(this.maxRequests - weightedCount - (allowed ? 1 : 0))),
+			resetAt: windowStart + this.windowMs,
+		};
+	}
 
-  /**
-   * Reset counter for a key
-   */
-  public reset(key: string): void {
-    this.counters.delete(key);
-  }
+	/**
+	 * Reset counter for a key
+	 */
+	public reset(key: string): void {
+		this.counters.delete(key);
+	}
 
-  /**
-   * Cleanup old entries
-   */
-  private cleanup(): void {
-    const cutoff = Date.now() - this.windowMs * 2;
-    for (const [key, counter] of this.counters.entries()) {
-      if (counter.windowStart < cutoff) {
-        this.counters.delete(key);
-      }
-    }
-  }
+	/**
+	 * Cleanup old entries
+	 */
+	private cleanup(): void {
+		const cutoff = Date.now() - this.windowMs * 2;
+		for (const [key, counter] of this.counters.entries()) {
+			if (counter.windowStart < cutoff) {
+				this.counters.delete(key);
+			}
+		}
+	}
 
-  /**
-   * Get stats
-   */
-  public getStats(): KeyedStats {
-    return {
-      activeKeys: this.counters.size,
-      keys: Array.from(this.counters.keys()),
-    };
-  }
+	/**
+	 * Get stats
+	 */
+	public getStats(): KeyedStats {
+		return {
+			activeKeys: this.counters.size,
+			keys: Array.from(this.counters.keys()),
+		};
+	}
 }
 
 // ============================================

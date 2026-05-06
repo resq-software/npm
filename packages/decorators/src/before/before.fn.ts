@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Method } from '../types.js';
-import type { BeforeConfig } from './before.types.js';
+import type { Method } from "../types.js";
+import type { BeforeConfig } from "./before.types.js";
 
 /**
  * Wraps a method to execute a before hook function before the method runs.
@@ -49,26 +49,26 @@ import type { BeforeConfig } from './before.types.js';
  * ```
  */
 export function beforeFn<D = any, A extends any[] = any[]>(
-  originalMethod: Method<D, A>,
-  config: BeforeConfig<any>,
+	originalMethod: Method<D, A>,
+	config: BeforeConfig<any>,
 ): Method<Promise<D>, A> {
-  const resolvedConfig: BeforeConfig<any> = {
-    wait: false,
-    ...config,
-  };
+	const resolvedConfig: BeforeConfig<any> = {
+		wait: false,
+		...config,
+	};
 
-  return async function (this: any, ...args: A): Promise<D> {
-    const beforeFunc =
-      typeof resolvedConfig.func === 'string'
-        ? this[resolvedConfig.func].bind(this)
-        : resolvedConfig.func;
+	return async function (this: any, ...args: A): Promise<D> {
+		const beforeFunc =
+			typeof resolvedConfig.func === "string"
+				? this[resolvedConfig.func].bind(this)
+				: resolvedConfig.func;
 
-    if (resolvedConfig.wait) {
-      await beforeFunc();
-      return originalMethod.apply(this, args);
-    }
+		if (resolvedConfig.wait) {
+			await beforeFunc();
+			return originalMethod.apply(this, args);
+		}
 
-    beforeFunc();
-    return originalMethod.apply(this, args);
-  };
+		beforeFunc();
+		return originalMethod.apply(this, args);
+	};
 }

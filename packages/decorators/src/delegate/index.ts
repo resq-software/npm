@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export * from './delegate.js';
-export * from './delegate.types.js';
+export * from "./delegate.js";
+export * from "./delegate.types.js";

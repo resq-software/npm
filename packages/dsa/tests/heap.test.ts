@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-import { BoundedHeap } from '../src/heap.js';
+import { describe, expect, it } from "vitest";
+import { BoundedHeap } from "../src/heap.js";
 
-describe('BoundedHeap', () => {
-  it('keeps the K nearest (smallest distance) entries', () => {
-    const heap = new BoundedHeap<{ id: string; distance: number }>(3);
-    heap.insert({ id: 'a', distance: 10 });
-    heap.insert({ id: 'b', distance: 2 });
-    heap.insert({ id: 'c', distance: 7 });
-    heap.insert({ id: 'd', distance: 1 }); // evicts 'a' (dist 10)
-    heap.insert({ id: 'e', distance: 50 }); // rejected — larger than root
+describe("BoundedHeap", () => {
+	it("keeps the K nearest (smallest distance) entries", () => {
+		const heap = new BoundedHeap<{ id: string; distance: number }>(3);
+		heap.insert({ id: "a", distance: 10 });
+		heap.insert({ id: "b", distance: 2 });
+		heap.insert({ id: "c", distance: 7 });
+		heap.insert({ id: "d", distance: 1 }); // evicts 'a' (dist 10)
+		heap.insert({ id: "e", distance: 50 }); // rejected — larger than root
 
-    expect(heap.size).toBe(3);
-    const sorted = heap.toSorted();
-    expect(sorted.map((x) => x.id)).toEqual(['d', 'b', 'c']); // ascending distance
-  });
+		expect(heap.size).toBe(3);
+		const sorted = heap.toSorted();
+		expect(sorted.map((x) => x.id)).toEqual(["d", "b", "c"]); // ascending distance
+	});
 
-  it('peek returns the current maximum', () => {
-    const heap = new BoundedHeap<{ id: string; distance: number }>(2);
-    heap.insert({ id: 'x', distance: 5 });
-    heap.insert({ id: 'y', distance: 3 });
-    expect(heap.peek()?.id).toBe('x'); // max-heap root = largest distance
-  });
+	it("peek returns the current maximum", () => {
+		const heap = new BoundedHeap<{ id: string; distance: number }>(2);
+		heap.insert({ id: "x", distance: 5 });
+		heap.insert({ id: "y", distance: 3 });
+		expect(heap.peek()?.id).toBe("x"); // max-heap root = largest distance
+	});
 
-  it('handles limit=1', () => {
-    const heap = new BoundedHeap<{ id: string; distance: number }>(1);
-    heap.insert({ id: 'a', distance: 9 });
-    heap.insert({ id: 'b', distance: 3 });
-    expect(heap.size).toBe(1);
-    expect(heap.peek()?.id).toBe('b');
-  });
+	it("handles limit=1", () => {
+		const heap = new BoundedHeap<{ id: string; distance: number }>(1);
+		heap.insert({ id: "a", distance: 9 });
+		heap.insert({ id: "b", distance: 3 });
+		expect(heap.size).toBe(1);
+		expect(heap.peek()?.id).toBe("b");
+	});
 });

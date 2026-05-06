@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export * from './memoize.js';
-export * from './memoize.types.js';
+export * from "./memoize.js";
+export * from "./memoize.types.js";

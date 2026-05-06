@@ -48,12 +48,12 @@ export type ReportFunction = (data: ExactTimeReportData) => unknown;
  * ```
  */
 export interface ExactTimeReportData {
-  /** The arguments passed to the method */
-  args: unknown[];
-  /** The return value of the method */
-  result: unknown;
-  /** The execution time in milliseconds */
-  execTime: number;
+	/** The arguments passed to the method */
+	args: unknown[];
+	/** The return value of the method */
+	result: unknown;
+	/** The execution time in milliseconds */
+	execTime: number;
 }
 
 /**
@@ -67,7 +67,7 @@ export interface ExactTimeReportData {
  * @returns {any} The modified descriptor
  */
 export type ExactTimeReportable<T> = (
-  target: T,
-  propertyName: keyof T,
-  descriptor: TypedPropertyDescriptor<any>,
+	target: T,
+	propertyName: keyof T,
+	descriptor: TypedPropertyDescriptor<any>,
 ) => any;

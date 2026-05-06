@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Method } from '../types.js';
-import type { AfterConfig, AfterFunc } from './after.types.js';
+import type { Method } from "../types.js";
+import type { AfterConfig, AfterFunc } from "./after.types.js";
 
 /**
  * Wraps a method to execute an after hook function after the method completes.
@@ -49,34 +49,34 @@ import type { AfterConfig, AfterFunc } from './after.types.js';
  * ```
  */
 export function afterFn<D = any, A extends any[] = any[]>(
-  originalMethod: Method<D, A>,
-  config: AfterConfig<any, ReturnType<typeof originalMethod>>,
+	originalMethod: Method<D, A>,
+	config: AfterConfig<any, ReturnType<typeof originalMethod>>,
 ): (...args: unknown[]) => Promise<D> {
-  const resolvedConfig: AfterConfig<any, ReturnType<typeof originalMethod>> = {
-    wait: false,
-    ...config,
-  };
+	const resolvedConfig: AfterConfig<any, ReturnType<typeof originalMethod>> = {
+		wait: false,
+		...config,
+	};
 
-  return async function (this: any, ...args: A): Promise<D> {
-    const afterFunc: AfterFunc<ReturnType<typeof originalMethod>> =
-      typeof resolvedConfig.func === 'string'
-        ? this[resolvedConfig.func].bind(this)
-        : resolvedConfig.func;
+	return async function (this: any, ...args: A): Promise<D> {
+		const afterFunc: AfterFunc<ReturnType<typeof originalMethod>> =
+			typeof resolvedConfig.func === "string"
+				? this[resolvedConfig.func].bind(this)
+				: resolvedConfig.func;
 
-    if (resolvedConfig.wait) {
-      const response = await originalMethod.apply(this, args);
-      afterFunc({
-        args,
-        response,
-      });
-      return response;
-    }
+		if (resolvedConfig.wait) {
+			const response = await originalMethod.apply(this, args);
+			afterFunc({
+				args,
+				response,
+			});
+			return response;
+		}
 
-    const response = originalMethod.apply(this, args);
-    afterFunc({
-      args,
-      response,
-    });
-    return response;
-  };
+		const response = originalMethod.apply(this, args);
+		afterFunc({
+			args,
+			response,
+		});
+		return response;
+	};
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Method } from '../types.js';
+import type { Method } from "../types.js";
 /*
  * Copyright 2026 ResQ
  *
@@ -57,8 +57,8 @@ import type { Method } from '../types.js';
  * @license MIT
  */
 
-import { memoizeFn } from './memoize.fn.js';
-import type { Memoizable, MemoizeConfig } from './memoize.types.js';
+import { memoizeFn } from "./memoize.fn.js";
+import type { Memoizable, MemoizeConfig } from "./memoize.types.js";
 
 /**
  * Decorator that caches method results based on their arguments.
@@ -122,16 +122,19 @@ export function memoize<T = any, D = any>(): Memoizable<T, D>;
 export function memoize<T = any, D = any>(config: MemoizeConfig<T, D>): Memoizable<T, D>;
 export function memoize<T = any, D = any>(expirationTimeMs: number): Memoizable<T, D>;
 export function memoize<T = any, D = any>(input?: MemoizeConfig<T, D> | number): Memoizable<T, D> {
-  return (
-    target: T,
-    propertyName: keyof T,
-    descriptor: TypedPropertyDescriptor<Method<D>>,
-  ): TypedPropertyDescriptor<Method<D>> => {
-    if (descriptor.value) {
-      descriptor.value = input === undefined ? memoizeFn(descriptor.value) : memoizeFn(descriptor.value, input as any);
+	return (
+		_target: T,
+		_propertyName: keyof T,
+		descriptor: TypedPropertyDescriptor<Method<D>>,
+	): TypedPropertyDescriptor<Method<D>> => {
+		if (descriptor.value) {
+			descriptor.value =
+				input === undefined
+					? memoizeFn(descriptor.value)
+					: memoizeFn(descriptor.value, input as any);
 
-      return descriptor;
-    }
-    throw new Error('@memoize is applicable only on a methods.');
-  };
+			return descriptor;
+		}
+		throw new Error("@memoize is applicable only on a methods.");
+	};
 }

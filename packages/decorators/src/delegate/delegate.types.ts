@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { AsyncMethod } from '../types.js';
+import type { AsyncMethod } from "../types.js";
 /*
  * Copyright 2026 ResQ
  *
@@ -62,7 +62,7 @@ import type { AsyncMethod } from '../types.js';
  * ```
  */
 export type Delegatable<T, D> = (
-  target: T,
-  propertyName: keyof T,
-  descriptor: TypedPropertyDescriptor<AsyncMethod<D>>,
+	target: T,
+	propertyName: keyof T,
+	descriptor: TypedPropertyDescriptor<AsyncMethod<D>>,
 ) => TypedPropertyDescriptor<AsyncMethod<D>>;

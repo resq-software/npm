@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Method } from '../types.js';
+import type { Method } from "../types.js";
 /*
  * Copyright 2026 ResQ
  *
@@ -77,14 +77,14 @@ export type KeyResolver = (...args: unknown[]) => string;
  * ```
  */
 export interface Cache<D> {
-  /** Store a value in the cache */
-  set: (key: string, value: D) => void;
-  /** Retrieve a value from the cache */
-  get: (key: string) => D | null | undefined;
-  /** Remove a value from the cache */
-  delete: (key: string) => void;
-  /** Check if a key exists in the cache */
-  has: (key: string) => boolean;
+	/** Store a value in the cache */
+	set: (key: string, value: D) => void;
+	/** Retrieve a value from the cache */
+	get: (key: string) => D | null | undefined;
+	/** Remove a value from the cache */
+	delete: (key: string) => void;
+	/** Check if a key exists in the cache */
+	has: (key: string) => boolean;
 }
 
 /**
@@ -107,12 +107,12 @@ export interface Cache<D> {
  * ```
  */
 export interface MemoizeConfig<T, D> {
-  /** Custom cache implementation (defaults to Map) */
-  cache?: Cache<D>;
-  /** Function or method name for generating cache keys */
-  keyResolver?: KeyResolver | keyof T;
-  /** Time in milliseconds after which cached values expire */
-  expirationTimeMs?: number;
+	/** Custom cache implementation (defaults to Map) */
+	cache?: Cache<D>;
+	/** Function or method name for generating cache keys */
+	keyResolver?: KeyResolver | keyof T;
+	/** Time in milliseconds after which cached values expire */
+	expirationTimeMs?: number;
 }
 
 /**
@@ -127,7 +127,7 @@ export interface MemoizeConfig<T, D> {
  * @returns {TypedPropertyDescriptor<Method<D>>} The modified descriptor
  */
 export type Memoizable<T, D> = (
-  target: T,
-  propertyName: keyof T,
-  descriptor: TypedPropertyDescriptor<Method<D>>,
+	target: T,
+	propertyName: keyof T,
+	descriptor: TypedPropertyDescriptor<Method<D>>,
 ) => TypedPropertyDescriptor<Method<D>>;

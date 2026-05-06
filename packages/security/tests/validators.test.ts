@@ -44,7 +44,7 @@ describe("containsXSSPatterns", () => {
 	});
 
 	it("should detect event handlers", () => {
-		const result = containsXSSPatterns('<img onerror=alert(1)>');
+		const result = containsXSSPatterns("<img onerror=alert(1)>");
 		expect(result.length).toBeGreaterThan(0);
 	});
 
@@ -126,7 +126,7 @@ describe("containsNoSQLInjection", () => {
 	});
 
 	it("should detect operator injection pattern", () => {
-		const result = containsNoSQLInjection('{ $ne: null }');
+		const result = containsNoSQLInjection("{ $ne: null }");
 		expect(result.length).toBeGreaterThan(0);
 	});
 
@@ -413,7 +413,7 @@ describe("validateSafeEmail", () => {
 	});
 
 	it("should reject emails with XSS in local part", () => {
-		expect(validateSafeEmail('<script>@example.com')).toBe(false);
+		expect(validateSafeEmail("<script>@example.com")).toBe(false);
 	});
 });
 

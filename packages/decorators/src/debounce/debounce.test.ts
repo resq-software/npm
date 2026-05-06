@@ -14,65 +14,65 @@
  * limitations under the License.
  */
 
-import { describe, expect, test } from 'vitest';
-import { debounceFn } from './debounce.fn.js';
+import { describe, expect, test } from "vitest";
+import { debounceFn } from "./debounce.fn.js";
 
-describe('debounce', () => {
-  describe('debounceFn', () => {
-    test('delays execution until after the delay', async () => {
-      let callCount = 0;
-      const fn = debounceFn(() => {
-        callCount++;
-      }, 30);
+describe("debounce", () => {
+	describe("debounceFn", () => {
+		test("delays execution until after the delay", async () => {
+			let callCount = 0;
+			const fn = debounceFn(() => {
+				callCount++;
+			}, 30);
 
-      fn();
-      expect(callCount).toBe(0);
+			fn();
+			expect(callCount).toBe(0);
 
-      await new Promise((r) => setTimeout(r, 60));
-      expect(callCount).toBe(1);
-    });
+			await new Promise((r) => setTimeout(r, 60));
+			expect(callCount).toBe(1);
+		});
 
-    test('resets timer on rapid calls — only last fires', async () => {
-      const received: number[] = [];
-      const fn = debounceFn((x: number) => {
-        received.push(x);
-      }, 30);
+		test("resets timer on rapid calls — only last fires", async () => {
+			const received: number[] = [];
+			const fn = debounceFn((x: number) => {
+				received.push(x);
+			}, 30);
 
-      fn(1);
-      fn(2);
-      fn(3);
+			fn(1);
+			fn(2);
+			fn(3);
 
-      await new Promise((r) => setTimeout(r, 60));
-      expect(received).toEqual([3]);
-    });
+			await new Promise((r) => setTimeout(r, 60));
+			expect(received).toEqual([3]);
+		});
 
-    test('uses last arguments when executing', async () => {
-      let result = '';
-      const fn = debounceFn((s: string) => {
-        result = s;
-      }, 30);
+		test("uses last arguments when executing", async () => {
+			let result = "";
+			const fn = debounceFn((s: string) => {
+				result = s;
+			}, 30);
 
-      fn('first');
-      fn('second');
-      fn('last');
+			fn("first");
+			fn("second");
+			fn("last");
 
-      await new Promise((r) => setTimeout(r, 60));
-      expect(result).toBe('last');
-    });
+			await new Promise((r) => setTimeout(r, 60));
+			expect(result).toBe("last");
+		});
 
-    test('allows multiple calls after delay expires', async () => {
-      let callCount = 0;
-      const fn = debounceFn(() => {
-        callCount++;
-      }, 20);
+		test("allows multiple calls after delay expires", async () => {
+			let callCount = 0;
+			const fn = debounceFn(() => {
+				callCount++;
+			}, 20);
 
-      fn();
-      await new Promise((r) => setTimeout(r, 50));
-      expect(callCount).toBe(1);
+			fn();
+			await new Promise((r) => setTimeout(r, 50));
+			expect(callCount).toBe(1);
 
-      fn();
-      await new Promise((r) => setTimeout(r, 50));
-      expect(callCount).toBe(2);
-    });
-  });
+			fn();
+			await new Promise((r) => setTimeout(r, 50));
+			expect(callCount).toBe(2);
+		});
+	});
 });

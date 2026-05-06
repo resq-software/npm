@@ -42,9 +42,9 @@
  * @license MIT
  */
 
-import type { AsyncMethod } from '../types.js';
-import { delegateFn } from './delegate.fn.js';
-import type { Delegatable } from './delegate.types.js';
+import type { AsyncMethod } from "../types.js";
+import { delegateFn } from "./delegate.fn.js";
+import type { Delegatable } from "./delegate.types.js";
 
 /**
  * Decorator that deduplicates concurrent async method calls.
@@ -88,19 +88,19 @@ import type { Delegatable } from './delegate.types.js';
  * ```
  */
 export function delegate<T = any, D = any>(
-  keyResolver?: (...args: unknown[]) => string,
+	keyResolver?: (...args: unknown[]) => string,
 ): Delegatable<T, D> {
-  return (
-    target: T,
-    propertyName: keyof T,
-    descriptor: TypedPropertyDescriptor<AsyncMethod<D>>,
-  ): TypedPropertyDescriptor<AsyncMethod<any>> => {
-    if (descriptor.value) {
-      descriptor.value = delegateFn(descriptor.value, keyResolver);
+	return (
+		_target: T,
+		_propertyName: keyof T,
+		descriptor: TypedPropertyDescriptor<AsyncMethod<D>>,
+	): TypedPropertyDescriptor<AsyncMethod<any>> => {
+		if (descriptor.value) {
+			descriptor.value = delegateFn(descriptor.value, keyResolver);
 
-      return descriptor;
-    }
+			return descriptor;
+		}
 
-    throw new Error('@delegate is applicable only on a methods.');
-  };
+		throw new Error("@delegate is applicable only on a methods.");
+	};
 }
