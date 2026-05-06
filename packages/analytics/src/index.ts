@@ -230,6 +230,16 @@ export const reset = (): void => analytics.reset();
 
 export const pageview = (url?: string): void => analytics.pageview(url);
 
+// ResQ-specific helpers shared across the three TS surfaces. Centralised
+// here so adding a fourth subdomain or tightening the GA4-ID regex is one
+// version bump instead of three coordinated edits in the consumer repos.
+export {
+	GA4_ID_PATTERN,
+	RESQ_SUBDOMAIN_ALLOWLIST,
+	resolveResqCookieDomain,
+	sanitizeGa4Id,
+} from "./resq";
+
 export const inferCookieDomain = (domains: string[]): string | undefined => {
 	if (domains.length === 0) return undefined;
 	const parts = domains.map((d) => d.replace(/^\./, "").split("."));
