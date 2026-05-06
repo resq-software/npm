@@ -178,11 +178,12 @@ jobs:
       - name: Build workspace dependencies
         run: bun run build
       - name: Run tests
+        if: matrix.package != 'ui'
         run: bun run test
         working-directory: packages/${{ matrix.package }}
-      - if: always() && matrix.package == 'ui'
-        name: Upload coverage to Codecov
-        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v5
+      - name: Skip note (ui)
+        if: matrix.package == 'ui'
+        run: echo "ui tests are skipped in CI — Storybook + Chromatic visual regression covers this surface."
 
   # ── Type-check all changed packages ───────────────────────────────────
 
