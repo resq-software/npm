@@ -163,4 +163,39 @@ describe("Analytics class", () => {
 		expect(a.config?.disabled).toBe(true);
 		expect(() => a.track("noop")).not.toThrow();
 	});
+
+	it("track + identify drop nested values when sending to GA4", async () => {
+		const captured: unknown[][] = [];
+		(globalThis as { window?: unknown }).window = {
+			dataLayer: { push: (args: unknown[]) => captured.push(args) },
+		};
+		const a = new Analytics();
+		await a.init({ ga4: { measurementId: "G-X" } });
+		a.track("cta_clicked", {
+			id: "hero",
+			section: "landing",
+			nested: { not: "allowed" },
+			arr: [1, 2],
+			count: 3,
+		});
+		const eventCall = captured.find((c) => c[0] === "event" && c[1] === "cta_clicked");
+		expect(eventCall?.[2]).toEqual({ id: "hero", section: "landing", count: 3 });
+		delete (globalThis as { window?: unknown }).window;
+	});
+
+	it("reset clears the GA4 user_id before tearing down", async () => {
+		const captured: unknown[][] = [];
+		(globalThis as { window?: unknown }).window = {
+			dataLayer: { push: (args: unknown[]) => captured.push(args) },
+		};
+		const a = new Analytics();
+		await a.init({ ga4: { measurementId: "G-X" } });
+		a.identify("user-1");
+		a.reset();
+		const resetConfig = captured.findLast(
+			(c) => c[0] === "config" && (c[2] as { user_id?: unknown })?.user_id === null,
+		);
+		expect(resetConfig).toBeDefined();
+		delete (globalThis as { window?: unknown }).window;
+	});
 });

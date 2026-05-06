@@ -16,7 +16,7 @@
  *
  */
 
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import {
 	type Analytics,
 	type AnalyticsConfig,
@@ -50,15 +50,22 @@ export const AnalyticsProvider = ({
 	deferUntilIdle = true,
 	children,
 }: AnalyticsProviderProps): ReactNode => {
+	const configRef = useRef(config);
+	configRef.current = config;
+	const initStarted = useRef(false);
+
 	useEffect(() => {
+		if (initStarted.current) return;
+		initStarted.current = true;
+		const start = (): void => {
+			void analytics.init(configRef.current);
+		};
 		if (deferUntilIdle) {
-			requestIdle(() => {
-				void analytics.init(config);
-			});
+			requestIdle(start);
 		} else {
-			void analytics.init(config);
+			start();
 		}
-	}, [config, deferUntilIdle]);
+	}, [deferUntilIdle]);
 
 	return children;
 };

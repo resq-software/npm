@@ -75,6 +75,39 @@ const gtag = (...args: unknown[]): void => {
 	}
 };
 
+/**
+ * Inject the gtag.js loader script once per measurement ID. Idempotent —
+ * keyed off a `data-resq-ga4` attribute so repeat calls are no-ops.
+ */
+const loadGa4Script = (measurementId: string): void => {
+	if (typeof document === "undefined") return;
+	const selector = `script[data-resq-ga4="${measurementId}"]`;
+	if (document.querySelector(selector)) return;
+	const script = document.createElement("script");
+	script.async = true;
+	script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
+	script.dataset.resqGa4 = measurementId;
+	document.head.appendChild(script);
+};
+
+/**
+ * GA4 only accepts flat objects with primitive values for event params and
+ * user properties. Filter out anything else so a stray nested object can't
+ * silently drop the whole event server-side.
+ */
+const primitivesOnly = (
+	props?: Record<string, unknown>,
+): Record<string, string | number | boolean> => {
+	if (!props) return {};
+	const out: Record<string, string | number | boolean> = {};
+	for (const [k, v] of Object.entries(props)) {
+		if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") {
+			out[k] = v;
+		}
+	}
+	return out;
+};
+
 export class Analytics {
 	#config: AnalyticsConfig | null = null;
 	#posthog: PostHog | null = null;
@@ -121,6 +154,7 @@ export class Analytics {
 	}
 
 	#initGa4(provider: GA4ProviderConfig): void {
+		loadGa4Script(provider.measurementId);
 		gtag("js", new Date());
 		const params: Record<string, unknown> = {};
 		if (provider.domains?.length) {
@@ -140,7 +174,7 @@ export class Analytics {
 		if (this.#config.disabled) return;
 		this.#posthog?.capture(event as string, properties as Record<string, unknown>);
 		if (this.#config.ga4) {
-			gtag("event", event, properties ?? {});
+			gtag("event", event, primitivesOnly(properties as Record<string, unknown>));
 		}
 	}
 
@@ -152,18 +186,28 @@ export class Analytics {
 		if (this.#config.disabled) return;
 		this.#posthog?.identify(userId, traits);
 		if (this.#config.ga4) {
-			gtag("set", "user_properties", traits ?? {});
+			gtag("set", "user_properties", primitivesOnly(traits));
 			gtag("config", this.#config.ga4.measurementId, { user_id: userId });
 		}
 	}
 
 	reset(): void {
+		if (this.#config?.ga4) {
+			gtag("config", this.#config.ga4.measurementId, { user_id: null });
+		}
 		this.#posthog?.reset();
 		this.#config = null;
 		this.#posthog = null;
 		this.#initPromise = null;
 	}
 
+	/**
+	 * Manually emit a pageview. Most consumers do **not** need to call this:
+	 * PostHog's `capture_pageview: "history_change"` (set in init) auto-captures
+	 * SPA navigation, and GA4's Enhanced Measurement (UI default) does the same
+	 * for gtag.js. Only call manually if you've disabled both auto-captures, or
+	 * for first-paint pageviews before init has resolved.
+	 */
 	pageview(url?: string): void {
 		if (!this.#config || this.#config.disabled) return;
 		this.#posthog?.capture("$pageview", url ? { $current_url: url } : undefined);
