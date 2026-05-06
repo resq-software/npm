@@ -223,8 +223,9 @@ describe("sanitizeGa4Id", () => {
 		expect(sanitizeGa4Id("G-XVXYL6V6WT")).toBe("G-XVXYL6V6WT");
 	});
 
-	it("returns null for undefined / empty", () => {
+	it("returns null for undefined / null / empty", () => {
 		expect(sanitizeGa4Id(undefined)).toBeNull();
+		expect(sanitizeGa4Id(null)).toBeNull();
 		expect(sanitizeGa4Id("")).toBeNull();
 	});
 
@@ -273,10 +274,20 @@ describe("resolveResqCookieDomain", () => {
 		expect(resolveResqCookieDomain("example.com")).toBeUndefined();
 	});
 
-	it("returns undefined for empty / undefined input (server-side)", () => {
+	it("returns undefined for null / empty / undefined input (server-side)", () => {
 		expect(resolveResqCookieDomain(undefined)).toBeUndefined();
+		expect(resolveResqCookieDomain(null)).toBeUndefined();
 		expect(resolveResqCookieDomain("")).toBeUndefined();
 		expect(resolveResqCookieDomain()).toBeUndefined();
+	});
+
+	it("normalises hostname casing (RFC 3986 §3.2.2)", () => {
+		// Server-side reads of the `Host` header can carry whatever casing
+		// the client sent — `RESQ.SOFTWARE`, `Resq.Software`, etc. — so
+		// the matcher must lowercase before comparing.
+		expect(resolveResqCookieDomain("RESQ.SOFTWARE")).toBe(".resq.software");
+		expect(resolveResqCookieDomain("Research.ResQ.Software")).toBe(".resq.software");
+		expect(resolveResqCookieDomain("VIZ.RESQ.SOFTWARE")).toBe(".resq.software");
 	});
 
 	it("does not be fooled by suffix collisions", () => {
