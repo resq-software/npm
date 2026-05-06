@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { TaskExec } from '../_utils.js';
-import type { Method } from '../types.js';
-import type { MemoizeConfig } from './memoize.types.js';
+import { TaskExec } from "../_utils.js";
+import type { Method } from "../types.js";
+import type { MemoizeConfig } from "./memoize.types.js";
 
 /**
  * Wraps a method to cache its results based on arguments.
@@ -78,58 +78,58 @@ import type { MemoizeConfig } from './memoize.types.js';
  * ```
  */
 export function memoizeFn<D = any, A extends any[] = any[]>(
-  originalMethod: Method<D, A>,
+	originalMethod: Method<D, A>,
 ): Method<D, A>;
 export function memoizeFn<D = any, A extends any[] = any[]>(
-  originalMethod: Method<D, A>,
-  config: MemoizeConfig<any, D>,
+	originalMethod: Method<D, A>,
+	config: MemoizeConfig<any, D>,
 ): Method<D, A>;
 export function memoizeFn<D = any, A extends any[] = any[]>(
-  originalMethod: Method<D, A>,
-  expirationTimeMs: number,
+	originalMethod: Method<D, A>,
+	expirationTimeMs: number,
 ): Method<D, A>;
 export function memoizeFn<D = any, A extends any[] = any[]>(
-  originalMethod: Method<D, A>,
-  input?: MemoizeConfig<any, D> | number,
+	originalMethod: Method<D, A>,
+	input?: MemoizeConfig<any, D> | number,
 ): Method<D, A> {
-  const defaultConfig: MemoizeConfig<any, D> = {
-    cache: new Map<string, D>(),
-  };
+	const defaultConfig: MemoizeConfig<any, D> = {
+		cache: new Map<string, D>(),
+	};
 
-  const runner = new TaskExec();
-  let resolvedConfig = {
-    ...defaultConfig,
-  } as MemoizeConfig<any, D>;
+	const runner = new TaskExec();
+	let resolvedConfig = {
+		...defaultConfig,
+	} as MemoizeConfig<any, D>;
 
-  if (typeof input === 'number') {
-    resolvedConfig.expirationTimeMs = input;
-  } else {
-    resolvedConfig = {
-      ...resolvedConfig,
-      ...input,
-    };
-  }
+	if (typeof input === "number") {
+		resolvedConfig.expirationTimeMs = input;
+	} else {
+		resolvedConfig = {
+			...resolvedConfig,
+			...input,
+		};
+	}
 
-  return function (this: any, ...args: A): D {
-    const keyResolver =
-      typeof resolvedConfig.keyResolver === 'string'
-        ? this[resolvedConfig.keyResolver].bind(this)
-        : resolvedConfig.keyResolver;
+	return function (this: any, ...args: A): D {
+		const keyResolver =
+			typeof resolvedConfig.keyResolver === "string"
+				? this[resolvedConfig.keyResolver].bind(this)
+				: resolvedConfig.keyResolver;
 
-    const key = keyResolver ? keyResolver(...args) : JSON.stringify(args);
+		const key = keyResolver ? keyResolver(...args) : JSON.stringify(args);
 
-    if (resolvedConfig.cache && !resolvedConfig.cache.has(key)) {
-      const response = originalMethod.apply(this, args);
+		if (resolvedConfig.cache && !resolvedConfig.cache.has(key)) {
+			const response = originalMethod.apply(this, args);
 
-      if (resolvedConfig.expirationTimeMs !== undefined) {
-        runner.exec(() => {
-          resolvedConfig.cache?.delete(key);
-        }, resolvedConfig.expirationTimeMs);
-      }
+			if (resolvedConfig.expirationTimeMs !== undefined) {
+				runner.exec(() => {
+					resolvedConfig.cache?.delete(key);
+				}, resolvedConfig.expirationTimeMs);
+			}
 
-      resolvedConfig.cache.set(key, response);
-    }
+			resolvedConfig.cache.set(key, response);
+		}
 
-    return resolvedConfig.cache?.get(key) as D;
-  };
+		return resolvedConfig.cache?.get(key) as D;
+	};
 }

@@ -14,51 +14,51 @@
  * limitations under the License.
  */
 
-import { describe, expect, test } from 'vitest';
-import { selfExecute } from './execute.js';
+import { describe, expect, test } from "vitest";
+import { selfExecute } from "./execute.js";
 
-describe('selfExecute', () => {
-  test('returns the constructor', () => {
-    let instantiated = false;
+describe("selfExecute", () => {
+	test("returns the constructor", () => {
+		let instantiated = false;
 
-    class Svc {
-      constructor() {
-        instantiated = true;
-      }
-    }
+		class Svc {
+			constructor() {
+				instantiated = true;
+			}
+		}
 
-    const result = selfExecute(Svc);
-    expect(result).toBe(Svc);
-    expect(instantiated).toBe(true);
-  });
+		const result = selfExecute(Svc);
+		expect(result).toBe(Svc);
+		expect(instantiated).toBe(true);
+	});
 
-  test('creates an instance as side effect', () => {
-    const instances: object[] = [];
+	test("creates an instance as side effect", () => {
+		const instances: object[] = [];
 
-    class Svc {
-      constructor() {
-        instances.push(this);
-      }
-    }
+		class Svc {
+			constructor() {
+				instances.push(this);
+			}
+		}
 
-    selfExecute(Svc);
-    expect(instances.length).toBe(1);
-    expect(instances[0]).toBeInstanceOf(Svc);
-  });
+		selfExecute(Svc);
+		expect(instances.length).toBe(1);
+		expect(instances[0]).toBeInstanceOf(Svc);
+	});
 
-  test('can be used as decorator', () => {
-    let constructed = false;
+	test("can be used as decorator", () => {
+		let constructed = false;
 
-    @selfExecute
-    class AutoService {
-      constructor() {
-        constructed = true;
-      }
-    }
+		@selfExecute
+		class AutoService {
+			constructor() {
+				constructed = true;
+			}
+		}
 
-    expect(constructed).toBe(true);
-    // Class is still usable as a constructor
-    const instance = new AutoService();
-    expect(instance).toBeInstanceOf(AutoService);
-  });
+		expect(constructed).toBe(true);
+		// Class is still usable as a constructor
+		const instance = new AutoService();
+		expect(instance).toBeInstanceOf(AutoService);
+	});
 });

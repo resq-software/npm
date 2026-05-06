@@ -15,11 +15,11 @@
  */
 
 import {
-  perf,
-  type AlgorithmCandidate,
-  type ComplexityDomain,
-  type AveragedTestResultPerSize,
-} from '@jsheaven/perf';
+	perf,
+	type AlgorithmCandidate,
+	type ComplexityDomain,
+	type AveragedTestResultPerSize,
+} from "@jsheaven/perf";
 
 export type { AlgorithmCandidate, ComplexityDomain };
 
@@ -28,18 +28,18 @@ export type { AlgorithmCandidate, ComplexityDomain };
  * ComplexityDomain.scientificNotation.
  */
 export type BigONotation =
-  | 'O(1)'
-  | 'O(log n)'
-  | 'O(n)'
-  | 'O(n log n)'
-  | 'O(n\u02E3)'   // polynomial
-  | 'O(X\u207F)'   // exponential
-  | 'O(n!)';
+	| "O(1)"
+	| "O(log n)"
+	| "O(n)"
+	| "O(n log n)"
+	| "O(n\u02E3)" // polynomial
+	| "O(X\u207F)" // exponential
+	| "O(n!)";
 
 export interface PerformanceResult {
-  duration: number;
-  complexity: number;
-  estimatedDomains: ComplexityDomain[];
+	duration: number;
+	complexity: number;
+	estimatedDomains: ComplexityDomain[];
 }
 
 /**
@@ -50,24 +50,24 @@ export interface PerformanceResult {
  * @returns Record keyed by algorithm name with duration and estimated domains
  */
 export const measurePerformance = async (
-  algorithms: AlgorithmCandidate | AlgorithmCandidate[],
+	algorithms: AlgorithmCandidate | AlgorithmCandidate[],
 ): Promise<Record<string, PerformanceResult>> => {
-  const algorithmArray = Array.isArray(algorithms) ? algorithms : [algorithms];
-  const results = await perf(algorithmArray);
-  return Object.entries(results).reduce(
-    (acc, [name, data]) => {
-      const d = data as AveragedTestResultPerSize;
-      return {
-        ...acc,
-        [name]: {
-          duration: d.duration,
-          complexity: d.complexity,
-          estimatedDomains: d.estimatedDomains,
-        },
-      };
-    },
-    {} as Record<string, PerformanceResult>,
-  );
+	const algorithmArray = Array.isArray(algorithms) ? algorithms : [algorithms];
+	const results = await perf(algorithmArray);
+	return Object.entries(results).reduce(
+		(acc, [name, data]) => {
+			const d = data as AveragedTestResultPerSize;
+			return {
+				...acc,
+				[name]: {
+					duration: d.duration,
+					complexity: d.complexity,
+					estimatedDomains: d.estimatedDomains,
+				},
+			};
+		},
+		{} as Record<string, PerformanceResult>,
+	);
 };
 
 /**
@@ -75,8 +75,8 @@ export const measurePerformance = async (
  * expected Big-O notations.
  */
 export const domainMatchesAny = (
-  domains: ComplexityDomain[],
-  expected: BigONotation[],
+	domains: ComplexityDomain[],
+	expected: BigONotation[],
 ): boolean => {
-  return domains.some((d) => expected.includes(d.scientificNotation as BigONotation));
+	return domains.some((d) => expected.includes(d.scientificNotation as BigONotation));
 };

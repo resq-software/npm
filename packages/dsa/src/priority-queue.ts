@@ -225,11 +225,7 @@ export class PriorityQueue<T> {
 	 * @param equalsFn - Optional equality function
 	 * @returns True if the element was found and updated
 	 */
-	updatePriority(
-		oldElement: T,
-		newElement: T,
-		equalsFn?: (a: T, b: T) => boolean,
-	): boolean {
+	updatePriority(oldElement: T, newElement: T, equalsFn?: (a: T, b: T) => boolean): boolean {
 		if (this.remove(oldElement, equalsFn)) {
 			this.enqueue(newElement);
 			return true;
@@ -312,10 +308,7 @@ export class PriorityQueue<T> {
 	 * @param options - Queue options
 	 * @returns New priority queue with elements
 	 */
-	static from<T>(
-		elements: T[],
-		options: PriorityQueueOptions<T> = {},
-	): PriorityQueue<T> {
+	static from<T>(elements: T[], options: PriorityQueueOptions<T> = {}): PriorityQueue<T> {
 		const queue = new PriorityQueue<T>(options);
 		queue.enqueueAll(elements);
 		return queue;
@@ -382,11 +375,7 @@ export class PriorityQueue<T> {
 				break;
 			}
 
-			if (
-				leftIndex < length &&
-				left !== undefined &&
-				this.compare(left, smallestEl) < 0
-			) {
+			if (leftIndex < length && left !== undefined && this.compare(left, smallestEl) < 0) {
 				smallest = leftIndex;
 			}
 

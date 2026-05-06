@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Method } from '../types.js';
+import type { Method } from "../types.js";
 /*
  * Copyright 2026 ResQ
  *
@@ -64,18 +64,18 @@ import type { Method } from '../types.js';
  * ```
  */
 export interface RateLimitConfigs<T = any> {
-  /** The time window in milliseconds */
-  timeSpanMs: number;
-  /** Maximum number of calls allowed in the time window */
-  allowedCalls: number;
-  /** Function to generate rate limit keys (for per-user/entity limiting) */
-  keyResolver?: ((...args: unknown[]) => string) | keyof T;
-  /** Custom counter implementation */
-  rateLimitCounter?: RateLimitCounter;
-  /** Async counter implementation */
-  rateLimitAsyncCounter?: RateLimitAsyncCounter;
-  /** Handler called when rate limit is exceeded */
-  exceedHandler?: () => void;
+	/** The time window in milliseconds */
+	timeSpanMs: number;
+	/** Maximum number of calls allowed in the time window */
+	allowedCalls: number;
+	/** Function to generate rate limit keys (for per-user/entity limiting) */
+	keyResolver?: ((...args: unknown[]) => string) | keyof T;
+	/** Custom counter implementation */
+	rateLimitCounter?: RateLimitCounter;
+	/** Async counter implementation */
+	rateLimitAsyncCounter?: RateLimitAsyncCounter;
+	/** Handler called when rate limit is exceeded */
+	exceedHandler?: () => void;
 }
 
 /**
@@ -112,12 +112,12 @@ export interface RateLimitConfigs<T = any> {
  * ```
  */
 export interface RateLimitCounter {
-  /** Increment the count for a key */
-  inc: (key: string) => void;
-  /** Decrement the count for a key */
-  dec: (key: string) => void;
-  /** Get the current count for a key */
-  getCount: (key: string) => number;
+	/** Increment the count for a key */
+	inc: (key: string) => void;
+	/** Decrement the count for a key */
+	dec: (key: string) => void;
+	/** Get the current count for a key */
+	getCount: (key: string) => number;
 }
 
 /**
@@ -148,12 +148,12 @@ export interface RateLimitCounter {
  * ```
  */
 export interface RateLimitAsyncCounter {
-  /** Increment the count for a key asynchronously */
-  inc: (key: string) => Promise<void>;
-  /** Decrement the count for a key asynchronously */
-  dec: (key: string) => Promise<void>;
-  /** Get the current count for a key asynchronously */
-  getCount: (key: string) => Promise<number>;
+	/** Increment the count for a key asynchronously */
+	inc: (key: string) => Promise<void>;
+	/** Decrement the count for a key asynchronously */
+	dec: (key: string) => Promise<void>;
+	/** Get the current count for a key asynchronously */
+	getCount: (key: string) => Promise<number>;
 }
 
 /**
@@ -168,7 +168,7 @@ export interface RateLimitAsyncCounter {
  * @returns {TypedPropertyDescriptor<Method<D>>} The modified descriptor
  */
 export type RateLimitable<T, D> = (
-  target: T,
-  propertyName: keyof T,
-  descriptor: TypedPropertyDescriptor<Method<D>>,
+	target: T,
+	propertyName: keyof T,
+	descriptor: TypedPropertyDescriptor<Method<D>>,
 ) => TypedPropertyDescriptor<Method<D>>;

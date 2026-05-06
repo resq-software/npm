@@ -15,6 +15,6 @@
  */
 
 export type TimedTask = {
-  func: (...args: unknown[]) => unknown;
-  execTime: number;
+	func: (...args: unknown[]) => unknown;
+	execTime: number;
 };

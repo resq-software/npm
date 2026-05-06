@@ -63,7 +63,7 @@ describe("encryptData / decryptData", () => {
 	});
 
 	it("should roundtrip special characters", async () => {
-		const plaintext = '!@#$%^&*()_+-={}[]|\\:";\'<>?,./~`';
+		const plaintext = "!@#$%^&*()_+-={}[]|\\:\";'<>?,./~`";
 		const key = "special-chars";
 		const encrypted = await encryptData(plaintext, key);
 		const decrypted = await decryptData(encrypted, key);

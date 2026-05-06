@@ -20,5 +20,5 @@
  * @license MIT
  */
 
-export * from './bind.js';
-export * from './bind.types.js';
+export * from "./bind.js";
+export * from "./bind.types.js";

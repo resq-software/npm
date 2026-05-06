@@ -38,8 +38,8 @@
  * ```
  */
 export interface BeforeConfig<T> {
-  /** The before function to execute, or a method name on the class */
-  func: ((...args: unknown[]) => unknown) | keyof T;
-  /** Whether to wait for the before function to complete before executing the method */
-  wait?: boolean;
+	/** The before function to execute, or a method name on the class */
+	func: ((...args: unknown[]) => unknown) | keyof T;
+	/** Whether to wait for the before function to complete before executing the method */
+	wait?: boolean;
 }

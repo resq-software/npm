@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Method } from '../types.js';
-import { rateLimitFn } from './rate-limit.fn.js';
-import type { RateLimitConfigs } from './rate-limit.types.js';
+import type { Method } from "../types.js";
+import { rateLimitFn } from "./rate-limit.fn.js";
+import type { RateLimitConfigs } from "./rate-limit.types.js";
 
 /**
  * Decorator that rate limits method calls.
@@ -69,22 +69,22 @@ import type { RateLimitConfigs } from './rate-limit.types.js';
  * ```
  */
 export function rateLimit<T = unknown>(
-  config: RateLimitConfigs<T>,
+	config: RateLimitConfigs<T>,
 ): (
-  target: T,
-  propertyName: keyof T,
-  descriptor: TypedPropertyDescriptor<Method<unknown>>,
+	target: T,
+	propertyName: keyof T,
+	descriptor: TypedPropertyDescriptor<Method<unknown>>,
 ) => TypedPropertyDescriptor<Method<unknown>> {
-  return (
-    _target: T,
-    _propertyName: keyof T,
-    descriptor: TypedPropertyDescriptor<Method<unknown>>,
-  ): TypedPropertyDescriptor<Method<unknown>> => {
-    if (descriptor.value) {
-      descriptor.value = rateLimitFn(descriptor.value, config);
-      return descriptor;
-    }
+	return (
+		_target: T,
+		_propertyName: keyof T,
+		descriptor: TypedPropertyDescriptor<Method<unknown>>,
+	): TypedPropertyDescriptor<Method<unknown>> => {
+		if (descriptor.value) {
+			descriptor.value = rateLimitFn(descriptor.value, config);
+			return descriptor;
+		}
 
-    throw new Error('@rateLimit is applicable only on methods.');
-  };
+		throw new Error("@rateLimit is applicable only on methods.");
+	};
 }

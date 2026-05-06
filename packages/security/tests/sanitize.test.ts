@@ -67,9 +67,7 @@ describe("sanitizeUrl", () => {
 	});
 
 	it("should allow mailto URLs", () => {
-		expect(sanitizeUrl("mailto:test@example.com")).toBe(
-			"mailto:test@example.com",
-		);
+		expect(sanitizeUrl("mailto:test@example.com")).toBe("mailto:test@example.com");
 	});
 
 	it("should reject javascript: URLs", () => {

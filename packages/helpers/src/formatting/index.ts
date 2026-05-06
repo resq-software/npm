@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export * from './date.js';
-export type * from './date.types.js';
-export * from './number.js';
-export * from './string.js';
+export * from "./date.js";
+export type * from "./date.types.js";
+export * from "./number.js";
+export * from "./string.js";

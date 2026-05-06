@@ -14,75 +14,75 @@
  * limitations under the License.
  */
 
-import { describe, expect, vi, test } from 'vitest';
-import { observe } from './observer.js';
+import { describe, expect, vi, test } from "vitest";
+import { observe } from "./observer.js";
 
-describe('observe decorator', () => {
-  // TODO: observer uses legacy field decorator semantics — update for TC39 decorators
-  test.skip('logs to console when no callback provided', () => {
-    const logSpy = vi.fn();
-    const originalLog = console.log;
-    console.log = logSpy;
+describe("observe decorator", () => {
+	// TODO: observer uses legacy field decorator semantics — update for TC39 decorators
+	test.skip("logs to console when no callback provided", () => {
+		const logSpy = vi.fn();
+		const originalLog = console.log;
+		console.log = logSpy;
 
-    try {
-      class Component {
-        @observe
-        count: number = 0;
-      }
+		try {
+			class Component {
+				@observe
+				count: number = 0;
+			}
 
-      const comp = new Component();
-      comp.count = 42;
+			const comp = new Component();
+			comp.count = 42;
 
-      expect(logSpy).toHaveBeenCalledWith('setting property Component#count = 42');
-    } finally {
-      console.log = originalLog;
-    }
-  });
+			expect(logSpy).toHaveBeenCalledWith("setting property Component#count = 42");
+		} finally {
+			console.log = originalLog;
+		}
+	});
 
-  test.skip('invokes custom callback on property set', () => {
-    const cb = vi.fn();
+	test.skip("invokes custom callback on property set", () => {
+		const cb = vi.fn();
 
-    class Component {
-      @observe(cb)
-      name: string = '';
-    }
+		class Component {
+			@observe(cb)
+			name: string = "";
+		}
 
-    const comp = new Component();
-    comp.name = 'hello';
+		const comp = new Component();
+		comp.name = "hello";
 
-    expect(cb).toHaveBeenCalledWith('hello');
-  });
+		expect(cb).toHaveBeenCalledWith("hello");
+	});
 
-  test('getter returns the set value', () => {
-    class Component {
-      @observe(() => {})
-      value: number = 0;
-    }
+	test("getter returns the set value", () => {
+		class Component {
+			@observe(() => {})
+			value: number = 0;
+		}
 
-    const comp = new Component();
-    comp.value = 99;
-    expect(comp.value).toBe(99);
-  });
+		const comp = new Component();
+		comp.value = 99;
+		expect(comp.value).toBe(99);
+	});
 
-  test.skip('calls callback on every assignment', () => {
-    const values: number[] = [];
+	test.skip("calls callback on every assignment", () => {
+		const values: number[] = [];
 
-    class Component {
-      @observe((v: number) => values.push(v))
-      counter: number = 0;
-    }
+		class Component {
+			@observe((v: number) => values.push(v))
+			counter: number = 0;
+		}
 
-    const comp = new Component();
-    comp.counter = 1;
-    comp.counter = 2;
-    comp.counter = 3;
+		const comp = new Component();
+		comp.counter = 1;
+		comp.counter = 2;
+		comp.counter = 3;
 
-    expect(values).toEqual([0, 1, 2, 3]); // initial + 3 assignments
-  });
+		expect(values).toEqual([0, 1, 2, 3]); // initial + 3 assignments
+	});
 
-  test('throws TypeError with incorrect parameters', () => {
-    expect(() => {
-      (observe as unknown as (arg: number) => void)(123);
-    }).toThrow(TypeError);
-  });
+	test("throws TypeError with incorrect parameters", () => {
+		expect(() => {
+			(observe as unknown as (arg: number) => void)(123);
+		}).toThrow(TypeError);
+	});
 });

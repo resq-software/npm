@@ -46,19 +46,19 @@
  * @license MIT
  */
 
-export * from './after/index.js';
-export * from './before/index.js';
-export * from './bind/index.js';
-export * from './debounce/index.js';
-export * from './delay/index.js';
-export * from './delegate/index.js';
-export * from './exec-time/index.js';
-export * from './execute/index.js';
-export * from './memoize/index.js';
-export * from './memoize-async/index.js';
-export * from './observer/index.js';
-export * from './rate-limit/index.js';
-export * from './readonly/index.js';
-export * from './throttle/index.js';
-export * from './throttle-async/index.js';
-export * from './types.js';
+export * from "./after/index.js";
+export * from "./before/index.js";
+export * from "./bind/index.js";
+export * from "./debounce/index.js";
+export * from "./delay/index.js";
+export * from "./delegate/index.js";
+export * from "./exec-time/index.js";
+export * from "./execute/index.js";
+export * from "./memoize/index.js";
+export * from "./memoize-async/index.js";
+export * from "./observer/index.js";
+export * from "./rate-limit/index.js";
+export * from "./readonly/index.js";
+export * from "./throttle/index.js";
+export * from "./throttle-async/index.js";
+export * from "./types.js";

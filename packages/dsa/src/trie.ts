@@ -22,12 +22,12 @@
  */
 
 import {
-  TrieInsertSchema,
-  type TrieOptions,
-  TrieOptionsSchema,
-  TrieSearchSchema,
-  validateSafe,
-} from './schemas.js';
+	TrieInsertSchema,
+	type TrieOptions,
+	TrieOptionsSchema,
+	TrieSearchSchema,
+	validateSafe,
+} from "./schemas.js";
 
 // ============================================
 // Types & Interfaces
@@ -38,14 +38,14 @@ import {
  * @template T - Type of data stored at word endings
  */
 interface TrieNode<T> {
-  /** Child nodes mapped by character */
-  children: Map<string, TrieNode<T>>;
-  /** Whether this node marks the end of a word */
-  isEndOfWord: boolean;
-  /** Data associated with the word (if end of word) */
-  data: T | null;
-  /** Number of words passing through this node (for ranking) */
-  frequency: number;
+	/** Child nodes mapped by character */
+	children: Map<string, TrieNode<T>>;
+	/** Whether this node marks the end of a word */
+	isEndOfWord: boolean;
+	/** Data associated with the word (if end of word) */
+	data: T | null;
+	/** Number of words passing through this node (for ranking) */
+	frequency: number;
 }
 
 /**
@@ -53,12 +53,12 @@ interface TrieNode<T> {
  * @template T - Type of stored data
  */
 export interface TrieSearchResult<T> {
-  /** The matched word */
-  word: string;
-  /** Associated data */
-  data: T;
-  /** Relevance score based on frequency */
-  score: number;
+	/** The matched word */
+	word: string;
+	/** Associated data */
+	data: T;
+	/** Relevance score based on frequency */
+	score: number;
 }
 
 // Re-export TrieOptions from schemas for consumers
@@ -89,222 +89,222 @@ export type { TrieOptions };
  * ```
  */
 export class Trie<T> {
-  private root: TrieNode<T>;
-  private readonly caseInsensitive: boolean;
-  private readonly maxResults: number;
-  private size: number;
+	private root: TrieNode<T>;
+	private readonly caseInsensitive: boolean;
+	private readonly maxResults: number;
+	private size: number;
 
-  /**
-   * Creates a new Trie instance
-   * @param options - Configuration options
-   * @throws Error if options validation fails
-   */
-  constructor(options: TrieOptions = {}) {
-    const validation = validateSafe(TrieOptionsSchema, options);
-    if (!validation.success) {
-      throw new Error(`Invalid Trie options: ${validation.error}`);
-    }
-    const validatedOptions = validation.data;
+	/**
+	 * Creates a new Trie instance
+	 * @param options - Configuration options
+	 * @throws Error if options validation fails
+	 */
+	constructor(options: TrieOptions = {}) {
+		const validation = validateSafe(TrieOptionsSchema, options);
+		if (!validation.success) {
+			throw new Error(`Invalid Trie options: ${validation.error}`);
+		}
+		const validatedOptions = validation.data;
 
-    this.root = this.createNode();
-    this.caseInsensitive = validatedOptions.caseInsensitive ?? true;
-    this.maxResults = validatedOptions.maxResults ?? 10;
-    this.size = 0;
-  }
+		this.root = this.createNode();
+		this.caseInsensitive = validatedOptions.caseInsensitive ?? true;
+		this.maxResults = validatedOptions.maxResults ?? 10;
+		this.size = 0;
+	}
 
-  private createNode(): TrieNode<T> {
-    return { children: new Map(), isEndOfWord: false, data: null, frequency: 0 };
-  }
+	private createNode(): TrieNode<T> {
+		return { children: new Map(), isEndOfWord: false, data: null, frequency: 0 };
+	}
 
-  private normalizeKey(key: string): string {
-    return this.caseInsensitive ? key.toLowerCase() : key;
-  }
+	private normalizeKey(key: string): string {
+		return this.caseInsensitive ? key.toLowerCase() : key;
+	}
 
-  /**
-   * Inserts a word with associated data into the Trie
-   * @returns This Trie instance for chaining
-   */
-  insert(word: string, data: T): this {
-    const validation = validateSafe(TrieInsertSchema, { word: word?.trim() || '' });
-    if (!validation.success) return this;
+	/**
+	 * Inserts a word with associated data into the Trie
+	 * @returns This Trie instance for chaining
+	 */
+	insert(word: string, data: T): this {
+		const validation = validateSafe(TrieInsertSchema, { word: word?.trim() || "" });
+		if (!validation.success) return this;
 
-    const normalizedWord = this.normalizeKey(validation.data.word);
-    let current = this.root;
+		const normalizedWord = this.normalizeKey(validation.data.word);
+		let current = this.root;
 
-    for (const char of normalizedWord) {
-      if (!current.children.has(char)) {
-        current.children.set(char, this.createNode());
-      }
-      const next = current.children.get(char);
-      if (next) {
-        current = next;
-        current.frequency++;
-      }
-    }
+		for (const char of normalizedWord) {
+			if (!current.children.has(char)) {
+				current.children.set(char, this.createNode());
+			}
+			const next = current.children.get(char);
+			if (next) {
+				current = next;
+				current.frequency++;
+			}
+		}
 
-    if (!current.isEndOfWord) this.size++;
-    current.isEndOfWord = true;
-    current.data = data;
+		if (!current.isEndOfWord) this.size++;
+		current.isEndOfWord = true;
+		current.data = data;
 
-    return this;
-  }
+		return this;
+	}
 
-  /**
-   * Bulk insert multiple words with data
-   * @returns This Trie instance for chaining
-   */
-  insertMany(entries: Array<[string, T]>): this {
-    for (const [word, data] of entries) {
-      this.insert(word, data);
-    }
-    return this;
-  }
+	/**
+	 * Bulk insert multiple words with data
+	 * @returns This Trie instance for chaining
+	 */
+	insertMany(entries: Array<[string, T]>): this {
+		for (const [word, data] of entries) {
+			this.insert(word, data);
+		}
+		return this;
+	}
 
-  /**
-   * Searches for an exact word match
-   * @returns The associated data or null if not found
-   */
-  search(word: string): T | null {
-    const node = this.findNode(word);
-    return node?.isEndOfWord ? node.data : null;
-  }
+	/**
+	 * Searches for an exact word match
+	 * @returns The associated data or null if not found
+	 */
+	search(word: string): T | null {
+		const node = this.findNode(word);
+		return node?.isEndOfWord ? node.data : null;
+	}
 
-  /**
-   * Checks if a word exists in the Trie
-   */
-  has(word: string): boolean {
-    const node = this.findNode(word);
-    return node?.isEndOfWord ?? false;
-  }
+	/**
+	 * Checks if a word exists in the Trie
+	 */
+	has(word: string): boolean {
+		const node = this.findNode(word);
+		return node?.isEndOfWord ?? false;
+	}
 
-  /**
-   * Checks if any word starts with the given prefix
-   */
-  startsWith(prefix: string): boolean {
-    return this.findNode(prefix) !== null;
-  }
+	/**
+	 * Checks if any word starts with the given prefix
+	 */
+	startsWith(prefix: string): boolean {
+		return this.findNode(prefix) !== null;
+	}
 
-  /**
-   * Finds all words starting with the given prefix
-   *
-   * @param prefix - The prefix to search for
-   * @param limit - Maximum number of results (defaults to maxResults option)
-   * @returns Array of search results sorted by relevance
-   */
-  searchByPrefix(prefix: string, limit?: number): TrieSearchResult<T>[] {
-    const validation = validateSafe(TrieSearchSchema, {
-      prefix: prefix?.trim() || '',
-      limit,
-    });
-    if (!validation.success) return [];
+	/**
+	 * Finds all words starting with the given prefix
+	 *
+	 * @param prefix - The prefix to search for
+	 * @param limit - Maximum number of results (defaults to maxResults option)
+	 * @returns Array of search results sorted by relevance
+	 */
+	searchByPrefix(prefix: string, limit?: number): TrieSearchResult<T>[] {
+		const validation = validateSafe(TrieSearchSchema, {
+			prefix: prefix?.trim() || "",
+			limit,
+		});
+		if (!validation.success) return [];
 
-    const maxCount = validation.data.limit ?? this.maxResults;
-    const normalizedPrefix = this.normalizeKey(validation.data.prefix);
+		const maxCount = validation.data.limit ?? this.maxResults;
+		const normalizedPrefix = this.normalizeKey(validation.data.prefix);
 
-    if (!normalizedPrefix) return [];
+		if (!normalizedPrefix) return [];
 
-    const prefixNode = this.findNode(prefix);
-    if (!prefixNode) return [];
+		const prefixNode = this.findNode(prefix);
+		if (!prefixNode) return [];
 
-    const results: TrieSearchResult<T>[] = [];
-    this.collectWords(prefixNode, normalizedPrefix, results, maxCount);
+		const results: TrieSearchResult<T>[] = [];
+		this.collectWords(prefixNode, normalizedPrefix, results, maxCount);
 
-    return results.sort((a, b) => b.score - a.score).slice(0, maxCount);
-  }
+		return results.sort((a, b) => b.score - a.score).slice(0, maxCount);
+	}
 
-  /**
-   * Deletes a word from the Trie
-   * @returns True if the word was deleted
-   */
-  delete(word: string): boolean {
-    const normalizedWord = this.normalizeKey(word.trim());
-    if (!normalizedWord) return false;
-    return this.deleteRecursive(this.root, normalizedWord, 0);
-  }
+	/**
+	 * Deletes a word from the Trie
+	 * @returns True if the word was deleted
+	 */
+	delete(word: string): boolean {
+		const normalizedWord = this.normalizeKey(word.trim());
+		if (!normalizedWord) return false;
+		return this.deleteRecursive(this.root, normalizedWord, 0);
+	}
 
-  /**
-   * Returns the number of words in the Trie
-   */
-  get length(): number {
-    return this.size;
-  }
+	/**
+	 * Returns the number of words in the Trie
+	 */
+	get length(): number {
+		return this.size;
+	}
 
-  /**
-   * Clears all words from the Trie
-   */
-  clear(): void {
-    this.root = this.createNode();
-    this.size = 0;
-  }
+	/**
+	 * Clears all words from the Trie
+	 */
+	clear(): void {
+		this.root = this.createNode();
+		this.size = 0;
+	}
 
-  /**
-   * Gets all words in the Trie
-   */
-  getAllWords(): Array<{ word: string; data: T }> {
-    const results: TrieSearchResult<T>[] = [];
-    this.collectWords(this.root, '', results, Number.MAX_SAFE_INTEGER);
-    return results.map(({ word, data }) => ({ word, data }));
-  }
+	/**
+	 * Gets all words in the Trie
+	 */
+	getAllWords(): Array<{ word: string; data: T }> {
+		const results: TrieSearchResult<T>[] = [];
+		this.collectWords(this.root, "", results, Number.MAX_SAFE_INTEGER);
+		return results.map(({ word, data }) => ({ word, data }));
+	}
 
-  // ============================================
-  // Private Helpers
-  // ============================================
+	// ============================================
+	// Private Helpers
+	// ============================================
 
-  private findNode(word: string): TrieNode<T> | null {
-    const normalizedWord = this.normalizeKey(word.trim());
-    if (!normalizedWord) return null;
+	private findNode(word: string): TrieNode<T> | null {
+		const normalizedWord = this.normalizeKey(word.trim());
+		if (!normalizedWord) return null;
 
-    let current = this.root;
-    for (const char of normalizedWord) {
-      const next = current.children.get(char);
-      if (!next) return null;
-      current = next;
-    }
-    return current;
-  }
+		let current = this.root;
+		for (const char of normalizedWord) {
+			const next = current.children.get(char);
+			if (!next) return null;
+			current = next;
+		}
+		return current;
+	}
 
-  private collectWords(
-    node: TrieNode<T>,
-    currentWord: string,
-    results: TrieSearchResult<T>[],
-    limit: number,
-  ): void {
-    if (results.length >= limit) return;
+	private collectWords(
+		node: TrieNode<T>,
+		currentWord: string,
+		results: TrieSearchResult<T>[],
+		limit: number,
+	): void {
+		if (results.length >= limit) return;
 
-    if (node.isEndOfWord && node.data !== null) {
-      results.push({ word: currentWord, data: node.data, score: node.frequency });
-    }
+		if (node.isEndOfWord && node.data !== null) {
+			results.push({ word: currentWord, data: node.data, score: node.frequency });
+		}
 
-    for (const [char, childNode] of node.children) {
-      this.collectWords(childNode, currentWord + char, results, limit);
-    }
-  }
+		for (const [char, childNode] of node.children) {
+			this.collectWords(childNode, currentWord + char, results, limit);
+		}
+	}
 
-  private deleteRecursive(node: TrieNode<T>, word: string, index: number): boolean {
-    if (index === word.length) {
-      if (!node.isEndOfWord) return false;
-      node.isEndOfWord = false;
-      node.data = null;
-      this.size--;
-      return node.children.size === 0;
-    }
+	private deleteRecursive(node: TrieNode<T>, word: string, index: number): boolean {
+		if (index === word.length) {
+			if (!node.isEndOfWord) return false;
+			node.isEndOfWord = false;
+			node.data = null;
+			this.size--;
+			return node.children.size === 0;
+		}
 
-    const char = word[index];
-    if (char === undefined) return false;
+		const char = word[index];
+		if (char === undefined) return false;
 
-    const childNode = node.children.get(char);
-    if (!childNode) return false;
+		const childNode = node.children.get(char);
+		if (!childNode) return false;
 
-    const shouldDeleteChild = this.deleteRecursive(childNode, word, index + 1);
+		const shouldDeleteChild = this.deleteRecursive(childNode, word, index + 1);
 
-    if (shouldDeleteChild) {
-      node.children.delete(char);
-      return !node.isEndOfWord && node.children.size === 0;
-    }
+		if (shouldDeleteChild) {
+			node.children.delete(char);
+			return !node.isEndOfWord && node.children.size === 0;
+		}
 
-    childNode.frequency--;
-    return false;
-  }
+		childNode.frequency--;
+		return false;
+	}
 }
 
 // ============================================
@@ -319,31 +319,31 @@ export class Trie<T> {
  * @returns Array of starting indices where the pattern is found
  */
 export function rabinKarp(text: string, pattern: string): number[] {
-  const n = text.length;
-  const m = pattern.length;
-  const matches: number[] = [];
-  if (m > n || m === 0) return matches;
+	const n = text.length;
+	const m = pattern.length;
+	const matches: number[] = [];
+	if (m > n || m === 0) return matches;
 
-  const BASE = 31;
-  const MOD = 1_000_000_007;
-  const pow = Array.from({ length: m }, () => 0);
-  pow[0] = 1;
-  for (let i = 1; i < m; i++) pow[i] = (pow[i - 1]! * BASE) % MOD;
+	const BASE = 31;
+	const MOD = 1_000_000_007;
+	const pow = Array.from({ length: m }, () => 0);
+	pow[0] = 1;
+	for (let i = 1; i < m; i++) pow[i] = (pow[i - 1]! * BASE) % MOD;
 
-  const cv = (s: string, i: number) => s.charCodeAt(i) - 96;
+	const cv = (s: string, i: number) => s.charCodeAt(i) - 96;
 
-  let patHash = 0;
-  let winHash = 0;
-  for (let i = 0; i < m; i++) {
-    patHash = (patHash + cv(pattern, i) * pow[m - 1 - i]!) % MOD;
-    winHash = (winHash + cv(text, i) * pow[m - 1 - i]!) % MOD;
-  }
-  if (winHash === patHash && text.slice(0, m) === pattern) matches.push(0);
+	let patHash = 0;
+	let winHash = 0;
+	for (let i = 0; i < m; i++) {
+		patHash = (patHash + cv(pattern, i) * pow[m - 1 - i]!) % MOD;
+		winHash = (winHash + cv(text, i) * pow[m - 1 - i]!) % MOD;
+	}
+	if (winHash === patHash && text.slice(0, m) === pattern) matches.push(0);
 
-  for (let i = 1; i <= n - m; i++) {
-    winHash = (winHash - (cv(text, i - 1) * pow[m - 1]!) % MOD + MOD) % MOD;
-    winHash = (winHash * BASE + cv(text, i + m - 1)) % MOD;
-    if (winHash === patHash && text.slice(i, i + m) === pattern) matches.push(i);
-  }
-  return matches;
+	for (let i = 1; i <= n - m; i++) {
+		winHash = (winHash - ((cv(text, i - 1) * pow[m - 1]!) % MOD) + MOD) % MOD;
+		winHash = (winHash * BASE + cv(text, i + m - 1)) % MOD;
+		if (winHash === patHash && text.slice(i, i + m) === pattern) matches.push(i);
+	}
+	return matches;
 }

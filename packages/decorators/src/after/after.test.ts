@@ -14,36 +14,30 @@
  * limitations under the License.
  */
 
-import { describe, expect, test } from 'vitest';
-import { afterFn } from './after.fn.js';
+import { describe, expect, test } from "vitest";
+import { afterFn } from "./after.fn.js";
 
-describe('after', () => {
-  describe('afterFn', () => {
-    test('calls the after function with args and response', async () => {
-      let afterArgs: unknown;
-      const fn = afterFn(
-        (x: number) => x * 2,
-        {
-          func: (ctx: { args: unknown[]; response: unknown }) => {
-            afterArgs = ctx;
-          },
-        },
-      );
+describe("after", () => {
+	describe("afterFn", () => {
+		test("calls the after function with args and response", async () => {
+			let afterArgs: unknown;
+			const fn = afterFn((x: number) => x * 2, {
+				func: (ctx: { args: unknown[]; response: unknown }) => {
+					afterArgs = ctx;
+				},
+			});
 
-      const result = await fn(5);
-      expect(result).toBe(10);
-      expect(afterArgs).toBeDefined();
-      expect((afterArgs as { args: unknown[] }).args).toEqual([5]);
-      expect((afterArgs as { response: unknown }).response).toBe(10);
-    });
+			const result = await fn(5);
+			expect(result).toBe(10);
+			expect(afterArgs).toBeDefined();
+			expect((afterArgs as { args: unknown[] }).args).toEqual([5]);
+			expect((afterArgs as { response: unknown }).response).toBe(10);
+		});
 
-    test('returns the original response', async () => {
-      const fn = afterFn(
-        (x: number) => x + 1,
-        { func: () => {} },
-      );
+		test("returns the original response", async () => {
+			const fn = afterFn((x: number) => x + 1, { func: () => {} });
 
-      expect(await fn(5)).toBe(6);
-    });
-  });
+			expect(await fn(5)).toBe(6);
+		});
+	});
 });

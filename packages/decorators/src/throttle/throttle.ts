@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Decorator, Method } from '../types.js';
-import { throttleFn } from './throttle.fn.js';
+import type { Decorator, Method } from "../types.js";
+import { throttleFn } from "./throttle.fn.js";
 
 /**
  * Decorator that throttles method calls to once per specified time period.
@@ -46,17 +46,17 @@ import { throttleFn } from './throttle.fn.js';
  * ```
  */
 export function throttle<T = any>(delayMs: number): Decorator<T> {
-  return (
-    target: T,
-    propertyName: keyof T,
-    descriptor: TypedPropertyDescriptor<Method<any>>,
-  ): TypedPropertyDescriptor<Method<any>> => {
-    if (descriptor.value) {
-      descriptor.value = throttleFn(descriptor.value, delayMs);
+	return (
+		_target: T,
+		_propertyName: keyof T,
+		descriptor: TypedPropertyDescriptor<Method<any>>,
+	): TypedPropertyDescriptor<Method<any>> => {
+		if (descriptor.value) {
+			descriptor.value = throttleFn(descriptor.value, delayMs);
 
-      return descriptor;
-    }
+			return descriptor;
+		}
 
-    throw new Error('@throttle is applicable only on a methods.');
-  };
+		throw new Error("@throttle is applicable only on a methods.");
+	};
 }

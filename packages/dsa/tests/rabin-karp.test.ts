@@ -153,10 +153,7 @@ describe("RabinKarp", () => {
 	describe("searchWithStats", () => {
 		it("should return matches with statistics", () => {
 			const matcher = new RabinKarp();
-			const { matches, stats } = matcher.searchWithStats(
-				"The quick brown fox",
-				"quick",
-			);
+			const { matches, stats } = matcher.searchWithStats("The quick brown fox", "quick");
 
 			expect(matches.length).toBe(1);
 			expect(stats.matchesFound).toBe(1);
@@ -166,10 +163,7 @@ describe("RabinKarp", () => {
 
 		it("should track hash collisions", () => {
 			const matcher = new RabinKarp();
-			const { stats } = matcher.searchWithStats(
-				"The quick brown fox jumps",
-				"fox",
-			);
+			const { stats } = matcher.searchWithStats("The quick brown fox jumps", "fox");
 			expect(typeof stats.hashCollisions).toBe("number");
 		});
 
@@ -211,7 +205,7 @@ describe("RabinKarp", () => {
 
 		it("should handle large text efficiently", () => {
 			const matcher = new RabinKarp();
-			const largeText = "Lorem ipsum ".repeat(10000) + "FOIA REQUEST";
+			const largeText = `${"Lorem ipsum ".repeat(10000)}FOIA REQUEST`;
 			const { stats } = matcher.searchWithStats(largeText, "FOIA REQUEST");
 			expect(stats.matchesFound).toBe(1);
 			expect(stats.timeTakenMs).toBeLessThan(1000);

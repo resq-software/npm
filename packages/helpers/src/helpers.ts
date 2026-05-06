@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Logger } from '@resq-sw/logger';
+import { Logger } from "@resq-sw/logger";
 
-const logger = Logger.getLogger('[helpers]');
+const logger = Logger.getLogger("[helpers]");
 
 /**
  * Converts an object to a formatted JSON string with proper indentation.
@@ -43,7 +43,7 @@ const logger = Logger.getLogger('[helpers]');
  * - Safe with primitives, arrays, objects, null and undefined
  */
 export const Stringify = (obj: object): string => {
-  return JSON.stringify(obj, null, 2);
+	return JSON.stringify(obj, null, 2);
 };
 
 /**
@@ -71,49 +71,47 @@ export const Stringify = (obj: object): string => {
  * - Suitable for client-side contexts where the API/resource is on the same origin.
  * - NOT recommended for defining a fixed API base URL across environments or for server-side use.
  */
-export const getURL = (path = ''): string => {
-  let url = '';
+export const getURL = (path = ""): string => {
+	let url = "";
 
-  // Use the current globalThis's  origin as the base URL if available.
-  // globalThis.location.origin includes the protocol, hostname, and port (e.g., "https://example.com:8080")
-  if (typeof globalThis !== 'undefined' && globalThis.location?.origin) {
-    url = globalThis.location.origin;
-  } else {
-    // This function will not work correctly in a non-browser environment (e.g., during SSR or build processes)
-    // where `globalThis` is not defined. We'll attempt to use environment variables for a more reliable default.
-    const envBaseUrl =
-      process?.env?.['VITE_BASE_URL'] ||
-      process?.env?.['NEXT_PUBLIC_BASE_URL'] ||
-      process?.env?.['BASE_URL'];
+	// Use the current globalThis's  origin as the base URL if available.
+	// globalThis.location.origin includes the protocol, hostname, and port (e.g., "https://example.com:8080")
+	if (typeof globalThis !== "undefined" && globalThis.location?.origin) {
+		url = globalThis.location.origin;
+	} else {
+		// This function will not work correctly in a non-browser environment (e.g., during SSR or build processes)
+		// where `globalThis` is not defined. We'll attempt to use environment variables for a more reliable default.
+		const envBaseUrl =
+			process?.env?.VITE_BASE_URL || process?.env?.NEXT_PUBLIC_BASE_URL || process?.env?.BASE_URL;
 
-    if (envBaseUrl && typeof envBaseUrl === 'string') {
-      url = envBaseUrl;
-    } else {
-      logger.warn(
-        "getURL: 'globalThis' is not defined and no environment base URL found. This function relies on client-side context. Returning empty string.",
-      );
-      return '';
-    }
-  }
+		if (envBaseUrl && typeof envBaseUrl === "string") {
+			url = envBaseUrl;
+		} else {
+			logger.warn(
+				"getURL: 'globalThis' is not defined and no environment base URL found. This function relies on client-side context. Returning empty string.",
+			);
+			return "";
+		}
+	}
 
-  // Remove any trailing slashes from the base URL (globalThis.location.origin typically doesn't have one, but for consistency)
-  url = url.replace(/\/+$/, '');
+	// Remove any trailing slashes from the base URL (globalThis.location.origin typically doesn't have one, but for consistency)
+	url = url.replace(/\/+$/, "");
 
-  // Remove any leading slashes from the path
-  const sanitizedPath = path.replace(/^\/+/, '');
+	// Remove any leading slashes from the path
+	const sanitizedPath = path.replace(/^\/+/, "");
 
-  // Combine the URL and path, ensuring a single slash in between if a path exists
-  return sanitizedPath ? `${url}/${sanitizedPath}` : url;
+	// Combine the URL and path, ensuring a single slash in between if a path exists
+	return sanitizedPath ? `${url}/${sanitizedPath}` : url;
 };
 
 type Success<T> = {
-  readonly success: true;
-  readonly value: T;
+	readonly success: true;
+	readonly value: T;
 };
 
 type Failure<E> = {
-  readonly success: false;
-  readonly error: E;
+	readonly success: false;
+	readonly error: E;
 };
 
 type Result<T, E> = Success<T> | Failure<E>;
@@ -131,19 +129,19 @@ export const success = <T>(value: T): Success<T> => Object.freeze({ success: tru
 export const failure = <E>(error: E): Failure<E> => Object.freeze({ success: false, error });
 
 type ExtractAsyncArgs<Args extends Array<unknown>> =
-  Args extends Array<infer PotentialArgTypes> ? [PotentialArgTypes] : [];
+	Args extends Array<infer PotentialArgTypes> ? [PotentialArgTypes] : [];
 
 export const catchError = async <Args extends Array<unknown>, ReturnType>(
-  asyncFunction: (...args: ExtractAsyncArgs<Args>) => Promise<ReturnType>,
-  ...args: ExtractAsyncArgs<Args>
+	asyncFunction: (...args: ExtractAsyncArgs<Args>) => Promise<ReturnType>,
+	...args: ExtractAsyncArgs<Args>
 ): Promise<Result<ReturnType, Error>> => {
-  try {
-    const result = await asyncFunction(...args);
-    return success(result);
-  } catch (error) {
-    logger.error('catchError', error);
-    return failure(error instanceof Error ? error : new Error(String(error)));
-  }
+	try {
+		const result = await asyncFunction(...args);
+		return success(result);
+	} catch (error) {
+		logger.error("catchError", error);
+		return failure(error instanceof Error ? error : new Error(String(error)));
+	}
 };
 
 /**
@@ -151,18 +149,18 @@ export const catchError = async <Args extends Array<unknown>, ReturnType>(
  * @param fn Mapping function to apply to the successful value
  */
 export const map =
-  <T, U, E>(fn: (value: T) => U): ((result: Result<T, E>) => Result<U, E>) =>
-  (result) =>
-    result.success ? success(fn(result.value)) : result;
+	<T, U, E>(fn: (value: T) => U): ((result: Result<T, E>) => Result<U, E>) =>
+	(result) =>
+		result.success ? success(fn(result.value)) : result;
 
 /**
  * Chains a result-returning function after a successful result
  * @param fn Function that returns a new result
  */
 export const bindResult =
-  <T, U, E>(fn: (value: T) => Result<U, E>): ((result: Result<T, E>) => Result<U, E>) =>
-  (result) =>
-    result.success ? fn(result.value) : result;
+	<T, U, E>(fn: (value: T) => Result<U, E>): ((result: Result<T, E>) => Result<U, E>) =>
+	(result) =>
+		result.success ? fn(result.value) : result;
 
 /**
  * Applies a series of functions to an input value, short-circuiting on the first failure
@@ -171,44 +169,44 @@ export const bindResult =
  * @returns Final result after applying all functions or first encountered failure
  */
 export function railway<TInput, T1, E>(
-  input: TInput,
-  fn1: (input: TInput) => Result<T1, E>,
+	input: TInput,
+	fn1: (input: TInput) => Result<T1, E>,
 ): Result<T1, E>;
 export function railway<TInput, T1, T2, E>(
-  input: TInput,
-  fn1: (input: TInput) => Result<T1, E>,
-  fn2: (input: T1) => Result<T2, E>,
+	input: TInput,
+	fn1: (input: TInput) => Result<T1, E>,
+	fn2: (input: T1) => Result<T2, E>,
 ): Result<T2, E>;
 export function railway<TInput, T1, T2, T3, E>(
-  input: TInput,
-  fn1: (input: TInput) => Result<T1, E>,
-  fn2: (input: T1) => Result<T2, E>,
-  fn3: (input: T2) => Result<T3, E>,
+	input: TInput,
+	fn1: (input: TInput) => Result<T1, E>,
+	fn2: (input: T1) => Result<T2, E>,
+	fn3: (input: T2) => Result<T3, E>,
 ): Result<T3, E>;
 export function railway<TInput, T1, T2, T3, T4, E>(
-  input: TInput,
-  fn1: (input: TInput) => Result<T1, E>,
-  fn2: (input: T1) => Result<T2, E>,
-  fn3: (input: T2) => Result<T3, E>,
-  fn4: (input: T3) => Result<T4, E>,
+	input: TInput,
+	fn1: (input: TInput) => Result<T1, E>,
+	fn2: (input: T1) => Result<T2, E>,
+	fn3: (input: T2) => Result<T3, E>,
+	fn4: (input: T3) => Result<T4, E>,
 ): Result<T4, E>;
 export function railway<TInput, T1, T2, T3, T4, T5, E>(
-  input: TInput,
-  fn1: (input: TInput) => Result<T1, E>,
-  fn2: (input: T1) => Result<T2, E>,
-  fn3: (input: T2) => Result<T3, E>,
-  fn4: (input: T3) => Result<T4, E>,
-  fn5: (input: T4) => Result<T5, E>,
+	input: TInput,
+	fn1: (input: TInput) => Result<T1, E>,
+	fn2: (input: T1) => Result<T2, E>,
+	fn3: (input: T2) => Result<T3, E>,
+	fn4: (input: T3) => Result<T4, E>,
+	fn5: (input: T4) => Result<T5, E>,
 ): Result<T5, E>;
 export function railway<TInput, TOutput, E>(
-  input: TInput,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ...functions: Array<(input: any) => Result<any, E>>
+	input: TInput,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	...functions: Array<(input: any) => Result<any, E>>
 ): Result<TOutput, E> {
-  return functions.reduce<Result<any, E>>(
-    (result, fn) => (result.success ? fn(result.value) : result),
-    success(input),
-  ) as Result<TOutput, E>;
+	return functions.reduce<Result<any, E>>(
+		(result, fn) => (result.success ? fn(result.value) : result),
+		success(input),
+	) as Result<TOutput, E>;
 }
 
 /**
@@ -216,47 +214,47 @@ export function railway<TInput, TOutput, E>(
  * @param fn Function to handle the error and return a new result
  */
 export const recover =
-  <T, E1, E2>(fn: (error: E1) => Result<T, E2>): ((result: Result<T, E1>) => Result<T, E2>) =>
-  (result) =>
-    result.success ? result : fn(result.error);
+	<T, E1, E2>(fn: (error: E1) => Result<T, E2>): ((result: Result<T, E1>) => Result<T, E2>) =>
+	(result) =>
+		result.success ? result : fn(result.error);
 
 /**
  * Taps into a result chain for side effects without modifying the value
  * @param fn Side effect function to execute on success
  */
 export const tap =
-  <T, E>(fn: (value: T) => void): ((result: Result<T, E>) => Result<T, E>) =>
-  (result) => {
-    if (result.success) {
-      fn(result.value);
-    }
-    return result;
-  };
+	<T, E>(fn: (value: T) => void): ((result: Result<T, E>) => Result<T, E>) =>
+	(result) => {
+		if (result.success) {
+			fn(result.value);
+		}
+		return result;
+	};
 
 /**
  * Checks if a value is a number
  * @param value The value to check
  */
-export const isNumber = (value: unknown): value is number => typeof value === 'number';
+export const isNumber = (value: unknown): value is number => typeof value === "number";
 
 /**
  * Checks if a value is a string
  * @param value The value to check
  */
-export const isString = (value: unknown): value is string => typeof value === 'string';
+export const isString = (value: unknown): value is string => typeof value === "string";
 
 /**
  * Checks if a value is a function
  * @param value The value to check
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
-export const isFunction = (value: unknown): value is Function => typeof value === 'function';
+export const isFunction = (value: unknown): value is Function => typeof value === "function";
 
 /**
  * Checks if a value is a promise
  * @param value The value to check
  */
 export const isPromise = (value: unknown): value is Promise<unknown> =>
-  !!value &&
-  (typeof value === 'object' || typeof value === 'function') &&
-  typeof (value as Promise<unknown>).then === 'function';
+	!!value &&
+	(typeof value === "object" || typeof value === "function") &&
+	typeof (value as Promise<unknown>).then === "function";

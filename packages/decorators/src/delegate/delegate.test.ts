@@ -14,71 +14,68 @@
  * limitations under the License.
  */
 
-import { describe, expect, test } from 'vitest';
-import { delegateFn } from './delegate.fn.js';
+import { describe, expect, test } from "vitest";
+import { delegateFn } from "./delegate.fn.js";
 
-describe('delegate', () => {
-  describe('delegateFn', () => {
-    test('deduplicates concurrent calls with same args', async () => {
-      let callCount = 0;
-      const fn = delegateFn(async (x: number) => {
-        callCount++;
-        await new Promise((r) => setTimeout(r, 50));
-        return x * 2;
-      });
+describe("delegate", () => {
+	describe("delegateFn", () => {
+		test("deduplicates concurrent calls with same args", async () => {
+			let callCount = 0;
+			const fn = delegateFn(async (x: number) => {
+				callCount++;
+				await new Promise((r) => setTimeout(r, 50));
+				return x * 2;
+			});
 
-      const [a, b] = await Promise.all([fn(5), fn(5)]);
-      expect(a).toBe(10);
-      expect(b).toBe(10);
-      expect(callCount).toBe(1);
-    });
+			const [a, b] = await Promise.all([fn(5), fn(5)]);
+			expect(a).toBe(10);
+			expect(b).toBe(10);
+			expect(callCount).toBe(1);
+		});
 
-    test('concurrent calls with different args are independent', async () => {
-      let callCount = 0;
-      const fn = delegateFn(async (x: number) => {
-        callCount++;
-        await new Promise((r) => setTimeout(r, 20));
-        return x * 2;
-      });
+		test("concurrent calls with different args are independent", async () => {
+			let callCount = 0;
+			const fn = delegateFn(async (x: number) => {
+				callCount++;
+				await new Promise((r) => setTimeout(r, 20));
+				return x * 2;
+			});
 
-      const [a, b] = await Promise.all([fn(5), fn(10)]);
-      expect(a).toBe(10);
-      expect(b).toBe(20);
-      expect(callCount).toBe(2);
-    });
+			const [a, b] = await Promise.all([fn(5), fn(10)]);
+			expect(a).toBe(10);
+			expect(b).toBe(20);
+			expect(callCount).toBe(2);
+		});
 
-    test('cleans up after promise resolves — new call creates new promise', async () => {
-      let callCount = 0;
-      const fn = delegateFn(async (x: number) => {
-        callCount++;
-        return x * 2;
-      });
+		test("cleans up after promise resolves — new call creates new promise", async () => {
+			let callCount = 0;
+			const fn = delegateFn(async (x: number) => {
+				callCount++;
+				return x * 2;
+			});
 
-      const a = await fn(5);
-      const b = await fn(5);
-      expect(a).toBe(10);
-      expect(b).toBe(10);
-      expect(callCount).toBe(2);
-    });
+			const a = await fn(5);
+			const b = await fn(5);
+			expect(a).toBe(10);
+			expect(b).toBe(10);
+			expect(callCount).toBe(2);
+		});
 
-    test('supports custom keyResolver', async () => {
-      let callCount = 0;
-      const fn = delegateFn(
-        async (obj: { id: number; ts: number }) => {
-          callCount++;
-          await new Promise((r) => setTimeout(r, 50));
-          return obj.id;
-        },
-        (obj: { id: number }) => String(obj.id),
-      );
+		test("supports custom keyResolver", async () => {
+			let callCount = 0;
+			const fn = delegateFn(
+				async (obj: { id: number; ts: number }) => {
+					callCount++;
+					await new Promise((r) => setTimeout(r, 50));
+					return obj.id;
+				},
+				(obj: { id: number }) => String(obj.id),
+			);
 
-      const [a, b] = await Promise.all([
-        fn({ id: 1, ts: 100 }),
-        fn({ id: 1, ts: 200 }),
-      ]);
-      expect(a).toBe(1);
-      expect(b).toBe(1);
-      expect(callCount).toBe(1);
-    });
-  });
+			const [a, b] = await Promise.all([fn({ id: 1, ts: 100 }), fn({ id: 1, ts: 200 })]);
+			expect(a).toBe(1);
+			expect(b).toBe(1);
+			expect(callCount).toBe(1);
+		});
+	});
 });

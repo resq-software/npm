@@ -19,23 +19,23 @@
  * @internal
  */
 interface CacheNode<K, V> {
-  key: K;
-  value: V;
-  prev: CacheNode<K, V> | null;
-  next: CacheNode<K, V> | null;
-  expiresAt?: number;
+	key: K;
+	value: V;
+	prev: CacheNode<K, V> | null;
+	next: CacheNode<K, V> | null;
+	expiresAt?: number;
 }
 
 /**
  * LRU Cache configuration
  */
 export interface LRUCacheOptions {
-  /** Maximum number of items in cache */
-  maxSize: number;
-  /** Default TTL in milliseconds (optional) */
-  defaultTTL?: number;
-  /** Callback when item is evicted */
-  onEvict?: <K, V>(key: K, value: V) => void;
+	/** Maximum number of items in cache */
+	maxSize: number;
+	/** Default TTL in milliseconds (optional) */
+	defaultTTL?: number;
+	/** Callback when item is evicted */
+	onEvict?: <K, V>(key: K, value: V) => void;
 }
 
 /**
@@ -46,166 +46,166 @@ export interface LRUCacheOptions {
  * @template V - Value type
  */
 export class LRUCache<K, V> {
-  private readonly cache: Map<K, CacheNode<K, V>>;
-  private head: CacheNode<K, V> | null = null;
-  private tail: CacheNode<K, V> | null = null;
-  private readonly maxSize: number;
-  private readonly defaultTTL?: number;
-  private readonly onEvict?: <K2, V2>(key: K2, value: V2) => void;
+	private readonly cache: Map<K, CacheNode<K, V>>;
+	private head: CacheNode<K, V> | null = null;
+	private tail: CacheNode<K, V> | null = null;
+	private readonly maxSize: number;
+	private readonly defaultTTL?: number;
+	private readonly onEvict?: <K2, V2>(key: K2, value: V2) => void;
 
-  constructor(options: LRUCacheOptions) {
-    this.cache = new Map();
-    this.maxSize = options.maxSize;
-    this.defaultTTL = options.defaultTTL;
-    this.onEvict = options.onEvict;
-  }
+	constructor(options: LRUCacheOptions) {
+		this.cache = new Map();
+		this.maxSize = options.maxSize;
+		this.defaultTTL = options.defaultTTL;
+		this.onEvict = options.onEvict;
+	}
 
-  get(key: K): V | undefined {
-    const node = this.cache.get(key);
-    if (!node) return undefined;
+	get(key: K): V | undefined {
+		const node = this.cache.get(key);
+		if (!node) return undefined;
 
-    if (node.expiresAt && Date.now() > node.expiresAt) {
-      this.delete(key);
-      return undefined;
-    }
+		if (node.expiresAt && Date.now() > node.expiresAt) {
+			this.delete(key);
+			return undefined;
+		}
 
-    this.moveToFront(node);
-    return node.value;
-  }
+		this.moveToFront(node);
+		return node.value;
+	}
 
-  set(key: K, value: V, ttl?: number): void {
-    const existingNode = this.cache.get(key);
+	set(key: K, value: V, ttl?: number): void {
+		const existingNode = this.cache.get(key);
 
-    if (existingNode) {
-      existingNode.value = value;
-      existingNode.expiresAt = this.calculateExpiry(ttl);
-      this.moveToFront(existingNode);
-      return;
-    }
+		if (existingNode) {
+			existingNode.value = value;
+			existingNode.expiresAt = this.calculateExpiry(ttl);
+			this.moveToFront(existingNode);
+			return;
+		}
 
-    const newNode: CacheNode<K, V> = {
-      key,
-      value,
-      prev: null,
-      next: this.head,
-      expiresAt: this.calculateExpiry(ttl),
-    };
+		const newNode: CacheNode<K, V> = {
+			key,
+			value,
+			prev: null,
+			next: this.head,
+			expiresAt: this.calculateExpiry(ttl),
+		};
 
-    if (this.head) {
-      this.head.prev = newNode;
-    }
-    this.head = newNode;
+		if (this.head) {
+			this.head.prev = newNode;
+		}
+		this.head = newNode;
 
-    if (!this.tail) {
-      this.tail = newNode;
-    }
+		if (!this.tail) {
+			this.tail = newNode;
+		}
 
-    this.cache.set(key, newNode);
+		this.cache.set(key, newNode);
 
-    if (this.cache.size > this.maxSize) {
-      this.evictLRU();
-    }
-  }
+		if (this.cache.size > this.maxSize) {
+			this.evictLRU();
+		}
+	}
 
-  has(key: K): boolean {
-    const node = this.cache.get(key);
-    if (!node) return false;
+	has(key: K): boolean {
+		const node = this.cache.get(key);
+		if (!node) return false;
 
-    if (node.expiresAt && Date.now() > node.expiresAt) {
-      this.delete(key);
-      return false;
-    }
+		if (node.expiresAt && Date.now() > node.expiresAt) {
+			this.delete(key);
+			return false;
+		}
 
-    return true;
-  }
+		return true;
+	}
 
-  delete(key: K): boolean {
-    const node = this.cache.get(key);
-    if (!node) return false;
+	delete(key: K): boolean {
+		const node = this.cache.get(key);
+		if (!node) return false;
 
-    this.removeNode(node);
-    this.cache.delete(key);
-    return true;
-  }
+		this.removeNode(node);
+		this.cache.delete(key);
+		return true;
+	}
 
-  clear(): void {
-    this.cache.clear();
-    this.head = null;
-    this.tail = null;
-  }
+	clear(): void {
+		this.cache.clear();
+		this.head = null;
+		this.tail = null;
+	}
 
-  get size(): number {
-    return this.cache.size;
-  }
+	get size(): number {
+		return this.cache.size;
+	}
 
-  getStats(): { size: number; maxSize: number; hitRate: number } {
-    return { size: this.cache.size, maxSize: this.maxSize, hitRate: 0 };
-  }
+	getStats(): { size: number; maxSize: number; hitRate: number } {
+		return { size: this.cache.size, maxSize: this.maxSize, hitRate: 0 };
+	}
 
-  async getOrCompute(key: K, compute: () => Promise<V>, ttl?: number): Promise<V> {
-    const cached = this.get(key);
-    if (cached !== undefined) return cached;
+	async getOrCompute(key: K, compute: () => Promise<V>, ttl?: number): Promise<V> {
+		const cached = this.get(key);
+		if (cached !== undefined) return cached;
 
-    const value = await compute();
-    this.set(key, value, ttl);
-    return value;
-  }
+		const value = await compute();
+		this.set(key, value, ttl);
+		return value;
+	}
 
-  getOrComputeSync(key: K, compute: () => V, ttl?: number): V {
-    const cached = this.get(key);
-    if (cached !== undefined) return cached;
+	getOrComputeSync(key: K, compute: () => V, ttl?: number): V {
+		const cached = this.get(key);
+		if (cached !== undefined) return cached;
 
-    const value = compute();
-    this.set(key, value, ttl);
-    return value;
-  }
+		const value = compute();
+		this.set(key, value, ttl);
+		return value;
+	}
 
-  private calculateExpiry(ttl?: number): number | undefined {
-    const effectiveTTL = ttl ?? this.defaultTTL;
-    return effectiveTTL ? Date.now() + effectiveTTL : undefined;
-  }
+	private calculateExpiry(ttl?: number): number | undefined {
+		const effectiveTTL = ttl ?? this.defaultTTL;
+		return effectiveTTL ? Date.now() + effectiveTTL : undefined;
+	}
 
-  private moveToFront(node: CacheNode<K, V>): void {
-    if (node === this.head) return;
+	private moveToFront(node: CacheNode<K, V>): void {
+		if (node === this.head) return;
 
-    this.removeNode(node);
-    node.prev = null;
-    node.next = this.head;
+		this.removeNode(node);
+		node.prev = null;
+		node.next = this.head;
 
-    if (this.head) {
-      this.head.prev = node;
-    }
-    this.head = node;
+		if (this.head) {
+			this.head.prev = node;
+		}
+		this.head = node;
 
-    if (!this.tail) {
-      this.tail = node;
-    }
-  }
+		if (!this.tail) {
+			this.tail = node;
+		}
+	}
 
-  private removeNode(node: CacheNode<K, V>): void {
-    if (node.prev) {
-      node.prev.next = node.next;
-    } else {
-      this.head = node.next;
-    }
+	private removeNode(node: CacheNode<K, V>): void {
+		if (node.prev) {
+			node.prev.next = node.next;
+		} else {
+			this.head = node.next;
+		}
 
-    if (node.next) {
-      node.next.prev = node.prev;
-    } else {
-      this.tail = node.prev;
-    }
-  }
+		if (node.next) {
+			node.next.prev = node.prev;
+		} else {
+			this.tail = node.prev;
+		}
+	}
 
-  private evictLRU(): void {
-    if (!this.tail) return;
+	private evictLRU(): void {
+		if (!this.tail) return;
 
-    const evictedNode = this.tail;
+		const evictedNode = this.tail;
 
-    if (this.onEvict) {
-      this.onEvict(evictedNode.key, evictedNode.value);
-    }
+		if (this.onEvict) {
+			this.onEvict(evictedNode.key, evictedNode.value);
+		}
 
-    this.removeNode(evictedNode);
-    this.cache.delete(evictedNode.key);
-  }
+		this.removeNode(evictedNode);
+		this.cache.delete(evictedNode.key);
+	}
 }

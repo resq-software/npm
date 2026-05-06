@@ -42,9 +42,7 @@ describe("PriorityQueue", () => {
 		});
 
 		it("should throw error for invalid initialCapacity", () => {
-			expect(
-				() => new PriorityQueue<number>({ initialCapacity: -1 }),
-			).toThrow();
+			expect(() => new PriorityQueue<number>({ initialCapacity: -1 })).toThrow();
 			expect(() => new PriorityQueue<number>({ initialCapacity: 0 })).toThrow();
 		});
 
@@ -166,11 +164,7 @@ describe("PriorityQueue", () => {
 			queue.enqueue(req1).enqueue(req2);
 
 			const updated: FOIARequest = { ...req2, priority: 1 };
-			const result = queue.updatePriority(
-				req2,
-				updated,
-				(a, b) => a.id === b.id,
-			);
+			const result = queue.updatePriority(req2, updated, (a, b) => a.id === b.id);
 			expect(result).toBe(true);
 			expect(queue.peek()?.id).toBe("2");
 		});

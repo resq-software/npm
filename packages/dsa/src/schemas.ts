@@ -52,9 +52,7 @@ export type TrieSearch = S.Schema.Type<typeof TrieSearchSchema>;
 export const PriorityQueueOptionsSchema = S.Struct({
 	initialCapacity: S.optional(S.Int.check(S.isGreaterThan(0))),
 });
-export type PriorityQueueOptions = S.Schema.Type<
-	typeof PriorityQueueOptionsSchema
->;
+export type PriorityQueueOptions = S.Schema.Type<typeof PriorityQueueOptionsSchema>;
 
 export const PriorityItemSchema = S.Struct({
 	id: S.String.check(S.isMinLength(1)),
@@ -86,9 +84,7 @@ export const RabinKarpMultiSearchSchema = S.Struct({
 	text: S.String.check(S.isMinLength(1)),
 	patterns: S.NonEmptyArray(S.String.check(S.isMinLength(1))),
 });
-export type RabinKarpMultiSearch = S.Schema.Type<
-	typeof RabinKarpMultiSearchSchema
->;
+export type RabinKarpMultiSearch = S.Schema.Type<typeof RabinKarpMultiSearchSchema>;
 
 // ============================================
 // Graph Schemas
@@ -135,8 +131,7 @@ export function validateSafe<T extends AnySchema>(
 		const data: S.Schema.Type<T> = (S.decodeUnknownSync as Function)(schema)(input);
 		return { success: true, data };
 	} catch (error) {
-		const message =
-			error instanceof Error ? error.message : "Validation failed";
+		const message = error instanceof Error ? error.message : "Validation failed";
 		return { success: false, error: message };
 	}
 }

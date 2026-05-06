@@ -41,7 +41,7 @@
  * @license MIT
  */
 
-import type { Method } from '../types.js';
+import type { Method } from "../types.js";
 
 /**
  * Decorator that automatically binds a method to its class instance.
@@ -86,31 +86,31 @@ import type { Method } from '../types.js';
  * ```
  */
 export function bind<T = unknown>(
-  _target: T,
-  propertyKey: string | symbol,
-  descriptor: TypedPropertyDescriptor<Method<unknown>>,
+	_target: T,
+	propertyKey: string | symbol,
+	descriptor: TypedPropertyDescriptor<Method<unknown>>,
 ): TypedPropertyDescriptor<Method<unknown>> {
-  const originalMethod = descriptor.value;
+	const originalMethod = descriptor.value;
 
-  if (!originalMethod) {
-    throw new Error('@bind is applicable only on methods.');
-  }
+	if (!originalMethod) {
+		throw new Error("@bind is applicable only on methods.");
+	}
 
-  // Use a getter to lazily bind the method on first access
-  return {
-    configurable: true,
-    enumerable: false,
-    get(this: object): Method<unknown> {
-      const boundMethod = originalMethod.bind(this);
+	// Use a getter to lazily bind the method on first access
+	return {
+		configurable: true,
+		enumerable: false,
+		get(this: object): Method<unknown> {
+			const boundMethod = originalMethod.bind(this);
 
-      // Define the bound method directly on the instance for subsequent accesses
-      Object.defineProperty(this, propertyKey, {
-        value: boundMethod,
-        configurable: true,
-        writable: true,
-      });
+			// Define the bound method directly on the instance for subsequent accesses
+			Object.defineProperty(this, propertyKey, {
+				value: boundMethod,
+				configurable: true,
+				writable: true,
+			});
 
-      return boundMethod;
-    },
-  };
+			return boundMethod;
+		},
+	};
 }

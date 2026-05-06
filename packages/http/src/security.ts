@@ -26,38 +26,38 @@
  * Check if a request should be redirected to HTTPS
  */
 export function shouldRedirectToHttps(
-  protocol: string,
-  url: string,
-  headers: Record<string, string | undefined>,
-  nodeEnv: string = process.env['NODE_ENV'] || 'development'
+	protocol: string,
+	url: string,
+	headers: Record<string, string | undefined>,
+	nodeEnv: string = process.env.NODE_ENV || "development",
 ): string | null {
-  // Skip in development/test environments
-  if (nodeEnv === 'development' || nodeEnv === 'test') {
-    return null;
-  }
+	// Skip in development/test environments
+	if (nodeEnv === "development" || nodeEnv === "test") {
+		return null;
+	}
 
-  // Check for HTTPS via various headers (handles proxies/load balancers)
-  const forwardedProto = headers['x-forwarded-proto'];
-  const forwardedSsl = headers['x-forwarded-ssl'];
-  
-  const isSecure =
-    forwardedProto === 'https' ||
-    forwardedSsl === 'on' ||
-    protocol === 'https' ||
-    url.startsWith('https://');
+	// Check for HTTPS via various headers (handles proxies/load balancers)
+	const forwardedProto = headers["x-forwarded-proto"];
+	const forwardedSsl = headers["x-forwarded-ssl"];
 
-  if (!isSecure) {
-    const httpsUrl = new URL(url);
-    httpsUrl.protocol = 'https:';
-    return httpsUrl.toString();
-  }
+	const isSecure =
+		forwardedProto === "https" ||
+		forwardedSsl === "on" ||
+		protocol === "https" ||
+		url.startsWith("https://");
 
-  return null;
+	if (!isSecure) {
+		const httpsUrl = new URL(url);
+		httpsUrl.protocol = "https:";
+		return httpsUrl.toString();
+	}
+
+	return null;
 }
 
 /**
  * Generate or retrieve a request ID
  */
 export function getRequestId(existingId?: string): string {
-  return existingId || crypto.randomUUID();
+	return existingId || crypto.randomUUID();
 }

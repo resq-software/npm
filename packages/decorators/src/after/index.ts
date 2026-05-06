@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export * from './after.js';
-export * from './after.types.js';
+export * from "./after.js";
+export * from "./after.types.js";

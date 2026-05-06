@@ -14,36 +14,36 @@
  * limitations under the License.
  */
 
-import { describe, expect, test } from 'vitest';
-import { readonly } from './readonly.js';
+import { describe, expect, test } from "vitest";
+import { readonly } from "./readonly.js";
 
-describe('readonly', () => {
-  test('prevents method reassignment in strict mode', () => {
-    class Example {
-      @readonly()
-      greet() {
-        return 'hello';
-      }
-    }
+describe("readonly", () => {
+	test("prevents method reassignment in strict mode", () => {
+		class Example {
+			@readonly()
+			greet() {
+				return "hello";
+			}
+		}
 
-    const instance = new Example();
-    expect(instance.greet()).toBe('hello');
+		const instance = new Example();
+		expect(instance.greet()).toBe("hello");
 
-    // In strict mode, assigning to readonly property throws TypeError
-    expect(() => {
-      (instance as unknown as Record<string, unknown>).greet = () => 'overwritten';
-    }).toThrow();
-  });
+		// In strict mode, assigning to readonly property throws TypeError
+		expect(() => {
+			(instance as unknown as Record<string, unknown>).greet = () => "overwritten";
+		}).toThrow();
+	});
 
-  test('method remains callable', () => {
-    class Calculator {
-      @readonly()
-      add(a: number, b: number) {
-        return a + b;
-      }
-    }
+	test("method remains callable", () => {
+		class Calculator {
+			@readonly()
+			add(a: number, b: number) {
+				return a + b;
+			}
+		}
 
-    const calc = new Calculator();
-    expect(calc.add(2, 3)).toBe(5);
-  });
+		const calc = new Calculator();
+		expect(calc.add(2, 3)).toBe(5);
+	});
 });

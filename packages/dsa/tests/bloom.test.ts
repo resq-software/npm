@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-import { BloomFilter } from '../src/bloom.js';
+import { describe, expect, it } from "vitest";
+import { BloomFilter } from "../src/bloom.js";
 
-describe('BloomFilter', () => {
-  it('has() returns true for added items', () => {
-    const bf = new BloomFilter(1000);
-    bf.add('drone-001');
-    bf.add('drone-002');
-    expect(bf.has('drone-001')).toBe(true);
-    expect(bf.has('drone-002')).toBe(true);
-  });
+describe("BloomFilter", () => {
+	it("has() returns true for added items", () => {
+		const bf = new BloomFilter(1000);
+		bf.add("drone-001");
+		bf.add("drone-002");
+		expect(bf.has("drone-001")).toBe(true);
+		expect(bf.has("drone-002")).toBe(true);
+	});
 
-  it('has() returns false for absent items', () => {
-    const bf = new BloomFilter(1000, 0.001);
-    bf.add('seen');
-    expect(bf.has('unseen')).toBe(false);
-    expect(bf.has('also-unseen')).toBe(false);
-  });
+	it("has() returns false for absent items", () => {
+		const bf = new BloomFilter(1000, 0.001);
+		bf.add("seen");
+		expect(bf.has("unseen")).toBe(false);
+		expect(bf.has("also-unseen")).toBe(false);
+	});
 
-  it('never has false negatives', () => {
-    const bf = new BloomFilter(500);
-    const items = Array.from({ length: 100 }, (_, i) => `item-${i}`);
-    items.forEach((x) => bf.add(x));
-    expect(items.every((x) => bf.has(x))).toBe(true);
-  });
+	it("never has false negatives", () => {
+		const bf = new BloomFilter(500);
+		const items = Array.from({ length: 100 }, (_, i) => `item-${i}`);
+		items.forEach((x) => bf.add(x));
+		expect(items.every((x) => bf.has(x))).toBe(true);
+	});
 });

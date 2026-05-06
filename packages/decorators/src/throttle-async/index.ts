@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from './throttle-async.js';
+export * from "./throttle-async.js";

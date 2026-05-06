@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export * from './platform.js';
-export * from './html-entities.js';
+export * from "./platform.js";
+export * from "./html-entities.js";

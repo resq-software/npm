@@ -39,9 +39,9 @@
  * @license MIT
  */
 
-import type { AsyncMethod, Method } from '../types.js';
-import { execTimeFn } from './exec-time.fn.js';
-import type { ReportFunction } from './exec-time.types.js';
+import type { AsyncMethod, Method } from "../types.js";
+import { execTimeFn } from "./exec-time.fn.js";
+import type { ReportFunction } from "./exec-time.types.js";
 
 /**
  * Decorator that measures and reports the execution time of methods.
@@ -79,30 +79,30 @@ import type { ReportFunction } from './exec-time.types.js';
  * ```
  */
 export function execTime<T = any>(arg?: ReportFunction | string): any {
-  return (
-    targetOrValue: unknown,
-    propertyNameOrContext: keyof T | ClassMethodDecoratorContext,
-    descriptor?: TypedPropertyDescriptor<any>,
-  ): any => {
-    // Legacy decorator
-    if (descriptor) {
-      if (descriptor.value) {
-        descriptor.value = execTimeFn(descriptor.value, arg);
-        return descriptor;
-      }
-      throw new Error('@execTime is applicable only on methods.');
-    }
+	return (
+		targetOrValue: unknown,
+		propertyNameOrContext: keyof T | ClassMethodDecoratorContext,
+		descriptor?: TypedPropertyDescriptor<any>,
+	): any => {
+		// Legacy decorator
+		if (descriptor) {
+			if (descriptor.value) {
+				descriptor.value = execTimeFn(descriptor.value, arg);
+				return descriptor;
+			}
+			throw new Error("@execTime is applicable only on methods.");
+		}
 
-    // Standard decorator (Stage 3)
-    // targetOrValue is the method itself
-    // propertyNameOrContext is the context
-    const method = targetOrValue as Method | AsyncMethod;
-    const context = propertyNameOrContext as ClassMethodDecoratorContext;
+		// Standard decorator (Stage 3)
+		// targetOrValue is the method itself
+		// propertyNameOrContext is the context
+		const method = targetOrValue as Method | AsyncMethod;
+		const context = propertyNameOrContext as ClassMethodDecoratorContext;
 
-    if (context.kind === 'method') {
-      return execTimeFn(method, arg);
-    }
+		if (context.kind === "method") {
+			return execTimeFn(method, arg);
+		}
 
-    throw new Error('@execTime is applicable only on methods.');
-  };
+		throw new Error("@execTime is applicable only on methods.");
+	};
 }

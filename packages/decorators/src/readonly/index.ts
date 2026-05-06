@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export * from './readonly.js';
-export * from './readonly.types.js';
+export * from "./readonly.js";
+export * from "./readonly.types.js";

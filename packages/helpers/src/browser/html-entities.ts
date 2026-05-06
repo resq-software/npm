@@ -23,10 +23,10 @@
  * @see https://dev.w3.org/html5/html-author/charref
  */
 const toEntities = (str: string): string =>
-  str
-    .split('')
-    .map((c) => `&#${c.codePointAt(0)};`)
-    .join('');
+	str
+		.split("")
+		.map((c) => `&#${c.codePointAt(0)};`)
+		.join("");
 
 /**
  * Obfuscates and encodes a contact hyperlink (such as mailto or tel) as HTML entities.
@@ -50,24 +50,24 @@ const toEntities = (str: string): string =>
  * ```
  */
 export const obfuscateLink = (opts: {
-  scheme: 'mailto' | 'tel';
-  address: string;
-  params?: Record<string, string>;
-  text?: string;
+	scheme: "mailto" | "tel";
+	address: string;
+	params?: Record<string, string>;
+	text?: string;
 }) => {
-  const { scheme, address, params, text } = opts;
+	const { scheme, address, params, text } = opts;
 
-  let uri = `${scheme}:${address}`;
+	let uri = `${scheme}:${address}`;
 
-  if (params && Object.keys(params).length) {
-    const qs = Object.entries(params)
-      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
-      .join('&');
-    uri += `?${qs}`;
-  }
+	if (params && Object.keys(params).length) {
+		const qs = Object.entries(params)
+			.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+			.join("&");
+		uri += `?${qs}`;
+	}
 
-  const href = uri;
-  const encodedText = toEntities(text ?? address);
+	const href = uri;
+	const encodedText = toEntities(text ?? address);
 
-  return { href, encodedText };
+	return { href, encodedText };
 };

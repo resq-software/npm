@@ -1,7 +1,10 @@
 {
 	"name": "resq-sw-workspace",
 	"private": true,
-	"workspaces": ["packages/*", "examples/*"],
+	"workspaces": [
+		"packages/*",
+		"examples/*"
+	],
 	"scripts": {
 		"prepare": "git config core.hooksPath .git-hooks",
 		"ws": "bun scripts/ws.ts",

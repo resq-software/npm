@@ -20,34 +20,34 @@
  * a WorkerResult or WorkerError.
  */
 
-import { basename } from 'node:path';
-import { parentPort } from 'node:worker_threads';
-import sharp from 'sharp';
+import { basename } from "node:path";
+import { parentPort } from "node:worker_threads";
+import sharp from "sharp";
 
-import type { WorkerMessage, WorkerTask } from './lqip.ts';
+import type { WorkerMessage, WorkerTask } from "./lqip.ts";
 
 sharp.cache(false);
 
 if (!parentPort) {
-	throw new Error('lqip.worker.ts must be run as a worker thread');
+	throw new Error("lqip.worker.ts must be run as a worker thread");
 }
 
-parentPort.on('message', async (task: WorkerTask) => {
+parentPort.on("message", async (task: WorkerTask) => {
 	try {
 		const buf = await Bun.file(task.filePath).arrayBuffer();
 		const img = sharp(buf);
 		const { format } = await img.metadata();
 
 		const lqipBuf = await img
-			.resize({ width: task.width, height: task.height, fit: 'inside' })
+			.resize({ width: task.width, height: task.height, fit: "inside" })
 			.toBuffer();
 
 		const result: WorkerMessage = {
 			ok: true,
 			entry: {
-				lqip: `data:image/${format};base64,${lqipBuf.toString('base64')}`,
+				lqip: `data:image/${format};base64,${lqipBuf.toString("base64")}`,
 				path: task.storePath,
-				src: basename(task.filePath).replace(/\.[^.]+$/, ''),
+				src: basename(task.filePath).replace(/\.[^.]+$/, ""),
 				width: task.width,
 				height: task.height,
 			},

@@ -43,9 +43,9 @@
  * @license MIT
  */
 
-import type { Decorator, Method } from '../types.js';
-import { beforeFn } from './before.fn.js';
-import type { BeforeConfig } from './before.types.js';
+import type { Decorator, Method } from "../types.js";
+import { beforeFn } from "./before.fn.js";
+import type { BeforeConfig } from "./before.types.js";
 
 /**
  * Decorator that executes a function before the decorated method.
@@ -73,16 +73,16 @@ import type { BeforeConfig } from './before.types.js';
  * ```
  */
 export function before<T = any>(config: BeforeConfig<T>): Decorator<T> {
-  return (
-    target: T,
-    propertyName: keyof T,
-    descriptor: TypedPropertyDescriptor<Method<any>>,
-  ): TypedPropertyDescriptor<Method<any>> => {
-    if (descriptor.value) {
-      descriptor.value = beforeFn(descriptor.value, config);
+	return (
+		_target: T,
+		_propertyName: keyof T,
+		descriptor: TypedPropertyDescriptor<Method<any>>,
+	): TypedPropertyDescriptor<Method<any>> => {
+		if (descriptor.value) {
+			descriptor.value = beforeFn(descriptor.value, config);
 
-      return descriptor;
-    }
-    throw new Error('@before is applicable only on a methods.');
-  };
+			return descriptor;
+		}
+		throw new Error("@before is applicable only on a methods.");
+	};
 }

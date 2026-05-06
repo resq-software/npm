@@ -45,9 +45,9 @@ export type Method<D = any, A extends any[] = any[]> = (...args: A) => D;
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Decorator<T = any> = (
-  target: T,
-  propertyName: keyof T,
-  descriptor: TypedPropertyDescriptor<Method<any>>,
+	target: T,
+	propertyName: keyof T,
+	descriptor: TypedPropertyDescriptor<Method<any>>,
 ) => TypedPropertyDescriptor<Method<any>>;
 
 /**
@@ -87,7 +87,7 @@ export type AsyncMethod<D = any, A extends any[] = any[]> = (...args: A) => Prom
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsyncDecorator<T = any> = (
-  target: T,
-  propertyName: keyof T,
-  descriptor: TypedPropertyDescriptor<AsyncMethod<any>>,
+	target: T,
+	propertyName: keyof T,
+	descriptor: TypedPropertyDescriptor<AsyncMethod<any>>,
 ) => TypedPropertyDescriptor<AsyncMethod<any>>;

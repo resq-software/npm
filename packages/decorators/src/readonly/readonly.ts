@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Method } from '../types.js';
-import type { Readonlyable } from './index.js';
+import type { Method } from "../types.js";
+import type { Readonlyable } from "./index.js";
 
 /**
  * Decorator that makes a method read-only (non-writable).
@@ -50,13 +50,13 @@ import type { Readonlyable } from './index.js';
  * ```
  */
 export function readonly<T = any>(): Readonlyable<T> {
-  return (
-    target: T,
-    key: keyof T,
-    descriptor: TypedPropertyDescriptor<Method<any>>,
-  ): TypedPropertyDescriptor<Method<any>> => {
-    descriptor.writable = false;
+	return (
+		_target: T,
+		_key: keyof T,
+		descriptor: TypedPropertyDescriptor<Method<any>>,
+	): TypedPropertyDescriptor<Method<any>> => {
+		descriptor.writable = false;
 
-    return descriptor;
-  };
+		return descriptor;
+	};
 }

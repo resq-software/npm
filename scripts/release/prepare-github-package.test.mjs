@@ -37,7 +37,11 @@ describe("prepareGithubPackage", () => {
 					name: "@resq-sw/ui",
 					version: "1.2.3",
 					main: "lib/index.js",
-					publishConfig: { access: "public", provenance: true, registry: "https://registry.npmjs.org/" },
+					publishConfig: {
+						access: "public",
+						provenance: true,
+						registry: "https://registry.npmjs.org/",
+					},
 					scripts: { prepare: "husky" },
 				}),
 			);

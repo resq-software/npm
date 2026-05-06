@@ -14,37 +14,34 @@
  * limitations under the License.
  */
 
-import { describe, expect, test } from 'vitest';
-import { beforeFn } from './before.fn.js';
+import { describe, expect, test } from "vitest";
+import { beforeFn } from "./before.fn.js";
 
-describe('before', () => {
-  describe('beforeFn', () => {
-    test('calls the before function before the original', async () => {
-      const order: string[] = [];
-      const fn = beforeFn(
-        () => {
-          order.push('original');
-          return 'result';
-        },
-        {
-          func: () => {
-            order.push('before');
-          },
-        },
-      );
+describe("before", () => {
+	describe("beforeFn", () => {
+		test("calls the before function before the original", async () => {
+			const order: string[] = [];
+			const fn = beforeFn(
+				() => {
+					order.push("original");
+					return "result";
+				},
+				{
+					func: () => {
+						order.push("before");
+					},
+				},
+			);
 
-      const result = await fn();
-      expect(order).toEqual(['before', 'original']);
-      expect(result).toBe('result');
-    });
+			const result = await fn();
+			expect(order).toEqual(["before", "original"]);
+			expect(result).toBe("result");
+		});
 
-    test('original return value is preserved', async () => {
-      const fn = beforeFn(
-        (x: number) => x * 2,
-        { func: () => {} },
-      );
+		test("original return value is preserved", async () => {
+			const fn = beforeFn((x: number) => x * 2, { func: () => {} });
 
-      expect(await fn(5)).toBe(10);
-    });
-  });
+			expect(await fn(5)).toBe(10);
+		});
+	});
 });

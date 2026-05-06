@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export * from './fetcher.js';
-export { shouldRedirectToHttps, getRequestId } from './security.js';
+export * from "./fetcher.js";
+export { shouldRedirectToHttps, getRequestId } from "./security.js";

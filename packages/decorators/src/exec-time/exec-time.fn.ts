@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { isPromise, logger } from '../_utils.js';
-import type { AsyncMethod, Method } from '../types.js';
-import type { ExactTimeReportData, ReportFunction } from './exec-time.types.js';
+import { isPromise, logger } from "../_utils.js";
+import type { AsyncMethod, Method } from "../types.js";
+import type { ExactTimeReportData, ReportFunction } from "./exec-time.types.js";
 
 /**
  * Default reporter function that logs execution time using the logger.
@@ -25,7 +25,7 @@ import type { ExactTimeReportData, ReportFunction } from './exec-time.types.js';
  * @returns {void}
  */
 const reporter: ReportFunction = (data: ExactTimeReportData): void => {
-  logger.info(`Execution time: ${data.execTime}ms`);
+	logger.info(`Execution time: ${data.execTime}ms`);
 };
 
 /**
@@ -71,37 +71,37 @@ const reporter: ReportFunction = (data: ExactTimeReportData): void => {
  * ```
  */
 export function execTimeFn<D = any, A extends any[] = any[]>(
-  originalMethod: Method<D, A> | AsyncMethod<D, A>,
-  arg?: ReportFunction | string,
+	originalMethod: Method<D, A> | AsyncMethod<D, A>,
+	arg?: ReportFunction | string,
 ): AsyncMethod<void, A> {
-  const input: ReportFunction | string = arg ?? reporter;
+	const input: ReportFunction | string = arg ?? reporter;
 
-  return async function (this: any, ...args: A): Promise<void> {
-    let repFunc: ReportFunction;
+	return async function (this: any, ...args: A): Promise<void> {
+		let repFunc: ReportFunction;
 
-    if (typeof input === 'string') {
-      if (typeof this[input] === 'function') {
-        repFunc = this[input].bind(this);
-      } else {
-        repFunc = (data) => {
-          logger.info(`${input} execution time`, { duration: `${data.execTime}ms` });
-        };
-      }
-    } else {
-      repFunc = input;
-    }
+		if (typeof input === "string") {
+			if (typeof this[input] === "function") {
+				repFunc = this[input].bind(this);
+			} else {
+				repFunc = (data) => {
+					logger.info(`${input} execution time`, { duration: `${data.execTime}ms` });
+				};
+			}
+		} else {
+			repFunc = input;
+		}
 
-    const start = Date.now();
-    let result = (originalMethod as Function).apply(this, args);
+		const start = Date.now();
+		let result = (originalMethod as Function).apply(this, args);
 
-    if (isPromise(result)) {
-      result = await result;
-    }
+		if (isPromise(result)) {
+			result = await result;
+		}
 
-    repFunc({
-      args,
-      result,
-      execTime: Date.now() - start,
-    });
-  };
+		repFunc({
+			args,
+			result,
+			execTime: Date.now() - start,
+		});
+	};
 }

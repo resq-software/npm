@@ -55,10 +55,10 @@ export type AfterFunc<D> = (x?: AfterParams<D>) => void;
  * ```
  */
 export interface AfterConfig<T = any, D = any> {
-  /** The after function to execute, or a method name on the class */
-  func: AfterFunc<D> | keyof T;
-  /** Whether to wait for the after function to complete before returning */
-  wait?: boolean;
+	/** The after function to execute, or a method name on the class */
+	func: AfterFunc<D> | keyof T;
+	/** Whether to wait for the after function to complete before returning */
+	wait?: boolean;
 }
 
 /**
@@ -78,8 +78,8 @@ export interface AfterConfig<T = any, D = any> {
  * ```
  */
 export interface AfterParams<D = any> {
-  /** The arguments passed to the decorated method */
-  args: unknown[];
-  /** The return value of the decorated method */
-  response: D;
+	/** The arguments passed to the decorated method */
+	args: unknown[];
+	/** The return value of the decorated method */
+	response: D;
 }

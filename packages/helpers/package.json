@@ -1,65 +1,65 @@
 {
-  "name": "@resq-sw/helpers",
-  "version": "0.1.2",
-  "description": "Functional utilities, type guards, result types, performance measurement, and async task execution",
-  "license": "Apache-2.0",
-  "type": "module",
-  "exports": {
-    ".": {
-      "types": "./lib/index.d.ts",
-      "import": "./lib/index.js",
-      "default": "./lib/index.js"
-    },
-    "./formatting": {
-      "types": "./lib/formatting/index.d.ts",
-      "import": "./lib/formatting/index.js",
-      "default": "./lib/formatting/index.js"
-    },
-    "./browser": {
-      "types": "./lib/browser/index.d.ts",
-      "import": "./lib/browser/index.js",
-      "default": "./lib/browser/index.js"
-    }
-  },
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "files": [
-    "lib",
-    "README.md"
-  ],
-  "scripts": {
-    "build": "tsdown",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "@resq-sw/logger": "^0.1.0",
-    "tinyqueue": "^3.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^25.6.0",
-    "jsdom": "^29.1.1",
-    "tsdown": "^0.21.10",
-    "typescript": "6.0.3",
-    "vitest": "4.1.5"
-  },
-  "publishConfig": {
-    "access": "public",
-    "provenance": true,
-    "registry": "https://registry.npmjs.org/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/resq-software/npm.git",
-    "directory": "packages/helpers"
-  },
-  "keywords": [
-    "helpers",
-    "utilities",
-    "result-type",
-    "type-guards",
-    "task-queue"
-  ],
-  "engines": {
-    "node": ">=20.19.0"
-  }
+	"name": "@resq-sw/helpers",
+	"version": "0.1.2",
+	"description": "Functional utilities, type guards, result types, performance measurement, and async task execution",
+	"license": "Apache-2.0",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./lib/index.d.ts",
+			"import": "./lib/index.js",
+			"default": "./lib/index.js"
+		},
+		"./formatting": {
+			"types": "./lib/formatting/index.d.ts",
+			"import": "./lib/formatting/index.js",
+			"default": "./lib/formatting/index.js"
+		},
+		"./browser": {
+			"types": "./lib/browser/index.d.ts",
+			"import": "./lib/browser/index.js",
+			"default": "./lib/browser/index.js"
+		}
+	},
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"files": [
+		"lib",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsdown",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@resq-sw/logger": "^0.1.0",
+		"tinyqueue": "^3.0.0"
+	},
+	"devDependencies": {
+		"@types/node": "^25.6.0",
+		"jsdom": "^29.1.1",
+		"tsdown": "^0.21.10",
+		"typescript": "6.0.3",
+		"vitest": "4.1.5"
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true,
+		"registry": "https://registry.npmjs.org/"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/resq-software/npm.git",
+		"directory": "packages/helpers"
+	},
+	"keywords": [
+		"helpers",
+		"utilities",
+		"result-type",
+		"type-guards",
+		"task-queue"
+	],
+	"engines": {
+		"node": ">=20.19.0"
+	}
 }

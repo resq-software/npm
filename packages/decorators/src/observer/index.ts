@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export * from './observer.js';
-export * from './observer.types.js';
+export * from "./observer.js";
+export * from "./observer.types.js";
