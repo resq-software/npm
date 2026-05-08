@@ -62,17 +62,24 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Install TypeDoc + Markdown plugin (scoped to ui pkg)
+        # Install the plugin first so its peerDependency on typedoc
+        # pulls in a compatible major; then top-up to latest typedoc
+        # within that range. Pinning to a specific minor here is
+        # fragile because the plugin's typedoc dependency moves with
+        # plugin releases.
         working-directory: ${{ env.PKG_DIR }}
         run: |
-          bun add --dev \
-            typedoc@^0.27 \
-            typedoc-plugin-markdown@^4
+          bun add --dev typedoc-plugin-markdown@latest
+          bun add --dev typedoc@latest
 
       - name: Write docs-site TypeDoc config
         # The package's checked-in typedoc.json uses
         # typedoc-github-wiki-theme, which produces sidebar files that
         # do not render cleanly in Mintlify. Write a sibling config
         # tailored for the docs site so we never load the wiki theme.
+        # Only options accepted by typedoc core are listed here;
+        # plugin-specific options (e.g. fileExtension) shifted between
+        # plugin majors and broke the build last time.
         working-directory: ${{ env.PKG_DIR }}
         run: |
           cat > typedoc.docs-site.json <<'JSON'
@@ -92,11 +99,7 @@ jobs:
               "**/*.spec.tsx"
             ],
             "out": "generated-docs",
-            "fileExtension": ".mdx",
-            "hideBreadcrumbs": true,
-            "hidePageHeader": true,
             "readme": "none",
-            "entryFileName": "index.mdx",
             "cleanOutputDir": true
           }
           JSON
@@ -108,13 +111,15 @@ jobs:
           bunx typedoc --options typedoc.docs-site.json
 
       - name: Build pages index
-        # Flat JSON array of generated MDX paths (without extension)
-        # so the docs repo can later splice them into docs.json
-        # automatically. Informational only today.
+        # Flat JSON array of generated Markdown paths (without
+        # extension) so the docs repo can later splice them into
+        # docs.json automatically. Mintlify resolves both .md and
+        # .mdx, and typedoc-plugin-markdown emits .md by default,
+        # so we keep the .md output and skip a rename step.
         working-directory: ${{ env.PKG_DIR }}/generated-docs
         run: |
-          find . -name '*.mdx' -type f \
-            | sed 's|^\./||; s|\.mdx$||' \
+          find . -name '*.md' -type f \
+            | sed 's|^\./||; s|\.md$||' \
             | sort > _pages.txt
           jq -R -s 'split("\n") | map(select(length > 0))' _pages.txt > _pages.json
           rm _pages.txt
