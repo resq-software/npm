@@ -68,32 +68,44 @@ jobs:
             typedoc@^0.27 \
             typedoc-plugin-markdown@^4
 
+      - name: Write docs-site TypeDoc config
+        # The package's checked-in typedoc.json uses
+        # typedoc-github-wiki-theme, which produces sidebar files that
+        # do not render cleanly in Mintlify. Write a sibling config
+        # tailored for the docs site so we never load the wiki theme.
+        working-directory: ${{ env.PKG_DIR }}
+        run: |
+          cat > typedoc.docs-site.json <<'JSON'
+          {
+            "$schema": "https://typedoc-plugin-markdown.org/schema.json",
+            "plugin": ["typedoc-plugin-markdown"],
+            "tsconfig": "tsconfig.json",
+            "entryPointStrategy": "Expand",
+            "entryPoints": ["src"],
+            "exclude": [
+              "**/*.cy.ts",
+              "**/*.test.ts",
+              "**/*.test.tsx",
+              "**/*.stories.ts",
+              "**/*.stories.tsx",
+              "**/*.spec.ts",
+              "**/*.spec.tsx"
+            ],
+            "out": "generated-docs",
+            "fileExtension": ".mdx",
+            "hideBreadcrumbs": true,
+            "hidePageHeader": true,
+            "readme": "none",
+            "entryFileName": "index.mdx",
+            "cleanOutputDir": true
+          }
+          JSON
+
       - name: Generate API reference
         working-directory: ${{ env.PKG_DIR }}
         run: |
           rm -rf generated-docs
-          # Override the package's existing typedoc.json (which uses
-          # typedoc-github-wiki-theme). For the docs site we want a
-          # plain markdown-plugin tree with .mdx files.
-          bunx typedoc \
-            --options /dev/null \
-            --tsconfig tsconfig.json \
-            --plugin typedoc-plugin-markdown \
-            --entryPointStrategy Expand \
-            --entryPoints src \
-            --exclude '**/*.cy.ts' \
-            --exclude '**/*.test.ts' \
-            --exclude '**/*.test.tsx' \
-            --exclude '**/*.stories.ts' \
-            --exclude '**/*.stories.tsx' \
-            --exclude '**/*.spec.ts' \
-            --exclude '**/*.spec.tsx' \
-            --out generated-docs \
-            --fileExtension .mdx \
-            --hideBreadcrumbs true \
-            --hidePageHeader true \
-            --readme none \
-            --entryFileName index.mdx
+          bunx typedoc --options typedoc.docs-site.json
 
       - name: Build pages index
         # Flat JSON array of generated MDX paths (without extension)
