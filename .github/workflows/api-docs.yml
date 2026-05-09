@@ -212,30 +212,32 @@ jobs:
           rm _pages.txt
 
       - name: Rename .md -> .mdx (Mintlify nav requires .mdx)
-        # Mintlify accepts both .md and .mdx for in-content links,
-        # but its docs.json navigation resolver only matches .mdx.
-        # A page id like "sdks/typescript/api/README" resolves to
-        # README.mdx, not README.md, so leaving the tree as .md
-        # makes `mint dev` warn that nav-registered files do not
-        # exist. Rename every .md and rewrite the matching
-        # `(path.md)` / `(path.md#anchor)` link targets in place.
+        # Mintlify's docs.json nav resolver only matches .mdx, so
+        # leaving the tree as .md makes `mint dev` warn that
+        # nav-registered files do not exist. Rename every .md to
+        # .mdx, then strip the `.md` extension from in-content
+        # link targets entirely. Mintlify resolves extensionless
+        # relative links to the matching .mdx file; an explicit
+        # `.mdx` in a link target is treated as a static-asset
+        # reference (not a page reference) and trips broken-links
+        # validation, so extensionless is the only form that works
+        # both before and after this rename.
         working-directory: ${{ env.PKG_DIR }}/generated-docs
         run: |
           set -euo pipefail
           find . -type f -name '*.md' -print0 | while IFS= read -r -d '' f; do
             mv "$f" "${f%.md}.mdx"
           done
-          # Rewrite in-content link targets. Skip external URLs
+          # Strip .md from relative-link targets. Skip external URLs
           # (http://, https://, mailto:, fragment-only `#`) and
-          # absolute paths (`/`). A relaxed regex catches
-          # `(path.md)`, `(./path.md)`, `(../path.md)` and the
-          # `#anchor` variants.
+          # absolute paths (`/`). Catches `(path.md)`, `(./path.md)`,
+          # `(../path.md)`, and the `#anchor` variants.
           python3 - <<'PY'
           import pathlib, re
-          LINK = re.compile(r'(\]\()((?!https?://|mailto:|#|/)[^)\s]*?)(\.md)((?:#[^)]*)?)(\))')
+          LINK = re.compile(r'(\]\()((?!https?://|mailto:|#|/)[^)\s]*?)(\.md)((?:#[^)]*)?(\)))')
           for p in pathlib.Path(".").rglob("*.mdx"):
               text = p.read_text(encoding="utf-8")
-              new = LINK.sub(r'\1\2.mdx\4\5', text)
+              new = LINK.sub(r'\1\2\4', text)
               if new != text:
                   p.write_text(new, encoding="utf-8")
           PY
