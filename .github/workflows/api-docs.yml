@@ -209,6 +209,12 @@ jobs:
         with:
           path: docs-checkout
           token: ${{ secrets.DOCS_REPO_PR_TOKEN }}
+          # Attribute commits to the org's bot account. Requires
+          # engineer@resq.software to be a verified email on
+          # https://github.com/resq-sw, otherwise GitHub will mark
+          # the commit as unverified-author.
+          author: 'resq-sw <engineer@resq.software>'
+          committer: 'resq-sw <engineer@resq.software>'
           commit-message: |
             docs(ui): sync API reference for ${{ github.ref_name }}
           title: 'docs(ui): API reference ${{ github.ref_name }}'
