@@ -62,6 +62,11 @@ jobs:
         uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2.0.2
         with:
           bun-version: latest
+          # Disable runtime cache: this workflow runs on release tags
+          # and produces artifacts (TypeDoc MDX) that get pushed to the
+          # docs repo. A poisoned cache from an earlier PR run could
+          # contaminate published docs. zizmor cache-poisoning (#50).
+          no-cache: true
 
       - name: Install workspace deps
         run: bun install --frozen-lockfile
