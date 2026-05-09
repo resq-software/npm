@@ -355,7 +355,9 @@ jobs:
           branch: auto/typescript-api-${{ github.ref_name }}
           base: main
           delete-branch: true
-          add-paths: sdks/typescript/api/**
+          add-paths: |
+            sdks/typescript/api/**
+            docs.json
           labels: |
             automated
             docs:api-ref
