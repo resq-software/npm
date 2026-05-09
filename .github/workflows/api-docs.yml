@@ -130,11 +130,21 @@ jobs:
         # `[components/X](X/README.md)` module list down to plain
         # backticked text. Users navigate to specific pages via
         # the URL bar.
+        #
+        # Prepend a version banner so users browsing the rendered
+        # docs can identify which release the reference describes.
+        # Version is read from package.json at the package root;
+        # ref is the workflow's input ref (tag for tag-triggered
+        # runs).
         working-directory: ${{ env.PKG_DIR }}/generated-docs
+        env:
+          PKG_REF: ${{ inputs.ref || github.ref_name }}
+          GH_REPO: ${{ github.repository }}
         run: |
           if [ -f README.md ]; then
             python3 - <<'PY'
-          import pathlib, re
+          import json, os, pathlib, re
+
           INTERNAL_LINK = re.compile(r'\[([^\]]+)\]\((?!https?://|mailto:|#)[^)]+\)')
           p = pathlib.Path("README.md")
           text = p.read_text(encoding="utf-8")
@@ -142,6 +152,30 @@ jobs:
           # Collapse accidental double-backticks from already-
           # backticked link text.
           text = text.replace("``", "`")
+
+          ref_name = os.environ.get("PKG_REF", "main")
+          repo = os.environ.get("GH_REPO", "")
+          # package.json is one level up from generated-docs.
+          pkg_json = pathlib.Path("..") / "package.json"
+          version = "unknown"
+          if pkg_json.exists():
+              try:
+                  version = json.loads(pkg_json.read_text(encoding="utf-8")).get("version", "unknown")
+              except json.JSONDecodeError:
+                  pass
+
+          banner = (
+              f"> **Version:** `v{version}` · **Ref:** `{ref_name}` · "
+              f"**Source:** [`{repo}`](https://github.com/{repo})\n\n"
+          )
+          # Insert banner after the first H1 (typedoc emits `# ui`
+          # or similar). If there's no leading H1, prepend.
+          h1_match = re.match(r'(# [^\n]+\n+)', text)
+          if h1_match:
+              text = text[:h1_match.end()] + banner + text[h1_match.end():]
+          else:
+              text = banner + text
+
           pathlib.Path("README.mdx").write_text(text, encoding="utf-8")
           p.unlink()
           PY
