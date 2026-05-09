@@ -201,8 +201,8 @@ jobs:
       - name: Build pages index
         # Flat JSON array of generated Markdown paths (without
         # extension) so the docs repo can later splice them into
-        # docs.json automatically. Built BEFORE the .md -> .mdx
-        # rename below so paths stay extensionless either way.
+        # docs.json automatically. Mintlify resolves both .md and
+        # .mdx for in-content links, so submodule files stay .md.
         working-directory: ${{ env.PKG_DIR }}/generated-docs
         run: |
           find . -name '*.md' -type f \
@@ -211,36 +211,20 @@ jobs:
           jq -R -s 'split("\n") | map(select(length > 0))' _pages.txt > _pages.json
           rm _pages.txt
 
-      - name: Rename .md -> .mdx (Mintlify nav requires .mdx)
-        # Mintlify's docs.json nav resolver only matches .mdx, so
-        # leaving the tree as .md makes `mint dev` warn that
-        # nav-registered files do not exist. Rename every .md to
-        # .mdx, then strip the `.md` extension from in-content
-        # link targets entirely. Mintlify resolves extensionless
-        # relative links to the matching .mdx file; an explicit
-        # `.mdx` in a link target is treated as a static-asset
-        # reference (not a page reference) and trips broken-links
-        # validation, so extensionless is the only form that works
-        # both before and after this rename.
+      - name: Rename top-level README -> .mdx (Mintlify nav)
+        # Mintlify's docs.json nav resolver only matches .mdx for
+        # page ids. Without this rename, mint dev warns:
+        #   "sdks/typescript/api/README" is referenced in the
+        #   docs.json navigation but the file does not exist.
+        # Scope is intentionally limited to the top-level entry
+        # file: in-content links to submodule .md files keep
+        # working as Mintlify treats those as page references and
+        # resolves them on-disk regardless of extension.
         working-directory: ${{ env.PKG_DIR }}/generated-docs
         run: |
-          set -euo pipefail
-          find . -type f -name '*.md' -print0 | while IFS= read -r -d '' f; do
-            mv "$f" "${f%.md}.mdx"
-          done
-          # Strip .md from relative-link targets. Skip external URLs
-          # (http://, https://, mailto:, fragment-only `#`) and
-          # absolute paths (`/`). Catches `(path.md)`, `(./path.md)`,
-          # `(../path.md)`, and the `#anchor` variants.
-          python3 - <<'PY'
-          import pathlib, re
-          LINK = re.compile(r'(\]\()((?!https?://|mailto:|#|/)[^)\s]*?)(\.md)((?:#[^)]*)?(\)))')
-          for p in pathlib.Path(".").rglob("*.mdx"):
-              text = p.read_text(encoding="utf-8")
-              new = LINK.sub(r'\1\2\4', text)
-              if new != text:
-                  p.write_text(new, encoding="utf-8")
-          PY
+          if [ -f README.md ]; then
+            mv README.md README.mdx
+          fi
 
       - name: Checkout docs repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
