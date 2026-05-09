@@ -130,7 +130,11 @@ jobs:
           repository: resq-software/docs
           path: docs-checkout
           token: ${{ secrets.DOCS_REPO_PR_TOKEN }}
-          persist-credentials: true
+          # peter-evans/create-pull-request also sets an Authorization
+          # extraheader; persisting credentials here too produces a
+          # "Duplicate header: Authorization" 400 from GitHub. Let the
+          # PR action manage its own auth.
+          persist-credentials: false
 
       - name: Sync generated MDX into docs checkout
         run: |
