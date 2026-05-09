@@ -202,7 +202,8 @@ jobs:
         # Flat JSON array of generated Markdown paths (without
         # extension) so the docs repo can later splice them into
         # docs.json automatically. Mintlify resolves both .md and
-        # .mdx for in-content links, so submodule files stay .md.
+        # .mdx, and typedoc-plugin-markdown emits .md by default,
+        # so we keep the .md output and skip a rename step.
         working-directory: ${{ env.PKG_DIR }}/generated-docs
         run: |
           find . -name '*.md' -type f \
@@ -210,21 +211,6 @@ jobs:
             | sort > _pages.txt
           jq -R -s 'split("\n") | map(select(length > 0))' _pages.txt > _pages.json
           rm _pages.txt
-
-      - name: Rename top-level README -> .mdx (Mintlify nav)
-        # Mintlify's docs.json nav resolver only matches .mdx for
-        # page ids. Without this rename, mint dev warns:
-        #   "sdks/typescript/api/README" is referenced in the
-        #   docs.json navigation but the file does not exist.
-        # Scope is intentionally limited to the top-level entry
-        # file: in-content links to submodule .md files keep
-        # working as Mintlify treats those as page references and
-        # resolves them on-disk regardless of extension.
-        working-directory: ${{ env.PKG_DIR }}/generated-docs
-        run: |
-          if [ -f README.md ]; then
-            mv README.md README.mdx
-          fi
 
       - name: Checkout docs repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
