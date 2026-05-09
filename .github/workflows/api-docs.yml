@@ -110,6 +110,33 @@ jobs:
           rm -rf generated-docs
           bunx typedoc --options typedoc.docs-site.json
 
+      - name: Escape curly braces outside code fences (MDX safety)
+        # Mintlify parses .md as MDX. Literal `{ ... }` in JSDoc
+        # prose looks like a JSX expression to acorn and fails the
+        # broken-links check. Walk every generated .md, toggle a
+        # "in code fence" flag on lines starting with ```, and
+        # rewrite curly braces to HTML entities only on lines that
+        # are NOT in a fence. Backticked inline code is preserved
+        # because TypeDoc emits inline `code` rather than literal
+        # `{` in code spans.
+        working-directory: ${{ env.PKG_DIR }}/generated-docs
+        run: |
+          find . -type f -name '*.md' -print0 | while IFS= read -r -d '' f; do
+            awk '
+              BEGIN { in_fence = 0 }
+              /^```/ { in_fence = !in_fence; print; next }
+              {
+                if (!in_fence) {
+                  # gsub replacement: \& == literal & (escapes the
+                  # awk match-reference). Result is &#123; / &#125;.
+                  gsub(/\{/, "\\&#123;")
+                  gsub(/\}/, "\\&#125;")
+                }
+                print
+              }
+            ' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+          done
+
       - name: Build pages index
         # Flat JSON array of generated Markdown paths (without
         # extension) so the docs repo can later splice them into
