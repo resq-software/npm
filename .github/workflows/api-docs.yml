@@ -62,11 +62,6 @@ jobs:
         uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2.0.2
         with:
           bun-version: latest
-          # Disable runtime cache: this workflow runs on release tags
-          # and produces artifacts (TypeDoc MDX) that get pushed to the
-          # docs repo. A poisoned cache from an earlier PR run could
-          # contaminate published docs. zizmor cache-poisoning (#50).
-          no-cache: true
 
       - name: Install workspace deps
         run: bun install --frozen-lockfile
@@ -125,6 +120,32 @@ jobs:
         run: |
           rm -rf generated-docs
           bunx typedoc --options typedoc.docs-site.json
+
+      - name: Convert top-level README to .mdx + plain-text module list
+        # Mintlify's docs.json nav resolver only matches .mdx for
+        # page ids, so the nav-registered README must be .mdx.
+        # Cross-page links from a .mdx parent require nav
+        # registration (a constraint the auto-generated tree of
+        # 3500+ pages cannot satisfy); strip the typedoc-emitted
+        # `[components/X](X/README.md)` module list down to plain
+        # backticked text. Users navigate to specific pages via
+        # the URL bar.
+        working-directory: ${{ env.PKG_DIR }}/generated-docs
+        run: |
+          if [ -f README.md ]; then
+            python3 - <<'PY'
+          import pathlib, re
+          INTERNAL_LINK = re.compile(r'\[([^\]]+)\]\((?!https?://|mailto:|#)[^)]+\)')
+          p = pathlib.Path("README.md")
+          text = p.read_text(encoding="utf-8")
+          text = INTERNAL_LINK.sub(r'`\1`', text)
+          # Collapse accidental double-backticks from already-
+          # backticked link text.
+          text = text.replace("``", "`")
+          pathlib.Path("README.mdx").write_text(text, encoding="utf-8")
+          p.unlink()
+          PY
+          fi
 
       - name: Prefix bare-filename intra-page links with ./
         # TypeDoc emits same-directory cross-references as bare
