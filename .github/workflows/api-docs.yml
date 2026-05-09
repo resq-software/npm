@@ -110,6 +110,23 @@ jobs:
           rm -rf generated-docs
           bunx typedoc --options typedoc.docs-site.json
 
+      - name: Prefix bare-filename intra-page links with ./
+        # TypeDoc emits same-directory cross-references as bare
+        # filenames, e.g. `[PaginationLink](PaginationLink.md)`.
+        # Mintlify accepts `(../foo/bar.md)` but rejects bare
+        # filenames as broken. Prefix any bare-filename `.md` link
+        # with `./` so the resolver keeps it as a relative path.
+        # External URLs (https://...) and already-relative paths
+        # (./, ../) are left alone because the [A-Za-z] anchor and
+        # the `[^)/]*` body exclude both.
+        working-directory: ${{ env.PKG_DIR }}/generated-docs
+        run: |
+          find . -type f -name '*.md' -print0 | while IFS= read -r -d '' f; do
+            sed -E -i \
+              's|\]\(([A-Za-z][^)/]*\.md(#[^)]*)?)\)|](./\1)|g' \
+              "$f"
+          done
+
       - name: Strip TypeDoc breadcrumb header
         # Every typedoc-plugin-markdown page begins with a breadcrumb
         # block that links to ../../README.md and similar paths.
