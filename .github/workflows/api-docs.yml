@@ -111,6 +111,34 @@ jobs:
           set -euo pipefail
           mkdir -p "$OUTPUT_DIR"
           rm -rf "${OUTPUT_DIR:?}"/*
+
+          # The typedoc config is identical across packages; write it
+          # once to a tmp path and copy into each package dir.
+          # Heredoc body lives at column 0 so the bash parser doesn't
+          # trip on the indented closing marker (tabs vs spaces).
+          tmp_cfg="$(mktemp)"
+          cat > "$tmp_cfg" <<'JSON'
+          {
+            "$schema": "https://typedoc-plugin-markdown.org/schema.json",
+            "plugin": ["typedoc-plugin-markdown"],
+            "tsconfig": "tsconfig.json",
+            "entryPointStrategy": "Expand",
+            "entryPoints": ["src"],
+            "exclude": [
+              "**/*.cy.ts",
+              "**/*.test.ts",
+              "**/*.test.tsx",
+              "**/*.stories.ts",
+              "**/*.stories.tsx",
+              "**/*.spec.ts",
+              "**/*.spec.tsx"
+            ],
+            "out": "generated-docs",
+            "readme": "none",
+            "cleanOutputDir": true
+          }
+          JSON
+
           generated=0
           for pkg in $PUBLIC_PACKAGES; do
             pkg_dir="packages/$pkg"
@@ -119,31 +147,11 @@ jobs:
               continue
             fi
             echo "==> generating $pkg"
+            cp "$tmp_cfg" "$pkg_dir/typedoc.docs-site.json"
             (
               cd "$pkg_dir"
               bun add --dev typedoc-plugin-markdown@latest >/dev/null
               bun add --dev typedoc@latest >/dev/null
-              cat > typedoc.docs-site.json <<'JSON'
-              {
-                "$schema": "https://typedoc-plugin-markdown.org/schema.json",
-                "plugin": ["typedoc-plugin-markdown"],
-                "tsconfig": "tsconfig.json",
-                "entryPointStrategy": "Expand",
-                "entryPoints": ["src"],
-                "exclude": [
-                  "**/*.cy.ts",
-                  "**/*.test.ts",
-                  "**/*.test.tsx",
-                  "**/*.stories.ts",
-                  "**/*.stories.tsx",
-                  "**/*.spec.ts",
-                  "**/*.spec.tsx"
-                ],
-                "out": "generated-docs",
-                "readme": "none",
-                "cleanOutputDir": true
-              }
-              JSON
               rm -rf generated-docs
               bunx typedoc --options typedoc.docs-site.json
             ) || {
