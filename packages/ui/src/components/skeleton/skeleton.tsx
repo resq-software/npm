@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Skeleton — pulsing placeholder shape used while
+ * content loads. Compose multiple `<Skeleton>` with sizing classes
+ * (`h-*`, `w-*`) to mimic the shape of the loaded UI so layout
+ * stays stable when real content arrives.
+ *
+ * Animation uses `animate-pulse` (compositor-friendly opacity), so
+ * many skeletons can render at once without dropping frames.
+ */
+
 import { cn } from "../../lib/utils.js";
 
 function Skeleton({ className, ...props }: Readonly<React.ComponentProps<"div">>) {

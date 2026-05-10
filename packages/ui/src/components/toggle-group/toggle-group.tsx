@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview ToggleGroup component family — group of `Toggle`
+ * buttons coordinated as either a single-select (`type="single"`)
+ * or multi-select (`type="multiple"`) cluster, built on
+ * `@radix-ui/react-toggle-group`.
+ *
+ * Composition: `ToggleGroup > ToggleGroupItem*`. Items inherit
+ * size/variant from the parent group via context, so the entire
+ * cluster styles consistently with one prop.
+ */
+
 "use client";
 
 import type { VariantProps } from "class-variance-authority";

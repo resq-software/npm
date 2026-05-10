@@ -27,23 +27,68 @@ interface CacheNode<K, V> {
 }
 
 /**
- * LRU Cache configuration
+ * Configuration for {@link LRUCache}.
  */
 export interface LRUCacheOptions {
-	/** Maximum number of items in cache */
+	/**
+	 * Maximum number of entries the cache will hold. Once exceeded, the
+	 * least-recently-used entry is evicted.
+	 */
 	maxSize: number;
-	/** Default TTL in milliseconds (optional) */
+	/**
+	 * Default time-to-live in milliseconds for entries inserted without a
+	 * per-call TTL. Omit for entries that never expire by time. Expired
+	 * entries are evicted **lazily** on the next `get`/`has` access.
+	 */
 	defaultTTL?: number;
-	/** Callback when item is evicted */
+	/**
+	 * Optional callback invoked whenever an entry is evicted to make room
+	 * for a new one. Receives the key and value of the evicted entry.
+	 *
+	 * Not called on explicit `delete()` or `clear()`, and not called when
+	 * an entry is removed because it expired.
+	 */
 	onEvict?: <K, V>(key: K, value: V) => void;
 }
 
 /**
- * High-performance LRU Cache with O(1) get/set operations
+ * Least-recently-used cache with constant-time `get`, `set`, `has`, and
+ * `delete`.
  *
- * @class LRUCache
- * @template K - Key type
- * @template V - Value type
+ * Implementation: `Map<K, Node>` for `O(1)` key lookup, paired with a
+ * doubly-linked list ordered MRU → LRU. Every access moves the touched node
+ * to the head so the tail is always the eviction candidate.
+ *
+ * Optional TTL support is **lazy**: expired entries stay in memory until
+ * the next access touches them, at which point they're removed and treated
+ * as a miss. There is no background sweeper.
+ *
+ * @typeParam K - Key type. Compared by `Map` semantics (SameValueZero).
+ * @typeParam V - Value type. The cache stores references — it does not
+ *   copy or freeze values.
+ *
+ * @example Basic use
+ * ```ts
+ * const cache = new LRUCache<string, User>({ maxSize: 100 });
+ * cache.set("u:42", user);
+ * cache.get("u:42"); // → User
+ * ```
+ *
+ * @example With TTL and eviction callback
+ * ```ts
+ * const cache = new LRUCache<string, Tile>({
+ *   maxSize: 1024,
+ *   defaultTTL: 60_000,
+ *   onEvict: (key, value) => value.dispose(),
+ * });
+ * cache.set("tile:42:17", tile);              // uses defaultTTL
+ * cache.set("tile:42:18", tile, 5_000);       // per-entry override (5s)
+ * ```
+ *
+ * @example Compute-on-miss
+ * ```ts
+ * const user = await cache.getOrCompute("u:42", () => fetchUser(42));
+ * ```
  */
 export class LRUCache<K, V> {
 	private readonly cache: Map<K, CacheNode<K, V>>;
@@ -53,6 +98,9 @@ export class LRUCache<K, V> {
 	private readonly defaultTTL?: number;
 	private readonly onEvict?: <K2, V2>(key: K2, value: V2) => void;
 
+	/**
+	 * @param options - See {@link LRUCacheOptions}. `maxSize` is required.
+	 */
 	constructor(options: LRUCacheOptions) {
 		this.cache = new Map();
 		this.maxSize = options.maxSize;
@@ -60,6 +108,15 @@ export class LRUCache<K, V> {
 		this.onEvict = options.onEvict;
 	}
 
+	/**
+	 * Look up a value and mark its entry as most-recently-used.
+	 *
+	 * @param key - Lookup key.
+	 * @returns The stored value, or `undefined` if the key is absent or
+	 *   the entry has expired (in which case it is also evicted).
+	 *
+	 * Time complexity: `O(1)`.
+	 */
 	get(key: K): V | undefined {
 		const node = this.cache.get(key);
 		if (!node) return undefined;
@@ -73,6 +130,20 @@ export class LRUCache<K, V> {
 		return node.value;
 	}
 
+	/**
+	 * Insert or replace an entry. Becomes the most-recently-used entry.
+	 *
+	 * If inserting causes `size` to exceed `maxSize`, the least-recently-used
+	 * entry is evicted and {@link LRUCacheOptions.onEvict | onEvict} fires.
+	 *
+	 * @param key - Entry key.
+	 * @param value - Entry value.
+	 * @param ttl - Optional per-call TTL in milliseconds. Overrides
+	 *   {@link LRUCacheOptions.defaultTTL | defaultTTL}. Omit for "never
+	 *   expire by time" (default if no `defaultTTL` is set).
+	 *
+	 * Time complexity: `O(1)`.
+	 */
 	set(key: K, value: V, ttl?: number): void {
 		const existingNode = this.cache.get(key);
 
@@ -107,6 +178,14 @@ export class LRUCache<K, V> {
 		}
 	}
 
+	/**
+	 * Membership test. Does **not** affect LRU order.
+	 *
+	 * @returns `true` if `key` has a non-expired entry. Expired entries
+	 *   are evicted as a side effect and return `false`.
+	 *
+	 * Time complexity: `O(1)`.
+	 */
 	has(key: K): boolean {
 		const node = this.cache.get(key);
 		if (!node) return false;
@@ -119,6 +198,17 @@ export class LRUCache<K, V> {
 		return true;
 	}
 
+	/**
+	 * Remove an entry by key.
+	 *
+	 * @returns `true` if a matching entry was found and removed, `false`
+	 *   otherwise.
+	 *
+	 * Note: does **not** invoke `onEvict` — that callback is reserved for
+	 * capacity-driven eviction.
+	 *
+	 * Time complexity: `O(1)`.
+	 */
 	delete(key: K): boolean {
 		const node = this.cache.get(key);
 		if (!node) return false;
@@ -128,20 +218,43 @@ export class LRUCache<K, V> {
 		return true;
 	}
 
+	/**
+	 * Drop every entry. `onEvict` is **not** called for any entry.
+	 */
 	clear(): void {
 		this.cache.clear();
 		this.head = null;
 		this.tail = null;
 	}
 
+	/** Current number of entries (including not-yet-evicted expired entries). */
 	get size(): number {
 		return this.cache.size;
 	}
 
+	/**
+	 * Snapshot of cache statistics.
+	 *
+	 * @returns `{ size, maxSize, hitRate }`. **Note:** `hitRate` is reserved
+	 *   for a future implementation; it currently always returns `0`.
+	 */
 	getStats(): { size: number; maxSize: number; hitRate: number } {
 		return { size: this.cache.size, maxSize: this.maxSize, hitRate: 0 };
 	}
 
+	/**
+	 * Read-through helper: return the cached value, or call `compute` to
+	 * load it on miss and cache the result.
+	 *
+	 * Concurrent calls with the same key may invoke `compute` more than
+	 * once — this method does **not** deduplicate in-flight loads. If
+	 * single-flight semantics matter, wrap `compute` in your own
+	 * promise-deduper or use a memoising decorator.
+	 *
+	 * @param key - Lookup key.
+	 * @param compute - Async loader called only on miss.
+	 * @param ttl - Optional TTL applied to the freshly computed value.
+	 */
 	async getOrCompute(key: K, compute: () => Promise<V>, ttl?: number): Promise<V> {
 		const cached = this.get(key);
 		if (cached !== undefined) return cached;
@@ -151,6 +264,13 @@ export class LRUCache<K, V> {
 		return value;
 	}
 
+	/**
+	 * Synchronous variant of {@link getOrCompute}.
+	 *
+	 * @param key - Lookup key.
+	 * @param compute - Synchronous loader called only on miss.
+	 * @param ttl - Optional TTL applied to the freshly computed value.
+	 */
 	getOrComputeSync(key: K, compute: () => V, ttl?: number): V {
 		const cached = this.get(key);
 		if (cached !== undefined) return cached;

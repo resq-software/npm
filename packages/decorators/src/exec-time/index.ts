@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@execTime` decorator and `execTimeFn` function form
+ * — measure and report wall-clock execution time of a method. The
+ * argument selects how the duration is reported (default `console`,
+ * a string label, a method name on `this`, or a custom reporter
+ * function). Supports both legacy and Stage-3 decorators.
+ */
+
 export * from "./exec-time.fn.js";
 export * from "./exec-time.js";
 export * from "./exec-time.types.js";

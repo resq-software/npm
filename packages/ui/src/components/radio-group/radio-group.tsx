@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview RadioGroup component family — single-choice option
+ * group built on `@radix-ui/react-radio-group`. Use for mutually
+ * exclusive selections from a small fixed set; for many options
+ * use `Select` or `Combobox` instead.
+ *
+ * Composition: `RadioGroup > RadioGroupItem*`. Each item renders a
+ * filled-circle indicator on the active option; full keyboard
+ * navigation (arrow keys, Tab) and `aria-checked` wiring come
+ * from Radix.
+ */
+
 "use client";
 
 import { CircleIcon } from "@phosphor-icons/react";

@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Input — themed wrapper around `<input>` matching the
+ * design system's surface, border, focus-ring, and disabled styles.
+ * Forwards every native `<input>` prop (including `type`,
+ * `placeholder`, `value`, `onChange`, etc.) so it's a drop-in
+ * replacement for any uncontrolled or controlled input.
+ *
+ * Pair with `Field` / `FieldLabel` / `FieldError` for fully
+ * accessible form rows, or `InputGroup` for affixed icons / addons.
+ */
+
 import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";

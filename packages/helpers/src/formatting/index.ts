@@ -14,6 +14,21 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Locale-aware formatting helpers for
+ * `@resq-sw/helpers/formatting`.
+ *
+ * - `date` — `Intl.DateTimeFormat`-backed date/time presentation,
+ *   relative time, week/quarter helpers.
+ * - `number` — currency, compact, percentage, and unit formatting via
+ *   `Intl.NumberFormat`.
+ * - `string` — case conversions, slugification, truncation, and
+ *   plurals.
+ *
+ * Pure functions; no DOM or Node-only globals. Safe in SSR and worker
+ * contexts.
+ */
+
 export * from "./date.js";
 export type * from "./date.types.js";
 export * from "./number.js";

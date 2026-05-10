@@ -1,6 +1,31 @@
 // Copyright 2026 ResQ
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @fileoverview Public API for `@resq-sw/ui` — 57-component React
+ * library built on Radix UI primitives and Tailwind CSS v4 with a
+ * dark-first oklch color system.
+ *
+ * **Prefer subpath imports** for production code:
+ *
+ * ```ts
+ * import { Button } from "@resq-sw/ui/button";
+ * import { Card, CardContent } from "@resq-sw/ui/card";
+ * ```
+ *
+ * The bare `@resq-sw/ui` import (this barrel) re-exports everything
+ * for convenience, but pulls the entire surface area; subpath
+ * imports keep bundles tree-shakeable per component.
+ *
+ * Also exposes utility surface:
+ * - {@link cn} — `clsx + tailwind-merge` class-name combiner.
+ * - {@link useIsMobile} — `(max-width: 767px)` matchMedia hook.
+ * - {@link getContrastingColor} — pick `#000` or `#fff` against any
+ *   CSS color.
+ *
+ * @module @resq-sw/ui
+ */
+
 export * from "./components/accordion/index.js";
 export * from "./components/alert/index.js";
 export * from "./components/alert-dialog/index.js";

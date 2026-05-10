@@ -14,6 +14,34 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public API for `@resq-sw/logger` — structured logging with
+ * log levels, context, timing, and class/method decorators for Node.js and Bun.
+ *
+ * **Zero runtime dependencies.**
+ *
+ * @module @resq-sw/logger
+ *
+ * @example Singleton usage
+ * ```ts
+ * import { logger } from "@resq-sw/logger";
+ *
+ * logger.info("server started", { port: 3000 });
+ * logger.error("db query failed", { query, error });
+ * ```
+ *
+ * @example Decorators
+ * ```ts
+ * import { logTiming, logErrors } from "@resq-sw/logger";
+ *
+ * class UserService {
+ *   @logTiming()
+ *   @logErrors()
+ *   async findById(id: string) { ... }
+ * }
+ * ```
+ */
+
 export * from "./logger.js";
 // logger.types.js re-exports types that overlap with logger.js (LogData, LoggerOptions, ColorKey)
 // Only export the additional types not already in logger.js

@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Accordion component family — vertically-stacked
+ * disclosure surfaces built on `@radix-ui/react-accordion`. Each
+ * `AccordionItem` toggles a single panel; `type="multiple"` on
+ * the root permits multiple open at once.
+ *
+ * Composition: `Accordion > AccordionItem > (AccordionTrigger + AccordionContent)`.
+ *
+ * Accessibility: keyboard-navigable (arrow keys, Home, End), full
+ * ARIA semantics from Radix. Open/close animations are wired via
+ * `data-open:animate-accordion-down` / `data-closed:animate-accordion-up`.
+ */
+
 "use client";
 
 import { CaretDownIcon, CaretUpIcon } from "@phosphor-icons/react";

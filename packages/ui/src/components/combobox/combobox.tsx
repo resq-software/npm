@@ -14,6 +14,21 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Combobox component family — searchable, filterable
+ * select built on Base UI's Combobox primitive. Single-select and
+ * multi-select via the `multiple` prop on the root.
+ *
+ * Composition: `Combobox > (ComboboxTrigger + ComboboxInput +
+ * ComboboxClear?) → ComboboxContent > (ComboboxList >
+ * ComboboxItem*)`. Empty results render via `ComboboxEmpty`,
+ * group headings via `ComboboxGroup` + `ComboboxGroupLabel`, and
+ * `ComboboxSeparator` divides logical sections.
+ *
+ * The trigger is styled to match `Button` for visual consistency
+ * across form rows.
+ */
+
 "use client";
 
 import { Combobox as ComboboxPrimitive } from "@base-ui/react";

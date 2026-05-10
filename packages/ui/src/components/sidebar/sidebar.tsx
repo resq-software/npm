@@ -14,6 +14,34 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Sidebar component family — collapsible app
+ * shell sidebar with desktop / mobile responsive behaviour. On
+ * desktop, the sidebar collapses to an icon rail; on mobile it
+ * slides in as a `Sheet`. Cookie-persisted open state survives
+ * page reloads.
+ *
+ * Composition:
+ * - `SidebarProvider` — wraps the app, provides context (open
+ *   state, mobile flag, keyboard shortcut binding for ⌘B).
+ * - `Sidebar` — the chrome itself (variants: sidebar / floating /
+ *   inset; sides: left / right; collapse modes).
+ * - `SidebarHeader`, `SidebarContent`, `SidebarFooter` — vertical
+ *   layout slots.
+ * - `SidebarGroup` + `SidebarGroupLabel` + `SidebarGroupContent` +
+ *   `SidebarGroupAction` — grouped sections within content.
+ * - `SidebarMenu` > `SidebarMenuItem` > `SidebarMenuButton` —
+ *   primary nav-item primitive.
+ * - `SidebarMenuSub` family — nested sub-nav.
+ * - `SidebarTrigger`, `SidebarRail`, `SidebarInset`,
+ *   `SidebarInput`, `SidebarSeparator`, `SidebarSkeleton` —
+ *   supporting helpers.
+ * - `useSidebar()` — read open/collapsed state from any
+ *   descendant.
+ *
+ * Layout shell pairs with `Drawer`/`Sheet` for mobile breakpoints.
+ */
+
 "use client";
 
 import { SidebarSimpleIcon } from "@phosphor-icons/react";

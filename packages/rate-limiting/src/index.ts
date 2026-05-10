@@ -14,5 +14,33 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public API for `@resq-sw/rate-limiting` — throttle and debounce
+ * utilities, in-memory rate-limit algorithms (token bucket, leaky bucket,
+ * sliding window), and HTTP middleware adapters.
+ *
+ * Optional peer dependencies:
+ * - `effect` — for Effect-based rate-limit Layers
+ * - `@upstash/redis` + `@upstash/ratelimit` — for distributed rate-limit stores
+ *
+ * @module @resq-sw/rate-limiting
+ *
+ * @example Throttle
+ * ```ts
+ * import { throttle } from "@resq-sw/rate-limiting";
+ *
+ * const onScroll = throttle(handleScroll, 100); // max 1 call / 100ms
+ * window.addEventListener("scroll", onScroll);
+ * ```
+ *
+ * @example Token bucket
+ * ```ts
+ * import { TokenBucket } from "@resq-sw/rate-limiting";
+ *
+ * const bucket = new TokenBucket({ capacity: 10, refillRate: 1 }); // 1 token/sec
+ * if (bucket.tryConsume()) { ... }
+ * ```
+ */
+
 export * from "./throttle.js";
 export * from "./rate-limit.js";

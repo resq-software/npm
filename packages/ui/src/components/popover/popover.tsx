@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Popover component family — click-triggered floating
+ * surface for non-modal context (date pickers, color pickers,
+ * filter panels), built on `@radix-ui/react-popover`.
+ *
+ * Composition: `Popover > PopoverTrigger + PopoverContent`, with
+ * `PopoverAnchor` for cases where the visual anchor and the
+ * trigger are separate elements.
+ *
+ * Use `Tooltip` for hover-triggered hints, `HoverCard` for richer
+ * hover previews, and `Dialog` when content needs to be modal.
+ */
+
 "use client";
 
 import { Popover as PopoverPrimitive } from "radix-ui";

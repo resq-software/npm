@@ -16,6 +16,9 @@
 
 # @resq-sw/rate-limiting
 
+[![npm](https://img.shields.io/npm/v/%40resq-sw%2Frate-limiting?style=flat-square)](https://www.npmjs.com/package/@resq-sw/rate-limiting)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
+
 > Rate limiting algorithms, throttle/debounce utilities, and distributed rate limit stores.
 
 ## Installation

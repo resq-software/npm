@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@delay(ms)` decorator and `delayFn` function form —
+ * defer the decorated method by `ms` milliseconds before it actually
+ * runs. Useful for sequencing, animation timing, and exponential
+ * back-off helpers.
+ */
+
 export * from "./delay.js";

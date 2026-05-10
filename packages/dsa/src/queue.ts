@@ -34,14 +34,21 @@ export class Queue<T> {
 	private lastItem: QueueNode<T> | null = null;
 	private size = 0;
 
+	/** @returns The number of items currently in the queue. */
 	public getSize(): number {
 		return this.size;
 	}
 
+	/** @returns `true` if the queue contains no items. */
 	public isEmpty(): boolean {
 		return this.size === 0;
 	}
 
+	/**
+	 * Append an item to the back of the queue. O(1).
+	 *
+	 * @param item - Value to store. The queue does not copy or freeze it.
+	 */
 	public enqueue(item: T): void {
 		const newItem: QueueNode<T> = { next: null, value: item };
 
@@ -58,6 +65,11 @@ export class Queue<T> {
 		this.size += 1;
 	}
 
+	/**
+	 * Remove and return the item at the front of the queue. O(1).
+	 *
+	 * @returns The dequeued value, or `null` if the queue is empty.
+	 */
 	public dequeue(): T | null {
 		let removedItem: T | null = null;
 

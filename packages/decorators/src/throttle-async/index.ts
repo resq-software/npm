@@ -14,4 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@throttleAsync(parallelCalls?)` decorator and
+ * `throttleAsyncFn` function form — limit concurrent in-flight
+ * executions of an async method (default `1`). Excess calls queue
+ * and resolve in FIFO order. Typical use: outbound API
+ * concurrency caps, IO-bound work funnels, expensive ML
+ * inference calls.
+ *
+ * Also exports `ThrottleAsyncExecutor` for callers that need
+ * direct queue access.
+ */
+
 export * from "./throttle-async.js";

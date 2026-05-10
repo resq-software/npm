@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Tabs component family — segmented panel switcher
+ * built on `@radix-ui/react-tabs`. Use for in-page sub-navigation
+ * where all panels are siblings (settings sections, dashboard
+ * views).
+ *
+ * Composition: `Tabs > TabsList > TabsTrigger* + TabsContent*`.
+ * Each `TabsTrigger.value` matches a `TabsContent.value`. Keyboard
+ * navigation (arrow keys, Home, End) and `aria-selected` /
+ * `role="tabpanel"` wiring are inherited from Radix.
+ *
+ * Triggers ship in two visual variants via the `tabsVariants` CVA
+ * (e.g. underlined vs. pill); pick the one that matches the
+ * surface containing the tabs.
+ */
+
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";

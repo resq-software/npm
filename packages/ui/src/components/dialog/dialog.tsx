@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Dialog component family — modal overlay built on
+ * `@radix-ui/react-dialog`. Use for content-bearing modals
+ * (forms, detail views, confirmations); use `AlertDialog` instead
+ * for destructive action gates.
+ *
+ * Composition: `Dialog > DialogTrigger + DialogContent`, with
+ * `DialogHeader > (DialogTitle + DialogDescription)`,
+ * `DialogFooter`, and an auto-rendered close button using the
+ * shared `Button` component.
+ *
+ * Per `STYLE_GUIDE.md`, `DialogTitle` renders `font-display`.
+ *
+ * Accessibility: focus trap, escape-to-close, scroll-lock, and
+ * `aria-labelledby` / `aria-describedby` wiring all handled by Radix.
+ */
+
 "use client";
 
 import { XIcon } from "@phosphor-icons/react";

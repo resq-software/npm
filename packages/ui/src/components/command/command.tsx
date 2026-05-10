@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Command component family — keyboard-first command
+ * palette / search picker built on `cmdk`. Use for global ⌘K menus,
+ * action launchers, or any quick-find UX.
+ *
+ * Composition: `Command > CommandInput → CommandList >
+ * (CommandEmpty | CommandGroup > CommandItem*)`, with optional
+ * `CommandShortcut` (right-aligned ⌘ hint) and `CommandSeparator`.
+ * `CommandDialog` wraps `Command` in a `Dialog` for the overlay
+ * pattern.
+ */
+
 "use client";
 
 import { CheckIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";

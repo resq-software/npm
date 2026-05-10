@@ -14,18 +14,56 @@
  * limitations under the License.
  */
 
+/**
+ * Anything with a numeric `distance` field — the only constraint
+ * {@link BoundedHeap} places on its elements.
+ */
 export interface Distanced {
 	distance: number;
 }
 
+/**
+ * Fixed-capacity max-heap that keeps the **N smallest** items by `distance`.
+ *
+ * Designed for top-K nearest-neighbour use: insert `M` candidates, retrieve
+ * the `N` closest in `O(M log N)` total time and `O(N)` memory regardless of
+ * how many candidates are scanned.
+ *
+ * Internally a max-heap on `distance`, so the *largest* distance among the
+ * kept N sits at the root. New entries are accepted only when they are
+ * strictly closer than the current worst.
+ *
+ * @typeParam T - Element type; must expose a numeric `distance` field.
+ *
+ * @example Keep the 5 nearest survey points
+ * ```ts
+ * const top5 = new BoundedHeap<{ id: string; distance: number }>(5);
+ * for (const p of points) top5.insert(p);
+ * const nearest = top5.toSorted(); // ascending by distance
+ * ```
+ */
 export class BoundedHeap<T extends Distanced> {
 	readonly #data: T[] = [];
+
+	/** Maximum number of elements the heap will retain. */
 	readonly limit: number;
 
+	/**
+	 * @param limit - Maximum number of items to retain. Once full, new
+	 *   inserts are accepted only when their `distance` is strictly less
+	 *   than the current worst-kept element's distance.
+	 */
 	constructor(limit: number) {
 		this.limit = limit;
 	}
 
+	/**
+	 * Insert a candidate. If the heap is below capacity, the entry is added
+	 * unconditionally. Otherwise the entry replaces the current worst-kept
+	 * element if and only if `entry.distance < currentWorst.distance`.
+	 *
+	 * Time complexity: `O(log limit)`.
+	 */
 	insert(entry: T): void {
 		if (this.#data.length < this.limit) {
 			this.#data.push(entry);
@@ -36,14 +74,24 @@ export class BoundedHeap<T extends Distanced> {
 		}
 	}
 
+	/**
+	 * @returns The element with the **largest** retained distance, or
+	 *   `undefined` if the heap is empty. This is the entry that would be
+	 *   evicted next on a closer insert.
+	 */
 	peek(): T | undefined {
 		return this.#data[0];
 	}
 
+	/**
+	 * @returns A new array of the retained entries sorted ascending by
+	 *   `distance` (nearest first). Does not mutate the heap.
+	 */
 	toSorted(): T[] {
 		return [...this.#data].sort((a, b) => a.distance - b.distance);
 	}
 
+	/** Current number of retained elements (≤ `limit`). */
 	get size(): number {
 		return this.#data.length;
 	}

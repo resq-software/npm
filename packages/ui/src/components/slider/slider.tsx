@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Slider — single- or multi-thumb range slider built
+ * on `@radix-ui/react-slider`. Supports `orientation` (`horizontal`
+ * / `vertical`), `min` / `max` / `step`, and arbitrary thumb
+ * counts via the `value` array (e.g. for range filters).
+ *
+ * Keyboard: arrow keys adjust by `step`, Home / End jump to bounds.
+ * Each thumb rolls up `aria-valuenow` for screen-reader
+ * announcements.
+ */
+
 "use client";
 
 import { Slider as SliderPrimitive } from "radix-ui";

@@ -250,8 +250,21 @@ export function debounce<T extends AnyFunction>(
 // ============================================
 
 /**
- * Per-key throttle manager for throttling by specific keys
- * Useful for throttling per-endpoint or per-user
+ * Per-key throttle manager — wraps {@link throttle} with a `Map` keyed
+ * by user-supplied identifiers so different keys throttle independently.
+ *
+ * Use cases: per-endpoint throttles, per-user click handlers,
+ * per-document save buffers. Memory grows with the number of distinct
+ * keys; call {@link cancel} or {@link cancelAll} to free resources.
+ *
+ * @typeParam T - Function being throttled.
+ *
+ * @example
+ * ```ts
+ * const saveDoc = new KeyedThrottle(saveToServer, 1000);
+ * saveDoc.execute("doc:42", payload);
+ * saveDoc.execute("doc:43", payload);   // independent timer
+ * ```
  */
 export class KeyedThrottle<T extends AnyFunction> {
 	private throttles = new Map<
@@ -262,6 +275,13 @@ export class KeyedThrottle<T extends AnyFunction> {
 	private readonly wait: number;
 	private readonly options: ThrottleOptions;
 
+	/**
+	 * @param func - Function to throttle. The same instance is used for
+	 *   every key.
+	 * @param wait - Throttle window in milliseconds.
+	 * @param options - Forwarded to {@link throttle} for each key's
+	 *   internal throttled wrapper.
+	 */
 	constructor(func: T, wait: number, options: ThrottleOptions = {}) {
 		this.func = func;
 		this.wait = wait;
@@ -269,7 +289,12 @@ export class KeyedThrottle<T extends AnyFunction> {
 	}
 
 	/**
-	 * Execute function with throttling per key
+	 * Invoke `func` under the throttle bucket associated with `key`,
+	 * lazily creating that bucket on first call.
+	 *
+	 * @returns Whatever the throttled call returns this tick — either
+	 *   the freshly-computed result, the cached previous result, or
+	 *   `undefined` if neither has fired yet.
 	 */
 	public execute(key: string, ...args: Parameters<T>): ReturnType<T> | undefined {
 		let throttled = this.throttles.get(key);
@@ -283,7 +308,8 @@ export class KeyedThrottle<T extends AnyFunction> {
 	}
 
 	/**
-	 * Cancel throttle for specific key
+	 * Cancel any pending trailing-edge call for `key` and drop the
+	 * bucket from the map. The next `execute(key, …)` will start fresh.
 	 */
 	public cancel(key: string): void {
 		const throttled = this.throttles.get(key);
@@ -293,9 +319,7 @@ export class KeyedThrottle<T extends AnyFunction> {
 		this.throttles.delete(key);
 	}
 
-	/**
-	 * Cancel all throttles
-	 */
+	/** Cancel and drop every bucket. */
 	public cancelAll(): void {
 		for (const throttled of this.throttles.values()) {
 			throttled.cancel();
@@ -304,7 +328,10 @@ export class KeyedThrottle<T extends AnyFunction> {
 	}
 
 	/**
-	 * Get stats
+	 * Snapshot of currently-tracked keys.
+	 *
+	 * @returns `{ activeKeys, keys }`. The `keys` array is a one-shot
+	 *   copy and not kept in sync with future mutations.
 	 */
 	public getStats(): KeyedStats {
 		return {
@@ -319,8 +346,23 @@ export class KeyedThrottle<T extends AnyFunction> {
 // ============================================
 
 /**
- * Per-key debounce manager for debouncing by specific keys
- * Useful for debouncing per-endpoint or per-user
+ * Per-key debounce manager — wraps {@link debounce} with a `Map` keyed
+ * by user-supplied identifiers so different keys debounce
+ * independently.
+ *
+ * Typical use: per-input search-as-you-type, per-form auto-save,
+ * per-resource validation. Memory grows with the number of distinct
+ * keys; call {@link cancel}, {@link flush}, or {@link cancelAll} to
+ * release resources.
+ *
+ * @typeParam T - Function being debounced.
+ *
+ * @example
+ * ```ts
+ * const search = new KeyedDebounce(runSearch, 300);
+ * search.execute("filter:name", "ali");   // debounced per key
+ * search.execute("filter:tag",  "team");  // independent timer
+ * ```
  */
 export class KeyedDebounce<T extends AnyFunction> {
 	private debounces = new Map<
@@ -331,6 +373,13 @@ export class KeyedDebounce<T extends AnyFunction> {
 	private readonly wait: number;
 	private readonly options: DebounceOptions;
 
+	/**
+	 * @param func - Function to debounce. The same instance is used for
+	 *   every key.
+	 * @param wait - Quiet window in milliseconds before firing.
+	 * @param options - Forwarded to {@link debounce} for each key's
+	 *   internal debounced wrapper.
+	 */
 	constructor(func: T, wait: number, options: DebounceOptions = {}) {
 		this.func = func;
 		this.wait = wait;
@@ -338,7 +387,8 @@ export class KeyedDebounce<T extends AnyFunction> {
 	}
 
 	/**
-	 * Execute function with debouncing per key
+	 * Push a new call for `key`, lazily creating the debounce bucket on
+	 * first invocation. Resets the quiet timer for that key.
 	 */
 	public execute(key: string, ...args: Parameters<T>): void {
 		let debounced = this.debounces.get(key);
@@ -352,7 +402,8 @@ export class KeyedDebounce<T extends AnyFunction> {
 	}
 
 	/**
-	 * Cancel debounce for specific key
+	 * Cancel any pending fire for `key` and drop the bucket from the map.
+	 * The next `execute(key, …)` will start fresh.
 	 */
 	public cancel(key: string): void {
 		const debounced = this.debounces.get(key);
@@ -363,7 +414,12 @@ export class KeyedDebounce<T extends AnyFunction> {
 	}
 
 	/**
-	 * Flush debounce for specific key (execute immediately)
+	 * Cancel any pending timer for `key` without firing it. The bucket
+	 * stays alive — future `execute(key, …)` calls are still debounced.
+	 *
+	 * (The wrapped `debounce(...).flush()` from this implementation
+	 * cancels rather than forces — see the `debounce` source for
+	 * specifics.)
 	 */
 	public flush(key: string): void {
 		const debounced = this.debounces.get(key);
@@ -372,9 +428,7 @@ export class KeyedDebounce<T extends AnyFunction> {
 		}
 	}
 
-	/**
-	 * Cancel all debounces
-	 */
+	/** Cancel and drop every bucket. */
 	public cancelAll(): void {
 		for (const debounced of this.debounces.values()) {
 			debounced.cancel();
@@ -383,7 +437,10 @@ export class KeyedDebounce<T extends AnyFunction> {
 	}
 
 	/**
-	 * Get stats
+	 * Snapshot of currently-tracked keys.
+	 *
+	 * @returns `{ activeKeys, keys }`. The `keys` array is a one-shot
+	 *   copy and not kept in sync with future mutations.
 	 */
 	public getStats(): KeyedStats {
 		return {
@@ -398,16 +455,24 @@ export class KeyedDebounce<T extends AnyFunction> {
 // ============================================
 
 /**
- * Rate limiter using token bucket algorithm
+ * Token-bucket rate limiter.
+ *
+ * The bucket holds at most `capacity` tokens. Tokens refill **continuously**
+ * over `windowMs` (one full bucket per window — i.e. `capacity / windowMs`
+ * tokens per ms). Each accepted call deducts one token; when no tokens are
+ * available, callers either wait via {@link acquire} or get rejected via
+ * {@link tryAcquire}.
+ *
+ * Token-bucket limiters allow short bursts up to `capacity` while pinning
+ * the long-run average to `capacity / windowMs`. Use this when bursty
+ * traffic is acceptable; pick {@link LeakyBucketLimiter} when you need
+ * smoother request spacing.
  *
  * @example
  * ```ts
- * const limiter = new TokenBucketLimiter(5, 60000); // 5 requests per minute
- *
- * async function fetchData() {
- *   await limiter.acquire();
- *   return fetch('/api/data');
- * }
+ * const limiter = new TokenBucketLimiter(5, 60_000); // 5 req/min
+ * await limiter.acquire();
+ * fetch("/api/data");
  * ```
  */
 export class TokenBucketLimiter {
@@ -419,8 +484,10 @@ export class TokenBucketLimiter {
 	private queue: Array<() => void> = [];
 
 	/**
-	 * @param capacity Maximum number of tokens (requests)
-	 * @param windowMs Time window in milliseconds
+	 * @param capacity - Maximum bucket size (also the burst limit).
+	 * @param windowMs - Time window over which one full bucket of
+	 *   tokens accumulates. The steady-state rate is
+	 *   `capacity / windowMs` tokens per millisecond.
 	 */
 	constructor(capacity: number, windowMs: number) {
 		this.capacity = capacity;
@@ -431,7 +498,10 @@ export class TokenBucketLimiter {
 	}
 
 	/**
-	 * Refill tokens based on elapsed time
+	 * Top up the bucket based on elapsed wall-clock time. Called
+	 * lazily on every `acquire`/`tryAcquire`/`getStats`.
+	 *
+	 * @internal
 	 */
 	private refill(): void {
 		const now = Date.now();
@@ -445,7 +515,11 @@ export class TokenBucketLimiter {
 	}
 
 	/**
-	 * Acquire a token (wait if none available)
+	 * Take one token, awaiting future refills if the bucket is empty.
+	 *
+	 * Calls are released in FIFO order. Resolved promises consume one
+	 * token each — the resolver `await`s and proceeds with the protected
+	 * work without further bookkeeping.
 	 */
 	public async acquire(): Promise<void> {
 		this.refill();
@@ -463,7 +537,11 @@ export class TokenBucketLimiter {
 	}
 
 	/**
-	 * Try to acquire a token without waiting
+	 * Non-blocking variant of {@link acquire}.
+	 *
+	 * @returns `true` if a token was consumed, `false` if the bucket
+	 *   was empty (the caller should drop the request, return 429, or
+	 *   apply its own back-pressure).
 	 */
 	public tryAcquire(): boolean {
 		this.refill();
@@ -477,7 +555,11 @@ export class TokenBucketLimiter {
 	}
 
 	/**
-	 * Schedule next token release
+	 * Arm a one-shot timer that will release the next queued caller
+	 * once the next token becomes available. Self-reschedules until
+	 * the queue drains.
+	 *
+	 * @internal
 	 */
 	private scheduleNextRelease(): void {
 		if (this.queue.length === 0) return;
@@ -496,7 +578,11 @@ export class TokenBucketLimiter {
 	}
 
 	/**
-	 * Get rate limiter stats
+	 * Snapshot of bucket state.
+	 *
+	 * @returns `{ availableTokens, queueSize, capacity }` —
+	 *   `availableTokens` is rounded down so it never claims more
+	 *   tokens than a caller could actually withdraw.
 	 */
 	public getStats(): RateLimiterStats {
 		this.refill();
@@ -508,7 +594,12 @@ export class TokenBucketLimiter {
 	}
 
 	/**
-	 * Reset the rate limiter
+	 * Refill the bucket to capacity and abandon any queued waiters.
+	 *
+	 * Note: queued promises returned by {@link acquire} that were
+	 * waiting at the time of `reset()` will **never resolve**. Use
+	 * with care in long-running services; prefer plumbing an
+	 * `AbortSignal` through call sites instead of resetting.
 	 */
 	public reset(): void {
 		this.tokens = this.capacity;
@@ -522,8 +613,24 @@ export class TokenBucketLimiter {
 // ============================================
 
 /**
- * Leaky bucket algorithm - requests "leak" out at a constant rate
- * Provides smoother rate limiting than token bucket
+ * Leaky-bucket rate limiter.
+ *
+ * Requests are appended to a fixed-capacity FIFO queue and "leak" out
+ * at a constant rate (`requestsPerSecond`). The result is **smoothed**
+ * traffic: even if `acquire` is called in a burst, each protected
+ * action fires at fixed `1000 / requestsPerSecond` millisecond
+ * intervals.
+ *
+ * Compared to {@link TokenBucketLimiter}, leaky-bucket does not allow
+ * bursts — pick this when downstream systems can't tolerate spiky
+ * load.
+ *
+ * @example
+ * ```ts
+ * const limiter = new LeakyBucketLimiter(50, 5); // up to 50 queued, drains 5/sec
+ * await limiter.acquire();
+ * await downstreamCall();
+ * ```
  */
 export class LeakyBucketLimiter {
 	private queue: Array<{ resolve: () => void; timestamp: number }> = [];
@@ -532,8 +639,12 @@ export class LeakyBucketLimiter {
 	private processing = false;
 
 	/**
-	 * @param capacity Maximum queue size
-	 * @param requestsPerSecond How many requests to process per second
+	 * @param capacity - Maximum queue depth. Calls to {@link acquire}
+	 *   that exceed this throw immediately ("Rate limit exceeded:
+	 *   queue full"); use {@link tryAcquire} to test first.
+	 * @param requestsPerSecond - Steady-state drain rate. Internally
+	 *   converted to a per-request gap of `1000 / requestsPerSecond`
+	 *   milliseconds.
 	 */
 	constructor(capacity: number, requestsPerSecond: number) {
 		this.capacity = capacity;
@@ -541,7 +652,11 @@ export class LeakyBucketLimiter {
 	}
 
 	/**
-	 * Add a request to the bucket
+	 * Enqueue and await release.
+	 *
+	 * @throws Error `"Rate limit exceeded: queue full"` when the queue
+	 *   is already at `capacity`. Catch and translate to a 429 in
+	 *   HTTP middleware.
 	 */
 	public async acquire(): Promise<void> {
 		if (this.queue.length >= this.capacity) {
@@ -555,7 +670,13 @@ export class LeakyBucketLimiter {
 	}
 
 	/**
-	 * Try to acquire without blocking
+	 * Non-blocking probe.
+	 *
+	 * @returns `true` only when the queue is empty **and** no drain
+	 *   timer is currently armed — i.e. the caller could fire
+	 *   immediately. Returns `false` even when there is room in the
+	 *   queue but a previous call is still mid-leak; in that case
+	 *   {@link acquire} would still succeed but with a wait.
 	 */
 	public tryAcquire(): boolean {
 		if (this.queue.length >= this.capacity) {
@@ -571,7 +692,11 @@ export class LeakyBucketLimiter {
 	}
 
 	/**
-	 * Process the queue at the leak rate
+	 * Drive the leak: pop one waiter, resolve it, then arm a timer
+	 * for the next at `leakRate` ms in the future. Self-reschedules
+	 * until the queue drains.
+	 *
+	 * @internal
 	 */
 	private processQueue(): void {
 		if (this.processing || this.queue.length === 0) return;
@@ -595,7 +720,10 @@ export class LeakyBucketLimiter {
 	}
 
 	/**
-	 * Get stats
+	 * Snapshot of bucket state.
+	 *
+	 * @returns `{ availableTokens, queueSize, capacity }` where
+	 *   `availableTokens = capacity − queueSize` (free queue slots).
 	 */
 	public getStats(): RateLimiterStats {
 		return {
@@ -606,7 +734,11 @@ export class LeakyBucketLimiter {
 	}
 
 	/**
-	 * Clear the queue
+	 * Drop every queued waiter and stop processing.
+	 *
+	 * Note: pending promises returned by {@link acquire} will **never
+	 * resolve** after a `reset()`. Plumb an `AbortSignal` through call
+	 * sites if cancellable waits are required.
 	 */
 	public reset(): void {
 		this.queue = [];
@@ -619,13 +751,38 @@ export class LeakyBucketLimiter {
 // ============================================
 
 /**
- * Sliding window counter for accurate rate limiting
+ * Sliding-window counter for per-key rate limiting.
+ *
+ * Maintains a `current` and `previous` window count per key and
+ * estimates the *weighted* request rate over the trailing
+ * `windowMs` ms by interpolating between the two windows. This
+ * provides smoother enforcement than a fixed-window counter (which
+ * lets twice the limit through across a window boundary) without the
+ * memory cost of a true sliding-window log.
+ *
+ * Calls a periodic `cleanup` every `windowMs` ms to drop stale
+ * entries — note that this means **the limiter holds a Node timer
+ * for its entire lifetime**. Long-lived processes are fine; for
+ * short-lived workers, manage instances explicitly or you'll keep
+ * the event loop alive.
+ *
+ * @example
+ * ```ts
+ * const counter = new SlidingWindowCounter(60_000, 100); // 100 req/min
+ * const decision = counter.check(`user:${userId}`);
+ * if (!decision.allowed) return new Response("Too many requests", { status: 429 });
+ * ```
  */
 export class SlidingWindowCounter {
 	private counters = new Map<string, { current: number; previous: number; windowStart: number }>();
 	private readonly windowMs: number;
 	private readonly maxRequests: number;
 
+	/**
+	 * @param windowMs - Sliding-window length in milliseconds.
+	 * @param maxRequests - Maximum allowed weighted count per window
+	 *   per key.
+	 */
 	constructor(windowMs: number, maxRequests: number) {
 		this.windowMs = windowMs;
 		this.maxRequests = maxRequests;
@@ -635,7 +792,16 @@ export class SlidingWindowCounter {
 	}
 
 	/**
-	 * Check and increment counter for a key
+	 * Atomically increment the counter for `key` and decide whether
+	 * to allow the request based on the trailing weighted count.
+	 *
+	 * @returns `{ allowed, remaining, resetAt }` where:
+	 *   - `allowed` — `true` if under the limit; `false` if rejected
+	 *     (counter is **not** incremented in this case).
+	 *   - `remaining` — best-effort lower bound on how many more
+	 *     requests fit in the current window for this key.
+	 *   - `resetAt` — Unix epoch ms when the current fixed window
+	 *     boundary rolls over.
 	 */
 	public check(key: string): { allowed: boolean; remaining: number; resetAt: number } {
 		const now = Date.now();
@@ -678,14 +844,20 @@ export class SlidingWindowCounter {
 	}
 
 	/**
-	 * Reset counter for a key
+	 * Forget all state for `key`. The next `check(key)` starts fresh.
+	 *
+	 * Useful for admin/test reset paths and for clearing limits when
+	 * a user upgrades to a higher tier.
 	 */
 	public reset(key: string): void {
 		this.counters.delete(key);
 	}
 
 	/**
-	 * Cleanup old entries
+	 * Drop counters older than two full windows. Runs on a timer
+	 * armed in the constructor; not part of the public API.
+	 *
+	 * @internal
 	 */
 	private cleanup(): void {
 		const cutoff = Date.now() - this.windowMs * 2;
@@ -697,7 +869,10 @@ export class SlidingWindowCounter {
 	}
 
 	/**
-	 * Get stats
+	 * Snapshot of currently-tracked keys.
+	 *
+	 * @returns `{ activeKeys, keys }`. The `keys` array is a one-shot
+	 *   copy and not kept in sync with future mutations.
 	 */
 	public getStats(): KeyedStats {
 		return {

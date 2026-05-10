@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview NavigationMenu component family — site-level
+ * primary nav with mega-menu support, built on
+ * `@radix-ui/react-navigation-menu`. Renders as `<nav>` with full
+ * keyboard navigation (Tab between triggers, arrow keys within
+ * content), focus-visible outlines, and animated indicator.
+ *
+ * Composition: `NavigationMenu > NavigationMenuList >
+ * NavigationMenuItem > (NavigationMenuLink | NavigationMenuTrigger
+ * + NavigationMenuContent)`. Animated `NavigationMenuIndicator`
+ * follows the active trigger; `NavigationMenuViewport` is the
+ * shared content container under the bar.
+ */
+
 import { CaretDownIcon } from "@phosphor-icons/react";
 import { cva } from "class-variance-authority";
 import { NavigationMenu as NavigationMenuPrimitive } from "radix-ui";

@@ -14,6 +14,24 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview ButtonGroup component family — visually-joined
+ * cluster of related controls (buttons, selects, inputs) that
+ * share borders and rounded corners. Two orientations:
+ * `horizontal` (default) and `vertical`.
+ *
+ * Composition:
+ * - `ButtonGroup` — wrapper that pins child border radii so only
+ *   the cluster's outer corners round.
+ * - `ButtonGroupSeparator` — divider for grouping sub-clusters.
+ * - `ButtonGroupText` — non-interactive label that participates in
+ *   the same border / radius system.
+ *
+ * Children can be `Button`, `Select`, or any `data-slot`-tagged
+ * element from the design system; the wrapper's CSS hooks resolve
+ * adjacency-based border collapse for any combination.
+ */
+
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
 

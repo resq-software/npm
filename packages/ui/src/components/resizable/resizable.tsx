@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Resizable component family — split-pane layout
+ * built on `react-resizable-panels`. Use for editor splits,
+ * sidebar+content layouts, multi-pane dashboards.
+ *
+ * Composition: `ResizablePanelGroup > ResizablePanel +
+ * ResizableHandle + ResizablePanel*`. Direction controlled by the
+ * group's `direction` prop (`horizontal` | `vertical`); handles
+ * support keyboard resize via arrow keys and `aria-valuenow`
+ * announcements.
+ */
+
 "use client";
 
 import type * as React from "react";

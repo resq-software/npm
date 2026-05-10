@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@selfExecute` class decorator — auto-instantiate
+ * the decorated class when its module loads. Useful for singletons
+ * with side-effectful constructors (event listener registration,
+ * runtime patching, telemetry init).
+ */
+
 export * from "./execute.js";

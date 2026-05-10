@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Menubar component family — desktop-style horizontal
+ * menu bar (think macOS app menus) built on
+ * `@radix-ui/react-menubar`. Each top-level `MenubarMenu` exposes
+ * its own dropdown content with the same item / submenu / shortcut
+ * vocabulary as `DropdownMenu`.
+ *
+ * Composition: `Menubar > MenubarMenu > MenubarTrigger +
+ * MenubarContent > (MenubarItem | MenubarCheckboxItem |
+ * MenubarRadioGroup > MenubarRadioItem | MenubarSub …)`.
+ */
+
 "use client";
 
 import { CaretRightIcon, CheckIcon } from "@phosphor-icons/react";

@@ -16,8 +16,28 @@
 
 import * as React from "react";
 
+/** Mobile breakpoint in CSS pixels. Matches Tailwind v4's default `md` breakpoint. */
 const MOBILE_BREAKPOINT = 768;
 
+/**
+ * Subscribe to a `(max-width: 767px)` `matchMedia` query and return
+ * whether the viewport is currently in the mobile range.
+ *
+ * SSR-safe: returns `false` during the first render (before
+ * `useEffect` runs), then re-renders with the real value once the
+ * subscription is active.
+ *
+ * Cleanup is automatic — the listener is removed on unmount or on
+ * route changes.
+ *
+ * @returns `true` when the viewport is < 768 CSS pixels wide.
+ *
+ * @example
+ * ```tsx
+ * const isMobile = useIsMobile();
+ * return isMobile ? <Drawer /> : <Sidebar />;
+ * ```
+ */
 export function useIsMobile() {
 	const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined);
 

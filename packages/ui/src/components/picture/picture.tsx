@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Picture component family — responsive image with
+ * art-direction support, AVIF/WebP fallbacks, blur-up placeholder,
+ * and lazy-loading. Wraps the platform `<picture>` element with a
+ * `<source>` resolution strategy and explicit width/height to
+ * prevent CLS.
+ *
+ * Composition: `Picture > PictureSource* + PictureImg`. The
+ * top-level `Picture` accepts variant / sizing props; sources
+ * declare media queries and asset URLs.
+ *
+ * Performance contract: every `Picture` requires explicit
+ * `width` × `height` (or `aspectRatio`) to reserve layout space —
+ * matches the perf checklist in
+ * `~/.claude/rules/web/performance.md`.
+ */
+
 import { cva, type VariantProps } from "class-variance-authority";
 import {
 	type ComponentProps,

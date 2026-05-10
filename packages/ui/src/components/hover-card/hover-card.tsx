@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview HoverCard component family — preview popover
+ * triggered on hover (and focus, for keyboard users) built on
+ * `@radix-ui/react-hover-card`. Use for richer-than-tooltip
+ * previews — user cards, link previews, citation hovers.
+ *
+ * Composition: `HoverCard > HoverCardTrigger + HoverCardContent`.
+ * Configurable open/close delays via `openDelay` / `closeDelay`
+ * props on the root.
+ */
+
 "use client";
 
 import { HoverCard as HoverCardPrimitive } from "radix-ui";

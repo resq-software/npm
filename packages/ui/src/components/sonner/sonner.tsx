@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Toaster — themed wrapper around `sonner`'s
+ * `<Toaster>`. Mount once at the root of the app; trigger
+ * notifications via `import { toast } from "sonner"`.
+ *
+ * Theme resolution flows through `next-themes` so toasts
+ * automatically follow the user's system / explicit theme
+ * preference. Default Phosphor icons are wired for success /
+ * error / info / warning / loading severity tiers, and design-token
+ * CSS variables are forwarded so border, surface, and text colours
+ * match the rest of the design system.
+ */
+
 "use client";
 
 import {

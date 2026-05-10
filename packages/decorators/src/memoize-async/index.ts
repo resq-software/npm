@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@memoizeAsync(configOrTTL?)` decorator and
+ * `memoizeAsyncFn` function form — cache **promise-returning**
+ * method results with built-in promise-deduplication: while a call
+ * is in flight, additional calls with the same key share the same
+ * pending promise, and the resolved value is cached for subsequent
+ * lookups (subject to the optional TTL).
+ */
+
 export * from "./memoize-async.fn.js";
 export * from "./memoize-async.js";
 export * from "./memoize-async.types.js";

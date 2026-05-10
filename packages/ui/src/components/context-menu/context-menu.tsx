@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview ContextMenu component family — right-click menu
+ * built on `@radix-ui/react-context-menu`. Same internal structure
+ * as `DropdownMenu` (items, sub-menus, checkbox/radio items,
+ * shortcut hints) but triggered by a context-menu event on the
+ * wrapping `ContextMenuTrigger`.
+ *
+ * Composition: `ContextMenu > ContextMenuTrigger + ContextMenuContent`,
+ * with `ContextMenuItem`, `ContextMenuCheckboxItem`,
+ * `ContextMenuRadioGroup` + `ContextMenuRadioItem`,
+ * `ContextMenuSub`, and label/separator helpers.
+ */
+
 "use client";
 
 import { CaretRightIcon, CheckIcon } from "@phosphor-icons/react";

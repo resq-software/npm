@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview InputOTP component family — segmented one-time-pin
+ * input built on `input-otp`. Each digit gets its own visual slot
+ * with focus and active states, while a single hidden `<input>`
+ * receives keyboard input for autofill compatibility.
+ *
+ * Composition: `InputOTP > InputOTPGroup > InputOTPSlot*`, with
+ * optional `InputOTPSeparator` (rendered as a minus icon between
+ * groups, e.g. `XXX-XXX`).
+ */
+
 "use client";
 
 import { MinusIcon } from "@phosphor-icons/react";

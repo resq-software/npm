@@ -157,17 +157,38 @@ const HOMOGLYPH_MAP: Record<string, string[]> = {
 // Detection Functions
 // ============================================
 
+/**
+ * Outcome of {@link detectThreatPatterns}.
+ *
+ * `isSafe` is the boolean shortcut; `threats` is the full list of
+ * findings (one per detector that fired). Use
+ * {@link getThreatErrorMessage} to render a user-facing message for
+ * the first finding.
+ */
 export interface ThreatDetectionResult {
+	/** `true` when no detectors fired. Equivalent to `threats.length === 0`. */
 	isSafe: boolean;
+	/** All findings produced by enabled detectors, in detector order. */
 	threats: ThreatFinding[];
 }
 
+/**
+ * A single detector hit. Detectors that fire return at most one
+ * finding per call (one example is enough to reject the input).
+ */
 export interface ThreatFinding {
+	/** Which detector matched. */
 	type: ThreatType;
+	/** Human-readable description suitable for log lines (not for end users — use {@link getThreatErrorMessage} instead). */
 	description: string;
+	/** First 50 chars of the matching substring, for diagnostics. Truncated to prevent leaking large payloads in logs. */
 	matchedPattern?: string;
 }
 
+/**
+ * The closed set of threat categories the validators recognise. Add
+ * new categories here when adding a new detector.
+ */
 export type ThreatType =
 	| "xss"
 	| "sql_injection"
@@ -177,7 +198,24 @@ export type ThreatType =
 	| "homoglyph";
 
 /**
- * Detects XSS attack patterns in input
+ * Detect XSS-style payloads (script tags, event handlers, dangerous
+ * URI schemes, prototype pollution, …) in a UTF-8 input.
+ *
+ * Inputs longer than 100 000 characters are truncated before scanning
+ * to bound regex evaluation cost and prevent ReDoS on crafted
+ * payloads. Returns at most one finding — the regex catalogue is
+ * exhaustive enough that the first hit is sufficient for a
+ * reject-or-sanitise decision.
+ *
+ * @param input - String to scan.
+ * @returns Empty array when nothing matches, or a single
+ *   {@link ThreatFinding} of type `"xss"`.
+ *
+ * @example
+ * ```ts
+ * containsXSSPatterns(`<img src=x onerror="alert(1)">`);
+ * // → [{ type: "xss", description: "...", matchedPattern: "onerror=" }]
+ * ```
  */
 export function containsXSSPatterns(input: string): ThreatFinding[] {
 	const findings: ThreatFinding[] = [];
@@ -200,7 +238,16 @@ export function containsXSSPatterns(input: string): ThreatFinding[] {
 }
 
 /**
- * Detects SQL injection patterns in input
+ * Detect SQL-injection patterns (UNION SELECT, DROP TABLE,
+ * comment-based bypasses, always-true tautologies, stacked queries)
+ * in input.
+ *
+ * **Not a replacement for parameterised queries.** Use this as a
+ * defence-in-depth signal in addition to a properly bound prepared
+ * statement, never as the only barrier.
+ *
+ * @param input - String to scan. Truncated at 100 000 characters.
+ * @returns Empty array, or one finding of type `"sql_injection"`.
  */
 export function containsSQLInjection(input: string): ThreatFinding[] {
 	const findings: ThreatFinding[] = [];
@@ -222,7 +269,13 @@ export function containsSQLInjection(input: string): ThreatFinding[] {
 }
 
 /**
- * Detects NoSQL injection patterns in input
+ * Detect NoSQL-injection patterns — Mongo-style operator injection
+ * (`$where`, `$ne`, `$regex`), JavaScript-in-query payloads, and
+ * structural manipulators that can bypass auth filters in document
+ * stores.
+ *
+ * @param input - String to scan.
+ * @returns Empty array, or one finding of type `"nosql_injection"`.
  */
 export function containsNoSQLInjection(input: string): ThreatFinding[] {
 	const findings: ThreatFinding[] = [];
@@ -243,8 +296,17 @@ export function containsNoSQLInjection(input: string): ThreatFinding[] {
 }
 
 /**
- * Detects command injection patterns in input
- * Note: This is strict - may trigger false positives on legitimate characters
+ * Detect shell command-injection patterns: command substitution
+ * (`$(...)`, backticks), chained dangerous commands (`; rm`, `; curl`,
+ * …) and shell-piped exec (`| sh`, `| bash`).
+ *
+ * **Off by default in {@link detectThreatPatterns}** — these patterns
+ * occasionally fire on legitimate user content. Enable explicitly
+ * (`checkCommandInjection: true`) only when input flows into a child
+ * process or shell.
+ *
+ * @param input - String to scan. Truncated at 100 000 characters.
+ * @returns Empty array, or one finding of type `"command_injection"`.
  */
 export function containsCommandInjection(input: string): ThreatFinding[] {
 	const findings: ThreatFinding[] = [];
@@ -275,7 +337,13 @@ export function containsCommandInjection(input: string): ThreatFinding[] {
 }
 
 /**
- * Detects path traversal patterns in input
+ * Detect path-traversal payloads — `../`, encoded dots, raw absolute
+ * paths trying to escape a base directory. Pair with `path.resolve()`
+ * + a `startsWith()` containment check on the canonicalised path
+ * before reading or writing the file.
+ *
+ * @param input - String to scan.
+ * @returns Empty array, or one finding of type `"path_traversal"`.
  */
 export function containsPathTraversal(input: string): ThreatFinding[] {
 	const findings: ThreatFinding[] = [];
@@ -296,8 +364,17 @@ export function containsPathTraversal(input: string): ThreatFinding[] {
 }
 
 /**
- * Detects homoglyph attacks in input
- * Used to detect phishing attempts using lookalike characters
+ * Detect lookalike Unicode characters (Cyrillic / Greek glyphs that
+ * render identically to common ASCII letters). The classic phishing
+ * trick is `paypaӏ.com` (`ӏ` instead of `l`); this detector catches
+ * the building blocks.
+ *
+ * Use {@link normalizeUnicode} to *replace* homoglyphs with their
+ * ASCII equivalents — this function only flags their presence.
+ *
+ * @param input - String to scan.
+ * @returns Empty array, or one finding of type `"homoglyph"` (the
+ *   first matched lookalike).
  */
 export function containsHomoglyphs(input: string): ThreatFinding[] {
 	const findings: ThreatFinding[] = [];
@@ -323,14 +400,25 @@ export function containsHomoglyphs(input: string): ThreatFinding[] {
 // ============================================
 
 /**
- * Configuration for threat detection
+ * Per-detector toggles for {@link detectThreatPatterns}.
+ *
+ * Defaults: XSS, SQL, NoSQL, path-traversal, and homoglyph detectors
+ * are **on**; command injection is **off** (false-positive prone).
+ * Pass `false` to disable a detector or `true` to force-enable
+ * `checkCommandInjection`.
  */
 export interface ThreatDetectionConfig {
+	/** Default `true`. */
 	checkXSS?: boolean;
+	/** Default `true`. */
 	checkSQLInjection?: boolean;
+	/** Default `true`. */
 	checkNoSQLInjection?: boolean;
+	/** Default `false` — opt in only when input reaches a shell. */
 	checkCommandInjection?: boolean;
+	/** Default `true`. */
 	checkPathTraversal?: boolean;
+	/** Default `true`. */
 	checkHomoglyphs?: boolean;
 }
 
@@ -344,10 +432,26 @@ const DEFAULT_CONFIG: ThreatDetectionConfig = {
 };
 
 /**
- * Runs all configured threat detectors on input
- * @param input - The string to check
- * @param config - Optional configuration for which checks to run
- * @returns Detection result with any findings
+ * Run every enabled detector against `input` and aggregate findings.
+ *
+ * Returns early-but-not-immediately: each individual detector still
+ * runs to completion, but each detector returns at most one finding,
+ * so the aggregate threats array is small (≤ 6 entries).
+ *
+ * Non-string inputs (`null`, `undefined`, numbers, …) are treated as
+ * safe — wrap caller-side validation around this if you want to
+ * reject non-strings.
+ *
+ * @param input - The candidate string.
+ * @param config - Detector toggles. Defaults turn on everything
+ *   except command-injection.
+ * @returns `{ isSafe, threats }`.
+ *
+ * @example
+ * ```ts
+ * const result = detectThreatPatterns(req.body.query);
+ * if (!result.isSafe) return new Response(getThreatErrorMessage(result), { status: 400 });
+ * ```
  */
 export function detectThreatPatterns(
 	input: string,
@@ -390,18 +494,30 @@ export function detectThreatPatterns(
 }
 
 /**
- * Quick check if input is safe
- * @param input - The string to check
- * @param config - Optional configuration
- * @returns true if no threats detected
+ * Boolean shortcut over {@link detectThreatPatterns} — discards the
+ * findings list when you only need a yes/no decision.
+ *
+ * @param input - String to test.
+ * @param config - Optional detector toggles.
+ * @returns `true` when no detector fires.
  */
 export function isSafeInput(input: string, config?: ThreatDetectionConfig): boolean {
 	return detectThreatPatterns(input, config).isSafe;
 }
 
 /**
- * Sanitizes input for safe display by escaping HTML entities
- * Use this when you need to display potentially unsafe content
+ * HTML-entity escape `&`, `<`, `>`, `"`, `'`, and `/` for safe
+ * insertion into HTML text and attribute contexts.
+ *
+ * **Limited scope.** This is appropriate for plain text destined for
+ * `textContent` or attribute values, not for unfiltered HTML
+ * rendering. For rich-text use a vetted sanitiser (DOMPurify on the
+ * client, sanitize-html or similar on the server).
+ *
+ * Returns `""` for non-string or empty input.
+ *
+ * @param input - Untrusted string.
+ * @returns Entity-escaped output safe to interpolate into HTML.
  */
 export function sanitizeForDisplay(input: string): string {
 	if (!input || typeof input !== "string") return "";
@@ -416,8 +532,22 @@ export function sanitizeForDisplay(input: string): string {
 }
 
 /**
- * Normalizes Unicode to prevent homoglyph attacks
- * Converts to NFC form and replaces common lookalikes with ASCII
+ * Canonicalise a string for safe equality checks against ASCII.
+ *
+ * Two-pass:
+ * 1. Normalise to NFC (composed form) so combining-character
+ *    sequences don't compare differently from their pre-composed
+ *    counterparts.
+ * 2. Replace known homoglyphs (Cyrillic `А`, Greek `Ε`, …) with their
+ *    ASCII equivalents (`A`, `E`, …).
+ *
+ * Use before storing user-controlled identifiers (usernames, domain
+ * names) and before comparing them to a denylist or to each other.
+ *
+ * Returns `""` for non-string or empty input.
+ *
+ * @param input - Raw string from an untrusted source.
+ * @returns ASCII-normalised, NFC-composed string.
  */
 export function normalizeUnicode(input: string): string {
 	if (!input || typeof input !== "string") return "";
@@ -440,21 +570,32 @@ export function normalizeUnicode(input: string): string {
 // ============================================
 
 /**
- * Error message for threat detection
+ * Generic user-facing fallback message. Render this verbatim when a
+ * detector fires but you don't want to expose which one. Prefer
+ * {@link getThreatErrorMessage} for category-specific messages.
  */
 export const THREAT_DETECTED_MESSAGE = "Input contains potentially unsafe content";
 
 /**
- * Validates that a string is safe from common attack patterns
- * For use as a Zod refinement
+ * Boolean refinement helper for use with `zod.string().refine(...)`,
+ * `effect/Schema.filter(...)`, or any predicate-based validator.
+ *
+ * Equivalent to `isSafeInput(input)` with default config.
  */
 export function validateSafeText(input: string): boolean {
 	return isSafeInput(input);
 }
 
 /**
- * Validates that a name field is safe
- * More permissive than general text - allows international characters
+ * Refinement for human name fields. More permissive than
+ * {@link validateSafeText} — allows international letters,
+ * combining marks, hyphens, apostrophes, and spaces — but still
+ * rejects HTML/SQL/NoSQL injection patterns and homoglyph forgeries.
+ *
+ * Suitable for first/last/full-name inputs in registration forms.
+ *
+ * @returns `true` when the name passes both the threat detectors and
+ *   the name-shape regex.
  */
 export function validateSafeName(input: string): boolean {
 	// Normalize first to handle combining characters
@@ -472,7 +613,15 @@ export function validateSafeName(input: string): boolean {
 }
 
 /**
- * Validates email addresses with additional security checks
+ * Refinement for email fields. Combines:
+ *
+ * 1. RFC-style format check (length-bounded to ≤ 254 chars to
+ *    prevent ReDoS).
+ * 2. XSS / SQL / NoSQL / homoglyph detectors — emails are extremely
+ *    constrained and should never legitimately contain HTML or query
+ *    operators.
+ *
+ * @returns `true` when both checks pass.
  */
 export function validateSafeEmail(input: string): boolean {
 	// Standard format check — bounded length to prevent ReDoS
@@ -498,7 +647,15 @@ export function validateSafeEmail(input: string): boolean {
 }
 
 /**
- * Get human-readable error for a threat detection result
+ * Map a {@link ThreatDetectionResult} into a user-facing error
+ * message string suitable for an HTTP 400 response or form
+ * validation error. Returns `""` when the result is safe (so
+ * `error || undefined` works).
+ *
+ * Uses only the **first** finding for the message — exposing every
+ * threat type to the user can leak information about the detection
+ * rules. For full diagnostics, log `result.threats` server-side
+ * rather than returning them.
  */
 export function getThreatErrorMessage(result: ThreatDetectionResult): string {
 	if (result.isSafe) return "";

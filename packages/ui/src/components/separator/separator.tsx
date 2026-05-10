@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Separator — semantic divider built on
+ * `@radix-ui/react-separator`. Defaults to horizontal,
+ * decorative (no `role="separator"` announcement). Pass
+ * `orientation="vertical"` for inline dividers and
+ * `decorative={false}` when the separator carries semantic weight
+ * (e.g. between sections of a navigation menu).
+ */
+
 "use client";
 
 import { Separator as SeparatorPrimitive } from "radix-ui";

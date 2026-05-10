@@ -14,6 +14,27 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Field component family — high-level form-row
+ * orchestrator that composes label, control, helper text, and error
+ * message into one accessible group.
+ *
+ * Composition:
+ * - `FieldGroup` — wraps multiple `Field`s in a `<fieldset>` shell.
+ * - `FieldSet` + `FieldLegend` — grouped field set with a heading.
+ * - `Field` — single row (vertical or horizontal orientation).
+ * - `FieldLabel` (alias of design-system `Label`) — the field label.
+ * - `FieldDescription` — helper text below the control.
+ * - `FieldError` — error message, automatically wired via
+ *   `aria-invalid`.
+ * - `FieldContent` — wraps the actual control(s) for layout.
+ * - `FieldSeparator` — visual divider between rows.
+ * - `FieldTitle` — section heading inside grouped fields.
+ *
+ * Generates and threads the `aria-describedby` IDs so screen readers
+ * announce description and error text alongside the control.
+ */
+
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";

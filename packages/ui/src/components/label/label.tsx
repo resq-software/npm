@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Label — accessible form label built on
+ * `@radix-ui/react-label` (clicking the label focuses the
+ * associated control). Per `STYLE_GUIDE.md`, labels render
+ * `font-mono uppercase` with wide letter-spacing and the
+ * `text-hint` token for muted labelling.
+ *
+ * Auto-disables (50% opacity, no pointer events) when its peer or
+ * group ancestor has `data-disabled="true"`.
+ */
+
 "use client";
 
 import { Label as LabelPrimitive } from "radix-ui";

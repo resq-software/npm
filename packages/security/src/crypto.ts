@@ -43,19 +43,48 @@ const SALT_LENGTH = 32;
 const KEY_LENGTH = 32;
 
 /**
- * Derives an encryption key from a password using scrypt
+ * Derive a 32-byte (AES-256) key from a password and per-record salt
+ * using scrypt with Node's default cost parameters.
+ *
+ * Internal helper — used inside the encrypt/decrypt round-trip because
+ * the salt must travel alongside the ciphertext for decryption to
+ * succeed.
+ *
+ * @internal
  */
 async function deriveKey(password: string, salt: Buffer): Promise<Buffer> {
 	return (await scryptAsync(password, salt, KEY_LENGTH)) as Buffer;
 }
 
 /**
- * Encrypts sensitive data using AES-256-GCM
+ * Encrypt a UTF-8 string with AES-256-GCM authenticated encryption.
  *
- * @param plaintext - Data to encrypt
- * @param encryptionKey - Encryption key/password
- * @returns Base64-encoded encrypted data (salt:iv:authTag:ciphertext)
- * @compliance NIST 800-53 SC-28 (Protection of Information at Rest)
+ * Each call generates a fresh random salt and IV — the same plaintext
+ * encrypted twice with the same `encryptionKey` produces different
+ * ciphertexts, which is the property you want for at-rest encryption.
+ *
+ * Output layout (base64-encoded): `salt(32) | iv(16) | authTag(16) | ciphertext(*)`.
+ * The companion {@link decryptData} understands this layout.
+ *
+ * @param plaintext - UTF-8 string to encrypt.
+ * @param encryptionKey - Caller-supplied secret. Treated as a password
+ *   and stretched into a 256-bit AES key via scrypt; can be any length,
+ *   though a high-entropy secret (≥ 32 bytes) is strongly preferred.
+ *
+ * @returns A self-contained base64 string. Store or transmit verbatim;
+ *   the salt/IV are recovered on decryption.
+ *
+ * @throws From the underlying Node crypto primitives if `encryptionKey`
+ *   is empty or scrypt fails.
+ *
+ * @compliance NIST 800-53 SC-28 (Protection of Information at Rest),
+ *   SC-13 (Cryptographic Protection).
+ *
+ * @example
+ * ```ts
+ * const ct = await encryptData("user@example.com", process.env.PII_KEY!);
+ * await db.users.update(id, { email: ct });
+ * ```
  */
 export async function encryptData(plaintext: string, encryptionKey: string): Promise<string> {
 	const salt = randomBytes(SALT_LENGTH);
@@ -71,7 +100,25 @@ export async function encryptData(plaintext: string, encryptionKey: string): Pro
 }
 
 /**
- * Decrypts data encrypted with encryptData
+ * Reverse {@link encryptData}. Verifies the GCM authentication tag
+ * before returning plaintext — tampered ciphertexts throw.
+ *
+ * @param encryptedData - Base64 string produced by {@link encryptData}.
+ * @param encryptionKey - Same key/password used to encrypt. Wrong keys
+ *   throw an "Unsupported state or unable to authenticate data" error
+ *   from Node — the authenticated tag failure is indistinguishable from
+ *   tampering, by design.
+ *
+ * @returns The original UTF-8 plaintext.
+ *
+ * @throws Error if the tag does not verify (wrong key, modified
+ *   ciphertext, truncated payload). Catch this and treat it as a
+ *   security event, not a recoverable error.
+ *
+ * @example
+ * ```ts
+ * const plaintext = await decryptData(stored, process.env.PII_KEY!);
+ * ```
  */
 export async function decryptData(encryptedData: string, encryptionKey: string): Promise<string> {
 	const combined = Buffer.from(encryptedData, "base64");
@@ -94,21 +141,59 @@ export async function decryptData(encryptedData: string, encryptionKey: string):
 }
 
 /**
- * Hash data using SHA-256 (for non-reversible hashing)
+ * Compute a SHA-256 digest of a UTF-8 string and return it as lowercase
+ * hex.
+ *
+ * **Not for password storage.** SHA-256 is fast by design — use a
+ * deliberately slow KDF (`bcrypt`, `argon2`, or `scrypt`) for
+ * password-equivalent material. This helper is intended for
+ * non-reversible identifiers, content hashes, and idempotency keys.
+ *
+ * @param data - UTF-8 input.
+ * @returns 64-character lowercase hex digest.
+ *
+ * @example
+ * ```ts
+ * hashData("hello"); // → "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+ * ```
  */
 export function hashData(data: string): string {
 	return createHash("sha256").update(data).digest("hex");
 }
 
 /**
- * Generate a secure random token
+ * Generate a cryptographically random hex token suitable for session
+ * IDs, password-reset tokens, CSRF tokens, and similar single-use
+ * secrets.
+ *
+ * @param length - Number of random *bytes* to draw (the returned hex
+ *   string is twice as long). Default `32` ⇒ 64-char hex / 256 bits of
+ *   entropy.
+ * @returns Lowercase hex string of length `length * 2`.
+ *
+ * @example
+ * ```ts
+ * generateSecureToken();    // 64-char hex (256-bit entropy)
+ * generateSecureToken(16);  // 32-char hex (128-bit entropy)
+ * ```
  */
 export function generateSecureToken(length: number = 32): string {
 	return randomBytes(length).toString("hex");
 }
 
 /**
- * Mask PII for logging (shows first 2 and last 2 characters)
+ * Mask an arbitrary PII string for safe logging — keeps the first two
+ * and last two characters and replaces everything in between with
+ * asterisks. Strings of length ≤ 4 are fully masked as `"****"`.
+ *
+ * @param data - Raw PII string.
+ * @returns Masked representation safe for logs.
+ *
+ * @example
+ * ```ts
+ * maskPII("4242424242424242"); // → "42************42"
+ * maskPII("AB12");              // → "****"
+ * ```
  */
 export function maskPII(data: string): string {
 	if (data.length <= 4) {
@@ -118,7 +203,20 @@ export function maskPII(data: string): string {
 }
 
 /**
- * Mask email for logging
+ * Mask an email address while preserving the domain — useful for
+ * deduplication and support workflows where the domain is non-PII but
+ * the local part identifies the user.
+ *
+ * @param email - Full email. Falls back to {@link maskPII} if the input
+ *   does not contain a valid `local@domain` shape.
+ * @returns Masked email; e.g. `"j*****e@example.com"`.
+ *
+ * @example
+ * ```ts
+ * maskEmail("jane@example.com"); // → "j**e@example.com"
+ * maskEmail("ab@example.com");   // → "**@example.com"
+ * maskEmail("not-an-email");     // → "no********il" (maskPII fallback)
+ * ```
  */
 export function maskEmail(email: string): string {
 	const parts = email.split("@");
@@ -133,7 +231,35 @@ export function maskEmail(email: string): string {
 }
 
 /**
- * Sanitize object for logging (removes sensitive fields)
+ * Recursively shallow-copy an object, replacing any field whose key
+ * contains a sensitive substring (case-insensitive) with `[REDACTED]`,
+ * and masking string fields whose key contains `"email"` via
+ * {@link maskEmail}.
+ *
+ * Designed for log structures — preserves shape so log queries continue
+ * to work, but ensures secrets and identifiers don't leak. Use as a
+ * defensive layer **before** writing structured log lines.
+ *
+ * @param obj - Object to sanitise. Original is not mutated.
+ * @param sensitiveFields - Substring allow-list. Defaults to
+ *   `["password", "passwordHash", "token", "secret",
+ *   "twoFactorSecret", "apiKey"]`. Substrings match anywhere in the
+ *   key, e.g. `"token"` matches `"refreshToken"` and `"id_token"`.
+ *
+ * @returns A new object with sensitive fields redacted and emails
+ *   masked. Nested objects are recursed; arrays and primitives pass
+ *   through unchanged.
+ *
+ * @example
+ * ```ts
+ * sanitizeForLogging({
+ *   id: 1,
+ *   email: "u@x.com",
+ *   apiKey: "sk-...",
+ *   nested: { token: "..." },
+ * });
+ * // → { id: 1, email: "u@x.com" (masked), apiKey: "[REDACTED]", nested: { token: "[REDACTED]" } }
+ * ```
  */
 export function sanitizeForLogging<T extends Record<string, unknown>>(
 	obj: T,

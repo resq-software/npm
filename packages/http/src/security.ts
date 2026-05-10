@@ -23,7 +23,38 @@
  */
 
 /**
- * Check if a request should be redirected to HTTPS
+ * Decide whether an inbound HTTP request must be redirected to HTTPS,
+ * accounting for reverse-proxy and load-balancer hops that terminate
+ * TLS upstream.
+ *
+ * The check inspects (in order) `x-forwarded-proto`, `x-forwarded-ssl`,
+ * the raw `protocol`, and the URL prefix. A request is treated as
+ * already-secure if **any** of these signals indicate HTTPS.
+ *
+ * In `development` and `test` environments the function always returns
+ * `null` to avoid breaking local workflows that run plain HTTP.
+ *
+ * @param protocol - The protocol string from the request (e.g. `"http"`
+ *   or `"https"`). Typically `req.protocol` or `req.url.protocol`.
+ * @param url - Full request URL. Used both as a fallback signal and as
+ *   the basis for the redirect target.
+ * @param headers - Request headers. Only the proxy-related ones
+ *   (`x-forwarded-proto`, `x-forwarded-ssl`) are consulted.
+ * @param nodeEnv - Override for the environment guard. Defaults to
+ *   `process.env.NODE_ENV` or `"development"`. Pass `"production"`
+ *   explicitly when running outside Node (Bun, Deno, edge runtimes).
+ *
+ * @returns The redirect target (an `https://` URL) when a redirect is
+ *   required, otherwise `null` (the request is already secure or in a
+ *   non-prod environment).
+ *
+ * @compliance NIST 800-53 SC-8 (Transmission Confidentiality).
+ *
+ * @example
+ * ```ts
+ * const target = shouldRedirectToHttps(req.protocol, req.url, req.headers);
+ * if (target) return Response.redirect(target, 301);
+ * ```
  */
 export function shouldRedirectToHttps(
 	protocol: string,
@@ -56,7 +87,29 @@ export function shouldRedirectToHttps(
 }
 
 /**
- * Generate or retrieve a request ID
+ * Resolve the request ID for an inbound request — passing through any
+ * caller-supplied value verbatim, otherwise minting a fresh UUID v4 via
+ * `crypto.randomUUID()`.
+ *
+ * Use as the source of truth for the per-request correlation ID written
+ * into log lines, response headers (`x-request-id`), and downstream
+ * service hops. Trusting an upstream-supplied ID lets distributed
+ * traces follow the request across service boundaries without
+ * regeneration.
+ *
+ * @param existingId - Inbound `x-request-id` (or equivalent), if any.
+ *   Returned unchanged when truthy; no validation is applied, so do not
+ *   echo untrusted values into log structures without your own
+ *   sanitisation.
+ *
+ * @returns The supplied ID, or a freshly generated UUID v4.
+ *
+ * @example
+ * ```ts
+ * const requestId = getRequestId(req.headers["x-request-id"]);
+ * res.headers.set("x-request-id", requestId);
+ * logger.info("incoming request", { requestId, path: req.url });
+ * ```
  */
 export function getRequestId(existingId?: string): string {
 	return existingId || crypto.randomUUID();

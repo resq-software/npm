@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Carousel component family — horizontal/vertical
+ * scrollable item set built on Embla Carousel. Supports keyboard
+ * navigation (arrow keys), touch/drag, and programmatic control via
+ * the exposed `setApi` callback.
+ *
+ * Composition: `Carousel > CarouselContent > CarouselItem` (one per
+ * slide), with `CarouselPrevious` / `CarouselNext` chevron buttons
+ * automatically wired to the Embla API.
+ *
+ * Pass an `opts` object to forward Embla options (loop, align,
+ * containScroll, …) and a `plugins` array for autoplay/wheel/etc.
+ */
+
 "use client";
 
 import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react";

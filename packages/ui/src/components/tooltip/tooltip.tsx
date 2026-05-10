@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Tooltip component family — short hover/focus hint
+ * built on `@radix-ui/react-tooltip`. Use for icon-button labels
+ * and brief affordance descriptions; reach for `HoverCard` when
+ * the hint needs richer content (links, images, paragraphs).
+ *
+ * Composition: `TooltipProvider > Tooltip > TooltipTrigger +
+ * TooltipContent`. The provider can be mounted once at the app
+ * root with a global `delayDuration`; individual `Tooltip` roots
+ * can override the delay locally.
+ */
+
 "use client";
 
 import { Tooltip as TooltipPrimitive } from "radix-ui";

@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Checkbox — accessible tri-state checkbox built on
+ * `@radix-ui/react-checkbox`. Supports `true` / `false` /
+ * `"indeterminate"` (the latter for parent rows with mixed child
+ * state). Radix handles keyboard activation (Space) and ARIA
+ * roles automatically.
+ */
+
 "use client";
 
 import { CheckIcon } from "@phosphor-icons/react";

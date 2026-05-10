@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
+/**
+ * A unit of deferred work tracked by {@link TaskExec}.
+ *
+ * Tasks are ordered by `execTime` (a Unix epoch millisecond) — the
+ * earliest-due task is always at the head of the priority queue.
+ */
 export type TimedTask = {
+	/** Callback to invoke when the task fires. Return value is ignored. */
 	func: (...args: unknown[]) => unknown;
+	/** Earliest time (epoch ms) at which `func` should run. */
 	execTime: number;
 };

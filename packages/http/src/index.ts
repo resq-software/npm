@@ -14,5 +14,30 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public API for `@resq-sw/http` — Effect-based HTTP client with
+ * retry, timeout, and schema validation.
+ *
+ * Subpath exports:
+ * - `@resq-sw/http` — fetcher, retry, timeout, JSON helpers
+ * - `@resq-sw/http/security` — HTTPS redirect helper, request-ID extraction
+ *
+ * Requires `effect` and `@effect/platform` as peer dependencies.
+ * `@effect/platform-bun` is an optional peer used when running on Bun.
+ *
+ * @module @resq-sw/http
+ *
+ * @example
+ * ```ts
+ * import { get, post } from "@resq-sw/http";
+ * import { Effect } from "effect";
+ *
+ * const program = Effect.gen(function* () {
+ *   const users = yield* get<User[]>("/api/users");
+ *   return users;
+ * });
+ * ```
+ */
+
 export * from "./fetcher.js";
 export { shouldRedirectToHttps, getRequestId } from "./security.js";

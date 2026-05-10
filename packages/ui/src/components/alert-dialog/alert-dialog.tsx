@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview AlertDialog component family — modal confirmation
+ * dialog built on `@radix-ui/react-alert-dialog`. Use this (rather
+ * than `Dialog`) for irreversible, destructive, or otherwise
+ * blocking confirmations. The cancel/action buttons reuse the
+ * shared `Button` component for consistent styling.
+ *
+ * Composition: `AlertDialog > AlertDialogTrigger + AlertDialogContent`,
+ * with `AlertDialogContent` wrapping `AlertDialogHeader`
+ * (`AlertDialogTitle` + `AlertDialogDescription`) and
+ * `AlertDialogFooter` (`AlertDialogCancel` + `AlertDialogAction`).
+ *
+ * Accessibility: focus trap, escape-to-close, and inert background
+ * via Radix. Title and description are wired through `aria-labelledby`
+ * / `aria-describedby` automatically.
+ */
+
 "use client";
 
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui";

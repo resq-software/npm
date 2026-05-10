@@ -16,6 +16,9 @@
 
 # @resq-sw/http
 
+[![npm](https://img.shields.io/npm/v/%40resq-sw%2Fhttp?style=flat-square)](https://www.npmjs.com/package/@resq-sw/http)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
+
 > Effect-based HTTP client with retry, timeout, schema validation, and security middleware.
 
 ## Installation

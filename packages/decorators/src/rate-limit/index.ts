@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@rateLimit(config)` decorator and `rateLimitFn`
+ * function form — cap method calls to `allowedCalls` per
+ * `timeSpanMs`. Configurable `keyResolver` for per-user/per-route
+ * limiting and an `exceedHandler` for the rejection path. Ships
+ * with a default `SimpleRateLimitCounter`; supply a custom counter
+ * via the `rateLimitCounter` option for distributed / Redis-backed
+ * limiting.
+ */
+
 export * from "./rate-limit.js";
 export * from "./rate-limit.types.js";
 export * from "./simple-rate-limit-counter.js";
