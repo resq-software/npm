@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview AlertDialog component family — modal confirmation
- * dialog built on `@radix-ui/react-alert-dialog`. Use this (rather
+ * dialog built on Radix UI's `AlertDialog` primitive. Use this (rather
  * than `Dialog`) for irreversible, destructive, or otherwise
  * blocking confirmations. The cancel/action buttons reuse the
  * shared `Button` component for consistent styling.

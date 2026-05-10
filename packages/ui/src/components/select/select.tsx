@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview Select component family — fully styled dropdown
- * select built on `@radix-ui/react-select`. Use for non-typeable
+ * select built on Radix UI's `Select` primitive. Use for non-typeable
  * choices from a defined list; reach for `Combobox` when you
  * need search/filter, `NativeSelect` when you need real native
  * mobile picker UX.

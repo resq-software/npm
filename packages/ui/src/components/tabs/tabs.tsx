@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview Tabs component family — segmented panel switcher
- * built on `@radix-ui/react-tabs`. Use for in-page sub-navigation
+ * built on Radix UI's `Tabs` primitive. Use for in-page sub-navigation
  * where all panels are siblings (settings sections, dashboard
  * views).
  *
@@ -25,9 +25,9 @@
  * navigation (arrow keys, Home, End) and `aria-selected` /
  * `role="tabpanel"` wiring are inherited from Radix.
  *
- * Triggers ship in two visual variants via the `tabsVariants` CVA
- * (e.g. underlined vs. pill); pick the one that matches the
- * surface containing the tabs.
+ * `TabsList` ships in multiple visual variants via the
+ * `tabsListVariants` CVA (default, underline, …); pick the one
+ * that matches the surface containing the tabs.
  */
 
 "use client";

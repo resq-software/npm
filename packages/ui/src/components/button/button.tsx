@@ -19,7 +19,7 @@
  * across the design system.
  *
  * Variants: `default` (primary), `secondary`, `outline`, `ghost`,
- * `link`, `destructive`, and `urgent` (info-coloured CTA used in
+ * `link`, `destructive`, and `urgent` (info-colored CTA used in
  * mission-control surfaces).
  *
  * Sizes: `xs`, `sm`, `default`, `lg`, plus icon-only variants

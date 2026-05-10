@@ -820,8 +820,7 @@ export const createPaginatedSchema = <T>(itemSchema: Schema.Schema<T>) => {
  * ```
  *
  * Use as the response schema for endpoints that wrap their payload
- * in a uniform success/error envelope (the convention recommended in
- * `~/.claude/rules/common/patterns.md`).
+ * in a uniform success/error envelope.
  *
  * @typeParam T - Inner data shape on success.
  */

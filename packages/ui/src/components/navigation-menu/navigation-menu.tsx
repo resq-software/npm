@@ -17,7 +17,7 @@
 /**
  * @fileoverview NavigationMenu component family — site-level
  * primary nav with mega-menu support, built on
- * `@radix-ui/react-navigation-menu`. Renders as `<nav>` with full
+ * Radix UI's `NavigationMenu` primitive. Renders as `<nav>` with full
  * keyboard navigation (Tab between triggers, arrow keys within
  * content), focus-visible outlines, and animated indicator.
  *

@@ -1520,7 +1520,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 
 // ---------------------------------------------------------------------------
-// Icon registry — categorised for browsing
+// Icon registry — categorized for browsing
 // ---------------------------------------------------------------------------
 
 type IconEntry = { component: Icon; name: string; tags: string[] };

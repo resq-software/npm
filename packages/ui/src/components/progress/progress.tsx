@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview Progress — determinate progress bar built on
- * `@radix-ui/react-progress`. Pass `value` (0–100) to drive the
+ * Radix UI's `Progress` primitive. Pass `value` (0–100) to drive the
  * fill; the indicator translates via `transform: translateX` so
  * animation stays compositor-friendly.
  *

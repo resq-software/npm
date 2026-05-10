@@ -265,7 +265,7 @@ export const bindResult =
  * railway(
  *   rawInput,
  *   parse,        // (raw) => Result<Parsed, ValidationError>
- *   normalise,    // (p)   => Result<Parsed, ValidationError>
+ *   normalize,    // (p)   => Result<Parsed, ValidationError>
  *   persist,      // (p)   => Result<Saved,  DatabaseError>
  * );
  * ```

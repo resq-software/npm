@@ -46,7 +46,7 @@ export const Priority: Story = {
 						value: "critical",
 					},
 					{
-						description: "Significant risk — prioritised response",
+						description: "Significant risk — prioritized response",
 						label: "High",
 						value: "high",
 					},

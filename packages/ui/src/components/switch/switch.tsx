@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview Switch — accessible binary toggle built on
- * `@radix-ui/react-switch`. Two sizes (`default`, `sm`) controlled
+ * Radix UI's `Switch` primitive. Two sizes (`default`, `sm`) controlled
  * via the `size` prop. Use for instant-effect toggles (settings,
  * feature flags); use `Checkbox` for form-submission contexts.
  *

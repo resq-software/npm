@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview Dialog component family — modal overlay built on
- * `@radix-ui/react-dialog`. Use for content-bearing modals
+ * Radix UI's `Dialog` primitive. Use for content-bearing modals
  * (forms, detail views, confirmations); use `AlertDialog` instead
  * for destructive action gates.
  *

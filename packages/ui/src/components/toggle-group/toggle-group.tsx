@@ -18,7 +18,7 @@
  * @fileoverview ToggleGroup component family — group of `Toggle`
  * buttons coordinated as either a single-select (`type="single"`)
  * or multi-select (`type="multiple"`) cluster, built on
- * `@radix-ui/react-toggle-group`.
+ * Radix UI's `ToggleGroup` primitive.
  *
  * Composition: `ToggleGroup > ToggleGroupItem*`. Items inherit
  * size/variant from the parent group via context, so the entire

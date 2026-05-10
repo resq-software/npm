@@ -16,9 +16,9 @@
 
 /**
  * @fileoverview RTL/LTR direction provider — thin wrapper around
- * `@radix-ui/react-direction`'s `DirectionProvider`. Wrap the app
+ * Radix UI's `DirectionProvider` primitive. Wrap the app
  * (or a sub-tree) in `<DirectionProvider direction="rtl">` to flip
- * directional behaviour for every Radix-based component
+ * directional behavior for every Radix-based component
  * underneath. Accepts both `dir` (Radix native) and `direction`
  * (alias for ergonomic JSX).
  *

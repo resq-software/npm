@@ -58,6 +58,12 @@ g.addEdge("base", "alpha", 10);
 g.addEdge("alpha", "site-7", 6);
 g.addEdge("base", "site-7", 18);
 
+const positions: Record<string, { x: number; y: number }> = {
+  base: { x: 0, y: 0 },
+  alpha: { x: 5, y: 2 },
+  "site-7": { x: 9, y: 4 },
+};
+
 const result = g.aStar(
   "base",
   "site-7",

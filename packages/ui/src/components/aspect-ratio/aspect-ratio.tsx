@@ -20,7 +20,7 @@
  * 1:1 avatars). Pass the desired ratio as a number prop:
  * `<AspectRatio ratio={16 / 9}>`.
  *
- * Built on `@radix-ui/react-aspect-ratio`, which uses the
+ * Built on Radix UI's `AspectRatio` primitive, which uses the
  * `padding-bottom: %` trick under the hood for layout-stable
  * preservation of ratio across viewport sizes.
  */

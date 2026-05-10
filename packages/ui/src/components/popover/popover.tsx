@@ -17,7 +17,7 @@
 /**
  * @fileoverview Popover component family — click-triggered floating
  * surface for non-modal context (date pickers, color pickers,
- * filter panels), built on `@radix-ui/react-popover`.
+ * filter panels), built on Radix UI's `Popover` primitive.
  *
  * Composition: `Popover > PopoverTrigger + PopoverContent`, with
  * `PopoverAnchor` for cases where the visual anchor and the

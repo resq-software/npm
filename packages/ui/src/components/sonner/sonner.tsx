@@ -23,7 +23,7 @@
  * automatically follow the user's system / explicit theme
  * preference. Default Phosphor icons are wired for success /
  * error / info / warning / loading severity tiers, and design-token
- * CSS variables are forwarded so border, surface, and text colours
+ * CSS variables are forwarded so border, surface, and text colors
  * match the rest of the design system.
  */
 

@@ -100,7 +100,7 @@ export function shouldRedirectToHttps(
  * @param existingId - Inbound `x-request-id` (or equivalent), if any.
  *   Returned unchanged when truthy; no validation is applied, so do not
  *   echo untrusted values into log structures without your own
- *   sanitisation.
+ *   sanitization.
  *
  * @returns The supplied ID, or a freshly generated UUID v4.
  *

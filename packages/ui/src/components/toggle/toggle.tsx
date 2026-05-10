@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview Toggle — two-state button (pressed / not pressed)
- * built on `@radix-ui/react-toggle`. Use for press-and-hold style
+ * built on Radix UI's `Toggle` primitive. Use for press-and-hold style
  * toggles like text-formatting controls (bold, italic). For
  * mutually-exclusive groups, use `ToggleGroup`; for binary
  * settings prefer `Switch`.

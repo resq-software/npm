@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview DropdownMenu component family — click-triggered
- * popover menu built on `@radix-ui/react-dropdown-menu`. Use for
+ * popover menu built on Radix UI's `DropdownMenu` primitive. Use for
  * action menus, settings menus, and any tap-to-reveal options
  * cluster.
  *

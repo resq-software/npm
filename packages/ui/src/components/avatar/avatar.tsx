@@ -26,7 +26,7 @@
  * - `AvatarGroup` + `AvatarGroupCount` for stacked overlapping
  *   avatars with an overflow counter.
  *
- * Built on `@radix-ui/react-avatar` so image-loading state is
+ * Built on Radix UI's `Avatar` primitive so image-loading state is
  * exposed via `data-state` for animation hooks.
  */
 

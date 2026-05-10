@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview RadioGroup component family — single-choice option
- * group built on `@radix-ui/react-radio-group`. Use for mutually
+ * group built on Radix UI's `RadioGroup` primitive. Use for mutually
  * exclusive selections from a small fixed set; for many options
  * use `Select` or `Combobox` instead.
  *

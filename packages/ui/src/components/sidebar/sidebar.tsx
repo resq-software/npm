@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview Sidebar component family — collapsible app
- * shell sidebar with desktop / mobile responsive behaviour. On
+ * shell sidebar with desktop / mobile responsive behavior. On
  * desktop, the sidebar collapses to an icon rail; on mobile it
  * slides in as a `Sheet`. Cookie-persisted open state survives
  * page reloads.

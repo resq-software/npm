@@ -17,7 +17,7 @@
 /**
  * @fileoverview ScrollArea component family — themed scroll
  * container with consistent scrollbar styling across browsers,
- * built on `@radix-ui/react-scroll-area`. Use when native
+ * built on Radix UI's `ScrollArea` primitive. Use when native
  * scrollbar appearance varies across platforms in a way that
  * breaks the design.
  *

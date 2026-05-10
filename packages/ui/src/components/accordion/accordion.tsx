@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview Accordion component family — vertically-stacked
- * disclosure surfaces built on `@radix-ui/react-accordion`. Each
+ * disclosure surfaces built on Radix UI's `Accordion` primitive. Each
  * `AccordionItem` toggles a single panel; `type="multiple"` on
  * the root permits multiple open at once.
  *

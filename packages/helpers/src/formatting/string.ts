@@ -67,7 +67,7 @@ export function truncate(str: string, length: number): string {
  *
  * Strips anything outside `[A-Za-z0-9_]` (and space). Diacritics are
  * removed rather than transliterated; for transliteration (`é → e`)
- * normalise the input first with `str.normalize("NFKD")` and strip
+ * normalize the input first with `str.normalize("NFKD")` and strip
  * combining marks before passing in.
  *
  * @param str - Input string (typically a title or human-entered name).

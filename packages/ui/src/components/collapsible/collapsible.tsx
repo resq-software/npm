@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview Collapsible component family — single-panel
- * disclosure built on `@radix-ui/react-collapsible`. Use for
+ * disclosure built on Radix UI's `Collapsible` primitive. Use for
  * "show more" / "expand details" patterns where you don't need
  * the multi-section coordination of `Accordion`.
  *

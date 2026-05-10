@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview Slider — single- or multi-thumb range slider built
- * on `@radix-ui/react-slider`. Supports `orientation` (`horizontal`
+ * on Radix UI's `Slider` primitive. Supports `orientation` (`horizontal`
  * / `vertical`), `min` / `max` / `step`, and arbitrary thumb
  * counts via the `value` array (e.g. for range filters).
  *

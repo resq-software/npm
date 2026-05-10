@@ -186,7 +186,7 @@ export interface ThreatFinding {
 }
 
 /**
- * The closed set of threat categories the validators recognise. Add
+ * The closed set of threat categories the validators recognize. Add
  * new categories here when adding a new detector.
  */
 export type ThreatType =
@@ -203,9 +203,9 @@ export type ThreatType =
  *
  * Inputs longer than 100 000 characters are truncated before scanning
  * to bound regex evaluation cost and prevent ReDoS on crafted
- * payloads. Returns at most one finding — the regex catalogue is
+ * payloads. Returns at most one finding — the regex catalog is
  * exhaustive enough that the first hit is sufficient for a
- * reject-or-sanitise decision.
+ * reject-or-sanitize decision.
  *
  * @param input - String to scan.
  * @returns Empty array when nothing matches, or a single
@@ -243,7 +243,7 @@ export function containsXSSPatterns(input: string): ThreatFinding[] {
  * in input.
  *
  * **Not a replacement for parameterised queries.** Use this as a
- * defence-in-depth signal in addition to a properly bound prepared
+ * defense-in-depth signal in addition to a properly bound prepared
  * statement, never as the only barrier.
  *
  * @param input - String to scan. Truncated at 100 000 characters.
@@ -511,7 +511,7 @@ export function isSafeInput(input: string, config?: ThreatDetectionConfig): bool
  *
  * **Limited scope.** This is appropriate for plain text destined for
  * `textContent` or attribute values, not for unfiltered HTML
- * rendering. For rich-text use a vetted sanitiser (DOMPurify on the
+ * rendering. For rich-text use a vetted sanitizer (DOMPurify on the
  * client, sanitize-html or similar on the server).
  *
  * Returns `""` for non-string or empty input.
@@ -535,7 +535,7 @@ export function sanitizeForDisplay(input: string): string {
  * Canonicalise a string for safe equality checks against ASCII.
  *
  * Two-pass:
- * 1. Normalise to NFC (composed form) so combining-character
+ * 1. Normalize to NFC (composed form) so combining-character
  *    sequences don't compare differently from their pre-composed
  *    counterparts.
  * 2. Replace known homoglyphs (Cyrillic `А`, Greek `Ε`, …) with their
@@ -547,7 +547,7 @@ export function sanitizeForDisplay(input: string): string {
  * Returns `""` for non-string or empty input.
  *
  * @param input - Raw string from an untrusted source.
- * @returns ASCII-normalised, NFC-composed string.
+ * @returns ASCII-normalized, NFC-composed string.
  */
 export function normalizeUnicode(input: string): string {
 	if (!input || typeof input !== "string") return "";

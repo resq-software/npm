@@ -16,10 +16,10 @@
 
 /**
  * @fileoverview Public API for `@resq-sw/security` — AES-256-GCM encryption,
- * Effect-Schema input validators, threat detection, and PII sanitisation.
+ * Effect-Schema input validators, threat detection, and PII sanitization.
  *
  * Subpath exports:
- * - `@resq-sw/security` — crypto, validators, sanitiser
+ * - `@resq-sw/security` — crypto, validators, sanitizer
  * - `@resq-sw/security/sanitize` — PII redaction without crypto deps
  *
  * `effect` is an optional peer dependency required only for the
@@ -27,7 +27,7 @@
  *
  * @module @resq-sw/security
  *
- * @example PII sanitisation for log lines
+ * @example PII sanitization for log lines
  * ```ts
  * import { sanitize } from "@resq-sw/security/sanitize";
  *

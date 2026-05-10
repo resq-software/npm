@@ -16,7 +16,13 @@
 
 /**
  * Format a number with US-English thousands separators using
- * `Intl.NumberFormat`. Pure presentation helper — does not round.
+ * `Intl.NumberFormat` (default options).
+ *
+ * Note: `Intl.NumberFormat` applies its own locale rounding for
+ * presentation — by default it caps fraction digits at 3 for
+ * non-integer values. Pass `Intl.NumberFormat` directly when you
+ * need precise control over `minimumFractionDigits` /
+ * `maximumFractionDigits`.
  *
  * @param num - The number to format. `NaN` and `Infinity` are formatted
  *   per the runtime's `Intl` implementation (typically `"NaN"` / `"∞"`).

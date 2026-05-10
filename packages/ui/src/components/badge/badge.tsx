@@ -17,7 +17,7 @@
 /**
  * @fileoverview Badge component — small status / category pill.
  * Six variants for the standard semantic intents:
- * `default` (success-coloured), `destructive`, `secondary` (info),
+ * `default` (success-colored), `destructive`, `secondary` (info),
  * `outline`, `ghost`, and `link`. Renders as `<span>` by default
  * but supports `asChild` to delegate to any element via Radix Slot.
  *

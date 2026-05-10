@@ -16,13 +16,16 @@
 
 /**
  * @fileoverview Label — accessible form label built on
- * `@radix-ui/react-label` (clicking the label focuses the
+ * Radix UI's `Label` primitive (clicking the label focuses the
  * associated control). Per `STYLE_GUIDE.md`, labels render
  * `font-mono uppercase` with wide letter-spacing and the
  * `text-hint` token for muted labelling.
  *
- * Auto-disables (50% opacity, no pointer events) when its peer or
- * group ancestor has `data-disabled="true"`.
+ * Auto-dims to 50% opacity when its peer (`peer-disabled:`) or its
+ * group ancestor (`group-data-[disabled=true]:`) is disabled. The
+ * group case also blocks pointer events; the peer case shows a
+ * `not-allowed` cursor without disabling clicks (so the label
+ * still focuses its associated input).
  */
 
 "use client";

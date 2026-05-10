@@ -240,7 +240,7 @@ export function maskEmail(email: string): string {
  * to work, but ensures secrets and identifiers don't leak. Use as a
  * defensive layer **before** writing structured log lines.
  *
- * @param obj - Object to sanitise. Original is not mutated.
+ * @param obj - Object to sanitize. Original is not mutated.
  * @param sensitiveFields - Substring allow-list. Defaults to
  *   `["password", "passwordHash", "token", "secret",
  *   "twoFactorSecret", "apiKey"]`. Substrings match anywhere in the

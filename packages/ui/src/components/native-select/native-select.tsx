@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview NativeSelect — themed wrapper around the platform
- * `<select>` element. Use when full native dropdown behaviour is
+ * `<select>` element. Use when full native dropdown behavior is
  * required (mobile pickers, screen-reader interop, form
  * submission), or when you need to ship something that works
  * without JS. Use the `Select` component for richer styled

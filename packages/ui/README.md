@@ -60,7 +60,7 @@ import { Combobox } from "@resq-sw/ui/combobox";
 
 The default export (`@resq-sw/ui`) re-exports everything for convenience but pulls the full surface — prefer subpaths in production code.
 
-## Component catalogue
+## Component catalog
 
 57 components grouped by intent:
 

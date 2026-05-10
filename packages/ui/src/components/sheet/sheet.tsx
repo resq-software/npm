@@ -17,7 +17,7 @@
 /**
  * @fileoverview Sheet component family — slide-in panel from any
  * edge of the viewport (top, right, bottom, left). Built on
- * `@radix-ui/react-dialog` so it inherits Dialog's focus trap,
+ * Radix UI's `Dialog` primitive so it inherits Dialog's focus trap,
  * scroll-lock, and ARIA wiring; visual treatment is the slide-in
  * panel rather than a centered card.
  *

@@ -36,6 +36,6 @@ Add ResQ-specific helpers shared across the three TS surfaces (`landing`,
   `window.location.hostname` so preview / `localhost` deployments
   don't get their cookie rejected with a domain mismatch.
 
-Centralising these means adding a fourth subdomain or tightening the
+Centralizing these means adding a fourth subdomain or tightening the
 GA4-ID format becomes a single version bump instead of three
-coordinated edits across consumer repos.
+coordinated edits across consumer repos

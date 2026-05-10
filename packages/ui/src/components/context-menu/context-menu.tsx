@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview ContextMenu component family — right-click menu
- * built on `@radix-ui/react-context-menu`. Same internal structure
+ * built on Radix UI's `ContextMenu` primitive. Same internal structure
  * as `DropdownMenu` (items, sub-menus, checkbox/radio items,
  * shortcut hints) but triggered by a context-menu event on the
  * wrapping `ContextMenuTrigger`.

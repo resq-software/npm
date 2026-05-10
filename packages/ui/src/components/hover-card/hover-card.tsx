@@ -17,7 +17,7 @@
 /**
  * @fileoverview HoverCard component family — preview popover
  * triggered on hover (and focus, for keyboard users) built on
- * `@radix-ui/react-hover-card`. Use for richer-than-tooltip
+ * Radix UI's `HoverCard` primitive. Use for richer-than-tooltip
  * previews — user cards, link previews, citation hovers.
  *
  * Composition: `HoverCard > HoverCardTrigger + HoverCardContent`.

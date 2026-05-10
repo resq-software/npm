@@ -17,7 +17,7 @@
 /**
  * @fileoverview Menubar component family — desktop-style horizontal
  * menu bar (think macOS app menus) built on
- * `@radix-ui/react-menubar`. Each top-level `MenubarMenu` exposes
+ * Radix UI's `Menubar` primitive. Each top-level `MenubarMenu` exposes
  * its own dropdown content with the same item / submenu / shortcut
  * vocabulary as `DropdownMenu`.
  *

@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview Tooltip component family — short hover/focus hint
- * built on `@radix-ui/react-tooltip`. Use for icon-button labels
+ * built on Radix UI's `Tooltip` primitive. Use for icon-button labels
  * and brief affordance descriptions; reach for `HoverCard` when
  * the hint needs richer content (links, images, paragraphs).
  *
