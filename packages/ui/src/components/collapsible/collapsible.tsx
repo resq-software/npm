@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Collapsible component family — single-panel
+ * disclosure built on Radix UI's `Collapsible` primitive. Use for
+ * "show more" / "expand details" patterns where you don't need
+ * the multi-section coordination of `Accordion`.
+ *
+ * Composition: `Collapsible > CollapsibleTrigger + CollapsibleContent`.
+ */
+
 "use client";
 
 import { Collapsible as CollapsiblePrimitive } from "radix-ui";

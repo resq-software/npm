@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Pagination component family — page-number
+ * navigation rendered as `<nav aria-label="pagination">`. Page
+ * links use `Button` styling internally for visual parity with
+ * other interactive controls.
+ *
+ * Composition: `Pagination > PaginationContent > PaginationItem*`,
+ * with `PaginationLink` for numbered pages, `PaginationPrevious` /
+ * `PaginationNext` for chevron controls, and `PaginationEllipsis`
+ * for elided ranges.
+ *
+ * Active state is opt-in via the `isActive` prop on
+ * `PaginationLink`; the helper renders `aria-current="page"`
+ * automatically.
+ */
+
 import { CaretLeftIcon, CaretRightIcon, DotsThreeIcon } from "@phosphor-icons/react";
 import type * as React from "react";
 

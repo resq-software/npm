@@ -16,11 +16,32 @@
  *
  */
 
+/**
+ * @fileoverview Next.js helpers for `@resq-sw/analytics`.
+ *
+ * Provides `next.config.{js,ts}` integration for the cross-subdomain
+ * reverse-proxy pattern (so PostHog ingestion appears to come from
+ * the app's own origin, avoiding ad blockers and third-party cookie
+ * loss) plus a small builder for GA4 cross-subdomain linker config.
+ *
+ * @module @resq-sw/analytics/next
+ */
+
 import type { GA4ProviderConfig } from "../index";
 
+/**
+ * Options for {@link withAnalyticsRewrites}.
+ *
+ * Defaults are tuned for PostHog's US ingestion endpoints; override
+ * `upstream` / `assetsUpstream` for EU regions or self-hosted
+ * deployments.
+ */
 export interface AnalyticsRewriteOptions {
+	/** Local path prefix that proxies to PostHog. Default `"/ingest"`. */
 	prefix?: string;
+	/** PostHog ingestion endpoint. Default `"https://us.i.posthog.com"`. */
 	upstream?: string;
+	/** PostHog static-assets endpoint. Default `"https://us-assets.i.posthog.com"`. */
 	assetsUpstream?: string;
 }
 
@@ -38,6 +59,34 @@ interface MinimalNextConfig {
 	[key: string]: unknown;
 }
 
+/**
+ * Wrap a Next.js config to add reverse-proxy rewrites for
+ * `@resq-sw/analytics`.
+ *
+ * Adds two rules to the `beforeFiles` rewrite array:
+ *
+ * 1. `/<prefix>/static/:path* → assetsUpstream/static/:path*`
+ *    (PostHog snippet bundle).
+ * 2. `/<prefix>/:path*        → upstream/:path*`
+ *    (everything else: capture, decide, `/e/`).
+ *
+ * Pre-existing user-defined rewrites are preserved — the proxy
+ * rules go *first* so they win when paths overlap. Also forces
+ * `skipTrailingSlashRedirect: true`, which is required for the
+ * proxy to work reliably across `/ingest` and `/ingest/`.
+ *
+ * @typeParam T - The user's full `next.config.{js,ts}` type.
+ *
+ * @example `next.config.ts`
+ * ```ts
+ * import { withAnalyticsRewrites } from "@resq-sw/analytics/next";
+ *
+ * export default withAnalyticsRewrites({
+ *   reactStrictMode: true,
+ *   // ...rest of your config
+ * });
+ * ```
+ */
 export const withAnalyticsRewrites = <T extends MinimalNextConfig>(
 	nextConfig: T,
 	options: AnalyticsRewriteOptions = {},
@@ -71,6 +120,22 @@ export const withAnalyticsRewrites = <T extends MinimalNextConfig>(
 	};
 };
 
+/**
+ * Build a {@link GA4ProviderConfig} with cross-subdomain linker
+ * domains. Drop into `AnalyticsConfig.ga4`:
+ *
+ * ```ts
+ * const config: AnalyticsConfig = {
+ *   posthog: { ... },
+ *   ga4: ga4Stream("G-XXXXXXX", ["resq.software", "research.resq.software", "viz.resq.software"]),
+ * };
+ * ```
+ *
+ * @param measurementId - GA4 Measurement ID (`G-…`).
+ * @param domains - Domain allow-list passed to gtag's `linker.domains`,
+ *   so cross-subdomain navigation no longer counts as referral
+ *   traffic.
+ */
 export const ga4Stream = (measurementId: string, domains?: string[]): GA4ProviderConfig => ({
 	measurementId,
 	domains,

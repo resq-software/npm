@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview AspectRatio — pin a child to a specific
+ * width:height ratio (e.g. 16:9 video thumbnails, 4:3 photo cards,
+ * 1:1 avatars). Pass the desired ratio as a number prop:
+ * `<AspectRatio ratio={16 / 9}>`.
+ *
+ * Built on Radix UI's `AspectRatio` primitive, which uses the
+ * `padding-bottom: %` trick under the hood for layout-stable
+ * preservation of ratio across viewport sizes.
+ */
+
 "use client";
 
 import { AspectRatio as AspectRatioPrimitive } from "radix-ui";

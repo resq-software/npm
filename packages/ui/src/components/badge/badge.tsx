@@ -14,6 +14,21 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Badge component — small status / category pill.
+ * Six variants for the standard semantic intents:
+ * `default` (success-colored), `destructive`, `secondary` (info),
+ * `outline`, `ghost`, and `link`. Renders as `<span>` by default
+ * but supports `asChild` to delegate to any element via Radix Slot.
+ *
+ * Per the design system style guide, badges always render
+ * `font-mono` + `uppercase`. Optional leading/trailing icons are
+ * laid out via `data-icon="inline-start" | "inline-end"` slots.
+ *
+ * Exports `badgeVariants` (the CVA) for downstream composition
+ * (e.g. polymorphic links styled like badges).
+ */
+
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
 import type * as React from "react";

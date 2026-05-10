@@ -10,35 +10,67 @@
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
+/**
+ * Linear-RGB triplet (each channel `0..1`, gamma-decoded). The
+ * intermediate representation used by all contrast math — every
+ * supported input format (`#hex`, `rgb()`, `hsl()`, `oklch()`,
+ * `lab()`, `lch()`, `oklab()`, named colors) is decoded into this.
+ */
 export interface LinearRGB {
-	r: number; // 0–1, linear (not gamma-encoded)
+	/** Red channel, `0..1` linear. */
+	r: number;
+	/** Green channel, `0..1` linear. */
 	g: number;
+	/** Blue channel, `0..1` linear. */
 	b: number;
 }
 
+/**
+ * Token map for a single theme: token name → CSS color string.
+ * Token names are the bare custom-property identifier without the
+ * `--` prefix (e.g. `"foreground"`, not `"--foreground"`).
+ */
 export type ColorTokens = Record<string, string>;
 
+/**
+ * Specification for one contrast check: foreground token, background
+ * token, required WCAG ratio, and a category label for reports.
+ */
 export interface ContrastPair {
+	/** Foreground token name. */
 	fg: string;
+	/** Background token name. */
 	bg: string;
+	/** Minimum ratio required (4.5 for normal text, 3 for UI / large text). */
 	minRatio: number;
+	/** Free-form category label (`"text"`, `"UI"`, `"large"`, …). */
 	label: string;
 }
 
+/** Result of evaluating a single {@link ContrastPair} against a theme. */
 export interface ContrastResult {
 	fg: string;
 	bg: string;
+	/** Raw CSS color value of the foreground (whatever was in the token map). */
 	fgRaw: string;
+	/** Raw CSS color value of the background. */
 	bgRaw: string;
+	/** Computed contrast ratio (≥ 1, higher is better). */
 	ratio: number;
+	/** The minimum ratio that was required to pass. */
 	required: number;
 	label: string;
+	/** `true` when `ratio >= required`. */
 	pass: boolean;
 }
 
+/** Aggregated result of auditing one theme mode (`"dark"`, `"light"`, …). */
 export interface ThemeAudit {
+	/** Theme identifier echoed back from the input. */
 	mode: string;
+	/** One {@link ContrastResult} per pair audited (skipping pairs whose tokens were missing). */
 	results: ContrastResult[];
+	/** `true` when every result passed. */
 	allPass: boolean;
 }
 
@@ -375,6 +407,15 @@ const PARSERS: { test: RegExp; parse: ParserFn }[] = [
 	{ test: /^#/, parse: parseHex },
 ];
 
+/**
+ * Decode any supported CSS color string into {@link LinearRGB}.
+ *
+ * Supported inputs (case-insensitive): named colors, `#hex` (3/4/6/8
+ * digits, with or without `#`), `rgb()` / `rgba()`, `hsl()` /
+ * `hsla()`, `oklch()`, `oklab()`, `lab()`, `lch()`.
+ *
+ * @throws Error when the input doesn't match any supported format.
+ */
 export function toLinearRGB(raw: string): LinearRGB {
 	const trimmed = raw.trim().toLowerCase();
 
@@ -416,6 +457,20 @@ export function contrastRatio(lum1: number, lum2: number): number {
 
 // ─── Audit Engine ───────────────────────────────────────────────────────────
 
+/**
+ * Run every {@link ContrastPair} against the theme's `tokens` and
+ * return a {@link ThemeAudit}.
+ *
+ * Pairs whose `fg` or `bg` token is missing from `tokens` are
+ * silently skipped (so partial themes can still audit their defined
+ * tokens). Luminance is memoised across pairs to keep the audit
+ * `O(tokens + pairs)` rather than `O(tokens × pairs)`.
+ *
+ * @param mode - Echoed back as `audit.mode` for reporting.
+ * @param tokens - Theme token map (token name → CSS color value).
+ * @param pairs - Pairs to evaluate. Use {@link DEFAULT_PAIRS} for the
+ *   project's standard checks.
+ */
 export function auditTheme(mode: string, tokens: ColorTokens, pairs: ContrastPair[]): ThemeAudit {
 	const lumCache = new Map<string, number>();
 
@@ -455,6 +510,17 @@ export function auditTheme(mode: string, tokens: ColorTokens, pairs: ContrastPai
 	return { mode, results, allPass };
 }
 
+/**
+ * Render a {@link ThemeAudit} as a multi-line plain-text report
+ * suitable for CLI output, CI logs, or vitest assertion messages.
+ *
+ * @example output
+ * ```
+ * DARK MODE:
+ *   PASS 12.45:1 (min 4.5) | foreground on background
+ *   FAIL  3.20:1 (min 4.5) | muted-foreground on surface
+ * ```
+ */
 export function formatAudit(audit: ThemeAudit): string {
 	const lines: string[] = [`${audit.mode} MODE:`];
 	for (const r of audit.results) {
@@ -467,6 +533,16 @@ export function formatAudit(audit: ThemeAudit): string {
 // ─── Default WCAG Pair Definitions ──────────────────────────────────────────
 // Text pairs -> Number.parseFloat("4.5"):1, UI elements -> 3:1, large text -> 3:1
 
+/**
+ * The full list of contrast pairs the design system commits to.
+ * Every entry pairs a foreground token with a background surface and
+ * encodes the WCAG-required ratio (4.5 : 1 for body text and small
+ * UI text, 3 : 1 for non-text UI affordances).
+ *
+ * Adding a new pair here automatically extends every theme's audit.
+ * Keep entries grouped by category and sorted by surface for
+ * readability.
+ */
 export const DEFAULT_PAIRS: ContrastPair[] = [
 	// Foreground text on surfaces
 	{ fg: "foreground", bg: "background", minRatio: Number.parseFloat("4.5"), label: "text" },
@@ -564,6 +640,18 @@ function parseTokenBlock(block: string): ColorTokens {
 
 // ─── Full Audit Runner ──────────────────────────────────────────────────────
 
+/**
+ * Run {@link auditTheme} across every theme in `themes` and return
+ * an aggregate decision plus per-theme details.
+ *
+ * @param themes - Map of `mode → ColorTokens` (e.g. the output of
+ *   {@link extractTokensFromCSS}).
+ * @param pairs - Contrast pairs to enforce. Defaults to
+ *   {@link DEFAULT_PAIRS}.
+ *
+ * @returns `{ globalPass, audits }` — `globalPass` is `true` only
+ *   when every theme passes every pair.
+ */
 export function runContrastAudit(
 	themes: Record<string, ColorTokens>,
 	pairs: ContrastPair[] = DEFAULT_PAIRS,

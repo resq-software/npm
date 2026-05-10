@@ -14,5 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@memoize(configOrTTL?)` decorator and `memoizeFn`
+ * function form — cache **synchronous** method results keyed by
+ * arguments. Accepts a TTL number, a full `MemoizeConfig` (custom
+ * cache, key resolver, expiry), or no args for cache-forever. Use
+ * {@link memoizeAsync} for promise-returning methods.
+ */
+
 export * from "./memoize.js";
 export * from "./memoize.types.js";

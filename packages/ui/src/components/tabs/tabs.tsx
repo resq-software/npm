@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Tabs component family — segmented panel switcher
+ * built on Radix UI's `Tabs` primitive. Use for in-page sub-navigation
+ * where all panels are siblings (settings sections, dashboard
+ * views).
+ *
+ * Composition: `Tabs > TabsList > TabsTrigger* + TabsContent*`.
+ * Each `TabsTrigger.value` matches a `TabsContent.value`. Keyboard
+ * navigation (arrow keys, Home, End) and `aria-selected` /
+ * `role="tabpanel"` wiring are inherited from Radix.
+ *
+ * `TabsList` ships in multiple visual variants via the
+ * `tabsListVariants` CVA (default, underline, …); pick the one
+ * that matches the surface containing the tabs.
+ */
+
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";

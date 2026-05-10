@@ -14,10 +14,54 @@
  * limitations under the License.
  */
 
+/**
+ * Format a number with US-English thousands separators using
+ * `Intl.NumberFormat` (default options).
+ *
+ * Note: `Intl.NumberFormat` applies its own locale rounding for
+ * presentation — by default it caps fraction digits at 3 for
+ * non-integer values. Pass `Intl.NumberFormat` directly when you
+ * need precise control over `minimumFractionDigits` /
+ * `maximumFractionDigits`.
+ *
+ * @param num - The number to format. `NaN` and `Infinity` are formatted
+ *   per the runtime's `Intl` implementation (typically `"NaN"` / `"∞"`).
+ *
+ * @returns A locale-formatted string, e.g. `formatNumber(1234567)` →
+ *   `"1,234,567"`.
+ *
+ * @example
+ * ```ts
+ * formatNumber(1234567);   // → "1,234,567"
+ * formatNumber(0);         // → "0"
+ * formatNumber(0.5);       // → "0.5"
+ * ```
+ */
 export function formatNumber(num: number): string {
 	return new Intl.NumberFormat("en-US").format(num);
 }
 
+/**
+ * Format a byte count as a binary-prefixed human-readable string
+ * (Bytes / KB / MB / GB / TB), where one KB = 1024 Bytes.
+ *
+ * Note: the unit suffixes use SI symbols for binary prefixes, which is
+ * the historical convention rather than IEC's KiB/MiB/… Pick whichever
+ * matches your product surface and stick with it.
+ *
+ * @param bytes - Non-negative byte count. `0` returns `"0 Bytes"`.
+ *   Negative inputs return `NaN` from the underlying `log`.
+ *
+ * @returns Human-readable size to two decimal places, e.g. `"1.50 MB"`.
+ *
+ * @example
+ * ```ts
+ * formatBytes(0);             // → "0 Bytes"
+ * formatBytes(1024);          // → "1 KB"
+ * formatBytes(1_572_864);     // → "1.5 MB"
+ * formatBytes(1_073_741_824); // → "1 GB"
+ * ```
+ */
 export function formatBytes(bytes: number): string {
 	if (bytes === 0) return "0 Bytes";
 	const k = 1024;
@@ -26,6 +70,24 @@ export function formatBytes(bytes: number): string {
 	return `${Math.round((bytes / k ** i) * 100) / 100} ${sizes[i]}`;
 }
 
+/**
+ * Format a fractional value (0–1 range) as a percentage with one
+ * decimal place.
+ *
+ * @param value - Fractional value where `1` = 100%. Inputs outside the
+ *   `[0, 1]` range are formatted as-is (e.g. `formatPercent(2)` →
+ *   `"200.0%"`); the helper does not clamp.
+ *
+ * @returns Percentage string with one decimal place.
+ *
+ * @example
+ * ```ts
+ * formatPercent(0);     // → "0.0%"
+ * formatPercent(0.5);   // → "50.0%"
+ * formatPercent(0.123); // → "12.3%"
+ * formatPercent(1);     // → "100.0%"
+ * ```
+ */
 export function formatPercent(value: number): string {
 	return `${(value * 100).toFixed(1)}%`;
 }

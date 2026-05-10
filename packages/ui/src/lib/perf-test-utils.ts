@@ -140,6 +140,13 @@ const BLOCKING_LISTENER_RE =
 // Source-level (static) assertions — throwing API (backwards-compatible)
 // ---------------------------------------------------------------------------
 
+/**
+ * Throw when `source` contains the `transition-all` Tailwind utility.
+ * `transition-all` animates every changing property on every change,
+ * burning frame budget on layout-bound properties that should stay
+ * static. Use specific transitions (`transition-colors`,
+ * `transition-transform`, …) instead.
+ */
 export function assertNoTransitionAll(source: string, file: string): void {
 	if (TRANSITION_ALL_RE.test(source)) {
 		throw new Error(
@@ -149,6 +156,13 @@ export function assertNoTransitionAll(source: string, file: string): void {
 	}
 }
 
+/**
+ * Throw when `source` uses a generic Tailwind radius utility
+ * (`rounded-xl`, `rounded-2xl`, `rounded-3xl`). The design system
+ * pins radii to specific pixel values per `STYLE_GUIDE.md`; the
+ * generic utilities sneak through Tailwind's defaults and break
+ * visual consistency.
+ */
 export function assertNoGenericRadius(source: string, file: string): void {
 	const match = source.match(GENERIC_RADIUS_RE);
 	if (match) {
@@ -159,6 +173,16 @@ export function assertNoGenericRadius(source: string, file: string): void {
 	}
 }
 
+/**
+ * Throw when `source` contains a `transition-[…]` arbitrary value
+ * that animates a layout-bound property (`width`, `height`, `top`,
+ * `left`, `right`, `bottom`, `margin`, `padding`). Animating those
+ * triggers Forced Reflows on every frame; switch to `transform` /
+ * `opacity` for compositor-friendly motion.
+ *
+ * Sidebar component files are exempted because their resize anim is
+ * unavoidably layout-bound and is gated by user input.
+ */
 export function assertNoLayoutTransitions(source: string, file: string): void {
 	if (SIDEBAR_LAYOUT_EXEMPT_RE.test(file)) return;
 
@@ -172,6 +196,13 @@ export function assertNoLayoutTransitions(source: string, file: string): void {
 	}
 }
 
+/**
+ * Throw when `source` reads a layout-triggering DOM property
+ * (`offsetWidth`, `getBoundingClientRect`, `getComputedStyle`, …).
+ * These cause synchronous layout when called after a style write,
+ * destroying frame budget. Batch reads before writes or replace
+ * with `ResizeObserver` / `IntersectionObserver`.
+ */
 export function assertNoForcedReflowTriggers(source: string, file: string): void {
 	const match = source.match(FORCED_REFLOW_TRIGGER_RE);
 	if (match) {
@@ -476,6 +507,12 @@ function collectClassNamesInto(element: unknown, acc: string[]): void {
 // Runtime throwing API (backwards-compatible)
 // ---------------------------------------------------------------------------
 
+/**
+ * Throw when the rendered React element is missing a `data-slot`
+ * attribute. The design system uses `data-slot` as the stable hook
+ * for Performance API Element Timing instrumentation; without it,
+ * field RUM can't time the component.
+ */
 export function assertHasDataSlot(element: unknown, componentName: string): void {
 	if (!isReactElement(element) || !element.props?.["data-slot"]) {
 		throw new Error(
@@ -485,6 +522,11 @@ export function assertHasDataSlot(element: unknown, componentName: string): void
 	}
 }
 
+/**
+ * Render-time variant of {@link assertNoTransitionAll}. Pass the
+ * concatenated `className` string from a rendered tree (collected
+ * via {@link collectClassNames}).
+ */
 export function assertRenderedNoTransitionAll(classes: string, componentName: string): void {
 	if (TRANSITION_ALL_RE.test(classes)) {
 		throw new Error(
@@ -494,6 +536,10 @@ export function assertRenderedNoTransitionAll(classes: string, componentName: st
 	}
 }
 
+/**
+ * Render-time variant of {@link assertNoGenericRadius}. Pass the
+ * concatenated `className` string from a rendered tree.
+ */
 export function assertRenderedNoGenericRadius(classes: string, componentName: string): void {
 	const match = classes.match(GENERIC_RADIUS_RE);
 	if (match) {
@@ -712,6 +758,13 @@ export const DIV_ONCLICK_RE = /<(?:div|span)\s[^>]*onClick[^>]*(?!role=)/;
  * Components with focus-visible interactions should have focus-visible
  * styling. Checks that interactive components include focus-visible classes.
  */
+/**
+ * Throw when a file declares interactive event handlers
+ * (`onClick`/`onKeyDown`/`onPress`) but does not include any
+ * `focus-visible:*` styling and does not delegate to a primitive
+ * (`Button`, `Pressable`, native `button`/`input`) that brings its
+ * own focus ring.
+ */
 export function assertInteractiveHasFocusVisible(source: string, file: string): void {
 	// Only check files that have interactive elements (onClick, onKeyDown, role="button", etc.)
 	if (!/\bon(?:Click|KeyDown|Press)\b/.test(source)) return;
@@ -770,6 +823,15 @@ const FONT_RULES: Record<string, { pattern: RegExp; requiredClasses: string[] }>
 	},
 };
 
+/**
+ * Enforce typography rules from `STYLE_GUIDE.md`. Walks the
+ * built-in `FONT_RULES` map and, when the file path matches a rule,
+ * verifies the source contains every required class
+ * (`font-mono uppercase` for buttons/badges/labels, `font-display`
+ * for titles).
+ *
+ * @throws Error listing the first missing class.
+ */
 export function assertFontCompliance(source: string, file: string): void {
 	for (const [suffix, rule] of Object.entries(FONT_RULES)) {
 		if (!file.endsWith(suffix)) continue;
@@ -796,6 +858,13 @@ export function assertFontCompliance(source: string, file: string): void {
  */
 const RAW_HEX_IN_CLASSNAME_RE = /className[^=]*=\{?[^}]*#[0-9a-fA-F]{3,8}\b/;
 
+/**
+ * Throw when a raw hex colour appears inside a `className` prop.
+ * Hex colours bypass the design-token system; use semantic Tailwind
+ * tokens (`bg-primary`, `text-foreground`, `border-destructive`, …)
+ * instead. Chart files are exempt because Recharts' config takes
+ * raw hex.
+ */
 export function assertNoRawHexInClassNames(source: string, file: string): void {
 	// chart.tsx has hex in config objects and regex, not classNames — exempt
 	if (file.includes("chart")) return;
@@ -816,6 +885,16 @@ export function assertNoRawHexInClassNames(source: string, file: string): void {
  * Bare `window.` or `document.` access outside hooks/callbacks crashes SSR.
  * We check for these globals at the module level (outside useEffect,
  * useCallback, useLayoutEffect, or event handler bodies).
+ */
+/**
+ * Throw when `source` reads `window.*` or `document.*` at module
+ * scope without any `useEffect` / `useLayoutEffect` / `useCallback`
+ * elsewhere in the file. Bare browser-global access at module load
+ * crashes Next.js / Remix during server-render.
+ *
+ * Heuristic: presence of any hook is treated as proof that browser
+ * accesses are guarded. False negatives are acceptable here — this
+ * is a fast-fail tripwire, not a sound type system.
  */
 export function assertSSRSafe(source: string, file: string): void {
 	// If the file wraps all browser globals in hooks, it's safe.
@@ -856,6 +935,13 @@ const TW_ANIMATE_PREFIX_RE =
 const TW_ANIMATE_SLIDE_FADE_ZOOM_RE =
 	/^(slide-in-from|slide-out-to|fade-in|fade-out|zoom-in|zoom-out|spin-in|spin-out)-/;
 
+/**
+ * Throw when `source` declares custom `animate-*` classes (i.e.
+ * not from `tw-animate-css` defaults) without any
+ * `motion-reduce:*` / `motion-safe:*` / `prefers-reduced-motion`
+ * handling. Prevents shipping animations that ignore the user's
+ * accessibility preference.
+ */
 export function assertReducedMotion(source: string, file: string): void {
 	const animateMatches = source.match(/\banimate-[\w-]+\b/g);
 	if (!animateMatches) return;
@@ -882,6 +968,16 @@ export function assertReducedMotion(source: string, file: string): void {
  * Verifies that a component function accepts and forwards className via
  * the cn() utility (className merging). Components that hardcode className
  * without merging break consumer customization.
+ */
+/**
+ * Throw when a component file uses `className` somewhere but never
+ * calls `cn()` to merge incoming `className` with internal classes.
+ * Components that hardcode `className` without merging silently
+ * drop consumer overrides.
+ *
+ * Exemptions: barrel files with no `className` usage, and wrappers
+ * that pass `className` straight to a non-relative third-party
+ * import (where the vendor handles merging).
  */
 export function assertClassNameMerging(source: string, file: string): void {
 	// Only check component files that export functions

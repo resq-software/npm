@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Label — accessible form label built on
+ * Radix UI's `Label` primitive (clicking the label focuses the
+ * associated control). Per `STYLE_GUIDE.md`, labels render
+ * `font-mono uppercase` with wide letter-spacing and the
+ * `text-hint` token for muted labelling.
+ *
+ * Auto-dims to 50% opacity when its peer (`peer-disabled:`) or its
+ * group ancestor (`group-data-[disabled=true]:`) is disabled. The
+ * group case also blocks pointer events; the peer case shows a
+ * `not-allowed` cursor without disabling clicks (so the label
+ * still focuses its associated input).
+ */
+
 "use client";
 
 import { Label as LabelPrimitive } from "radix-ui";

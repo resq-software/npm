@@ -14,5 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@after` decorator — run a callback after the
+ * decorated method completes (synchronously or after the returned
+ * promise resolves). Useful for logging, telemetry, and cache
+ * eviction. Companion `afterFn(method, config)` wraps a plain
+ * function with the same semantics.
+ */
+
 export * from "./after.js";
 export * from "./after.types.js";

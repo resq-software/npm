@@ -14,6 +14,49 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public API for `@resq-sw/dsa` — production-grade data structures
+ * and algorithms with zero runtime dependencies.
+ *
+ * Tree-shakeable: importing one collection (e.g. `BloomFilter`) does not pull in
+ * the others. The `effect` peer dependency is optional; install it only to use
+ * the runtime schema validators exposed via {@link addValidatedEdge}.
+ *
+ * @module @resq-sw/dsa
+ *
+ * @example Graph traversal
+ * ```ts
+ * import { Graph } from "@resq-sw/dsa";
+ *
+ * const g = new Graph<string>({ directed: true });
+ * g.addEdge("base", "alpha", 5);
+ * g.addEdge("alpha", "site-7", 3);
+ * const path = g.shortestPath("base", "site-7"); // → ["base", "alpha", "site-7"]
+ * ```
+ *
+ * @example Priority dispatch
+ * ```ts
+ * import { createPriorityLevelQueue } from "@resq-sw/dsa";
+ *
+ * const triage = createPriorityLevelQueue<{ id: string; severity: number }>(
+ *   (item) => item.severity,
+ * );
+ * triage.enqueue({ id: "alpha", severity: 1 });
+ * triage.enqueue({ id: "bravo", severity: 5 });
+ * triage.dequeue(); // → { id: "bravo", severity: 5 }
+ * ```
+ *
+ * @example Probabilistic membership
+ * ```ts
+ * import { BloomFilter } from "@resq-sw/dsa";
+ *
+ * const seen = new BloomFilter(100_000, 0.001);
+ * seen.add("drone-04");
+ * seen.has("drone-04"); // → true (always)
+ * seen.has("drone-99"); // → false (probably; 0.1% false-positive rate)
+ * ```
+ */
+
 export { BoundedHeap } from "./heap.js";
 export type { Distanced } from "./heap.js";
 export { Graph, addValidatedEdge, isValidVertexId } from "./graph.js";

@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Breadcrumb component family — hierarchical
+ * navigation trail rendered as `<nav aria-label="breadcrumb">`.
+ *
+ * Composition: `Breadcrumb > BreadcrumbList > BreadcrumbItem`,
+ * with optional `BreadcrumbLink` (active links), `BreadcrumbPage`
+ * (current page, marked `aria-current="page"`),
+ * `BreadcrumbSeparator` (defaults to caret-right), and
+ * `BreadcrumbEllipsis` for collapsed deep paths.
+ *
+ * `asChild` on `BreadcrumbLink` delegates to a routing library's
+ * `<Link>` via Radix Slot.
+ */
+
 import { CaretRightIcon, DotsThreeIcon } from "@phosphor-icons/react";
 import { Slot } from "radix-ui";
 import type * as React from "react";

@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@throttle(delayMs)` decorator and `throttleFn`
+ * function form — cap the decorated method to at most one call
+ * per `delayMs` milliseconds. Excess calls are dropped. Typical
+ * use: scroll handlers, resize handlers, polling endpoints.
+ */
+
 export * from "./throttle.js";

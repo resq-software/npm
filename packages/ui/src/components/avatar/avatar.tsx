@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Avatar component family — circular profile-image
+ * containers with graceful fallbacks. Three sizes (`sm`/`default`/`lg`)
+ * controlled by a `size` prop on `<Avatar>`.
+ *
+ * Composition:
+ * - `Avatar > AvatarImage` for the photo, with `AvatarFallback` for
+ *   text/initials when the image errors or hasn't loaded.
+ * - `AvatarBadge` for status pips (green online dot, red unread, …).
+ * - `AvatarGroup` + `AvatarGroupCount` for stacked overlapping
+ *   avatars with an overflow counter.
+ *
+ * Built on Radix UI's `Avatar` primitive so image-loading state is
+ * exposed via `data-state` for animation hooks.
+ */
+
 "use client";
 
 import { Avatar as AvatarPrimitive } from "radix-ui";

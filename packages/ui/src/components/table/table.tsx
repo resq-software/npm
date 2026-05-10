@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Table component family — themed wrappers around
+ * the native semantic table elements (`<table>`, `<thead>`, etc.).
+ * Composes with `@tanstack/react-table` (or any data-table
+ * library) for sorting / pagination / filtering — these primitives
+ * only handle the chrome and styling.
+ *
+ * Composition: `Table > (TableHeader > TableRow > TableHead*) +
+ * (TableBody > TableRow > TableCell*) + TableFooter? +
+ * TableCaption?`. Each piece is a thin wrapper preserving native
+ * semantics for accessibility (rows, cells, scope, role).
+ */
+
 "use client";
 
 import type * as React from "react";

@@ -104,33 +104,94 @@ export const getURL = (path = ""): string => {
 	return sanitizedPath ? `${url}/${sanitizedPath}` : url;
 };
 
+/**
+ * The success branch of a {@link Result}.
+ *
+ * @typeParam T - Type of the wrapped value.
+ */
 type Success<T> = {
 	readonly success: true;
 	readonly value: T;
 };
 
+/**
+ * The failure branch of a {@link Result}.
+ *
+ * @typeParam E - Type of the wrapped error.
+ */
 type Failure<E> = {
 	readonly success: false;
 	readonly error: E;
 };
 
+/**
+ * Discriminated union representing either a successful value or an error.
+ * Discriminate with the `success` boolean field.
+ *
+ * @typeParam T - Type of the value on success.
+ * @typeParam E - Type of the error on failure.
+ *
+ * @example
+ * ```ts
+ * function parsePort(raw: string): Result<number, string> {
+ *   const n = Number(raw);
+ *   return Number.isInteger(n) && n > 0 && n < 65536
+ *     ? success(n)
+ *     : failure(`invalid port: ${raw}`);
+ * }
+ *
+ * const r = parsePort(process.env.PORT ?? "3000");
+ * if (r.success) listen(r.value);
+ * else console.error(r.error);
+ * ```
+ */
 type Result<T, E> = Success<T> | Failure<E>;
 
 /**
- * Creates a successful result
- * @param value The value to wrap in a success result
+ * Wrap a value in a {@link Success} branch. The returned object is frozen
+ * so consumers cannot mutate `success`/`value` after the fact.
+ *
+ * @param value - The value the operation produced.
+ * @returns `{ success: true, value }` (frozen).
  */
 export const success = <T>(value: T): Success<T> => Object.freeze({ success: true, value });
 
 /**
- * Creates a failed result
- * @param error The error to wrap in a failure result
+ * Wrap an error in a {@link Failure} branch. The returned object is frozen
+ * so consumers cannot mutate `success`/`error` after the fact.
+ *
+ * @param error - The error value (any type — typically `Error`, but can be
+ *   a plain string, code, or domain-specific type).
+ * @returns `{ success: false, error }` (frozen).
  */
 export const failure = <E>(error: E): Failure<E> => Object.freeze({ success: false, error });
 
 type ExtractAsyncArgs<Args extends Array<unknown>> =
 	Args extends Array<infer PotentialArgTypes> ? [PotentialArgTypes] : [];
 
+/**
+ * Run an async function and convert thrown errors into a {@link Failure}
+ * branch instead of rejecting the returned promise.
+ *
+ * Logs a structured `error` line via `@resq-sw/logger` whenever the inner
+ * function throws — useful for keeping rejected paths visible in
+ * production telemetry without forcing every caller to wrap a try/catch.
+ *
+ * Non-`Error` thrown values are coerced to `new Error(String(value))` so
+ * the failure branch always carries a real `Error` instance with a stack.
+ *
+ * @param asyncFunction - The async function to invoke.
+ * @param args - Arguments forwarded to `asyncFunction`.
+ * @returns A `Result<T, Error>` resolving to `success(returnValue)` on
+ *   resolve, or `failure(err)` on throw / reject.
+ *
+ * @example
+ * ```ts
+ * const r = await catchError(fetch, "/api/users");
+ * if (r.success) handleResponse(r.value);
+ * else logger.warn("fetch failed", r.error);
+ * ```
+ */
 export const catchError = async <Args extends Array<unknown>, ReturnType>(
 	asyncFunction: (...args: ExtractAsyncArgs<Args>) => Promise<ReturnType>,
 	...args: ExtractAsyncArgs<Args>
@@ -145,8 +206,20 @@ export const catchError = async <Args extends Array<unknown>, ReturnType>(
 };
 
 /**
- * Maps a successful result to a new value
- * @param fn Mapping function to apply to the successful value
+ * Curried `Result` mapper. Apply a function to the value of a `Success`,
+ * pass `Failure` through unchanged.
+ *
+ * @param fn - Pure transformation applied only to the success value.
+ * @returns A function `Result<T, E> → Result<U, E>`.
+ *
+ * @example
+ * ```ts
+ * const doubled = map<number, number, string>((n) => n * 2)(success(21));
+ * // → { success: true, value: 42 }
+ *
+ * map<number, number, string>((n) => n * 2)(failure("nope"));
+ * // → { success: false, error: "nope" } (unchanged)
+ * ```
  */
 export const map =
 	<T, U, E>(fn: (value: T) => U): ((result: Result<T, E>) => Result<U, E>) =>
@@ -154,8 +227,21 @@ export const map =
 		result.success ? success(fn(result.value)) : result;
 
 /**
- * Chains a result-returning function after a successful result
- * @param fn Function that returns a new result
+ * Curried `Result` flatMap (also known as `chain` or `bind`). Like
+ * {@link map} but the transformation itself returns a `Result`, allowing
+ * fallible steps to be sequenced without nesting.
+ *
+ * @param fn - Result-returning step applied to the success value.
+ * @returns A function `Result<T, E> → Result<U, E>`.
+ *
+ * @example
+ * ```ts
+ * const validateAge = (n: number): Result<number, string> =>
+ *   n >= 0 && n < 150 ? success(n) : failure("out of range");
+ *
+ * bindResult(validateAge)(success(42)); // → success(42)
+ * bindResult(validateAge)(success(-1)); // → failure("out of range")
+ * ```
  */
 export const bindResult =
 	<T, U, E>(fn: (value: T) => Result<U, E>): ((result: Result<T, E>) => Result<U, E>) =>
@@ -163,10 +249,26 @@ export const bindResult =
 		result.success ? fn(result.value) : result;
 
 /**
- * Applies a series of functions to an input value, short-circuiting on the first failure
- * @param input Initial input value
- * @param functions Array of functions to apply sequentially
- * @returns Final result after applying all functions or first encountered failure
+ * Compose up to five `Result`-returning steps over an input value,
+ * short-circuiting on the first {@link Failure}.
+ *
+ * Each step receives the previous step's success value and may return a
+ * new `Success` (continuing the pipeline) or a `Failure` (stopping it).
+ * The first failure is returned verbatim — later steps are not invoked.
+ *
+ * @param input - Initial value piped into `fn1`.
+ * @param functions - Up to five sequential transformations.
+ * @returns Final `Result` from the last step that ran.
+ *
+ * @example
+ * ```ts
+ * railway(
+ *   rawInput,
+ *   parse,        // (raw) => Result<Parsed, ValidationError>
+ *   normalize,    // (p)   => Result<Parsed, ValidationError>
+ *   persist,      // (p)   => Result<Saved,  DatabaseError>
+ * );
+ * ```
  */
 export function railway<TInput, T1, E>(
 	input: TInput,
@@ -210,8 +312,21 @@ export function railway<TInput, TOutput, E>(
 }
 
 /**
- * Recovers from a failure by applying a function to the error
- * @param fn Function to handle the error and return a new result
+ * Curried error-recovery combinator. Applies `fn` to the error of a
+ * {@link Failure}, optionally lifting the pipeline back to a `Success`
+ * with a different success type. Pass `Success` through unchanged.
+ *
+ * @param fn - Recovery handler: takes the original error, returns a new
+ *   `Result` (success-with-fallback or different failure).
+ * @returns A function `Result<T, E1> → Result<T, E2>`.
+ *
+ * @example Fall back to a default
+ * ```ts
+ * const withFallback = recover<User, FetchError, never>((_err) =>
+ *   success(GUEST_USER),
+ * );
+ * withFallback(failure(timeoutErr)); // → success(GUEST_USER)
+ * ```
  */
 export const recover =
 	<T, E1, E2>(fn: (error: E1) => Result<T, E2>): ((result: Result<T, E1>) => Result<T, E2>) =>
@@ -219,8 +334,25 @@ export const recover =
 		result.success ? result : fn(result.error);
 
 /**
- * Taps into a result chain for side effects without modifying the value
- * @param fn Side effect function to execute on success
+ * Curried side-effect helper. On `Success`, invoke `fn(value)` for its
+ * side effects and pass the result through unchanged. On `Failure`, do
+ * nothing. The returned `Result` is identical to the input (same shape
+ * and value identity).
+ *
+ * Useful for instrumentation, logging, or analytics events sprinkled
+ * through a pipeline without breaking the chain.
+ *
+ * @param fn - Side-effect callback; its return value is discarded.
+ * @returns A function `Result<T, E> → Result<T, E>` (same `Result`).
+ *
+ * @example
+ * ```ts
+ * pipe(
+ *   parse(input),
+ *   tap((parsed) => logger.debug("parsed", parsed)),
+ *   bindResult(persist),
+ * );
+ * ```
  */
 export const tap =
 	<T, E>(fn: (value: T) => void): ((result: Result<T, E>) => Result<T, E>) =>
@@ -232,27 +364,56 @@ export const tap =
 	};
 
 /**
- * Checks if a value is a number
- * @param value The value to check
+ * Type guard: narrow `unknown` to `number`.
+ *
+ * Note: returns `true` for `NaN` (which is a `number`). Use
+ * `Number.isFinite` afterward if you need to exclude it.
+ *
+ * @example
+ * ```ts
+ * if (isNumber(input)) input.toFixed(2);
+ * ```
  */
 export const isNumber = (value: unknown): value is number => typeof value === "number";
 
 /**
- * Checks if a value is a string
- * @param value The value to check
+ * Type guard: narrow `unknown` to `string`. Does not match `String`
+ * object wrappers (`new String("x")`), only string primitives.
+ *
+ * @example
+ * ```ts
+ * if (isString(input)) input.toUpperCase();
+ * ```
  */
 export const isString = (value: unknown): value is string => typeof value === "string";
 
 /**
- * Checks if a value is a function
- * @param value The value to check
+ * Type guard: narrow `unknown` to a callable.
+ *
+ * Matches arrow functions, `function` declarations, classes, and
+ * built-in callables. Use `isFunction` before invoking values pulled
+ * from untrusted sources (e.g. dynamic imports, JSON-config).
+ *
+ * @example
+ * ```ts
+ * if (isFunction(handler)) handler(payload);
+ * ```
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const isFunction = (value: unknown): value is Function => typeof value === "function";
 
 /**
- * Checks if a value is a promise
- * @param value The value to check
+ * Type guard: narrow `unknown` to a `PromiseLike` / `Promise`.
+ *
+ * Uses Promises/A+ duck-typing (presence of a callable `.then`) rather
+ * than `instanceof Promise` so it works across realm boundaries
+ * (iframes, workers) and with custom thenables.
+ *
+ * @example
+ * ```ts
+ * const v = maybeAsync();
+ * const value = isPromise(v) ? await v : v;
+ * ```
  */
 export const isPromise = (value: unknown): value is Promise<unknown> =>
 	!!value &&

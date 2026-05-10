@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Alert component family — inline `role="alert"`
+ * banner for surfacing status, errors, and confirmations. Two
+ * variants: `default` (informational, card-colored) and
+ * `destructive` (error, destructive-colored).
+ *
+ * Composition: `Alert > (AlertTitle + AlertDescription + AlertAction?)`.
+ * An optional leading SVG icon is auto-laid-out via `:has` selectors
+ * so callers can drop in a Phosphor icon without writing grid CSS.
+ */
+
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
 

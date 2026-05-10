@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Kbd component family — semantic `<kbd>` element
+ * styled to render keyboard shortcut hints (e.g. ⌘K, Ctrl+P).
+ * `KbdGroup` wraps multiple `<Kbd>`s for chord display
+ * (`Cmd + Shift + K`).
+ *
+ * When nested inside a `Tooltip`, the styling auto-inverts to read
+ * against the tooltip surface.
+ */
+
 import { cn } from "../../lib/utils.js";
 
 function Kbd({ className, ...props }: Readonly<React.ComponentProps<"kbd">>) {

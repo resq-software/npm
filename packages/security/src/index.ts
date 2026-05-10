@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public API for `@resq-sw/security` — AES-256-GCM encryption,
+ * Effect-Schema input validators, threat detection, and PII sanitization.
+ *
+ * Subpath exports:
+ * - `@resq-sw/security` — crypto, validators, sanitizer
+ * - `@resq-sw/security/sanitize` — PII redaction without crypto deps
+ *
+ * `effect` is an optional peer dependency required only for the
+ * Schema-based validators.
+ *
+ * @module @resq-sw/security
+ *
+ * @example PII sanitization for log lines
+ * ```ts
+ * import { sanitize } from "@resq-sw/security/sanitize";
+ *
+ * logger.info(sanitize({ email: "u@x.com", ip: "1.2.3.4", note: "ok" }));
+ * // → { email: "[REDACTED:email]", ip: "[REDACTED:ip]", note: "ok" }
+ * ```
+ */
+
 export * from "./crypto.js";
 export * from "./validators.js";
 export * from "./sanitize.js";

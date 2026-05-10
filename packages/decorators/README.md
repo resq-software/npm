@@ -16,6 +16,10 @@
 
 # @resq-sw/decorators
 
+[![npm](https://img.shields.io/npm/v/%40resq-sw%2Fdecorators?style=flat-square)](https://www.npmjs.com/package/@resq-sw/decorators)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
+[![deps](https://img.shields.io/badge/runtime%20deps-0-25c68a?style=flat-square)](./package.json)
+
 > TypeScript method and class decorators for caching, rate limiting, control flow, and observability.
 
 ## Installation

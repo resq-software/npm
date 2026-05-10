@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview InputGroup component family — wraps an `Input` with
+ * adjacent affixes (icons, prefixes, suffix buttons) so the cluster
+ * shares a single border and focus ring.
+ *
+ * Composition: `InputGroup > InputGroupAddon (start) + Input +
+ * InputGroupAddon (end)`. `InputGroupInput`, `InputGroupTextarea`,
+ * `InputGroupText`, and `InputGroupButton` are pre-styled inner
+ * controls that drop seamlessly into the group's border collapse.
+ */
+
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";

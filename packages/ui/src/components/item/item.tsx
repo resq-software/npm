@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Item component family — generic list-row primitive
+ * with media / content / actions slots and group wrappers. Use as
+ * the building block for nav lists, contact lists, settings rows,
+ * and any vertically-stacked, line-per-record UI.
+ *
+ * Composition:
+ * - `ItemGroup` — wraps a vertical list of items.
+ * - `Item` — single row; supports `variant` (default / outline /
+ *   muted) and `size` (default / sm).
+ * - `ItemMedia` — leading slot for an avatar, icon, or thumbnail
+ *   with its own variant set.
+ * - `ItemContent` — main text column.
+ * - `ItemTitle`, `ItemDescription` — text helpers within content.
+ * - `ItemActions` — trailing slot for buttons / chevrons.
+ * - `ItemHeader`, `ItemFooter`, `ItemSeparator` — supporting
+ *   helpers.
+ *
+ * `Item` supports `asChild` so it can render as a routing link via
+ * Radix Slot.
+ */
+
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
 import type * as React from "react";

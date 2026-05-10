@@ -241,6 +241,7 @@ describe("sanitizeGa4Id", () => {
 
 	it("rejects IDs that try to break out of the script-tag context", () => {
 		expect(sanitizeGa4Id("G-X</script>")).toBeNull();
+		expect(sanitizeGa4Id("G-X\nINJECT")).toBeNull();
 		expect(sanitizeGa4Id("G-X INJECT")).toBeNull();
 		expect(sanitizeGa4Id('G-X"; alert(1);"')).toBeNull();
 	});

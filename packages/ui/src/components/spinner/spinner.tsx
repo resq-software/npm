@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Spinner — indeterminate loading indicator. Renders
+ * `SpinnerGapIcon` with a CSS spin animation, `role="status"`, and
+ * `aria-label="Loading"` for screen readers. For determinate
+ * progress, use `Progress` instead.
+ */
+
 import { SpinnerGapIcon } from "@phosphor-icons/react";
 
 import { cn } from "../../lib/utils.js";

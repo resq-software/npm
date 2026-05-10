@@ -119,7 +119,18 @@ const RequestBody = Schema.Any;
 const Headers = Schema.Record(Schema.String, Schema.String);
 
 /**
- * Custom error class for validation-specific errors.
+ * Thrown when a response payload fails Effect Schema validation.
+ *
+ * Contains both the schema's reported `problems` description and the
+ * raw `responseData` that was rejected, so callers can log a
+ * structured diagnostic without a second decode pass.
+ *
+ * @property url - The request URL.
+ * @property problems - The schema parse error messages.
+ * @property responseData - The raw value that failed validation.
+ * @property attempt - Retry attempt number (1-indexed) at which the
+ *   failure occurred. Useful for distinguishing transient parse
+ *   failures from persistent ones.
  */
 export class FetcherValidationError extends Error {
 	constructor(
@@ -147,7 +158,20 @@ export class FetcherValidationError extends Error {
 }
 
 /**
- * Custom error class for fetcher-specific errors.
+ * Thrown for transport-level fetcher failures: timeouts, network
+ * errors, non-2xx responses, JSON-parse failures, and request-body
+ * serialisation errors.
+ *
+ * Distinct from {@link FetcherValidationError}, which is reserved
+ * for schema decode failures on otherwise-valid responses.
+ *
+ * @property url - The request URL.
+ * @property status - HTTP status code, when one was received.
+ *   Absent for timeouts and pre-flight errors.
+ * @property responseData - Best-effort capture of the response body
+ *   (parsed when possible, otherwise the raw text).
+ * @property attempt - Retry attempt number (1-indexed) at which the
+ *   failure occurred.
  */
 export class FetcherError extends Error {
 	constructor(
@@ -408,6 +432,46 @@ export function fetcher<T = unknown>(
 	params?: QueryParams,
 ): Effect.Effect<T, FetcherError | FetcherValidationError, HttpClient.HttpClient>;
 
+/**
+ * Effect-based HTTP client with retry, timeout, schema validation,
+ * and structured error handling.
+ *
+ * Resolves the URL by prepending the runtime-detected base URL
+ * (Vite/Next env, fallback to `http://localhost:5173` server-side; no
+ * prefix in the browser). Encodes `params` into a query string,
+ * picks the body encoding (`json` / `text` / `form`) per
+ * `options.bodyType`, and runs the request through `HttpClient` with
+ * `Schedule.exponential` retry on failure.
+ *
+ * On 4xx/5xx, timeout, transport, or body-parse failure: fails with
+ * {@link FetcherError}. When `options.schema` is supplied and the
+ * response body decodes against it: returns the typed value;
+ * otherwise: fails with {@link FetcherValidationError}.
+ *
+ * Prefer the verb-specific helpers ({@link get}, {@link post},
+ * {@link put}, {@link patch}, {@link del}, {@link options},
+ * {@link head}) — they have nicer overloads and avoid you specifying
+ * the method string by hand. Reach for `fetcher` directly only when
+ * the method is dynamic.
+ *
+ * @typeParam T - Response shape inferred from `options.schema` when
+ *   provided, otherwise `unknown`.
+ *
+ * @param input - URL or path. Absolute (`http(s)://…`) is used
+ *   verbatim; relative paths are joined to the resolved base URL.
+ * @param method - HTTP verb. Defaults to `"GET"`.
+ * @param options - {@link FetcherOptions} (retries, timeout, headers,
+ *   schema, abort signal, …).
+ * @param params - Optional query parameters. Array values are
+ *   serialised as repeated keys.
+ * @param body - Optional request body for POST/PUT/PATCH. Encoded
+ *   per `options.bodyType` (default `"json"`).
+ *
+ * @returns An `Effect` that yields the parsed (and optionally
+ *   schema-validated) response or fails with `FetcherError |
+ *   FetcherValidationError`. Requires `HttpClient.HttpClient` in
+ *   the Effect environment.
+ */
 export function fetcher<T = unknown>(
 	input: string,
 	method: HttpMethod = "GET",
@@ -523,6 +587,19 @@ export function get<A>(
 	params?: QueryParams,
 ): Effect.Effect<A, FetcherError | FetcherValidationError, HttpClient.HttpClient>;
 
+/**
+ * Issue an HTTP GET. Convenience wrapper around {@link fetcher}.
+ *
+ * @example Untyped
+ * ```ts
+ * const data = yield* get<User[]>("/api/users");
+ * ```
+ *
+ * @example Schema-validated
+ * ```ts
+ * const users = yield* get("/api/users", { schema: UserListSchema });
+ * ```
+ */
 export function get<T = unknown>(url: string, options?: FetcherOptions<T>, params?: QueryParams) {
 	return fetcher<T>(url, "GET", options, params);
 }
@@ -545,6 +622,15 @@ export function post<S extends SyncSchema<Schema.Schema.Type<S>>>(
 	HttpClient.HttpClient
 >;
 
+/**
+ * Issue an HTTP POST with a JSON body (or text/form when overridden
+ * via `options.bodyType`). Convenience wrapper around {@link fetcher}.
+ *
+ * @example
+ * ```ts
+ * const created = yield* post<User>("/api/users", { name: "Alice" });
+ * ```
+ */
 export function post<T = unknown>(
 	url: string,
 	body?: RequestBody,
@@ -572,6 +658,10 @@ export function put<S extends SyncSchema<Schema.Schema.Type<S>>>(
 	HttpClient.HttpClient
 >;
 
+/**
+ * Issue an HTTP PUT (full-resource replace). Convenience wrapper
+ * around {@link fetcher}.
+ */
 export function put<T = unknown>(
 	url: string,
 	body?: RequestBody,
@@ -599,6 +689,10 @@ export function patch<S extends SyncSchema<Schema.Schema.Type<S>>>(
 	HttpClient.HttpClient
 >;
 
+/**
+ * Issue an HTTP PATCH (partial update). Convenience wrapper around
+ * {@link fetcher}.
+ */
 export function patch<T = unknown>(
 	url: string,
 	body?: RequestBody,
@@ -624,6 +718,10 @@ export function del<S extends SyncSchema<Schema.Schema.Type<S>>>(
 	HttpClient.HttpClient
 >;
 
+/**
+ * Issue an HTTP DELETE. Named `del` because `delete` is a reserved
+ * keyword. Convenience wrapper around {@link fetcher}.
+ */
 export function del<T = unknown>(url: string, options?: FetcherOptions<T>, params?: QueryParams) {
 	return fetcher<T>(url, "DELETE", options, params);
 }
@@ -644,6 +742,11 @@ export function options<S extends SyncSchema<Schema.Schema.Type<S>>>(
 	HttpClient.HttpClient
 >;
 
+/**
+ * Issue an HTTP OPTIONS. Used for CORS pre-flight discovery and
+ * server-supported-method probes. Convenience wrapper around
+ * {@link fetcher}.
+ */
 export function options<T = unknown>(
 	url: string,
 	options?: FetcherOptions<T>,
@@ -668,10 +771,35 @@ export function head<S extends SyncSchema<Schema.Schema.Type<S>>>(
 	HttpClient.HttpClient
 >;
 
+/**
+ * Issue an HTTP HEAD (response headers only, no body). Convenience
+ * wrapper around {@link fetcher}.
+ *
+ * Useful for cache validation, content-length probing, or existence
+ * checks without the body transfer cost.
+ */
 export function head<T = unknown>(url: string, options?: FetcherOptions<T>, params?: QueryParams) {
 	return fetcher<T>(url, "HEAD", options, params);
 }
 
+/**
+ * Build a paginated-list schema:
+ *
+ * ```
+ * { data: T[], pagination: { page, pageSize, total, totalPages } }
+ * ```
+ *
+ * Pass to `options.schema` to validate paginated endpoints in a
+ * single declarative call.
+ *
+ * @typeParam T - Element type of the paginated list.
+ *
+ * @example
+ * ```ts
+ * const Page = createPaginatedSchema(UserSchema);
+ * const page = yield* get("/api/users?page=1", { schema: Page });
+ * ```
+ */
 export const createPaginatedSchema = <T>(itemSchema: Schema.Schema<T>) => {
 	return Schema.Struct({
 		data: Schema.Array(itemSchema),
@@ -684,6 +812,18 @@ export const createPaginatedSchema = <T>(itemSchema: Schema.Schema<T>) => {
 	});
 };
 
+/**
+ * Build an envelope schema:
+ *
+ * ```
+ * { success: boolean, data: T, message?: string, errors?: string[] }
+ * ```
+ *
+ * Use as the response schema for endpoints that wrap their payload
+ * in a uniform success/error envelope.
+ *
+ * @typeParam T - Inner data shape on success.
+ */
 export const createApiResponseSchema = <T>(dataSchema: Schema.Schema<T>) => {
 	return Schema.Struct({
 		success: Schema.Boolean,

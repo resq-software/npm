@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Empty component family — empty-state surface for
+ * tables, lists, and dashboards that have no data yet (or have
+ * filtered to zero results).
+ *
+ * Composition: `Empty > EmptyHeader > (EmptyMedia + EmptyTitle +
+ * EmptyDescription)` followed by `EmptyContent` (typically a CTA
+ * button cluster). `EmptyMedia` accepts a `variant` prop for the
+ * leading icon container styling.
+ */
+
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "../../lib/utils.js";

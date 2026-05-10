@@ -14,11 +14,44 @@
  * limitations under the License.
  */
 
+/**
+ * Space-efficient probabilistic set membership test.
+ *
+ * `has(x)` is guaranteed to return `true` for any item that was added; for
+ * items that were *not* added it returns `true` with probability ≤ the
+ * configured `errorRate` (false positives) and `false` otherwise (no false
+ * negatives).
+ *
+ * Bit array size `m` and hash count `k` are derived from `capacity` and
+ * `errorRate` using the standard formulas:
+ *
+ * - `m = ⌈ -n · ln(p) / (ln 2)² ⌉`
+ * - `k = max(1, round((m / n) · ln 2))`
+ *
+ * Hashing uses double FNV-1a with per-call seeds — no allocation per
+ * `add`/`has` call.
+ *
+ * @example
+ * ```ts
+ * const seen = new BloomFilter(100_000, 0.001); // 0.1% false-positive rate
+ * seen.add("drone-04");
+ * seen.has("drone-04"); // → true
+ * seen.has("drone-99"); // → false (with high probability)
+ * ```
+ */
 export class BloomFilter {
 	readonly #bits: Uint8Array;
 	readonly #k: number;
 	readonly #m: number;
 
+	/**
+	 * @param capacity - Expected number of distinct items to insert. Memory
+	 *   use grows linearly with this value.
+	 * @param errorRate - Target false-positive rate, in `(0, 1)`. Default
+	 *   `0.01` (1%). Smaller values increase memory and hash count.
+	 *
+	 * @throws RangeError if `capacity <= 0` or `errorRate` is outside `(0, 1)`.
+	 */
 	constructor(capacity: number, errorRate = 0.01) {
 		if (errorRate <= 0 || errorRate >= 1) {
 			throw new RangeError(`BloomFilter: errorRate must be in (0, 1), got ${errorRate}`);
@@ -42,6 +75,10 @@ export class BloomFilter {
 		return h % this.#m;
 	}
 
+	/**
+	 * Mark `item` as present. Subsequent `has(item)` calls always return
+	 * `true`. Adding an item already present is a no-op.
+	 */
 	add(item: string): void {
 		for (let i = 0; i < this.#k; i++) {
 			const idx = this.#hash(item, (i * 0x9e3779b9) >>> 0);
@@ -49,6 +86,13 @@ export class BloomFilter {
 		}
 	}
 
+	/**
+	 * Probabilistic membership test.
+	 *
+	 * @returns `false` ⇒ the item was definitely never added.
+	 *          `true`  ⇒ the item was probably added (false-positive rate
+	 *          bounded by the constructor's `errorRate`).
+	 */
 	has(item: string): boolean {
 		for (let i = 0; i < this.#k; i++) {
 			const idx = this.#hash(item, (i * 0x9e3779b9) >>> 0);

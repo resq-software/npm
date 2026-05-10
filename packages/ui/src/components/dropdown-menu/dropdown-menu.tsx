@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview DropdownMenu component family — click-triggered
+ * popover menu built on Radix UI's `DropdownMenu` primitive. Use for
+ * action menus, settings menus, and any tap-to-reveal options
+ * cluster.
+ *
+ * Composition: `DropdownMenu > DropdownMenuTrigger +
+ * DropdownMenuContent`, with `DropdownMenuItem`,
+ * `DropdownMenuCheckboxItem`, `DropdownMenuRadioGroup` +
+ * `DropdownMenuRadioItem`, `DropdownMenuSub` (for nested menus),
+ * plus label/separator/shortcut helpers.
+ */
+
 "use client";
 
 import { CaretRightIcon, CheckIcon } from "@phosphor-icons/react";

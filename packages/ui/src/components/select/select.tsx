@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Select component family — fully styled dropdown
+ * select built on Radix UI's `Select` primitive. Use for non-typeable
+ * choices from a defined list; reach for `Combobox` when you
+ * need search/filter, `NativeSelect` when you need real native
+ * mobile picker UX.
+ *
+ * Composition: `Select > SelectTrigger + SelectValue → SelectContent
+ * > (SelectItem | SelectGroup > SelectLabel + SelectItem)*`, with
+ * `SelectSeparator` between sections and `SelectScrollUp/Down`
+ * buttons auto-rendered for long lists.
+ */
+
 "use client";
 
 import { CaretDownIcon, CaretUpIcon, CheckIcon } from "@phosphor-icons/react";

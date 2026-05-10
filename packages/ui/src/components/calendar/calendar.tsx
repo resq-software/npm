@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Calendar component family — date-picker UI built on
+ * `react-day-picker` v10. Supports single, range, and multi-select
+ * modes (forwarded via the `mode` prop). Header navigation, weekday
+ * labels, and day buttons are all themed against the design tokens
+ * and use the shared `Button` primitive for the chevrons.
+ *
+ * Exports `Calendar` (the surface) and `CalendarDayButton` (the
+ * individual day cell, exposed for callers that need to render a
+ * custom day with the same hover/focus/selected states).
+ */
+
 "use client";
 
 import { CaretDownIcon, CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react";

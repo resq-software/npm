@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Progress — determinate progress bar built on
+ * Radix UI's `Progress` primitive. Pass `value` (0–100) to drive the
+ * fill; the indicator translates via `transform: translateX` so
+ * animation stays compositor-friendly.
+ *
+ * For indeterminate / spinning loaders, use `Spinner` instead.
+ */
+
 "use client";
 
 import { Progress as ProgressPrimitive } from "radix-ui";

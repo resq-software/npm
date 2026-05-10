@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Switch — accessible binary toggle built on
+ * Radix UI's `Switch` primitive. Two sizes (`default`, `sm`) controlled
+ * via the `size` prop. Use for instant-effect toggles (settings,
+ * feature flags); use `Checkbox` for form-submission contexts.
+ *
+ * Touch target extends 8/12 pixels beyond the visual hit area via
+ * a transparent `::after` pseudo-element so mobile taps land
+ * reliably on smaller screens.
+ */
+
 "use client";
 
 import { Switch as SwitchPrimitive } from "radix-ui";

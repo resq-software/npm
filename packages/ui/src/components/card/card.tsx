@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Card component family — generic content surface
+ * with structured slots for header, content, footer, and an
+ * optional action area in the header.
+ *
+ * Composition:
+ * - `Card` — the surface (two sizes: `default`, `sm`).
+ * - `CardHeader` — top region; can host `CardTitle`,
+ *   `CardDescription`, and `CardAction` (right-aligned action
+ *   button).
+ * - `CardContent` — body.
+ * - `CardFooter` — bottom region (typically holds Button(s)).
+ *
+ * Per `STYLE_GUIDE.md`, `CardTitle` renders `font-display` for
+ * editorial weight against the rest of the dashboard.
+ */
+
 import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";

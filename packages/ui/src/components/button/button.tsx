@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Button component — the primary interactive control
+ * across the design system.
+ *
+ * Variants: `default` (primary), `secondary`, `outline`, `ghost`,
+ * `link`, `destructive`, and `urgent` (info-colored CTA used in
+ * mission-control surfaces).
+ *
+ * Sizes: `xs`, `sm`, `default`, `lg`, plus icon-only variants
+ * `icon-xs`, `icon-sm`, `icon`, `icon-lg`. Per `STYLE_GUIDE.md`,
+ * buttons render `font-mono uppercase`.
+ *
+ * Polymorphism: pass `asChild` to delegate to any underlying
+ * element (e.g. `<Link>`) via Radix Slot.
+ *
+ * Optional leading/trailing icons are auto-spaced via
+ * `data-icon="inline-start" | "inline-end"` slots.
+ *
+ * Exports `buttonVariants` (the CVA) for composing button-styled
+ * non-button elements.
+ */
+
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
 import type * as React from "react";

@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview ScrollArea component family — themed scroll
+ * container with consistent scrollbar styling across browsers,
+ * built on Radix UI's `ScrollArea` primitive. Use when native
+ * scrollbar appearance varies across platforms in a way that
+ * breaks the design.
+ *
+ * Composition: `ScrollArea > [content] + ScrollBar*`. Note that
+ * Radix renders the bars only when scrolling is needed and uses
+ * pointer-events targeting that doesn't intercept clicks on the
+ * content.
+ */
+
 "use client";
 
 import { ScrollArea as ScrollAreaPrimitive } from "radix-ui";

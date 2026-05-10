@@ -14,6 +14,26 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Chart component family — Recharts wrapper that
+ * threads design-token colors and style-guide-compliant tooltips /
+ * legends through every chart type.
+ *
+ * Composition:
+ * - `ChartContainer` — wraps a Recharts `<ResponsiveContainer>`,
+ *   accepts a `config` map (`{ key: { label, color, icon? } }`) and
+ *   emits scoped CSS variables so individual series pull their
+ *   colors from the design system.
+ * - `ChartTooltip` / `ChartTooltipContent` — themed tooltip surface.
+ * - `ChartLegend` / `ChartLegendContent` — themed legend surface.
+ * - `ChartStyle` — internal style-tag helper (auto-rendered by
+ *   `ChartContainer`).
+ *
+ * `// @ts-nocheck` is set because recharts 3.x types don't align
+ * with `React.ComponentProps` inference; the runtime contract is
+ * still type-safe via the explicit prop interfaces in this file.
+ */
+
 // @ts-nocheck -- recharts 3.x type exports don't align with ComponentProps inference
 
 "use client";

@@ -14,5 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@before` decorator — run a callback before the
+ * decorated method runs. The pre-callback can be `await`-ed via
+ * `wait: true` for state-validation or guard patterns. Companion
+ * `beforeFn(method, config)` wraps a plain function with the same
+ * semantics.
+ */
+
 export * from "./before.js";
 export * from "./before.types.js";

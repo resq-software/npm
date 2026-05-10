@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview NativeSelect — themed wrapper around the platform
+ * `<select>` element. Use when full native dropdown behavior is
+ * required (mobile pickers, screen-reader interop, form
+ * submission), or when you need to ship something that works
+ * without JS. Use the `Select` component for richer styled
+ * dropdowns.
+ *
+ * Wrapped in a relative `<div>` with a chevron overlay so the
+ * styled trigger matches the design system without losing native
+ * picker UX.
+ */
+
 import { CaretDownIcon } from "@phosphor-icons/react";
 import type * as React from "react";
 

@@ -16,6 +16,9 @@
 
 # @resq-sw/analytics
 
+[![npm](https://img.shields.io/npm/v/%40resq-sw%2Fanalytics?style=flat-square)](https://www.npmjs.com/package/@resq-sw/analytics)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
+
 Unified PostHog + GA4 analytics client for the ResQ platform. Built for cross-subdomain identity (`resq.software` ↔ `research.resq.software` ↔ `viz.resq.software`), lazy-loaded so it never sits on the LCP critical path, and typed events you can extend per-app.
 
 ## Install

@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@debounce(delayMs)` decorator and `debounceFn`
+ * function form — collapse rapid calls into a single fire after
+ * `delayMs` milliseconds of inactivity. Typical use: form-input
+ * validation, autosave, search-as-you-type.
+ */
+
 export * from "./debounce.fn.js";

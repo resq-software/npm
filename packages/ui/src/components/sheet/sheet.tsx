@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Sheet component family — slide-in panel from any
+ * edge of the viewport (top, right, bottom, left). Built on
+ * Radix UI's `Dialog` primitive so it inherits Dialog's focus trap,
+ * scroll-lock, and ARIA wiring; visual treatment is the slide-in
+ * panel rather than a centered card.
+ *
+ * Composition: `Sheet > SheetTrigger + SheetContent`, with
+ * `SheetHeader > (SheetTitle + SheetDescription)`, `SheetFooter`,
+ * and `SheetClose`. Per `STYLE_GUIDE.md`, `SheetTitle` renders
+ * `font-display`. Use `Drawer` for swipe-friendly mobile
+ * variants.
+ */
+
 "use client";
 
 import { XIcon } from "@phosphor-icons/react";

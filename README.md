@@ -28,6 +28,7 @@
 [![@resq-sw/decorators](https://img.shields.io/npm/v/%40resq-sw%2Fdecorators?style=flat-square&label=%40resq-sw%2Fdecorators)](https://www.npmjs.com/package/@resq-sw/decorators)
 [![@resq-sw/security](https://img.shields.io/npm/v/%40resq-sw%2Fsecurity?style=flat-square&label=%40resq-sw%2Fsecurity)](https://www.npmjs.com/package/@resq-sw/security)
 [![@resq-sw/rate-limiting](https://img.shields.io/npm/v/%40resq-sw%2Frate-limiting?style=flat-square&label=%40resq-sw%2Frate-limiting)](https://www.npmjs.com/package/@resq-sw/rate-limiting)
+[![@resq-sw/analytics](https://img.shields.io/npm/v/%40resq-sw%2Fanalytics?style=flat-square&label=%40resq-sw%2Fanalytics)](https://www.npmjs.com/package/@resq-sw/analytics)
 
 Registry workspace for all ResQ npm packages published under the `@resq-sw` scope. Provides the shared UI component library, zero-dependency data structures, and standalone server/client utilities for the ResQ autonomous disaster response platform.
 
@@ -53,18 +54,23 @@ graph TB
             helpers["@resq-sw/helpers"]
             decorators["@resq-sw/decorators"]
         end
+        subgraph telemetry["Telemetry"]
+            analytics["@resq-sw/analytics<br/><small>PostHog + GA4 · cross-subdomain</small>"]
+        end
     end
 
     frontend --> apps["Consumer Apps"]
     algorithms --> apps
     infra --> apps
     utilities --> apps
+    telemetry --> apps
 
     style repo fill:#0d0f14,stroke:#222b42,color:#f5f5f7
     style frontend fill:#141722,stroke:#388feb,color:#f5f5f7
     style algorithms fill:#141722,stroke:#25c68a,color:#f5f5f7
     style infra fill:#141722,stroke:#f5a623,color:#f5f5f7
     style utilities fill:#141722,stroke:#9ba3b5,color:#f5f5f7
+    style telemetry fill:#141722,stroke:#b478ff,color:#f5f5f7
     style apps fill:#1a1e2e,stroke:#e24b4a,color:#f5f5f7
 ```
 
@@ -80,6 +86,7 @@ graph TB
 | [`@resq-sw/rate-limiting`](packages/rate-limiting/) | Throttle, debounce, token bucket, leaky bucket, sliding window, Redis store | effect (peer) | [README](packages/rate-limiting/README.md) |
 | [`@resq-sw/decorators`](packages/decorators/) | 15 TypeScript decorators — memoize, throttle, debounce, bind, execTime, rateLimit | **zero deps** | [README](packages/decorators/README.md) |
 | [`@resq-sw/helpers`](packages/helpers/) | Result monad, type guards, date/number/string formatting, platform detection | @resq-sw/logger | [README](packages/helpers/README.md) |
+| [`@resq-sw/analytics`](packages/analytics/) | Unified PostHog + GA4 client — cross-subdomain identity, lazy-loaded, typed events, Next.js + React adapters | posthog-js (peer) | [README](packages/analytics/README.md) |
 
 ## Examples
 

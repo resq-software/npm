@@ -47,7 +47,7 @@ export const RESQ_SUBDOMAIN_ALLOWLIST: readonly string[] = [
  * Strict GA4 Measurement ID shape per Google's documented format:
  * `G-` followed by 6–32 uppercase ASCII letters / digits.
  *
- * Used as a sanitiser before interpolating an env-var-sourced ID into an
+ * Used as a sanitizer before interpolating an env-var-sourced ID into an
  * inline `<script>` body. Even though `NEXT_PUBLIC_*` values are
  * build-time controlled, validating with a regex makes the taint flow
  * provably safe — closes static-analysis warnings (CodeQL
@@ -80,9 +80,9 @@ export function sanitizeGa4Id(id: string | null | undefined): string | null {
  * breaking analytics in every non-prod environment. This guards that
  * path so the package can ship safe defaults.
  *
- * Hostnames are case-insensitive per RFC 3986 §3.2.2. Browsers normalise
+ * Hostnames are case-insensitive per RFC 3986 §3.2.2. Browsers normalize
  * `window.location.hostname` to lowercase, but server-side reads of the
- * `Host` header can carry whatever casing the client sent — normalise
+ * `Host` header can carry whatever casing the client sent — normalize
  * here so a stray `RESQ.SOFTWARE` from a Workers `request.headers` read
  * still returns the cookie domain.
  *
@@ -96,8 +96,8 @@ export function sanitizeGa4Id(id: string | null | undefined): string | null {
  */
 export function resolveResqCookieDomain(host?: string | null | undefined): string | undefined {
 	if (typeof host !== "string" || host.length === 0) return undefined;
-	const normalised = host.toLowerCase();
-	if (normalised === "resq.software" || normalised.endsWith(".resq.software")) {
+	const normalized = host.toLowerCase();
+	if (normalized === "resq.software" || normalized.endsWith(".resq.software")) {
 		return ".resq.software";
 	}
 	return undefined;

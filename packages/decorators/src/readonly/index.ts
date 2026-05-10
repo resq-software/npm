@@ -14,5 +14,12 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@readonly()` method decorator — set the property
+ * descriptor's `writable: false` so consumers cannot reassign the
+ * method on instances. Useful for sealing security-sensitive
+ * methods (auth tokens, signature checks) against monkey-patching.
+ */
+
 export * from "./readonly.js";
 export * from "./readonly.types.js";

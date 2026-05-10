@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Toggle — two-state button (pressed / not pressed)
+ * built on Radix UI's `Toggle` primitive. Use for press-and-hold style
+ * toggles like text-formatting controls (bold, italic). For
+ * mutually-exclusive groups, use `ToggleGroup`; for binary
+ * settings prefer `Switch`.
+ *
+ * Exports `toggleVariants` (CVA) so `ToggleGroupItem` can reuse
+ * the same variant matrix.
+ */
+
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";

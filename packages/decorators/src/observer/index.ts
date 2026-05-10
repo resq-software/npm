@@ -14,5 +14,12 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@observe` property decorator — intercept assignments
+ * to a class property and run a callback (default: log; optional
+ * custom handler) for each new value. Useful for state-tracking,
+ * analytics, and debugging.
+ */
+
 export * from "./observer.js";
 export * from "./observer.types.js";

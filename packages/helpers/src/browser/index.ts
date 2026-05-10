@@ -14,5 +14,19 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Browser-only helpers for `@resq-sw/helpers/browser`.
+ *
+ * Surfaces:
+ * - Platform / browser detection (`isIOS`, `isAndroid`, `getBrowser`,
+ *   `getPlatform`, `isTouchScreen`, …)
+ * - HTML-entity obfuscation for `mailto:` / `tel:` links
+ *   (`obfuscateLink`)
+ *
+ * All exports rely on `navigator`, `window`, or DOM globals — do not
+ * import this subpath into server-side bundles. Use the universal
+ * `@resq-sw/helpers` entry for SSR-safe utilities.
+ */
+
 export * from "./platform.js";
 export * from "./html-entities.js";

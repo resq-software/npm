@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Textarea — themed wrapper around `<textarea>`.
+ * Uses `field-sizing: content` so the textarea grows with its
+ * content (no manual `rows` adjustment needed) while respecting
+ * the `min-h-20` floor.
+ *
+ * Forwards every native textarea prop. Pair with `Field` for label
+ * + helper-text / error wiring.
+ */
+
 import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";

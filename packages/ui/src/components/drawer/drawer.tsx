@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Drawer component family — bottom-sheet-style modal
+ * built on Vaul. Designed for mobile-first interactions: swipe to
+ * dismiss, snap points, scroll-locked content. Use instead of
+ * `Sheet` when the content benefits from drag interactions.
+ *
+ * Composition: `Drawer > DrawerTrigger + DrawerContent`, with
+ * `DrawerHeader > (DrawerTitle + DrawerDescription)`, `DrawerFooter`,
+ * and `DrawerClose`. Per `STYLE_GUIDE.md`, `DrawerTitle` renders
+ * `font-display`.
+ */
+
 "use client";
 
 import type * as React from "react";

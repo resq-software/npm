@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview RTL/LTR direction provider — thin wrapper around
+ * Radix UI's `DirectionProvider` primitive. Wrap the app
+ * (or a sub-tree) in `<DirectionProvider direction="rtl">` to flip
+ * directional behavior for every Radix-based component
+ * underneath. Accepts both `dir` (Radix native) and `direction`
+ * (alias for ergonomic JSX).
+ *
+ * Re-exports `useDirection()` for components that need to read the
+ * resolved direction.
+ */
+
 "use client";
 
 import { Direction } from "radix-ui";
