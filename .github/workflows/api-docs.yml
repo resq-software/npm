@@ -181,24 +181,84 @@ jobs:
           PY
           fi
 
-      - name: Prefix bare-filename intra-page links with ./
-        # TypeDoc emits same-directory cross-references as bare
-        # filenames, e.g. `[PaginationLink](PaginationLink.md)`.
-        # Mintlify accepts `(../foo/bar.md)` but rejects bare
-        # filenames as broken. Prefix any bare-filename `.md` link
-        # with `./` so the resolver keeps it as a relative path.
-        # External URLs (https://...) and already-relative paths
-        # (./, ../) are left alone because the leading-char class
-        # `[A-Za-z0-9]` excludes both. Including digits handles
-        # files that start with a digit (e.g. 01-introduction.md)
-        # if any future tooling generates them.
+      - name: Rename subdirectory READMEs to index.md
+        # TypeDoc writes `<dir>/README.md` for each module's landing
+        # page. Mintlify's nav resolver expects `<dir>.{md,mdx}` or
+        # `<dir>/index.{md,mdx}` for a registered page id like
+        # `<dir>`; `<dir>/README.md` is a Hugo convention that
+        # Mintlify doesn't natively pick up. Without this rename,
+        # registering `<dir>` in the splice produces a "file does
+        # not exist" warning on every dev start and the URL
+        # `/<dir>` 307-redirects to the first leaf instead of
+        # rendering the README content.
+        #
+        # Rename only the subdirectory READMEs; the top-level
+        # README is already converted to README.mdx in the previous
+        # step (it's nav-registered explicitly). Also rewrite any
+        # in-content `README.md` references to `index.md` so
+        # cross-links keep working.
         working-directory: ${{ env.PKG_DIR }}/generated-docs
         run: |
+          # Rename each non-top-level README.md to index.md.
+          find . -mindepth 2 -type f -name 'README.md' -print0 \
+            | while IFS= read -r -d '' f; do
+              mv "$f" "$(dirname "$f")/index.md"
+            done
+          # Rewrite link targets so cross-page references keep
+          # resolving. Match `(...README.md)` and `(...README.md#frag)`
+          # in markdown link syntax only.
           find . -type f -name '*.md' -print0 | while IFS= read -r -d '' f; do
             sed -E -i \
-              's|\]\(([A-Za-z0-9][^)/]*\.md(#[^)]*)?)\)|](./\1)|g' \
+              's|\]\(([^)]*)README\.md(#[^)]*)?\)|](\1index.md\2)|g' \
               "$f"
           done
+
+      - name: Prefix bare relative .md links with ./
+        # TypeDoc emits cross-references as bare relative paths,
+        # both single-segment (`PaginationLink.md`) and multi-segment
+        # (`functions/Accordion.md`, `accordion/index.md`). Mintlify
+        # only resolves explicitly-relative paths (./, ../) and
+        # absolute paths (/...) — bare paths are flagged as broken.
+        #
+        # Skip targets that are already qualified: external URLs,
+        # already-relative paths, fragment-only links, and special
+        # schemes (mailto:, data:, etc.). A target is "qualified"
+        # iff it starts with `./`, `../`, `/`, `#`, or contains `:`
+        # before the first `/`.
+        working-directory: ${{ env.PKG_DIR }}/generated-docs
+        run: |
+          python3 - <<'PY'
+          import pathlib
+          import re
+
+          # Match `[label](target)` where target is bare relative.
+          # Captured target stops at `)` to support targets without
+          # spaces; markdown spec allows them as long as parens
+          # don't appear inside.
+          link_re = re.compile(r'(?<!\!)\[([^\]]*)\]\(([^)]+)\)')
+
+          def is_qualified(target: str) -> bool:
+              t = target.strip().split(None, 1)[0]
+              if t.startswith(("./", "../", "/", "#")):
+                  return True
+              # URL schemes / mailto: / data: — colon before /.
+              if ":" in t.split("/", 1)[0]:
+                  return True
+              return False
+
+          for f in pathlib.Path(".").rglob("*.md"):
+              text = f.read_text(encoding="utf-8")
+              def fix(m: re.Match) -> str:
+                  label, target = m.group(1), m.group(2)
+                  if is_qualified(target):
+                      return m.group(0)
+                  if not target.endswith(".md") and ".md#" not in target:
+                      return m.group(0)
+                  return f"[{label}](./{target})"
+              new = link_re.sub(fix, text)
+              if new != text:
+                  f.write_text(new, encoding="utf-8")
+          PY
 
       - name: Strip TypeDoc breadcrumb header
         # Every typedoc-plugin-markdown page begins with a breadcrumb
@@ -327,15 +387,21 @@ jobs:
               insert(node.setdefault("_dirs", {}).setdefault(head, {}), rest, full_id)
 
           for p in raw:
-              if p == "README":
+              if p in ("README", "index"):
                   continue
-              # Mintlify auto-redirects `/path/README` to `/path`, so
-              # register the directory form (page id without trailing
-              # /README). Files that don't end in /README keep their
-              # path verbatim.
-              if p.endswith("/README"):
-                  full_id = f"{PREFIX}/{p[: -len('/README')]}"
-                  parts = full_id[len(PREFIX) + 1:].split("/")
+              # Each subdir's landing page is `<dir>/index.md` (after
+              # the rename step above) which Mintlify natively
+              # resolves from page id `<dir>`. Strip the `/index`
+              # suffix when building the registered path so the URL
+              # stays clean (`/<dir>` not `/<dir>/index`). Same
+              # principle applied to legacy `/README` entries in
+              # case any downstream tool still emits them. Files
+              # that don't end in either suffix keep their path
+              # verbatim.
+              if p.endswith("/index") or p.endswith("/README"):
+                  bare = p.rsplit("/", 1)[0]
+                  full_id = f"{PREFIX}/{bare}"
+                  parts = bare.split("/")
               else:
                   full_id = f"{PREFIX}/{p}"
                   parts = p.split("/")
