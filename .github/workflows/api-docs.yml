@@ -7,22 +7,19 @@
 # Copy this file to resq-software/npm at:
 #   .github/workflows/api-docs.yml
 #
-# Renders TypeDoc API reference for @resq-sw/ui and opens a PR in
-# resq-software/docs with generated MDX under sdks/typescript/api/.
-#
-# The npm repo is a bun monorepo. Today this workflow only documents
-# the @resq-sw/ui package because that is the surface mapped by
-# sdks/typescript in the docs site. Add a matrix when other packages
-# get their own SDK pages.
+# Renders TypeDoc API reference for every public @resq-sw/* package
+# in the bun monorepo and opens a single PR in resq-software/docs
+# with generated MDX under sdks/typescript/api/<pkg>/.
 
 name: api-docs
 
 on:
   push:
     # Tag convention in resq-software/npm is "@resq-sw/<pkg>@v*"
-    # (driven by changesets). Only ui releases trigger a docs sync.
+    # (driven by changesets). Trigger on any package release so the
+    # docs sync stays current across the monorepo.
     tags:
-      - '@resq-sw/ui@v*'
+      - '@resq-sw/*@v*'
   workflow_dispatch:
     inputs:
       ref:
@@ -45,13 +42,43 @@ concurrency:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     env:
-      PKG_DIR: packages/ui
+      OUTPUT_DIR: generated-docs
       DOCS_TARGET: sdks/typescript/api
+      # Public packages to document. Discovered manually from
+      # `packages/*/package.json` where `private` is false. Update
+      # this list when the monorepo gains new public packages.
+      PUBLIC_PACKAGES: >-
+        analytics
+        decorators
+        dsa
+        helpers
+        http
+        logger
+        rate-limiting
+        security
+        ui
 
     steps:
+      - name: Resolve ref metadata
+        # Single source of truth for the ref this run documents.
+        # workflow_dispatch can pass an alternate ref via inputs.ref;
+        # fall back to github.ref_name (already stripped of refs/...).
+        # DOCS_REF_SLUG is branch-safe for use in PR/branch names
+        # (`@resq-sw/ui@v0.35.6` → `resq-sw-ui-v0.35.6`).
+        run: |
+          raw='${{ inputs.ref || github.ref_name }}'
+          raw="${raw#refs/tags/}"
+          raw="${raw#refs/heads/}"
+          slug="${raw//\//-}"
+          slug="${slug//\@/}"
+          {
+            echo "DOCS_REF_NAME=$raw"
+            echo "DOCS_REF_SLUG=$slug"
+          } >> "$GITHUB_ENV"
+
       - name: Checkout source repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -66,152 +93,147 @@ jobs:
       - name: Install workspace deps
         run: bun install --frozen-lockfile
 
-      - name: Install TypeDoc + Markdown plugin (scoped to ui pkg)
-        # NOTE on @latest: the obvious advice is to pin to a specific
-        # major (e.g. typedoc@^0.28, typedoc-plugin-markdown@^4) so
-        # CI is reproducible. We tried that first and hit a peer-dep
-        # alignment failure: the plugin's CategoryRouter import
-        # requires a typedoc minor that was newer than what `^0.27`
-        # resolved to, breaking plugin load with a SyntaxError. Until
-        # one of the two packages cuts a major, the safest pin is to
-        # take whatever the plugin's peerDependency happens to want.
-        # Installing the plugin FIRST forces bun to resolve typedoc
-        # to a compatible version; the second `bun add` only nudges
-        # typedoc upward if the plugin's peer range allows it.
-        working-directory: ${{ env.PKG_DIR }}
-        run: |
-          bun add --dev typedoc-plugin-markdown@latest
-          bun add --dev typedoc@latest
-
-      - name: Write docs-site TypeDoc config
-        # The package's checked-in typedoc.json uses
-        # typedoc-github-wiki-theme, which produces sidebar files that
-        # do not render cleanly in Mintlify. Write a sibling config
-        # tailored for the docs site so we never load the wiki theme.
-        # Only options accepted by typedoc core are listed here;
-        # plugin-specific options (e.g. fileExtension) shifted between
-        # plugin majors and broke the build last time.
-        working-directory: ${{ env.PKG_DIR }}
-        run: |
-          cat > typedoc.docs-site.json <<'JSON'
-          {
-            "$schema": "https://typedoc-plugin-markdown.org/schema.json",
-            "plugin": ["typedoc-plugin-markdown"],
-            "tsconfig": "tsconfig.json",
-            "entryPointStrategy": "Expand",
-            "entryPoints": ["src"],
-            "exclude": [
-              "**/*.cy.ts",
-              "**/*.test.ts",
-              "**/*.test.tsx",
-              "**/*.stories.ts",
-              "**/*.stories.tsx",
-              "**/*.spec.ts",
-              "**/*.spec.tsx"
-            ],
-            "out": "generated-docs",
-            "readme": "none",
-            "cleanOutputDir": true
-          }
-          JSON
-
-      - name: Generate API reference
-        working-directory: ${{ env.PKG_DIR }}
-        run: |
-          rm -rf generated-docs
-          bunx typedoc --options typedoc.docs-site.json
-
-      - name: Convert top-level README to .mdx + plain-text module list
-        # Mintlify's docs.json nav resolver only matches .mdx for
-        # page ids, so the nav-registered README must be .mdx.
-        # Cross-page links from a .mdx parent require nav
-        # registration (a constraint the auto-generated tree of
-        # 3500+ pages cannot satisfy); strip the typedoc-emitted
-        # `[components/X](X/README.md)` module list down to plain
-        # backticked text. Users navigate to specific pages via
-        # the URL bar.
+      - name: Generate per-package TypeDoc output
+        # Loop over every public package, install typedoc + the
+        # markdown plugin scoped to that package, generate docs, and
+        # move the output into OUTPUT_DIR/<pkg>/. A typedoc failure
+        # for one package logs a warning and continues; aborting the
+        # whole run on one bad package would leave the rest of the
+        # docs stale.
         #
-        # Prepend a version banner so users browsing the rendered
-        # docs can identify which release the reference describes.
-        # Version is read from package.json at the package root;
-        # ref is the workflow's input ref (tag for tag-triggered
-        # runs).
-        working-directory: ${{ env.PKG_DIR }}/generated-docs
-        env:
-          PKG_REF: ${{ inputs.ref || github.ref_name }}
-          GH_REPO: ${{ github.repository }}
+        # NOTE on @latest pinning: pinning to a specific typedoc
+        # major and a separate plugin major drifts apart over time
+        # because the plugin's CategoryRouter import follows typedoc
+        # minor versions. Installing the plugin first forces bun to
+        # resolve typedoc to a peer-compatible version, then nudging
+        # typedoc up keeps it on the latest the plugin allows.
         run: |
-          if [ -f README.md ]; then
-            python3 - <<'PY'
-          import json, os, pathlib, re
-
-          INTERNAL_LINK = re.compile(r'\[([^\]]+)\]\((?!https?://|mailto:|#)[^)]+\)')
-          p = pathlib.Path("README.md")
-          text = p.read_text(encoding="utf-8")
-          text = INTERNAL_LINK.sub(r'`\1`', text)
-          # Collapse accidental double-backticks from already-
-          # backticked link text.
-          text = text.replace("``", "`")
-
-          ref_name = os.environ.get("PKG_REF", "main")
-          repo = os.environ.get("GH_REPO", "")
-          # package.json is one level up from generated-docs.
-          pkg_json = pathlib.Path("..") / "package.json"
-          version = "unknown"
-          if pkg_json.exists():
-              try:
-                  version = json.loads(pkg_json.read_text(encoding="utf-8")).get("version", "unknown")
-              except json.JSONDecodeError:
-                  pass
-
-          banner = (
-              f"> **Version:** `v{version}` · **Ref:** `{ref_name}` · "
-              f"**Source:** [`{repo}`](https://github.com/{repo})\n\n"
-          )
-          # Insert banner after the first H1 (typedoc emits `# ui`
-          # or similar). If there's no leading H1, prepend.
-          h1_match = re.match(r'(# [^\n]+\n+)', text)
-          if h1_match:
-              text = text[:h1_match.end()] + banner + text[h1_match.end():]
-          else:
-              text = banner + text
-
-          pathlib.Path("README.mdx").write_text(text, encoding="utf-8")
-          p.unlink()
-          PY
+          set -euo pipefail
+          mkdir -p "$OUTPUT_DIR"
+          rm -rf "${OUTPUT_DIR:?}"/*
+          generated=0
+          for pkg in $PUBLIC_PACKAGES; do
+            pkg_dir="packages/$pkg"
+            if [ ! -d "$pkg_dir/src" ]; then
+              echo "::warning ::skipping $pkg (no src/ at $pkg_dir)"
+              continue
+            fi
+            echo "==> generating $pkg"
+            (
+              cd "$pkg_dir"
+              bun add --dev typedoc-plugin-markdown@latest >/dev/null
+              bun add --dev typedoc@latest >/dev/null
+              cat > typedoc.docs-site.json <<'JSON'
+              {
+                "$schema": "https://typedoc-plugin-markdown.org/schema.json",
+                "plugin": ["typedoc-plugin-markdown"],
+                "tsconfig": "tsconfig.json",
+                "entryPointStrategy": "Expand",
+                "entryPoints": ["src"],
+                "exclude": [
+                  "**/*.cy.ts",
+                  "**/*.test.ts",
+                  "**/*.test.tsx",
+                  "**/*.stories.ts",
+                  "**/*.stories.tsx",
+                  "**/*.spec.ts",
+                  "**/*.spec.tsx"
+                ],
+                "out": "generated-docs",
+                "readme": "none",
+                "cleanOutputDir": true
+              }
+              JSON
+              rm -rf generated-docs
+              bunx typedoc --options typedoc.docs-site.json
+            ) || {
+              echo "::warning ::typedoc failed for $pkg, skipping"
+              continue
+            }
+            mkdir -p "$OUTPUT_DIR/$pkg"
+            cp -R "$pkg_dir/generated-docs/." "$OUTPUT_DIR/$pkg/"
+            generated=$((generated + 1))
+          done
+          if [ "$generated" -eq 0 ]; then
+            echo "::error ::no packages generated; aborting empty doc PR"
+            exit 1
           fi
+          echo "generated $generated packages"
 
-      - name: Rename subdirectory READMEs to index.md
-        # TypeDoc writes `<dir>/README.md` for each module's landing
-        # page. Mintlify's nav resolver expects `<dir>.{md,mdx}` or
+      - name: Rename per-package READMEs to index.md
+        # TypeDoc writes `<pkg>/README.md` for each package landing
+        # page and `<pkg>/<dir>/README.md` for each module landing.
+        # Mintlify's nav resolver expects `<dir>.{md,mdx}` or
         # `<dir>/index.{md,mdx}` for a registered page id like
         # `<dir>`; `<dir>/README.md` is a Hugo convention that
         # Mintlify doesn't natively pick up. Without this rename,
-        # registering `<dir>` in the splice produces a "file does
-        # not exist" warning on every dev start and the URL
-        # `/<dir>` 307-redirects to the first leaf instead of
-        # rendering the README content.
+        # registering `<dir>` produces a "file does not exist"
+        # warning on every dev start and the URL `/<dir>` 307s to
+        # the first leaf instead of rendering the README content.
         #
-        # Rename only the subdirectory READMEs; the top-level
-        # README is already converted to README.mdx in the previous
-        # step (it's nav-registered explicitly). Also rewrite any
-        # in-content `README.md` references to `index.md` so
-        # cross-links keep working.
-        working-directory: ${{ env.PKG_DIR }}/generated-docs
+        # Rename ALL READMEs in the multi-package layout. There's no
+        # top-level README in OUTPUT_DIR yet — the "Write top-level
+        # index" step writes that as README.mdx separately.
+        # Also rewrite any in-content `README.md` references to
+        # `index.md` so cross-links keep working.
+        working-directory: ${{ env.OUTPUT_DIR }}
         run: |
-          # Rename each non-top-level README.md to index.md.
-          find . -mindepth 2 -type f -name 'README.md' -print0 \
+          find . -type f -name 'README.md' -print0 \
             | while IFS= read -r -d '' f; do
               mv "$f" "$(dirname "$f")/index.md"
             done
-          # Rewrite link targets so cross-page references keep
-          # resolving. Match `(...README.md)` and `(...README.md#frag)`
-          # in markdown link syntax only.
           find . -type f -name '*.md' -print0 | while IFS= read -r -d '' f; do
             sed -E -i \
               's|\]\(([^)]*)README\.md(#[^)]*)?\)|](\1index.md\2)|g' \
               "$f"
           done
+
+      - name: Inject per-package version banners
+        # Each `<pkg>/index.md` (the package landing page) gets a
+        # banner showing the version from packages/<pkg>/package.json
+        # and the source ref, matching the pattern used by the .NET
+        # and Python templates. Inserted after the file's first H1.
+        env:
+          PKG_REF: ${{ env.DOCS_REF_NAME }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import re
+
+          ref_name = os.environ.get("PKG_REF", "main")
+          repo = os.environ.get("GH_REPO", "")
+          out = pathlib.Path(os.environ["OUTPUT_DIR"])
+
+          for pkg_dir in sorted(out.iterdir()):
+              if not pkg_dir.is_dir():
+                  continue
+              landing = pkg_dir / "index.md"
+              if not landing.is_file():
+                  continue
+              pkg_json = pathlib.Path("packages") / pkg_dir.name / "package.json"
+              version = "unknown"
+              if pkg_json.exists():
+                  try:
+                      version = json.loads(
+                          pkg_json.read_text(encoding="utf-8")
+                      ).get("version", "unknown")
+                  except json.JSONDecodeError:
+                      pass
+              banner = (
+                  f"> **Version:** `v{version}` · **Ref:** `{ref_name}` · "
+                  f"**Source:** [`{repo}`](https://github.com/{repo})\n\n"
+              )
+              text = landing.read_text(encoding="utf-8")
+              h1 = re.match(r"(# [^\n]+\n+)", text)
+              if h1:
+                  text = text[: h1.end()] + banner + text[h1.end():]
+              else:
+                  text = banner + text
+              landing.write_text(text, encoding="utf-8")
+          PY
 
       - name: Prefix bare relative .md links with ./
         # TypeDoc emits cross-references as bare relative paths,
@@ -225,23 +247,18 @@ jobs:
         # schemes (mailto:, data:, etc.). A target is "qualified"
         # iff it starts with `./`, `../`, `/`, `#`, or contains `:`
         # before the first `/`.
-        working-directory: ${{ env.PKG_DIR }}/generated-docs
+        working-directory: ${{ env.OUTPUT_DIR }}
         run: |
           python3 - <<'PY'
           import pathlib
           import re
 
-          # Match `[label](target)` where target is bare relative.
-          # Captured target stops at `)` to support targets without
-          # spaces; markdown spec allows them as long as parens
-          # don't appear inside.
           link_re = re.compile(r'(?<!\!)\[([^\]]*)\]\(([^)]+)\)')
 
           def is_qualified(target: str) -> bool:
               t = target.strip().split(None, 1)[0]
               if t.startswith(("./", "../", "/", "#")):
                   return True
-              # URL schemes / mailto: / data: — colon before /.
               if ":" in t.split("/", 1)[0]:
                   return True
               return False
@@ -268,7 +285,7 @@ jobs:
         # Drop everything before the first "# " heading on each file
         # (typedoc emits exactly one top-level heading per page).
         # Files without a heading are left untouched.
-        working-directory: ${{ env.PKG_DIR }}/generated-docs
+        working-directory: ${{ env.OUTPUT_DIR }}
         run: |
           find . -type f -name '*.md' -print0 | while IFS= read -r -d '' f; do
             if grep -q '^# ' "$f"; then
@@ -289,7 +306,7 @@ jobs:
         # things like `\`type T = { id: string }\`` in JSDoc, and
         # escaping the braces there causes &#123; to render
         # literally inside `<code>` tags in the browser.
-        working-directory: ${{ env.PKG_DIR }}/generated-docs
+        working-directory: ${{ env.OUTPUT_DIR }}
         run: |
           find . -type f -name '*.md' -print0 | while IFS= read -r -d '' f; do
             awk '
@@ -318,13 +335,64 @@ jobs:
             ' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
           done
 
+      - name: Write top-level index
+        # Stitch a small README.mdx at the top of OUTPUT_DIR listing
+        # all generated packages with their pinned versions. This is
+        # what users land on when clicking "TypeScript" in the
+        # Generated Package References sidebar group.
+        #
+        # Emit .mdx (not .md) because Mintlify's docs.json nav
+        # resolver only matches .mdx for explicitly-registered page
+        # ids; the splice registers `sdks/typescript/api/README` as
+        # the language sub-group's first page.
+        env:
+          PKG_REF: ${{ env.DOCS_REF_NAME }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          python3 - <<'PY' > "$OUTPUT_DIR/README.mdx"
+          import json
+          import os
+          import pathlib
+
+          ref_name = os.environ.get("PKG_REF", "main")
+          repo = os.environ.get("GH_REPO", "")
+          out = pathlib.Path(os.environ["OUTPUT_DIR"])
+
+          def read_version(pkg: str) -> str:
+              pkg_json = pathlib.Path("packages") / pkg / "package.json"
+              if not pkg_json.exists():
+                  return "unknown"
+              try:
+                  return json.loads(
+                      pkg_json.read_text(encoding="utf-8")
+                  ).get("version", "unknown")
+              except json.JSONDecodeError:
+                  return "unknown"
+
+          print("# ResQ TypeScript SDK")
+          print()
+          print(
+              f"Auto-generated reference for "
+              f"[`{repo}`](https://github.com/{repo}) "
+              f"at ref `{ref_name}`."
+          )
+          print()
+          print("## Packages")
+          print()
+          for pkg_dir in sorted(out.iterdir()):
+              if not pkg_dir.is_dir():
+                  continue
+              version = read_version(pkg_dir.name)
+              print(f"- `@resq-sw/{pkg_dir.name}` — `v{version}`")
+          PY
+
       - name: Build pages index
         # Flat JSON array of generated Markdown paths (without
         # extension) so the docs repo can later splice them into
         # docs.json automatically. Mintlify resolves both .md and
         # .mdx, and typedoc-plugin-markdown emits .md by default,
         # so we keep the .md output and skip a rename step.
-        working-directory: ${{ env.PKG_DIR }}/generated-docs
+        working-directory: ${{ env.OUTPUT_DIR }}
         run: |
           find . -name '*.md' -type f \
             | sed 's|^\./||; s|\.md$||' \
@@ -349,7 +417,7 @@ jobs:
           target="docs-checkout/${DOCS_TARGET}"
           mkdir -p "$target"
           rm -rf "${target:?}"/*
-          cp -R "${PKG_DIR}/generated-docs/." "$target/"
+          cp -R "${OUTPUT_DIR}/." "$target/"
 
       - name: Splice _pages.json into docs.json nav
         # Mintlify only routes pages registered in docs.json. The
@@ -357,7 +425,8 @@ jobs:
         # rewrite the matching language sub-group under the
         # 'Generated Package References' group so all pages are
         # discoverable, in-content cross-links resolve, and direct
-        # URLs work.
+        # URLs work. Each top-level dir under sdks/typescript/api/
+        # becomes its own collapsible package group.
         working-directory: docs-checkout
         run: |
           python3 - <<'PYINNER'
@@ -374,9 +443,6 @@ jobs:
               raise SystemExit(f"missing {pages_path}")
           raw = json.loads(pages_path.read_text())
 
-          # Build hierarchical groups by path segments. Each
-          # `<dir>/README` becomes the dir's group entry rather than
-          # a duplicate leaf.
           tree: dict = {}
 
           def insert(node, parts, full_id):
@@ -395,9 +461,7 @@ jobs:
               # suffix when building the registered path so the URL
               # stays clean (`/<dir>` not `/<dir>/index`). Same
               # principle applied to legacy `/README` entries in
-              # case any downstream tool still emits them. Files
-              # that don't end in either suffix keep their path
-              # verbatim.
+              # case any downstream tool still emits them.
               if p.endswith("/index") or p.endswith("/README"):
                   bare = p.rsplit("/", 1)[0]
                   full_id = f"{PREFIX}/{bare}"
@@ -443,16 +507,17 @@ jobs:
           author: 'resq-sw <engineer@resq.software>'
           committer: 'resq-sw <engineer@resq.software>'
           commit-message: |
-            docs(ui): sync API reference for ${{ github.ref_name }}
-          title: 'docs(ui): API reference ${{ github.ref_name }}'
+            docs(typescript): sync API reference for ${{ env.DOCS_REF_NAME }}
+          title: 'docs(typescript): API reference ${{ env.DOCS_REF_NAME }}'
           body: |
             Auto-generated by `${{ github.workflow }}` in
-            `${{ github.repository }}` for ref `${{ github.ref_name }}`
+            `${{ github.repository }}` for ref `${{ env.DOCS_REF_NAME }}`
             (run: ${{ github.run_id }}).
 
-            Regenerated files under `sdks/typescript/api/`. Review the
-            diff for unintended exports and merge to publish.
-          branch: auto/typescript-api-${{ github.ref_name }}
+            Regenerated files under `sdks/typescript/api/`. One
+            sub-directory per `@resq-sw/*` package. Review the diff
+            for unintended exports and merge to publish.
+          branch: auto/typescript-api-${{ env.DOCS_REF_SLUG }}
           base: main
           delete-branch: true
           add-paths: |
