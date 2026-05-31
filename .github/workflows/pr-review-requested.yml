@@ -13,10 +13,12 @@ jobs:
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
-      - uses: actions-ecosystem/action-remove-labels@2ce5d41b4b6aa8503e285553f75ed56e0a40bae0 # v1.3.0
-        with:
-          labels: "status: waiting for author"
-      - if: failure()
+      - name: Remove "waiting for author" label
+        # Use the runner's built-in gh CLI instead of a third-party action
+        # (zizmor superfluous-actions, alert #53). `|| true` keeps this
+        # non-fatal when the label isn't currently applied to the PR.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
         run: |
-          echo "Don't worry if the previous step failed."
-          echo "See https://github.com/actions-ecosystem/action-remove-labels/issues/221."
+          gh pr edit "$PR_URL" --remove-label "status: waiting for author" || true
