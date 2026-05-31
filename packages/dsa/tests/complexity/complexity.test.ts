@@ -121,7 +121,9 @@ describe("Algorithmic Complexity Verification", () => {
 		expectComplexityIn(results["CountMinSketch.increment"], ["O(1)", "O(log n)", "O(n)"]);
 	});
 
-	it("PriorityQueue enqueue+dequeue cycle should be O(n log n) total", async () => {
+	// Heap ops are sub-microsecond, so a single sample can be dominated by timing
+	// noise and under-fit the curve. Retry rather than weaken the assertion.
+	it("PriorityQueue enqueue+dequeue cycle should be O(n log n) total", { retry: 2 }, async () => {
 		const algo: AlgorithmCandidate = {
 			name: "PriorityQueue",
 			fn: async (size) => {
@@ -135,8 +137,6 @@ describe("Algorithmic Complexity Verification", () => {
 			},
 		};
 		const results = await measurePerformance(algo);
-		// Heap ops are sub-microsecond; microbenchmark noise can under-fit the curve
-		// to O(log n) for small n. Tolerate it like BoundedHeap.insert above.
-		expectComplexityIn(results.PriorityQueue, ["O(log n)", "O(n)", "O(n log n)"]);
+		expectComplexityIn(results.PriorityQueue, ["O(n)", "O(n log n)"]);
 	});
 });
