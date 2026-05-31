@@ -98,6 +98,11 @@ jobs:
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: latest
+          # This workflow runs on release tags and opens a cross-repo PR using
+          # DOCS_REPO_PR_TOKEN. Disable setup-bun's default cache so a cache
+          # poisoned by a less-trusted run cannot be restored into this
+          # privileged context (zizmor cache-poisoning, alert #50).
+          no-cache: true
 
       - name: Install workspace deps
         run: bun install --frozen-lockfile
