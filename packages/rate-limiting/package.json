@@ -40,7 +40,7 @@
 	"devDependencies": {
 		"@upstash/ratelimit": "^2.0.5",
 		"@upstash/redis": "^1.38.0",
-		"effect": "4.0.0-beta.65",
+		"effect": "4.0.0-beta.66",
 		"tsdown": "^0.22.0",
 		"typescript": "6.0.3",
 		"vitest": "4.1.5"
