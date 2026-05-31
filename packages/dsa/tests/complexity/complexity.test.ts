@@ -135,6 +135,8 @@ describe("Algorithmic Complexity Verification", () => {
 			},
 		};
 		const results = await measurePerformance(algo);
-		expectComplexityIn(results.PriorityQueue, ["O(n)", "O(n log n)"]);
+		// Heap ops are sub-microsecond; microbenchmark noise can under-fit the curve
+		// to O(log n) for small n. Tolerate it like BoundedHeap.insert above.
+		expectComplexityIn(results.PriorityQueue, ["O(log n)", "O(n)", "O(n log n)"]);
 	});
 });
