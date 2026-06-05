@@ -40,9 +40,9 @@
 		"@effect/platform-bun": "4.0.0-beta.74",
 		"@types/node": "^25.9.1",
 		"effect": "4.0.0-beta.66",
-		"tsdown": "^0.22.1",
+		"tsdown": "^0.22.2",
 		"typescript": "6.0.3",
-		"vitest": "4.1.7"
+		"vitest": "4.1.8"
 	},
 	"publishConfig": {
 		"access": "public",
