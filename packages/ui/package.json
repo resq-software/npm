@@ -369,7 +369,7 @@
 		"@types/react": "^19.2.16",
 		"@types/react-dom": "^19.2.3",
 		"@vitest/coverage-v8": "4.1.8",
-		"chromatic": "^16.9.1",
+		"chromatic": "^17.4.0",
 		"console-fail-test": "0.6.1",
 		"cspell": "10.0.1",
 		"jsdom": "^29.1.1",
