@@ -1,39 +1,38 @@
-version: 2
 updates:
-  # GitHub Actions — Monday
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 3
-    labels:
-      - "dependencies"
-      - "github-actions"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    groups:
-      actions-minor-patch:
-        update-types:
-          - "minor"
-          - "patch"
-
-  # Bun — Friday
-  - package-ecosystem: "bun"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "friday"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "javascript"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    groups:
-      bun-minor-patch:
-        update-types:
-          - "minor"
-          - "patch"
+- commit-message:
+    include: scope
+    prefix: chore
+  directory: /
+  groups:
+    actions-minor-patch:
+      update-types:
+      - minor
+      - patch
+  ignore:
+  - dependency-name: "github/gh-aw-actions" # Managed by gh aw compile. Version-locked to the gh-aw compiler; do not bump.
+  labels:
+  - dependencies
+  - github-actions
+  open-pull-requests-limit: 3
+  package-ecosystem: github-actions
+  schedule:
+    day: monday
+    interval: weekly
+- commit-message:
+    include: scope
+    prefix: chore
+  directory: /
+  groups:
+    bun-minor-patch:
+      update-types:
+      - minor
+      - patch
+  labels:
+  - dependencies
+  - javascript
+  open-pull-requests-limit: 5
+  package-ecosystem: bun
+  schedule:
+    day: friday
+    interval: weekly
+version: 2
