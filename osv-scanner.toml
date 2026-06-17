@@ -1,0 +1,73 @@
+# Copyright 2026 ResQ Software
+# SPDX-License-Identifier: Apache-2.0
+#
+# OSV-Scanner configuration — scopes the commit/CI audit gate to what actually
+# ships to consumers.
+#
+# Every package ignored below is a DEV / BUILD-tooling transitive dependency
+# (Storybook → next/vite/esbuild/ws/@babel/core/markdown-it, markdownlint-cli →
+# js-yaml/brace-expansion, posthog-js dev chain → dompurify). None is a runtime
+# `dependencies` entry of any published `@resq-sw/*` package, so these advisories
+# cannot reach consumers of the libraries.
+#
+# Verified 2026-06-13 via `bun why <pkg>` + a scan of every packages/*/package.json
+# `dependencies` block (not devDependencies). The npm audit-ci pass (level=critical)
+# already passes; this file brings the OSV pass in line with the same "production
+# dependencies only" posture.
+#
+# Review periodically: when Storybook / the dev toolchain is upgraded, prune any
+# entry whose advisories no longer appear so real future issues aren't masked.
+
+[[PackageOverrides]]
+name = "next"
+ecosystem = "npm"
+ignore = true
+reason = "dev-only: pulled transitively by @storybook/nextjs-vite; not a runtime dep of any published package"
+
+[[PackageOverrides]]
+name = "vite"
+ecosystem = "npm"
+ignore = true
+reason = "dev-only: Storybook / example-react-dashboard build tooling; not shipped"
+
+[[PackageOverrides]]
+name = "esbuild"
+ecosystem = "npm"
+ignore = true
+reason = "dev-only: Storybook + vite build tooling; not shipped"
+
+[[PackageOverrides]]
+name = "ws"
+ecosystem = "npm"
+ignore = true
+reason = "dev-only: storybook + @effect/platform-bun dev chain; not a runtime dep of any published package"
+
+[[PackageOverrides]]
+name = "@babel/core"
+ecosystem = "npm"
+ignore = true
+reason = "dev-only: Storybook (@storybook/react, nextjs-vite) build tooling; not shipped"
+
+[[PackageOverrides]]
+name = "js-yaml"
+ecosystem = "npm"
+ignore = true
+reason = "dev-only: markdownlint-cli + @changesets/cli tooling; not shipped"
+
+[[PackageOverrides]]
+name = "markdown-it"
+ecosystem = "npm"
+ignore = true
+reason = "dev-only: Storybook docs tooling; not shipped"
+
+[[PackageOverrides]]
+name = "brace-expansion"
+ecosystem = "npm"
+ignore = true
+reason = "dev-only: markdownlint-cli + @storybook/nextjs-vite tooling; not shipped"
+
+[[PackageOverrides]]
+name = "dompurify"
+ecosystem = "npm"
+ignore = true
+reason = "dev-only: pulled by posthog-js, a devDependency / optional peer of @resq-sw/analytics; not a runtime dep of any published package"
