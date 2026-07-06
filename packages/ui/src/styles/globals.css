@@ -28,7 +28,7 @@
 @custom-variant dark (&:where(html:not(.light) *));
 
 :root {
-	--background: oklch(16.04% 0.0152 272.20);
+	--background: oklch(16.63% 0.0262 269.37);
 	--foreground: oklch(96.19% 0.0109 274.89);
 	--surface: oklch(19.72% 0.0231 268.80);
 	--card: oklch(22.90% 0.0302 269.75);
