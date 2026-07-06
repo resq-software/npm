@@ -71,3 +71,15 @@ name = "dompurify"
 ecosystem = "npm"
 ignore = true
 reason = "dev-only: pulled by posthog-js, a devDependency / optional peer of @resq-sw/analytics; not a runtime dep of any published package"
+
+[[PackageOverrides]]
+name = "linkify-it"
+ecosystem = "npm"
+ignore = true
+reason = "dev-only: markdown-it → markdownlint-cli tooling (@resq-sw/ui devDependency); not a runtime dep of any published package"
+
+[[PackageOverrides]]
+name = "undici"
+ecosystem = "npm"
+ignore = true
+reason = "dev-only: jsdom (test env for @resq-sw/ui + @resq-sw/helpers) and the vitest test runner; not a runtime dep of any published package"
