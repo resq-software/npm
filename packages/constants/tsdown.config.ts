@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Systems, Inc.
+ * Copyright 2026 ResQ Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-import { defineConfig } from "vitest/config";
+import { defineConfig } from "tsdown";
+
 export default defineConfig({
-	test: {
-		include: ["src/**/*.test.ts"],
-	},
-	// This package's tests use legacy (`experimentalDecorators`) decorators, e.g.
-	// `@bind`, `@observe`. Vite 8's oxc transform respects tsconfig include/exclude,
-	// and tsconfig excludes *.test.ts — so oxc wouldn't otherwise enable the legacy
-	// decorator transform for the test files, and the raw `@` reaches Node as a
-	// SyntaxError. Enable it explicitly for the test transform.
-	oxc: {
-		decorator: {
-			legacy: true,
-			emitDecoratorMetadata: true,
-		},
-	},
+	dts: true,
+	entry: ["src/**/*.ts", "!src/**/*.test.*"],
+	outDir: "lib",
+	platform: "neutral",
+	unbundle: true,
 });

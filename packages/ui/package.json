@@ -359,6 +359,7 @@
 		"@biomejs/biome": "^2.5.2",
 		"@chromatic-com/storybook": "^5.2.1",
 		"@github-ui/storybook-addon-performance-panel": "^1.1.4",
+		"@resq-sw/constants": "workspace:*",
 		"@storybook/addon-a11y": "^10.4.6",
 		"@storybook/addon-docs": "^10.4.6",
 		"@storybook/addon-links": "^10.4.6",

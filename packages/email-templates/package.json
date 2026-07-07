@@ -1,0 +1,93 @@
+{
+	"name": "@resq-sw/email-templates",
+	"version": "0.0.0",
+	"description": "Type-safe transactional email templates: an Effect Schema contract, React Email components, headless render-to-html/text, and an optional Resend sender",
+	"license": "Apache-2.0",
+	"author": {
+		"name": "ResQ Software"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./lib/index.d.ts",
+			"import": "./lib/index.js",
+			"default": "./lib/index.js"
+		},
+		"./emails": {
+			"types": "./lib/emails/index.d.ts",
+			"import": "./lib/emails/index.js",
+			"default": "./lib/emails/index.js"
+		},
+		"./send": {
+			"types": "./lib/send/index.d.ts",
+			"import": "./lib/send/index.js",
+			"default": "./lib/send/index.js"
+		}
+	},
+	"main": "lib/index.js",
+	"module": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"sideEffects": false,
+	"files": [
+		"lib",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsdown",
+		"test": "vitest run",
+		"tsc": "tsc --noEmit",
+		"email:dev": "email dev --dir ./emails --port 3000",
+		"email:export": "email export --dir ./emails --outDir ./out --pretty --plainText"
+	},
+	"dependencies": {
+		"@react-email/components": "^1.0.12",
+		"@react-email/render": "^2.0.10",
+		"@resq-sw/constants": "workspace:*"
+	},
+	"peerDependencies": {
+		"effect": ">=3.0.0",
+		"react": ">=19",
+		"react-dom": ">=19",
+		"resend": ">=6"
+	},
+	"peerDependenciesMeta": {
+		"resend": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@types/node": "^25.9.1",
+		"@types/react": "^19.2.16",
+		"@types/react-dom": "^19.2.3",
+		"@vitest/coverage-v8": "4.1.8",
+		"effect": "4.0.0-beta.78",
+		"react": "^19.2.7",
+		"react-dom": "^19.2.7",
+		"react-email": "^6.6.6",
+		"resend": "6.17.1",
+		"tsdown": "^0.22.2",
+		"typescript": "6.0.3",
+		"vitest": "4.1.8"
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true,
+		"registry": "https://registry.npmjs.org/"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/resq-software/npm.git",
+		"directory": "packages/email-templates"
+	},
+	"keywords": [
+		"email",
+		"react-email",
+		"templates",
+		"transactional",
+		"effect",
+		"resend"
+	],
+	"engines": {
+		"node": ">=20.19.0"
+	}
+}

@@ -1,0 +1,67 @@
+{
+	"name": "@resq-sw/constants",
+	"version": "0.0.0",
+	"description": "Shared, zero-dependency constants for ResQ apps: design tokens (oklch + email-safe hex), brand identity, and cross-app values",
+	"license": "Apache-2.0",
+	"author": {
+		"name": "ResQ Software"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./lib/index.d.ts",
+			"import": "./lib/index.js",
+			"default": "./lib/index.js"
+		},
+		"./tokens": {
+			"types": "./lib/tokens.d.ts",
+			"import": "./lib/tokens.js",
+			"default": "./lib/tokens.js"
+		},
+		"./brand": {
+			"types": "./lib/brand.d.ts",
+			"import": "./lib/brand.js",
+			"default": "./lib/brand.js"
+		}
+	},
+	"main": "lib/index.js",
+	"module": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"sideEffects": false,
+	"files": [
+		"lib",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsdown",
+		"test": "vitest run",
+		"tsc": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@types/node": "^25.9.1",
+		"@vitest/coverage-v8": "4.1.8",
+		"tsdown": "^0.22.2",
+		"typescript": "6.0.3",
+		"vitest": "4.1.8"
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true,
+		"registry": "https://registry.npmjs.org/"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/resq-software/npm.git",
+		"directory": "packages/constants"
+	},
+	"keywords": [
+		"constants",
+		"design-tokens",
+		"brand",
+		"oklch",
+		"theme"
+	],
+	"engines": {
+		"node": ">=20.19.0"
+	}
+}
