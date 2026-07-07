@@ -19,4 +19,15 @@ export default defineConfig({
 	test: {
 		include: ["src/**/*.test.ts"],
 	},
+	// This package's tests use legacy (`experimentalDecorators`) decorators, e.g.
+	// `@bind`, `@observe`. Vite 8's oxc transform respects tsconfig include/exclude,
+	// and tsconfig excludes *.test.ts — so oxc wouldn't otherwise enable the legacy
+	// decorator transform for the test files, and the raw `@` reaches Node as a
+	// SyntaxError. Enable it explicitly for the test transform.
+	oxc: {
+		decorator: {
+			legacy: true,
+			emitDecoratorMetadata: true,
+		},
+	},
 });
