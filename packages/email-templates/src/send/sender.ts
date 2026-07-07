@@ -40,5 +40,11 @@ export type SendResult =
  * SES, Postmark, SMTP); the rest of the package depends only on this interface.
  */
 export interface EmailSender {
+	/**
+	 * Send one email. Implementations SHOULD normalize transport/API failures into
+	 * a `{ ok: false, error }` result rather than throwing (the bundled Resend
+	 * adapter does). `sendEmail` still guards against a throwing sender, but
+	 * honoring this contract keeps the failure `name`/`message` provider-accurate.
+	 */
 	send(input: SendEmailInput): Promise<SendResult>;
 }

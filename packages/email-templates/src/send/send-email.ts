@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { EmailValidationError } from "../mailer.js";
 import { renderEmail } from "../render.js";
 import type { EmailSender, SendResult } from "./sender.js";
 
@@ -36,16 +37,50 @@ export async function sendEmail(
 	payload: unknown,
 	options: SendEmailOptions,
 ): Promise<SendResult> {
-	const { to, subject, html, text } = await renderEmail(payload);
+	let rendered: Awaited<ReturnType<typeof renderEmail>>;
+	try {
+		rendered = await renderEmail(payload);
+	} catch (err) {
+		// Preserve the never-throws SendResult contract (see the sender adapters):
+		// an invalid payload — or any other render failure — becomes a failure
+		// result instead of a rejected promise, so pipeline callers that only
+		// branch on `SendResult` never hit an unhandled rejection.
+		// EmailValidationError keeps its name so callers can tell a bad payload
+		// apart from an unexpected render error.
+		if (err instanceof EmailValidationError) {
+			return { ok: false, error: { name: err.name, message: err.message } };
+		}
+		return {
+			ok: false,
+			error: {
+				name: "render_error",
+				message: err instanceof Error ? err.message : String(err),
+			},
+		};
+	}
 
-	return sender.send({
-		from: options.from,
-		to,
-		subject,
-		html,
-		text,
-		replyTo: options.replyTo,
-		idempotencyKey: options.idempotencyKey,
-		headers: options.headers,
-	});
+	try {
+		return await sender.send({
+			from: options.from,
+			to: rendered.to,
+			subject: rendered.subject,
+			html: rendered.html,
+			text: rendered.text,
+			replyTo: options.replyTo,
+			idempotencyKey: options.idempotencyKey,
+			headers: options.headers,
+		});
+	} catch (err) {
+		// EmailSender.send is expected to normalize failures into SendResult, but a
+		// third-party sender might still throw; keep sendEmail's never-throws
+		// contract regardless, tagged distinctly so it isn't confused with a
+		// render_error.
+		return {
+			ok: false,
+			error: {
+				name: "sender_error",
+				message: err instanceof Error ? err.message : String(err),
+			},
+		};
+	}
 }

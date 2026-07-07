@@ -41,7 +41,7 @@ Everything is `as const`, so values are literal-typed and tree-shakeable.
 import { colors, fonts } from "@resq-sw/constants/tokens";
 import { brand } from "@resq-sw/constants/brand";
 
-element.style.background = colors.hex.background; // "#0B0D14"
+element.style.background = colors.hex.background; // "#0A0E1A"
 const from = brand.email.from; // "ResQ <updates@send.resq.software>"
 ```
 

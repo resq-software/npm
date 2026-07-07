@@ -25,6 +25,8 @@ vi.mock("resend", () => ({
 }));
 
 import { createResendSender } from "../src/send/resend-sender";
+import { sendEmail } from "../src/send/send-email";
+import type { EmailSender } from "../src/send/sender";
 
 const input = { from: "ResQ <a@b.com>", to: "c@d.com", subject: "Hi", html: "<b>hi</b>" };
 
@@ -78,5 +80,44 @@ describe("createResendSender", () => {
 		expect(sendMock).toHaveBeenCalledWith(expect.objectContaining({ subject: "Hi" }), {
 			idempotencyKey: "incident-1",
 		});
+	});
+});
+
+describe("sendEmail", () => {
+	// A sender that would succeed, so any failure result must come from rendering.
+	const okSender: EmailSender = { send: async () => ({ ok: true, id: "msg_ok" }) };
+
+	it("normalizes an invalid payload into a SendResult failure instead of throwing", async () => {
+		const result = await sendEmail(
+			okSender,
+			{ name: "not-a-template" },
+			{ from: "ResQ <a@b.com>" },
+		);
+		expect(result.ok).toBe(false);
+		if (!result.ok) expect(result.error.name).toBe("EmailValidationError");
+	});
+
+	it("does not call the sender when the payload fails validation", async () => {
+		const send = vi.fn(async () => ({ ok: true, id: "msg_x" }) as const);
+		await sendEmail({ send }, {}, { from: "ResQ <a@b.com>" });
+		expect(send).not.toHaveBeenCalled();
+	});
+
+	it("normalizes a throwing sender into a SendResult failure", async () => {
+		const throwingSender: EmailSender = {
+			send: async () => {
+				throw new Error("SMTP 500");
+			},
+		};
+		const result = await sendEmail(
+			throwingSender,
+			{ name: "otp", to: "user@example.com", data: { code: "123456", firstName: "Ada" } },
+			{ from: "ResQ <a@b.com>" },
+		);
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.error.name).toBe("sender_error");
+			expect(result.error.message).toContain("SMTP 500");
+		}
 	});
 });
