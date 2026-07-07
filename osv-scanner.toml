@@ -4,82 +4,135 @@
 # OSV-Scanner configuration — scopes the commit/CI audit gate to what actually
 # ships to consumers.
 #
-# Every package ignored below is a DEV / BUILD-tooling transitive dependency
-# (Storybook → next/vite/esbuild/ws/@babel/core/markdown-it, markdownlint-cli →
-# js-yaml/brace-expansion, posthog-js dev chain → dompurify). None is a runtime
-# `dependencies` entry of any published `@resq-sw/*` package, so these advisories
-# cannot reach consumers of the libraries.
+# Every advisory ignored below currently affects a DEV / BUILD / TEST-tooling
+# transitive dependency only (Storybook -> next/vite/esbuild/ws/@babel/core/
+# markdown-it/linkify-it, markdownlint-cli + @changesets/cli -> js-yaml/
+# brace-expansion, jsdom + vitest -> undici). None is a runtime `dependencies`
+# entry of any published `@resq-sw/*` package, so these advisories cannot reach
+# consumers of the libraries.
 #
-# Verified 2026-06-13 via `bun why <pkg>` + a scan of every packages/*/package.json
-# `dependencies` block (not devDependencies). The npm audit-ci pass (level=critical)
-# already passes; this file brings the OSV pass in line with the same "production
-# dependencies only" posture.
+# We ignore by SPECIFIC ADVISORY ID (not whole-package `ignore = true`): if a
+# NEW advisory is published against any of these packages, it is still surfaced
+# by the gate instead of being silently masked. When the dev toolchain is
+# upgraded, prune any ID whose advisory no longer appears.
 #
-# Review periodically: when Storybook / the dev toolchain is upgraded, prune any
-# entry whose advisories no longer appear so real future issues aren't masked.
+# NOTE on dompurify: it was previously ignored here, but it is production-
+# reachable — `posthog-js` is an optional peer of `@resq-sw/analytics` and pulls
+# dompurify into a consumer's runtime. Rather than mask it, the root package.json
+# `overrides` pins dompurify to `>=3.4.11`, which clears all 8 advisories that
+# affected 3.4.2. dompurify is therefore fully monitored again (no entry below).
+#
+# Verified 2026-07-06 via `osv-scanner scan source --lockfile=bun.lock` + a scan
+# of every packages/*/package.json `dependencies` block (not devDependencies).
+# The npm audit-ci pass (level=critical) already passes; this file brings the OSV
+# pass in line with the same "production dependencies only" posture.
 
-[[PackageOverrides]]
-name = "next"
-ecosystem = "npm"
-ignore = true
-reason = "dev-only: pulled transitively by @storybook/nextjs-vite; not a runtime dep of any published package"
+# --- next: Storybook (@storybook/nextjs-vite) build tooling; not shipped ---
+[[IgnoredVulns]]
+id = "GHSA-267c-6grr-h53f"
+reason = "dev-only: next via @storybook/nextjs-vite; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-26hh-7cqf-hhc6"
+reason = "dev-only: next via @storybook/nextjs-vite; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-36qx-fr4f-26g5"
+reason = "dev-only: next via @storybook/nextjs-vite; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-3g8h-86w9-wvmq"
+reason = "dev-only: next via @storybook/nextjs-vite; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-492v-c6pp-mqqv"
+reason = "dev-only: next via @storybook/nextjs-vite; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-8h8q-6873-q5fj"
+reason = "dev-only: next via @storybook/nextjs-vite; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-c4j6-fc7j-m34r"
+reason = "dev-only: next via @storybook/nextjs-vite; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-ffhc-5mcf-pf4q"
+reason = "dev-only: next via @storybook/nextjs-vite; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-gx5p-jg67-6x7h"
+reason = "dev-only: next via @storybook/nextjs-vite; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-h64f-5h5j-jqjh"
+reason = "dev-only: next via @storybook/nextjs-vite; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-mg66-mrh9-m8jx"
+reason = "dev-only: next via @storybook/nextjs-vite; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-vfv6-92ff-j949"
+reason = "dev-only: next via @storybook/nextjs-vite; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-wfc6-r584-vfw7"
+reason = "dev-only: next via @storybook/nextjs-vite; not a runtime dep of any published package"
 
-[[PackageOverrides]]
-name = "vite"
-ecosystem = "npm"
-ignore = true
-reason = "dev-only: Storybook / example-react-dashboard build tooling; not shipped"
+# --- undici: jsdom test env + vitest runner; not shipped ---
+[[IgnoredVulns]]
+id = "GHSA-35p6-xmwp-9g52"
+reason = "dev-only: undici via jsdom/vitest test tooling; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-g8m3-5g58-fq7m"
+reason = "dev-only: undici via jsdom/vitest test tooling; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-hm92-r4w5-c3mj"
+reason = "dev-only: undici via jsdom/vitest test tooling; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-p88m-4jfj-68fv"
+reason = "dev-only: undici via jsdom/vitest test tooling; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-pr7r-676h-xcf6"
+reason = "dev-only: undici via jsdom/vitest test tooling; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-vmh5-mc38-953g"
+reason = "dev-only: undici via jsdom/vitest test tooling; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-vxpw-j846-p89q"
+reason = "dev-only: undici via jsdom/vitest test tooling; not a runtime dep of any published package"
 
-[[PackageOverrides]]
-name = "esbuild"
-ecosystem = "npm"
-ignore = true
-reason = "dev-only: Storybook + vite build tooling; not shipped"
+# --- vite: Storybook + example build tooling; not shipped ---
+[[IgnoredVulns]]
+id = "GHSA-fx2h-pf6j-xcff"
+reason = "dev-only: vite build tooling (Storybook/examples); not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-v6wh-96g9-6wx3"
+reason = "dev-only: vite build tooling (Storybook/examples); not a runtime dep of any published package"
 
-[[PackageOverrides]]
-name = "ws"
-ecosystem = "npm"
-ignore = true
-reason = "dev-only: storybook + @effect/platform-bun dev chain; not a runtime dep of any published package"
+# --- ws: storybook + @effect/platform-bun dev chain; not shipped ---
+[[IgnoredVulns]]
+id = "GHSA-58qx-3vcg-4xpx"
+reason = "dev-only: ws via storybook + @effect/platform-bun dev chain; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-96hv-2xvq-fx4p"
+reason = "dev-only: ws via storybook + @effect/platform-bun dev chain; not a runtime dep of any published package"
 
-[[PackageOverrides]]
-name = "@babel/core"
-ecosystem = "npm"
-ignore = true
-reason = "dev-only: Storybook (@storybook/react, nextjs-vite) build tooling; not shipped"
+# --- esbuild: Storybook + vite build tooling; not shipped ---
+[[IgnoredVulns]]
+id = "GHSA-g7r4-m6w7-qqqr"
+reason = "dev-only: esbuild via Storybook/vite build tooling; not a runtime dep of any published package"
 
-[[PackageOverrides]]
-name = "js-yaml"
-ecosystem = "npm"
-ignore = true
-reason = "dev-only: markdownlint-cli + @changesets/cli tooling; not shipped"
+# --- @babel/core: Storybook build tooling; not shipped ---
+[[IgnoredVulns]]
+id = "GHSA-4x5r-pxfx-6jf8"
+reason = "dev-only: @babel/core via Storybook build tooling; not a runtime dep of any published package"
 
-[[PackageOverrides]]
-name = "markdown-it"
-ecosystem = "npm"
-ignore = true
-reason = "dev-only: Storybook docs tooling; not shipped"
+# --- js-yaml: markdownlint-cli + @changesets/cli tooling; not shipped ---
+[[IgnoredVulns]]
+id = "GHSA-h67p-54hq-rp68"
+reason = "dev-only: js-yaml via markdownlint-cli + @changesets/cli tooling; not a runtime dep of any published package"
 
-[[PackageOverrides]]
-name = "brace-expansion"
-ecosystem = "npm"
-ignore = true
-reason = "dev-only: markdownlint-cli + @storybook/nextjs-vite tooling; not shipped"
+# --- markdown-it: Storybook docs tooling; not shipped ---
+[[IgnoredVulns]]
+id = "GHSA-6v5v-wf23-fmfq"
+reason = "dev-only: markdown-it via Storybook docs tooling; not a runtime dep of any published package"
 
-[[PackageOverrides]]
-name = "dompurify"
-ecosystem = "npm"
-ignore = true
-reason = "dev-only: pulled by posthog-js, a devDependency / optional peer of @resq-sw/analytics; not a runtime dep of any published package"
+# --- linkify-it: markdown-it -> markdownlint-cli tooling; not shipped ---
+[[IgnoredVulns]]
+id = "GHSA-22p9-wv53-3rq4"
+reason = "dev-only: linkify-it via markdown-it -> markdownlint-cli (@resq-sw/ui devDependency); not a runtime dep of any published package"
 
-[[PackageOverrides]]
-name = "linkify-it"
-ecosystem = "npm"
-ignore = true
-reason = "dev-only: markdown-it → markdownlint-cli tooling (@resq-sw/ui devDependency); not a runtime dep of any published package"
-
-[[PackageOverrides]]
-name = "undici"
-ecosystem = "npm"
-ignore = true
-reason = "dev-only: jsdom (test env for @resq-sw/ui + @resq-sw/helpers) and the vitest test runner; not a runtime dep of any published package"
+# --- brace-expansion: markdownlint-cli + @storybook/nextjs-vite tooling; not shipped ---
+[[IgnoredVulns]]
+id = "GHSA-jxxr-4gwj-5jf2"
+reason = "dev-only: brace-expansion via markdownlint-cli + @storybook/nextjs-vite tooling; not a runtime dep of any published package"
