@@ -36,7 +36,7 @@
 		"tinyqueue": "^3.0.0"
 	},
 	"devDependencies": {
-		"@types/node": "^25.9.3",
+		"@types/node": "^26.1.0",
 		"jsdom": "^29.1.1",
 		"tsdown": "^0.22.2",
 		"typescript": "6.0.3",
