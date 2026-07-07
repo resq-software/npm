@@ -23,6 +23,7 @@
 			"!**/storybook-static",
 			"!**/coverage",
 			"!**/dist",
+			"!design",
 			"!packages/ui/src/styles/globals.css"
 		]
 	},
