@@ -121,7 +121,18 @@ function Footer({ children }: { children: ReactNode }) {
  * `Section`, `Text`, `Link`, and `Hr` are re-exported for templates that need
  * finer control.
  */
-export const Email = {
+export const Email: {
+	readonly Shell: typeof Shell;
+	readonly Title: typeof Title;
+	readonly Paragraph: typeof Paragraph;
+	readonly Code: typeof Code;
+	readonly CTA: typeof CTA;
+	readonly Footer: typeof Footer;
+	readonly Section: typeof Section;
+	readonly Text: typeof Text;
+	readonly Link: typeof Link;
+	readonly Hr: typeof Hr;
+} = {
 	Shell,
 	Title,
 	Paragraph,
@@ -132,4 +143,4 @@ export const Email = {
 	Text,
 	Link,
 	Hr,
-} as const;
+};
