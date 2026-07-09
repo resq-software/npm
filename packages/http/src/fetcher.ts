@@ -509,8 +509,13 @@ export function fetcher<T = unknown>(
 
 	const queryString = buildQueryString(params);
 
+	// Whether the caller passed an absolute URL. Relative inputs are joined to the
+	// trusted base URL, so the allowedHosts/blockedHosts SSRF filters below apply
+	// only to absolute URLs — a relative path can't target an arbitrary host, and
+	// blocking e.g. "localhost" must not reject internal `fetcher("/api/...")` calls.
+	const isAbsoluteInput = input.startsWith("http");
 	let url: string;
-	if (input.startsWith("http")) {
+	if (isAbsoluteInput) {
 		url = queryString ? `${input}?${queryString}` : input;
 	} else {
 		const baseURL = getBaseURL();
@@ -537,7 +542,12 @@ export function fetcher<T = unknown>(
 		return Effect.fail(new FetcherError(`Invalid URL: ${url}`, url, undefined, undefined, 1));
 	}
 
-	const host = parsedUrl.hostname.toLowerCase();
+	// Lowercase (hostnames are case-insensitive per RFC 3986) and strip IPv6
+	// brackets so `[::1]` matches a `::1` entry. This remains basic hostname
+	// filtering (see the allowedHosts/blockedHosts docs); robust SSRF defence
+	// against alternate IP encodings and DNS rebinding belongs at the
+	// transport/HttpClient layer.
+	const host = parsedUrl.hostname.toLowerCase().replace(/^\[|\]$/g, "");
 
 	const matchHost = (targetHost: string, pattern: string): boolean => {
 		const patternLower = pattern.toLowerCase();
@@ -548,7 +558,7 @@ export function fetcher<T = unknown>(
 		return targetHost === patternLower;
 	};
 
-	if (allowedHosts && allowedHosts.length > 0) {
+	if (isAbsoluteInput && allowedHosts && allowedHosts.length > 0) {
 		const isAllowed = allowedHosts.some((allowed) => matchHost(host, allowed));
 		if (!isAllowed) {
 			return Effect.fail(
@@ -563,7 +573,7 @@ export function fetcher<T = unknown>(
 		}
 	}
 
-	if (blockedHosts && blockedHosts.length > 0) {
+	if (isAbsoluteInput && blockedHosts && blockedHosts.length > 0) {
 		const isBlocked = blockedHosts.some((blocked) => matchHost(host, blocked));
 		if (isBlocked) {
 			return Effect.fail(

@@ -776,4 +776,17 @@ describe("fetcher – allowedHosts / blockedHosts (SSRF protection)", () => {
 		expect(error).toBeInstanceOf(FetcherError);
 		expect((error as FetcherError).message).toContain("Host 'sub.malicious.com' is blocked");
 	});
+
+	it("does not apply blockedHosts to relative inputs (joined to the trusted base URL)", async () => {
+		// A relative path resolves against the base URL (localhost server-side); the
+		// SSRF host filter must not reject internal `fetcher("/api/...")` calls just
+		// because "localhost" is blocked for absolute URLs.
+		const res = await Effect.runPromise(
+			Effect.provide(
+				fetcher("/api/data", "GET", { blockedHosts: ["localhost", "127.0.0.1"] }),
+				clientLayer,
+			),
+		);
+		expect(res).toEqual({ ok: true });
+	});
 });

@@ -26,7 +26,6 @@
 import { Exit, Option, Schema as S } from "effect";
 import DOMPurify from "dompurify";
 import type { Config, WindowLike } from "dompurify";
-import { createRequire } from "node:module";
 
 /**
  * A Schema with DecodingServices constrained to `never`, allowing synchronous decoding.
@@ -252,7 +251,21 @@ const getPurify = (): typeof DOMPurify | null => {
 		purifyInstance = DOMPurify;
 	} else {
 		try {
-			const req = createRequire(import.meta.url);
+			// Resolve `node:module` at runtime (server-side only) via
+			// process.getBuiltinModule so browser bundlers never see a static
+			// `node:module` import. Available on Node >=20.16 and Bun; absent in
+			// browsers, where the `window` branch above is taken instead. jsdom is an
+			// optional peer dependency — install it for server-side HTML sanitization.
+			const proc = (globalThis as { process?: { getBuiltinModule?: (m: string) => unknown } })
+				.process;
+			const nodeModule = proc?.getBuiltinModule?.("module") as
+				| { createRequire(path: string | URL): (id: string) => unknown }
+				| undefined;
+			if (!nodeModule) {
+				purifyInstance = null;
+				return purifyInstance;
+			}
+			const req = nodeModule.createRequire(import.meta.url);
 			const { JSDOM } = req("jsdom") as {
 				JSDOM: new (
 					html?: string,
