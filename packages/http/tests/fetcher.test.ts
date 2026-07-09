@@ -789,4 +789,19 @@ describe("fetcher – allowedHosts / blockedHosts (SSRF protection)", () => {
 		);
 		expect(res).toEqual({ ok: true });
 	});
+
+	it("applies blockedHosts to uppercase-scheme absolute URLs (case-insensitive)", async () => {
+		// URL schemes are case-insensitive; `HTTP://` must not slip past the host
+		// filter by being misclassified as a relative path.
+		const error = await Effect.runPromise(
+			Effect.flip(
+				Effect.provide(
+					fetcher("HTTPS://malicious.com/data", "GET", { blockedHosts: ["malicious.com"] }),
+					clientLayer,
+				),
+			),
+		);
+		expect(error).toBeInstanceOf(FetcherError);
+		expect((error as FetcherError).message).toContain("is blocked");
+	});
 });

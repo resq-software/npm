@@ -513,7 +513,10 @@ export function fetcher<T = unknown>(
 	// trusted base URL, so the allowedHosts/blockedHosts SSRF filters below apply
 	// only to absolute URLs — a relative path can't target an arbitrary host, and
 	// blocking e.g. "localhost" must not reject internal `fetcher("/api/...")` calls.
-	const isAbsoluteInput = input.startsWith("http");
+	// Case-insensitive per RFC 3986 (URL schemes are case-insensitive), so an
+	// uppercase `HTTP://evil.com` is still classified absolute and subjected to the
+	// host filter below rather than being mistaken for a relative path.
+	const isAbsoluteInput = /^https?:\/\//i.test(input);
 	let url: string;
 	if (isAbsoluteInput) {
 		url = queryString ? `${input}?${queryString}` : input;
