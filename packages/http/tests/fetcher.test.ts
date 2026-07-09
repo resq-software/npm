@@ -700,3 +700,57 @@ describe("fetcher – URL construction", () => {
 		);
 	});
 });
+
+describe("fetcher – allowedHosts / blockedHosts (SSRF protection)", () => {
+	const clientLayer = makeClient((req) =>
+		Effect.succeed(
+			HttpClientResponse.fromWeb(req, new Response(JSON.stringify({ ok: true }), { status: 200 })),
+		),
+	);
+
+	it("allows request when host is in allowedHosts", async () => {
+		const res = await Effect.runPromise(
+			Effect.provide(
+				fetcher("https://api.example.com/data", "GET", { allowedHosts: ["api.example.com"] }),
+				clientLayer,
+			),
+		);
+		expect(res).toEqual({ ok: true });
+	});
+
+	it("blocks request and fails with FetcherError when host is NOT in allowedHosts", async () => {
+		const error = await Effect.runPromise(
+			Effect.flip(
+				Effect.provide(
+					fetcher("https://malicious.com/data", "GET", { allowedHosts: ["api.example.com"] }),
+					clientLayer,
+				),
+			),
+		);
+		expect(error).toBeInstanceOf(FetcherError);
+		expect((error as FetcherError).message).toContain("Host 'malicious.com' is not allowed");
+	});
+
+	it("supports wildcard subdomains in allowedHosts", async () => {
+		const res = await Effect.runPromise(
+			Effect.provide(
+				fetcher("https://sub.api.example.com/data", "GET", { allowedHosts: ["*.api.example.com"] }),
+				clientLayer,
+			),
+		);
+		expect(res).toEqual({ ok: true });
+	});
+
+	it("blocks request and fails with FetcherError when host is in blockedHosts", async () => {
+		const error = await Effect.runPromise(
+			Effect.flip(
+				Effect.provide(
+					fetcher("https://localhost/data", "GET", { blockedHosts: ["localhost", "127.0.0.1"] }),
+					clientLayer,
+				),
+			),
+		);
+		expect(error).toBeInstanceOf(FetcherError);
+		expect((error as FetcherError).message).toContain("Host 'localhost' is blocked");
+	});
+});

@@ -24,6 +24,8 @@
  */
 
 import { Exit, Option, Schema as S } from "effect";
+import DOMPurify from "dompurify";
+import { createRequire } from "node:module";
 
 /**
  * A Schema with DecodingServices constrained to `never`, allowing synchronous decoding.
@@ -240,6 +242,48 @@ export const sanitizeUrl = (
 	return Exit.isSuccess(result) ? result.value : "";
 };
 
+let purifyInstance: typeof DOMPurify | null | undefined;
+
+const getPurify = (): typeof DOMPurify | null => {
+	if (purifyInstance !== undefined) return purifyInstance;
+
+	if (typeof window !== "undefined") {
+		purifyInstance = DOMPurify;
+	} else {
+		try {
+			const req = createRequire(import.meta.url);
+			const { JSDOM } = req("jsdom");
+			const dom = new JSDOM("");
+			purifyInstance = DOMPurify(dom.window as unknown as Window);
+		} catch {
+			purifyInstance = null;
+		}
+	}
+	return purifyInstance;
+};
+
+/**
+ * Sanitizes HTML to prevent XSS attacks.
+ * Uses DOMPurify under the hood. If DOM is not available (e.g. server-side without JSDOM),
+ * it falls back to escaping all HTML characters for safety.
+ *
+ * @param html - The HTML string to sanitize.
+ * @param options - Optional DOMPurify configuration.
+ * @returns The sanitized HTML string.
+ */
+export const sanitizeHtml = (html: string, options?: DOMPurify.Config): string => {
+	if (!html || typeof html !== "string") {
+		return "";
+	}
+
+	const purify = getPurify();
+	if (purify) {
+		return purify.sanitize(html, options);
+	}
+
+	return escapeHtml(html);
+};
+
 /**
  * Validates user input using Effect Schema and returns an Exit.
  *
@@ -274,6 +318,8 @@ export const validateUserInputEffect = (
 			prev = result;
 			result = result.replaceAll(/<[^>]*>/g, "");
 		} while (result !== prev);
+	} else {
+		result = sanitizeHtml(result);
 	}
 
 	if (!allowNewlines) {
@@ -322,6 +368,31 @@ export const validateUserInput = (input: string, maxLength = 500, allowHtml = fa
 };
 
 /**
+ * Recursively removes dangerous prototype pollution keys from an object.
+ */
+const sanitizeObject = (val: unknown): void => {
+	if (typeof val !== "object" || val === null) {
+		return;
+	}
+	if (Array.isArray(val)) {
+		for (const item of val) {
+			sanitizeObject(item);
+		}
+		return;
+	}
+	const dangerous = ["__proto__", "constructor", "prototype"];
+	const obj = val as Record<string, unknown>;
+	for (const key of dangerous) {
+		if (key in obj) {
+			delete obj[key];
+		}
+	}
+	for (const key of Object.keys(obj)) {
+		sanitizeObject(obj[key]);
+	}
+};
+
+/**
  * Safely parses JSON with Effect Schema validation and prototype pollution protection.
  *
  * @template A - The expected schema type
@@ -353,17 +424,9 @@ export const parseJsonWithSchema = <A>(
 
 		const parsed = JSON.parse(sanitized);
 
-		if (typeof parsed === "object" && parsed !== null) {
-			const dangerous = ["__proto__", "constructor", "prototype"];
-			const parsedObj = parsed as Record<string, unknown>;
-			for (const key of dangerous) {
-				if (key in parsedObj) {
-					delete parsedObj[key];
-				}
-			}
-		}
+		sanitizeObject(parsed);
 
-		const result = S.decodeUnknownExit(schema as any)(parsed);
+		const result = S.decodeUnknownExit(schema as S.Schema<A, unknown, never>)(parsed);
 		return Exit.isSuccess(result) ? Option.some(result.value as A) : Option.none();
 	} catch {
 		return Option.none();
@@ -398,14 +461,7 @@ export const sanitizeJson = <T>(jsonString: string): T | null => {
 
 		const parsed = JSON.parse(sanitized) as T;
 
-		if (typeof parsed === "object" && parsed !== null) {
-			const dangerous = ["__proto__", "constructor", "prototype"];
-			for (const key of dangerous) {
-				if (key in parsed) {
-					delete (parsed as Record<string, unknown>)[key];
-				}
-			}
-		}
+		sanitizeObject(parsed);
 
 		return parsed;
 	} catch {

@@ -25,6 +25,7 @@
  */
 
 import { Schema as S } from "effect";
+import { LRUCache } from "@resq-sw/dsa";
 
 // ============================================
 // Effect Schema Definitions
@@ -267,10 +268,10 @@ export function debounce<T extends AnyFunction>(
  * ```
  */
 export class KeyedThrottle<T extends AnyFunction> {
-	private throttles = new Map<
+	private throttles: LRUCache<
 		string,
 		((...args: Parameters<T>) => ReturnType<T> | undefined) & { cancel: () => void }
-	>();
+	>;
 	private readonly func: T;
 	private readonly wait: number;
 	private readonly options: ThrottleOptions;
@@ -280,12 +281,19 @@ export class KeyedThrottle<T extends AnyFunction> {
 	 *   every key.
 	 * @param wait - Throttle window in milliseconds.
 	 * @param options - Forwarded to {@link throttle} for each key's
-	 *   internal throttled wrapper.
+	 *   internal throttled wrapper. Supports `maxKeys` configuration.
 	 */
-	constructor(func: T, wait: number, options: ThrottleOptions = {}) {
+	constructor(func: T, wait: number, options: ThrottleOptions & { maxKeys?: number } = {}) {
 		this.func = func;
 		this.wait = wait;
-		this.options = options;
+		const { maxKeys = 10000, ...throttleOptions } = options;
+		this.options = throttleOptions;
+		this.throttles = new LRUCache({
+			maxSize: maxKeys,
+			onEvict: (_, throttled) => {
+				throttled.cancel();
+			},
+		});
 	}
 
 	/**
@@ -365,10 +373,10 @@ export class KeyedThrottle<T extends AnyFunction> {
  * ```
  */
 export class KeyedDebounce<T extends AnyFunction> {
-	private debounces = new Map<
+	private debounces: LRUCache<
 		string,
 		((...args: Parameters<T>) => void) & { cancel: () => void; flush: () => void }
-	>();
+	>;
 	private readonly func: T;
 	private readonly wait: number;
 	private readonly options: DebounceOptions;
@@ -378,12 +386,19 @@ export class KeyedDebounce<T extends AnyFunction> {
 	 *   every key.
 	 * @param wait - Quiet window in milliseconds before firing.
 	 * @param options - Forwarded to {@link debounce} for each key's
-	 *   internal debounced wrapper.
+	 *   internal debounced wrapper. Supports `maxKeys` configuration.
 	 */
-	constructor(func: T, wait: number, options: DebounceOptions = {}) {
+	constructor(func: T, wait: number, options: DebounceOptions & { maxKeys?: number } = {}) {
 		this.func = func;
 		this.wait = wait;
-		this.options = options;
+		const { maxKeys = 10000, ...debounceOptions } = options;
+		this.options = debounceOptions;
+		this.debounces = new LRUCache({
+			maxSize: maxKeys,
+			onEvict: (_, debounced) => {
+				debounced.cancel();
+			},
+		});
 	}
 
 	/**

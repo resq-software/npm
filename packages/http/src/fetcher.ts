@@ -48,6 +48,10 @@ export interface FetcherOptions<T = unknown> {
 	signal?: AbortSignal;
 	/** Body type - defaults to 'json', use 'text' for raw data, 'form' for FormData */
 	bodyType?: "json" | "text" | "form";
+	/** Optional list of allowed hosts (e.g. `['api.example.com']` or `['*.example.com']`). If provided, requests to other hosts fail with FetcherError. */
+	allowedHosts?: readonly string[];
+	/** Optional list of blocked hosts (e.g. `['localhost', '127.0.0.1']`). If provided, requests to these hosts fail with FetcherError. */
+	blockedHosts?: readonly string[];
 }
 
 /**
@@ -255,7 +259,7 @@ const validateResponse = <T>(
 		return Effect.succeed(data as T);
 	}
 
-	const result = Schema.decodeUnknownExit(schema as any)(data);
+	const result = Schema.decodeUnknownExit(schema as Schema.Schema<T, unknown, never>)(data);
 
 	if (Exit.isFailure(result)) {
 		const schemaError = Cause.squash(result.cause);
@@ -487,6 +491,8 @@ export function fetcher<T = unknown>(
 		headers = {},
 		schema,
 		bodyType = "json",
+		allowedHosts,
+		blockedHosts,
 	} = options;
 
 	const queryString = buildQueryString(params);
@@ -498,6 +504,59 @@ export function fetcher<T = unknown>(
 		const baseURL = getBaseURL();
 		const fullPath = baseURL ? `${baseURL}${input}` : input;
 		url = queryString ? `${fullPath}?${queryString}` : fullPath;
+	}
+
+	let parsedUrl: URL;
+	try {
+		if (url.startsWith("http:") || url.startsWith("https:")) {
+			parsedUrl = new URL(url);
+		} else if (typeof globalThis.location !== "undefined") {
+			parsedUrl = new URL(url, globalThis.location.href);
+		} else {
+			parsedUrl = new URL(url, "http://localhost");
+		}
+	} catch {
+		return Effect.fail(new FetcherError(`Invalid URL: ${url}`, url, undefined, undefined, 1));
+	}
+
+	const host = parsedUrl.hostname.toLowerCase();
+
+	if (allowedHosts && allowedHosts.length > 0) {
+		const isAllowed = allowedHosts.some((allowed) => {
+			const allowedLower = allowed.toLowerCase();
+			if (allowedLower.startsWith("*.")) {
+				const suffix = allowedLower.slice(1);
+				return host === allowedLower.slice(2) || host.endsWith(suffix);
+			}
+			return host === allowedLower;
+		});
+		if (!isAllowed) {
+			return Effect.fail(
+				new FetcherError(
+					`Host '${parsedUrl.hostname}' is not allowed`,
+					url,
+					undefined,
+					undefined,
+					1,
+				),
+			);
+		}
+	}
+
+	if (blockedHosts && blockedHosts.length > 0) {
+		const isBlocked = blockedHosts.some((blocked) => {
+			const blockedLower = blocked.toLowerCase();
+			if (blockedLower.startsWith("*.")) {
+				const suffix = blockedLower.slice(1);
+				return host === blockedLower.slice(2) || host.endsWith(suffix);
+			}
+			return host === blockedLower;
+		});
+		if (isBlocked) {
+			return Effect.fail(
+				new FetcherError(`Host '${parsedUrl.hostname}' is blocked`, url, undefined, undefined, 1),
+			);
+		}
 	}
 
 	return Effect.gen(function* () {

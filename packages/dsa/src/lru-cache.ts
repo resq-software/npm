@@ -328,4 +328,44 @@ export class LRUCache<K, V> {
 		this.removeNode(evictedNode);
 		this.cache.delete(evictedNode.key);
 	}
+
+	/**
+	 * Returns an iterator for the keys in the cache, from most-recently-used to least-recently-used.
+	 */
+	*keys(): Generator<K> {
+		let current = this.head;
+		while (current) {
+			yield current.key;
+			current = current.next;
+		}
+	}
+
+	/**
+	 * Returns an iterator for the values in the cache, from most-recently-used to least-recently-used.
+	 */
+	*values(): Generator<V> {
+		let current = this.head;
+		while (current) {
+			yield current.value;
+			current = current.next;
+		}
+	}
+
+	/**
+	 * Returns an iterator for the [key, value] pairs in the cache, from most-recently-used to least-recently-used.
+	 */
+	*entries(): Generator<[K, V]> {
+		let current = this.head;
+		while (current) {
+			yield [current.key, current.value];
+			current = current.next;
+		}
+	}
+
+	/**
+	 * Default iterator returning entries.
+	 */
+	[Symbol.iterator](): Generator<[K, V]> {
+		return this.entries();
+	}
 }
