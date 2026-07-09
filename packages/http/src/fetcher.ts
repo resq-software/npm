@@ -539,15 +539,17 @@ export function fetcher<T = unknown>(
 
 	const host = parsedUrl.hostname.toLowerCase();
 
+	const matchHost = (targetHost: string, pattern: string): boolean => {
+		const patternLower = pattern.toLowerCase();
+		if (patternLower.startsWith("*.")) {
+			const suffix = patternLower.slice(1);
+			return targetHost === patternLower.slice(2) || targetHost.endsWith(suffix);
+		}
+		return targetHost === patternLower;
+	};
+
 	if (allowedHosts && allowedHosts.length > 0) {
-		const isAllowed = allowedHosts.some((allowed) => {
-			const allowedLower = allowed.toLowerCase();
-			if (allowedLower.startsWith("*.")) {
-				const suffix = allowedLower.slice(1);
-				return host === allowedLower.slice(2) || host.endsWith(suffix);
-			}
-			return host === allowedLower;
-		});
+		const isAllowed = allowedHosts.some((allowed) => matchHost(host, allowed));
 		if (!isAllowed) {
 			return Effect.fail(
 				new FetcherError(
@@ -562,14 +564,7 @@ export function fetcher<T = unknown>(
 	}
 
 	if (blockedHosts && blockedHosts.length > 0) {
-		const isBlocked = blockedHosts.some((blocked) => {
-			const blockedLower = blocked.toLowerCase();
-			if (blockedLower.startsWith("*.")) {
-				const suffix = blockedLower.slice(1);
-				return host === blockedLower.slice(2) || host.endsWith(suffix);
-			}
-			return host === blockedLower;
-		});
+		const isBlocked = blockedHosts.some((blocked) => matchHost(host, blocked));
 		if (isBlocked) {
 			return Effect.fail(
 				new FetcherError(`Host '${parsedUrl.hostname}' is blocked`, url, undefined, undefined, 1),

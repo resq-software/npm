@@ -753,4 +753,27 @@ describe("fetcher – allowedHosts / blockedHosts (SSRF protection)", () => {
 		expect(error).toBeInstanceOf(FetcherError);
 		expect((error as FetcherError).message).toContain("Host 'localhost' is blocked");
 	});
+
+	it("permits the apex domain when using a wildcard allowedHosts entry", async () => {
+		const res = await Effect.runPromise(
+			Effect.provide(
+				fetcher("https://example.com/data", "GET", { allowedHosts: ["*.example.com"] }),
+				clientLayer,
+			),
+		);
+		expect(res).toEqual({ ok: true });
+	});
+
+	it("blocks subdomains when a wildcard blockedHosts entry is matched", async () => {
+		const error = await Effect.runPromise(
+			Effect.flip(
+				Effect.provide(
+					fetcher("https://sub.malicious.com/data", "GET", { blockedHosts: ["*.malicious.com"] }),
+					clientLayer,
+				),
+			),
+		);
+		expect(error).toBeInstanceOf(FetcherError);
+		expect((error as FetcherError).message).toContain("Host 'sub.malicious.com' is blocked");
+	});
 });
