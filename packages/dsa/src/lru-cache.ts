@@ -29,7 +29,7 @@ interface CacheNode<K, V> {
 /**
  * Configuration for {@link LRUCache}.
  */
-export interface LRUCacheOptions {
+export interface LRUCacheOptions<K = unknown, V = unknown> {
 	/**
 	 * Maximum number of entries the cache will hold. Once exceeded, the
 	 * least-recently-used entry is evicted.
@@ -48,7 +48,7 @@ export interface LRUCacheOptions {
 	 * Not called on explicit `delete()` or `clear()`, and not called when
 	 * an entry is removed because it expired.
 	 */
-	onEvict?: <K, V>(key: K, value: V) => void;
+	onEvict?: (key: K, value: V) => void;
 }
 
 /**
@@ -96,12 +96,12 @@ export class LRUCache<K, V> {
 	private tail: CacheNode<K, V> | null = null;
 	private readonly maxSize: number;
 	private readonly defaultTTL?: number;
-	private readonly onEvict?: <K2, V2>(key: K2, value: V2) => void;
+	private readonly onEvict?: (key: K, value: V) => void;
 
 	/**
 	 * @param options - See {@link LRUCacheOptions}. `maxSize` is required.
 	 */
-	constructor(options: LRUCacheOptions) {
+	constructor(options: LRUCacheOptions<K, V>) {
 		this.cache = new Map();
 		this.maxSize = options.maxSize;
 		this.defaultTTL = options.defaultTTL;

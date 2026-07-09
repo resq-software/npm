@@ -25,6 +25,7 @@
 
 import { Exit, Option, Schema as S } from "effect";
 import DOMPurify from "dompurify";
+import type { Config, WindowLike } from "dompurify";
 import { createRequire } from "node:module";
 
 /**
@@ -254,7 +255,7 @@ const getPurify = (): typeof DOMPurify | null => {
 			const req = createRequire(import.meta.url);
 			const { JSDOM } = req("jsdom");
 			const dom = new JSDOM("");
-			purifyInstance = DOMPurify(dom.window as unknown as Window);
+			purifyInstance = DOMPurify(dom.window as unknown as WindowLike);
 		} catch {
 			purifyInstance = null;
 		}
@@ -267,18 +268,21 @@ const getPurify = (): typeof DOMPurify | null => {
  * Uses DOMPurify under the hood. If DOM is not available (e.g. server-side without JSDOM),
  * it falls back to escaping all HTML characters for safety.
  *
+ * NOTE: Server-side HTML sanitization requires `jsdom` to be installed in the consuming application
+ * environment; otherwise, it will fall back to escaping HTML characters.
+ *
  * @param html - The HTML string to sanitize.
  * @param options - Optional DOMPurify configuration.
  * @returns The sanitized HTML string.
  */
-export const sanitizeHtml = (html: string, options?: DOMPurify.Config): string => {
+export const sanitizeHtml = (html: string, options?: Config): string => {
 	if (!html || typeof html !== "string") {
 		return "";
 	}
 
 	const purify = getPurify();
 	if (purify) {
-		return purify.sanitize(html, options);
+		return purify.sanitize(html, options) as string;
 	}
 
 	return escapeHtml(html);
@@ -370,13 +374,16 @@ export const validateUserInput = (input: string, maxLength = 500, allowHtml = fa
 /**
  * Recursively removes dangerous prototype pollution keys from an object.
  */
-const sanitizeObject = (val: unknown): void => {
+const sanitizeObject = (val: unknown, depth = 0): void => {
+	if (depth > 50) {
+		return;
+	}
 	if (typeof val !== "object" || val === null) {
 		return;
 	}
 	if (Array.isArray(val)) {
 		for (const item of val) {
-			sanitizeObject(item);
+			sanitizeObject(item, depth + 1);
 		}
 		return;
 	}
@@ -388,7 +395,7 @@ const sanitizeObject = (val: unknown): void => {
 		}
 	}
 	for (const key of Object.keys(obj)) {
-		sanitizeObject(obj[key]);
+		sanitizeObject(obj[key], depth + 1);
 	}
 };
 
@@ -426,7 +433,7 @@ export const parseJsonWithSchema = <A>(
 
 		sanitizeObject(parsed);
 
-		const result = S.decodeUnknownExit(schema as S.Schema<A, unknown, never>)(parsed);
+		const result = S.decodeUnknownExit(schema)(parsed);
 		return Exit.isSuccess(result) ? Option.some(result.value as A) : Option.none();
 	} catch {
 		return Option.none();

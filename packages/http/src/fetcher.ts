@@ -48,9 +48,21 @@ export interface FetcherOptions<T = unknown> {
 	signal?: AbortSignal;
 	/** Body type - defaults to 'json', use 'text' for raw data, 'form' for FormData */
 	bodyType?: "json" | "text" | "form";
-	/** Optional list of allowed hosts (e.g. `['api.example.com']` or `['*.example.com']`). If provided, requests to other hosts fail with FetcherError. */
+	/**
+	 * Optional list of allowed hosts (e.g. `['api.example.com']` or `['*.example.com']`).
+	 * If provided, requests to other hosts fail with FetcherError.
+	 * NOTE: This offers basic hostname-based security filtering. It does not protect against
+	 * advanced DNS rebinding or IP-based bypasses (e.g., alternative IP encodings, IPv6 vs IPv4)
+	 * unless such filtering is enabled at the lower network transport or HttpClient layer.
+	 */
 	allowedHosts?: readonly string[];
-	/** Optional list of blocked hosts (e.g. `['localhost', '127.0.0.1']`). If provided, requests to these hosts fail with FetcherError. */
+	/**
+	 * Optional list of blocked hosts (e.g. `['localhost', '127.0.0.1']`).
+	 * If provided, requests to these hosts fail with FetcherError.
+	 * NOTE: This offers basic hostname-based security filtering. It does not protect against
+	 * advanced DNS rebinding or IP-based bypasses (e.g., alternative IP encodings, IPv6 vs IPv4)
+	 * unless such filtering is enabled at the lower network transport or HttpClient layer.
+	 */
 	blockedHosts?: readonly string[];
 }
 
@@ -259,7 +271,7 @@ const validateResponse = <T>(
 		return Effect.succeed(data as T);
 	}
 
-	const result = Schema.decodeUnknownExit(schema as Schema.Schema<T, unknown, never>)(data);
+	const result = Schema.decodeUnknownExit(schema)(data);
 
 	if (Exit.isFailure(result)) {
 		const schemaError = Cause.squash(result.cause);
@@ -502,7 +514,13 @@ export function fetcher<T = unknown>(
 		url = queryString ? `${input}?${queryString}` : input;
 	} else {
 		const baseURL = getBaseURL();
-		const fullPath = baseURL ? `${baseURL}${input}` : input;
+		let fullPath: string;
+		if (baseURL) {
+			const separator = input.startsWith("/") ? "" : "/";
+			fullPath = `${baseURL}${separator}${input}`;
+		} else {
+			fullPath = input;
+		}
 		url = queryString ? `${fullPath}?${queryString}` : fullPath;
 	}
 
