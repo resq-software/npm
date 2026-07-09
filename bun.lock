@@ -119,7 +119,7 @@
     },
     "packages/dsa": {
       "name": "@resq-sw/dsa",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "devDependencies": {
         "@jsheaven/perf": "^1.1.1",
         "@total-typescript/ts-reset": "^0.6.1",
@@ -137,13 +137,14 @@
     },
     "packages/email-templates": {
       "name": "@resq-sw/email-templates",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@react-email/components": "^1.0.12",
         "@react-email/render": "^2.0.10",
         "@resq-sw/constants": "workspace:*",
       },
       "devDependencies": {
+        "@react-email/ui": "6.6.6",
         "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "^25.9.1",
         "@types/react": "^19.2.16",
@@ -186,7 +187,7 @@
     },
     "packages/http": {
       "name": "@resq-sw/http",
-      "version": "0.1.2",
+      "version": "0.2.0",
       "devDependencies": {
         "@effect/platform-bun": "4.0.0-beta.93",
         "@total-typescript/ts-reset": "^0.6.1",
@@ -217,7 +218,7 @@
     },
     "packages/rate-limiting": {
       "name": "@resq-sw/rate-limiting",
-      "version": "0.1.2",
+      "version": "0.2.0",
       "dependencies": {
         "@resq-sw/dsa": "workspace:*",
       },
@@ -243,7 +244,7 @@
     },
     "packages/security": {
       "name": "@resq-sw/security",
-      "version": "0.1.2",
+      "version": "0.2.0",
       "dependencies": {
         "dompurify": "^3.4.11",
       },
@@ -1055,6 +1056,8 @@
     "@react-email/tailwind": ["@react-email/tailwind@2.0.7", "", { "dependencies": { "tailwindcss": "^4.1.18" }, "peerDependencies": { "@react-email/body": ">=0", "@react-email/button": ">=0", "@react-email/code-block": ">=0", "@react-email/code-inline": ">=0", "@react-email/container": ">=0", "@react-email/heading": ">=0", "@react-email/hr": ">=0", "@react-email/img": ">=0", "@react-email/link": ">=0", "@react-email/preview": ">=0", "@react-email/text": ">=0", "react": "^18.0 || ^19.0 || ^19.0.0-rc" }, "optionalPeers": ["@react-email/body", "@react-email/button", "@react-email/code-block", "@react-email/code-inline", "@react-email/container", "@react-email/heading", "@react-email/hr", "@react-email/img", "@react-email/link", "@react-email/preview"] }, "sha512-kGw80weVFXikcnCXbigTGXGWQ0MRCSYNCudcdkWxebkWYd0FG6/NPoN3V1p/u68/4+NxZwYPVi2fhnp0x23HdA=="],
 
     "@react-email/text": ["@react-email/text@0.1.6", "", { "peerDependencies": { "react": "^18.0 || ^19.0 || ^19.0.0-rc" } }, "sha512-TYqkioRS45wTR5il3dYk/SbUjjEdhSwh9BtRNB99qNH1pXAwA45H7rAuxehiu8iJQJH0IyIr+6n62gBz9ezmsw=="],
+
+    "@react-email/ui": ["@react-email/ui@6.6.6", "", { "dependencies": { "esbuild": "0.28.0", "next": "16.2.6" } }, "sha512-mupCOgV0sC94ODcYGwqj7CD0RAonBgaeeMxnu8DYA9JPFH8hx1061X87itIKL1OVxoBW3IftjvsECuMfqUilwg=="],
 
     "@reduxjs/toolkit": ["@reduxjs/toolkit@2.11.2", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "@standard-schema/utils": "^0.3.0", "immer": "^11.0.0", "redux": "^5.0.1", "redux-thunk": "^3.1.0", "reselect": "^5.1.0" }, "peerDependencies": { "react": "^16.9.0 || ^17.0.0 || ^18 || ^19", "react-redux": "^7.2.1 || ^8.1.3 || ^9.0.0" }, "optionalPeers": ["react", "react-redux"] }, "sha512-Kd6kAHTA6/nUpp8mySPqj3en3dm0tdMIgbttnQ1xFMVpufoj+ADi8pXLBsd4xzTRHQa7t/Jv8W5UnCuW4kuWMQ=="],
 
