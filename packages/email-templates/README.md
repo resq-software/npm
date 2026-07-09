@@ -213,6 +213,23 @@ Email clients drop `oklch()`, `color-mix()`, and CSS custom properties, and many
 bun --filter @resq-sw/email-templates test
 ```
 
+Coverage includes behavioural tests (contract validation, subject/link presence,
+theme overrides) plus **HTML/text regression snapshots** for every built-in
+template in [`tests/snapshots.test.ts`](tests/snapshots.test.ts). Because
+`renderEmail()` is deterministic for fixed input, the committed
+`tests/__snapshots__` baseline catches unintended changes to markup, inline
+styles, or the plaintext fallback. When a change is intentional, re-baseline and
+review the diff:
+
+```sh
+bun --filter @resq-sw/email-templates test -u
+```
+
+Snapshots are the email-appropriate substitute for Storybook/Chromatic here:
+React Email renders to client-accurate HTML (tables + inline styles), which a
+browser-oriented Storybook would not represent faithfully. For a live, mail-client
+preview during development, use `email:dev` (see [Preview](#preview)).
+
 ## Troubleshooting
 
 - **Rendering Failures**: Next.js Server Components might struggle with client-side React Email components. Render mailers asynchronously on the server.

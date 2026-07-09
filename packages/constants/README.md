@@ -63,11 +63,25 @@ place by being reused across apps, not by being convenient to dump here.
 ## Prerequisites
 
 - **Runtime**: Bun 1.1+ or Node.js 20+
-- **Format support**: CSS variable extraction, ESM modules, and JSON structures.
+- **Module format**: ESM only (`"type": "module"`); every value is a plain `as const` object.
 
-## Configuration
+## Consuming in CSS
 
-- **Tailwind/Vite**: Import styles directly in your entry point: `import "@resq-sw/constants/tokens.css";`.
+This package ships **TypeScript token objects, not a stylesheet** — there is no
+`tokens.css` export. To expose the palette as CSS custom properties, generate them
+from the tokens at build time, or reference the hex values directly:
+
+```ts
+import { colors, radii } from "@resq-sw/constants/tokens";
+
+const rootVars = `:root {
+  --color-background: ${colors.hex.background}; /* #0A0E1A */
+  --radius-md: ${radii.md};                     /* 8px */
+}`;
+```
+
+For Tailwind v4, map the tokens into your `@theme` block (or a generated file) so
+utilities resolve against the same source of truth as the rest of the platform.
 
 ## Testing
 
@@ -77,5 +91,8 @@ bun --filter @resq-sw/constants test
 
 ## Troubleshooting
 
-- **Missing CSS Variables**: Ensure `@resq-sw/constants/tokens.css` is imported at the very top of your global CSS sheet.
+- **`Cannot find module '@resq-sw/constants/tokens.css'`**: There is no CSS export.
+  Import the token objects from `@resq-sw/constants/tokens` and emit variables yourself.
+- **Colors look wrong in email or older targets**: use the email-safe `colors.hex.*`
+  values, not the `oklch` source — many mail clients drop `oklch()`.
 
