@@ -1,6 +1,6 @@
 {
 	"name": "@resq-sw/constants",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "Shared, zero-dependency constants for ResQ apps: design tokens (oklch + email-safe hex), brand identity, and cross-app values",
 	"license": "Apache-2.0",
 	"author": {
