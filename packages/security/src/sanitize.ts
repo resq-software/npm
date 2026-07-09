@@ -31,7 +31,7 @@ import { createRequire } from "node:module";
 /**
  * A Schema with DecodingServices constrained to `never`, allowing synchronous decoding.
  */
-type SyncSchema<T> = S.Schema<T> & { readonly DecodingServices: never };
+type SyncSchema<T> = S.Codec<T, any, never>;
 
 // ============================================
 // Effect Schema Definitions

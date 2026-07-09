@@ -26,7 +26,7 @@ import {
  * A Schema with DecodingServices constrained to `never`, allowing synchronous decoding.
  * All standard built-in schemas (e.g. `Schema.Struct(...)`) satisfy this constraint.
  */
-type SyncSchema<T> = Schema.Schema<T> & { readonly DecodingServices: never };
+type SyncSchema<T> = Schema.Codec<T, any, never>;
 
 /**
  * Configuration options for the fetcher utility.
