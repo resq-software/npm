@@ -38,10 +38,11 @@
 		"tsc": "tsc --noEmit"
 	},
 	"devDependencies": {
+		"@total-typescript/ts-reset": "^0.6.1",
 		"@types/node": "^25.9.1",
 		"@vitest/coverage-v8": "4.1.8",
 		"tsdown": "^0.22.2",
-		"typescript": "6.0.3",
+		"typescript": "7.0.2",
 		"vitest": "4.1.8"
 	},
 	"publishConfig": {

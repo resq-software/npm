@@ -13,6 +13,6 @@
 		"skipLibCheck": true,
 		"types": ["node"]
 	},
-	"include": ["src"],
+	"include": ["reset.d.ts", "src"],
 	"exclude": ["node_modules", "lib", "tests"]
 }

@@ -49,13 +49,14 @@
 		}
 	},
 	"devDependencies": {
+		"@total-typescript/ts-reset": "^0.6.1",
 		"@types/node": "^26.1.0",
 		"@types/react": "^19.2.17",
 		"posthog-js": "^1.398.0",
 		"react": "^19.2.7",
 		"react-dom": "^19.2.7",
 		"tsdown": "^0.22.3",
-		"typescript": "6.0.3",
+		"typescript": "7.0.2",
 		"vitest": "4.1.10"
 	},
 	"publishConfig": {
