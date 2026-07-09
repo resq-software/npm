@@ -45,7 +45,7 @@
 		"@resq-sw/constants": "workspace:*"
 	},
 	"peerDependencies": {
-		"effect": ">=3.0.0",
+		"effect": ">=4.0.0-beta.78",
 		"react": ">=19",
 		"react-dom": ">=19",
 		"resend": ">=6"

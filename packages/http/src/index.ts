@@ -22,8 +22,11 @@
  * - `@resq-sw/http` — fetcher, retry, timeout, JSON helpers
  * - `@resq-sw/http/security` — HTTPS redirect helper, request-ID extraction
  *
- * Requires `effect` and `@effect/platform` as peer dependencies.
- * `@effect/platform-bun` is an optional peer used when running on Bun.
+ * Requires `effect` (v4) as a peer dependency — the HTTP client lives in core at
+ * `effect/unstable/http`. `@effect/platform` is NOT required: it never shipped a
+ * v4, and its v3 line imports `effect/Either` and `effect/FiberRef`, which v4
+ * removed. `@effect/platform-bun` is an optional peer for `BunHttpClient.layer`
+ * when running on Bun; `FetchHttpClient.layer` from core works everywhere else.
  *
  * @module @resq-sw/http
  *
