@@ -36,6 +36,7 @@
 		"tinyqueue": "^3.0.0"
 	},
 	"devDependencies": {
+		"@total-typescript/ts-reset": "^0.6.1",
 		"@types/node": "^26.1.0",
 		"jsdom": "^29.1.1",
 		"tsdown": "^0.22.3",

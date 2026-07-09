@@ -74,6 +74,7 @@
       "name": "@resq-sw/analytics",
       "version": "0.4.0",
       "devDependencies": {
+        "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "^26.1.0",
         "@types/react": "^19.2.17",
         "posthog-js": "^1.398.0",
@@ -98,6 +99,7 @@
       "name": "@resq-sw/constants",
       "version": "0.0.0",
       "devDependencies": {
+        "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "^25.9.1",
         "@vitest/coverage-v8": "4.1.8",
         "tsdown": "^0.22.2",
@@ -109,6 +111,7 @@
       "name": "@resq-sw/decorators",
       "version": "0.1.1",
       "devDependencies": {
+        "@total-typescript/ts-reset": "^0.6.1",
         "tsdown": "^0.22.3",
         "typescript": "6.0.3",
         "vitest": "4.1.10",
@@ -119,6 +122,7 @@
       "version": "0.1.0",
       "devDependencies": {
         "@jsheaven/perf": "^1.1.1",
+        "@total-typescript/ts-reset": "^0.6.1",
         "effect": "4.0.0-beta.93",
         "tsdown": "^0.22.3",
         "typescript": "6.0.3",
@@ -140,6 +144,7 @@
         "@resq-sw/constants": "workspace:*",
       },
       "devDependencies": {
+        "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "^25.9.1",
         "@types/react": "^19.2.16",
         "@types/react-dom": "^19.2.3",
@@ -171,6 +176,7 @@
         "tinyqueue": "^3.0.0",
       },
       "devDependencies": {
+        "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "^26.1.0",
         "jsdom": "^29.1.1",
         "tsdown": "^0.22.3",
@@ -183,6 +189,7 @@
       "version": "0.1.1",
       "devDependencies": {
         "@effect/platform-bun": "4.0.0-beta.93",
+        "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "^26.1.0",
         "effect": "4.0.0-beta.93",
         "tsdown": "^0.22.3",
@@ -202,6 +209,7 @@
       "name": "@resq-sw/logger",
       "version": "0.1.1",
       "devDependencies": {
+        "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "^26.1.0",
         "tsdown": "^0.22.3",
         "typescript": "6.0.3",
@@ -212,6 +220,7 @@
       "name": "@resq-sw/rate-limiting",
       "version": "0.1.1",
       "devDependencies": {
+        "@total-typescript/ts-reset": "^0.6.1",
         "@upstash/ratelimit": "^2.0.5",
         "@upstash/redis": "^1.38.0",
         "effect": "4.0.0-beta.93",
@@ -234,6 +243,7 @@
       "name": "@resq-sw/security",
       "version": "0.1.1",
       "devDependencies": {
+        "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "^26.1.0",
         "effect": "4.0.0-beta.93",
         "tsdown": "^0.22.3",
@@ -279,6 +289,7 @@
         "@storybook/nextjs-vite": "10.4.6",
         "@storybook/react": "^10.2.17",
         "@tailwindcss/vite": "^4.3.2",
+        "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "26.1.0",
         "@types/react": "^19.2.17",
         "@types/react-dom": "^19.2.3",
@@ -1190,6 +1201,8 @@
     "@testing-library/jest-dom": ["@testing-library/jest-dom@6.9.1", "", { "dependencies": { "@adobe/css-tools": "^4.4.0", "aria-query": "^5.0.0", "css.escape": "^1.5.1", "dom-accessibility-api": "^0.6.3", "picocolors": "^1.1.1", "redent": "^3.0.0" } }, "sha512-zIcONa+hVtVSSep9UT3jZ5rizo2BsxgyDYU7WFD5eICBE7no3881HGeb/QkGfsJs6JTkY1aQhT7rIPC7e+0nnA=="],
 
     "@testing-library/user-event": ["@testing-library/user-event@14.6.1", "", { "peerDependencies": { "@testing-library/dom": ">=7.21.4" } }, "sha512-vq7fv0rnt+QTXgPxr5Hjc210p6YKq2kmdziLgnsZGgLJ9e6VAShx1pACLuRjd/AS/sr7phAR58OIIpf0LlmQNw=="],
+
+    "@total-typescript/ts-reset": ["@total-typescript/ts-reset@0.6.1", "", {}, "sha512-cka47fVSo6lfQDIATYqb/vO1nvFfbPw7uWLayIXIhGETj0wcOOlrlkobOMDNQOFr9QOafegUPq13V2+6vtD7yg=="],
 
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.3", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-F3fo1MYrRJYL3zER0OUOmkutjr1Vp23m7OsSgp7nq4SP6OqX6C/56XFIPAl5bt3zaBRjmW7SGz3u/6LwFpYcOg=="],
 
