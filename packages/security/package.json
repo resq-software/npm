@@ -38,7 +38,7 @@
 		"test": "vitest run"
 	},
 	"peerDependencies": {
-		"effect": ">=3.0.0",
+		"effect": ">=4.0.0-beta.78",
 		"jsdom": ">=22.0.0"
 	},
 	"peerDependenciesMeta": {
