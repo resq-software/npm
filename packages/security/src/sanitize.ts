@@ -253,9 +253,15 @@ const getPurify = (): typeof DOMPurify | null => {
 	} else {
 		try {
 			const req = createRequire(import.meta.url);
-			const { JSDOM } = req("jsdom");
+			const { JSDOM } = req("jsdom") as {
+				JSDOM: new (
+					html?: string,
+				) => {
+					window: WindowLike;
+				};
+			};
 			const dom = new JSDOM("");
-			purifyInstance = DOMPurify(dom.window as unknown as WindowLike);
+			purifyInstance = DOMPurify(dom.window);
 		} catch {
 			purifyInstance = null;
 		}
