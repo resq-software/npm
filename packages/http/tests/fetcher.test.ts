@@ -790,18 +790,23 @@ describe("fetcher – allowedHosts / blockedHosts (SSRF protection)", () => {
 		expect(res).toEqual({ ok: true });
 	});
 
-	it("applies blockedHosts to uppercase-scheme absolute URLs (case-insensitive)", async () => {
-		// URL schemes are case-insensitive; `HTTP://` must not slip past the host
-		// filter by being misclassified as a relative path.
-		const error = await Effect.runPromise(
-			Effect.flip(
-				Effect.provide(
-					fetcher("HTTPS://malicious.com/data", "GET", { blockedHosts: ["malicious.com"] }),
-					clientLayer,
+	it("applies blockedHosts to absolute URLs the WHATWG parser accepts (case/slash variants)", async () => {
+		// URL schemes are case-insensitive and `new URL` treats these all as
+		// absolute; none may slip past the host filter as a mistaken relative path.
+		const variants = [
+			"HTTPS://malicious.com/data", // uppercase scheme
+			"https:\\\\malicious.com/data", // backslashes (normalized to //)
+			"HTTPS:malicious.com/data", // no slashes
+			"http:\\\\malicious.com/data", // http, backslashes
+		];
+		for (const url of variants) {
+			const error = await Effect.runPromise(
+				Effect.flip(
+					Effect.provide(fetcher(url, "GET", { blockedHosts: ["malicious.com"] }), clientLayer),
 				),
-			),
-		);
-		expect(error).toBeInstanceOf(FetcherError);
-		expect((error as FetcherError).message).toContain("is blocked");
+			);
+			expect(error, url).toBeInstanceOf(FetcherError);
+			expect((error as FetcherError).message, url).toContain("is blocked");
+		}
 	});
 });
