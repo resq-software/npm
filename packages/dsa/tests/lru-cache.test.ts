@@ -199,6 +199,16 @@ describe("LRUCache", () => {
 			vi.advanceTimersByTime(999);
 			expect(cache.get("a")).toBe(1);
 		});
+
+		it("skips expired entries in keys, values, and entries iterators", () => {
+			const cache = new LRUCache<string, number>({ maxSize: 5 });
+			cache.set("a", 1, 100);
+			cache.set("b", 2);
+			vi.advanceTimersByTime(101);
+			expect(Array.from(cache.keys())).toEqual(["b"]);
+			expect(Array.from(cache.values())).toEqual([2]);
+			expect(Array.from(cache.entries())).toEqual([["b", 2]]);
+		});
 	});
 
 	// --- getOrCompute / getOrComputeSync ---

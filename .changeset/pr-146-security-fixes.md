@@ -25,4 +25,4 @@ Resolve security, algorithmic consistency, and memory leak issues:
 - @resq-sw/security: Implement recursive prototype pollution protection in `sanitizeJson` and `sanitizeObject`. Integrate DOMPurify for HTML sanitization when `allowHtml` is enabled in `validateUserInput`.
 - @resq-sw/http: Add SSRF protection with optional `allowedHosts` and `blockedHosts` in `FetcherOptions` to restrict requests to internal or untrusted networks.
 - @resq-sw/rate-limiting: Address memory leaks in memory-based rate-limit stores, `KeyedThrottle`, and `KeyedDebounce` by using the LRU cache from `@resq-sw/dsa` with configurable capacity limits.
-- @resq-sw/dsa: Add an optional `onEvict` callback to `LRUCache` to support cleanup tasks like canceling active timers during eviction.
+- @resq-sw/dsa: Add an optional `onEvict` callback to `LRUCache` to support cleanup tasks like canceling active timers during eviction, and skip expired entries when calling keys(), values(), and entries() iterators.

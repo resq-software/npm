@@ -334,8 +334,11 @@ export class LRUCache<K, V> {
 	 */
 	*keys(): Generator<K> {
 		let current = this.head;
+		const now = Date.now();
 		while (current) {
-			yield current.key;
+			if (!current.expiresAt || now <= current.expiresAt) {
+				yield current.key;
+			}
 			current = current.next;
 		}
 	}
@@ -345,8 +348,11 @@ export class LRUCache<K, V> {
 	 */
 	*values(): Generator<V> {
 		let current = this.head;
+		const now = Date.now();
 		while (current) {
-			yield current.value;
+			if (!current.expiresAt || now <= current.expiresAt) {
+				yield current.value;
+			}
 			current = current.next;
 		}
 	}
@@ -356,8 +362,11 @@ export class LRUCache<K, V> {
 	 */
 	*entries(): Generator<[K, V]> {
 		let current = this.head;
+		const now = Date.now();
 		while (current) {
-			yield [current.key, current.value];
+			if (!current.expiresAt || now <= current.expiresAt) {
+				yield [current.key, current.value];
+			}
 			current = current.next;
 		}
 	}
