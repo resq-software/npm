@@ -15,7 +15,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { debounce, throttle } from "../src/throttle.js";
+import { debounce, throttle, KeyedThrottle, KeyedDebounce } from "../src/throttle.js";
 
 describe("throttle", () => {
 	beforeEach(() => {
@@ -182,5 +182,92 @@ describe("debounce", () => {
 		vi.advanceTimersByTime(100);
 		// After full wait time, function should execute
 		expect(fn.mock.calls.length).toBeGreaterThanOrEqual(0);
+	});
+});
+
+describe("KeyedThrottle", () => {
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	it("should throttle execution independently per key", () => {
+		const fn = vi.fn();
+		const keyed = new KeyedThrottle(fn, 100);
+
+		keyed.execute("key1", "val1");
+		keyed.execute("key1", "val2");
+		keyed.execute("key2", "val3");
+
+		expect(fn).toHaveBeenCalledTimes(2);
+		expect(fn).toHaveBeenNthCalledWith(1, "val1");
+		expect(fn).toHaveBeenNthCalledWith(2, "val3");
+
+		vi.advanceTimersByTime(100);
+		expect(fn).toHaveBeenCalledTimes(3); // trailing edges call (only key1 has trailing edge)
+	});
+
+	it("evicts oldest keys and cancels their pending trailing timers when maxKeys is reached", () => {
+		const fn = vi.fn();
+		const keyed = new KeyedThrottle(fn, 100, { maxKeys: 2 });
+
+		keyed.execute("key1");
+		keyed.execute("key1"); // schedules trailing edge
+
+		keyed.execute("key2");
+		keyed.execute("key2"); // schedules trailing edge
+
+		// Trigger eviction of key1 by adding key3
+		keyed.execute("key3");
+
+		vi.advanceTimersByTime(100);
+		// key1 was evicted so its pending trailing edge is cancelled.
+		// key2 should fire its trailing edge. key3 has no trailing edge.
+		expect(fn).toHaveBeenCalledTimes(4); // leading: key1, key2, key3 (3) + trailing: key2 (1)
+	});
+});
+
+describe("KeyedDebounce", () => {
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	it("should debounce execution independently per key", () => {
+		const fn = vi.fn();
+		const keyed = new KeyedDebounce(fn, 100);
+
+		keyed.execute("key1", "val1");
+		keyed.execute("key2", "val2");
+
+		expect(fn).not.toHaveBeenCalled();
+
+		vi.advanceTimersByTime(100);
+		expect(fn).toHaveBeenCalledTimes(2);
+		expect(fn).toHaveBeenCalledWith("val1");
+		expect(fn).toHaveBeenCalledWith("val2");
+	});
+
+	it("evicts oldest keys and cancels their pending timers when maxKeys is reached", () => {
+		const fn = vi.fn();
+		const keyed = new KeyedDebounce(fn, 100, { maxKeys: 2 });
+
+		keyed.execute("key1");
+		keyed.execute("key2");
+
+		// Trigger eviction of key1 by adding key3
+		keyed.execute("key3");
+
+		vi.advanceTimersByTime(100);
+		// key1 was evicted, so its timer is cancelled and it does not execute.
+		// key2 and key3 should execute.
+		expect(fn).toHaveBeenCalledTimes(2);
+		expect(fn).not.toHaveBeenCalledWith("key1");
 	});
 });

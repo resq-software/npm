@@ -130,6 +130,44 @@ describe("MemoryRateLimitStore", () => {
 		const result = await store.check("user:total", 60_000, 42);
 		expect(result.total).toBe(42);
 	});
+
+	it("evicts oldest keys when maxSize is exceeded to prevent unbounded memory growth", async () => {
+		const boundedStore = new MemoryRateLimitStore({ maxSize: 2 });
+		await boundedStore.check("user:1", 60_000, 5);
+		await boundedStore.check("user:2", 60_000, 5);
+
+		// Trigger eviction of user:1 by adding user:3
+		await boundedStore.check("user:3", 60_000, 5);
+
+		// user:1 should have been evicted and start fresh
+		const result1 = await boundedStore.check("user:1", 60_000, 5);
+		expect(result1.remaining).toBe(4); // would be 3 if it wasn't evicted
+	});
+
+	it("smooths limits across windows via sliding window estimation", async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(1000);
+		try {
+			const key = "user:sliding";
+			const windowMs = 1000;
+			const maxRequests = 10;
+
+			// Populate 10 requests at t=1000
+			for (let i = 0; i < maxRequests; i++) {
+				await store.check(key, windowMs, maxRequests);
+			}
+
+			// Under sliding window, at t=1500ms (halfway into next window), the estimated count of the first window is
+			// 10 * (1 - 0.5) = 5. So we should be able to make 5 more requests.
+			vi.advanceTimersByTime(1500);
+
+			const result = await store.check(key, windowMs, maxRequests);
+			expect(result.limited).toBe(false);
+			expect(result.remaining).toBe(4); // 10 - (5 + 1) = 4
+		} finally {
+			vi.useRealTimers();
+		}
+	});
 });
 
 // ------------------------------------------------------------------

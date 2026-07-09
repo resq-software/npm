@@ -27,6 +27,7 @@ import {
 	sanitizeUrl,
 	stripAnsi,
 	validateUserInput,
+	sanitizeHtml,
 } from "../src/sanitize.js";
 
 describe("escapeHtml", () => {
@@ -141,6 +142,20 @@ describe("sanitizeJson", () => {
 		// Check that the __proto__ key was removed from the object's own properties
 		expect(result).not.toBeNull();
 		expect(Object.hasOwn(result!, "__proto__")).toBe(false);
+	});
+
+	it("should recursively remove dangerous prototype pollution keys", () => {
+		const malicious =
+			'{"nested":{"__proto__":{"polluted":true},"constructor":{"prototype":{"foo":"bar"}},"safe":"value"},"array":[{"__proto__":{"a":1}}]}';
+		const result = sanitizeJson<{
+			nested: { safe: string };
+			array: Array<Record<string, unknown>>;
+		}>(malicious);
+		expect(result).not.toBeNull();
+		expect(result!.nested.safe).toBe("value");
+		expect(Object.hasOwn(result!.nested, "__proto__")).toBe(false);
+		expect(Object.hasOwn(result!.nested, "constructor")).toBe(false);
+		expect(Object.hasOwn(result!.array[0], "__proto__")).toBe(false);
 	});
 
 	it("should return null for empty input", () => {
@@ -273,6 +288,22 @@ describe("Validation helpers", () => {
 
 		it("should reject unsafe URLs", () => {
 			expect(isValidUrl("javascript:alert(1)")).toBe(false);
+		});
+	});
+
+	describe("sanitizeHtml", () => {
+		it("should remove XSS vectors using DOMPurify (or fallback to escaping)", () => {
+			const dirty = '<script>alert("xss")</script><p>hello</p>';
+			const clean = sanitizeHtml(dirty);
+			expect(clean).not.toContain("<script>");
+		});
+
+		it("should preserve safe HTML if allowHtml is used in validateUserInput", () => {
+			const input = "<p>hello <script>alert(1)</script>world</p>";
+			const clean = validateUserInput(input, 500, true);
+			expect(clean).not.toContain("<script>");
+			expect(clean).toContain("hello");
+			expect(clean).toContain("world");
 		});
 	});
 });

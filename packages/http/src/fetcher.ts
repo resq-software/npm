@@ -26,7 +26,7 @@ import {
  * A Schema with DecodingServices constrained to `never`, allowing synchronous decoding.
  * All standard built-in schemas (e.g. `Schema.Struct(...)`) satisfy this constraint.
  */
-type SyncSchema<T> = Schema.Schema<T> & { readonly DecodingServices: never };
+type SyncSchema<T> = Schema.Codec<T, any, never>;
 
 /**
  * Configuration options for the fetcher utility.
@@ -48,6 +48,22 @@ export interface FetcherOptions<T = unknown> {
 	signal?: AbortSignal;
 	/** Body type - defaults to 'json', use 'text' for raw data, 'form' for FormData */
 	bodyType?: "json" | "text" | "form";
+	/**
+	 * Optional list of allowed hosts (e.g. `['api.example.com']` or `['*.example.com']`).
+	 * If provided, requests to other hosts fail with FetcherError.
+	 * NOTE: This offers basic hostname-based security filtering. It does not protect against
+	 * advanced DNS rebinding or IP-based bypasses (e.g., alternative IP encodings, IPv6 vs IPv4)
+	 * unless such filtering is enabled at the lower network transport or HttpClient layer.
+	 */
+	allowedHosts?: readonly string[];
+	/**
+	 * Optional list of blocked hosts (e.g. `['localhost', '127.0.0.1']`).
+	 * If provided, requests to these hosts fail with FetcherError.
+	 * NOTE: This offers basic hostname-based security filtering. It does not protect against
+	 * advanced DNS rebinding or IP-based bypasses (e.g., alternative IP encodings, IPv6 vs IPv4)
+	 * unless such filtering is enabled at the lower network transport or HttpClient layer.
+	 */
+	blockedHosts?: readonly string[];
 }
 
 /**
@@ -255,7 +271,7 @@ const validateResponse = <T>(
 		return Effect.succeed(data as T);
 	}
 
-	const result = Schema.decodeUnknownExit(schema as any)(data);
+	const result = Schema.decodeUnknownExit(schema)(data);
 
 	if (Exit.isFailure(result)) {
 		const schemaError = Cause.squash(result.cause);
@@ -487,17 +503,83 @@ export function fetcher<T = unknown>(
 		headers = {},
 		schema,
 		bodyType = "json",
+		allowedHosts,
+		blockedHosts,
 	} = options;
 
 	const queryString = buildQueryString(params);
 
+	// Whether the caller passed an absolute URL. Relative inputs are joined to the
+	// trusted base URL, so the allowedHosts/blockedHosts SSRF filters below apply
+	// only to absolute URLs — a relative path can't target an arbitrary host, and
+	// blocking e.g. "localhost" must not reject internal `fetcher("/api/...")` calls.
+	const isAbsoluteInput = input.startsWith("http");
 	let url: string;
-	if (input.startsWith("http")) {
+	if (isAbsoluteInput) {
 		url = queryString ? `${input}?${queryString}` : input;
 	} else {
 		const baseURL = getBaseURL();
-		const fullPath = baseURL ? `${baseURL}${input}` : input;
+		let fullPath: string;
+		if (baseURL) {
+			const separator = input.startsWith("/") ? "" : "/";
+			fullPath = `${baseURL}${separator}${input}`;
+		} else {
+			fullPath = input;
+		}
 		url = queryString ? `${fullPath}?${queryString}` : fullPath;
+	}
+
+	let parsedUrl: URL;
+	try {
+		if (url.startsWith("http:") || url.startsWith("https:")) {
+			parsedUrl = new URL(url);
+		} else if (typeof globalThis.location !== "undefined") {
+			parsedUrl = new URL(url, globalThis.location.href);
+		} else {
+			parsedUrl = new URL(url, "http://localhost");
+		}
+	} catch {
+		return Effect.fail(new FetcherError(`Invalid URL: ${url}`, url, undefined, undefined, 1));
+	}
+
+	// Lowercase (hostnames are case-insensitive per RFC 3986) and strip IPv6
+	// brackets so `[::1]` matches a `::1` entry. This remains basic hostname
+	// filtering (see the allowedHosts/blockedHosts docs); robust SSRF defence
+	// against alternate IP encodings and DNS rebinding belongs at the
+	// transport/HttpClient layer.
+	const host = parsedUrl.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+
+	const matchHost = (targetHost: string, pattern: string): boolean => {
+		const patternLower = pattern.toLowerCase();
+		if (patternLower.startsWith("*.")) {
+			const suffix = patternLower.slice(1);
+			return targetHost === patternLower.slice(2) || targetHost.endsWith(suffix);
+		}
+		return targetHost === patternLower;
+	};
+
+	if (isAbsoluteInput && allowedHosts && allowedHosts.length > 0) {
+		const isAllowed = allowedHosts.some((allowed) => matchHost(host, allowed));
+		if (!isAllowed) {
+			return Effect.fail(
+				new FetcherError(
+					`Host '${parsedUrl.hostname}' is not allowed`,
+					url,
+					undefined,
+					undefined,
+					1,
+				),
+			);
+		}
+	}
+
+	if (isAbsoluteInput && blockedHosts && blockedHosts.length > 0) {
+		const isBlocked = blockedHosts.some((blocked) => matchHost(host, blocked));
+		if (isBlocked) {
+			return Effect.fail(
+				new FetcherError(`Host '${parsedUrl.hostname}' is blocked`, url, undefined, undefined, 1),
+			);
+		}
 	}
 
 	return Effect.gen(function* () {

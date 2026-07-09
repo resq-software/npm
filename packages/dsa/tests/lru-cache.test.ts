@@ -199,6 +199,16 @@ describe("LRUCache", () => {
 			vi.advanceTimersByTime(999);
 			expect(cache.get("a")).toBe(1);
 		});
+
+		it("skips expired entries in keys, values, and entries iterators", () => {
+			const cache = new LRUCache<string, number>({ maxSize: 5 });
+			cache.set("a", 1, 100);
+			cache.set("b", 2);
+			vi.advanceTimersByTime(101);
+			expect(Array.from(cache.keys())).toEqual(["b"]);
+			expect(Array.from(cache.values())).toEqual([2]);
+			expect(Array.from(cache.entries())).toEqual([["b", 2]]);
+		});
 	});
 
 	// --- getOrCompute / getOrComputeSync ---
@@ -252,5 +262,28 @@ describe("LRUCache", () => {
 		cache.set(2, "two");
 		expect(cache.get(1)).toBe("one");
 		expect(cache.get(2)).toBe("two");
+	});
+
+	it("supports iteration over keys, values, and entries in MRU to LRU order", () => {
+		const cache = new LRUCache<string, number>({ maxSize: 3 });
+		cache.set("a", 1);
+		cache.set("b", 2);
+		cache.set("c", 3);
+		// Access "b" to move it to MRU
+		cache.get("b");
+
+		// Order should be b (MRU) -> c -> a (LRU)
+		expect(Array.from(cache.keys())).toEqual(["b", "c", "a"]);
+		expect(Array.from(cache.values())).toEqual([2, 3, 1]);
+		expect(Array.from(cache.entries())).toEqual([
+			["b", 2],
+			["c", 3],
+			["a", 1],
+		]);
+		expect(Array.from(cache)).toEqual([
+			["b", 2],
+			["c", 3],
+			["a", 1],
+		]);
 	});
 });

@@ -22,6 +22,7 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import type { Redis } from "@upstash/redis";
 import { Schema as S } from "effect";
+import { LRUCache } from "@resq-sw/dsa";
 
 // ============================================
 // Effect Schema Definitions
@@ -190,30 +191,55 @@ export class RedisRateLimitStore implements IRateLimitStore {
  * long-lived processes that see unbounded key cardinality.
  */
 export class MemoryRateLimitStore implements IRateLimitStore {
-	private readonly store = new Map<string, { count: number; resetTime: number }>();
+	private readonly store: LRUCache<
+		string,
+		{ current: number; previous: number; windowStart: number; windowMs: number }
+	>;
+
+	constructor(options?: { maxSize?: number }) {
+		this.store = new LRUCache({ maxSize: options?.maxSize ?? 10000 });
+	}
 
 	/** @inheritdoc */
 	async check(key: string, windowMs: number, maxRequests: number): Promise<RateLimitCheckResult> {
 		const now = Date.now();
-		const state = this.store.get(key);
+		const windowStart = Math.floor(now / windowMs) * windowMs;
+		const previousWindowStart = windowStart - windowMs;
 
-		if (!state || state.resetTime <= now) {
-			const newState = { count: 1, resetTime: now + windowMs };
-			this.store.set(key, newState);
-			return {
-				limited: false,
-				remaining: maxRequests - 1,
-				resetTime: newState.resetTime,
-				total: maxRequests,
-			};
+		let counter = this.store.get(key);
+
+		if (!counter || counter.windowMs !== windowMs || counter.windowStart + windowMs * 2 <= now) {
+			counter = { current: 0, previous: 0, windowStart, windowMs };
+		} else if (counter.windowStart < windowStart) {
+			if (counter.windowStart === previousWindowStart) {
+				counter.previous = counter.current;
+			} else {
+				counter.previous = 0;
+			}
+			counter.current = 0;
+			counter.windowStart = windowStart;
 		}
 
-		state.count++;
-		const limited = state.count > maxRequests;
+		// Calculate weighted count
+		const windowPosition = (now - windowStart) / windowMs;
+		const weightedCount = counter.previous * (1 - windowPosition) + counter.current;
+
+		const limited = weightedCount >= maxRequests;
+
+		if (!limited) {
+			counter.current++;
+		}
+
+		this.store.set(key, counter);
+
+		// Calculate final count and remaining after optional increment
+		const finalWeightedCount = counter.previous * (1 - windowPosition) + counter.current;
+		const remaining = Math.max(0, maxRequests - Math.floor(finalWeightedCount));
+
 		return {
 			limited,
-			remaining: Math.max(0, maxRequests - state.count),
-			resetTime: state.resetTime,
+			remaining,
+			resetTime: windowStart + windowMs,
 			total: maxRequests,
 		};
 	}

@@ -29,7 +29,7 @@ interface CacheNode<K, V> {
 /**
  * Configuration for {@link LRUCache}.
  */
-export interface LRUCacheOptions {
+export interface LRUCacheOptions<K = unknown, V = unknown> {
 	/**
 	 * Maximum number of entries the cache will hold. Once exceeded, the
 	 * least-recently-used entry is evicted.
@@ -48,7 +48,7 @@ export interface LRUCacheOptions {
 	 * Not called on explicit `delete()` or `clear()`, and not called when
 	 * an entry is removed because it expired.
 	 */
-	onEvict?: <K, V>(key: K, value: V) => void;
+	onEvict?: (key: K, value: V) => void;
 }
 
 /**
@@ -96,12 +96,12 @@ export class LRUCache<K, V> {
 	private tail: CacheNode<K, V> | null = null;
 	private readonly maxSize: number;
 	private readonly defaultTTL?: number;
-	private readonly onEvict?: <K2, V2>(key: K2, value: V2) => void;
+	private readonly onEvict?: (key: K, value: V) => void;
 
 	/**
 	 * @param options - See {@link LRUCacheOptions}. `maxSize` is required.
 	 */
-	constructor(options: LRUCacheOptions) {
+	constructor(options: LRUCacheOptions<K, V>) {
 		this.cache = new Map();
 		this.maxSize = options.maxSize;
 		this.defaultTTL = options.defaultTTL;
@@ -327,5 +327,54 @@ export class LRUCache<K, V> {
 
 		this.removeNode(evictedNode);
 		this.cache.delete(evictedNode.key);
+	}
+
+	/**
+	 * Returns an iterator for the keys in the cache, from most-recently-used to least-recently-used.
+	 */
+	*keys(): Generator<K> {
+		let current = this.head;
+		const now = Date.now();
+		while (current) {
+			if (!current.expiresAt || now <= current.expiresAt) {
+				yield current.key;
+			}
+			current = current.next;
+		}
+	}
+
+	/**
+	 * Returns an iterator for the values in the cache, from most-recently-used to least-recently-used.
+	 */
+	*values(): Generator<V> {
+		let current = this.head;
+		const now = Date.now();
+		while (current) {
+			if (!current.expiresAt || now <= current.expiresAt) {
+				yield current.value;
+			}
+			current = current.next;
+		}
+	}
+
+	/**
+	 * Returns an iterator for the [key, value] pairs in the cache, from most-recently-used to least-recently-used.
+	 */
+	*entries(): Generator<[K, V]> {
+		let current = this.head;
+		const now = Date.now();
+		while (current) {
+			if (!current.expiresAt || now <= current.expiresAt) {
+				yield [current.key, current.value];
+			}
+			current = current.next;
+		}
+	}
+
+	/**
+	 * Default iterator returning entries.
+	 */
+	[Symbol.iterator](): Generator<[K, V]> {
+		return this.entries();
 	}
 }
