@@ -29,6 +29,8 @@
 [![@resq-sw/security](https://img.shields.io/npm/v/%40resq-sw%2Fsecurity?style=flat-square&label=%40resq-sw%2Fsecurity)](https://www.npmjs.com/package/@resq-sw/security)
 [![@resq-sw/rate-limiting](https://img.shields.io/npm/v/%40resq-sw%2Frate-limiting?style=flat-square&label=%40resq-sw%2Frate-limiting)](https://www.npmjs.com/package/@resq-sw/rate-limiting)
 [![@resq-sw/analytics](https://img.shields.io/npm/v/%40resq-sw%2Fanalytics?style=flat-square&label=%40resq-sw%2Fanalytics)](https://www.npmjs.com/package/@resq-sw/analytics)
+[![@resq-sw/constants](https://img.shields.io/npm/v/%40resq-sw%2Fconstants?style=flat-square&label=%40resq-sw%2Fconstants)](https://www.npmjs.com/package/@resq-sw/constants)
+[![@resq-sw/email-templates](https://img.shields.io/npm/v/%40resq-sw%2Femail-templates?style=flat-square&label=%40resq-sw%2Femail-templates)](https://www.npmjs.com/package/@resq-sw/email-templates)
 
 Registry workspace for all ResQ npm packages published under the `@resq-sw` scope. Provides the shared UI component library, zero-dependency data structures, and standalone server/client utilities for the ResQ autonomous disaster response platform.
 
@@ -38,6 +40,9 @@ Registry workspace for all ResQ npm packages published under the `@resq-sw` scop
 graph TB
     subgraph repo["resq-sw/npm"]
         direction TB
+        subgraph foundation["Foundation"]
+            constants["@resq-sw/constants<br/><small>design tokens · brand · zero deps</small>"]
+        end
         subgraph frontend["Frontend"]
             ui["@resq-sw/ui<br/><small>57 components · Radix + Tailwind v4</small>"]
         end
@@ -49,6 +54,7 @@ graph TB
             logger["@resq-sw/logger"]
             security["@resq-sw/security"]
             ratelimit["@resq-sw/rate-limiting"]
+            email["@resq-sw/email-templates<br/><small>React Email · Effect contract</small>"]
         end
         subgraph utilities["Utilities"]
             helpers["@resq-sw/helpers"]
@@ -59,13 +65,17 @@ graph TB
         end
     end
 
-    frontend --> apps["Consumer Apps"]
+    constants --> ui
+    constants --> email
+    foundation --> apps["Consumer Apps"]
+    frontend --> apps
     algorithms --> apps
     infra --> apps
     utilities --> apps
     telemetry --> apps
 
     style repo fill:#0d0f14,stroke:#222b42,color:#f5f5f7
+    style foundation fill:#141722,stroke:#5db8ff,color:#f5f5f7
     style frontend fill:#141722,stroke:#388feb,color:#f5f5f7
     style algorithms fill:#141722,stroke:#25c68a,color:#f5f5f7
     style infra fill:#141722,stroke:#f5a623,color:#f5f5f7
@@ -78,6 +88,7 @@ graph TB
 
 | Package | Description | Deps | Docs |
 | :--- | :--- | :--- | :--- |
+| [`@resq-sw/constants`](packages/constants/) | Shared design tokens (oklch + email-safe hex), brand identity, and cross-app values — one source of truth | **zero deps** | [README](packages/constants/README.md) |
 | [`@resq-sw/ui`](packages/ui/) | React component library — dark-first oklch color system, WCAG AA, subpath exports | radix-ui, tailwindcss | [README](packages/ui/README.md) · [Storybook](https://master--69b2711843dac80a70e4ca83.chromatic.com) |
 | [`@resq-sw/dsa`](packages/dsa/) | Data structures & algorithms — graph, heap, trie, bloom filter, distance, LRU cache, queue | **zero deps** | [README](packages/dsa/README.md) |
 | [`@resq-sw/http`](packages/http/) | Effect-based HTTP client with retry, timeout, and schema validation | effect | [README](packages/http/README.md) |
@@ -87,6 +98,7 @@ graph TB
 | [`@resq-sw/decorators`](packages/decorators/) | 15 TypeScript decorators — memoize, throttle, debounce, bind, execTime, rateLimit | **zero deps** | [README](packages/decorators/README.md) |
 | [`@resq-sw/helpers`](packages/helpers/) | Result monad, type guards, date/number/string formatting, platform detection | @resq-sw/logger | [README](packages/helpers/README.md) |
 | [`@resq-sw/analytics`](packages/analytics/) | Unified PostHog + GA4 client — cross-subdomain identity, lazy-loaded, typed events, Next.js + React adapters | posthog-js (peer) | [README](packages/analytics/README.md) |
+| [`@resq-sw/email-templates`](packages/email-templates/) | Type-safe transactional emails — Effect Schema contract, React Email components, headless render, optional Resend sender | react, effect, @react-email | [README](packages/email-templates/README.md) |
 
 ## Examples
 

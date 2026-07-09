@@ -513,7 +513,12 @@ export function fetcher<T = unknown>(
 	// trusted base URL, so the allowedHosts/blockedHosts SSRF filters below apply
 	// only to absolute URLs — a relative path can't target an arbitrary host, and
 	// blocking e.g. "localhost" must not reject internal `fetcher("/api/...")` calls.
-	const isAbsoluteInput = input.startsWith("http");
+	// Match any `http:`/`https:` scheme (case-insensitive per RFC 3986), regardless
+	// of the slashes that follow. The WHATWG URL parser resolves `HTTP://evil.com`,
+	// `http:evil.com` (no slashes), and `https:\\evil.com` (backslashes normalized
+	// to `/`) all as absolute; classifying them absolute here ensures none slip past
+	// the allowedHosts/blockedHosts SSRF filter as a mistaken relative path.
+	const isAbsoluteInput = /^https?:/i.test(input);
 	let url: string;
 	if (isAbsoluteInput) {
 		url = queryString ? `${input}?${queryString}` : input;
