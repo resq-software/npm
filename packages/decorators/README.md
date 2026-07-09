@@ -304,8 +304,6 @@ All decorator types are exported: `Method`, `Decorator`, `AsyncMethod`, `AsyncDe
 ## Testing
 
 ```sh
-bun test packages/decorators
-# or
 bun --filter @resq-sw/decorators test
 ```
 

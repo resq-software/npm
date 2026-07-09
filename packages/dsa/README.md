@@ -171,8 +171,6 @@ Benchmarks live in `tests/perf/` and run via `bun --filter @resq-sw/dsa bench`.
 ## Testing
 
 ```sh
-bun test packages/dsa
-# or
 bun --filter @resq-sw/dsa test
 ```
 

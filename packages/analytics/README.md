@@ -145,13 +145,11 @@ For ResQ's three surfaces to share a single `distinct_id`:
 ## Configuration
 
 - **PostHog Integration**: Requires `NEXT_PUBLIC_POSTHOG_KEY` and host rewrites using `withAnalyticsRewrites`.
-- **GA4 Linker**: Cross-subdomain linker domains config option (`cookieDomain`).
+- **GA4 Linker**: Cross-subdomain linker domains config option (`domains`).
 
 ## Testing
 
 ```sh
-bun test packages/analytics
-# or
 bun --filter @resq-sw/analytics test
 ```
 

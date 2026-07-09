@@ -205,13 +205,11 @@ Email clients drop `oklch()`, `color-mix()`, and CSS custom properties, and many
 ## Configuration
 
 - **Resend Token**: Supply `RESEND_API_KEY` to the environment.
-- **SMTP Transport**: If not using Resend, construct a custom Mailer instance with standard SMTP parameters.
+- **SMTP Transport**: If not using Resend, implement a custom `EmailSender` (e.g., using Nodemailer or SES).
 
 ## Testing
 
 ```sh
-bun test packages/email-templates
-# or
 bun --filter @resq-sw/email-templates test
 ```
 

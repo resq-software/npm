@@ -187,8 +187,6 @@ const reqId = getRequestId(headers["x-request-id"]);
 ## Testing
 
 ```sh
-bun test packages/http
-# or
 bun --filter @resq-sw/http test
 ```
 

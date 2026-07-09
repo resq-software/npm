@@ -211,8 +211,6 @@ Exported types: `LogData`, `LoggerOptions`, `LogLevel`, `LogLevelString`, `Color
 ## Testing
 
 ```sh
-bun test packages/logger
-# or
 bun --filter @resq-sw/logger test
 ```
 

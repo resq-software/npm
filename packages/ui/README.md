@@ -138,8 +138,6 @@ bun --filter @resq-sw/ui chromatic        # publish visual baseline
 ## Testing
 
 ```sh
-bun test packages/ui
-# or
 bun --filter @resq-sw/ui test
 ```
 

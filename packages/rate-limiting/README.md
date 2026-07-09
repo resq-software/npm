@@ -250,8 +250,6 @@ Exported for runtime validation: `ThrottleOptionsSchema`, `DebounceOptionsSchema
 ## Testing
 
 ```sh
-bun test packages/rate-limiting
-# or
 bun --filter @resq-sw/rate-limiting test
 ```
 

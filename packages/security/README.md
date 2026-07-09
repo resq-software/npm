@@ -267,8 +267,6 @@ Exported types: `ThreatDetectionResult`, `ThreatFinding`, `ThreatType`, `ThreatD
 ## Testing
 
 ```sh
-bun test packages/security
-# or
 bun --filter @resq-sw/security test
 ```
 

@@ -244,8 +244,6 @@ const { href, encodedText } = obfuscateLink({
 ## Testing
 
 ```sh
-bun test packages/helpers
-# or
 bun --filter @resq-sw/helpers test
 ```
 

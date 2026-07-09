@@ -72,8 +72,6 @@ place by being reused across apps, not by being convenient to dump here.
 ## Testing
 
 ```sh
-bun test packages/constants
-# or
 bun --filter @resq-sw/constants test
 ```
 
