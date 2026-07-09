@@ -175,6 +175,26 @@ Returns the existing request ID or generates a new UUID.
 const reqId = getRequestId(headers["x-request-id"]);
 ```
 
+## Prerequisites
+
+- **Runtime**: Bun 1.1+ or Node.js 20+
+- **Peer Dependencies**: `effect` (v4.0.0-beta.93+)
+
+## Configuration
+
+- **Effect Configuration**: Client instances are constructed through standard Effect Layers.
+
+## Testing
+
+```sh
+bun --filter @resq-sw/http test
+```
+
+## Troubleshooting
+
+- **Effect Version Mismatch**: Ensure your root project resolves to `effect: 4.0.0-beta.93` using overrides to prevent duplicate effect typings.
+
+
 ## License
 
 Apache-2.0

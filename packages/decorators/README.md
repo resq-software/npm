@@ -292,6 +292,26 @@ Also exported: `throttleAsyncFn(method, parallelCalls?)`, `ThrottleAsyncExecutor
 
 All decorator types are exported: `Method`, `Decorator`, `AsyncMethod`, `AsyncDecorator`.
 
+## Prerequisites
+
+- **Runtime**: Bun 1.1+ or Node.js 20+
+- **Compiler Option**: Requires `"experimentalDecorators": true` in your `tsconfig.json`.
+
+## Configuration
+
+- **Decorator Flags**: Configure your TypeScript target to support ES2022 classes.
+
+## Testing
+
+```sh
+bun --filter @resq-sw/decorators test
+```
+
+## Troubleshooting
+
+- **Legacy Decorators Compiler Warning**: If you get a warning about decorator signatures, ensure `experimentalDecorators` is enabled under `compilerOptions`.
+
+
 ## License
 
 Apache-2.0

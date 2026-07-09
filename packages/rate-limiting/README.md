@@ -238,6 +238,26 @@ import { RATE_LIMIT_PRESETS } from "@resq-sw/rate-limiting";
 
 Exported for runtime validation: `ThrottleOptionsSchema`, `DebounceOptionsSchema`, `RateLimiterStatsSchema`, `KeyedStatsSchema`, `RateLimitConfigSchema`, `RateLimitCheckResultSchema`.
 
+## Prerequisites
+
+- **Runtime**: Bun 1.1+ or Node.js 20+
+- **Peer Dependencies**: `effect`, `@upstash/ratelimit` (optional, for Redis token bucket)
+
+## Configuration
+
+- **Redis Layer**: Set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` when leveraging Upstash rate limit bounds.
+
+## Testing
+
+```sh
+bun --filter @resq-sw/rate-limiting test
+```
+
+## Troubleshooting
+
+- **Rate Limit Exceeded Failures**: Upstash limits are globally synchronized. Check for Redis connection latency/throttling in network logs.
+
+
 ## License
 
 Apache-2.0

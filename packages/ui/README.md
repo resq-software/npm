@@ -126,6 +126,26 @@ bun --filter @resq-sw/ui chromatic        # publish visual baseline
 | Visual regression | Chromatic |
 | Build | tsdown |
 
+## Prerequisites
+
+- **Runtime**: Bun 1.1+ or Node.js 20+
+- **Peer Dependencies**: `react` (v19+), `react-dom` (v19+), `tailwindcss` (v4+), `@radix-ui/*` primitives
+
+## Configuration
+
+- **Tailwind CSS**: Requires Tailwind v4 config inclusion. Import root styles: `import "@resq-sw/ui/lib/index.css";`.
+
+## Testing
+
+```sh
+bun --filter @resq-sw/ui test
+```
+
+## Troubleshooting
+
+- **Contrast Failures**: The package utilizes dark-first oklch colors. If custom background utilities fail accessibility tests, verify they meet the minimum WCAG AA contrast thresholds using the built-in audit utility.
+
+
 ## License
 
 Apache-2.0 — see [LICENSE.md](../../LICENSE.md).

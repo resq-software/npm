@@ -255,6 +255,26 @@ Exported for runtime validation: `SafeUrlSchema`, `EmailSchema`, `PhoneNumberSch
 
 Exported types: `ThreatDetectionResult`, `ThreatFinding`, `ThreatType`, `ThreatDetectionConfig`, `PIIRedactionOptions`, `UserInputOptions`, `SafeUrl`, `Email`, `PhoneNumber`, `SSN`, `CreditCard`, `IPv4`, `UrlProtocol`.
 
+## Prerequisites
+
+- **Runtime**: Bun 1.1+ or Node.js 20+
+- **Peer Dependencies**: `effect` (v4.0.0-beta.93+)
+
+## Configuration
+
+- **Crypto Key**: Ensure `ENCRYPTION_KEY` is set for cryptographic modules (must be a valid hex string of proper bit length).
+
+## Testing
+
+```sh
+bun --filter @resq-sw/security test
+```
+
+## Troubleshooting
+
+- **Strict JSON parsing error**: Stricter `ts-reset` settings type `JSON.parse` as `unknown`. Use the provided `sanitizeJson` / `parseJsonWithSchema` wrapper helpers to cast to safe formats.
+
+
 ## License
 
 Apache-2.0

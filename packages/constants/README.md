@@ -59,3 +59,23 @@ place by being reused across apps, not by being convenient to dump here.
 - **Zero runtime dependencies.** This package must stay dependency-free.
 - Values are data only — no logic, no side effects (`sideEffects: false`).
 - A change here ripples to every dependent; prefer additive, stable edits.
+
+## Prerequisites
+
+- **Runtime**: Bun 1.1+ or Node.js 20+
+- **Format support**: CSS variable extraction, ESM modules, and JSON structures.
+
+## Configuration
+
+- **Tailwind/Vite**: Import styles directly in your entry point: `import "@resq-sw/constants/tokens.css";`.
+
+## Testing
+
+```sh
+bun --filter @resq-sw/constants test
+```
+
+## Troubleshooting
+
+- **Missing CSS Variables**: Ensure `@resq-sw/constants/tokens.css` is imported at the very top of your global CSS sheet.
+

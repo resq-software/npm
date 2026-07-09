@@ -200,6 +200,25 @@ class MyService {
 
 Exported types: `LogData`, `LoggerOptions`, `LogLevel`, `LogLevelString`, `ColorKey`, `LogEntry`, `LogTransport`, `LogMethodOptions`, `LogTimingOptions`, `LogErrorOptions`, `LogClassOptions`.
 
+## Prerequisites
+
+- **Runtime**: Bun 1.1+ or Node.js 20+
+
+## Configuration
+
+- **Log Levels**: Configure `LOG_LEVEL` environment variable (`debug`, `info`, `warn`, `error`). Defaults to `info`.
+
+## Testing
+
+```sh
+bun --filter @resq-sw/logger test
+```
+
+## Troubleshooting
+
+- **Missing Logs in Production**: Verify `LOG_LEVEL` is not set too high. Check that decorator logs are initialized correctly.
+
+
 ## License
 
 Apache-2.0
