@@ -355,9 +355,10 @@ export const parseJsonWithSchema = <A>(
 
 		if (typeof parsed === "object" && parsed !== null) {
 			const dangerous = ["__proto__", "constructor", "prototype"];
+			const parsedObj = parsed as Record<string, unknown>;
 			for (const key of dangerous) {
-				if (key in parsed) {
-					delete parsed[key];
+				if (key in parsedObj) {
+					delete parsedObj[key];
 				}
 			}
 		}
