@@ -137,6 +137,30 @@ For ResQ's three surfaces to share a single `distinct_id`:
 - `<AnalyticsProvider deferUntilIdle>` waits for `requestIdleCallback` before booting.
 - `person_profiles: "identified_only"` is set by default, so anonymous traffic doesn't burn PostHog units.
 
+## Prerequisites
+
+- **Runtime**: Bun 1.1+ or Node.js 20+
+- **Peer Dependencies**: `posthog-js`, `react` (optional, for React/Next.js integrations)
+
+## Configuration
+
+- **PostHog Integration**: Requires `NEXT_PUBLIC_POSTHOG_KEY` and host rewrites using `withAnalyticsRewrites`.
+- **GA4 Linker**: Cross-subdomain linker domains config option (`cookieDomain`).
+
+## Testing
+
+```sh
+bun test packages/analytics
+# or
+bun --filter @resq-sw/analytics test
+```
+
+## Troubleshooting
+
+- **Cross-Subdomain Linker Issues**: Ensure cookie domains match (e.g., `.resq.software`). Linker domain checks fail on exact host mismatches.
+- **Ad-Blockers**: Reverse proxies (/ingest/*) can sometimes be blocked by custom DNS-level filters. Ensure proxy rewrites are active.
+
+
 ## License
 
 Apache-2.0

@@ -159,6 +159,28 @@ bun --filter @resq-sw/dsa build      # tsdown → lib/
 
 Benchmarks live in `tests/perf/` and run via `bun --filter @resq-sw/dsa bench`.
 
+## Prerequisites
+
+- **Runtime**: Bun 1.1+ or Node.js 20+
+- **Peer Dependencies**: `effect` (optional, for input validation schemas)
+
+## Configuration
+
+- **Optional Schemas**: Import from `@resq-sw/dsa/schemas` to enable input constraints validation.
+
+## Testing
+
+```sh
+bun test packages/dsa
+# or
+bun --filter @resq-sw/dsa test
+```
+
+## Troubleshooting
+
+- **Timing Noise in Benchmarks**: Algorithmic complexity tests (Vitest) can flake if the runner CPU is highly throttled. Run them separately with isolated CPU cores.
+
+
 ## License
 
 Apache-2.0 — see [LICENSE.md](../../LICENSE.md).

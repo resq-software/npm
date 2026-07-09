@@ -195,3 +195,27 @@ Email clients drop `oklch()`, `color-mix()`, and CSS custom properties, and many
 - use the hex `emailColors` snapshot (keep it in sync with the oklch design tokens);
 - pass `pixelBasedPreset` to `<Tailwind>` so utilities emit `px`;
 - avoid responsive prefixes and flex/grid — use `Section` for layout.
+
+## Prerequisites
+
+- **Runtime**: Bun 1.1+ or Node.js 20+
+- **Peer Dependencies**: `react`, `react-dom` (v19+ recommended)
+- **Services**: Requires a Resend API key for direct delivery.
+
+## Configuration
+
+- **Resend Token**: Supply `RESEND_API_KEY` to the environment.
+- **SMTP Transport**: If not using Resend, construct a custom Mailer instance with standard SMTP parameters.
+
+## Testing
+
+```sh
+bun test packages/email-templates
+# or
+bun --filter @resq-sw/email-templates test
+```
+
+## Troubleshooting
+
+- **Rendering Failures**: Next.js Server Components might struggle with client-side React Email components. Render mailers asynchronously on the server.
+

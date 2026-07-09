@@ -232,6 +232,28 @@ const { href, encodedText } = obfuscateLink({
 });
 ```
 
+## Prerequisites
+
+- **Runtime**: Bun 1.1+ or Node.js 20+
+- **Peer Dependencies**: `@resq-sw/logger`
+
+## Configuration
+
+- **Utility setup**: Auto-resolved from subpaths.
+
+## Testing
+
+```sh
+bun test packages/helpers
+# or
+bun --filter @resq-sw/helpers test
+```
+
+## Troubleshooting
+
+- **Format Date Mismatches**: Localized format helpers default to UTC on serverless runtimes. Explicitly configure timezone offsets.
+
+
 ## License
 
 Apache-2.0
