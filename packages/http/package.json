@@ -39,7 +39,7 @@
 		"@effect/platform-bun": "4.0.0-beta.93",
 		"@total-typescript/ts-reset": "^0.6.1",
 		"@types/node": "^26.1.0",
-		"effect": "4.0.0-beta.93",
+		"effect": "4.0.0-beta.97",
 		"tsdown": "^0.22.3",
 		"typescript": "7.0.2",
 		"vitest": "4.1.10"
