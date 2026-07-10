@@ -61,7 +61,7 @@
 		"@types/react": "^19.2.16",
 		"@types/react-dom": "^19.2.3",
 		"@vitest/coverage-v8": "4.1.8",
-		"effect": "4.0.0-beta.78",
+		"effect": "4.0.0-beta.97",
 		"react": "^19.2.7",
 		"react-dom": "^19.2.7",
 		"react-email": "^6.6.6",
