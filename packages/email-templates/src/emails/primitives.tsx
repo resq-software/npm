@@ -117,6 +117,24 @@ function Signature({ children }: { children?: ReactNode }) {
 	);
 }
 
+/**
+ * Muted support-contact line for security notices, sourced from
+ * `theme.org.supportEmail` so there is always an actionable path even when a
+ * template's optional CTA is absent. `children` overrides the lead-in prompt.
+ */
+function SupportLine({ children }: { children?: ReactNode }) {
+	const { org } = useContext(EmailThemeContext);
+	return (
+		<Text className="mb-4 font-sans text-sm leading-relaxed text-muted">
+			{children ?? "Didn't do this?"} Contact us at{" "}
+			<Link href={`mailto:${org.supportEmail}`} className="text-primary underline">
+				{org.supportEmail}
+			</Link>
+			.
+		</Text>
+	);
+}
+
 /** A large, letter-spaced code block for OTP / verification codes. */
 function Code({ children }: { children: ReactNode }) {
 	return (
@@ -234,6 +252,7 @@ export const Email: {
 	readonly Title: typeof Title;
 	readonly Paragraph: typeof Paragraph;
 	readonly Signature: typeof Signature;
+	readonly SupportLine: typeof SupportLine;
 	readonly Code: typeof Code;
 	readonly CTA: typeof CTA;
 	readonly FallbackLink: typeof FallbackLink;
@@ -249,6 +268,7 @@ export const Email: {
 	Title,
 	Paragraph,
 	Signature,
+	SupportLine,
 	Code,
 	CTA,
 	FallbackLink,

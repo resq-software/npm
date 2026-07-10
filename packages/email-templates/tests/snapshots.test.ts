@@ -71,6 +71,51 @@ const cases: readonly EmailPayload[] = [
 			dashboardUrl: "https://app.resq.software/incidents/INC-2048",
 		},
 	},
+	{
+		name: "password-changed",
+		to: "user@example.com",
+		data: {
+			firstName: "Ada",
+			changedAt: "2026-07-10 09:14 PT",
+			secureAccountUrl: "https://app.resq.software/security",
+		},
+	},
+	{
+		name: "new-device-login",
+		to: "user@example.com",
+		data: {
+			firstName: "Ada",
+			device: "Chrome on macOS",
+			location: "Newark, DE, USA",
+			ipAddress: "203.0.113.24",
+			at: "2026-07-10 09:14 PT",
+			secureAccountUrl: "https://app.resq.software/security",
+		},
+	},
+	{
+		name: "mission-approval",
+		to: "approver@example.com",
+		data: {
+			missionId: "MSN-4821",
+			title: "Deploy swarm to Sector 7 wildfire",
+			summary: "Reroute 12 drones for thermal mapping along the northern ridge.",
+			requestedBy: "Field Commander Vega",
+			severity: "critical",
+			approveUrl: "https://app.example.com/missions/MSN-4821/approve",
+			expiresInMinutes: 15,
+		},
+	},
+	{
+		name: "org-invitation",
+		to: "invitee@example.com",
+		data: {
+			orgName: "Cascade County SAR",
+			inviterName: "Dana Ruiz",
+			role: "Operator",
+			acceptUrl: "https://app.resq.software/invitations/accept?token=demo",
+			expiresInDays: 7,
+		},
+	},
 ];
 
 describe("email template snapshots", () => {

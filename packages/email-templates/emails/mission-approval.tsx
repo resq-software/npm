@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-export * from "./tokens.js";
-export * from "./primitives.js";
-export * from "./otp.js";
-export * from "./welcome.js";
-export * from "./password-reset.js";
-export * from "./notification.js";
-export * from "./incident-alert.js";
-export * from "./password-changed.js";
-export * from "./new-device-login.js";
-export * from "./mission-approval.js";
-export * from "./org-invitation.js";
-export * from "./theme.js";
+import { MissionApprovalEmail } from "../src/emails/mission-approval";
+
+/** Preview for `email dev`. Not part of the published build. */
+export default function MissionApprovalPreview() {
+	return (
+		<MissionApprovalEmail
+			missionId="MSN-4821"
+			title="Deploy swarm to Sector 7 wildfire"
+			summary="Reroute 12 drones for thermal mapping and survivor detection along the northern ridge."
+			requestedBy="Field Commander Vega"
+			severity="critical"
+			approveUrl="https://app.example.com/missions/MSN-4821/approve"
+			expiresInMinutes={15}
+		/>
+	);
+}

@@ -18,7 +18,17 @@ import { describe, expect, it } from "vitest";
 import type { EmailName } from "../src/contract";
 import { registry } from "../src/registry";
 
-const names: EmailName[] = ["otp", "welcome", "password-reset", "notification", "incident-alert"];
+const names: EmailName[] = [
+	"otp",
+	"welcome",
+	"password-reset",
+	"notification",
+	"incident-alert",
+	"password-changed",
+	"new-device-login",
+	"mission-approval",
+	"org-invitation",
+];
 
 describe("registry", () => {
 	it("has a subject and component for every template name", () => {
