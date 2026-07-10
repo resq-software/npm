@@ -23,17 +23,25 @@ export type WelcomeEmailProps = WelcomeData;
 export function WelcomeEmail({ firstName = "there", verifyUrl }: WelcomeEmailProps) {
 	return (
 		<Email.Shell preview={`Welcome to ResQ, ${firstName}`}>
-			<Email.Title>Welcome, {firstName}!</Email.Title>
-			<Email.Paragraph>Thanks for joining ResQ. We are glad to have you on board.</Email.Paragraph>
+			<Email.Header />
+			<Email.Title>Welcome to ResQ</Email.Title>
+			<Email.Paragraph>Hi {firstName},</Email.Paragraph>
+			<Email.Paragraph>
+				Thanks for creating an account. Everything is set up and ready when you are.
+			</Email.Paragraph>
 			{verifyUrl ? (
 				<>
-					<Email.Paragraph>Confirm your email address to get started.</Email.Paragraph>
+					<Email.Paragraph>
+						Confirm your email address to finish setting up your account.
+					</Email.Paragraph>
 					<Email.CTA href={verifyUrl}>Verify email</Email.CTA>
 				</>
 			) : null}
-			<Email.Footer>
-				You are receiving this email because you created a ResQ account. ResQ Software.
-			</Email.Footer>
+			<Email.Signature />
+			<Email.LegalFooter
+				category="transactional"
+				reason="You are receiving this email because you created a ResQ account."
+			/>
 		</Email.Shell>
 	);
 }

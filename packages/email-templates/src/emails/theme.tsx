@@ -16,12 +16,26 @@
 
 import { pixelBasedPreset } from "@react-email/components";
 import { type ReactElement, createContext, createElement } from "react";
-import { emailColors, emailFonts } from "./tokens.js";
+import type { EmailCategory } from "../schemas.js";
+import { emailColors, emailFonts, emailOrg } from "./tokens.js";
 
 export interface EmailThemeFonts {
 	display: string[];
 	sans: string[];
 	mono: string[];
+}
+
+/** Organization identity rendered into email chrome (header, signature, footer). */
+export interface EmailOrgIdentity {
+	brandName: string;
+	productName: string;
+	legalName: string;
+	registeredAddress: string;
+	supportEmail: string;
+	websiteUrl: string;
+	termsUrl: string;
+	privacyUrl: string;
+	logoUrl: string;
 }
 
 /** The full, resolved theme every template renders against. */
@@ -30,6 +44,8 @@ export interface EmailTheme {
 	colors: Record<string, string>;
 	/** Font stacks → Tailwind `theme.extend.fontFamily` (pre-quoted multi-word names). */
 	fonts: EmailThemeFonts;
+	/** Organization identity for header lockup, signatures, and legal footer. */
+	org: EmailOrgIdentity;
 	/** Optional stylesheet `<link>` injected in `<Head>` for brand webfonts. */
 	fontsHref?: string;
 }
@@ -38,6 +54,8 @@ export interface EmailTheme {
 export interface EmailThemeOverride {
 	colors?: Record<string, string>;
 	fonts?: Partial<EmailThemeFonts>;
+	/** Override organization identity fields (shallow-merged over the base). */
+	org?: Partial<EmailOrgIdentity>;
 	/** Pass `null` to drop the webfont link entirely. */
 	fontsHref?: string | null;
 }
@@ -50,6 +68,7 @@ export const defaultEmailTheme: EmailTheme = {
 		sans: [...emailFonts.stacks.body],
 		mono: [...emailFonts.stacks.mono],
 	},
+	org: { ...emailOrg },
 	fontsHref: emailFonts.googleFontsHref,
 };
 
@@ -59,6 +78,7 @@ export function resolveEmailTheme(base: EmailTheme, override?: EmailThemeOverrid
 	return {
 		colors: { ...base.colors, ...override.colors },
 		fonts: { ...base.fonts, ...override.fonts },
+		org: { ...base.org, ...override.org },
 		fontsHref: override.fontsHref === null ? undefined : (override.fontsHref ?? base.fontsHref),
 	};
 }
@@ -96,4 +116,25 @@ export const EmailThemeContext = createContext<EmailTheme>(defaultEmailTheme);
 export function withEmailTheme(element: ReactElement, override?: EmailThemeOverride): ReactElement {
 	if (!override) return element;
 	return createElement(EmailThemeContext.Provider, { value: mergeEmailTheme(override) }, element);
+}
+
+/** Per-send message policy carried through context to the legal footer. */
+export interface EmailMessage {
+	/** Compliance class; defaults to `transactional`. */
+	category: EmailCategory;
+	/** Where the unsubscribe/preferences link points (used for `marketing`). */
+	unsubscribeUrl?: string;
+}
+
+/** Context carrying the active message policy; defaults to a transactional send. */
+export const EmailMessageContext = createContext<EmailMessage>({ category: "transactional" });
+
+/**
+ * Wrap an element so it renders against a message policy (used by `renderEmail`).
+ * Returns the element unchanged when no message is given, so the default
+ * transactional policy flows through context.
+ */
+export function withEmailMessage(element: ReactElement, message?: EmailMessage): ReactElement {
+	if (!message) return element;
+	return createElement(EmailMessageContext.Provider, { value: message }, element);
 }

@@ -26,17 +26,24 @@ export function PasswordResetEmail({
 	expiresInMinutes = 30,
 }: PasswordResetEmailProps) {
 	return (
-		<Email.Shell preview="Reset your ResQ password">
+		<Email.Shell preview="Reset your password">
+			<Email.Header />
 			<Email.Title>Reset your password</Email.Title>
 			{firstName ? <Email.Paragraph>Hi {firstName},</Email.Paragraph> : null}
 			<Email.Paragraph>
-				We received a request to reset your password. This link expires in {expiresInMinutes}{" "}
-				minutes.
+				Someone requested a password reset for your account. Use the button below to choose a new
+				password.
 			</Email.Paragraph>
 			<Email.CTA href={resetUrl}>Reset password</Email.CTA>
-			<Email.Footer>
-				If you did not request a password reset, you can safely ignore this email. ResQ Software.
-			</Email.Footer>
+			<Email.Paragraph>This link expires in {expiresInMinutes} minutes.</Email.Paragraph>
+			<Email.Paragraph>
+				If you didn't request this, your password is unchanged and you can ignore this email. If
+				you're concerned about unauthorized access, reset your password to secure your account.
+			</Email.Paragraph>
+			<Email.LegalFooter
+				category="transactional"
+				reason="You're receiving this email because a password reset was requested for your account."
+			/>
 		</Email.Shell>
 	);
 }

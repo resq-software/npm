@@ -39,6 +39,7 @@ export function IncidentAlertEmail({
 
 	return (
 		<Email.Shell preview={`[${severity.toUpperCase()}] ${title}`}>
+			<Email.Header />
 			<Email.Text
 				className={`mb-2 font-mono text-xs font-medium uppercase tracking-wide ${severityClass[severity]}`}
 			>
@@ -50,10 +51,10 @@ export function IncidentAlertEmail({
 				{meta}
 			</Email.Text>
 			<Email.CTA href={dashboardUrl}>Open incident dashboard</Email.CTA>
-			<Email.Footer>
-				You are receiving this alert because you are on-call for ResQ disaster response. ResQ
-				Software.
-			</Email.Footer>
+			<Email.LegalFooter
+				category="transactional"
+				reason="You are receiving this alert because you are on-call for ResQ disaster response."
+			/>
 		</Email.Shell>
 	);
 }
