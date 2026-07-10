@@ -36,7 +36,7 @@
 		}
 	},
 	"devDependencies": {
-		"@effect/platform-bun": "4.0.0-beta.93",
+		"@effect/platform-bun": "4.0.0-beta.97",
 		"@total-typescript/ts-reset": "^0.6.1",
 		"@types/node": "^26.1.0",
 		"effect": "4.0.0-beta.93",
