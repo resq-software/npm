@@ -140,3 +140,46 @@ When adding or changing a template:
 - Don't imply endorsements, certifications, or guarantees you can't back.
 - Don't use urgency/scarcity dark patterns in transactional mail.
 - Don't reference an opt-out the email doesn't actually provide.
+
+## 7. Template coverage roadmap
+
+The gaps worth filling, grouped by system. Everything here is `transactional`
+unless flagged **marketing**. Items marked ✅ ship today; the rest are planned
+and follow the exact schema-struct + `Email.*` component pattern.
+
+**Shipped (9):** `otp` ✅ · `welcome` ✅ · `password-reset` ✅ ·
+`notification` ✅ · `incident-alert` ✅ · `password-changed` ✅ ·
+`new-device-login` ✅ · `mission-approval` ✅ · `org-invitation` ✅
+
+### 1. Auth / security completeness
+`password-changed` ✅ · `new-device-login` (new sign-in alert) ✅ ·
+email-verification / email-change confirm (distinct from welcome) ·
+MFA enabled/disabled · account-locked.
+
+### 2. Team & access (multi-operator orgs)
+`org-invitation` ✅ · invite-accepted · role/permission changed · access revoked.
+
+### 3. ResQ-operational (tie into existing code)
+`mission-approval` ✅ (maps to the HCE `/admin/missions/approve` and
+`/v1/ops/plan/:id/execute|approve` routes) · incident **ack receipt** and
+**escalation / SLA-breach** (round out `incident-alert`) · fleet/drone health —
+offline drone, **loss-of-link** (`src/fleet/loss-of-link.ts`), low battery ·
+after-action / mission summary · report/export ready (incident PDF, forensic
+bundle) · **evidence-anchored receipt** — "evidence CIDv1 + Merkle root anchored
+to Neo N3 at T" (the forensics differentiator).
+
+### 4. Compliance / trust (runbooks already exist)
+breach / security-incident notification · GDPR data-export ready ·
+account-deletion completed · ToS/Privacy update notice.
+
+### 5. Billing (only when commercial)
+receipt/invoice · payment-failed / dunning · trial-ending · quota/usage.
+
+### 6. Marketing — **NOT transactional**
+feature announcements · re-engagement · promo digests. These MUST be sent with
+`category: "marketing"` + an `unsubscribeUrl` so the footer renders the opt-out,
+and MUST NOT reuse transactional templates.
+
+> **Note.** Items in §3–§4 are severity/CTA-shaped, so they map cleanly onto the
+> existing primitives with a typed schema — cheap to add once their domain fields
+> (CIDv1/Merkle/Neo N3 anchor, drone telemetry, SLA windows) are pinned down.

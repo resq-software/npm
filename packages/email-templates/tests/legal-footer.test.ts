@@ -73,6 +73,34 @@ const builtInPayloads = [
 			dashboardUrl: "https://app.resq.software/incidents/INC-2048",
 		},
 	},
+	{
+		name: "password-changed",
+		to: "user@example.com",
+		data: { firstName: "Ada", changedAt: "2026-07-10 09:14 PT" },
+	},
+	{
+		name: "new-device-login",
+		to: "user@example.com",
+		data: { firstName: "Ada", device: "Chrome on macOS", location: "Newark, DE, USA" },
+	},
+	{
+		name: "mission-approval",
+		to: "approver@example.com",
+		data: {
+			missionId: "MSN-4821",
+			title: "Deploy swarm to Sector 7 wildfire",
+			approveUrl: "https://app.resq.software/admin/missions/MSN-4821/approve",
+		},
+	},
+	{
+		name: "org-invitation",
+		to: "invitee@example.com",
+		data: {
+			orgName: "Cascade County SAR",
+			inviterName: "Dana Ruiz",
+			acceptUrl: "https://app.resq.software/invitations/accept?token=demo",
+		},
+	},
 ] as const;
 
 describe("legal footer", () => {
