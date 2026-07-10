@@ -119,7 +119,7 @@
     },
     "packages/dsa": {
       "name": "@resq-sw/dsa",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "devDependencies": {
         "@jsheaven/perf": "^1.1.1",
         "@total-typescript/ts-reset": "^0.6.1",
@@ -137,7 +137,7 @@
     },
     "packages/email-templates": {
       "name": "@resq-sw/email-templates",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@react-email/components": "^1.0.12",
         "@react-email/render": "^2.0.10",
@@ -186,7 +186,7 @@
     },
     "packages/http": {
       "name": "@resq-sw/http",
-      "version": "0.1.2",
+      "version": "0.2.0",
       "devDependencies": {
         "@effect/platform-bun": "4.0.0-beta.93",
         "@total-typescript/ts-reset": "^0.6.1",
@@ -217,7 +217,7 @@
     },
     "packages/rate-limiting": {
       "name": "@resq-sw/rate-limiting",
-      "version": "0.1.2",
+      "version": "0.2.0",
       "dependencies": {
         "@resq-sw/dsa": "workspace:*",
       },
@@ -243,7 +243,7 @@
     },
     "packages/security": {
       "name": "@resq-sw/security",
-      "version": "0.1.2",
+      "version": "0.2.0",
       "dependencies": {
         "dompurify": "^3.4.11",
       },
@@ -302,7 +302,7 @@
         "@types/react": "^19.2.17",
         "@types/react-dom": "^19.2.3",
         "@vitest/coverage-v8": "4.1.10",
-        "chromatic": "^17.4.0",
+        "chromatic": "^18.0.1",
         "console-fail-test": "0.6.1",
         "cspell": "10.0.1",
         "jsdom": "^29.1.1",
@@ -1434,7 +1434,7 @@
 
     "chokidar": ["chokidar@4.0.3", "", { "dependencies": { "readdirp": "^4.0.1" } }, "sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA=="],
 
-    "chromatic": ["chromatic@17.4.0", "", { "dependencies": { "semver": "^7.3.5" }, "peerDependencies": { "@chromatic-com/cypress": "^0.*.* || ^1.0.0", "@chromatic-com/playwright": "^0.*.* || ^1.0.0", "@chromatic-com/vitest": "^0.*.* || ^1.0.0" }, "optionalPeers": ["@chromatic-com/cypress", "@chromatic-com/playwright", "@chromatic-com/vitest"], "bin": { "chroma": "dist/bin.cjs", "chromatic": "dist/bin.cjs", "chromatic-cli": "dist/bin.cjs" } }, "sha512-DWHWcnCO6NR6HZ6ta5XFKHI+PBvYxAPSFX8xORhXxRPangWpsAs0FgMlz64L1oZPkEkzM7r0B4PkMb0R6e43CQ=="],
+    "chromatic": ["chromatic@18.0.1", "", { "dependencies": { "semver": "^7.3.5" }, "peerDependencies": { "@chromatic-com/cypress": "^0.*.* || ^1.0.0", "@chromatic-com/playwright": "^0.*.* || ^1.0.0", "@chromatic-com/vitest": "^0.*.* || ^1.0.0" }, "optionalPeers": ["@chromatic-com/cypress", "@chromatic-com/playwright", "@chromatic-com/vitest"], "bin": { "chroma": "dist/bin.cjs", "chromatic": "dist/bin.cjs", "chromatic-cli": "dist/bin.cjs" } }, "sha512-GlTYrZ4ui5ZW8Jzut6SAo5bMH3sIugYZ37Nq2DyVHBfPINeEzGA8eG5xNo4N/I2aRdM9Xnqw0SCls7wgf2llvA=="],
 
     "citty": ["citty@0.2.2", "", {}, "sha512-+6vJA3L98yv+IdfKGZHBNiGW5KHn22e/JwID0Strsz8h4S/csAu/OuICwxrg44k5MRiZHWIo8XXuJgQTriRP4w=="],
 
@@ -2646,7 +2646,7 @@
 
     "bun-types/@types/node": ["@types/node@25.9.1", "", { "dependencies": { "undici-types": ">=7.24.0 <7.24.7" } }, "sha512-xfrlY7UD5rMJk3ZVJP8BNzS28J36YJg+xp+LPXV1TdWxr8uMH5A860QNxYDGQe/ylDSgjxE52Q9VnO7p75tJxg=="],
 
-    "chromatic/semver": ["semver@7.8.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-rkVq3IXh+4FDGch+KwzX3aV9W3kO54GyEgpvBzSyctDA6Xtd7RJQV1xmXbeQp5v7+VzLOfVqiutSE6GICgPFvg=="],
+    "chromatic/semver": ["semver@7.8.5", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA=="],
 
     "cli-truncate/string-width": ["string-width@8.2.0", "", { "dependencies": { "get-east-asian-width": "^1.5.0", "strip-ansi": "^7.1.2" } }, "sha512-6hJPQ8N0V0P3SNmP6h2J99RLuzrWz2gvT7VnK5tKvrNqJoyS9W4/Fb8mo31UiPvy00z7DQXkP2hnKBVav76thw=="],
 
