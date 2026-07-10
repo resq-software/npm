@@ -45,6 +45,10 @@ export const brand = {
 		support: "support@resq.software",
 		contact: "contact@resq.software",
 	},
+	legal: {
+		termsUrl: "https://resq.software/legal/terms",
+		privacyUrl: "https://resq.software/legal/privacy",
+	},
 	socials: {
 		x: "https://x.com/resqsystems_inc",
 		/** The `@handle` form for `twitter:creator`/`site` meta (matches the `x` profile). */

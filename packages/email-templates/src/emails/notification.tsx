@@ -36,6 +36,7 @@ export function NotificationEmail({
 }: NotificationEmailProps) {
 	return (
 		<Email.Shell preview={title}>
+			<Email.Header />
 			<Email.Text
 				className={`mb-2 text-xs font-bold uppercase tracking-wide ${severityClass[severity]}`}
 			>
@@ -44,7 +45,7 @@ export function NotificationEmail({
 			<Email.Title>{title}</Email.Title>
 			<Email.Paragraph>{body}</Email.Paragraph>
 			{actionUrl ? <Email.CTA href={actionUrl}>{actionLabel ?? "View details"}</Email.CTA> : null}
-			<Email.Footer>You are receiving this notification from ResQ. ResQ Software.</Email.Footer>
+			<Email.LegalFooter reason="You are receiving this notification because of recent activity on your ResQ account." />
 		</Email.Shell>
 	);
 }

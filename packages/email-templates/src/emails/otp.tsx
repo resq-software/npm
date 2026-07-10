@@ -26,15 +26,19 @@ export type OtpEmailProps = OtpData;
 export function OtpEmail({ code = "123456", firstName, expiresInMinutes = 10 }: OtpEmailProps) {
 	return (
 		<Email.Shell preview="Your ResQ verification code">
+			<Email.Header />
 			<Email.Title>Verification code</Email.Title>
 			{firstName ? <Email.Paragraph>Hi {firstName},</Email.Paragraph> : null}
-			<Email.Paragraph>
-				Use this one-time code to continue. It expires in {expiresInMinutes} minutes.
-			</Email.Paragraph>
+			<Email.Paragraph>Use this one-time code to continue.</Email.Paragraph>
 			<Email.Code>{code}</Email.Code>
-			<Email.Footer>
-				If you did not request this code, you can safely ignore this email. ResQ Software.
-			</Email.Footer>
+			{expiresInMinutes ? (
+				<Email.Paragraph>This code expires in {expiresInMinutes} minutes.</Email.Paragraph>
+			) : null}
+			<Email.Paragraph>If you didn't request this code, ignore this email.</Email.Paragraph>
+			<Email.LegalFooter
+				category="transactional"
+				reason="You received this email because a verification code was requested for your account."
+			/>
 		</Email.Shell>
 	);
 }
