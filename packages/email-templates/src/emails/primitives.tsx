@@ -187,7 +187,10 @@ function LegalFooter({ reason, category }: { reason?: ReactNode; category?: Emai
 	const { org } = useContext(EmailThemeContext);
 	const message = useContext(EmailMessageContext);
 	const effectiveCategory = category ?? message.category;
-	const unsubscribeHref = message.unsubscribeUrl ?? org.websiteUrl;
+	// CAN-SPAM/GDPR: the homepage is not a valid opt-out, so never fall back to
+	// `org.websiteUrl`. Marketing sends without a real `unsubscribeUrl` simply
+	// omit the affordance (and are effectively transactional).
+	const unsubscribeHref = message.unsubscribeUrl;
 	return (
 		<>
 			<Hr className="my-6 border-border" />
@@ -208,7 +211,7 @@ function LegalFooter({ reason, category }: { reason?: ReactNode; category?: Emai
 					Privacy
 				</Link>
 			</Text>
-			{effectiveCategory === "marketing" ? (
+			{effectiveCategory === "marketing" && unsubscribeHref ? (
 				<Text className="font-sans text-xs leading-relaxed text-muted">
 					<Link href={unsubscribeHref} className="text-muted underline">
 						Unsubscribe or manage preferences

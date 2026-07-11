@@ -148,4 +148,21 @@ describe("unsubscribe affordance", () => {
 
 		expect(html.toLowerCase()).not.toContain("unsubscribe");
 	});
+
+	it("omits unsubscribe UI for a marketing notification when unsubscribeUrl is missing", async () => {
+		const { html } = await renderEmail({
+			name: "notification",
+			to: "ops@example.com",
+			category: "marketing",
+			data: {
+				title: "Product update",
+				body: "New features shipped this week.",
+				severity: "info",
+			},
+		});
+
+		// CAN-SPAM/GDPR: without a real opt-out URL we render no unsubscribe link
+		// (and never fall back to the homepage).
+		expect(html.toLowerCase()).not.toContain("unsubscribe");
+	});
 });
