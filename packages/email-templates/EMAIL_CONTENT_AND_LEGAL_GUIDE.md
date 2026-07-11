@@ -62,7 +62,7 @@ Names, addresses, and legal URLs come from **one** place: the `brand` object in
 | `legalName`         | `legalName`             | (available; address line leads with it) |
 | `registeredAddress` | `postalAddress`         | `LegalFooter` postal line |
 | `supportEmail`      | `email.support`         | support references |
-| `websiteUrl`        | `domains.marketing`     | unsubscribe fallback |
+| `websiteUrl`        | `domains.marketing`     | (available; **not** used as an unsubscribe fallback) |
 | `termsUrl`          | `legal.termsUrl`        | `LegalFooter` Terms link |
 | `privacyUrl`        | `legal.privacyUrl`      | `LegalFooter` Privacy link |
 | `logoUrl`           | `logo`                  | `Header` logo |
