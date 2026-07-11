@@ -1,5 +1,27 @@
 <!--
 
+## 0.2.0
+### Minor Changes
+
+
+
+- [#164](https://github.com/resq-software/npm/pull/164) [`d324afe`](https://github.com/resq-software/npm/commit/d324afe582374c9573142edf2b03ce5fa890fdaf) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add password-changed, new-device-login, mission-approval, and org-invitation templates plus Email.SupportLine
+
+  - New transactional templates: `password-changed` and `new-device-login` (security notices), `mission-approval` (approver sign-off, maps to the HCE mission-approval routes), and `org-invitation` (team/org invite).
+  - New `Email.SupportLine` primitive that renders a support-contact line sourced from `theme.org.supportEmail`, so security notices always surface an actionable path.
+  - Documents the full template coverage roadmap in `EMAIL_CONTENT_AND_LEGAL_GUIDE.md`.
+
+
+- [#158](https://github.com/resq-software/npm/pull/158) [`4cdfb89`](https://github.com/resq-software/npm/commit/4cdfb89871ca5fa0b74314813083eed0e8cfda1a) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add brand-sourced org identity, legal footer, and compliance category to email templates
+
+  - `@resq-sw/constants`: add `brand.legal` with `termsUrl` and `privacyUrl`.
+  - `@resq-sw/email-templates`: add `Email.Header`, `Email.Signature`, `Email.LegalFooter`, and `Email.FallbackLink` primitives; thread org identity (name, registered address, legal URLs, logo) from `@resq-sw/constants` through `theme.org`; add a per-send `category` (`transactional` | `marketing`) and `unsubscribeUrl` to the mailer envelope so the legal footer renders an unsubscribe affordance only for marketing sends; `Email.CTA` now renders a copy-pasteable fallback link. All five built-in templates render the compliant header/footer.
+
+### Patch Changes
+
+- Updated dependencies [[`4cdfb89`](https://github.com/resq-software/npm/commit/4cdfb89871ca5fa0b74314813083eed0e8cfda1a)]:
+  - @resq-sw/constants@0.2.0
+
 ## 0.1.1
 ### Patch Changes
 
