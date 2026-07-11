@@ -3,6 +3,8 @@
 !**/src/lib/
 storybook-static/
 .next/
+# `email export --outDir ./out` render output (email-templates)
+**/out/
 
 # Test artifacts
 coverage/

@@ -17,7 +17,13 @@
 import { render } from "@react-email/render";
 import { Cause, Exit, Schema } from "effect";
 import type { ReactElement } from "react";
-import { type EmailThemeOverride, withEmailTheme } from "./emails/theme.js";
+import {
+	type EmailMessage,
+	type EmailThemeOverride,
+	withEmailMessage,
+	withEmailTheme,
+} from "./emails/theme.js";
+import { HttpUrl, emailCategory } from "./schemas.js";
 
 const Recipient = Schema.String;
 
@@ -49,10 +55,18 @@ interface AnyTemplateDef {
 	readonly Component: (data: never) => ReactElement;
 }
 
-/** The `{ name, to, data }` payload for a single template def. */
+/** The `{ name, to, data, category?, unsubscribeUrl? }` payload for a single template def. */
 type PayloadFor<Def> =
 	Def extends EmailTemplateDef<infer Name, infer DataSchema>
-		? { readonly name: Name; readonly to: string; readonly data: DataSchema["Type"] }
+		? {
+				readonly name: Name;
+				readonly to: string;
+				readonly data: DataSchema["Type"];
+				/** Compliance class for this send; defaults to `transactional`. */
+				readonly category?: "transactional" | "marketing";
+				/** Unsubscribe/preferences URL, surfaced in the legal footer for `marketing`. */
+				readonly unsubscribeUrl?: string;
+			}
 		: never;
 
 /** The discriminated payload union for a tuple of template defs. */
@@ -118,7 +132,13 @@ export function createMailer<const Defs extends readonly AnyTemplateDef[]>(
 
 	const schema = Schema.Union(
 		defs.map((def) =>
-			Schema.Struct({ name: Schema.Literal(def.name), to: Recipient, data: def.data }),
+			Schema.Struct({
+				name: Schema.Literal(def.name),
+				to: Recipient,
+				data: def.data,
+				category: Schema.optional(emailCategory),
+				unsubscribeUrl: Schema.optional(HttpUrl),
+			}),
 		),
 	);
 
@@ -156,7 +176,14 @@ export function createMailer<const Defs extends readonly AnyTemplateDef[]>(
 	async function renderEmail(input: unknown, options?: RenderEmailOptions): Promise<RenderedEmail> {
 		const payload = decode(input);
 		const entry = registry[payload.name as string];
-		const element = withEmailTheme(entry.render(payload.data), options?.theme);
+		const message: EmailMessage = {
+			category: payload.category ?? "transactional",
+			unsubscribeUrl: payload.unsubscribeUrl,
+		};
+		const element = withEmailMessage(
+			withEmailTheme(entry.render(payload.data), options?.theme),
+			message,
+		);
 		const [html, text] = await Promise.all([render(element), render(element, { plainText: true })]);
 		return { to: payload.to, subject: entry.subject(payload.data), html, text };
 	}

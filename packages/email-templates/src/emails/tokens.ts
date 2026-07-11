@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { brand } from "@resq-sw/constants/brand";
 import { colors, fonts } from "@resq-sw/constants/tokens";
 
 /**
@@ -27,3 +28,20 @@ export const emailColors = colors.hex;
 export const emailFonts = fonts;
 
 export type EmailColorToken = keyof typeof emailColors;
+
+/**
+ * Organization identity for email chrome (header lockup, signatures, legal
+ * footer), derived from the shared `@resq-sw/constants` brand so names,
+ * addresses, and legal URLs live in one place across apps.
+ */
+export const emailOrg = {
+	brandName: brand.name,
+	productName: brand.productName,
+	legalName: brand.legalName,
+	registeredAddress: brand.postalAddress,
+	supportEmail: brand.email.support,
+	websiteUrl: brand.domains.marketing,
+	termsUrl: brand.legal.termsUrl,
+	privacyUrl: brand.legal.privacyUrl,
+	logoUrl: brand.logo,
+} as const;

@@ -22,6 +22,7 @@ import {
 	Heading,
 	Hr,
 	Html,
+	Img,
 	Link,
 	Preview,
 	Section,
@@ -29,7 +30,9 @@ import {
 	Text,
 } from "@react-email/components";
 import { type ReactNode, useContext } from "react";
+import type { EmailCategory } from "../schemas.js";
 import {
+	EmailMessageContext,
 	EmailThemeContext,
 	type EmailThemeOverride,
 	buildTailwindConfig,
@@ -67,6 +70,25 @@ function Shell({ preview, theme, children }: ShellProps) {
 	);
 }
 
+/** Brand lockup (logo + product wordmark) rendered at the top of the card. */
+function Header() {
+	const { org } = useContext(EmailThemeContext);
+	return (
+		<Section className="mb-8">
+			<Img
+				src={org.logoUrl}
+				width="40"
+				height="40"
+				alt={org.productName}
+				className="inline-block align-middle"
+			/>
+			<Text className="ml-3 inline-block align-middle font-display text-lg font-bold tracking-tight text-foreground">
+				{org.productName}
+			</Text>
+		</Section>
+	);
+}
+
 function Title({ children }: { children: ReactNode }) {
 	return (
 		<Heading className="mb-4 font-display text-2xl font-bold tracking-tight text-foreground">
@@ -81,6 +103,20 @@ function Paragraph({ children }: { children: ReactNode }) {
 	);
 }
 
+/**
+ * Role-based sign-off. Defaults to "— The {brand} team", derived from the active
+ * theme's org so a rebrand flows through. Keep copy neutral: no first-person
+ * promises or commitments (per the content & legal guide).
+ */
+function Signature({ children }: { children?: ReactNode }) {
+	const { org } = useContext(EmailThemeContext);
+	return (
+		<Text className="mt-6 font-sans text-sm leading-relaxed text-muted">
+			{children ?? `— The ${org.brandName} team`}
+		</Text>
+	);
+}
+
 /** A large, letter-spaced code block for OTP / verification codes. */
 function Code({ children }: { children: ReactNode }) {
 	return (
@@ -92,8 +128,33 @@ function Code({ children }: { children: ReactNode }) {
 	);
 }
 
+/**
+ * Plain-text fallback for a link/button — improves deliverability and works in
+ * clients that strip buttons. Renders the raw URL so it stays copy-pasteable.
+ */
+function FallbackLink({ href }: { href: string }) {
+	return (
+		<Text className="mt-4 font-sans text-xs leading-relaxed text-muted">
+			Or paste this link into your browser:
+			<br />
+			<Link href={href} className="break-all text-primary">
+				{href}
+			</Link>
+		</Text>
+	);
+}
+
 /** Primary call-to-action — brand primary, mono, uppercase, tracked (per style guide). */
-function CTA({ href, children }: { href: string; children: ReactNode }) {
+function CTA({
+	href,
+	children,
+	fallback = true,
+}: {
+	href: string;
+	children: ReactNode;
+	/** Render a copy-pasteable {@link FallbackLink} below the button (default `true`). */
+	fallback?: boolean;
+}) {
 	return (
 		<Section className="my-6">
 			<Button
@@ -102,6 +163,7 @@ function CTA({ href, children }: { href: string; children: ReactNode }) {
 			>
 				{children}
 			</Button>
+			{fallback ? <FallbackLink href={href} /> : null}
 		</Section>
 	);
 }
@@ -116,6 +178,51 @@ function Footer({ children }: { children: ReactNode }) {
 }
 
 /**
+ * Compliance footer: legal entity + registered postal address, Terms/Privacy
+ * links, and — for `marketing` sends only — an unsubscribe affordance. The
+ * effective category is the `category` prop, falling back to the active
+ * {@link EmailMessageContext}. All copy is small and muted.
+ */
+function LegalFooter({ reason, category }: { reason?: ReactNode; category?: EmailCategory }) {
+	const { org } = useContext(EmailThemeContext);
+	const message = useContext(EmailMessageContext);
+	const effectiveCategory = category ?? message.category;
+	// CAN-SPAM/GDPR: the homepage is not a valid opt-out, so never fall back to
+	// `org.websiteUrl`. Marketing sends without a real `unsubscribeUrl` simply
+	// omit the affordance (and are effectively transactional).
+	const unsubscribeHref = message.unsubscribeUrl;
+	return (
+		<>
+			<Hr className="my-6 border-border" />
+			{reason ? (
+				<Text className="mb-2 font-sans text-xs leading-relaxed text-muted">{reason}</Text>
+			) : null}
+			{/* `registeredAddress` already leads with the legal entity name, so it is a
+			    complete CAN-SPAM postal line on its own — no separate `legalName`. */}
+			<Text className="mb-2 font-sans text-xs leading-relaxed text-muted">
+				{org.registeredAddress}
+			</Text>
+			<Text className="mb-2 font-sans text-xs leading-relaxed text-muted">
+				<Link href={org.termsUrl} className="text-muted underline">
+					Terms
+				</Link>
+				{" · "}
+				<Link href={org.privacyUrl} className="text-muted underline">
+					Privacy
+				</Link>
+			</Text>
+			{effectiveCategory === "marketing" && unsubscribeHref ? (
+				<Text className="font-sans text-xs leading-relaxed text-muted">
+					<Link href={unsubscribeHref} className="text-muted underline">
+						Unsubscribe or manage preferences
+					</Link>
+				</Text>
+			) : null}
+		</>
+	);
+}
+
+/**
  * Compound email primitives. Templates compose only from these so styling stays
  * consistent, theme-driven, and email-client safe. The raw react-email
  * `Section`, `Text`, `Link`, and `Hr` are re-exported for templates that need
@@ -123,22 +230,30 @@ function Footer({ children }: { children: ReactNode }) {
  */
 export const Email: {
 	readonly Shell: typeof Shell;
+	readonly Header: typeof Header;
 	readonly Title: typeof Title;
 	readonly Paragraph: typeof Paragraph;
+	readonly Signature: typeof Signature;
 	readonly Code: typeof Code;
 	readonly CTA: typeof CTA;
+	readonly FallbackLink: typeof FallbackLink;
 	readonly Footer: typeof Footer;
+	readonly LegalFooter: typeof LegalFooter;
 	readonly Section: typeof Section;
 	readonly Text: typeof Text;
 	readonly Link: typeof Link;
 	readonly Hr: typeof Hr;
 } = {
 	Shell,
+	Header,
 	Title,
 	Paragraph,
+	Signature,
 	Code,
 	CTA,
+	FallbackLink,
 	Footer,
+	LegalFooter,
 	Section,
 	Text,
 	Link,

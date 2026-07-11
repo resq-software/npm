@@ -23,6 +23,13 @@ import { Schema as S } from "effect";
  */
 export const HttpUrl = S.String.check(S.isPattern(/^https?:\/\/\S+$/i));
 
+/**
+ * Compliance class of an email send. `transactional` skips unsubscribe UI;
+ * `marketing` requires an unsubscribe affordance in the legal footer.
+ */
+export const emailCategory = S.Literals(["transactional", "marketing"]);
+export type EmailCategory = typeof emailCategory.Type;
+
 export const otpData = S.Struct({
 	code: S.NonEmptyString,
 	firstName: S.optional(S.String),
