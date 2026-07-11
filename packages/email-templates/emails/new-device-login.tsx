@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-export * from "./tokens.js";
-export * from "./primitives.js";
-export * from "./otp.js";
-export * from "./welcome.js";
-export * from "./password-reset.js";
-export * from "./notification.js";
-export * from "./incident-alert.js";
-export * from "./password-changed.js";
-export * from "./new-device-login.js";
-export * from "./mission-approval.js";
-export * from "./org-invitation.js";
-export * from "./theme.js";
+import { NewDeviceLoginEmail } from "../src/emails/new-device-login";
+
+/** Preview for `email dev`. Not part of the published build. */
+export default function NewDeviceLoginPreview() {
+	return (
+		<NewDeviceLoginEmail
+			firstName="Ada"
+			device="Chrome on macOS"
+			location="Newark, DE, USA"
+			ipAddress="203.0.113.24"
+			at="2026-07-10 09:14 PT"
+			secureAccountUrl="https://app.resq.software/security"
+		/>
+	);
+}

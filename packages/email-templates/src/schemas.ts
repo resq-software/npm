@@ -67,9 +67,53 @@ export const incidentAlertData = S.Struct({
 	dashboardUrl: HttpUrl,
 });
 
+export const passwordChangedData = S.Struct({
+	firstName: S.optional(S.String),
+	// Preformatted timestamp string (caller formats/localizes).
+	changedAt: S.optional(S.String),
+	// Where to secure the account if the change was not authorized.
+	secureAccountUrl: S.optional(HttpUrl),
+});
+
+export const newDeviceLoginData = S.Struct({
+	firstName: S.optional(S.String),
+	// Human-readable client, e.g. "Chrome on macOS".
+	device: S.optional(S.String),
+	// Human-readable place, e.g. "Newark, DE, USA".
+	location: S.optional(S.String),
+	ipAddress: S.optional(S.String),
+	// Preformatted timestamp string (caller formats/localizes).
+	at: S.optional(S.String),
+	// Where to review activity / secure the account if the sign-in was not the recipient.
+	secureAccountUrl: S.optional(HttpUrl),
+});
+
+export const missionApprovalData = S.Struct({
+	missionId: S.NonEmptyString,
+	title: S.NonEmptyString,
+	summary: S.optional(S.String),
+	requestedBy: S.optional(S.String),
+	severity: S.optional(S.Literals(["info", "warning", "critical"])),
+	// Approver sign-off link (e.g. the HCE mission-approval route).
+	approveUrl: HttpUrl,
+	expiresInMinutes: S.optional(S.Number),
+});
+
+export const orgInvitationData = S.Struct({
+	orgName: S.NonEmptyString,
+	inviterName: S.optional(S.String),
+	orgRole: S.optional(S.String),
+	acceptUrl: HttpUrl,
+	expiresInDays: S.optional(S.Number),
+});
+
 /** Inferred `data` types for the built-in templates (used for component props). */
 export type OtpData = typeof otpData.Type;
 export type WelcomeData = typeof welcomeData.Type;
 export type PasswordResetData = typeof passwordResetData.Type;
 export type NotificationData = typeof notificationData.Type;
 export type IncidentAlertData = typeof incidentAlertData.Type;
+export type PasswordChangedData = typeof passwordChangedData.Type;
+export type NewDeviceLoginData = typeof newDeviceLoginData.Type;
+export type MissionApprovalData = typeof missionApprovalData.Type;
+export type OrgInvitationData = typeof orgInvitationData.Type;

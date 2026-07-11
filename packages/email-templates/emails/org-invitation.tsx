@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-export * from "./tokens.js";
-export * from "./primitives.js";
-export * from "./otp.js";
-export * from "./welcome.js";
-export * from "./password-reset.js";
-export * from "./notification.js";
-export * from "./incident-alert.js";
-export * from "./password-changed.js";
-export * from "./new-device-login.js";
-export * from "./mission-approval.js";
-export * from "./org-invitation.js";
-export * from "./theme.js";
+import { OrgInvitationEmail } from "../src/emails/org-invitation";
+
+/** Preview for `email dev`. Not part of the published build. */
+export default function OrgInvitationPreview() {
+	return (
+		<OrgInvitationEmail
+			orgName="Cascade County SAR"
+			inviterName="Dana Ruiz"
+			orgRole="Operator"
+			acceptUrl="https://app.resq.software/invitations/accept?token=demo"
+			expiresInDays={7}
+		/>
+	);
+}
