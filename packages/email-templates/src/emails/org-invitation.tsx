@@ -23,7 +23,7 @@ export type OrgInvitationEmailProps = OrgInvitationData;
 export function OrgInvitationEmail({
 	orgName,
 	inviterName,
-	role,
+	orgRole,
 	acceptUrl = "https://app.resq.software/invitations/accept",
 	expiresInDays,
 }: OrgInvitationEmailProps) {
@@ -37,7 +37,7 @@ export function OrgInvitationEmail({
 			<Email.Header />
 			<Email.Title>You're invited to join {orgName}</Email.Title>
 			<Email.Paragraph>
-				{inviterPhrase} to join {orgName} on ResQ{role ? ` as ${role}` : ""}.
+				{inviterPhrase} to join {orgName} on ResQ{orgRole ? ` as ${orgRole}` : ""}.
 			</Email.Paragraph>
 			<Email.CTA href={acceptUrl}>Accept invitation</Email.CTA>
 			{expiresInDays ? (

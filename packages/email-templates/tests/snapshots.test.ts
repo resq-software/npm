@@ -111,7 +111,7 @@ const cases: readonly EmailPayload[] = [
 		data: {
 			orgName: "Cascade County SAR",
 			inviterName: "Dana Ruiz",
-			role: "Operator",
+			orgRole: "Operator",
 			acceptUrl: "https://app.resq.software/invitations/accept?token=demo",
 			expiresInDays: 7,
 		},

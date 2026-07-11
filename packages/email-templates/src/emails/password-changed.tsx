@@ -34,10 +34,19 @@ export function PasswordChangedEmail({
 				The password on your ResQ account was changed{changedAt ? ` on ${changedAt}` : ""}. If you
 				made this change, no further action is needed.
 			</Email.Paragraph>
-			<Email.Paragraph>
-				If you didn't change your password, your account may be at risk — secure it now.
-			</Email.Paragraph>
-			{secureAccountUrl ? <Email.CTA href={secureAccountUrl}>Secure your account</Email.CTA> : null}
+			{secureAccountUrl ? (
+				<>
+					<Email.Paragraph>
+						If you didn't change your password, your account may be at risk — secure it now.
+					</Email.Paragraph>
+					<Email.CTA href={secureAccountUrl}>Secure your account</Email.CTA>
+				</>
+			) : (
+				<Email.Paragraph>
+					If you didn't change your password, your account may be at risk. Please contact support
+					immediately.
+				</Email.Paragraph>
+			)}
 			<Email.SupportLine>Didn't change your password?</Email.SupportLine>
 			<Email.LegalFooter
 				category="transactional"

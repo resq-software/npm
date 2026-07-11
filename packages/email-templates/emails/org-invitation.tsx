@@ -19,11 +19,10 @@ import { OrgInvitationEmail } from "../src/emails/org-invitation";
 /** Preview for `email dev`. Not part of the published build. */
 export default function OrgInvitationPreview() {
 	return (
-		// biome-ignore lint/a11y/useValidAriaRole: `role` is an org-membership prop on a custom component, not an ARIA role
 		<OrgInvitationEmail
 			orgName="Cascade County SAR"
 			inviterName="Dana Ruiz"
-			role="Operator"
+			orgRole="Operator"
 			acceptUrl="https://app.resq.software/invitations/accept?token=demo"
 			expiresInDays={7}
 		/>

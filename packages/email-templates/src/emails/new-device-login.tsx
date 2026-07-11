@@ -42,8 +42,10 @@ export function NewDeviceLoginEmail({
 				</Email.Text>
 			) : null}
 			<Email.Paragraph>
-				If this was you, no action is needed. If you don't recognize this sign-in, secure your
-				account now.
+				If this was you, no action is needed.{" "}
+				{secureAccountUrl
+					? "If you don't recognize this sign-in, secure your account now."
+					: "If you don't recognize this sign-in, please contact support immediately."}
 			</Email.Paragraph>
 			{secureAccountUrl ? <Email.CTA href={secureAccountUrl}>Secure your account</Email.CTA> : null}
 			<Email.SupportLine>Don't recognize this sign-in?</Email.SupportLine>

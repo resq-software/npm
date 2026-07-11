@@ -102,7 +102,7 @@ export const missionApprovalData = S.Struct({
 export const orgInvitationData = S.Struct({
 	orgName: S.NonEmptyString,
 	inviterName: S.optional(S.String),
-	role: S.optional(S.String),
+	orgRole: S.optional(S.String),
 	acceptUrl: HttpUrl,
 	expiresInDays: S.optional(S.Number),
 });
