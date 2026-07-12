@@ -60,7 +60,10 @@ jobs:
         working-directory: ${{ steps.resolve.outputs.dir }}
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          bunx npm publish --access public
+          # `bun publish` rewrites Bun's `workspace:*` protocol to concrete versions
+          # at pack time. `bunx npm publish` does NOT, and previously shipped packages
+          # with unresolvable `workspace:*` deps (breaking downstream installs).
+          bun publish --access public
 
       - name: Publish to GitHub Packages
         uses: ./.github/actions/publish-github-packages
