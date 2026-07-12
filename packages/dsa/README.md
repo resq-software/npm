@@ -20,7 +20,7 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
 [![deps](https://img.shields.io/badge/runtime%20deps-0-25c68a?style=flat-square)](./package.json)
 
-Production-grade data structures and algorithms for the ResQ Systems platform — graph traversal, heaps, tries, bloom filters, sketches, distance math, queues, and string search. **Zero runtime dependencies.** `effect` is an optional peer dependency that unlocks runtime schema validation for hot-path inputs.
+Production-grade data structures and algorithms for the ResQ Systems platform — graph traversal, heaps, tries, bloom filters, sketches, distance math, queues, and string search. **Zero runtime dependencies.** `effect` is an optional peer dependency that unlocks runtime schema validation and nominal branded types (`VertexId`, `Probability`, `Latitude`, `Longitude`) for hot-path inputs.
 
 ## Install
 
@@ -35,16 +35,17 @@ npm install @resq-systems/dsa
 | Module | Class / Helper | Use case |
 | :--- | :--- | :--- |
 | `heap` | `BoundedHeap<T extends Distanced>` | Top-K smallest by `distance` (k-nearest neighbour, ranking) |
-| `graph` | `Graph`, `addValidatedEdge`, `isValidVertexId` | BFS, DFS, Dijkstra, A*, topological sort |
+| `graph` | `Graph<T, M>`, `addValidatedEdge`, `isValidVertexId` | BFS, DFS, Dijkstra, A*, topological sort (typed vertex/edge metadata `M`) |
 | `trie` | `Trie`, `rabinKarp` | Prefix lookup, autocomplete, dispatch routing |
 | `bloom` | `BloomFilter` | Probabilistic set membership with bounded error rate |
 | `count-min` | `CountMinSketch` | Approximate frequency counting at sub-linear memory |
-| `priority-queue` | `PriorityQueue`, `createDeadlineQueue`, `createPriorityLevelQueue`, `createMaxHeap`, `createMinHeap` | Priority dispatch, triage, scheduling |
+| `priority-queue` | `PriorityQueue`, `createDeadlineQueue`, `createPriorityLevelQueue`, `createMaxHeap`, `createMinHeap`, `validatePriorityItem` | Priority dispatch, triage, scheduling |
 | `rabin-karp` | `RabinKarp`, `quickSearch` | Multi-pattern string search with rolling hash |
 | `distance` | `Distance` | Haversine, Euclidean, Manhattan, Vincenty, Chebyshev |
 | `queue` | `Queue` | O(1) FIFO with linked-list backing |
 | `lru-cache` | `LRUCache` | O(1) get/set with capacity and optional TTL |
-| `schemas` | (subpath: `@resq-systems/dsa/schemas`) | Optional Effect schemas for input validation |
+| `schemas` (branded) | `toProbability`, `toLatitude`, `toLongitude`, `isProbability`, `isLatitude`, `isLongitude` | Nominal `Probability` / `Latitude` / `Longitude` brands — smart constructors + guards (re-exported at top level) |
+| `schemas` | (subpath: `@resq-systems/dsa/schemas`) | Optional Effect schemas + `validate` / `validateSafe` / `createValidator`, `VertexId` brand for input validation |
 
 ## Quick start
 
@@ -71,6 +72,8 @@ const result = g.aStar(
 );
 // → { path: ["base", "alpha", "site-7"], cost: 16, expanded: 3 }
 ```
+
+`Graph<T, M = Record<string, unknown>>` carries a second type parameter for structured metadata attached to vertices and edges — `addVertex(v, metadata)`, `addEdge(a, b, weight, metadata)`, and `getVertexMetadata(v)` are all typed as `M`. It defaults to a loose record, so `new Graph<string>()` keeps working unchanged.
 
 ### Triage queue
 
@@ -141,6 +144,25 @@ if (isValidVertexId(input)) {
 ```
 
 The validators short-circuit and return descriptive errors instead of throwing on bad input — safe to call on user-supplied IDs.
+
+### Branded numeric domains
+
+The package exports nominal **branded types**: a `Probability` is assignable to `number`, but a plain `number` is not assignable to `Probability` without passing through a smart constructor. Use them to make out-of-range values unrepresentable at the public boundary — e.g. `BloomFilter` error rates (`Probability`, open interval `(0, 1)`) and geographic coordinates (`Latitude` `[-90, 90]`, `Longitude` `[-180, 180]`). The constructors and guards decode through Effect schemas, so they also require the optional `effect` peer.
+
+```ts
+import { toProbability, toLatitude, toLongitude, isProbability } from "@resq-systems/dsa";
+import type { Probability, Latitude, Longitude } from "@resq-systems/dsa";
+
+const errorRate: Probability = toProbability(0.001); // throws if outside (0, 1)
+const lat: Latitude = toLatitude(34.052);            // throws if outside [-90, 90]
+const lng: Longitude = toLongitude(-118.243);        // throws if outside [-180, 180]
+
+if (isProbability(input)) {
+	// `input` is narrowed to Probability here
+}
+```
+
+The `VertexId` brand (`VertexIdSchema`) and the generic decoders `validate`, `validateSafe`, and `createValidator` are available from the `@resq-systems/dsa/schemas` subpath.
 
 ## Performance notes
 

@@ -30,6 +30,7 @@
 [![@resq-systems/rate-limiting](https://img.shields.io/npm/v/%40resq-systems%2Frate-limiting?style=flat-square&label=%40resq-systems%2Frate-limiting)](https://www.npmjs.com/package/@resq-systems/rate-limiting)
 [![@resq-systems/analytics](https://img.shields.io/npm/v/%40resq-systems%2Fanalytics?style=flat-square&label=%40resq-systems%2Fanalytics)](https://www.npmjs.com/package/@resq-systems/analytics)
 [![@resq-systems/constants](https://img.shields.io/npm/v/%40resq-systems%2Fconstants?style=flat-square&label=%40resq-systems%2Fconstants)](https://www.npmjs.com/package/@resq-systems/constants)
+[![@resq-systems/types](https://img.shields.io/npm/v/%40resq-systems%2Ftypes?style=flat-square&label=%40resq-systems%2Ftypes)](https://www.npmjs.com/package/@resq-systems/types)
 [![@resq-systems/email-templates](https://img.shields.io/npm/v/%40resq-systems%2Femail-templates?style=flat-square&label=%40resq-systems%2Femail-templates)](https://www.npmjs.com/package/@resq-systems/email-templates)
 
 Registry workspace for all ResQ Systems npm packages published under the `@resq-systems` scope. Provides the shared UI component library, zero-dependency data structures, and standalone server/client utilities for the ResQ Systems autonomous disaster response platform.
@@ -42,6 +43,7 @@ graph TB
         direction TB
         subgraph foundation["Foundation"]
             constants["@resq-systems/constants<br/><small>design tokens · brand · zero deps</small>"]
+            types["@resq-systems/types<br/><small>nominal/branded types · zero deps</small>"]
         end
         subgraph frontend["Frontend"]
             ui["@resq-systems/ui<br/><small>57 components · Radix + Tailwind v4</small>"]
@@ -89,6 +91,7 @@ graph TB
 | Package | Description | Deps | Docs |
 | :--- | :--- | :--- | :--- |
 | [`@resq-systems/constants`](packages/constants/) | Shared design tokens (oklch + email-safe hex), brand identity, and cross-app values — one source of truth | **zero deps** | [README](packages/constants/README.md) |
+| [`@resq-systems/types`](packages/types/) | Nominal/branded type toolkit — `Brand`, `Opaque`, `NumberRange`, numeric brands, `assertNever`, and type-level test helpers | **zero deps** | [README](packages/types/README.md) |
 | [`@resq-systems/ui`](packages/ui/) | React component library — dark-first oklch color system, WCAG AA, subpath exports | radix-ui, tailwindcss | [README](packages/ui/README.md) · [Storybook](https://master--69b2711843dac80a70e4ca83.chromatic.com) |
 | [`@resq-systems/dsa`](packages/dsa/) | Data structures & algorithms — graph, heap, trie, bloom filter, distance, LRU cache, queue | **zero deps** | [README](packages/dsa/README.md) |
 | [`@resq-systems/http`](packages/http/) | Effect-based HTTP client with retry, timeout, and schema validation | effect | [README](packages/http/README.md) |

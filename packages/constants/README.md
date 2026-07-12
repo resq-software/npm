@@ -30,8 +30,8 @@ bun add @resq-systems/constants
 | Import | Contents |
 | --- | --- |
 | `@resq-systems/constants` | everything below |
-| `@resq-systems/constants/tokens` | `colors` (oklch source + email-safe hex), `fonts` (stacks + webfont href), `radii`, `themeColor` (light/dark PWA + viewport `theme-color`) |
-| `@resq-systems/constants/brand` | `brand` — name, legal name, tagline, domains, email addresses, postal address |
+| `@resq-systems/constants/tokens` | `colors` (`oklch` source + email-safe `hex` snapshot, incl. `info`/`success`/`warning`/`danger` status roles), `fonts` (stacks + webfont href), `radii`, `themeColor` (light/dark PWA + viewport `theme-color`), plus the color-role types `ColorRole`, `StatusRole`, `OklchColorRole`, `ColorTokenName` |
+| `@resq-systems/constants/brand` | `brand` — name, product name, legal name, tagline, description, domains, email addresses, legal URLs, socials, company info, logo, postal address |
 
 Everything is `as const`, so values are literal-typed and tree-shakeable.
 

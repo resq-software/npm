@@ -75,7 +75,11 @@ URL resolution: absolute URLs are used as-is; relative paths are prefixed with `
 | `schema` | `Schema.Schema<T>` | -- | Effect Schema for response validation |
 | `onError` | `(error: unknown) => void` | -- | Error callback |
 | `signal` | `AbortSignal` | -- | Abort signal |
-| `bodyType` | `"json" \| "text" \| "form"` | `"json"` | Request body encoding |
+| `bodyType` | `"json" \| "text" \| "form"` | `"json"` | Request body encoding. `"form"` requires a `FormData` body (fails fast otherwise) |
+| `allowedHosts` | `readonly HostPattern[]` | -- | SSRF allow-list. When set, absolute-URL requests to any other host fail with `FetcherError` |
+| `blockedHosts` | `readonly HostPattern[]` | -- | SSRF block-list. Absolute-URL requests to a matching host fail with `FetcherError` |
+
+The exported `HostPattern` type (`` Lowercase<string> | `*.${string}` ``) documents the two supported shapes: an exact hostname (`"api.example.com"`) or a wildcard-subdomain pattern (`` `*.example.com` ``, which matches the apex and any subdomain). Matching is case-insensitive at runtime. These filters apply only to **absolute** URLs — relative paths join to the trusted base URL, so `fetcher("/api/...")` is never blocked. This is basic hostname filtering, not full SSRF defence against DNS rebinding or alternate IP encodings.
 
 ### Retry Behavior
 
@@ -167,13 +171,24 @@ const redirect = shouldRedirectToHttps("http", req.url, req.headers);
 if (redirect) return Response.redirect(redirect, 301);
 ```
 
-#### `getRequestId(existingId?): string`
+#### `getRequestId(existingId?): RequestId`
 
-Returns the existing request ID or generates a new UUID.
+Resolves the per-request correlation ID: sanitizes a caller-supplied value (via `sanitizeRequestId`) or mints a fresh UUID v4. Returns a branded `RequestId` — a plain `string` is not assignable, so an unsanitized header value cannot be logged as a request ID by accident.
 
 ```ts
 const reqId = getRequestId(headers["x-request-id"]);
+res.headers.set("x-request-id", reqId);
 ```
+
+#### `sanitizeRequestId(raw): RequestId`
+
+The only safe minting path for an untrusted correlation ID. Strips every character outside `[A-Za-z0-9_-]` (defeating CRLF/log injection and header smuggling) and truncates to 200 chars. When no usable characters remain, mints a fresh UUID v4 instead.
+
+#### `isRequestId(value): value is RequestId`
+
+Type guard that narrows a `string` to `RequestId` when it already consists solely of the safe charset and is within the length bound.
+
+The `RequestId` type is exported for annotating values threaded through logs, response headers, and downstream hops.
 
 ## Prerequisites
 

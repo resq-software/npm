@@ -47,15 +47,21 @@ export default withAnalyticsRewrites({
 "use client";
 
 import { AnalyticsProvider } from "@resq-systems/analytics/react";
+import { inferCookieDomain, sanitizeGa4Id, type AnalyticsConfig } from "@resq-systems/analytics";
 
-const config = {
+// GA4 ids and cookie domains are branded — mint them through their validators
+// so a raw env string can never reach a gtag / cookie sink unchecked.
+const ga4Id = sanitizeGa4Id(process.env.NEXT_PUBLIC_GA4_ID);
+
+const config: AnalyticsConfig = {
   posthog: {
     key: process.env.NEXT_PUBLIC_POSTHOG_KEY!,
     host: "/ingest",
     uiHost: "https://us.posthog.com",
   },
-  ga4: { measurementId: process.env.NEXT_PUBLIC_GA4_ID! },
-  cookieDomain: ".resq.software",
+  // Only wire GA4 once the id passes validation.
+  ...(ga4Id ? { ga4: { measurementId: ga4Id } } : {}),
+  cookieDomain: inferCookieDomain(["resq.software", "research.resq.software", "viz.resq.software"]),
 };
 
 export const Providers = ({ children }: { children: React.ReactNode }) => (
@@ -106,7 +112,27 @@ After this, `track("briefing_requested", { tier: "civilian" })` type-checks; `tr
 | `pageview(url?)` | Manual SPA pageview. |
 | `reset()` | Clear identity + provider state. Use on sign-out. |
 | `analytics` | The singleton, if you need direct access. |
-| `inferCookieDomain(domains)` | Build `.resq.software` from a domain allow-list. |
+| `inferCookieDomain(domains)` | Longest shared registrable root as a branded `CookieDomain`, or `undefined`. |
+| `resolveResqCookieDomain(host?)` | The branded `.resq.software` `CookieDomain` when `host` is under that root, else `undefined`. |
+| `toCookieDomain(host)` | Normalize + validate any host to a leading-dot `CookieDomain`, or `null`. |
+| `isCookieDomain(value)` | Type guard: is a string already a normalized `CookieDomain`? |
+| `sanitizeGa4Id(id)` | Validate a GA4 Measurement ID against `GA4_ID_PATTERN`; returns a branded `Ga4MeasurementId` or `null`. |
+| `GA4_ID_PATTERN` | `RegExp` for Google's `G-XXXXXX` Measurement ID format. |
+| `RESQ_SUBDOMAIN_ALLOWLIST` | The three ResQ subdomains used for GA4 cross-domain linking. |
+
+### Types (`@resq-systems/analytics`)
+
+| Type | Purpose |
+|---|---|
+| `AnalyticsConfig` | Root config: `posthog`, `ga4`, `cookieDomain`, `disabled`, `debug`. |
+| `AnalyticsEvents` | Augmentable event registry (see [Typed events](#typed-events)). |
+| `EventName` / `TrackArgs<E>` | Derived from `AnalyticsEvents` to type `track()` names and payload arity. |
+| `PostHogProviderConfig` / `GA4ProviderConfig` | Per-provider config shapes. |
+| `CookieDomain` | Branded leading-dot cookie domain (e.g. `.resq.software`). Mint via `toCookieDomain` / `inferCookieDomain` / `resolveResqCookieDomain`. |
+| `Ga4MeasurementId` | Branded, validated GA4 Measurement ID — minted only by `sanitizeGa4Id`. |
+| `ResqSubdomain` | Union of `RESQ_SUBDOMAIN_ALLOWLIST` members. |
+| `GtagCommand` | Discriminated union of the `gtag(...)` command tuples emitted here (`js` / `config` / `event` / `set` / `consent`). |
+| `GtagConfigParams` / `GtagEventParams` | Flat, primitive-only parameter bags for gtag `config` / `event` calls. |
 
 ### React (`@resq-systems/analytics/react`)
 
@@ -126,14 +152,14 @@ After this, `track("briefing_requested", { tier: "civilian" })` type-checks; `tr
 
 For ResQ Systems's three surfaces to share a single `distinct_id`:
 
-1. **Cookie domain.** Set `cookieDomain: ".resq.software"` (or call `inferCookieDomain([...])`).
+1. **Cookie domain.** Set `cookieDomain` to a branded `CookieDomain` — mint it with `inferCookieDomain([...])`, `toCookieDomain(".resq.software")`, or `resolveResqCookieDomain(host)`.
 2. **Reverse proxy.** Each subdomain's `next.config.ts` calls `withAnalyticsRewrites(...)` so events ingest at `<subdomain>/ingest/*`, not `*.posthog.com`.
 3. **GA4 linker.** Pass `domains: ["resq.software", "research.resq.software", "viz.resq.software"]` so GA4 stops counting cross-subdomain navigation as referral traffic.
 4. **Same Measurement ID + PostHog key** across all three apps.
 
 ## Performance posture
 
-- Zero runtime dependencies; `posthog-js` is loaded via dynamic `import()` inside `init()`.
+- The only runtime dependency is `@resq-systems/types` (tiny brand helpers); `posthog-js` is loaded via dynamic `import()` inside `init()`.
 - `<AnalyticsProvider deferUntilIdle>` waits for `requestIdleCallback` before booting.
 - `person_profiles: "identified_only"` is set by default, so anonymous traffic doesn't burn PostHog units.
 

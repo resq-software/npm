@@ -60,6 +60,12 @@ Brands **compose** — `Brand<Brand<string, "Sanitized">, "Trimmed">` is both a
 `Sanitized` and a `Trimmed` — and a branded value is always assignable back to
 its carrier type, so reading it needs no unwrapping.
 
+`Opaque<T, B>` is a semantic alias of `Brand<T, B>` — reach for it when "opaque
+handle" reads better at the call site than "brand". `unsafeBrand<B>(value)` is
+the unchecked escape hatch: it casts to the brand **without** running a
+predicate, for the rare case where validation already happened upstream. The
+brand toolkit is also published on its own at `@resq-systems/types/brand`.
+
 ### Branded numerics
 
 ```ts
@@ -88,6 +94,9 @@ function label(t: "xss" | "sqli"): string {
 }
 ```
 
+`assertUnreachable` is an exported alias of `assertNever` — identical behavior,
+for call sites where that phrasing reads better.
+
 ## Utility types
 
 - **Object** — `DeepReadonly`, `DeepPartial`, `DeepRequired`, `DeepMutable`,
@@ -95,11 +104,12 @@ function label(t: "xss" | "sqli"): string {
   `PickByType`, `OmitByType`, `RemoveIndexSignature`, `Without`, `XOR`,
   `RequireAtLeastOne`, `RequireExactlyOne`.
 - **Collection** — `Head`, `Tail`, `Last`, `Length`, `Reverse`, `Push`,
-  `Unshift`, `Concat`, `Includes`, `TupleToUnion`, `UnionToIntersection`,
-  `UnionToTuple`, `IsUnion`, `LastInUnion`, `NonEmptyArray`, `Flatten`, `Zip`,
-  `Enumerate`, `NumberRange` (inclusive integer range → literal union).
-- **String** — `Trim`, `Split`, `Join`, `Replace`, `ReplaceAll`, `StartsWith`,
-  `EndsWith`, `ParseInt`, `LiteralUnion`.
+  `Unshift`, `Concat`, `IsEmpty`, `Includes`, `TupleToUnion`,
+  `UnionToIntersection`, `UnionToTuple`, `IsUnion`, `LastInUnion`,
+  `NonEmptyArray`, `ReadonlyNonEmptyArray`, `Flatten`, `Zip`, `Enumerate`,
+  `NumberRange` (inclusive integer range → literal union).
+- **String** — `TrimLeft`, `TrimRight`, `Trim`, `Split`, `Join`, `Replace`,
+  `ReplaceAll`, `StartsWith`, `EndsWith`, `ParseInt`, `LiteralUnion`.
 
 ## Type-level test kit
 
@@ -117,6 +127,10 @@ type _cases = [
 ```
 
 A failing assertion is a compile error on the `Expect<...>` line.
+
+The kit exports `Equal` / `NotEqual`, the `Expect` / `ExpectTrue` / `ExpectFalse`
+assertions, `Verify<T, U>` (assert `U` is assignable to `T`), and the `IsAny` /
+`IsNever` / `IsUnknown` probes.
 
 ## License
 
