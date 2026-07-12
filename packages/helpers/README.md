@@ -27,7 +27,7 @@
 bun add @resq-systems/helpers
 ```
 
-Dependencies: `@resq-systems/logger`, `tinyqueue`.
+Dependencies: `@resq-systems/logger`, `@resq-systems/types`, `tinyqueue`.
 
 ## Quick Start
 
@@ -213,9 +213,9 @@ Combo detectors: `isIOSSafari`, `isIOSChrome`, `isAndroidChrome`, `isMacOSChrome
 
 #### HTML Entities
 
-#### `obfuscateLink(opts): { href, encodedText }`
+#### `obfuscateLink(opts): ObfuscatedLink`
 
-Encodes contact links (mailto/tel) as HTML character references for spam protection.
+Encodes contact links (mailto/tel) as HTML character references for spam protection. Returns an `ObfuscatedLink`: a raw, un-encoded `href` (browsers require a literal `mailto:` / `tel:` URI in the attribute) paired with `encodedText`, a nominal `HtmlEntityEncoded` brand (`Brand<string, "HtmlEntityEncoded">` from `@resq-systems/types`) so entity-encoded text is not interchangeable with an arbitrary string.
 
 | Option | Type | Description |
 |--------|------|-------------|

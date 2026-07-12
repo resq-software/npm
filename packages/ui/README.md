@@ -41,11 +41,10 @@ Add the package to your Tailwind v4 sources:
 @import "tailwindcss";
 @source "../node_modules/@resq-systems/ui/lib";
 
-@import "@resq-systems/ui/styles/tokens.css";
-@import "@resq-systems/ui/styles/global.css";
+@import "@resq-systems/ui/styles/globals.css";
 ```
 
-The token sheet exposes the oklch palette as CSS custom properties. The global sheet wires Tailwind's `bg-background`, `text-foreground`, etc. to those tokens.
+The `globals.css` sheet exposes the oklch palette as CSS custom properties and wires Tailwind's `bg-background`, `text-foreground`, etc. to those tokens.
 
 ## Subpath imports
 
@@ -75,6 +74,35 @@ The default export (`@resq-systems/ui`) re-exports everything for convenience bu
 | Misc | `avatar`, `direction`, `icons`, `item`, `kbd`, `picture` |
 
 Browse all components and variants in [Storybook on Chromatic](https://master--69b2711843dac80a70e4ca83.chromatic.com).
+
+## Utilities
+
+Beyond components, the barrel exports a few helpers:
+
+| Export | Import from | Description |
+| :--- | :--- | :--- |
+| `cn` | `@resq-systems/ui/lib/utils` | `clsx` + `tailwind-merge` class-name combiner. |
+| `useIsMobile` | `@resq-systems/ui` | Subscribes to a `(max-width: 767px)` `matchMedia` query; returns `true` below the mobile breakpoint (SSR-safe). |
+| `getContrastingColor` | `@resq-systems/ui` | Picks `#000000` or `#ffffff` for maximum contrast against any CSS color. Browser-only — returns `undefined` on the server. |
+
+```tsx
+import { cn } from "@resq-systems/ui/lib/utils";
+import { getContrastingColor, useIsMobile } from "@resq-systems/ui";
+```
+
+### Color types
+
+`getContrastingColor` is backed by nominal, branded color types (from [`@resq-systems/types`](../types)) re-exported from the barrel:
+
+| Type | Shape | Notes |
+| :--- | :--- | :--- |
+| `Channel` | `NumberRange<0, 255>` | A single 8-bit color channel; out-of-gamut literals (e.g. `256`) are a compile error. |
+| `Rgb` | readonly `r` / `g` / `b`, each a `Channel` | A parsed, always-valid RGB triple. |
+| `RGB` | `Rgb \| null` | **Deprecated** alias — prefer `Rgb` and express parse failure as `Rgb \| null` at each boundary. |
+
+```ts
+import type { Channel, Rgb, RGB } from "@resq-systems/ui";
+```
 
 ## Quick start
 
@@ -133,7 +161,7 @@ bun --filter @resq-systems/ui chromatic        # publish visual baseline
 
 ## Configuration
 
-- **Tailwind CSS**: Requires Tailwind v4 config inclusion. Import root styles: `import "@resq-systems/ui/lib/index.css";`.
+- **Tailwind CSS**: Requires Tailwind v4 config inclusion. Import root styles: `@import "@resq-systems/ui/styles/globals.css";`.
 
 ## Testing
 

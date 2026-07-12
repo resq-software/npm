@@ -32,11 +32,12 @@ Peer dependency: `effect`. Uses Node.js `crypto` module for encryption.
 ## Quick Start
 
 ```ts
-import { encryptData, decryptData, isSafeInput, escapeHtml, redactPII } from "@resq-systems/security";
+import { encryptData, decryptData, toEncryptionKey, isSafeInput, escapeHtml, redactPII } from "@resq-systems/security";
 
-// Encrypt/decrypt
-const encrypted = await encryptData("sensitive", "my-secret-key");
-const decrypted = await decryptData(encrypted, "my-secret-key");
+// Encrypt/decrypt — the key is a branded `EncryptionKey`; mint it once at the boundary.
+const key = toEncryptionKey(process.env.ENCRYPTION_KEY ?? "my-secret-key");
+const encrypted = await encryptData("sensitive", key); // Ciphertext (branded)
+const decrypted = await decryptData(encrypted, key);
 
 // Validate input
 if (!isSafeInput(userInput)) {
@@ -55,42 +56,40 @@ const clean = redactPII("Email: john@example.com, SSN: 123-45-6789");
 
 ### Encryption (`crypto.ts`)
 
-#### `encryptData(plaintext, encryptionKey): Promise<string>`
+#### `encryptData(plaintext, encryptionKey): Promise<Ciphertext>`
 
 Encrypts data using AES-256-GCM with scrypt key derivation.
 
 - **plaintext** (`string`) -- data to encrypt.
-- **encryptionKey** (`string`) -- encryption key/password.
-- Returns base64 string containing `salt:iv:authTag:ciphertext`.
+- **encryptionKey** (`EncryptionKey`) -- branded secret; mint with `toEncryptionKey`.
+- Returns a branded `Ciphertext`: a base64 `salt | iv | authTag | ciphertext` envelope.
 
 #### `decryptData(encryptedData, encryptionKey): Promise<string>`
 
-Decrypts data produced by `encryptData`.
+Decrypts data produced by `encryptData`. Verifies the GCM auth tag before returning -- tampered or wrong-key input throws.
 
-- **encryptedData** (`string`) -- base64-encoded encrypted data.
-- **encryptionKey** (`string`) -- same key used for encryption.
+- **encryptedData** (`Ciphertext`) -- the branded envelope from `encryptData` (read one back from storage via `toCiphertext`).
+- **encryptionKey** (`EncryptionKey`) -- same key used for encryption.
 - Returns the original plaintext string.
 
-#### `hashData(data): string`
+#### `hashData(data): Sha256Hex`
 
-Hashes data using SHA-256. Non-reversible.
+Hashes data using SHA-256. Non-reversible. Returns a branded 64-char lowercase hex digest. Not for password storage -- use a slow KDF (bcrypt/argon2/scrypt) for password-equivalent material.
 
-- Returns hex-encoded hash string.
-
-#### `generateSecureToken(length?): string`
+#### `generateSecureToken(length?): SecureToken`
 
 Generates a cryptographically secure random token.
 
-- **length** (`number`, default `32`) -- byte length.
-- Returns hex string (2x the byte length).
+- **length** (`PositiveInt`, default `toPositiveInt(32)`) -- byte length. Build non-default lengths with `toPositiveInt` from `@resq-systems/types`.
+- Returns a branded `SecureToken`: hex string (2x the byte length).
 
-#### `maskPII(data): string`
+#### `maskPII(data): Masked`
 
-Masks a string, showing first 2 and last 2 characters (e.g. `"Al****ce"`). Returns `"****"` for strings <= 4 chars.
+Masks a string, showing first 2 and last 2 characters (e.g. `"Al****ce"`). Returns `"****"` for strings <= 4 chars. Result is a branded `Masked` string.
 
-#### `maskEmail(email): string`
+#### `maskEmail(email): Masked`
 
-Masks email local part (e.g. `"j***n@example.com"`).
+Masks the email local part while preserving the domain (e.g. `"j***n@example.com"`). Falls back to `maskPII` when the input is not a `local@domain` shape.
 
 #### `sanitizeForLogging(obj, sensitiveFields?): Partial<T>`
 
@@ -103,6 +102,23 @@ Recursively redacts sensitive fields from an object for safe logging.
 sanitizeForLogging({ password: "secret", email: "john@example.com", name: "John" });
 // { password: "[REDACTED]", email: "j***n@example.com", name: "John" }
 ```
+
+#### Branded Crypto Types
+
+The crypto surface uses nominal (branded) types so a plain `string` cannot be passed where a validated secret or ciphertext is expected. Exported brands: `Ciphertext`, `EncryptionKey`, `SecureToken`, `Sha256Hex`, `Masked`.
+
+`EncryptionKey` and `Ciphertext` ship smart constructors (backed by `@resq-systems/types`):
+
+| Function | Brand | Behavior |
+|----------|-------|----------|
+| `toEncryptionKey(value)` | `EncryptionKey` | Assert non-empty, brand, or throw |
+| `coerceEncryptionKey(value)` | `EncryptionKey \| null` | Brand, or `null` when empty |
+| `isEncryptionKey(value)` | type guard | `true` when `value` is a usable key |
+| `unsafeEncryptionKey(value)` | `EncryptionKey` | Brand without checking |
+| `toCiphertext(value)` | `Ciphertext` | Assert well-formed base64 envelope, or throw |
+| `coerceCiphertext(value)` | `Ciphertext \| null` | Brand, or `null` when malformed |
+| `isCiphertext(value)` | type guard | `true` for a well-formed envelope |
+| `unsafeCiphertext(value)` | `Ciphertext` | Brand without checking |
 
 ### Threat Detection (`validators.ts`)
 
@@ -172,6 +188,10 @@ Escapes `&`, `<`, `>`, `"`, `'` to HTML entities.
 escapeHtml('<img onerror="alert(1)">'); // "&lt;img onerror=&quot;alert(1)&quot;&gt;"
 ```
 
+#### `sanitizeHtml(html, options?): string`
+
+Sanitizes HTML to prevent XSS using DOMPurify. Accepts an optional DOMPurify `Config`. When no DOM is available (server-side without `jsdom`), it falls back to escaping all HTML characters. `jsdom` is an optional peer dependency required only for server-side HTML sanitization.
+
 #### `sanitizeUrl(url, allowedProtocols?): string`
 
 Validates and returns a safe URL; returns empty string if unsafe.
@@ -229,8 +249,13 @@ Replaces PII patterns with redaction markers.
 | `redactPhones` | `boolean` | `true` | `[PHONE]` |
 | `redactSSN` | `boolean` | `true` | `[SSN]` |
 | `redactCreditCards` | `boolean` | `true` | `[CREDIT_CARD]` |
-| `redactIPs` | `boolean` | `true` | `[IP_ADDRESS]` |
+| `redactIPs` | `boolean` | `true` | `[IP_ADDRESS]` (IPv4 and IPv6) |
+| `redactDates` | `boolean` | `false` | `[DATE]` |
 | `customPatterns` | `Array<{ pattern, replacement }>` | `[]` | custom |
+
+#### `redactPIIEffect(text, options?): Exit<string, SchemaError>`
+
+Effect-based variant of `redactPII` that validates the options against `PIIRedactionOptionsSchema` and returns an `Exit`. Does not apply `customPatterns`.
 
 #### `safeStringify(obj, sensitiveKeys?, indent?): string`
 
@@ -240,20 +265,24 @@ JSON.stringify with automatic redaction of sensitive keys.
 
 ### Validation Helpers
 
-| Function | Description |
-|----------|-------------|
-| `isValidEmail(email)` | Validates email format |
-| `isValidPhone(phone)` | Validates US phone format |
-| `isValidSSN(ssn)` | Validates US SSN format |
-| `isValidUrl(url)` | Validates safe URL |
+Each is a type guard that narrows its input to the matching brand on success.
+
+| Function | Narrows to | Description |
+|----------|------------|-------------|
+| `isValidEmail(email)` | `Email` | Validates email format; accepts alphabetic and Punycode/IDN (`xn--…`) TLDs |
+| `isValidPhone(phone)` | `PhoneNumber` | Validates US phone format |
+| `isValidSSN(ssn)` | `SSN` | Validates US SSN format |
+| `isValidUrl(url)` | `SafeUrl` | Validates safe URL |
 
 ### Effect Schemas
 
 Exported for runtime validation: `SafeUrlSchema`, `EmailSchema`, `PhoneNumberSchema`, `SSNSchema`, `CreditCardSchema`, `IPv4Schema`, `SanitizedStringSchema`, `UrlProtocolSchema`, `PIIRedactionOptionsSchema`, `UserInputOptionsSchema`.
 
+`EmailSchema` accepts a 2+ character alphabetic TLD **or** a Punycode/IDN `xn--…` TLD (e.g. `.xn--p1ai` for `.рф`), so internationalized domains are not rejected. It is kept in sync with the `EmailAddress` brand in `@resq-systems/email-templates`.
+
 ### Types
 
-Exported types: `ThreatDetectionResult`, `ThreatFinding`, `ThreatType`, `ThreatDetectionConfig`, `PIIRedactionOptions`, `UserInputOptions`, `SafeUrl`, `Email`, `PhoneNumber`, `SSN`, `CreditCard`, `IPv4`, `UrlProtocol`.
+Exported types: `ThreatDetectionResult`, `ThreatFinding`, `ThreatType`, `ThreatDetectionConfig`, `PIIRedactionOptions`, `UserInputOptions`, `SanitizedString`, `SafeUrl`, `Email`, `PhoneNumber`, `SSN`, `CreditCard`, `IPv4`, `UrlProtocol`. Crypto brands: `Ciphertext`, `EncryptionKey`, `SecureToken`, `Sha256Hex`, `Masked`.
 
 ## Prerequisites
 
@@ -262,7 +291,7 @@ Exported types: `ThreatDetectionResult`, `ThreatFinding`, `ThreatType`, `ThreatD
 
 ## Configuration
 
-- **Crypto Key**: Ensure `ENCRYPTION_KEY` is set for cryptographic modules (must be a valid hex string of proper bit length).
+- **Crypto Key**: Ensure `ENCRYPTION_KEY` is set for cryptographic modules. Any non-empty secret works -- scrypt stretches it into a 256-bit AES key -- but a high-entropy value (>= 32 bytes) is strongly preferred. Brand it once with `toEncryptionKey` before passing it to `encryptData`/`decryptData`.
 
 ## Testing
 
