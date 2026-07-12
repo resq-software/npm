@@ -1,5 +1,29 @@
 <!--
 
+## 2.0.0
+### Major Changes
+
+
+
+- [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add branded CookieDomain and a gtag command discriminated union, tightening cookieDomain and resolver return types
+
+
+### Patch Changes
+
+
+
+- [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Republish with corrected manifests. Earlier releases via the tag-triggered
+  `release-package.yml` workflow used `bunx npm publish`, which does not rewrite
+  Bun's `workspace:*` protocol, so these packages shipped with unresolvable
+  `workspace:*` dependencies (`@resq-systems/types`, `@resq-systems/dsa`,
+  `@resq-systems/constants`) that break `bun install` / `npm install` in
+  downstream consumers. The workflow now uses `bun publish`, which resolves the
+  protocol to concrete versions at pack time.
+
+  `@resq-systems/rate-limiting` additionally re-adds a `@deprecated`
+  `RateLimitCheckResult` type alias for the renamed `RateLimitDecision`, restoring
+  backward compatibility for consumers written before the rename.
+
 ## 1.0.0
 ### Major Changes
 

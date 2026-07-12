@@ -1,5 +1,12 @@
 <!--
 
+## 0.3.0
+### Minor Changes
+
+
+
+- [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Harden decorator types: make `Decorator`/`AsyncDecorator` generic over the decorated method so its signature is preserved end-to-end instead of erased to `Method<any>`; default Method/AsyncMethod to unknown and drop `any` across the package; narrow the isFunction/isPromise guards and cache reads; await after-hook responses; and resolve rate-limit async counters and key resolvers. Fixes a `memoizeAsync` cache race where a TTL expiry or concurrent delete between `has()` and `get()` returned `null` instead of recomputing.
+
 ## 0.2.0
 ### Minor Changes
 

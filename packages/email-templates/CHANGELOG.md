@@ -1,5 +1,34 @@
 <!--
 
+## 0.4.0
+### Minor Changes
+
+
+
+- [#174](https://github.com/resq-software/npm/pull/174) [`59d6d6d`](https://github.com/resq-software/npm/commit/59d6d6d053e755acb28bd655a9faa44362bb680d) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Validate and brand the recipient address at the mailer boundary
+
+  `createMailer`, `decodeEmailPayload`, `renderEmail`, and `sendEmail` now decode each payload's `to` through a branded `EmailAddress` schema (exported from the package root) instead of a bare `Schema.String`. A malformed address — or one carrying the CR/LF that underpins SMTP header injection (e.g. `"ok@example.com\r\nBcc: attacker@evil"`) — is rejected with `EmailValidationError` at the decode boundary, and the validated recipient carries the `EmailAddress` brand through to `RenderedEmail["to"]`. Also replaces the opaque `decodeUnknownExit` cast with the shared `Schema.Codec<Payload, unknown, never>` idiom used across the workspace.
+
+  BREAKING: a `to` that is not a syntactically valid email now fails validation instead of passing through; `RenderedEmail["to"]` and the decoded payload `to` narrow from `string` to the branded `EmailAddress`.
+
+### Patch Changes
+
+
+
+- [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Republish with corrected manifests. Earlier releases via the tag-triggered
+  `release-package.yml` workflow used `bunx npm publish`, which does not rewrite
+  Bun's `workspace:*` protocol, so these packages shipped with unresolvable
+  `workspace:*` dependencies (`@resq-systems/types`, `@resq-systems/dsa`,
+  `@resq-systems/constants`) that break `bun install` / `npm install` in
+  downstream consumers. The workflow now uses `bun publish`, which resolves the
+  protocol to concrete versions at pack time.
+
+  `@resq-systems/rate-limiting` additionally re-adds a `@deprecated`
+  `RateLimitCheckResult` type alias for the renamed `RateLimitDecision`, restoring
+  backward compatibility for consumers written before the rename.
+- Updated dependencies [[`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca)]:
+  - @resq-systems/constants@0.3.1
+
 ## 0.3.0
 ### Minor Changes
 

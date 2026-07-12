@@ -1,5 +1,16 @@
 <!--
 
+## 0.3.0
+### Minor Changes
+
+
+
+- [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Implement the LogTransport Observer pipeline: Logger.addTransport/removeTransport/clearTransports fan every log out as a structured LogEntry with full error isolation, plus built-in MemoryTransport, JsonTransport, and composable createFilterTransport/byLevel
+
+
+
+- [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add SimpleLogLevel to exclude "error" from data-logging decorator levels, dedupe LogData/LoggerOptions/ColorKey to a single canonical source, and add exhaustive level-name parsing
+
 ## 0.2.0
 ### Minor Changes
 
