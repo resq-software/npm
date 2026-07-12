@@ -68,4 +68,31 @@ describe("decodeEmailPayload", () => {
 			}),
 		).toThrow(EmailValidationError);
 	});
+
+	it("throws EmailValidationError when the recipient is not a valid email", () => {
+		// Valid data isolates the failure to the recipient check.
+		expect(() =>
+			decodeEmailPayload({ name: "welcome", to: "not-an-email", data: { firstName: "Grace" } }),
+		).toThrow(EmailValidationError);
+	});
+
+	it("rejects a recipient carrying a CR/LF header-injection payload", () => {
+		expect(() =>
+			decodeEmailPayload({
+				name: "welcome",
+				to: "grace@example.com\r\nBcc: attacker@evil.test",
+				data: { firstName: "Grace" },
+			}),
+		).toThrow(EmailValidationError);
+	});
+
+	it("accepts a well-formed plus-tagged recipient", () => {
+		const payload = decodeEmailPayload({
+			name: "welcome",
+			to: "grace+alerts@example.com",
+			data: { firstName: "Grace" },
+		});
+
+		expect(payload.to).toBe("grace+alerts@example.com");
+	});
 });
