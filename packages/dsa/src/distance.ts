@@ -42,6 +42,8 @@
  * @license Apache-2.0
  */
 
+import { assertNever } from "./_assert.js";
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -93,6 +95,17 @@ export interface Coordinates3D extends Coordinates2D {
 	/** Altitude in meters */
 	alt: number;
 }
+
+/**
+ * The point shape a given formula requires. Every formula operates on 2D
+ * coordinates except `"threed"`, which needs an altitude component. Used to
+ * make {@link Distance.calculate} reject 2D points for the 3D formula at the
+ * type level.
+ * @category Types
+ */
+export type PointFor<F extends DistanceFormula> = F extends "threed"
+	? Coordinates3D
+	: Coordinates2D;
 
 /**
  * Options for distance calculations.
@@ -166,6 +179,16 @@ function validateGeographicCoordinates(point: Coordinates2D, name: string): void
 	if (point.lng < -180 || point.lng > 180) {
 		throw new ValidationError(`${name} longitude must be between -180 and 180`);
 	}
+}
+
+/**
+ * Runtime narrowing guard for 3D coordinates. Lets the `"threed"` branch of
+ * {@link Distance.calculate} narrow a generically-typed point to
+ * {@link Coordinates3D} without an unsound cast, and also rejects untyped
+ * callers that slip a 2D point past the compiler.
+ */
+function isCoordinates3D(point: Coordinates2D | Coordinates3D): point is Coordinates3D {
+	return "alt" in point && typeof point.alt === "number";
 }
 
 // ============================================================================
@@ -416,10 +439,10 @@ export class Distance {
 		return 1 - (2 * intersection.size) / denominator;
 	}
 
-	static calculate(
-		formula: DistanceFormula,
-		point1: Coordinates2D | Coordinates3D,
-		point2: Coordinates2D | Coordinates3D,
+	static calculate<F extends DistanceFormula>(
+		formula: F,
+		point1: PointFor<F>,
+		point2: PointFor<F>,
 		options: DistanceOptions = {},
 	): number {
 		switch (formula) {
@@ -435,8 +458,12 @@ export class Distance {
 				return Distance.chebyshev(point1, point2);
 			case "minkowski":
 				return Distance.minkowski(point1, point2, options.p);
-			case "threed":
-				return Distance.threed(point1 as Coordinates3D, point2 as Coordinates3D);
+			case "threed": {
+				if (isCoordinates3D(point1) && isCoordinates3D(point2)) {
+					return Distance.threed(point1, point2);
+				}
+				throw new ValidationError("threed formula requires 3D coordinates with a numeric alt");
+			}
 			case "cosine":
 				return Distance.cosine(point1, point2);
 			case "hamming":
@@ -445,17 +472,15 @@ export class Distance {
 				return Distance.jaccard(point1, point2);
 			case "sorensen-dice":
 				return Distance.sorensenDice(point1, point2);
-			default: {
-				const exhaustiveCheck: never = formula;
-				throw new Error(`Unknown distance formula: ${exhaustiveCheck}`);
-			}
+			default:
+				return assertNever(formula);
 		}
 	}
 
-	static calculateSafe(
-		formula: DistanceFormula,
-		point1: Coordinates2D | Coordinates3D,
-		point2: Coordinates2D | Coordinates3D,
+	static calculateSafe<F extends DistanceFormula>(
+		formula: F,
+		point1: PointFor<F>,
+		point2: PointFor<F>,
 		options: DistanceOptions = {},
 	): DistanceResult {
 		try {

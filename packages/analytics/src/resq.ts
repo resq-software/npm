@@ -24,6 +24,8 @@
  * three coordinated edits.
  */
 
+import { type Brand, unsafeBrand } from "@resq-systems/types";
+
 /**
  * Cross-subdomain allow-list for GA4 cross-domain linking.
  *
@@ -37,11 +39,27 @@
  * consolidate to a single property (or roll up via GA4 360), it just
  * works.
  */
-export const RESQ_SUBDOMAIN_ALLOWLIST: readonly string[] = [
+export const RESQ_SUBDOMAIN_ALLOWLIST = [
 	"resq.software",
 	"research.resq.software",
 	"viz.resq.software",
-];
+] as const;
+
+/**
+ * A host known to belong to the ResQ cross-subdomain family. Derived from
+ * {@link RESQ_SUBDOMAIN_ALLOWLIST} so adding a subdomain updates the type in
+ * lockstep with the runtime value.
+ */
+export type ResqSubdomain = (typeof RESQ_SUBDOMAIN_ALLOWLIST)[number];
+
+/**
+ * A GA4 Measurement ID that has been validated against {@link GA4_ID_PATTERN}.
+ *
+ * Branding separates a checked ID from an arbitrary env string at the type
+ * level: only {@link sanitizeGa4Id} (the validated boundary) can mint one, so a
+ * raw `process.env.*` value can never reach a gtag sink by accident.
+ */
+export type Ga4MeasurementId = Brand<string, "Ga4MeasurementId">;
 
 /**
  * Strict GA4 Measurement ID shape per Google's documented format:
@@ -66,9 +84,9 @@ export const GA4_ID_PATTERN = /^G-[A-Z0-9]{6,32}$/;
  * @returns The validated ID when it matches Google's format, otherwise
  *   `null`. Skip GA4 init entirely when this returns `null`.
  */
-export function sanitizeGa4Id(id: string | null | undefined): string | null {
+export function sanitizeGa4Id(id: string | null | undefined): Ga4MeasurementId | null {
 	if (!id) return null;
-	return GA4_ID_PATTERN.test(id) ? id : null;
+	return GA4_ID_PATTERN.test(id) ? unsafeBrand<"Ga4MeasurementId", string>(id) : null;
 }
 
 /**

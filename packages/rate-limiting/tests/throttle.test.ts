@@ -15,7 +15,16 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { debounce, throttle, KeyedThrottle, KeyedDebounce } from "../src/throttle.js";
+import { toPositiveInt, toPositiveMillis, toPositiveNumber } from "@resq-systems/types";
+import {
+	debounce,
+	throttle,
+	KeyedThrottle,
+	KeyedDebounce,
+	LeakyBucketLimiter,
+	SlidingWindowCounter,
+	TokenBucketLimiter,
+} from "../src/throttle.js";
 
 describe("throttle", () => {
 	beforeEach(() => {
@@ -269,5 +278,68 @@ describe("KeyedDebounce", () => {
 		// key2 and key3 should execute.
 		expect(fn).toHaveBeenCalledTimes(2);
 		expect(fn).not.toHaveBeenCalledWith("key1");
+	});
+});
+
+describe("branded limiter constructors", () => {
+	it("TokenBucketLimiter accepts branded capacity/window and enforces the burst limit", () => {
+		const limiter = new TokenBucketLimiter(toPositiveInt(2), toPositiveMillis(60_000));
+
+		expect(limiter.tryAcquire()).toBe(true);
+		expect(limiter.tryAcquire()).toBe(true);
+		expect(limiter.tryAcquire()).toBe(false);
+		expect(limiter.getStats().capacity).toBe(2);
+	});
+
+	it("LeakyBucketLimiter accepts branded capacity/rate", () => {
+		const limiter = new LeakyBucketLimiter(toPositiveInt(5), toPositiveNumber(10));
+
+		expect(limiter.tryAcquire()).toBe(true);
+		expect(limiter.getStats().capacity).toBe(5);
+	});
+
+	it("LeakyBucketLimiter accepts a fractional drain rate (e.g. 0.5 req/s)", () => {
+		const limiter = new LeakyBucketLimiter(toPositiveInt(2), toPositiveNumber(0.5));
+
+		expect(limiter.tryAcquire()).toBe(true);
+	});
+
+	it("rejects zero, negative, and fractional capacities at the construction boundary", () => {
+		expect(() => new TokenBucketLimiter(toPositiveInt(0), toPositiveMillis(1000))).toThrow(
+			TypeError,
+		);
+		expect(() => new TokenBucketLimiter(toPositiveInt(-1), toPositiveMillis(1000))).toThrow(
+			TypeError,
+		);
+		expect(() => new TokenBucketLimiter(toPositiveInt(1.5), toPositiveMillis(1000))).toThrow(
+			TypeError,
+		);
+		expect(() => new TokenBucketLimiter(toPositiveInt(5), toPositiveMillis(0))).toThrow(TypeError);
+	});
+});
+
+describe("SlidingWindowCounter", () => {
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	it("returns the shared RateLimitDecision shape and enforces the limit", () => {
+		const counter = new SlidingWindowCounter(toPositiveMillis(60_000), toPositiveInt(2));
+
+		const first = counter.check("user:1");
+		expect(first.allowed).toBe(true);
+		expect(first.limit).toBe(2);
+		expect(first.remaining).toBe(1);
+		expect(typeof first.resetAt).toBe("number");
+
+		counter.check("user:1");
+		const denied = counter.check("user:1");
+		expect(denied.allowed).toBe(false);
+		expect(denied.remaining).toBe(0);
+		expect(denied.limit).toBe(2);
 	});
 });

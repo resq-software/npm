@@ -127,7 +127,7 @@ describe("validateUserInput", () => {
 
 describe("sanitizeJson", () => {
 	it("should parse valid JSON", () => {
-		const result = sanitizeJson<{ foo: string }>('{"foo":"bar"}');
+		const result = sanitizeJson('{"foo":"bar"}');
 		expect(result).toEqual({ foo: "bar" });
 	});
 
@@ -137,7 +137,7 @@ describe("sanitizeJson", () => {
 
 	it("should remove dangerous __proto__ key from parsed object", () => {
 		const malicious = '{"__proto__":{"polluted":true},"safe":"value"}';
-		const result = sanitizeJson<{ safe: string }>(malicious);
+		const result = sanitizeJson(malicious) as { safe: string } | null;
 		expect(result?.safe).toBe("value");
 		// Check that the __proto__ key was removed from the object's own properties
 		expect(result).not.toBeNull();
@@ -147,10 +147,10 @@ describe("sanitizeJson", () => {
 	it("should recursively remove dangerous prototype pollution keys", () => {
 		const malicious =
 			'{"nested":{"__proto__":{"polluted":true},"constructor":{"prototype":{"foo":"bar"}},"safe":"value"},"array":[{"__proto__":{"a":1}}]}';
-		const result = sanitizeJson<{
+		const result = sanitizeJson(malicious) as {
 			nested: { safe: string };
 			array: Array<Record<string, unknown>>;
-		}>(malicious);
+		} | null;
 		expect(result).not.toBeNull();
 		expect(result!.nested.safe).toBe("value");
 		expect(Object.hasOwn(result!.nested, "__proto__")).toBe(false);

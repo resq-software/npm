@@ -26,6 +26,8 @@
 
 import { Schema as S } from "effect";
 import { LRUCache } from "@resq-systems/dsa";
+import type { PositiveInt, PositiveMillis, PositiveNumber } from "@resq-systems/types";
+import type { RateLimitDecision } from "./decision.js";
 
 // ============================================
 // Effect Schema Definitions
@@ -493,18 +495,21 @@ export class KeyedDebounce<T extends AnyFunction> {
 export class TokenBucketLimiter {
 	private tokens: number;
 	private lastRefill: number;
-	private readonly capacity: number;
-	private readonly refillRate: number;
-	private readonly refillInterval: number;
+	private readonly capacity: PositiveInt;
+	private readonly refillRate: PositiveInt;
+	private readonly refillInterval: PositiveMillis;
 	private queue: Array<() => void> = [];
 
 	/**
-	 * @param capacity - Maximum bucket size (also the burst limit).
+	 * @param capacity - Maximum bucket size (also the burst limit). Construct
+	 *   with `toPositiveInt(...)` so zero, negative, and fractional capacities
+	 *   are rejected at the boundary.
 	 * @param windowMs - Time window over which one full bucket of
 	 *   tokens accumulates. The steady-state rate is
-	 *   `capacity / windowMs` tokens per millisecond.
+	 *   `capacity / windowMs` tokens per millisecond. Construct with
+	 *   `toPositiveMillis(...)`.
 	 */
-	constructor(capacity: number, windowMs: number) {
+	constructor(capacity: PositiveInt, windowMs: PositiveMillis) {
 		this.capacity = capacity;
 		this.tokens = capacity;
 		this.lastRefill = Date.now();
@@ -649,19 +654,21 @@ export class TokenBucketLimiter {
  */
 export class LeakyBucketLimiter {
 	private queue: Array<{ resolve: () => void; timestamp: number }> = [];
-	private readonly capacity: number;
-	private readonly leakRate: number; // requests per second
+	private readonly capacity: PositiveInt;
+	private readonly leakRate: number; // ms between requests
 	private processing = false;
 
 	/**
 	 * @param capacity - Maximum queue depth. Calls to {@link acquire}
 	 *   that exceed this throw immediately ("Rate limit exceeded:
-	 *   queue full"); use {@link tryAcquire} to test first.
+	 *   queue full"); use {@link tryAcquire} to test first. Construct with
+	 *   `toPositiveInt(...)` so invalid depths are rejected at the boundary.
 	 * @param requestsPerSecond - Steady-state drain rate. Internally
 	 *   converted to a per-request gap of `1000 / requestsPerSecond`
-	 *   milliseconds.
+	 *   milliseconds. May be fractional (e.g. `0.5` = one request every two
+	 *   seconds); construct with `toPositiveNumber(...)`.
 	 */
-	constructor(capacity: number, requestsPerSecond: number) {
+	constructor(capacity: PositiveInt, requestsPerSecond: PositiveNumber) {
 		this.capacity = capacity;
 		this.leakRate = 1000 / requestsPerSecond; // ms between requests
 	}
@@ -790,15 +797,17 @@ export class LeakyBucketLimiter {
  */
 export class SlidingWindowCounter {
 	private counters = new Map<string, { current: number; previous: number; windowStart: number }>();
-	private readonly windowMs: number;
-	private readonly maxRequests: number;
+	private readonly windowMs: PositiveMillis;
+	private readonly maxRequests: PositiveInt;
 
 	/**
-	 * @param windowMs - Sliding-window length in milliseconds.
+	 * @param windowMs - Sliding-window length in milliseconds. Construct with
+	 *   `toPositiveMillis(...)` so non-positive windows are rejected at the
+	 *   boundary.
 	 * @param maxRequests - Maximum allowed weighted count per window
-	 *   per key.
+	 *   per key. Construct with `toPositiveInt(...)`.
 	 */
-	constructor(windowMs: number, maxRequests: number) {
+	constructor(windowMs: PositiveMillis, maxRequests: PositiveInt) {
 		this.windowMs = windowMs;
 		this.maxRequests = maxRequests;
 
@@ -810,15 +819,17 @@ export class SlidingWindowCounter {
 	 * Atomically increment the counter for `key` and decide whether
 	 * to allow the request based on the trailing weighted count.
 	 *
-	 * @returns `{ allowed, remaining, resetAt }` where:
+	 * @returns A {@link RateLimitDecision} — the same discriminated union the
+	 *   store layer returns — where:
 	 *   - `allowed` — `true` if under the limit; `false` if rejected
 	 *     (counter is **not** incremented in this case).
 	 *   - `remaining` — best-effort lower bound on how many more
-	 *     requests fit in the current window for this key.
+	 *     requests fit in the current window for this key (`0` when rejected).
+	 *   - `limit` — the configured `maxRequests` for this counter.
 	 *   - `resetAt` — Unix epoch ms when the current fixed window
 	 *     boundary rolls over.
 	 */
-	public check(key: string): { allowed: boolean; remaining: number; resetAt: number } {
+	public check(key: string): RateLimitDecision {
 		const now = Date.now();
 		const windowStart = Math.floor(now / this.windowMs) * this.windowMs;
 		const previousWindowStart = windowStart - this.windowMs;
@@ -845,16 +856,19 @@ export class SlidingWindowCounter {
 		const windowPosition = (now - windowStart) / this.windowMs;
 		const weightedCount = counter.previous * (1 - windowPosition) + counter.current;
 
-		const allowed = weightedCount < this.maxRequests;
+		const resetAt = windowStart + this.windowMs;
 
-		if (allowed) {
-			counter.current++;
+		if (weightedCount >= this.maxRequests) {
+			return { allowed: false, remaining: 0, limit: this.maxRequests, resetAt };
 		}
 
+		counter.current++;
+
 		return {
-			allowed,
-			remaining: Math.max(0, Math.floor(this.maxRequests - weightedCount - (allowed ? 1 : 0))),
-			resetAt: windowStart + this.windowMs,
+			allowed: true,
+			remaining: Math.max(0, Math.floor(this.maxRequests - weightedCount - 1)),
+			limit: this.maxRequests,
+			resetAt,
 		};
 	}
 

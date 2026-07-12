@@ -31,19 +31,19 @@
  * const g = new Graph<string>({ directed: true });
  * g.addEdge("base", "alpha", 5);
  * g.addEdge("alpha", "site-7", 3);
- * const path = g.shortestPath("base", "site-7"); // → ["base", "alpha", "site-7"]
+ * const result = g.findShortestPath("base", "site-7");
+ * result.path; // → ["base", "alpha", "site-7"]
  * ```
  *
  * @example Priority dispatch
  * ```ts
  * import { createPriorityLevelQueue } from "@resq-systems/dsa";
  *
- * const triage = createPriorityLevelQueue<{ id: string; severity: number }>(
- *   (item) => item.severity,
- * );
- * triage.enqueue({ id: "alpha", severity: 1 });
- * triage.enqueue({ id: "bravo", severity: 5 });
- * triage.dequeue(); // → { id: "bravo", severity: 5 }
+ * // Orders by `priority` (1 = most urgent), breaking ties by `deadline`.
+ * const triage = createPriorityLevelQueue();
+ * triage.enqueue({ id: "alpha", deadline: new Date("2025-01-11"), priority: 5, status: "open" });
+ * triage.enqueue({ id: "bravo", deadline: new Date("2025-01-10"), priority: 1, status: "open" });
+ * triage.dequeue(); // → { id: "bravo", priority: 1, ... }
  * ```
  *
  * @example Probabilistic membership
@@ -75,6 +75,8 @@ export {
 } from "./priority-queue.js";
 export type {
 	CompareFn,
+	PQArgs,
+	PQOptions,
 	PriorityQueueOptions,
 	PriorityQueueStats,
 	PriorityRequestItem,

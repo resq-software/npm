@@ -23,6 +23,7 @@
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 
+import type { Brand } from "@resq-systems/types";
 import { Exit, Option, Schema as S } from "effect";
 import DOMPurify from "dompurify";
 import type { Config, WindowLike } from "dompurify";
@@ -30,7 +31,7 @@ import type { Config, WindowLike } from "dompurify";
 /**
  * A Schema with DecodingServices constrained to `never`, allowing synchronous decoding.
  */
-type SyncSchema<T> = S.Codec<T, any, never>;
+type SyncSchema<T> = S.Codec<T, unknown, never>;
 
 // ============================================
 // Effect Schema Definitions
@@ -89,7 +90,8 @@ export const SafeUrlSchema = S.String.check(
 		{ message: "Invalid or unsafe URL" },
 	),
 );
-export type SafeUrl = typeof SafeUrlSchema.Type;
+/** A string that has passed {@link isValidUrl} — a validated, injection-safe URL. */
+export type SafeUrl = Brand<string, "SafeUrl">;
 
 /**
  * Schema for sanitized HTML-safe string (validates as string; escaping done at runtime)
@@ -105,7 +107,8 @@ export type SanitizedString = typeof SanitizedStringSchema.Type;
 export const EmailSchema = S.String.check(
 	S.isPattern(/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/),
 );
-export type Email = typeof EmailSchema.Type;
+/** A string that has passed {@link isValidEmail}. */
+export type Email = Brand<string, "Email">;
 
 /**
  * Schema for phone number validation (US format)
@@ -114,14 +117,16 @@ export type Email = typeof EmailSchema.Type;
 export const PhoneNumberSchema = S.String.check(
 	S.isPattern(/^(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/),
 );
-export type PhoneNumber = typeof PhoneNumberSchema.Type;
+/** A string that has passed {@link isValidPhone} (US format). */
+export type PhoneNumber = Brand<string, "PhoneNumber">;
 
 /**
  * Schema for SSN validation (US format)
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const SSNSchema = S.String.check(S.isPattern(/^\d{3}[-\s]?\d{2}[-\s]?\d{4}$/));
-export type SSN = typeof SSNSchema.Type;
+/** A string that has passed {@link isValidSSN} (US format). */
+export type SSN = Brand<string, "SSN">;
 
 /**
  * Schema for credit card number validation
@@ -130,13 +135,15 @@ export type SSN = typeof SSNSchema.Type;
 export const CreditCardSchema = S.String.check(
 	S.isPattern(/^(?:\d{4}[-\s]?){3}\d{4}$|^\d{15,16}$/),
 );
-export type CreditCard = typeof CreditCardSchema.Type;
+/** A string matching the {@link CreditCardSchema} pattern. */
+export type CreditCard = Brand<string, "CreditCard">;
 
 /**
  * Schema for IPv4 address validation
  */
 export const IPv4Schema = S.String.check(S.isPattern(/^(?:\d{1,3}\.){3}\d{1,3}$/));
-export type IPv4 = typeof IPv4Schema.Type;
+/** A string matching the {@link IPv4Schema} dotted-quad pattern. */
+export type IPv4 = Brand<string, "IPv4">;
 
 // ============================================
 // Sanitization Functions
@@ -189,8 +196,8 @@ export const escapeHtml = (text: string): string => {
  */
 export const sanitizeUrlEffect = (
 	url: string,
-	allowedProtocols: readonly string[] = ["http:", "https:", "mailto:"],
-): Exit.Exit<string, unknown> => {
+	allowedProtocols: readonly UrlProtocol[] = ["http:", "https:", "mailto:"],
+): Exit.Exit<string, S.SchemaError> => {
 	const CustomSafeUrlSchema = S.String.check(
 		S.makeFilter(
 			(u: string) => {
@@ -236,7 +243,7 @@ export const sanitizeUrlEffect = (
  */
 export const sanitizeUrl = (
 	url: string,
-	allowedProtocols: readonly string[] = ["http:", "https:", "mailto:"],
+	allowedProtocols: readonly UrlProtocol[] = ["http:", "https:", "mailto:"],
 ): string => {
 	const result = sanitizeUrlEffect(url, allowedProtocols);
 	return Exit.isSuccess(result) ? result.value : "";
@@ -318,7 +325,7 @@ export const sanitizeHtml = (html: string, options?: Config): string => {
 export const validateUserInputEffect = (
 	input: string,
 	options: UserInputOptions = {},
-): Exit.Exit<string, unknown> => {
+): Exit.Exit<string, S.SchemaError> => {
 	const {
 		maxLength = 500,
 		allowHtml = false,
@@ -463,18 +470,23 @@ export const parseJsonWithSchema = <A>(
  * Sanitizes and safely parses a JSON string, removing suspicious syntax elements that could
  * potentially result in JSON polyglot exploits or prototype pollution.
  *
- * @template T - The expected type of the parsed object
+ * The result is returned as `unknown` — this function performs **no** schema
+ * validation, so it cannot honestly promise any concrete shape for
+ * attacker-controlled input. Narrow the result yourself, or prefer
+ * {@link parseJsonWithSchema}, which validates against an Effect Schema and
+ * returns a typed `Option`.
+ *
  * @param jsonString - The JSON string to sanitize and parse.
- * @returns The parsed JavaScript object if valid, or `null` if invalid.
+ * @returns The parsed value (as `unknown`) if valid, or `null` if invalid.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  *
  * @example
  * ```typescript
- * const obj = sanitizeJson<{ foo: string }>('{"foo":"bar"}');
- * // obj = { foo: 'bar' }
+ * const obj = sanitizeJson('{"foo":"bar"}');
+ * // obj: unknown — narrow before use, or use parseJsonWithSchema
  * ```
  */
-export const sanitizeJson = <T>(jsonString: string): T | null => {
+export const sanitizeJson = (jsonString: string): unknown => {
 	if (!jsonString || typeof jsonString !== "string") {
 		return null;
 	}
@@ -485,7 +497,7 @@ export const sanitizeJson = <T>(jsonString: string): T | null => {
 			.replaceAll(/\]\s*\{/g, "] {}")
 			.replaceAll(/\}\s*\{/g, "} {}");
 
-		const parsed = JSON.parse(sanitized) as T;
+		const parsed: unknown = JSON.parse(sanitized);
 
 		sanitizeObject(parsed);
 
@@ -548,9 +560,9 @@ const PII_PATTERNS = {
 export const redactPIIEffect = (
 	text: string,
 	options: PIIRedactionOptions = {},
-): Exit.Exit<string, unknown> => {
+): Exit.Exit<string, S.SchemaError> => {
 	const parsed = S.decodeUnknownExit(PIIRedactionOptionsSchema)(options);
-	if (Exit.isFailure(parsed)) return parsed as unknown as Exit.Exit<string, unknown>;
+	if (Exit.isFailure(parsed)) return Exit.failCause(parsed.cause);
 
 	const {
 		redactEmails = true,
@@ -615,12 +627,7 @@ export const redactPIIEffect = (
  */
 export const redactPII = (
 	text: string,
-	options: {
-		redactEmails?: boolean;
-		redactPhones?: boolean;
-		redactSSN?: boolean;
-		redactCreditCards?: boolean;
-		redactIPs?: boolean;
+	options: PIIRedactionOptions & {
 		customPatterns?: Array<{ pattern: RegExp; replacement: string }>;
 	} = {},
 ): string => {
@@ -634,6 +641,7 @@ export const redactPII = (
 		redactSSN = true,
 		redactCreditCards = true,
 		redactIPs = true,
+		redactDates = false,
 		customPatterns = [],
 	} = options;
 
@@ -643,6 +651,7 @@ export const redactPII = (
 		redactSSN,
 		redactCreditCards,
 		redactIPs,
+		redactDates,
 	});
 
 	let output = Exit.isSuccess(result) ? result.value : text;
@@ -707,39 +716,48 @@ export const safeStringify = (
 /**
  * Validates if a string is a valid email address using Effect Schema.
  *
+ * Narrows the input to {@link Email} on success, so validated call sites
+ * carry the brand into downstream code.
+ *
  * @param email - The string to validate.
  * @returns true if valid email, false otherwise.
  */
-export const isValidEmail = (email: string): boolean => {
+export const isValidEmail = (email: string): email is Email => {
 	return Exit.isSuccess(S.decodeUnknownExit(EmailSchema)(email));
 };
 
 /**
  * Validates if a string is a valid phone number using Effect Schema.
  *
+ * Narrows the input to {@link PhoneNumber} on success.
+ *
  * @param phone - The string to validate.
  * @returns true if valid phone number, false otherwise.
  */
-export const isValidPhone = (phone: string): boolean => {
+export const isValidPhone = (phone: string): phone is PhoneNumber => {
 	return Exit.isSuccess(S.decodeUnknownExit(PhoneNumberSchema)(phone));
 };
 
 /**
  * Validates if a string is a valid SSN using Effect Schema.
  *
+ * Narrows the input to {@link SSN} on success.
+ *
  * @param ssn - The string to validate.
  * @returns true if valid SSN, false otherwise.
  */
-export const isValidSSN = (ssn: string): boolean => {
+export const isValidSSN = (ssn: string): ssn is SSN => {
 	return Exit.isSuccess(S.decodeUnknownExit(SSNSchema)(ssn));
 };
 
 /**
  * Validates if a string is a safe URL using Effect Schema.
  *
+ * Narrows the input to {@link SafeUrl} on success.
+ *
  * @param url - The string to validate.
  * @returns true if valid and safe URL, false otherwise.
  */
-export const isValidUrl = (url: string): boolean => {
+export const isValidUrl = (url: string): url is SafeUrl => {
 	return Exit.isSuccess(S.decodeUnknownExit(SafeUrlSchema)(url));
 };

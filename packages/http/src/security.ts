@@ -22,6 +22,8 @@
  * @compliance NIST 800-53 SC-8 (Transmission Confidentiality), SC-23 (Session Authenticity)
  */
 
+import { type Brand, brandRefiner, type LiteralUnion, unsafeBrand } from "@resq-systems/types";
+
 /**
  * Decide whether an inbound HTTP request must be redirected to HTTPS,
  * accounting for reverse-proxy and load-balancer hops that terminate
@@ -57,10 +59,11 @@
  * ```
  */
 export function shouldRedirectToHttps(
-	protocol: string,
+	protocol: LiteralUnion<"http" | "https">,
 	url: string,
 	headers: Record<string, string | undefined>,
-	nodeEnv: string = process.env.NODE_ENV || "development",
+	nodeEnv: LiteralUnion<"development" | "test" | "production"> = process.env.NODE_ENV ||
+		"development",
 ): string | null {
 	// Skip in development/test environments
 	if (nodeEnv === "development" || nodeEnv === "test") {
@@ -87,22 +90,78 @@ export function shouldRedirectToHttps(
 }
 
 /**
- * Resolve the request ID for an inbound request — passing through any
- * caller-supplied value verbatim, otherwise minting a fresh UUID v4 via
+ * A correlation ID that is safe to write into log lines, response headers, and
+ * downstream service hops.
+ *
+ * The brand is nominal: a plain `string` is **not** assignable to `RequestId`.
+ * The only way to obtain one is {@link sanitizeRequestId} (which strips a raw,
+ * possibly-untrusted value down to a safe charset) or {@link getRequestId}.
+ * This makes it a type error to log an unsanitized header value as a request ID.
+ */
+export type RequestId = Brand<string, "RequestId">;
+
+/**
+ * Maximum retained length of a sanitized request ID. Bounds log-line and header
+ * size and blunts resource-exhaustion via an oversized inbound `x-request-id`.
+ */
+const MAX_REQUEST_ID_LENGTH = 200;
+
+/**
+ * Characters permitted in a request ID: URL-safe, header-safe, log-safe.
+ * Anything outside `[A-Za-z0-9-_]` is a CRLF/log-injection or header-smuggling
+ * risk, so it is dropped rather than escaped.
+ */
+const REQUEST_ID_ALLOWED = /^[A-Za-z0-9_-]+$/;
+
+const requestIdRefiner = brandRefiner<string, "RequestId">(
+	(value) =>
+		value.length > 0 && value.length <= MAX_REQUEST_ID_LENGTH && REQUEST_ID_ALLOWED.test(value),
+	"request ID",
+);
+
+/**
+ * Type guard: narrows a `string` to {@link RequestId} when it already consists
+ * solely of the safe charset and is within the length bound.
+ */
+export const isRequestId: (value: string) => value is RequestId = requestIdRefiner.is;
+
+/**
+ * Sanitize a raw, untrusted correlation ID into a {@link RequestId} — the ONLY
+ * safe minting path for a caller-supplied value.
+ *
+ * Strips every character outside `[A-Za-z0-9-_]` (defeating CRLF/log injection
+ * and header smuggling) and truncates to {@link MAX_REQUEST_ID_LENGTH}. When the
+ * input contains no usable characters, a fresh UUID v4 is minted instead so the
+ * result is always a non-empty, well-formed ID.
+ *
+ * @param raw - The untrusted inbound value (e.g. `x-request-id`).
+ * @returns A branded, log-safe request ID.
+ */
+export function sanitizeRequestId(raw: string): RequestId {
+	const cleaned = raw.replace(/[^A-Za-z0-9_-]/g, "").slice(0, MAX_REQUEST_ID_LENGTH);
+	if (cleaned.length === 0) {
+		return unsafeBrand<"RequestId", string>(crypto.randomUUID());
+	}
+	return unsafeBrand<"RequestId", string>(cleaned);
+}
+
+/**
+ * Resolve the request ID for an inbound request — sanitizing any caller-supplied
+ * value via {@link sanitizeRequestId}, otherwise minting a fresh UUID v4 via
  * `crypto.randomUUID()`.
  *
- * Use as the source of truth for the per-request correlation ID written
- * into log lines, response headers (`x-request-id`), and downstream
- * service hops. Trusting an upstream-supplied ID lets distributed
- * traces follow the request across service boundaries without
- * regeneration.
+ * Use as the source of truth for the per-request correlation ID written into log
+ * lines, response headers (`x-request-id`), and downstream service hops.
+ * Trusting an upstream-supplied ID lets distributed traces follow the request
+ * across service boundaries — but the raw value is untrusted, so it is passed
+ * through {@link sanitizeRequestId} (safe charset + length bound) before use.
  *
- * @param existingId - Inbound `x-request-id` (or equivalent), if any.
- *   Returned unchanged when truthy; no validation is applied, so do not
- *   echo untrusted values into log structures without your own
- *   sanitization.
+ * @param existingId - Inbound `x-request-id` (or equivalent), if any. Sanitized
+ *   (not echoed verbatim) when truthy; unsafe characters are stripped so the
+ *   value cannot inject CRLF into logs or smuggle response headers.
  *
- * @returns The supplied ID, or a freshly generated UUID v4.
+ * @returns A branded {@link RequestId}: the sanitized inbound value, or a freshly
+ *   generated UUID v4.
  *
  * @example
  * ```ts
@@ -111,6 +170,8 @@ export function shouldRedirectToHttps(
  * logger.info("incoming request", { requestId, path: req.url });
  * ```
  */
-export function getRequestId(existingId?: string): string {
-	return existingId || crypto.randomUUID();
+export function getRequestId(existingId?: string): RequestId {
+	return existingId
+		? sanitizeRequestId(existingId)
+		: unsafeBrand<"RequestId", string>(crypto.randomUUID());
 }

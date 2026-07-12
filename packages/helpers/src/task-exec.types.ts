@@ -21,8 +21,8 @@
  * earliest-due task is always at the head of the priority queue.
  */
 export type TimedTask = {
-	/** Callback to invoke when the task fires. Return value is ignored. */
-	func: (...args: unknown[]) => unknown;
+	/** Callback to invoke when the task fires. Invoked with no arguments; return value is ignored. */
+	func: () => unknown;
 	/** Earliest time (epoch ms) at which `func` should run. */
 	execTime: number;
 };

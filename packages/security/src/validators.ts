@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { assertNever } from "@resq-systems/types";
+
 // ============================================
 // Threat Pattern Definitions
 // ============================================
@@ -661,7 +663,9 @@ export function getThreatErrorMessage(result: ThreatDetectionResult): string {
 	if (result.isSafe) return "";
 
 	const threat = result.threats[0];
-	switch (threat?.type) {
+	if (!threat) return THREAT_DETECTED_MESSAGE;
+
+	switch (threat.type) {
 		case "xss":
 			return "Input contains potentially malicious script content";
 		case "sql_injection":
@@ -675,6 +679,6 @@ export function getThreatErrorMessage(result: ThreatDetectionResult): string {
 		case "homoglyph":
 			return "Input contains suspicious lookalike characters";
 		default:
-			return THREAT_DETECTED_MESSAGE;
+			return assertNever(threat.type);
 	}
 }

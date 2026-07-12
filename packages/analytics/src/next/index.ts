@@ -27,7 +27,9 @@
  * @module @resq-systems/analytics/next
  */
 
+import type { LiteralUnion } from "@resq-systems/types";
 import type { GA4ProviderConfig } from "../index";
+import type { Ga4MeasurementId, ResqSubdomain } from "../resq";
 
 /**
  * Options for {@link withAnalyticsRewrites}.
@@ -136,7 +138,10 @@ export const withAnalyticsRewrites = <T extends MinimalNextConfig>(
  *   so cross-subdomain navigation no longer counts as referral
  *   traffic.
  */
-export const ga4Stream = (measurementId: string, domains?: string[]): GA4ProviderConfig => ({
+export const ga4Stream = (
+	measurementId: Ga4MeasurementId,
+	domains?: LiteralUnion<ResqSubdomain>[],
+): GA4ProviderConfig => ({
 	measurementId,
 	domains,
 });

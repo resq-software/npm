@@ -34,19 +34,19 @@ describe("MemoryRateLimitStore", () => {
 
 	it("allows the first request within the window", async () => {
 		const result = await store.check("user:1", 60_000, 5);
-		expect(result.limited).toBe(false);
+		expect(result.allowed).toBe(true);
 		expect(result.remaining).toBe(4);
-		expect(result.total).toBe(5);
+		expect(result.limit).toBe(5);
 	});
 
 	it("decrements remaining count on each request", async () => {
 		await store.check("user:1", 60_000, 5);
 		const result = await store.check("user:1", 60_000, 5);
 		expect(result.remaining).toBe(3);
-		expect(result.limited).toBe(false);
+		expect(result.allowed).toBe(true);
 	});
 
-	it("marks as limited when requests exceed maxRequests", async () => {
+	it("marks as not allowed when requests exceed maxRequests", async () => {
 		const key = "user:flood";
 		const max = 3;
 		await store.check(key, 60_000, max);
@@ -54,7 +54,7 @@ describe("MemoryRateLimitStore", () => {
 		await store.check(key, 60_000, max);
 
 		const result = await store.check(key, 60_000, max);
-		expect(result.limited).toBe(true);
+		expect(result.allowed).toBe(false);
 		expect(result.remaining).toBe(0);
 	});
 
@@ -67,7 +67,7 @@ describe("MemoryRateLimitStore", () => {
 		// 2 requests with max 2 — count equals max, not over yet
 		// Third request pushes count to 3 which is > max
 		const result = await store.check(key, 60_000, max);
-		expect(result.limited).toBe(true);
+		expect(result.allowed).toBe(false);
 		expect(result.remaining).toBe(0);
 	});
 
@@ -79,7 +79,7 @@ describe("MemoryRateLimitStore", () => {
 		await store.reset(key);
 
 		const result = await store.check(key, 60_000, 2);
-		expect(result.limited).toBe(false);
+		expect(result.allowed).toBe(true);
 		expect(result.remaining).toBe(1);
 	});
 
@@ -90,8 +90,8 @@ describe("MemoryRateLimitStore", () => {
 		const resultA = await store.check("user:a", 60_000, 1);
 		const resultB = await store.check("user:b", 60_000, 1);
 
-		expect(resultA.limited).toBe(true);
-		expect(resultB.limited).toBe(false);
+		expect(resultA.allowed).toBe(false);
+		expect(resultB.allowed).toBe(true);
 	});
 
 	it("resets window after expiration", async () => {
@@ -107,17 +107,17 @@ describe("MemoryRateLimitStore", () => {
 			vi.advanceTimersByTime(1001);
 
 			const result = await store.check(key, windowMs, 1);
-			expect(result.limited).toBe(false);
+			expect(result.allowed).toBe(true);
 			expect(result.remaining).toBe(0);
 		} finally {
 			vi.useRealTimers();
 		}
 	});
 
-	it("returns a valid resetTime in the future", async () => {
+	it("returns a valid resetAt in the future", async () => {
 		const before = Date.now();
 		const result = await store.check("user:time", 60_000, 10);
-		expect(result.resetTime).toBeGreaterThan(before);
+		expect(result.resetAt).toBeGreaterThan(before);
 	});
 
 	it("implements IRateLimitStore interface", () => {
@@ -126,9 +126,9 @@ describe("MemoryRateLimitStore", () => {
 		expect(typeof iface.reset).toBe("function");
 	});
 
-	it("returns correct total value", async () => {
+	it("returns correct limit value", async () => {
 		const result = await store.check("user:total", 60_000, 42);
-		expect(result.total).toBe(42);
+		expect(result.limit).toBe(42);
 	});
 
 	it("evicts oldest keys when maxSize is exceeded to prevent unbounded memory growth", async () => {
@@ -162,7 +162,7 @@ describe("MemoryRateLimitStore", () => {
 			vi.advanceTimersByTime(1500);
 
 			const result = await store.check(key, windowMs, maxRequests);
-			expect(result.limited).toBe(false);
+			expect(result.allowed).toBe(true);
 			expect(result.remaining).toBe(4); // 10 - (5 + 1) = 4
 		} finally {
 			vi.useRealTimers();

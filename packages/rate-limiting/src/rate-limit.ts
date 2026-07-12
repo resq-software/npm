@@ -23,6 +23,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 import type { Redis } from "@upstash/redis";
 import { Schema as S } from "effect";
 import { LRUCache } from "@resq-systems/dsa";
+import type { RateLimitDecision } from "./decision.js";
 
 // ============================================
 // Effect Schema Definitions
@@ -40,35 +41,16 @@ import { LRUCache } from "@resq-systems/dsa";
  * ```
  */
 export const RateLimitConfigSchema = S.Struct({
-	/** Sliding-window length in milliseconds. */
-	windowMs: S.Number,
-	/** Max requests permitted per `windowMs` per key. */
-	maxRequests: S.Number,
+	/** Sliding-window length in milliseconds — a positive integer. */
+	windowMs: S.Int.check(S.isGreaterThan(0)),
+	/** Max requests permitted per `windowMs` per key — a positive integer. */
+	maxRequests: S.Int.check(S.isGreaterThan(0)),
 	/** Optional flag controlling whether `RateLimit-*` headers are emitted by middleware. */
 	headers: S.optional(S.Boolean),
 });
 
 /** TypeScript type inferred from {@link RateLimitConfigSchema}. */
 export type RateLimitConfig = typeof RateLimitConfigSchema.Type;
-
-/**
- * Effect Schema for the structured result of an {@link IRateLimitStore}
- * `check()`. Useful when serialising decisions to inter-service queues
- * or persisting them for audit.
- */
-export const RateLimitCheckResultSchema = S.Struct({
-	/** `true` when the request exceeded the configured limit. */
-	limited: S.Boolean,
-	/** Requests remaining in the current window (clamped at `0`). */
-	remaining: S.Number,
-	/** Unix epoch ms when the window resets and counters drop. */
-	resetTime: S.Number,
-	/** The configured `maxRequests` (echoed for header generation). */
-	total: S.Number,
-});
-
-/** TypeScript type inferred from {@link RateLimitCheckResultSchema}. */
-export type RateLimitCheckResult = typeof RateLimitCheckResultSchema.Type;
 
 // ============================================
 // Rate Limit Store Interfaces
@@ -91,9 +73,9 @@ export interface IRateLimitStore {
 	 * @param key - Caller-chosen identity key (e.g. `"user:42"`).
 	 * @param windowMs - Window length in milliseconds.
 	 * @param maxRequests - Maximum requests permitted in the window.
-	 * @returns A {@link RateLimitCheckResult} describing the decision.
+	 * @returns A {@link RateLimitDecision} describing the decision.
 	 */
-	check(key: string, windowMs: number, maxRequests: number): Promise<RateLimitCheckResult>;
+	check(key: string, windowMs: number, maxRequests: number): Promise<RateLimitDecision>;
 	/**
 	 * Drop any state held for `key`. Useful for admin / unit-test reset
 	 * paths; not invoked by middleware itself.
@@ -119,7 +101,7 @@ export interface IRateLimitStore {
  *
  * const store = new RedisRateLimitStore(Redis.fromEnv());
  * const decision = await store.check("user:42", 60_000, 100);
- * if (decision.limited) return new Response("Too many requests", { status: 429 });
+ * if (!decision.allowed) return new Response("Too many requests", { status: 429 });
  * ```
  */
 export class RedisRateLimitStore implements IRateLimitStore {
@@ -149,15 +131,19 @@ export class RedisRateLimitStore implements IRateLimitStore {
 	}
 
 	/** @inheritdoc */
-	async check(key: string, windowMs: number, maxRequests: number): Promise<RateLimitCheckResult> {
+	async check(key: string, windowMs: number, maxRequests: number): Promise<RateLimitDecision> {
 		const limiter = this.getLimiter(windowMs, maxRequests);
 		const result = await limiter.limit(key);
 
+		if (!result.success) {
+			return { allowed: false, remaining: 0, limit: result.limit, resetAt: result.reset };
+		}
+
 		return {
-			limited: !result.success,
+			allowed: true,
 			remaining: result.remaining,
-			resetTime: result.reset,
-			total: result.limit,
+			limit: result.limit,
+			resetAt: result.reset,
 		};
 	}
 
@@ -185,7 +171,7 @@ export class RedisRateLimitStore implements IRateLimitStore {
  * backend) in production when more than one node serves traffic.
  *
  * Counters are reset *implicitly* once the window expires — the next
- * `check()` past `resetTime` starts a fresh window. There is no
+ * `check()` past `resetAt` starts a fresh window. There is no
  * background sweeper, so memory grows with the number of distinct keys
  * over the lifetime of the process; pair with periodic `reset()` for
  * long-lived processes that see unbounded key cardinality.
@@ -201,7 +187,7 @@ export class MemoryRateLimitStore implements IRateLimitStore {
 	}
 
 	/** @inheritdoc */
-	async check(key: string, windowMs: number, maxRequests: number): Promise<RateLimitCheckResult> {
+	async check(key: string, windowMs: number, maxRequests: number): Promise<RateLimitDecision> {
 		const now = Date.now();
 		const windowStart = Math.floor(now / windowMs) * windowMs;
 		const previousWindowStart = windowStart - windowMs;
@@ -232,16 +218,17 @@ export class MemoryRateLimitStore implements IRateLimitStore {
 
 		this.store.set(key, counter);
 
-		// Calculate final count and remaining after optional increment
+		const resetAt = windowStart + windowMs;
+
+		if (limited) {
+			return { allowed: false, remaining: 0, limit: maxRequests, resetAt };
+		}
+
+		// Calculate final count and remaining after the increment
 		const finalWeightedCount = counter.previous * (1 - windowPosition) + counter.current;
 		const remaining = Math.max(0, maxRequests - Math.floor(finalWeightedCount));
 
-		return {
-			limited,
-			remaining,
-			resetTime: windowStart + windowMs,
-			total: maxRequests,
-		};
+		return { allowed: true, remaining, limit: maxRequests, resetAt };
 	}
 
 	/** @inheritdoc */

@@ -16,7 +16,9 @@
  *
  */
 
+import type { LiteralUnion } from "@resq-systems/types";
 import type { PostHog, PostHogConfig } from "posthog-js";
+import type { Ga4MeasurementId, ResqSubdomain } from "./resq";
 
 /**
  * Augmentable typed event registry. Consumers extend this via module
@@ -30,10 +32,13 @@ import type { PostHog, PostHogConfig } from "posthog-js";
  *   }
  * }
  * ```
+ *
+ * The base is intentionally empty (no string index signature): a signature
+ * would collapse {@link EventName} to plain `string` and destroy autocomplete.
+ * Keys only exist once a consumer augments this interface.
  */
-export interface AnalyticsEvents {
-	[event: string]: Record<string, unknown> | undefined;
-}
+// biome-ignore lint/suspicious/noEmptyInterface: augmentation-only registry — a body would add an index signature and collapse EventName to string
+export interface AnalyticsEvents {}
 
 export interface PostHogProviderConfig {
 	key: string;
@@ -43,8 +48,8 @@ export interface PostHogProviderConfig {
 }
 
 export interface GA4ProviderConfig {
-	measurementId: string;
-	domains?: string[];
+	measurementId: Ga4MeasurementId;
+	domains?: LiteralUnion<ResqSubdomain>[];
 }
 
 export interface AnalyticsConfig {
@@ -55,7 +60,31 @@ export interface AnalyticsConfig {
 	debug?: boolean;
 }
 
-type EventName = keyof AnalyticsEvents | (string & {});
+/**
+ * The set of trackable event names. Falls back to plain `string` until a
+ * consumer augments {@link AnalyticsEvents}; once augmented, it becomes the
+ * union of registered keys plus `(string & {})` so ad-hoc names still compile
+ * while registered names autocomplete.
+ */
+export type EventName = keyof AnalyticsEvents extends never
+	? string
+	: keyof AnalyticsEvents | (string & {});
+
+/**
+ * Arguments accepted by {@link Analytics.track} after the event name, as a
+ * rest tuple. For a registered event the payload arg is **required** exactly
+ * when its type has at least one required key (`{}` is not assignable to it),
+ * and optional otherwise. Unregistered names accept an optional free-form
+ * property bag.
+ */
+export type TrackArgs<E extends EventName> = E extends keyof AnalyticsEvents
+	? undefined extends AnalyticsEvents[E]
+		? [properties?: AnalyticsEvents[E]]
+		: // biome-ignore lint/complexity/noBannedTypes: `{} extends T` is the canonical "T has no required keys" probe
+			{} extends AnalyticsEvents[E]
+			? [properties?: AnalyticsEvents[E]]
+			: [properties: AnalyticsEvents[E]]
+	: [properties?: Record<string, unknown>];
 
 interface GtagWindow {
 	gtag?: (...args: unknown[]) => void;
@@ -163,18 +192,16 @@ export class Analytics {
 		gtag("config", provider.measurementId, params);
 	}
 
-	track<E extends EventName>(
-		event: E,
-		properties?: E extends keyof AnalyticsEvents ? AnalyticsEvents[E] : Record<string, unknown>,
-	): void {
+	track<E extends EventName>(event: E, ...args: TrackArgs<E>): void {
 		if (!this.#config) return;
+		const [properties] = args as [Record<string, unknown> | undefined];
 		if (this.#config.debug) {
 			console.debug("[analytics] track", event, properties);
 		}
 		if (this.#config.disabled) return;
-		this.#posthog?.capture(event as string, properties as Record<string, unknown>);
+		this.#posthog?.capture(event, properties);
 		if (this.#config.ga4) {
-			gtag("event", event, primitivesOnly(properties as Record<string, unknown>));
+			gtag("event", event, primitivesOnly(properties));
 		}
 	}
 
@@ -221,7 +248,9 @@ export const analytics = new Analytics();
 
 export const initAnalytics = (config: AnalyticsConfig): Promise<void> => analytics.init(config);
 
-export const track: Analytics["track"] = (event, properties) => analytics.track(event, properties);
+export function track<E extends EventName>(event: E, ...args: TrackArgs<E>): void {
+	analytics.track(event, ...args);
+}
 
 export const identify = (userId: string, traits?: Record<string, unknown>): void =>
 	analytics.identify(userId, traits);
@@ -239,6 +268,7 @@ export {
 	resolveResqCookieDomain,
 	sanitizeGa4Id,
 } from "./resq";
+export type { Ga4MeasurementId, ResqSubdomain } from "./resq";
 
 export const inferCookieDomain = (domains: string[]): string | undefined => {
 	if (domains.length === 0) return undefined;

@@ -15,7 +15,12 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { getRequestId, shouldRedirectToHttps } from "../src/security.js";
+import {
+	getRequestId,
+	isRequestId,
+	sanitizeRequestId,
+	shouldRedirectToHttps,
+} from "../src/security.js";
 
 // ------------------------------------------------------------------
 // shouldRedirectToHttps
@@ -128,10 +133,22 @@ describe("shouldRedirectToHttps", () => {
 // getRequestId
 // ------------------------------------------------------------------
 
+const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 describe("getRequestId", () => {
-	it("returns the existing ID when provided", () => {
+	it("returns a safe existing ID unchanged (and branded)", () => {
 		const id = "req-abc-123";
-		expect(getRequestId(id)).toBe(id);
+		const result = getRequestId(id);
+		expect(result).toBe(id);
+		// The returned value is a branded RequestId: still a string at runtime.
+		expect(isRequestId(result)).toBe(true);
+	});
+
+	it("strips unsafe characters from a caller-supplied ID", () => {
+		// A raw header carrying CRLF/log-injection characters must be sanitized.
+		const result = getRequestId("abc\r\n def<script>");
+		expect(result).toBe("abcdefscript");
+		expect(isRequestId(result)).toBe(true);
 	});
 
 	it("generates a UUID when no ID is provided", () => {
@@ -139,12 +156,12 @@ describe("getRequestId", () => {
 		expect(id).toBeDefined();
 		expect(typeof id).toBe("string");
 		// UUID v4 format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-		expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+		expect(id).toMatch(UUID_V4);
 	});
 
 	it("generates a UUID when undefined is passed", () => {
 		const id = getRequestId(undefined);
-		expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+		expect(id).toMatch(UUID_V4);
 	});
 
 	it("generates unique IDs on each call", () => {
@@ -153,9 +170,54 @@ describe("getRequestId", () => {
 		expect(id1).not.toBe(id2);
 	});
 
-	it("returns empty string when empty string is passed", () => {
+	it("generates a UUID when empty string is passed", () => {
 		// Empty string is falsy, so a UUID should be generated
 		const id = getRequestId("");
-		expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+		expect(id).toMatch(UUID_V4);
+	});
+});
+
+// ------------------------------------------------------------------
+// sanitizeRequestId / isRequestId
+// ------------------------------------------------------------------
+
+describe("sanitizeRequestId", () => {
+	it("passes through an already-safe value", () => {
+		const result = sanitizeRequestId("Req_ABC-123");
+		expect(result).toBe("Req_ABC-123");
+		expect(isRequestId(result)).toBe(true);
+	});
+
+	it("strips characters outside [A-Za-z0-9-_]", () => {
+		expect(sanitizeRequestId("a b\tc\r\nd")).toBe("abcd");
+		expect(sanitizeRequestId("id;with,punct.!@#")).toBe("idwithpunct");
+	});
+
+	it("truncates to the 200-character bound", () => {
+		const raw = "x".repeat(500);
+		const result = sanitizeRequestId(raw);
+		expect(result.length).toBe(200);
+		expect(isRequestId(result)).toBe(true);
+	});
+
+	it("falls back to a UUID when no usable characters remain", () => {
+		const result = sanitizeRequestId("<<< >>> !!!");
+		expect(result).toMatch(UUID_V4);
+	});
+});
+
+describe("isRequestId", () => {
+	it("accepts safe, bounded strings", () => {
+		expect(isRequestId("abc-123_XYZ")).toBe(true);
+	});
+
+	it("rejects empty strings and unsafe characters", () => {
+		expect(isRequestId("")).toBe(false);
+		expect(isRequestId("has space")).toBe(false);
+		expect(isRequestId("bad\nid")).toBe(false);
+	});
+
+	it("rejects strings longer than the bound", () => {
+		expect(isRequestId("a".repeat(201))).toBe(false);
 	});
 });

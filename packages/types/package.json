@@ -1,0 +1,61 @@
+{
+	"name": "@resq-systems/types",
+	"version": "0.0.0",
+	"description": "Zero-dependency advanced TypeScript type toolkit: nominal brands, exhaustiveness helpers, deep object/collection/string utilities, and a type-level test kit",
+	"license": "Apache-2.0",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./lib/index.d.ts",
+			"import": "./lib/index.js",
+			"default": "./lib/index.js"
+		},
+		"./brand": {
+			"types": "./lib/brand.d.ts",
+			"import": "./lib/brand.js",
+			"default": "./lib/brand.js"
+		},
+		"./testing": {
+			"types": "./lib/testing.d.ts",
+			"import": "./lib/testing.js",
+			"default": "./lib/testing.js"
+		}
+	},
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"files": [
+		"lib",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsdown",
+		"test": "vitest run"
+	},
+	"devDependencies": {
+		"@total-typescript/ts-reset": "^0.6.1",
+		"tsdown": "^0.22.4",
+		"typescript": "7.0.2",
+		"vitest": "4.1.10"
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true,
+		"registry": "https://registry.npmjs.org/"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/resq-software/npm.git",
+		"directory": "packages/types"
+	},
+	"keywords": [
+		"typescript",
+		"types",
+		"branded-types",
+		"nominal-types",
+		"type-utilities",
+		"type-safety"
+	],
+	"engines": {
+		"node": ">=20.19.0"
+	}
+}

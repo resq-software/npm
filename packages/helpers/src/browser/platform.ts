@@ -15,6 +15,24 @@
  */
 
 /**
+ * Closed set of browser names returned by {@link getBrowser}.
+ */
+export type BrowserName =
+	| "edge"
+	| "chrome"
+	| "firefox"
+	| "safari"
+	| "opera"
+	| "android"
+	| "iphone"
+	| "unknown";
+
+/**
+ * Closed set of platform names returned by {@link getPlatform}.
+ */
+export type Platform = "ios" | "android" | "macos" | "chromeos" | "windows" | "unknown";
+
+/**
  * Detects if the current user agent is an iOS device (iPad, iPhone, iPod).
  *
  * @returns {boolean} True if the platform is iOS, otherwise false.
@@ -25,7 +43,7 @@
  * ```
  */
 export const isIOS = (): boolean =>
-	/iPad|iPhone|iPod/.test(navigator.userAgent) && !(globalThis.window as any).MSStream;
+	/iPad|iPhone|iPod/.test(navigator.userAgent) && !(globalThis as { MSStream?: unknown }).MSStream;
 
 /**
  * Detects if the current user agent is an Android device.
@@ -88,7 +106,7 @@ export const isChromeOS = (): boolean => /CrOS/gi.test(navigator.userAgent);
  * const browser = getBrowser(); // 'chrome', 'firefox', etc.
  * ```
  */
-export const getBrowser = (): string => {
+export const getBrowser = (): BrowserName => {
 	const { userAgent } = navigator;
 
 	if (/edg/i.test(userAgent)) {
@@ -129,7 +147,7 @@ export const getBrowser = (): string => {
  * const platform = getPlatform(); // 'android', 'ios', etc.
  * ```
  */
-export const getPlatform = (): string => {
+export const getPlatform = (): Platform => {
 	if (isIOS()) {
 		return "ios";
 	}
@@ -160,9 +178,9 @@ export const getPlatform = (): string => {
  * ```
  */
 export const isTouchScreen = (): boolean => {
-	return (
+	return Boolean(
 		(navigator.maxTouchPoints && navigator.maxTouchPoints > 0) ||
-		globalThis.window.matchMedia?.("(any-pointer:coarse)").matches
+			globalThis.window.matchMedia?.("(any-pointer:coarse)").matches,
 	);
 };
 

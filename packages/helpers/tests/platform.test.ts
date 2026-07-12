@@ -52,12 +52,12 @@ describe("platform detection", () => {
 
 	beforeEach(() => {
 		originalUA = navigator.userAgent;
-		originalMSStream = (globalThis.window as any).MSStream;
+		originalMSStream = (globalThis as { MSStream?: unknown }).MSStream;
 		originalMaxTouchPoints = navigator.maxTouchPoints ?? 0;
 		originalMatchMedia = globalThis.window?.matchMedia;
 
 		// Default: no MSStream, no touch
-		(globalThis.window as any).MSStream = undefined;
+		(globalThis as { MSStream?: unknown }).MSStream = undefined;
 		Object.defineProperty(navigator, "maxTouchPoints", {
 			value: 0,
 			writable: true,
@@ -70,7 +70,7 @@ describe("platform detection", () => {
 
 	afterEach(() => {
 		mockUserAgent(originalUA);
-		(globalThis.window as any).MSStream = originalMSStream;
+		(globalThis as { MSStream?: unknown }).MSStream = originalMSStream;
 		Object.defineProperty(navigator, "maxTouchPoints", {
 			value: originalMaxTouchPoints,
 			writable: true,
@@ -94,7 +94,7 @@ describe("platform detection", () => {
 
 		test("returns false when MSStream is present (IE on Windows Phone)", () => {
 			mockUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)");
-			(globalThis.window as any).MSStream = {};
+			(globalThis as { MSStream?: unknown }).MSStream = {};
 			expect(isIOS()).toBe(false);
 		});
 

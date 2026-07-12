@@ -122,4 +122,25 @@ describe("obfuscateLink", () => {
 			expect(result.href).toContain("&");
 		});
 	});
+
+	describe("raw href vs encoded text distinction", () => {
+		test("href is a raw URI while encodedText is entity-encoded", () => {
+			const result = obfuscateLink({
+				scheme: "mailto",
+				address: "jane@example.com",
+			});
+			// href must be the literal, un-encoded URI the browser needs.
+			expect(result.href).toBe("mailto:jane@example.com");
+			expect(result.href).not.toContain("&#");
+			// encodedText must be fully entity-encoded (no literal '@').
+			expect(result.encodedText).toContain("&#");
+			expect(result.encodedText).not.toContain("@");
+		});
+
+		test("encodedText remains a plain string at runtime (brand is compile-time only)", () => {
+			const result = obfuscateLink({ scheme: "tel", address: "5" });
+			expect(typeof result.encodedText).toBe("string");
+			expect(result.encodedText).toBe("&#53;");
+		});
+	});
 });

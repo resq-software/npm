@@ -54,7 +54,7 @@ export class TaskExec {
 	 * @param ttl - Delay in milliseconds. Pass `0` for "run on the next
 	 *   tick". Negative values are clamped to `0`.
 	 */
-	exec(func: (...args: unknown[]) => unknown, ttl: number): void {
+	exec(func: () => unknown, ttl: number): void {
 		this.tasks.push({ func, execTime: Date.now() + ttl });
 		this.handleNext();
 	}
