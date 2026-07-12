@@ -219,3 +219,87 @@ export function validateSafe<T extends AnySchema>(
 export function createValidator<T extends AnySchema>(schema: T): (input: unknown) => T["Type"] {
 	return (input: unknown) => S.decodeUnknownSync(schema)(input);
 }
+
+// ============================================
+// Branded Numeric Domains
+// ============================================
+
+/**
+ * A probability / unit-interval value in the OPEN interval `(0, 1)`.
+ *
+ * Carries a nominal `Probability` brand: a `Probability` is assignable to
+ * `number`, but a plain `number` is not assignable to `Probability` without
+ * going through {@link toProbability} (or a deliberate cast for untrusted
+ * input). Used at the public boundary of `BloomFilter` (`errorRate`) and
+ * `CountMinSketch` (`epsilon`, `delta`) so an out-of-range rate is
+ * unrepresentable at the type level.
+ */
+export const ProbabilitySchema = S.Finite.check(S.isGreaterThan(0), S.isLessThan(1)).pipe(
+	S.brand("Probability"),
+);
+/** Inferred TS type for {@link ProbabilitySchema} — `number & Brand<"Probability">`. */
+export type Probability = S.Schema.Type<typeof ProbabilitySchema>;
+
+/**
+ * Geographic latitude in decimal degrees, in the CLOSED interval `[-90, 90]`.
+ * Carries a nominal `Latitude` brand — construct via {@link toLatitude}.
+ */
+export const LatitudeSchema = S.Finite.check(
+	S.isGreaterThanOrEqualTo(-90),
+	S.isLessThanOrEqualTo(90),
+).pipe(S.brand("Latitude"));
+/** Inferred TS type for {@link LatitudeSchema} — `number & Brand<"Latitude">`. */
+export type Latitude = S.Schema.Type<typeof LatitudeSchema>;
+
+/**
+ * Geographic longitude in decimal degrees, in the CLOSED interval
+ * `[-180, 180]`. Carries a nominal `Longitude` brand — construct via
+ * {@link toLongitude}.
+ */
+export const LongitudeSchema = S.Finite.check(
+	S.isGreaterThanOrEqualTo(-180),
+	S.isLessThanOrEqualTo(180),
+).pipe(S.brand("Longitude"));
+/** Inferred TS type for {@link LongitudeSchema} — `number & Brand<"Longitude">`. */
+export type Longitude = S.Schema.Type<typeof LongitudeSchema>;
+
+/**
+ * Smart constructor for {@link Probability}. Decodes `value`, throwing a
+ * schema error when it is non-finite or outside the open interval `(0, 1)`.
+ *
+ * @throws The Effect parse error when `value` is out of range.
+ */
+export function toProbability(value: number): Probability {
+	return validate(ProbabilitySchema, value);
+}
+
+/**
+ * Smart constructor for {@link Latitude}; throws when `value` is non-finite
+ * or outside `[-90, 90]`.
+ */
+export function toLatitude(value: number): Latitude {
+	return validate(LatitudeSchema, value);
+}
+
+/**
+ * Smart constructor for {@link Longitude}; throws when `value` is non-finite
+ * or outside `[-180, 180]`.
+ */
+export function toLongitude(value: number): Longitude {
+	return validate(LongitudeSchema, value);
+}
+
+/** Non-throwing type guard narrowing `value` to {@link Probability}. */
+export function isProbability(value: unknown): value is Probability {
+	return validateSafe(ProbabilitySchema, value).success;
+}
+
+/** Non-throwing type guard narrowing `value` to {@link Latitude}. */
+export function isLatitude(value: unknown): value is Latitude {
+	return validateSafe(LatitudeSchema, value).success;
+}
+
+/** Non-throwing type guard narrowing `value` to {@link Longitude}. */
+export function isLongitude(value: unknown): value is Longitude {
+	return validateSafe(LongitudeSchema, value).success;
+}

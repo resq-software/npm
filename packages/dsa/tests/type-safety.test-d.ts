@@ -26,10 +26,13 @@
 import { expectTypeOf, test } from "vitest";
 import type { Coordinates2D, Coordinates3D } from "../src/distance.js";
 import { Distance } from "../src/distance.js";
+import type { Edge } from "../src/graph.js";
+import { Graph } from "../src/graph.js";
 import { PriorityQueue, createMinHeap } from "../src/priority-queue.js";
+import { toLatitude, toLongitude } from "../src/schemas.js";
 
-const p2d: Coordinates2D = { lat: 0, lng: 0 };
-const p3d: Coordinates3D = { lat: 0, lng: 0, alt: 5 };
+const p2d: Coordinates2D = { lat: toLatitude(0), lng: toLongitude(0) };
+const p3d: Coordinates3D = { lat: toLatitude(0), lng: toLongitude(0), alt: 5 };
 
 interface Task {
 	id: string;
@@ -68,4 +71,20 @@ test("PriorityQueue requires a compareFn for non-comparable element types", () =
 
 	// @ts-expect-error — an options object without `compareFn` is still rejected.
 	new PriorityQueue<Task>({ initialCapacity: 8 });
+});
+
+test("Graph<T, M> yields typed metadata reads instead of unknown", () => {
+	interface Meta {
+		label: string;
+		priority: number;
+	}
+
+	const typed = new Graph<string, Meta>();
+	// Reads are the concrete `M`, not `Record<string, unknown>`.
+	expectTypeOf(typed.getVertexMetadata("x")).toEqualTypeOf<Meta | undefined>();
+	expectTypeOf(typed.getNeighbors("x")[0]).toEqualTypeOf<Edge<string, Meta> | undefined>();
+
+	// The default parameter keeps the legacy loose metadata shape.
+	const loose = new Graph<string>();
+	expectTypeOf(loose.getVertexMetadata("x")).toEqualTypeOf<Record<string, unknown> | undefined>();
 });

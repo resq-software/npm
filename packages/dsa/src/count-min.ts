@@ -36,20 +36,25 @@
  * sketch.estimate("203.0.113.7"); // approximate count
  * ```
  */
+
+import type { Probability } from "./schemas.js";
+
 export class CountMinSketch {
 	readonly #table: Uint32Array[];
 	readonly #width: number;
 	readonly #depth: number;
 
 	/**
-	 * @param epsilon - Additive error bound, in `(0, 1)`. Smaller ⇒ more
-	 *   memory, tighter estimates.
-	 * @param delta - Probability that the error bound is exceeded, in
-	 *   `(0, 1)`. Smaller ⇒ more rows.
+	 * @param epsilon - Additive error bound as a branded {@link Probability}
+	 *   in `(0, 1)`. Smaller ⇒ more memory, tighter estimates. Construct with
+	 *   `toProbability(...)` so an out-of-range value is rejected at the type
+	 *   level; the runtime check below still guards untrusted callers.
+	 * @param delta - Probability that the error bound is exceeded, as a branded
+	 *   {@link Probability} in `(0, 1)`. Smaller ⇒ more rows.
 	 *
 	 * @throws RangeError if either parameter is outside `(0, 1)`.
 	 */
-	constructor(epsilon: number, delta: number) {
+	constructor(epsilon: Probability, delta: Probability) {
 		if (epsilon <= 0 || epsilon >= 1) {
 			throw new RangeError(`CountMinSketch: epsilon must be in (0, 1), got ${epsilon}`);
 		}

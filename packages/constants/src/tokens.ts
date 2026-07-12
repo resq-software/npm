@@ -58,8 +58,8 @@ export const colors = {
 		danger: "#D43E3F",
 	},
 } as const satisfies {
-	oklch: Record<ColorRole, string>;
-	hex: Record<ColorRole | StatusRole, string>;
+	oklch: Record<ColorRole, `oklch(${string})`>;
+	hex: Record<ColorRole | StatusRole, `#${string}`>;
 };
 
 /**

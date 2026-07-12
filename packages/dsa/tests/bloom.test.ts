@@ -16,6 +16,7 @@
 
 import { describe, expect, it } from "vitest";
 import { BloomFilter } from "../src/bloom.js";
+import { type Probability, toProbability } from "../src/schemas.js";
 
 describe("BloomFilter", () => {
 	describe("basic membership", () => {
@@ -28,7 +29,7 @@ describe("BloomFilter", () => {
 		});
 
 		it("has() returns false for absent items", () => {
-			const bf = new BloomFilter(1000, 0.001);
+			const bf = new BloomFilter(1000, toProbability(0.001));
 			bf.add("seen");
 			expect(bf.has("unseen")).toBe(false);
 			expect(bf.has("also-unseen")).toBe(false);
@@ -54,21 +55,40 @@ describe("BloomFilter", () => {
 		});
 	});
 
+	describe("Probability smart constructor", () => {
+		it("rejects an out-of-range errorRate at the type boundary", () => {
+			// The smart constructor is the trusted path: out-of-range values
+			// never produce a `Probability` in the first place.
+			expect(() => toProbability(0)).toThrow();
+			expect(() => toProbability(1)).toThrow();
+			expect(() => toProbability(1.5)).toThrow();
+			expect(() => toProbability(-0.01)).toThrow();
+			expect(() => toProbability(Number.NaN)).toThrow();
+		});
+
+		it("accepts a value inside (0, 1)", () => {
+			expect(toProbability(0.01)).toBe(0.01);
+			expect(toProbability(0.999999)).toBe(0.999999);
+		});
+	});
+
 	describe("constructor validation", () => {
+		// A cast simulates an untrusted caller who slipped an out-of-range
+		// value past the type system; the constructor still guards at runtime.
 		it("throws RangeError when errorRate is 0", () => {
-			expect(() => new BloomFilter(100, 0)).toThrow(RangeError);
+			expect(() => new BloomFilter(100, 0 as Probability)).toThrow(RangeError);
 		});
 
 		it("throws RangeError when errorRate is 1", () => {
-			expect(() => new BloomFilter(100, 1)).toThrow(RangeError);
+			expect(() => new BloomFilter(100, 1 as Probability)).toThrow(RangeError);
 		});
 
 		it("throws RangeError when errorRate is negative", () => {
-			expect(() => new BloomFilter(100, -0.01)).toThrow(RangeError);
+			expect(() => new BloomFilter(100, -0.01 as Probability)).toThrow(RangeError);
 		});
 
 		it("throws RangeError when errorRate exceeds 1", () => {
-			expect(() => new BloomFilter(100, 1.5)).toThrow(RangeError);
+			expect(() => new BloomFilter(100, 1.5 as Probability)).toThrow(RangeError);
 		});
 
 		it("throws RangeError when capacity is 0", () => {
@@ -80,8 +100,8 @@ describe("BloomFilter", () => {
 		});
 
 		it("accepts edge errorRate values just inside (0, 1)", () => {
-			expect(() => new BloomFilter(100, 0.000001)).not.toThrow();
-			expect(() => new BloomFilter(100, 0.999999)).not.toThrow();
+			expect(() => new BloomFilter(100, toProbability(0.000001))).not.toThrow();
+			expect(() => new BloomFilter(100, toProbability(0.999999))).not.toThrow();
 		});
 	});
 
@@ -110,7 +130,7 @@ describe("BloomFilter", () => {
 		});
 
 		it("distinguishes case-sensitive variants", () => {
-			const bf = new BloomFilter(1000, 0.001);
+			const bf = new BloomFilter(1000, toProbability(0.001));
 			bf.add("Drone");
 			expect(bf.has("Drone")).toBe(true);
 			// "drone" might be a false positive at higher error rates,
@@ -123,7 +143,7 @@ describe("BloomFilter", () => {
 		it("stays under 5% when configured at errorRate=0.01", () => {
 			// Insert exactly the configured capacity, then probe with disjoint set.
 			const capacity = 1000;
-			const bf = new BloomFilter(capacity, 0.01);
+			const bf = new BloomFilter(capacity, toProbability(0.01));
 			for (let i = 0; i < capacity; i++) bf.add(`real-${i}`);
 
 			let falsePositives = 0;
@@ -139,7 +159,7 @@ describe("BloomFilter", () => {
 			const capacity = 500;
 			const probes = 2_000;
 			const measure = (rate: number): number => {
-				const bf = new BloomFilter(capacity, rate);
+				const bf = new BloomFilter(capacity, toProbability(rate));
 				for (let i = 0; i < capacity; i++) bf.add(`real-${i}`);
 				let fp = 0;
 				for (let i = 0; i < probes; i++) {
@@ -155,7 +175,7 @@ describe("BloomFilter", () => {
 
 	describe("scale", () => {
 		it("handles 100k inserts at low error rate", () => {
-			const bf = new BloomFilter(100_000, 0.001);
+			const bf = new BloomFilter(100_000, toProbability(0.001));
 			for (let i = 0; i < 100_000; i++) {
 				bf.add(`drone-${i}`);
 			}

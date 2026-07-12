@@ -17,124 +17,138 @@
 import { describe, expect, test } from "vitest";
 import type { Coordinates2D, Coordinates3D } from "../src/distance.js";
 import { Distance } from "../src/distance.js";
+import { type Latitude, type Longitude, toLatitude, toLongitude } from "../src/schemas.js";
+
+/** Builds a branded 2D coordinate from raw in-range numbers. */
+const coord = (lat: number, lng: number): Coordinates2D => ({
+	lat: toLatitude(lat),
+	lng: toLongitude(lng),
+});
+
+/** Builds a branded 3D coordinate from raw in-range numbers. */
+const coord3 = (lat: number, lng: number, alt: number): Coordinates3D => ({
+	lat: toLatitude(lat),
+	lng: toLongitude(lng),
+	alt,
+});
 
 describe("Distance", () => {
 	describe("euclidean", () => {
 		test("calculates distance between two 2D points", () => {
-			const p1: Coordinates2D = { lat: 0, lng: 0 };
-			const p2: Coordinates2D = { lat: 3, lng: 4 };
-			expect(Distance.euclidean(p1, p2)).toBeCloseTo(5, 5);
+			expect(Distance.euclidean(coord(0, 0), coord(3, 4))).toBeCloseTo(5, 5);
 		});
 
 		test("returns 0 for identical points", () => {
-			const p: Coordinates2D = { lat: 5, lng: 5 };
+			const p = coord(5, 5);
 			expect(Distance.euclidean(p, p)).toBeCloseTo(0, 5);
 		});
 
 		test("throws for non-finite coordinates", () => {
-			const p1: Coordinates2D = { lat: Number.NaN, lng: 0 };
-			const p2: Coordinates2D = { lat: 0, lng: 0 };
-			expect(() => Distance.euclidean(p1, p2)).toThrow();
+			// A cast simulates untrusted input: a non-finite latitude that
+			// bypassed the branded smart constructor still trips runtime validation.
+			const p1: Coordinates2D = { lat: Number.NaN as Latitude, lng: 0 as Longitude };
+			expect(() => Distance.euclidean(p1, coord(0, 0))).toThrow();
 		});
 	});
 
 	describe("haversine", () => {
 		test("calculates distance between NYC and London", () => {
-			const nyc: Coordinates2D = { lat: 40.7128, lng: -74.006 };
-			const london: Coordinates2D = { lat: 51.5074, lng: -0.1278 };
-			const km = Distance.haversine(nyc, london);
+			const km = Distance.haversine(coord(40.7128, -74.006), coord(51.5074, -0.1278));
 			// Known distance is ~5570 km
 			expect(km).toBeGreaterThan(5500);
 			expect(km).toBeLessThan(5600);
 		});
 
 		test("returns 0 for identical points", () => {
-			const p: Coordinates2D = { lat: 40.7128, lng: -74.006 };
+			const p = coord(40.7128, -74.006);
 			expect(Distance.haversine(p, p)).toBeCloseTo(0, 5);
 		});
 
 		test("throws for out-of-range latitude", () => {
-			const p1: Coordinates2D = { lat: 91, lng: 0 };
-			const p2: Coordinates2D = { lat: 0, lng: 0 };
-			expect(() => Distance.haversine(p1, p2)).toThrow();
+			// Untrusted input: 91° latitude slipped past the branded type.
+			const p1: Coordinates2D = { lat: 91 as Latitude, lng: 0 as Longitude };
+			expect(() => Distance.haversine(p1, coord(0, 0))).toThrow();
 		});
 
 		test("throws for out-of-range longitude", () => {
-			const p1: Coordinates2D = { lat: 0, lng: 181 };
-			const p2: Coordinates2D = { lat: 0, lng: 0 };
-			expect(() => Distance.haversine(p1, p2)).toThrow();
+			const p1: Coordinates2D = { lat: 0 as Latitude, lng: 181 as Longitude };
+			expect(() => Distance.haversine(p1, coord(0, 0))).toThrow();
 		});
 	});
 
 	describe("manhattan", () => {
 		test("calculates sum of absolute differences", () => {
-			const p1: Coordinates2D = { lat: 0, lng: 0 };
-			const p2: Coordinates2D = { lat: 3, lng: 4 };
-			expect(Distance.manhattan(p1, p2)).toBeCloseTo(7, 5);
+			expect(Distance.manhattan(coord(0, 0), coord(3, 4))).toBeCloseTo(7, 5);
 		});
 	});
 
 	describe("chebyshev", () => {
 		test("calculates max of absolute differences", () => {
-			const p1: Coordinates2D = { lat: 0, lng: 0 };
-			const p2: Coordinates2D = { lat: 3, lng: 7 };
-			expect(Distance.chebyshev(p1, p2)).toBeCloseTo(7, 5);
+			expect(Distance.chebyshev(coord(0, 0), coord(3, 7))).toBeCloseTo(7, 5);
 		});
 	});
 
 	describe("threed", () => {
 		test("calculates 3D distance with altitude", () => {
-			const a: Coordinates3D = { lat: 0, lng: 0, alt: 0 };
-			const b: Coordinates3D = { lat: 0, lng: 0, alt: 100 };
-			const dist = Distance.threed(a, b);
+			const dist = Distance.threed(coord3(0, 0, 0), coord3(0, 0, 100));
 			expect(dist).toBeGreaterThan(0);
 		});
 
 		test("throws for missing altitude", () => {
-			const a = { lat: 0, lng: 0 } as Coordinates3D;
-			const b: Coordinates3D = { lat: 0, lng: 0, alt: 100 };
-			expect(() => Distance.threed(a, b)).toThrow();
+			const a = coord(0, 0) as Coordinates3D;
+			expect(() => Distance.threed(a, coord3(0, 0, 100))).toThrow();
 		});
 	});
 
 	describe("calculate", () => {
 		test("dispatches to euclidean", () => {
-			const p1: Coordinates2D = { lat: 0, lng: 0 };
-			const p2: Coordinates2D = { lat: 3, lng: 4 };
-			const result = Distance.calculate("euclidean", p1, p2);
+			const result = Distance.calculate("euclidean", coord(0, 0), coord(3, 4));
 			expect(result).toBeCloseTo(5, 5);
 		});
 
 		test("dispatches to haversine", () => {
-			const p1: Coordinates2D = { lat: 40.7128, lng: -74.006 };
-			const p2: Coordinates2D = { lat: 51.5074, lng: -0.1278 };
-			const result = Distance.calculate("haversine", p1, p2);
+			const result = Distance.calculate(
+				"haversine",
+				coord(40.7128, -74.006),
+				coord(51.5074, -0.1278),
+			);
 			expect(result).toBeGreaterThan(5500);
 		});
 
 		test("dispatches to manhattan", () => {
-			const p1: Coordinates2D = { lat: 1, lng: 2 };
-			const p2: Coordinates2D = { lat: 4, lng: 6 };
-			expect(Distance.calculate("manhattan", p1, p2)).toBeCloseTo(7, 5);
+			expect(Distance.calculate("manhattan", coord(1, 2), coord(4, 6))).toBeCloseTo(7, 5);
 		});
 	});
 
 	describe("safe", () => {
 		test("returns valid result for good coordinates", () => {
-			const p1: Coordinates2D = { lat: 0, lng: 0 };
-			const p2: Coordinates2D = { lat: 3, lng: 4 };
-			const result = Distance.calculateSafe("euclidean", p1, p2);
+			const result = Distance.calculateSafe("euclidean", coord(0, 0), coord(3, 4));
 			expect(result.valid).toBe(true);
 			expect(result.distance).toBeCloseTo(5, 5);
 			expect(result.formula).toBe("euclidean");
 		});
 
 		test("returns invalid result for bad coordinates", () => {
-			const p1: Coordinates2D = { lat: Number.NaN, lng: 0 };
-			const p2: Coordinates2D = { lat: 0, lng: 0 };
-			const result = Distance.calculateSafe("euclidean", p1, p2);
+			const p1: Coordinates2D = { lat: Number.NaN as Latitude, lng: 0 as Longitude };
+			const result = Distance.calculateSafe("euclidean", p1, coord(0, 0));
 			expect(result.valid).toBe(false);
 			expect(result.error).toBeDefined();
+		});
+	});
+
+	describe("coordinate smart constructors", () => {
+		test("reject out-of-range latitude and longitude", () => {
+			expect(() => toLatitude(91)).toThrow();
+			expect(() => toLatitude(-90.1)).toThrow();
+			expect(() => toLongitude(181)).toThrow();
+			expect(() => toLongitude(-180.1)).toThrow();
+		});
+
+		test("accept boundary values", () => {
+			expect(toLatitude(90)).toBe(90);
+			expect(toLatitude(-90)).toBe(-90);
+			expect(toLongitude(180)).toBe(180);
+			expect(toLongitude(-180)).toBe(-180);
 		});
 	});
 });

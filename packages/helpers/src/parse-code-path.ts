@@ -21,10 +21,8 @@
  * The result is useful for debugging, developer logging, and traceability—matching the entity (function, class, etc.)
  * and the context in source code references.
  *
- * @template C The type of the context value.
- * @template T The type of the entity parameter.
- * @param {C} context - A description, situation, or custom value relevant to this code path.
- * @param {T} entity - The entity whose name is included; may be a function, class, object, component, decorator, or their name.
+ * @param {string | number} context - A description, situation, or custom value relevant to this code path.
+ * @param {object | string | symbol} entity - The entity whose name is included; a function, class, or instance (all `object`), a string, or a symbol.
  * @returns {string} A formatted string: "location: <path> @<entity>: <context>".
  * @throws {Error} This function does not throw directly, but see {@link getFilePath}, which may throw in rare stack-trace parsing errors.
  * @example
@@ -49,7 +47,10 @@
  * @public
  * @version 1.0.0
  */
-export const parseCodePath = <C, T>(context: C, entity: T): string => {
+export const parseCodePath = (
+	context: string | number,
+	entity: object | string | symbol,
+): string => {
 	const entityName = extractEntityName(entity);
 	const filePath = getFilePath();
 
@@ -65,8 +66,7 @@ export const parseCodePath = <C, T>(context: C, entity: T): string => {
  * - For symbols, returns their string representation
  * - Returns 'UnknownEntity' if no name is found
  *
- * @template T The type of the entity.
- * @param {T} entity - The entity to extract a name from.
+ * @param {unknown} entity - The entity to extract a name from.
  * @returns {string} The extracted name or 'UnknownEntity' if not determinable.
  * @example
  * extractEntityName(function test() {}); // 'test'
@@ -79,12 +79,12 @@ export const parseCodePath = <C, T>(context: C, entity: T): string => {
  * @public
  * @version 1.0.0
  */
-function extractEntityName<T>(entity: T): string {
+function extractEntityName(entity: unknown): string {
 	if (typeof entity === "function") {
 		return entity.name || "AnonymousFunction";
 	}
 	if (typeof entity === "object" && entity !== null) {
-		const entityConstructor = entity.constructor;
+		const entityConstructor = (entity as { constructor?: unknown }).constructor;
 		if (typeof entityConstructor === "function" && entityConstructor.name) {
 			return entityConstructor.name;
 		}
@@ -142,10 +142,8 @@ function getFilePath(): string {
  * Parses and constructs a detailed formatted location string, including file path, entity, and context,
  * with optional line number, ISO timestamp, and custom prefix control. Useful for enhanced debugging or audit logs.
  *
- * @template C The type of the context parameter.
- * @template T The type of entity (function, class, etc.).
- * @param {C} context - Context description of the operation or location.
- * @param {T} entity - The entity whose name is included.
+ * @param {string | number} context - Context description of the operation or location.
+ * @param {object | string | symbol} entity - The entity whose name is included; a function, class, or instance (all `object`), a string, or a symbol.
  * @param {object} [options] - Optional configuration for output.
  * @param {boolean} [options.includeLineNumber] - If true, appends the call site line number.
  * @param {boolean} [options.includeTimestamp] - If true, appends an ISO 8601 timestamp.
@@ -163,9 +161,9 @@ function getFilePath(): string {
  * @public
  * @version 1.0.0
  */
-export const parseCodePathDetailed = <C, T>(
-	context: C,
-	entity: T,
+export const parseCodePathDetailed = (
+	context: string | number,
+	entity: object | string | symbol,
 	options: {
 		includeLineNumber?: boolean;
 		includeTimestamp?: boolean;

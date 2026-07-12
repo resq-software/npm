@@ -24,18 +24,22 @@
  * @param {PropertyDescriptor} descriptor - The property descriptor
  * @returns {PropertyDescriptor} The modified descriptor with writable set to false
  *
+ * The decorator is generic over the decorated method `F`, so the descriptor's
+ * type is **preserved** end-to-end rather than erased to `Method<any>` — this is
+ * exactly the shape of the built-in `MethodDecorator` (itself generic).
+ *
  * @example
  * ```typescript
  * type ReadonlyMethod = Readonlyable<MyClass>;
  *
- * const decorator: ReadonlyMethod = (target, key, descriptor) => {
- *   descriptor.writable = false;
- *   return descriptor;
- * };
+ * const decorator: ReadonlyMethod = (_target, _key, descriptor) => ({
+ *   ...descriptor,
+ *   writable: false,
+ * });
  * ```
  */
-export type Readonlyable<T = any> = (
+export type Readonlyable<T = unknown> = <F extends (...args: never[]) => unknown>(
 	target: T,
-	propertyName: keyof T,
-	descriptor: PropertyDescriptor,
-) => PropertyDescriptor;
+	propertyName: PropertyKey,
+	descriptor: TypedPropertyDescriptor<F>,
+) => TypedPropertyDescriptor<F>;

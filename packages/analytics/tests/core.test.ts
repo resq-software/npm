@@ -23,9 +23,11 @@ import {
 	GA4_ID_PATTERN,
 	type Ga4MeasurementId,
 	inferCookieDomain,
+	isCookieDomain,
 	RESQ_SUBDOMAIN_ALLOWLIST,
 	resolveResqCookieDomain,
 	sanitizeGa4Id,
+	toCookieDomain,
 } from "../src/index";
 import { ga4Stream, withAnalyticsRewrites } from "../src/next/index";
 
@@ -53,6 +55,80 @@ describe("inferCookieDomain", () => {
 
 	it("strips a leading dot before comparing", () => {
 		expect(inferCookieDomain([".resq.software", "research.resq.software"])).toBe(".resq.software");
+	});
+
+	it("returns a value that is a valid normalized CookieDomain", () => {
+		const domain = inferCookieDomain(["research.resq.software", "viz.resq.software"]);
+		expect(domain).toBe(".resq.software");
+		// The branded output round-trips through the guard.
+		expect(domain !== undefined && isCookieDomain(domain)).toBe(true);
+	});
+});
+
+describe("toCookieDomain", () => {
+	it("normalizes a bare host to leading-dot form", () => {
+		expect(toCookieDomain("resq.software")).toBe(".resq.software");
+		expect(toCookieDomain("app.example.com")).toBe(".app.example.com");
+	});
+
+	it("preserves an existing leading dot", () => {
+		expect(toCookieDomain(".resq.software")).toBe(".resq.software");
+	});
+
+	it("lowercases casing (RFC 3986 §3.2.2)", () => {
+		expect(toCookieDomain("ReSQ.Software")).toBe(".resq.software");
+		expect(toCookieDomain(".RESQ.SOFTWARE")).toBe(".resq.software");
+	});
+
+	it("strips a trailing FQDN dot and surrounding whitespace", () => {
+		expect(toCookieDomain("resq.software.")).toBe(".resq.software");
+		expect(toCookieDomain("  resq.software  ")).toBe(".resq.software");
+	});
+
+	it("rejects a single-label host with no registrable root", () => {
+		expect(toCookieDomain("localhost")).toBeNull();
+	});
+
+	it("rejects invalid label characters", () => {
+		expect(toCookieDomain("bad_domain.com")).toBeNull();
+		expect(toCookieDomain(".-lead.com")).toBeNull();
+	});
+
+	it("returns null for empty / null / undefined input", () => {
+		expect(toCookieDomain("")).toBeNull();
+		expect(toCookieDomain("   ")).toBeNull();
+		expect(toCookieDomain(null)).toBeNull();
+		expect(toCookieDomain(undefined)).toBeNull();
+	});
+
+	it("produces a value AnalyticsConfig.cookieDomain accepts at the sink", async () => {
+		const domain = toCookieDomain("resq.software");
+		expect(domain).not.toBeNull();
+		if (domain) {
+			const a = new Analytics();
+			await a.init({ disabled: true, cookieDomain: domain });
+			expect(a.config?.cookieDomain).toBe(".resq.software");
+		}
+	});
+});
+
+describe("isCookieDomain", () => {
+	it("accepts an already-normalized leading-dot domain", () => {
+		expect(isCookieDomain(".resq.software")).toBe(true);
+		expect(isCookieDomain(".app.example.com")).toBe(true);
+	});
+
+	it("rejects a bare host (the guard does not normalize)", () => {
+		expect(isCookieDomain("resq.software")).toBe(false);
+	});
+
+	it("rejects a rootless single-label domain", () => {
+		expect(isCookieDomain(".localhost")).toBe(false);
+	});
+
+	it("narrows the type, and resolveResqCookieDomain output satisfies it", () => {
+		const resolved = resolveResqCookieDomain("viz.resq.software");
+		expect(resolved !== undefined && isCookieDomain(resolved)).toBe(true);
 	});
 });
 

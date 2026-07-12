@@ -741,6 +741,45 @@ describe("fetcher – allowedHosts / blockedHosts (SSRF protection)", () => {
 		expect(res).toEqual({ ok: true });
 	});
 
+	it("wildcard '*.example.com' matches a subdomain but not an unrelated host", async () => {
+		// Positive: a direct subdomain is allowed.
+		const allowed = await Effect.runPromise(
+			Effect.provide(
+				fetcher("https://api.example.com/data", "GET", { allowedHosts: ["*.example.com"] }),
+				clientLayer,
+			),
+		);
+		expect(allowed).toEqual({ ok: true });
+
+		// Negative: an unrelated host is rejected (the leading dot in the suffix
+		// prevents "evil.com" from matching the "*.example.com" wildcard).
+		const error = await Effect.runPromise(
+			Effect.flip(
+				Effect.provide(
+					fetcher("https://evil.com/data", "GET", { allowedHosts: ["*.example.com"] }),
+					clientLayer,
+				),
+			),
+		);
+		expect(error).toBeInstanceOf(FetcherError);
+		expect((error as FetcherError).message).toContain("Host 'evil.com' is not allowed");
+	});
+
+	it("wildcard suffix does not match a host that merely ends with the bare label", async () => {
+		// "notexample.com" ends with "example.com" but not ".example.com", so the
+		// "*.example.com" allow entry must not permit it.
+		const error = await Effect.runPromise(
+			Effect.flip(
+				Effect.provide(
+					fetcher("https://notexample.com/data", "GET", { allowedHosts: ["*.example.com"] }),
+					clientLayer,
+				),
+			),
+		);
+		expect(error).toBeInstanceOf(FetcherError);
+		expect((error as FetcherError).message).toContain("Host 'notexample.com' is not allowed");
+	});
+
 	it("blocks request and fails with FetcherError when host is in blockedHosts", async () => {
 		const error = await Effect.runPromise(
 			Effect.flip(

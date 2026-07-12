@@ -23,5 +23,14 @@ export default defineConfig({
 		environment: "node",
 		include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
 		globals: false,
+		// Type-level assertions (assertType / @ts-expect-error) live in
+		// tests/**/*.test-d.ts and are checked by the typechecker, not the runtime.
+		// `enabled: true` makes `vitest run` (the `test` script) run tsc over the
+		// *.test-d.ts files as part of the suite.
+		typecheck: {
+			enabled: true,
+			include: ["tests/**/*.test-d.ts"],
+			tsconfig: "./tsconfig.test.json",
+		},
 	},
 });

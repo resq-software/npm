@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import type { Probability } from "./schemas.js";
+
+/** Default target false-positive rate (1%) used when none is supplied. */
+const DEFAULT_ERROR_RATE = 0.01;
+
 /**
  * Space-efficient probabilistic set membership test.
  *
@@ -47,19 +52,23 @@ export class BloomFilter {
 	/**
 	 * @param capacity - Expected number of distinct items to insert. Memory
 	 *   use grows linearly with this value.
-	 * @param errorRate - Target false-positive rate, in `(0, 1)`. Default
-	 *   `0.01` (1%). Smaller values increase memory and hash count.
+	 * @param errorRate - Target false-positive rate as a branded
+	 *   {@link Probability} in `(0, 1)`. Omit to use the default `0.01` (1%).
+	 *   Construct one with `toProbability(...)` so an out-of-range value is
+	 *   rejected at the type level; the runtime check below still guards
+	 *   untrusted callers that reach this boundary via a cast.
 	 *
 	 * @throws RangeError if `capacity <= 0` or `errorRate` is outside `(0, 1)`.
 	 */
-	constructor(capacity: number, errorRate = 0.01) {
-		if (errorRate <= 0 || errorRate >= 1) {
-			throw new RangeError(`BloomFilter: errorRate must be in (0, 1), got ${errorRate}`);
+	constructor(capacity: number, errorRate?: Probability) {
+		const rate: number = errorRate ?? DEFAULT_ERROR_RATE;
+		if (rate <= 0 || rate >= 1) {
+			throw new RangeError(`BloomFilter: errorRate must be in (0, 1), got ${rate}`);
 		}
 		if (capacity <= 0) {
 			throw new RangeError(`BloomFilter: capacity must be > 0, got ${capacity}`);
 		}
-		const m = Math.ceil((-capacity * Math.log(errorRate)) / Math.LN2 ** 2);
+		const m = Math.ceil((-capacity * Math.log(rate)) / Math.LN2 ** 2);
 		const k = Math.max(1, Math.round((m / capacity) * Math.LN2));
 		this.#m = m;
 		this.#k = k;
