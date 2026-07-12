@@ -58,6 +58,19 @@ export type ExpectTrue<T extends true> = T;
 /** Assert that a type is exactly `false`. Fails to compile otherwise. */
 export type ExpectFalse<T extends false> = T;
 
+/**
+ * Assert that `U` is assignable to `T` (a one-way subtype/constraint check) and
+ * pass `U` through. Unlike {@link Equal}, which demands exact identity, this
+ * only checks assignability — use it to lock "X still satisfies contract Y":
+ *
+ * @example
+ * ```ts
+ * type _ok = Verify<{ id: string }, { id: string; extra: number }>; // ✓
+ * type _no = Verify<{ id: string }, { id: number }>;                 // ✗ compile error
+ * ```
+ */
+export type Verify<T, U extends T> = U;
+
 /** `true` only for the `any` type. */
 export type IsAny<T> = 0 extends 1 & T ? true : false;
 

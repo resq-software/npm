@@ -56,7 +56,7 @@ import type {
 	XOR,
 } from "./object.js";
 import type { EndsWith, Join, LiteralUnion, ParseInt, Split, StartsWith, Trim } from "./string.js";
-import type { Equal, Expect, IsAny, IsNever, IsUnknown } from "./testing.js";
+import type { Equal, Expect, IsAny, IsNever, IsUnknown, Verify } from "./testing.js";
 
 // --- testing kit self-checks --------------------------------------------------
 // biome-ignore lint/suspicious/noExplicitAny: type-level tests must reference the `any` type to verify IsAny/Equal behavior
@@ -71,6 +71,8 @@ type _testing = [
 	Expect<Equal<IsUnknown<unknown>, true>>,
 	Expect<Equal<IsUnknown<Any>, false>>,
 	Expect<Equal<Equal<Any, unknown>, false>>,
+	// Verify passes U through when it is assignable to T.
+	Expect<Equal<Verify<{ id: string }, { id: string; x: 1 }>, { id: string; x: 1 }>>,
 ];
 
 // --- brands -------------------------------------------------------------------
