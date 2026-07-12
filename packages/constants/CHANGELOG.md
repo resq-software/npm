@@ -1,5 +1,12 @@
 <!--
 
+## 0.3.1
+### Patch Changes
+
+
+
+- [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Type color token maps with template-literal formats via satisfies so malformed hex/oklch literals fail at compile time
+
 ## 0.3.0
 ### Minor Changes
 

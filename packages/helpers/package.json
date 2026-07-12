@@ -1,6 +1,6 @@
 {
 	"name": "@resq-systems/helpers",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "Functional utilities, type guards, result types, performance measurement, and async task execution",
 	"license": "Apache-2.0",
 	"type": "module",
@@ -32,7 +32,7 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@resq-systems/logger": "^0.2.0",
+		"@resq-systems/logger": "^0.3.0",
 		"@resq-systems/types": "workspace:*",
 		"tinyqueue": "^3.0.0"
 	},

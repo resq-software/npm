@@ -1,5 +1,12 @@
 <!--
 
+## 0.37.0
+### Minor Changes
+
+
+
+- [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Type RGB channels with NumberRange<0,255>, split Rgb from its null failure state, and fix getContrastingColor treating a zero channel as absent
+
 ## 0.36.0
 ### Minor Changes
 
