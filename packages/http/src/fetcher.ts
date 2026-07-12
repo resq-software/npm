@@ -37,20 +37,16 @@ type SyncSchema<T> = Schema.Codec<T, unknown, never>;
  * A host-matching pattern for the SSRF allow/block lists
  * ({@link FetcherOptions.allowedHosts}, {@link FetcherOptions.blockedHosts}).
  *
- * Either an exact, already-lowercased hostname (`"api.example.com"`) or a
- * wildcard-subdomain pattern (`` `*.example.com` ``). Encoding this as a
- * template-literal union turns a malformed entry into a **compile error**
- * instead of a latent security hole:
+ * Either an exact hostname (`"api.example.com"`) or a wildcard-subdomain
+ * pattern (`` `*.example.com` ``).
  *
- * - `Lowercase<string>` only accepts string literals with no uppercase
- *   characters, so an exact host such as `"API.example.com"` — which would
- *   silently never match the lowercased request host and thus quietly widen
- *   the allow list / weaken the block list — fails to typecheck.
- * - `` `*.${string}` `` accepts any `*.`-prefixed wildcard.
- *
- * A plain `string` is intentionally **not** assignable, so host lists must be
- * written as literals (or asserted with `as const`), keeping the SSRF filter's
- * inputs auditable at the call site.
+ * The two members document the supported shapes, but this is **not** a
+ * compile-time SSRF guarantee: `Lowercase<string>` evaluates to `string`, so
+ * the union widens to `string` and does not reject uppercase or otherwise
+ * malformed literals at the type level. Case-insensitive matching and host
+ * normalization are enforced at **runtime** by `matchHost` (which lowercases
+ * both the pattern and the request host before comparing), so an entry like
+ * `"API.example.com"` still matches correctly.
  */
 export type HostPattern = Lowercase<string> | `*.${string}`;
 

@@ -475,7 +475,10 @@ export class KeyedDebounce<T extends AnyFunction> {
  * A **keyless** rate limiter: one bucket per instance, guarding a single stream
  * of work. The Strategy interface shared by {@link TokenBucketLimiter} (bursty)
  * and {@link LeakyBucketLimiter} (smoothed) — depend on this abstraction and swap
- * the algorithm without touching call sites.
+ * the algorithm without touching call sites, provided call sites already honor
+ * the interface contract (handle a rejected {@link RateLimiter.acquire}, and do
+ * not assume {@link RateLimiter.tryAcquire} reserves a slot). See each method's
+ * doc for where the two algorithms legitimately diverge.
  *
  * @example
  * ```ts
@@ -489,9 +492,23 @@ export class KeyedDebounce<T extends AnyFunction> {
  * ```
  */
 export interface RateLimiter {
-	/** Take one slot, awaiting future capacity if none is available. */
+	/**
+	 * Take one slot, awaiting future capacity if none is available.
+	 *
+	 * Implementations backed by a bounded queue (e.g. {@link LeakyBucketLimiter})
+	 * MAY reject once that bound is exceeded rather than waiting indefinitely, so
+	 * callers must handle rejection — not only eventual resolution.
+	 */
 	acquire(): Promise<void>;
-	/** Non-blocking probe: consume a slot and return `true`, or `false` if none is free. */
+	/**
+	 * Non-blocking probe for a free slot.
+	 *
+	 * Implementations that can consume atomically (e.g. {@link TokenBucketLimiter})
+	 * reserve a slot when they return `true`. Implementations that cannot guarantee
+	 * atomic reservation (e.g. {@link LeakyBucketLimiter}) may probe without
+	 * reserving — check the concrete class before relying on `true` to mean a
+	 * slot is held for you.
+	 */
 	tryAcquire(): boolean;
 	/** A snapshot of the limiter's current capacity state. */
 	getStats(): RateLimiterStats;
