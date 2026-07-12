@@ -95,4 +95,14 @@ describe("decodeEmailPayload", () => {
 
 		expect(payload.to).toBe("grace+alerts@example.com");
 	});
+
+	it("accepts a recipient with a Punycode/IDN TLD", () => {
+		const payload = decodeEmailPayload({
+			name: "welcome",
+			to: "grace@example.xn--p1ai",
+			data: { firstName: "Grace" },
+		});
+
+		expect(payload.to).toBe("grace@example.xn--p1ai");
+	});
 });

@@ -101,11 +101,15 @@ export const SanitizedStringSchema = S.String;
 export type SanitizedString = typeof SanitizedStringSchema.Type;
 
 /**
- * Schema for email address validation
+ * Schema for email address validation.
+ *
+ * Accepts a 2+ character alphabetic TLD or a Punycode/IDN `xn--…` TLD (e.g.
+ * `.xn--p1ai` for `.рф`) so internationalized domains are not rejected. Kept in
+ * sync with `@resq-systems/email-templates`'s `EmailAddress` brand.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const EmailSchema = S.String.check(
-	S.isPattern(/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/),
+	S.isPattern(/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.(?:[A-Za-z]{2,}|xn--[A-Za-z0-9-]+)$/),
 );
 /** A string that has passed {@link isValidEmail}. */
 export type Email = Brand<string, "Email">;

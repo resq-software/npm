@@ -247,6 +247,10 @@ describe("Validation helpers", () => {
 			expect(isValidEmail("user.name@domain.org")).toBe(true);
 		});
 
+		it("should accept Punycode/IDN TLDs", () => {
+			expect(isValidEmail("user@example.xn--p1ai")).toBe(true);
+		});
+
 		it("should reject invalid emails", () => {
 			expect(isValidEmail("invalid")).toBe(false);
 			expect(isValidEmail("@example.com")).toBe(false);
