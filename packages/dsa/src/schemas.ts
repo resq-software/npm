@@ -137,18 +137,28 @@ export const GraphEdgeSchema = S.Struct({
 /** Inferred TS type for {@link GraphEdgeSchema}. */
 export type GraphEdge = S.Schema.Type<typeof GraphEdgeSchema>;
 
-/** Schema for a graph vertex identifier (non-empty string). */
-export const VertexIdSchema = S.String.check(S.isMinLength(1));
-/** Inferred TS type for {@link VertexIdSchema}. */
+/**
+ * Schema for a graph vertex identifier: a non-empty string carrying a
+ * nominal `VertexId` brand. A `VertexId` is assignable to `string`, but a
+ * plain `string` is not assignable to `VertexId` without going through
+ * validation — see {@link isValidVertexId}.
+ */
+export const VertexIdSchema = S.String.check(S.isMinLength(1)).pipe(S.brand("VertexId"));
+/** Inferred TS type for {@link VertexIdSchema} — `string & Brand<"VertexId">`. */
 export type VertexId = S.Schema.Type<typeof VertexIdSchema>;
 
 // ============================================
 // Validation Helpers
 // ============================================
 
-// biome-ignore lint: Effect Schema generics require flexible typing for cross-version compat
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnySchema = S.Schema<any>;
+/**
+ * Marker constraint for "any schema decoding with no service context".
+ *
+ * `S.Codec<unknown>` fixes both decoding and encoding services to `never`, so
+ * it satisfies the `decodeUnknownSync` bound while every concrete schema in
+ * this module remains assignable to it — no `any` and no unsafe casts required.
+ */
+type AnySchema = S.Codec<unknown>;
 
 /**
  * Decode `input` against `schema` synchronously, throwing on failure.
@@ -160,9 +170,8 @@ type AnySchema = S.Schema<any>;
  *
  * @throws The Effect parse error from `decodeUnknownSync`.
  */
-export function validate<T extends AnySchema>(schema: T, input: unknown): S.Schema.Type<T> {
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-	return (S.decodeUnknownSync as Function)(schema)(input);
+export function validate<T extends AnySchema>(schema: T, input: unknown): T["Type"] {
+	return S.decodeUnknownSync(schema)(input);
 }
 
 type ValidationSuccess<A> = { readonly success: true; readonly data: A };
@@ -187,10 +196,9 @@ type ValidationResult<A> = ValidationSuccess<A> | ValidationFailure;
 export function validateSafe<T extends AnySchema>(
 	schema: T,
 	input: unknown,
-): ValidationResult<S.Schema.Type<T>> {
+): ValidationResult<T["Type"]> {
 	try {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-		const data: S.Schema.Type<T> = (S.decodeUnknownSync as Function)(schema)(input);
+		const data: T["Type"] = S.decodeUnknownSync(schema)(input);
 		return { success: true, data };
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "Validation failed";
@@ -208,9 +216,6 @@ export function validateSafe<T extends AnySchema>(
  * const edge = parseEdge(rawJson);
  * ```
  */
-export function createValidator<T extends AnySchema>(
-	schema: T,
-): (input: unknown) => S.Schema.Type<T> {
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-	return (input: unknown) => (S.decodeUnknownSync as Function)(schema)(input);
+export function createValidator<T extends AnySchema>(schema: T): (input: unknown) => T["Type"] {
+	return (input: unknown) => S.decodeUnknownSync(schema)(input);
 }

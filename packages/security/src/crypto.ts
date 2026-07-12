@@ -26,6 +26,13 @@
  * @compliance NIST 800-53 SC-13 (Cryptographic Protection)
  */
 
+import {
+	type Brand,
+	brandRefiner,
+	type PositiveInt,
+	toPositiveInt,
+	unsafeBrand,
+} from "@resq-systems/types";
 import { createCipheriv, createDecipheriv, createHash, randomBytes, scrypt } from "node:crypto";
 import { promisify } from "node:util";
 
@@ -41,6 +48,77 @@ const AUTH_TAG_LENGTH = 16;
 const SALT_LENGTH = 32;
 /** Derived key length (256 bits for AES-256) */
 const KEY_LENGTH = 32;
+
+// ============================================
+// Nominal (branded) types
+// ============================================
+
+/**
+ * Base64 AES-256-GCM payload produced by {@link encryptData} — the
+ * `salt | iv | authTag | ciphertext` envelope. Only {@link decryptData}
+ * should consume a value of this type; read one back from storage through
+ * {@link toCiphertext}.
+ */
+export type Ciphertext = Brand<string, "Ciphertext">;
+
+/**
+ * A secret accepted by {@link encryptData}/{@link decryptData} as the
+ * scrypt password. Mint one at the boundary where the secret enters the
+ * process (typically from `process.env`) via {@link toEncryptionKey}.
+ */
+export type EncryptionKey = Brand<string, "EncryptionKey">;
+
+/** Cryptographically random hex token minted by {@link generateSecureToken}. */
+export type SecureToken = Brand<string, "SecureToken">;
+
+/** Lowercase 64-char SHA-256 hex digest produced by {@link hashData}. */
+export type Sha256Hex = Brand<string, "Sha256Hex">;
+
+/** A PII string masked for safe logging by {@link maskPII}/{@link maskEmail}. */
+export type Masked = Brand<string, "Masked">;
+
+/** Minimum decoded byte length of a well-formed {@link Ciphertext} envelope. */
+const CIPHERTEXT_MIN_BYTES = SALT_LENGTH + IV_LENGTH + AUTH_TAG_LENGTH;
+
+/**
+ * Smart constructors for {@link EncryptionKey}. The runtime check is a
+ * non-empty string — scrypt stretches any non-empty secret into a 256-bit
+ * key, so entropy is the caller's responsibility, but an empty key is
+ * always a bug.
+ */
+const EncryptionKeyBrand = brandRefiner<string, "EncryptionKey">(
+	(value) => value.length > 0,
+	"encryption key",
+);
+
+/** Type guard: `true` when `value` is a usable {@link EncryptionKey}. */
+export const isEncryptionKey = EncryptionKeyBrand.is;
+/** Assert `value` is a non-empty secret and brand it, throwing otherwise. */
+export const toEncryptionKey = EncryptionKeyBrand.from;
+/** Return `value` branded as an {@link EncryptionKey}, or `null` when empty. */
+export const coerceEncryptionKey = EncryptionKeyBrand.coerce;
+/** Brand `value` as an {@link EncryptionKey} without checking. */
+export const unsafeEncryptionKey = EncryptionKeyBrand.unsafe;
+
+/**
+ * Smart constructors for {@link Ciphertext}. The runtime check verifies the
+ * value base64-decodes to at least the fixed envelope header size — enough
+ * to reject truncated or non-base64 input before it reaches
+ * {@link decryptData}.
+ */
+const CiphertextBrand = brandRefiner<string, "Ciphertext">(
+	(value) => value.length > 0 && Buffer.from(value, "base64").length >= CIPHERTEXT_MIN_BYTES,
+	"ciphertext",
+);
+
+/** Type guard: `true` when `value` is a well-formed {@link Ciphertext} envelope. */
+export const isCiphertext = CiphertextBrand.is;
+/** Assert `value` is a well-formed envelope and brand it, throwing otherwise. */
+export const toCiphertext = CiphertextBrand.from;
+/** Return `value` branded as a {@link Ciphertext}, or `null` when malformed. */
+export const coerceCiphertext = CiphertextBrand.coerce;
+/** Brand `value` as a {@link Ciphertext} without checking. */
+export const unsafeCiphertext = CiphertextBrand.unsafe;
 
 /**
  * Derive a 32-byte (AES-256) key from a password and per-record salt
@@ -86,7 +164,10 @@ async function deriveKey(password: string, salt: Buffer): Promise<Buffer> {
  * await db.users.update(id, { email: ct });
  * ```
  */
-export async function encryptData(plaintext: string, encryptionKey: string): Promise<string> {
+export async function encryptData(
+	plaintext: string,
+	encryptionKey: EncryptionKey,
+): Promise<Ciphertext> {
 	const salt = randomBytes(SALT_LENGTH);
 	const key = await deriveKey(encryptionKey, salt);
 	const iv = randomBytes(IV_LENGTH);
@@ -96,7 +177,7 @@ export async function encryptData(plaintext: string, encryptionKey: string): Pro
 	const authTag = cipher.getAuthTag();
 
 	const combined = Buffer.concat([salt, iv, authTag, encrypted]);
-	return combined.toString("base64");
+	return CiphertextBrand.unsafe(combined.toString("base64"));
 }
 
 /**
@@ -120,7 +201,10 @@ export async function encryptData(plaintext: string, encryptionKey: string): Pro
  * const plaintext = await decryptData(stored, process.env.PII_KEY!);
  * ```
  */
-export async function decryptData(encryptedData: string, encryptionKey: string): Promise<string> {
+export async function decryptData(
+	encryptedData: Ciphertext,
+	encryptionKey: EncryptionKey,
+): Promise<string> {
 	const combined = Buffer.from(encryptedData, "base64");
 
 	const salt = combined.subarray(0, SALT_LENGTH);
@@ -157,8 +241,8 @@ export async function decryptData(encryptedData: string, encryptionKey: string):
  * hashData("hello"); // → "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
  * ```
  */
-export function hashData(data: string): string {
-	return createHash("sha256").update(data).digest("hex");
+export function hashData(data: string): Sha256Hex {
+	return unsafeBrand<"Sha256Hex", string>(createHash("sha256").update(data).digest("hex"));
 }
 
 /**
@@ -166,19 +250,21 @@ export function hashData(data: string): string {
  * IDs, password-reset tokens, CSRF tokens, and similar single-use
  * secrets.
  *
- * @param length - Number of random *bytes* to draw (the returned hex
- *   string is twice as long). Default `32` ⇒ 64-char hex / 256 bits of
- *   entropy.
- * @returns Lowercase hex string of length `length * 2`.
+ * @param length - Number of random *bytes* to draw as a {@link PositiveInt}
+ *   (the returned hex string is twice as long). Default `32` ⇒ 64-char hex
+ *   / 256 bits of entropy. Construct non-default lengths with `toPositiveInt`
+ *   so zero-byte and negative lengths are unrepresentable.
+ * @returns A {@link SecureToken}: lowercase hex string of length `length * 2`.
  *
  * @example
  * ```ts
- * generateSecureToken();    // 64-char hex (256-bit entropy)
- * generateSecureToken(16);  // 32-char hex (128-bit entropy)
+ * import { toPositiveInt } from "@resq-systems/types";
+ * generateSecureToken();                 // 64-char hex (256-bit entropy)
+ * generateSecureToken(toPositiveInt(16)); // 32-char hex (128-bit entropy)
  * ```
  */
-export function generateSecureToken(length: number = 32): string {
-	return randomBytes(length).toString("hex");
+export function generateSecureToken(length: PositiveInt = toPositiveInt(32)): SecureToken {
+	return unsafeBrand<"SecureToken", string>(randomBytes(length).toString("hex"));
 }
 
 /**
@@ -195,11 +281,13 @@ export function generateSecureToken(length: number = 32): string {
  * maskPII("AB12");              // → "****"
  * ```
  */
-export function maskPII(data: string): string {
+export function maskPII(data: string): Masked {
 	if (data.length <= 4) {
-		return "****";
+		return unsafeBrand<"Masked", string>("****");
 	}
-	return `${data.slice(0, 2)}${"*".repeat(data.length - 4)}${data.slice(-2)}`;
+	return unsafeBrand<"Masked", string>(
+		`${data.slice(0, 2)}${"*".repeat(data.length - 4)}${data.slice(-2)}`,
+	);
 }
 
 /**
@@ -218,7 +306,7 @@ export function maskPII(data: string): string {
  * maskEmail("not-an-email");     // → "no********il" (maskPII fallback)
  * ```
  */
-export function maskEmail(email: string): string {
+export function maskEmail(email: string): Masked {
 	const parts = email.split("@");
 	const local = parts[0];
 	const domain = parts[1];
@@ -227,7 +315,7 @@ export function maskEmail(email: string): string {
 		local.length > 2
 			? `${local[0]}${"*".repeat(local.length - 2)}${local[local.length - 1]}`
 			: "**";
-	return `${maskedLocal}@${domain}`;
+	return unsafeBrand<"Masked", string>(`${maskedLocal}@${domain}`);
 }
 
 /**
@@ -261,8 +349,8 @@ export function maskEmail(email: string): string {
  * // → { id: 1, email: "u@x.com" (masked), apiKey: "[REDACTED]", nested: { token: "[REDACTED]" } }
  * ```
  */
-export function sanitizeForLogging<T extends Record<string, unknown>>(
-	obj: T,
+export function sanitizeForLogging(
+	obj: Record<string, unknown>,
 	sensitiveFields: string[] = [
 		"password",
 		"passwordHash",
@@ -271,7 +359,7 @@ export function sanitizeForLogging<T extends Record<string, unknown>>(
 		"twoFactorSecret",
 		"apiKey",
 	],
-): Partial<T> {
+): Record<string, unknown> {
 	const sanitized: Record<string, unknown> = {};
 
 	for (const [key, value] of Object.entries(obj)) {
@@ -286,5 +374,5 @@ export function sanitizeForLogging<T extends Record<string, unknown>>(
 		}
 	}
 
-	return sanitized as Partial<T>;
+	return sanitized;
 }

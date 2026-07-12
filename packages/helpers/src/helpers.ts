@@ -166,9 +166,6 @@ export const success = <T>(value: T): Success<T> => Object.freeze({ success: tru
  */
 export const failure = <E>(error: E): Failure<E> => Object.freeze({ success: false, error });
 
-type ExtractAsyncArgs<Args extends Array<unknown>> =
-	Args extends Array<infer PotentialArgTypes> ? [PotentialArgTypes] : [];
-
 /**
  * Run an async function and convert thrown errors into a {@link Failure}
  * branch instead of rejecting the returned promise.
@@ -192,10 +189,10 @@ type ExtractAsyncArgs<Args extends Array<unknown>> =
  * else logger.warn("fetch failed", r.error);
  * ```
  */
-export const catchError = async <Args extends Array<unknown>, ReturnType>(
-	asyncFunction: (...args: ExtractAsyncArgs<Args>) => Promise<ReturnType>,
-	...args: ExtractAsyncArgs<Args>
-): Promise<Result<ReturnType, Error>> => {
+export const catchError = async <Args extends readonly unknown[], R>(
+	asyncFunction: (...args: Args) => Promise<R>,
+	...args: Args
+): Promise<Result<R, Error>> => {
 	try {
 		const result = await asyncFunction(...args);
 		return success(result);

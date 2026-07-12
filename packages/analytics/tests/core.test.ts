@@ -16,16 +16,21 @@
  *
  */
 
+import { unsafeBrand } from "@resq-systems/types";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	Analytics,
 	GA4_ID_PATTERN,
+	type Ga4MeasurementId,
 	inferCookieDomain,
 	RESQ_SUBDOMAIN_ALLOWLIST,
 	resolveResqCookieDomain,
 	sanitizeGa4Id,
 } from "../src/index";
 import { ga4Stream, withAnalyticsRewrites } from "../src/next/index";
+
+/** Mint a branded GA4 id for tests without going through the regex boundary. */
+const gid = (id: string): Ga4MeasurementId => unsafeBrand<"Ga4MeasurementId", string>(id);
 
 describe("inferCookieDomain", () => {
 	it("returns the registrable root with a leading dot", () => {
@@ -53,14 +58,14 @@ describe("inferCookieDomain", () => {
 
 describe("ga4Stream", () => {
 	it("builds a GA4 config with domains", () => {
-		expect(ga4Stream("G-XXXXXXX", ["resq.software", "research.resq.software"])).toEqual({
+		expect(ga4Stream(gid("G-XXXXXXX"), ["resq.software", "research.resq.software"])).toEqual({
 			measurementId: "G-XXXXXXX",
 			domains: ["resq.software", "research.resq.software"],
 		});
 	});
 
 	it("omits domains when none provided", () => {
-		expect(ga4Stream("G-XXXXXXX")).toEqual({
+		expect(ga4Stream(gid("G-XXXXXXX"))).toEqual({
 			measurementId: "G-XXXXXXX",
 			domains: undefined,
 		});
@@ -166,7 +171,7 @@ describe("Analytics class", () => {
 
 	it("disabled mode still records config but skips dispatch", async () => {
 		const a = new Analytics();
-		await a.init({ disabled: true, ga4: { measurementId: "G-X" } });
+		await a.init({ disabled: true, ga4: { measurementId: gid("G-X") } });
 		expect(a.config?.disabled).toBe(true);
 		expect(() => a.track("noop")).not.toThrow();
 	});
@@ -177,7 +182,7 @@ describe("Analytics class", () => {
 			dataLayer: { push: (args: unknown[]) => captured.push(args) },
 		};
 		const a = new Analytics();
-		await a.init({ ga4: { measurementId: "G-X" } });
+		await a.init({ ga4: { measurementId: gid("G-X") } });
 		a.track("cta_clicked", {
 			id: "hero",
 			section: "landing",
@@ -196,7 +201,7 @@ describe("Analytics class", () => {
 			dataLayer: { push: (args: unknown[]) => captured.push(args) },
 		};
 		const a = new Analytics();
-		await a.init({ ga4: { measurementId: "G-X" } });
+		await a.init({ ga4: { measurementId: gid("G-X") } });
 		a.identify("user-1");
 		a.reset();
 		const resetConfig = captured.findLast(

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { toPositiveInt } from "@resq-systems/types";
 import { describe, expect, it } from "vitest";
 import {
 	decryptData,
@@ -23,12 +24,13 @@ import {
 	maskEmail,
 	maskPII,
 	sanitizeForLogging,
+	toEncryptionKey,
 } from "../src/crypto.js";
 
 describe("encryptData / decryptData", () => {
 	it("should roundtrip a simple string", async () => {
 		const plaintext = "hello world";
-		const key = "my-secret-key";
+		const key = toEncryptionKey("my-secret-key");
 		const encrypted = await encryptData(plaintext, key);
 		const decrypted = await decryptData(encrypted, key);
 		expect(decrypted).toBe(plaintext);
@@ -36,19 +38,19 @@ describe("encryptData / decryptData", () => {
 
 	it("should produce different ciphertext on each call (random IV/salt)", async () => {
 		const plaintext = "deterministic?";
-		const key = "key123";
+		const key = toEncryptionKey("key123");
 		const a = await encryptData(plaintext, key);
 		const b = await encryptData(plaintext, key);
 		expect(a).not.toBe(b);
 	});
 
 	it("should fail to decrypt with wrong key", async () => {
-		const encrypted = await encryptData("secret", "correct-key");
-		await expect(decryptData(encrypted, "wrong-key")).rejects.toThrow();
+		const encrypted = await encryptData("secret", toEncryptionKey("correct-key"));
+		await expect(decryptData(encrypted, toEncryptionKey("wrong-key"))).rejects.toThrow();
 	});
 
 	it("should roundtrip an empty string", async () => {
-		const key = "key";
+		const key = toEncryptionKey("key");
 		const encrypted = await encryptData("", key);
 		const decrypted = await decryptData(encrypted, key);
 		expect(decrypted).toBe("");
@@ -56,7 +58,7 @@ describe("encryptData / decryptData", () => {
 
 	it("should roundtrip unicode content", async () => {
 		const plaintext = "Hello \u{1F600} \u00E9\u00E8\u00EA \u4F60\u597D";
-		const key = "unicode-key";
+		const key = toEncryptionKey("unicode-key");
 		const encrypted = await encryptData(plaintext, key);
 		const decrypted = await decryptData(encrypted, key);
 		expect(decrypted).toBe(plaintext);
@@ -64,7 +66,7 @@ describe("encryptData / decryptData", () => {
 
 	it("should roundtrip special characters", async () => {
 		const plaintext = "!@#$%^&*()_+-={}[]|\\:\";'<>?,./~`";
-		const key = "special-chars";
+		const key = toEncryptionKey("special-chars");
 		const encrypted = await encryptData(plaintext, key);
 		const decrypted = await decryptData(encrypted, key);
 		expect(decrypted).toBe(plaintext);
@@ -72,14 +74,14 @@ describe("encryptData / decryptData", () => {
 
 	it("should roundtrip a long string", async () => {
 		const plaintext = "x".repeat(10000);
-		const key = "long-key";
+		const key = toEncryptionKey("long-key");
 		const encrypted = await encryptData(plaintext, key);
 		const decrypted = await decryptData(encrypted, key);
 		expect(decrypted).toBe(plaintext);
 	});
 
 	it("should produce base64-encoded output", async () => {
-		const encrypted = await encryptData("test", "key");
+		const encrypted = await encryptData("test", toEncryptionKey("key"));
 		expect(() => Buffer.from(encrypted, "base64")).not.toThrow();
 		// Re-encoding to base64 should match the original
 		expect(Buffer.from(encrypted, "base64").toString("base64")).toBe(encrypted);
@@ -123,7 +125,7 @@ describe("generateSecureToken", () => {
 	});
 
 	it("should generate a token with custom length", () => {
-		const token = generateSecureToken(16);
+		const token = generateSecureToken(toPositiveInt(16));
 		expect(token).toMatch(/^[0-9a-f]{32}$/);
 	});
 
@@ -133,7 +135,7 @@ describe("generateSecureToken", () => {
 	});
 
 	it("should handle length of 1", () => {
-		const token = generateSecureToken(1);
+		const token = generateSecureToken(toPositiveInt(1));
 		expect(token).toMatch(/^[0-9a-f]{2}$/);
 	});
 });

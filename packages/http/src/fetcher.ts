@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { assertNever } from "@resq-systems/types";
 import { Cause, Duration, Effect, Exit, pipe, Schedule, Schema } from "effect";
 import {
 	HttpClient,
@@ -25,8 +26,12 @@ import {
 /**
  * A Schema with DecodingServices constrained to `never`, allowing synchronous decoding.
  * All standard built-in schemas (e.g. `Schema.Struct(...)`) satisfy this constraint.
+ *
+ * The Encoded slot is `unknown` (not `any`): `Codec`'s encoded type parameter is
+ * covariant, so every concrete schema — whose encoded type is a real, specific
+ * type — still satisfies the constraint, without opening an `any` hole.
  */
-type SyncSchema<T> = Schema.Codec<T, any, never>;
+type SyncSchema<T> = Schema.Codec<T, unknown, never>;
 
 /**
  * Configuration options for the fetcher utility.
@@ -76,10 +81,26 @@ export type HttpMethod = Schema.Schema.Type<typeof HttpMethod>;
  */
 export type QueryParams = Schema.Schema.Type<typeof QueryParams>;
 /**
- * Represents a type-safe request body for HTTP methods that support a body.
- * Can be an object, array, string, number, boolean, or null.
+ * A JSON-serialisable value: the recursive shape `bodyType: "json"` (the
+ * default) accepts and `HttpClientRequest.bodyJson` can encode.
  */
-export type RequestBody = Schema.Schema.Type<typeof RequestBody>;
+export type JsonValue =
+	| string
+	| number
+	| boolean
+	| null
+	| { readonly [key: string]: JsonValue }
+	| readonly JsonValue[];
+
+/**
+ * Represents a type-safe request body for HTTP methods that support a body.
+ *
+ * Either a JSON-serialisable value (encoded via `bodyType: "json"`/`"text"`) or
+ * a {@link FormData} instance (encoded via `bodyType: "form"`). These are the
+ * two shapes the request builder actually supports; other transport payloads
+ * are intentionally excluded so the type never lies about what will be sent.
+ */
+export type RequestBody = JsonValue | FormData;
 /**
  * Represents HTTP headers as key-value string pairs.
  */
@@ -128,9 +149,6 @@ const QueryParams = Schema.Record(
 		Schema.Array(Schema.Union([Schema.String, Schema.Number, Schema.Boolean])),
 	]),
 );
-// Request body type definition
-const RequestBody = Schema.Any;
-
 // Headers type definition
 const Headers = Schema.Record(Schema.String, Schema.String);
 
@@ -254,6 +272,8 @@ const buildRequest = (method: HttpMethod, url: string): HttpClientRequest.HttpCl
 			return HttpClientRequest.options(url);
 		case "HEAD":
 			return HttpClientRequest.head(url);
+		default:
+			return assertNever(method);
 	}
 };
 
@@ -594,8 +614,21 @@ export function fetcher<T = unknown>(
 		let req = buildRequest(method, url);
 
 		if (body != null && (method === "POST" || method === "PUT" || method === "PATCH")) {
-			if (bodyType === "form" || body instanceof FormData) {
-				req = HttpClientRequest.bodyFormData(body as FormData)(req);
+			if (body instanceof FormData) {
+				// Real FormData: safe to encode as multipart, regardless of bodyType.
+				req = HttpClientRequest.bodyFormData(body)(req);
+			} else if (bodyType === "form") {
+				// bodyType 'form' was requested but the body is not FormData — the old
+				// `as FormData` cast lied here. Fail fast rather than send a malformed body.
+				return yield* Effect.fail(
+					new FetcherError(
+						"bodyType 'form' requires a FormData body",
+						url,
+						undefined,
+						undefined,
+						attempt,
+					),
+				);
 			} else if (bodyType === "text") {
 				const textBody = typeof body === "object" ? JSON.stringify(body) : String(body);
 				req = HttpClientRequest.bodyText(textBody)(req);
@@ -668,11 +701,15 @@ export function get<T = unknown>(
 	params?: QueryParams,
 ): Effect.Effect<T, FetcherError | FetcherValidationError, HttpClient.HttpClient>;
 
-export function get<A>(
+export function get<S extends SyncSchema<Schema.Schema.Type<S>>>(
 	url: string,
-	options: FetcherOptions<A> & { schema: Schema.Schema<A> },
+	options: FetcherOptions<Schema.Schema.Type<S>> & { schema: S },
 	params?: QueryParams,
-): Effect.Effect<A, FetcherError | FetcherValidationError, HttpClient.HttpClient>;
+): Effect.Effect<
+	Schema.Schema.Type<S>,
+	FetcherError | FetcherValidationError,
+	HttpClient.HttpClient
+>;
 
 /**
  * Issue an HTTP GET. Convenience wrapper around {@link fetcher}.

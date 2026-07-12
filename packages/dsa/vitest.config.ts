@@ -18,5 +18,13 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
 	test: {
 		include: ["tests/**/*.test.ts"],
+		// Type-level assertions (expectTypeOf / @ts-expect-error) live in
+		// tests/**/*.test-d.ts and are verified by the typechecker, not the runtime.
+		// `enabled: true` makes `vitest run` type-check them as part of the suite.
+		typecheck: {
+			enabled: true,
+			include: ["tests/**/*.test-d.ts"],
+			tsconfig: "./tsconfig.test.json",
+		},
 	},
 });

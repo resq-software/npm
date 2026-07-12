@@ -48,6 +48,34 @@ export interface PriorityQueueOptions<T> {
 }
 
 /**
+ * Element types the built-in default comparator can order safely: the JS
+ * primitives with a meaningful `<`/`-` ordering.
+ */
+type Comparable = number | string | bigint;
+
+/**
+ * Options refined by element type. For {@link Comparable} elements the default
+ * numeric/lexicographic comparator is sound, so `compareFn` stays optional. For
+ * every other element type (objects, tuples, unions, …) a `compareFn` is
+ * **required** — otherwise the default comparator would stringify elements and
+ * silently mis-order them, which is dangerous for a triage/dispatch queue.
+ */
+export type PQOptions<T> = [T] extends [Comparable]
+	? PriorityQueueOptions<T>
+	: PriorityQueueOptions<T> & Required<Pick<PriorityQueueOptions<T>, "compareFn">>;
+
+/**
+ * Constructor/factory argument tuple derived from {@link PQOptions}. The tuple
+ * makes the options argument optional for {@link Comparable} elements but
+ * required for non-comparable ones, so `new PriorityQueue<Task>()` (object
+ * element, no comparator) is a compile error while `new PriorityQueue<number>()`
+ * keeps working.
+ */
+export type PQArgs<T> = [T] extends [Comparable]
+	? [options?: PQOptions<T>]
+	: [options: PQOptions<T>];
+
+/**
  * Priority queue statistics
  */
 export interface PriorityQueueStats {
@@ -103,7 +131,9 @@ export class PriorityQueue<T> {
 	 * @param options - Configuration options
 	 * @throws Error if options validation fails
 	 */
-	constructor(options: PriorityQueueOptions<T> = {}) {
+	constructor(...args: PQArgs<T>) {
+		const options: PriorityQueueOptions<T> = args[0] ?? {};
+
 		// Validate options using Effect Schema (only numeric options)
 		const validation = validateSafe(PriorityQueueOptionsSchema, {
 			initialCapacity: options.initialCapacity,
@@ -308,8 +338,8 @@ export class PriorityQueue<T> {
 	 * @param options - Queue options
 	 * @returns New priority queue with elements
 	 */
-	static from<T>(elements: T[], options: PriorityQueueOptions<T> = {}): PriorityQueue<T> {
-		const queue = new PriorityQueue<T>(options);
+	static from<T>(elements: T[], ...args: PQArgs<T>): PriorityQueue<T> {
+		const queue = new PriorityQueue<T>(...args);
 		queue.enqueueAll(elements);
 		return queue;
 	}
@@ -459,28 +489,38 @@ export function createPriorityLevelQueue(): PriorityQueue<PriorityRequestItem> {
 }
 
 /**
- * Creates a max-heap priority queue (highest value = highest priority)
+ * Creates a max-heap priority queue (highest value = highest priority).
+ *
+ * For {@link Comparable} elements the ordering is derived automatically. For
+ * non-comparable elements a `compareFn` is required (min-ordering semantics);
+ * it is wrapped so the largest element sits at the head.
  *
  * @returns Max-heap priority queue
  */
-export function createMaxHeap<T>(): PriorityQueue<T> {
-	return new PriorityQueue<T>({
-		compareFn: (a, b) => {
-			if (typeof a === "number" && typeof b === "number") {
-				return b - a; // Reverse for max-heap
-			}
-			return String(b).localeCompare(String(a));
-		},
-	});
+export function createMaxHeap<T>(...args: PQArgs<T>): PriorityQueue<T> {
+	const options: PriorityQueueOptions<T> = args[0] ?? {};
+	const userCompare = options.compareFn;
+	const compareFn: CompareFn<T> = userCompare
+		? (a, b) => userCompare(b, a)
+		: (a, b) => {
+				if (typeof a === "number" && typeof b === "number") {
+					return b - a; // Reverse for max-heap
+				}
+				return String(b).localeCompare(String(a));
+			};
+	return new PriorityQueue<T>({ ...options, compareFn });
 }
 
 /**
- * Creates a min-heap priority queue (lowest value = highest priority)
+ * Creates a min-heap priority queue (lowest value = highest priority).
+ *
+ * For {@link Comparable} elements no options are required; for non-comparable
+ * elements a `compareFn` is required (see {@link PQArgs}).
  *
  * @returns Min-heap priority queue
  */
-export function createMinHeap<T>(): PriorityQueue<T> {
-	return new PriorityQueue<T>();
+export function createMinHeap<T>(...args: PQArgs<T>): PriorityQueue<T> {
+	return new PriorityQueue<T>(...args);
 }
 
 /**
@@ -489,5 +529,5 @@ export function createMinHeap<T>(): PriorityQueue<T> {
  */
 export function validatePriorityItem(input: unknown): PriorityItemInput | null {
 	const result = validateSafe(PriorityItemSchema, input);
-	return result.success ? (result.data as PriorityItemInput) : null;
+	return result.success ? result.data : null;
 }

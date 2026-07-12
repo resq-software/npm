@@ -29,6 +29,21 @@ describe("colors", () => {
 			expect(value).toMatch(/^oklch\(/);
 		}
 	});
+
+	it("defines oklch for exactly the six shared roles", () => {
+		expect(Object.keys(colors.oklch).sort()).toEqual(
+			["background", "border", "foreground", "muted", "primary", "surface"].sort(),
+		);
+	});
+
+	it("keeps hex a superset of the oklch roles (shared roles + status roles)", () => {
+		for (const role of Object.keys(colors.oklch)) {
+			expect(colors.hex).toHaveProperty(role);
+		}
+		expect(Object.keys(colors.hex)).toEqual(
+			expect.arrayContaining(["info", "success", "warning", "danger"]),
+		);
+	});
 });
 
 describe("fonts", () => {

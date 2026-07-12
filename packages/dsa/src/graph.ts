@@ -21,7 +21,13 @@
  *              Supports BFS, DFS, Dijkstra's shortest path, A* search, and topological sort.
  */
 
-import { GraphEdgeSchema, GraphOptionsSchema, VertexIdSchema, validateSafe } from "./schemas.js";
+import {
+	GraphEdgeSchema,
+	GraphOptionsSchema,
+	type VertexId,
+	VertexIdSchema,
+	validateSafe,
+} from "./schemas.js";
 
 // ============================================
 // Types & Interfaces
@@ -441,7 +447,8 @@ export class Graph<T> {
 
 		while (open.length > 0) {
 			open.sort((a, b) => (f.get(a) ?? Infinity) - (f.get(b) ?? Infinity));
-			const u = open.shift()!;
+			const u = open.shift();
+			if (u === undefined) break;
 
 			if (u === end) {
 				const path: T[] = [];
@@ -450,7 +457,8 @@ export class Graph<T> {
 					path.unshift(cur);
 					cur = prev.get(cur);
 				}
-				return { path, cost: g.get(end)! };
+				const cost = g.get(end);
+				return cost === undefined ? null : { path, cost };
 			}
 
 			for (const edge of this.getNeighbors(u)) {
@@ -690,7 +698,7 @@ export function addValidatedEdge(
  *
  * @returns True if valid
  */
-export function isValidVertexId(id: unknown): id is string {
+export function isValidVertexId(id: unknown): id is VertexId {
 	const validation = validateSafe(VertexIdSchema, id);
 	return validation.success;
 }

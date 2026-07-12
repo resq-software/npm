@@ -80,6 +80,7 @@
 		"node": ">=20.19.0"
 	},
 	"dependencies": {
+		"@resq-systems/types": "workspace:*",
 		"dompurify": "^3.4.11"
 	}
 }

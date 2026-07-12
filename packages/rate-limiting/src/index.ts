@@ -42,5 +42,6 @@
  * ```
  */
 
+export * from "./decision.js";
 export * from "./throttle.js";
 export * from "./rate-limit.js";

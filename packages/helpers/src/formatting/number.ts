@@ -49,8 +49,9 @@ export function formatNumber(num: number): string {
  * the historical convention rather than IEC's KiB/MiB/… Pick whichever
  * matches your product surface and stick with it.
  *
- * @param bytes - Non-negative byte count. `0` returns `"0 Bytes"`.
- *   Negative inputs return `NaN` from the underlying `log`.
+ * @param bytes - Byte count. `0`, negative, `NaN`, and non-finite inputs
+ *   all return `"0 Bytes"`. Values at or beyond 1 PiB are clamped to the
+ *   largest available unit (`TB`) rather than overflowing the unit table.
  *
  * @returns Human-readable size to two decimal places, e.g. `"1.50 MB"`.
  *
@@ -63,11 +64,19 @@ export function formatNumber(num: number): string {
  * ```
  */
 export function formatBytes(bytes: number): string {
-	if (bytes === 0) return "0 Bytes";
+	if (!Number.isFinite(bytes) || bytes <= 0) return "0 Bytes";
 	const k = 1024;
-	const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return `${Math.round((bytes / k ** i) * 100) / 100} ${sizes[i]}`;
+	const sizes = ["Bytes", "KB", "MB", "GB", "TB"] as const;
+	// Divide-and-count rather than Math.log(bytes)/Math.log(k): the logarithm
+	// approach is off-by-one at exact powers of 1024 on some runtimes (floating-
+	// point rounding), reporting e.g. "1024 KB" instead of "1 MB".
+	let value = bytes;
+	let i = 0;
+	while (value >= k && i < sizes.length - 1) {
+		value /= k;
+		i += 1;
+	}
+	return `${Math.round(value * 100) / 100} ${sizes[i]}`;
 }
 
 /**

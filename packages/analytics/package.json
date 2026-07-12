@@ -32,6 +32,9 @@
 		"build": "tsdown",
 		"test": "vitest run"
 	},
+	"dependencies": {
+		"@resq-systems/types": "workspace:*"
+	},
 	"peerDependencies": {
 		"posthog-js": ">=1.180.0",
 		"react": ">=19",

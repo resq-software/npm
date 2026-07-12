@@ -74,6 +74,25 @@ describe("formatBytes", () => {
 		// 2.5 MB = 2621440 bytes
 		expect(formatBytes(2_621_440)).toBe("2.5 MB");
 	});
+
+	test('returns "0 Bytes" for negative input', () => {
+		expect(formatBytes(-1024)).toBe("0 Bytes");
+	});
+
+	test('returns "0 Bytes" for NaN', () => {
+		expect(formatBytes(Number.NaN)).toBe("0 Bytes");
+	});
+
+	test('returns "0 Bytes" for Infinity', () => {
+		expect(formatBytes(Number.POSITIVE_INFINITY)).toBe("0 Bytes");
+	});
+
+	test("clamps units at or beyond 1 PiB to TB (never emits undefined)", () => {
+		// 1 PiB = 1024^5 bytes, which is one unit beyond the TB table entry.
+		const result = formatBytes(1024 ** 5);
+		expect(result).toContain("TB");
+		expect(result).not.toContain("undefined");
+	});
 });
 
 describe("formatPercent", () => {

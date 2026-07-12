@@ -33,6 +33,7 @@
 	},
 	"dependencies": {
 		"@resq-systems/logger": "^0.1.2",
+		"@resq-systems/types": "workspace:*",
 		"tinyqueue": "^3.0.0"
 	},
 	"devDependencies": {

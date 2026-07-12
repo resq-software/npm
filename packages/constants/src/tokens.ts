@@ -22,6 +22,20 @@
  * snapshot (email clients and older targets do not support `oklch()`). Keep the
  * two representations in sync when the palette changes.
  */
+/**
+ * The six canonical color roles present in **both** representations. `oklch`
+ * (the design-system source of truth) and `hex` (the email-safe snapshot) must
+ * each define every one of these.
+ */
+export type ColorRole = "background" | "surface" | "border" | "foreground" | "muted" | "primary";
+
+/**
+ * Status roles that exist only in the email-safe `hex` snapshot. `oklch` does
+ * not define these, so they are indexable on `colors.hex` but never on
+ * `colors.oklch`.
+ */
+export type StatusRole = "info" | "success" | "warning" | "danger";
+
 export const colors = {
 	oklch: {
 		background: "oklch(16.63% 0.0262 269.37)",
@@ -43,8 +57,19 @@ export const colors = {
 		warning: "#E0A100",
 		danger: "#D43E3F",
 	},
-} as const;
+} as const satisfies {
+	oklch: Record<ColorRole, string>;
+	hex: Record<ColorRole | StatusRole, string>;
+};
 
+/**
+ * Roles indexable on `colors.oklch` — exactly {@link ColorRole}. Type any
+ * lookup into the oklch source with this so a hex-only {@link StatusRole} can
+ * never index it (which would type as `string` yet be `undefined` at runtime).
+ */
+export type OklchColorRole = keyof typeof colors.oklch;
+
+/** Every token name present on the email-safe `hex` snapshot. */
 export type ColorTokenName = keyof typeof colors.hex;
 
 /**

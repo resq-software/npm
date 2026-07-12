@@ -264,6 +264,28 @@ describe("catchError", () => {
 		expect(r.success).toBe(true);
 		if (r.success) expect(r.value).toBe("HI");
 	});
+
+	test("infers and forwards a full variadic argument list (2+ args)", async () => {
+		// The wrapped function's parameter types must be preserved position-by-position;
+		// a broken variadic inference would collapse (string, number, boolean) into one slot.
+		const fn = async (label: string, count: number, upper: boolean): Promise<string> => {
+			const body = `${label}:${count}`;
+			return upper ? body.toUpperCase() : body;
+		};
+		const r = await catchError(fn, "item", 3, true);
+		expect(r.success).toBe(true);
+		if (r.success) {
+			const value: string = r.value;
+			expect(value).toBe("ITEM:3");
+		}
+	});
+
+	test("infers rest parameters of the wrapped function", async () => {
+		const sum = async (...nums: number[]): Promise<number> => nums.reduce((a, b) => a + b, 0);
+		const r = await catchError(sum, 1, 2, 3, 4);
+		expect(r.success).toBe(true);
+		if (r.success) expect(r.value).toBe(10);
+	});
 });
 
 describe("map", () => {

@@ -43,4 +43,10 @@
  */
 
 export * from "./fetcher.js";
-export { shouldRedirectToHttps, getRequestId } from "./security.js";
+export {
+	getRequestId,
+	isRequestId,
+	type RequestId,
+	sanitizeRequestId,
+	shouldRedirectToHttps,
+} from "./security.js";
