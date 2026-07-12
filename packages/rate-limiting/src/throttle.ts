@@ -468,6 +468,53 @@ export class KeyedDebounce<T extends AnyFunction> {
 }
 
 // ============================================
+// Rate limiter strategies
+// ============================================
+
+/**
+ * A **keyless** rate limiter: one bucket per instance, guarding a single stream
+ * of work. The Strategy interface shared by {@link TokenBucketLimiter} (bursty)
+ * and {@link LeakyBucketLimiter} (smoothed) — depend on this abstraction and swap
+ * the algorithm without touching call sites.
+ *
+ * @example
+ * ```ts
+ * async function guarded(limiter: RateLimiter, work: () => Promise<void>) {
+ *   await limiter.acquire();
+ *   await work();
+ * }
+ * // interchangeable:
+ * guarded(new TokenBucketLimiter(toPositiveInt(5), toPositiveMillis(1000)), work);
+ * guarded(new LeakyBucketLimiter(toPositiveInt(5), toPositiveNumber(2)), work);
+ * ```
+ */
+export interface RateLimiter {
+	/** Take one slot, awaiting future capacity if none is available. */
+	acquire(): Promise<void>;
+	/** Non-blocking probe: consume a slot and return `true`, or `false` if none is free. */
+	tryAcquire(): boolean;
+	/** A snapshot of the limiter's current capacity state. */
+	getStats(): RateLimiterStats;
+	/** Restore full capacity, abandoning any queued waiters. */
+	reset(): void;
+}
+
+/**
+ * A **per-key** rate limiter: one independent limit per string key (e.g. per
+ * user or IP). The Strategy interface implemented by {@link SlidingWindowCounter}.
+ * Unlike {@link RateLimiter} it is keyed and non-blocking — each {@link check}
+ * both records the request and returns a {@link RateLimitDecision}.
+ */
+export interface KeyedRateLimiter {
+	/** Record a request for `key` and decide whether it is allowed. */
+	check(key: string): RateLimitDecision;
+	/** Forget all state for `key`; the next `check(key)` starts fresh. */
+	reset(key: string): void;
+	/** A snapshot of the currently-tracked keys. */
+	getStats(): KeyedStats;
+}
+
+// ============================================
 // Token Bucket Rate Limiter
 // ============================================
 
@@ -492,7 +539,7 @@ export class KeyedDebounce<T extends AnyFunction> {
  * fetch("/api/data");
  * ```
  */
-export class TokenBucketLimiter {
+export class TokenBucketLimiter implements RateLimiter {
 	private tokens: number;
 	private lastRefill: number;
 	private readonly capacity: PositiveInt;
@@ -652,7 +699,7 @@ export class TokenBucketLimiter {
  * await downstreamCall();
  * ```
  */
-export class LeakyBucketLimiter {
+export class LeakyBucketLimiter implements RateLimiter {
 	private queue: Array<{ resolve: () => void; timestamp: number }> = [];
 	private readonly capacity: PositiveInt;
 	private readonly leakRate: number; // ms between requests
@@ -795,7 +842,7 @@ export class LeakyBucketLimiter {
  * if (!decision.allowed) return new Response("Too many requests", { status: 429 });
  * ```
  */
-export class SlidingWindowCounter {
+export class SlidingWindowCounter implements KeyedRateLimiter {
 	private counters = new Map<string, { current: number; previous: number; windowStart: number }>();
 	private readonly windowMs: PositiveMillis;
 	private readonly maxRequests: PositiveInt;

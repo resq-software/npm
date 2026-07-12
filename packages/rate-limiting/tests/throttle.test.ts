@@ -19,9 +19,11 @@ import { toPositiveInt, toPositiveMillis, toPositiveNumber } from "@resq-systems
 import {
 	debounce,
 	throttle,
+	type KeyedRateLimiter,
 	KeyedThrottle,
 	KeyedDebounce,
 	LeakyBucketLimiter,
+	type RateLimiter,
 	SlidingWindowCounter,
 	TokenBucketLimiter,
 } from "../src/throttle.js";
@@ -341,5 +343,33 @@ describe("SlidingWindowCounter", () => {
 		expect(denied.allowed).toBe(false);
 		expect(denied.remaining).toBe(0);
 		expect(denied.limit).toBe(2);
+	});
+});
+
+describe("RateLimiter / KeyedRateLimiter strategy interfaces", () => {
+	it("TokenBucket and LeakyBucket are interchangeable behind RateLimiter", () => {
+		// Typing as RateLimiter[] is the interchangeability guarantee (compile-time);
+		// the loop confirms the shared shape works uniformly at runtime.
+		const limiters: RateLimiter[] = [
+			new TokenBucketLimiter(toPositiveInt(2), toPositiveMillis(1000)),
+			new LeakyBucketLimiter(toPositiveInt(2), toPositiveNumber(5)),
+		];
+
+		for (const limiter of limiters) {
+			expect(typeof limiter.tryAcquire()).toBe("boolean");
+			expect(limiter.getStats().capacity).toBe(2);
+			limiter.reset();
+		}
+	});
+
+	it("SlidingWindowCounter satisfies KeyedRateLimiter", () => {
+		const limiter: KeyedRateLimiter = new SlidingWindowCounter(
+			toPositiveMillis(1000),
+			toPositiveInt(3),
+		);
+
+		expect(limiter.check("user:1").allowed).toBe(true);
+		limiter.reset("user:1");
+		expect(limiter.getStats().activeKeys).toBe(0);
 	});
 });
