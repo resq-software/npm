@@ -38,6 +38,8 @@
  * ```
  */
 
+//#region Nominal brand types
+
 /**
  * The phantom key that carries a value's brand set. Declared as a
  * `unique symbol` and never assigned at runtime, so the whole tag is erased
@@ -83,6 +85,10 @@ export type Brand<T, B extends PropertyKey> = T & Tag<B>;
  * Identical semantics.
  */
 export type Opaque<T, B extends PropertyKey> = Brand<T, B>;
+
+//#endregion
+
+//#region Smart constructors
 
 /**
  * Assert-cast an already-validated base value into a brand **without a runtime
@@ -187,3 +193,5 @@ export const brandRefiner = <T, B extends PropertyKey>(
 		unsafe: (value: T): Brand<T, B> => value as Brand<T, B>,
 	};
 };
+
+//#endregion

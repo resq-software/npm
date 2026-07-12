@@ -23,9 +23,7 @@
  * that recur in real library code.
  */
 
-// ---------------------------------------------------------------------------
-// Tuples
-// ---------------------------------------------------------------------------
+//#region Tuples
 
 /** The first element of a tuple, or `never` for the empty tuple. */
 export type Head<T extends readonly unknown[]> = T extends readonly [infer H, ...unknown[]]
@@ -76,9 +74,9 @@ export type Includes<T extends readonly unknown[], E> = T extends readonly [infe
 		: Includes<R, E>
 	: false;
 
-// ---------------------------------------------------------------------------
-// Unions
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region Unions
 
 /**
  * Convert a union into the intersection of its members —
@@ -121,9 +119,9 @@ export type UnionToTuple<U> =
 			: [...UnionToTuple<Exclude<U, L>>, L]
 		: never;
 
-// ---------------------------------------------------------------------------
-// Shape helpers
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region Shape helpers
 
 /**
  * An array guaranteed to hold at least one element. Assigning `[]` to a
@@ -159,9 +157,9 @@ export type Zip<T extends readonly unknown[], U extends readonly unknown[]> = T 
 		: []
 	: [];
 
-// ---------------------------------------------------------------------------
-// Numeric literal ranges
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region Numeric literal ranges
 
 /**
  * The union of non-negative integer literals strictly below `N` —
@@ -185,3 +183,5 @@ export type Enumerate<N extends number, Acc extends number[] = []> = Acc["length
 export type NumberRange<Low extends number, High extends number> =
 	| Exclude<Enumerate<High>, Enumerate<Low>>
 	| High;
+
+//#endregion

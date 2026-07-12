@@ -25,6 +25,8 @@
  * protocol tag.
  */
 
+//#region Exhaustiveness
+
 /**
  * Assert that a code path is unreachable. Placed in the `default` arm of an
  * exhaustive `switch`, the `value: never` parameter fails to type-check the
@@ -61,3 +63,5 @@ export function assertNever(value: never, message?: string): never {
  * vocabulary at the call site. Identical behavior.
  */
 export const assertUnreachable: (value: never, message?: string) => never = assertNever;
+
+//#endregion

@@ -27,6 +27,8 @@
 
 import { type Brand, brandRefiner } from "./brand.js";
 
+//#region Branded numeric types
+
 /** A finite integer strictly greater than zero (`1, 2, 3, …`). */
 export type PositiveInt = Brand<number, "PositiveInt">;
 
@@ -48,6 +50,10 @@ export type PositiveNumber = Brand<number, "PositiveNumber">;
  * rates, fractions, ratios.
  */
 export type UnitInterval = Brand<number, "UnitInterval">;
+
+//#endregion
+
+//#region Constructors & guards
 
 const positiveInt = brandRefiner<number, "PositiveInt">(
 	(n) => Number.isInteger(n) && n > 0,
@@ -104,3 +110,5 @@ export const isUnitInterval: (n: number) => n is UnitInterval = unitInterval.is;
 export const toUnitInterval: (n: number) => UnitInterval = unitInterval.from;
 /** Return `n` as a {@link UnitInterval}, or `null` when out of range. */
 export const coerceUnitInterval: (n: number) => UnitInterval | null = unitInterval.coerce;
+
+//#endregion

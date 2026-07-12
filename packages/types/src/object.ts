@@ -23,6 +23,8 @@
  * way to express "exactly one of these keys" that the platform does not provide.
  */
 
+//#region Shallow helpers
+
 /**
  * Non-recursively strip `readonly` from every property. The dual of the
  * built-in `Readonly`.
@@ -45,6 +47,10 @@ export type ValueOf<T> = T[keyof T];
  * own key, rather than `[string, unknown]`.
  */
 export type Entries<T> = { [K in keyof T]: [K, T[K]] }[keyof T];
+
+//#endregion
+
+//#region Deep helpers
 
 /**
  * Recursively mark every property (and array element, map/set member)
@@ -93,6 +99,10 @@ export type DeepRequired<T> = T extends (...args: never[]) => unknown
 		: T extends object
 			? { [K in keyof T]-?: DeepRequired<T[K]> }
 			: T;
+
+//#endregion
+
+//#region Derivation & combination
 
 /**
  * Require **at least one** of the keys `K` of `T` (the rest stay optional).
@@ -171,3 +181,5 @@ export type Without<T, U> = { [K in Exclude<keyof T, keyof U>]?: never };
  * ```
  */
 export type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
+
+//#endregion

@@ -35,6 +35,8 @@
  * "tests" run wherever the file is type-checked.
  */
 
+//#region Type-level test kit
+
 /**
  * Strict type equality. `Equal<X, Y>` is `true` only when `X` and `Y` are
  * mutually assignable *and* identical — it distinguishes `any` from `unknown`,
@@ -64,3 +66,5 @@ export type IsNever<T> = [T] extends [never] ? true : false;
 
 /** `true` only for the `unknown` type (and not for `any`). */
 export type IsUnknown<T> = IsAny<T> extends true ? false : unknown extends T ? true : false;
+
+//#endregion

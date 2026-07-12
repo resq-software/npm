@@ -23,6 +23,8 @@
  * host allow-list of `` `*.${string}` `` wildcards) at compile time.
  */
 
+//#region Template-literal string types
+
 type Whitespace = " " | "\t" | "\n" | "\r";
 
 /** Remove leading whitespace from a string literal type. */
@@ -90,3 +92,5 @@ export type LiteralUnion<Known extends string> = Known | (string & {});
  * `ParseInt<"42">` is `42`. Resolves to `never` for non-numeric strings.
  */
 export type ParseInt<S extends string> = S extends `${infer N extends number}` ? N : never;
+
+//#endregion
