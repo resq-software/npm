@@ -1,5 +1,19 @@
 <!--
 
+## 1.0.2
+### Patch Changes
+
+
+
+- [#176](https://github.com/resq-software/npm/pull/176) [`189eed6`](https://github.com/resq-software/npm/commit/189eed6040a1e2422cf2f3f640b23b20035be32d) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Fix redactPII leaking email addresses with Punycode/IDN TLDs
+
+  `PII_PATTERNS.email` was not updated when `EmailSchema` gained Punycode/IDN TLD support, so `redactPII` silently failed to redact addresses like `user@example.xn--p1ai`. The redaction pattern now mirrors `EmailSchema`'s TLD alternation (and drops a stray `|` from the former `[A-Z|a-z]` character class).
+
+
+- [#175](https://github.com/resq-software/npm/pull/175) [`abc88da`](https://github.com/resq-software/npm/commit/abc88da66987f0cce47303d09108d4f1fc3b4520) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Accept Punycode/IDN TLDs in EmailSchema / isValidEmail
+
+  `EmailSchema` (and `isValidEmail`) previously rejected valid internationalized domains whose TLD is Punycode-encoded (e.g. `user@example.xn--p1ai` for `.рф`). The TLD pattern now also accepts an `xn--…` label. Structural rejections (no `@`, empty domain, disallowed local-part characters) are unchanged. Kept in sync with `@resq-systems/email-templates`'s `EmailAddress` brand.
+
 ## 1.0.1
 ### Patch Changes
 
