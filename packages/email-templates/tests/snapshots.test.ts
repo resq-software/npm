@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import { renderEmail } from "../src/render";
  * React Email renders headlessly and deterministically for fixed input, so a
  * committed snapshot of `{ subject, html, text }` catches unintended structural
  * changes to the markup, inline styles, or plaintext fallback. When a change is
- * intentional, re-baseline with `bun --filter @resq-sw/email-templates test -u`
+ * intentional, re-baseline with `bun --filter @resq-systems/email-templates test -u`
  * and review the diff.
  */
 const cases: readonly EmailPayload[] = [

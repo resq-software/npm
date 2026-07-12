@@ -14,9 +14,9 @@
   limitations under the License.
 -->
 
-# @resq-sw/rate-limiting
+# @resq-systems/rate-limiting
 
-[![npm](https://img.shields.io/npm/v/%40resq-sw%2Frate-limiting?style=flat-square)](https://www.npmjs.com/package/@resq-sw/rate-limiting)
+[![npm](https://img.shields.io/npm/v/%40resq-systems%2Frate-limiting?style=flat-square)](https://www.npmjs.com/package/@resq-systems/rate-limiting)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
 
 > Rate limiting algorithms, throttle/debounce utilities, and distributed rate limit stores.
@@ -24,7 +24,7 @@
 ## Installation
 
 ```bash
-bun add @resq-sw/rate-limiting effect
+bun add @resq-systems/rate-limiting effect
 ```
 
 Optional peer dependencies for Redis-backed limiting:
@@ -36,7 +36,7 @@ bun add @upstash/ratelimit @upstash/redis
 ## Quick Start
 
 ```ts
-import { throttle, debounce, TokenBucketLimiter } from "@resq-sw/rate-limiting";
+import { throttle, debounce, TokenBucketLimiter } from "@resq-systems/rate-limiting";
 
 const save = throttle(() => persist(data), 1000);
 const search = debounce((q: string) => fetchResults(q), 300);
@@ -224,7 +224,7 @@ const result = await store.check("key", 60000, 100);
 ### Presets
 
 ```ts
-import { RATE_LIMIT_PRESETS } from "@resq-sw/rate-limiting";
+import { RATE_LIMIT_PRESETS } from "@resq-systems/rate-limiting";
 ```
 
 | Preset | Window | Max Requests |
@@ -250,7 +250,7 @@ Exported for runtime validation: `ThrottleOptionsSchema`, `DebounceOptionsSchema
 ## Testing
 
 ```sh
-bun --filter @resq-sw/rate-limiting test
+bun --filter @resq-systems/rate-limiting test
 ```
 
 ## Troubleshooting

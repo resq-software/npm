@@ -28,6 +28,6 @@ jobs:
             The release is available on:
 
             * [GitHub releases](https://github.com/resq-software/npm/releases/tag/{release_tag})
-            * [npm package (@latest dist-tag)](https://www.npmjs.com/package/@resq-sw/ui/v/${{ env.npm_version }})
+            * [npm package (@latest dist-tag)](https://www.npmjs.com/package/@resq-systems/ui/v/${{ env.npm_version }})
 
             Cheers! 📦🚀

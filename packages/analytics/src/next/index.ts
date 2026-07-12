@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,14 @@
  */
 
 /**
- * @fileoverview Next.js helpers for `@resq-sw/analytics`.
+ * @fileoverview Next.js helpers for `@resq-systems/analytics`.
  *
  * Provides `next.config.{js,ts}` integration for the cross-subdomain
  * reverse-proxy pattern (so PostHog ingestion appears to come from
  * the app's own origin, avoiding ad blockers and third-party cookie
  * loss) plus a small builder for GA4 cross-subdomain linker config.
  *
- * @module @resq-sw/analytics/next
+ * @module @resq-systems/analytics/next
  */
 
 import type { GA4ProviderConfig } from "../index";
@@ -61,7 +61,7 @@ interface MinimalNextConfig {
 
 /**
  * Wrap a Next.js config to add reverse-proxy rewrites for
- * `@resq-sw/analytics`.
+ * `@resq-systems/analytics`.
  *
  * Adds two rules to the `beforeFiles` rewrite array:
  *
@@ -79,7 +79,7 @@ interface MinimalNextConfig {
  *
  * @example `next.config.ts`
  * ```ts
- * import { withAnalyticsRewrites } from "@resq-sw/analytics/next";
+ * import { withAnalyticsRewrites } from "@resq-systems/analytics/next";
  *
  * export default withAnalyticsRewrites({
  *   reactStrictMode: true,

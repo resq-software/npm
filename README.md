@@ -14,54 +14,54 @@
   limitations under the License.
 -->
 
-# ResQ npm Packages
+# ResQ Systems npm Packages
 
 [![CI](https://img.shields.io/github/actions/workflow/status/resq-software/npm/ci.yml?branch=master&label=ci&style=flat-square)](https://github.com/resq-software/npm/actions)
 [![Storybook](https://img.shields.io/badge/storybook-chromatic-FF4785?style=flat-square)](https://master--69b2711843dac80a70e4ca83.chromatic.com)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](LICENSE)
 
-[![@resq-sw/ui](https://img.shields.io/npm/v/%40resq-sw%2Fui?style=flat-square&label=%40resq-sw%2Fui)](https://www.npmjs.com/package/@resq-sw/ui)
-[![@resq-sw/dsa](https://img.shields.io/npm/v/%40resq-sw%2Fdsa?style=flat-square&label=%40resq-sw%2Fdsa)](https://www.npmjs.com/package/@resq-sw/dsa)
-[![@resq-sw/helpers](https://img.shields.io/npm/v/%40resq-sw%2Fhelpers?style=flat-square&label=%40resq-sw%2Fhelpers)](https://www.npmjs.com/package/@resq-sw/helpers)
-[![@resq-sw/http](https://img.shields.io/npm/v/%40resq-sw%2Fhttp?style=flat-square&label=%40resq-sw%2Fhttp)](https://www.npmjs.com/package/@resq-sw/http)
-[![@resq-sw/logger](https://img.shields.io/npm/v/%40resq-sw%2Flogger?style=flat-square&label=%40resq-sw%2Flogger)](https://www.npmjs.com/package/@resq-sw/logger)
-[![@resq-sw/decorators](https://img.shields.io/npm/v/%40resq-sw%2Fdecorators?style=flat-square&label=%40resq-sw%2Fdecorators)](https://www.npmjs.com/package/@resq-sw/decorators)
-[![@resq-sw/security](https://img.shields.io/npm/v/%40resq-sw%2Fsecurity?style=flat-square&label=%40resq-sw%2Fsecurity)](https://www.npmjs.com/package/@resq-sw/security)
-[![@resq-sw/rate-limiting](https://img.shields.io/npm/v/%40resq-sw%2Frate-limiting?style=flat-square&label=%40resq-sw%2Frate-limiting)](https://www.npmjs.com/package/@resq-sw/rate-limiting)
-[![@resq-sw/analytics](https://img.shields.io/npm/v/%40resq-sw%2Fanalytics?style=flat-square&label=%40resq-sw%2Fanalytics)](https://www.npmjs.com/package/@resq-sw/analytics)
-[![@resq-sw/constants](https://img.shields.io/npm/v/%40resq-sw%2Fconstants?style=flat-square&label=%40resq-sw%2Fconstants)](https://www.npmjs.com/package/@resq-sw/constants)
-[![@resq-sw/email-templates](https://img.shields.io/npm/v/%40resq-sw%2Femail-templates?style=flat-square&label=%40resq-sw%2Femail-templates)](https://www.npmjs.com/package/@resq-sw/email-templates)
+[![@resq-systems/ui](https://img.shields.io/npm/v/%40resq-systems%2Fui?style=flat-square&label=%40resq-systems%2Fui)](https://www.npmjs.com/package/@resq-systems/ui)
+[![@resq-systems/dsa](https://img.shields.io/npm/v/%40resq-systems%2Fdsa?style=flat-square&label=%40resq-systems%2Fdsa)](https://www.npmjs.com/package/@resq-systems/dsa)
+[![@resq-systems/helpers](https://img.shields.io/npm/v/%40resq-systems%2Fhelpers?style=flat-square&label=%40resq-systems%2Fhelpers)](https://www.npmjs.com/package/@resq-systems/helpers)
+[![@resq-systems/http](https://img.shields.io/npm/v/%40resq-systems%2Fhttp?style=flat-square&label=%40resq-systems%2Fhttp)](https://www.npmjs.com/package/@resq-systems/http)
+[![@resq-systems/logger](https://img.shields.io/npm/v/%40resq-systems%2Flogger?style=flat-square&label=%40resq-systems%2Flogger)](https://www.npmjs.com/package/@resq-systems/logger)
+[![@resq-systems/decorators](https://img.shields.io/npm/v/%40resq-systems%2Fdecorators?style=flat-square&label=%40resq-systems%2Fdecorators)](https://www.npmjs.com/package/@resq-systems/decorators)
+[![@resq-systems/security](https://img.shields.io/npm/v/%40resq-systems%2Fsecurity?style=flat-square&label=%40resq-systems%2Fsecurity)](https://www.npmjs.com/package/@resq-systems/security)
+[![@resq-systems/rate-limiting](https://img.shields.io/npm/v/%40resq-systems%2Frate-limiting?style=flat-square&label=%40resq-systems%2Frate-limiting)](https://www.npmjs.com/package/@resq-systems/rate-limiting)
+[![@resq-systems/analytics](https://img.shields.io/npm/v/%40resq-systems%2Fanalytics?style=flat-square&label=%40resq-systems%2Fanalytics)](https://www.npmjs.com/package/@resq-systems/analytics)
+[![@resq-systems/constants](https://img.shields.io/npm/v/%40resq-systems%2Fconstants?style=flat-square&label=%40resq-systems%2Fconstants)](https://www.npmjs.com/package/@resq-systems/constants)
+[![@resq-systems/email-templates](https://img.shields.io/npm/v/%40resq-systems%2Femail-templates?style=flat-square&label=%40resq-systems%2Femail-templates)](https://www.npmjs.com/package/@resq-systems/email-templates)
 
-Registry workspace for all ResQ npm packages published under the `@resq-sw` scope. Provides the shared UI component library, zero-dependency data structures, and standalone server/client utilities for the ResQ autonomous disaster response platform.
+Registry workspace for all ResQ Systems npm packages published under the `@resq-systems` scope. Provides the shared UI component library, zero-dependency data structures, and standalone server/client utilities for the ResQ Systems autonomous disaster response platform.
 
 ## Architecture
 
 ```mermaid
 graph TB
-    subgraph repo["resq-sw/npm"]
+    subgraph repo["resq-software/npm"]
         direction TB
         subgraph foundation["Foundation"]
-            constants["@resq-sw/constants<br/><small>design tokens · brand · zero deps</small>"]
+            constants["@resq-systems/constants<br/><small>design tokens · brand · zero deps</small>"]
         end
         subgraph frontend["Frontend"]
-            ui["@resq-sw/ui<br/><small>57 components · Radix + Tailwind v4</small>"]
+            ui["@resq-systems/ui<br/><small>57 components · Radix + Tailwind v4</small>"]
         end
         subgraph algorithms["Algorithms"]
-            dsa["@resq-sw/dsa<br/><small>11 modules · zero deps</small>"]
+            dsa["@resq-systems/dsa<br/><small>11 modules · zero deps</small>"]
         end
         subgraph infra["Infrastructure"]
-            http["@resq-sw/http"]
-            logger["@resq-sw/logger"]
-            security["@resq-sw/security"]
-            ratelimit["@resq-sw/rate-limiting"]
-            email["@resq-sw/email-templates<br/><small>React Email · Effect contract</small>"]
+            http["@resq-systems/http"]
+            logger["@resq-systems/logger"]
+            security["@resq-systems/security"]
+            ratelimit["@resq-systems/rate-limiting"]
+            email["@resq-systems/email-templates<br/><small>React Email · Effect contract</small>"]
         end
         subgraph utilities["Utilities"]
-            helpers["@resq-sw/helpers"]
-            decorators["@resq-sw/decorators"]
+            helpers["@resq-systems/helpers"]
+            decorators["@resq-systems/decorators"]
         end
         subgraph telemetry["Telemetry"]
-            analytics["@resq-sw/analytics<br/><small>PostHog + GA4 · cross-subdomain</small>"]
+            analytics["@resq-systems/analytics<br/><small>PostHog + GA4 · cross-subdomain</small>"]
         end
     end
 
@@ -88,17 +88,17 @@ graph TB
 
 | Package | Description | Deps | Docs |
 | :--- | :--- | :--- | :--- |
-| [`@resq-sw/constants`](packages/constants/) | Shared design tokens (oklch + email-safe hex), brand identity, and cross-app values — one source of truth | **zero deps** | [README](packages/constants/README.md) |
-| [`@resq-sw/ui`](packages/ui/) | React component library — dark-first oklch color system, WCAG AA, subpath exports | radix-ui, tailwindcss | [README](packages/ui/README.md) · [Storybook](https://master--69b2711843dac80a70e4ca83.chromatic.com) |
-| [`@resq-sw/dsa`](packages/dsa/) | Data structures & algorithms — graph, heap, trie, bloom filter, distance, LRU cache, queue | **zero deps** | [README](packages/dsa/README.md) |
-| [`@resq-sw/http`](packages/http/) | Effect-based HTTP client with retry, timeout, and schema validation | effect | [README](packages/http/README.md) |
-| [`@resq-sw/logger`](packages/logger/) | Structured logging with 7 levels, context, timing, and logging decorators | **zero deps** | [README](packages/logger/README.md) |
-| [`@resq-sw/security`](packages/security/) | AES-256-GCM encryption, threat detection, PII sanitization, input validation | effect (peer) | [README](packages/security/README.md) |
-| [`@resq-sw/rate-limiting`](packages/rate-limiting/) | Throttle, debounce, token bucket, leaky bucket, sliding window, Redis store | effect (peer) | [README](packages/rate-limiting/README.md) |
-| [`@resq-sw/decorators`](packages/decorators/) | 15 TypeScript decorators — memoize, throttle, debounce, bind, execTime, rateLimit | **zero deps** | [README](packages/decorators/README.md) |
-| [`@resq-sw/helpers`](packages/helpers/) | Result monad, type guards, date/number/string formatting, platform detection | @resq-sw/logger | [README](packages/helpers/README.md) |
-| [`@resq-sw/analytics`](packages/analytics/) | Unified PostHog + GA4 client — cross-subdomain identity, lazy-loaded, typed events, Next.js + React adapters | posthog-js (peer) | [README](packages/analytics/README.md) |
-| [`@resq-sw/email-templates`](packages/email-templates/) | Type-safe transactional emails — Effect Schema contract, React Email components, headless render, optional Resend sender | react, effect, @react-email | [README](packages/email-templates/README.md) |
+| [`@resq-systems/constants`](packages/constants/) | Shared design tokens (oklch + email-safe hex), brand identity, and cross-app values — one source of truth | **zero deps** | [README](packages/constants/README.md) |
+| [`@resq-systems/ui`](packages/ui/) | React component library — dark-first oklch color system, WCAG AA, subpath exports | radix-ui, tailwindcss | [README](packages/ui/README.md) · [Storybook](https://master--69b2711843dac80a70e4ca83.chromatic.com) |
+| [`@resq-systems/dsa`](packages/dsa/) | Data structures & algorithms — graph, heap, trie, bloom filter, distance, LRU cache, queue | **zero deps** | [README](packages/dsa/README.md) |
+| [`@resq-systems/http`](packages/http/) | Effect-based HTTP client with retry, timeout, and schema validation | effect | [README](packages/http/README.md) |
+| [`@resq-systems/logger`](packages/logger/) | Structured logging with 7 levels, context, timing, and logging decorators | **zero deps** | [README](packages/logger/README.md) |
+| [`@resq-systems/security`](packages/security/) | AES-256-GCM encryption, threat detection, PII sanitization, input validation | effect (peer) | [README](packages/security/README.md) |
+| [`@resq-systems/rate-limiting`](packages/rate-limiting/) | Throttle, debounce, token bucket, leaky bucket, sliding window, Redis store | effect (peer) | [README](packages/rate-limiting/README.md) |
+| [`@resq-systems/decorators`](packages/decorators/) | 15 TypeScript decorators — memoize, throttle, debounce, bind, execTime, rateLimit | **zero deps** | [README](packages/decorators/README.md) |
+| [`@resq-systems/helpers`](packages/helpers/) | Result monad, type guards, date/number/string formatting, platform detection | @resq-systems/logger | [README](packages/helpers/README.md) |
+| [`@resq-systems/analytics`](packages/analytics/) | Unified PostHog + GA4 client — cross-subdomain identity, lazy-loaded, typed events, Next.js + React adapters | posthog-js (peer) | [README](packages/analytics/README.md) |
+| [`@resq-systems/email-templates`](packages/email-templates/) | Type-safe transactional emails — Effect Schema contract, React Email components, headless render, optional Resend sender | react, effect, @react-email | [README](packages/email-templates/README.md) |
 
 ## Examples
 
@@ -145,10 +145,10 @@ bun install
 bun install                          # Install all workspace dependencies
 bun test                             # Run all workspace tests
 bun run build                        # Build all packages
-bun --filter @resq-sw/<pkg> test     # Test single package
-bun --filter @resq-sw/<pkg> build    # Build single package
-bun --filter @resq-sw/ui storybook   # Start Storybook dev server
-bun --filter @resq-sw/ui lint        # Lint with Biome
+bun --filter @resq-systems/<pkg> test     # Test single package
+bun --filter @resq-systems/<pkg> build    # Build single package
+bun --filter @resq-systems/ui storybook   # Start Storybook dev server
+bun --filter @resq-systems/ui lint        # Lint with Biome
 bun changeset                        # Create a changeset for versioning
 ```
 
@@ -177,4 +177,4 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org/) (`fe
 
 Apache-2.0 — see [LICENSE.md](./LICENSE.md).
 
-Copyright 2026 ResQ Software
+Copyright 2026 ResQ Systems, Inc.

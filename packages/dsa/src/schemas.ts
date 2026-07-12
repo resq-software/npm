@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,7 +172,7 @@ type ValidationResult<A> = ValidationSuccess<A> | ValidationFailure;
 /**
  * Decode `input` against `schema` and return a discriminated result
  * instead of throwing. Mirrors the `Result<T, E>` shape used
- * elsewhere in `@resq-sw/helpers`.
+ * elsewhere in `@resq-systems/helpers`.
  *
  * @returns `{ success: true, data }` on success; `{ success: false,
  *   error }` (with the parse-error message) on failure.

@@ -1,14 +1,14 @@
 {
-	"name": "@resq-sw/ui",
+	"name": "@resq-systems/ui",
 	"version": "0.35.7",
-	"description": "ResQ shared UI component library — shadcn-based design system for the ResQ platform",
+	"description": "ResQ Systems shared UI component library — shadcn-based design system for the ResQ Systems platform",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/resq-software/npm.git"
 	},
 	"license": "Apache-2.0",
 	"author": {
-		"name": "ResQ Software"
+		"name": "ResQ Systems, Inc."
 	},
 	"type": "module",
 	"exports": {
@@ -359,7 +359,7 @@
 		"@biomejs/biome": "^2.5.3",
 		"@chromatic-com/storybook": "^5.2.1",
 		"@github-ui/storybook-addon-performance-panel": "^1.1.4",
-		"@resq-sw/constants": "workspace:*",
+		"@resq-systems/constants": "workspace:*",
 		"@storybook/addon-a11y": "^10.5.0",
 		"@storybook/addon-docs": "^10.5.0",
 		"@storybook/addon-links": "^10.5.0",

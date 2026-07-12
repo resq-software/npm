@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 /**
  * Pipeline example: validate a `{ name, to, data }` payload and render it to
  * `{ subject, html, text }` — exactly what a queue worker or cron job would do.
- * Run with `bun run index.ts` (after `bun run build` for @resq-sw/email-templates).
+ * Run with `bun run index.ts` (after `bun run build` for @resq-systems/email-templates).
  */
 
-import { type EmailPayload, renderEmail } from "@resq-sw/email-templates";
+import { type EmailPayload, renderEmail } from "@resq-systems/email-templates";
 // Sending is server-only and needs `resend` + RESEND_API_KEY:
-// import { createResendSender, sendEmail } from "@resq-sw/email-templates/send";
+// import { createResendSender, sendEmail } from "@resq-systems/email-templates/send";
 
 const payload: EmailPayload = {
 	name: "incident-alert",

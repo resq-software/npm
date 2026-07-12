@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview Browser-only helpers for `@resq-sw/helpers/browser`.
+ * @fileoverview Browser-only helpers for `@resq-systems/helpers/browser`.
  *
  * Surfaces:
  * - Platform / browser detection (`isIOS`, `isAndroid`, `getBrowser`,
@@ -25,7 +25,7 @@
  *
  * All exports rely on `navigator`, `window`, or DOM globals — do not
  * import this subpath into server-side bundles. Use the universal
- * `@resq-sw/helpers` entry for SSR-safe utilities.
+ * `@resq-systems/helpers` entry for SSR-safe utilities.
  */
 
 export * from "./platform.js";

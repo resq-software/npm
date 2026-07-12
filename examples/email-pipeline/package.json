@@ -3,13 +3,13 @@
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",
-	"description": "Render and (optionally) send @resq-sw/email-templates from a Node/Bun pipeline",
+	"description": "Render and (optionally) send @resq-systems/email-templates from a Node/Bun pipeline",
 	"scripts": {
 		"start": "bun run index.ts",
 		"tsc": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@resq-sw/email-templates": "workspace:*",
+		"@resq-systems/email-templates": "workspace:*",
 		"effect": "4.0.0-beta.97",
 		"react": "^19.2.7",
 		"react-dom": "^19.2.7",

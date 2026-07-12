@@ -1,7 +1,7 @@
 {
-	"name": "@resq-sw/analytics",
+	"name": "@resq-systems/analytics",
 	"version": "0.4.1",
-	"description": "Unified PostHog + GA4 analytics client for the ResQ platform — cross-subdomain, lazy-loaded, with typed events",
+	"description": "Unified PostHog + GA4 analytics client for the ResQ Systems platform — cross-subdomain, lazy-loaded, with typed events",
 	"license": "Apache-2.0",
 	"type": "module",
 	"sideEffects": false,

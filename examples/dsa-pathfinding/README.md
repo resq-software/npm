@@ -16,7 +16,7 @@
 
 # Drone Fleet Route Optimization
 
-A demonstration of `@resq-sw/dsa` in a disaster response scenario: optimizing drone delivery routes after an earthquake.
+A demonstration of `@resq-systems/dsa` in a disaster response scenario: optimizing drone delivery routes after an earthquake.
 
 ## What it shows
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,11 @@ export function NewDeviceLoginEmail({
 	const meta = [device, location, ipAddress, at].filter(Boolean).join(" · ");
 
 	return (
-		<Email.Shell preview="New sign-in to your ResQ account">
+		<Email.Shell preview="New sign-in to your ResQ Systems account">
 			<Email.Header />
 			<Email.Title>New sign-in to your account</Email.Title>
 			{firstName ? <Email.Paragraph>Hi {firstName},</Email.Paragraph> : null}
-			<Email.Paragraph>We noticed a new sign-in to your ResQ account.</Email.Paragraph>
+			<Email.Paragraph>We noticed a new sign-in to your ResQ Systems account.</Email.Paragraph>
 			{meta ? (
 				<Email.Text className="mb-4 font-mono text-xs uppercase tracking-wide text-muted">
 					{meta}
@@ -51,7 +51,7 @@ export function NewDeviceLoginEmail({
 			<Email.SupportLine>Don't recognize this sign-in?</Email.SupportLine>
 			<Email.LegalFooter
 				category="transactional"
-				reason="You are receiving this email because a new sign-in to your ResQ account was detected."
+				reason="You are receiving this email because a new sign-in to your ResQ Systems account was detected."
 			/>
 		</Email.Shell>
 	);

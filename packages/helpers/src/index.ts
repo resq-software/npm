@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,20 @@
  */
 
 /**
- * @fileoverview Public API for `@resq-sw/helpers` — functional utilities,
+ * @fileoverview Public API for `@resq-systems/helpers` — functional utilities,
  * type guards, Result types, code-path parsing, async task execution, and
  * formatting helpers.
  *
  * Subpath exports keep server-only and browser-only code separate:
- * - `@resq-sw/helpers` — universal utilities (Result, type guards, task exec)
- * - `@resq-sw/helpers/formatting` — date / number / string formatters
- * - `@resq-sw/helpers/browser` — DOM helpers, platform detection, html entities
+ * - `@resq-systems/helpers` — universal utilities (Result, type guards, task exec)
+ * - `@resq-systems/helpers/formatting` — date / number / string formatters
+ * - `@resq-systems/helpers/browser` — DOM helpers, platform detection, html entities
  *
- * @module @resq-sw/helpers
+ * @module @resq-systems/helpers
  *
  * @example Result type
  * ```ts
- * import { catchError } from "@resq-sw/helpers";
+ * import { catchError } from "@resq-systems/helpers";
  *
  * const result = await catchError(fetch, "/api/data");
  * if (result.success) console.log(result.value);
@@ -37,7 +37,7 @@
  *
  * @example Type guards
  * ```ts
- * import { isString, isObject } from "@resq-sw/helpers";
+ * import { isString, isObject } from "@resq-systems/helpers";
  *
  * if (isString(input)) input.toUpperCase();
  * if (isObject(input)) Object.keys(input);

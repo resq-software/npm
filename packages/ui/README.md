@@ -14,20 +14,20 @@
   limitations under the License.
 -->
 
-# @resq-sw/ui
+# @resq-systems/ui
 
-[![npm](https://img.shields.io/npm/v/%40resq-sw%2Fui?style=flat-square)](https://www.npmjs.com/package/@resq-sw/ui)
+[![npm](https://img.shields.io/npm/v/%40resq-systems%2Fui?style=flat-square)](https://www.npmjs.com/package/@resq-systems/ui)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
 [![Storybook](https://img.shields.io/badge/storybook-chromatic-FF4785?style=flat-square)](https://master--69b2711843dac80a70e4ca83.chromatic.com)
 
-ResQ's shared React component library — **57 components** built on Radix UI primitives and Tailwind CSS v4 with a dark-first oklch color system. Tree-shakeable subpath exports, WCAG AA contrast, full keyboard support.
+ResQ Systems's shared React component library — **57 components** built on Radix UI primitives and Tailwind CSS v4 with a dark-first oklch color system. Tree-shakeable subpath exports, WCAG AA contrast, full keyboard support.
 
 ## Install
 
 ```sh
-bun add @resq-sw/ui react react-dom tailwindcss
+bun add @resq-systems/ui react react-dom tailwindcss
 # or
-npm install @resq-sw/ui react react-dom tailwindcss
+npm install @resq-systems/ui react react-dom tailwindcss
 ```
 
 `react`, `react-dom`, and `tailwindcss` are peer dependencies — bring your own.
@@ -39,10 +39,10 @@ Add the package to your Tailwind v4 sources:
 ```css
 /* app.css */
 @import "tailwindcss";
-@source "../node_modules/@resq-sw/ui/lib";
+@source "../node_modules/@resq-systems/ui/lib";
 
-@import "@resq-sw/ui/styles/tokens.css";
-@import "@resq-sw/ui/styles/global.css";
+@import "@resq-systems/ui/styles/tokens.css";
+@import "@resq-systems/ui/styles/global.css";
 ```
 
 The token sheet exposes the oklch palette as CSS custom properties. The global sheet wires Tailwind's `bg-background`, `text-foreground`, etc. to those tokens.
@@ -52,13 +52,13 @@ The token sheet exposes the oklch palette as CSS custom properties. The global s
 Every component ships its own subpath export to keep bundles small:
 
 ```tsx
-import { Button } from "@resq-sw/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@resq-sw/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@resq-sw/ui/tabs";
-import { Combobox } from "@resq-sw/ui/combobox";
+import { Button } from "@resq-systems/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@resq-systems/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@resq-systems/ui/tabs";
+import { Combobox } from "@resq-systems/ui/combobox";
 ```
 
-The default export (`@resq-sw/ui`) re-exports everything for convenience but pulls the full surface — prefer subpaths in production code.
+The default export (`@resq-systems/ui`) re-exports everything for convenience but pulls the full surface — prefer subpaths in production code.
 
 ## Component catalog
 
@@ -79,8 +79,8 @@ Browse all components and variants in [Storybook on Chromatic](https://master--6
 ## Quick start
 
 ```tsx
-import { Button } from "@resq-sw/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@resq-sw/ui/card";
+import { Button } from "@resq-systems/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@resq-systems/ui/card";
 
 export const MissionCard = () => (
   <Card>
@@ -108,11 +108,11 @@ See [`design/STYLE_GUIDE.md`](../../design/STYLE_GUIDE.md) for tokens, typograph
 ## Development
 
 ```sh
-bun --filter @resq-sw/ui storybook        # Storybook dev server
-bun --filter @resq-sw/ui test             # vitest + @testing-library/react
-bun --filter @resq-sw/ui build            # tsdown → lib/
-bun --filter @resq-sw/ui lint             # Biome
-bun --filter @resq-sw/ui chromatic        # publish visual baseline
+bun --filter @resq-systems/ui storybook        # Storybook dev server
+bun --filter @resq-systems/ui test             # vitest + @testing-library/react
+bun --filter @resq-systems/ui build            # tsdown → lib/
+bun --filter @resq-systems/ui lint             # Biome
+bun --filter @resq-systems/ui chromatic        # publish visual baseline
 ```
 
 ## Stack
@@ -133,12 +133,12 @@ bun --filter @resq-sw/ui chromatic        # publish visual baseline
 
 ## Configuration
 
-- **Tailwind CSS**: Requires Tailwind v4 config inclusion. Import root styles: `import "@resq-sw/ui/lib/index.css";`.
+- **Tailwind CSS**: Requires Tailwind v4 config inclusion. Import root styles: `import "@resq-systems/ui/lib/index.css";`.
 
 ## Testing
 
 ```sh
-bun --filter @resq-sw/ui test
+bun --filter @resq-systems/ui test
 ```
 
 ## Troubleshooting

@@ -1,4 +1,4 @@
-// Copyright 2026 ResQ
+// Copyright 2026 ResQ Systems, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 /**
@@ -13,7 +13,7 @@
  * - `IconProps`  — props accepted by every icon (weight, size, color, className, …)
  * - `IconWeight` — the union of allowed weight strings
  *
- * Server Components: import from `@resq-sw/ui/icons/ssr` instead to avoid
+ * Server Components: import from `@resq-systems/ui/icons/ssr` instead to avoid
  * the React.createContext call at module-init time.
  */
 

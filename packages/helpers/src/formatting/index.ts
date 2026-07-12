@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview Locale-aware formatting helpers for
- * `@resq-sw/helpers/formatting`.
+ * `@resq-systems/helpers/formatting`.
  *
  * - `date` — `Intl.DateTimeFormat`-backed date/time presentation,
  *   relative time, week/quarter helpers.

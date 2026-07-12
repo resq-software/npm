@@ -1,4 +1,4 @@
-// Copyright 2026 ResQ
+// Copyright 2026 ResQ Systems, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 import { ActivityIcon, GearIcon, MapPinIcon, RadioIcon, UsersIcon } from "@phosphor-icons/react";

@@ -10,26 +10,26 @@ bun install && bun run build
 
 ```bash
 bun test                             # All packages
-bun --filter @resq-sw/<pkg> test     # Single package
+bun --filter @resq-systems/<pkg> test     # Single package
 ```
 
 ## Architecture
 
 | Package | Purpose | Deps |
 |---------|---------|------|
-| `@resq-sw/ui` | React component library (Radix + Tailwind v4, 57 components) | radix-ui, tailwindcss |
-| `@resq-sw/dsa` | Data structures and algorithms (graph, heap, trie, bloom, etc.) | **zero deps** |
-| `@resq-sw/helpers` | Utilities, type guards, result types, formatting | @resq-sw/logger |
-| `@resq-sw/http` | Effect-based HTTP client with retry, timeout, schema validation | effect |
-| `@resq-sw/logger` | Structured logging with levels and decorators | **zero deps** |
-| `@resq-sw/decorators` | TypeScript method/class decorators (memoize, throttle, bind, etc.) | **zero deps** |
-| `@resq-sw/security` | Encryption, input validation, PII sanitization | effect (peer) |
-| `@resq-sw/rate-limiting` | Token bucket, leaky bucket, sliding window, throttle/debounce | effect, @upstash/ratelimit (peers) |
+| `@resq-systems/ui` | React component library (Radix + Tailwind v4, 57 components) | radix-ui, tailwindcss |
+| `@resq-systems/dsa` | Data structures and algorithms (graph, heap, trie, bloom, etc.) | **zero deps** |
+| `@resq-systems/helpers` | Utilities, type guards, result types, formatting | @resq-systems/logger |
+| `@resq-systems/http` | Effect-based HTTP client with retry, timeout, schema validation | effect |
+| `@resq-systems/logger` | Structured logging with levels and decorators | **zero deps** |
+| `@resq-systems/decorators` | TypeScript method/class decorators (memoize, throttle, bind, etc.) | **zero deps** |
+| `@resq-systems/security` | Encryption, input validation, PII sanitization | effect (peer) |
+| `@resq-systems/rate-limiting` | Token bucket, leaky bucket, sliding window, throttle/debounce | effect, @upstash/ratelimit (peers) |
 
 ## Key Rules
 
-- `@resq-sw/dsa` must have **zero runtime deps**. Effect is a peer dep for optional schemas only.
-- `@resq-sw/ui` uses **dark-first oklch color system** with WCAG AA contrast.
+- `@resq-systems/dsa` must have **zero runtime deps**. Effect is a peer dep for optional schemas only.
+- `@resq-systems/ui` uses **dark-first oklch color system** with WCAG AA contrast.
 - All packages must be **tree-shakeable** with subpath exports.
 - **Zero `any`** — strict TypeScript throughout.
 - Package manager is **bun** — do not use npm, yarn, or pnpm.
@@ -43,7 +43,7 @@ bun --filter @resq-sw/<pkg> test     # Single package
 
 ```md
 ---
-"@resq-sw/dsa": minor
+"@resq-systems/dsa": minor
 ---
 
 Add LRU cache data structure with configurable capacity

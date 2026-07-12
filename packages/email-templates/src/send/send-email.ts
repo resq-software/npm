@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import { renderEmail } from "../render.js";
 import type { EmailSender, SendResult } from "./sender.js";
 
 export interface SendEmailOptions {
-	/** Verified sender address, e.g. "ResQ <updates@send.resq.software>". */
+	/** Verified sender address, e.g. "ResQ Systems <updates@send.resq.software>". */
 	from: string;
 	replyTo?: string | string[];
 	/** Stable key so Resend de-dupes identical sends for 24h. */

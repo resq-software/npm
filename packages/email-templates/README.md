@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 ResQ
+  Copyright 2026 ResQ Systems, Inc.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,19 +14,19 @@
   limitations under the License.
 -->
 
-# @resq-sw/email-templates
+# @resq-systems/email-templates
 
 Type-safe transactional email templates for React apps and backend pipelines.
 
 - **One contract.** Every email is a validated `{ name, to, data }` payload, described by an [Effect Schema](https://effect.website) discriminated union. Nothing else can be enqueued or rendered.
-- **React Email components.** Templates are React components built on [React Email](https://react.email) with a `<Tailwind>` theme mapped to the dark-first ResQ brand — red primary, Syne/DM Sans/DM Mono — with oklch tokens converted to email-safe hex.
+- **React Email components.** Templates are React components built on [React Email](https://react.email) with a `<Tailwind>` theme mapped to the dark-first ResQ Systems brand — red primary, Syne/DM Sans/DM Mono — with oklch tokens converted to email-safe hex.
 - **Headless render.** `renderEmail(payload)` returns `{ to, subject, html, text }` with no DOM — safe to call from queue workers, cron jobs, and other pipelines.
-- **Pluggable sending.** A provider-agnostic `EmailSender` port with an optional Resend adapter under `@resq-sw/email-templates/send`.
+- **Pluggable sending.** A provider-agnostic `EmailSender` port with an optional Resend adapter under `@resq-systems/email-templates/send`.
 
 ## Install
 
 ```sh
-bun add @resq-sw/email-templates effect react react-dom
+bun add @resq-systems/email-templates effect react react-dom
 # only if you use the ./send Resend adapter:
 bun add resend
 ```
@@ -37,17 +37,17 @@ bun add resend
 
 | Import | Contents | Runtime |
 | --- | --- | --- |
-| `@resq-sw/email-templates` | `EmailPayload` schema, types, `decodeEmailPayload`, `registry`, `renderEmail` | browser + server |
-| `@resq-sw/email-templates/emails` | `Email` primitives, `emailColors`, and the template components | browser + server |
-| `@resq-sw/email-templates/send` | `EmailSender` port, `createResendSender`, `sendEmail` | **server only** |
+| `@resq-systems/email-templates` | `EmailPayload` schema, types, `decodeEmailPayload`, `registry`, `renderEmail` | browser + server |
+| `@resq-systems/email-templates/emails` | `Email` primitives, `emailColors`, and the template components | browser + server |
+| `@resq-systems/email-templates/send` | `EmailSender` port, `createResendSender`, `sendEmail` | **server only** |
 
 ## Pipeline / worker usage
 
 Validate an untrusted payload, render it, and send it:
 
 ```ts
-import { renderEmail } from "@resq-sw/email-templates";
-import { createResendSender, sendEmail } from "@resq-sw/email-templates/send";
+import { renderEmail } from "@resq-systems/email-templates";
+import { createResendSender, sendEmail } from "@resq-systems/email-templates/send";
 
 const sender = createResendSender(); // reads RESEND_API_KEY
 
@@ -55,7 +55,7 @@ const sender = createResendSender(); // reads RESEND_API_KEY
 const result = await sendEmail(
 	sender,
 	{ name: "otp", to: "user@example.com", data: { code: "123456", firstName: "Ada" } },
-	{ from: "ResQ <noreply@resq.example>" },
+	{ from: "ResQ Systems <noreply@resq.example>" },
 );
 
 if (!result.ok) {
@@ -66,7 +66,7 @@ if (!result.ok) {
 Or render now and hand the HTML to any transport:
 
 ```ts
-import { renderEmail } from "@resq-sw/email-templates";
+import { renderEmail } from "@resq-systems/email-templates";
 
 const { subject, html, text } = await renderEmail({
 	name: "password-reset",
@@ -83,7 +83,7 @@ The payload is validated at the boundary — an unknown `name` or missing requir
 Import a template component directly (for in-app previews or your own rendering):
 
 ```tsx
-import { WelcomeEmail } from "@resq-sw/email-templates/emails";
+import { WelcomeEmail } from "@resq-systems/email-templates/emails";
 
 <WelcomeEmail firstName="Ada" verifyUrl="https://app.resq.example/verify" />;
 ```
@@ -100,8 +100,8 @@ import { WelcomeEmail } from "@resq-sw/email-templates/emails";
 
 ## Theming
 
-Templates render in the dark-first ResQ brand by default, sourced from
-[`@resq-sw/constants`](../constants)`/tokens`. Rebrand any render without forking:
+Templates render in the dark-first ResQ Systems brand by default, sourced from
+[`@resq-systems/constants`](../constants)`/tokens`. Rebrand any render without forking:
 
 ```ts
 const { html } = await renderEmail(payload, {
@@ -112,15 +112,15 @@ const { html } = await renderEmail(payload, {
 Or wrap React usage in a provider:
 
 ```tsx
-import { EmailThemeContext, mergeEmailTheme } from "@resq-sw/email-templates";
+import { EmailThemeContext, mergeEmailTheme } from "@resq-systems/email-templates";
 
 <EmailThemeContext.Provider value={mergeEmailTheme({ colors: { primary: "#0ea5e9" } })}>
 	<WelcomeEmail firstName="Ada" />
 </EmailThemeContext.Provider>;
 ```
 
-`colors` map to Tailwind `theme.extend.colors`; unset keys fall back to the ResQ
-defaults. Change the brand for every app at once by editing `@resq-sw/constants`.
+`colors` map to Tailwind `theme.extend.colors`; unset keys fall back to the ResQ Systems
+defaults. Change the brand for every app at once by editing `@resq-systems/constants`.
 
 ## Custom template suites
 
@@ -128,7 +128,7 @@ Compose your own typed `{ name, to, data }` contract — spread the built-in
 `resqEmailTemplates` and add your own, or start fresh:
 
 ```tsx
-import { createMailer, defineEmailTemplate, Email, resqEmailTemplates } from "@resq-sw/email-templates";
+import { createMailer, defineEmailTemplate, Email, resqEmailTemplates } from "@resq-systems/email-templates";
 import { Schema } from "effect";
 
 const shiftReminder = defineEmailTemplate({
@@ -166,7 +166,7 @@ typed over your template set — unknown names and bad `data` are rejected at de
 Implement the `EmailSender` port to use any provider:
 
 ```ts
-import type { EmailSender } from "@resq-sw/email-templates/send";
+import type { EmailSender } from "@resq-systems/email-templates/send";
 
 export const sesSender: EmailSender = {
 	async send({ from, to, subject, html, text }) {
@@ -179,14 +179,14 @@ export const sesSender: EmailSender = {
 ## Preview
 
 ```sh
-bun --filter @resq-sw/email-templates email:dev   # http://localhost:3000
+bun --filter @resq-systems/email-templates email:dev   # http://localhost:3000
 ```
 
 ## Runtime support
 
-`renderEmail()` runs in **Node and Bun** (it uses `react-dom/server`). It does **not** run on Cloudflare Workers / `workerd` — `@react-email/render` resolves to its Node build there and throws at runtime (OpenNext #1205). For edge/Workers delivery, pre-render at build time (`bun --filter @resq-sw/email-templates email:export`) or render in a Node/Bun pipeline and ship the resulting HTML/text.
+`renderEmail()` runs in **Node and Bun** (it uses `react-dom/server`). It does **not** run on Cloudflare Workers / `workerd` — `@react-email/render` resolves to its Node build there and throws at runtime (OpenNext #1205). For edge/Workers delivery, pre-render at build time (`bun --filter @resq-systems/email-templates email:export`) or render in a Node/Bun pipeline and ship the resulting HTML/text.
 
-Sender config follows the ResQ convention: `RESEND_API_KEY` (required) and `RESEND_FROM` (verified sender, e.g. `ResQ <updates@send.resq.software>`).
+Sender config follows the ResQ Systems convention: `RESEND_API_KEY` (required) and `RESEND_FROM` (verified sender, e.g. `ResQ Systems <updates@send.resq.software>`).
 
 ## Email-client safety
 
@@ -210,7 +210,7 @@ Email clients drop `oklch()`, `color-mix()`, and CSS custom properties, and many
 ## Testing
 
 ```sh
-bun --filter @resq-sw/email-templates test
+bun --filter @resq-systems/email-templates test
 ```
 
 Coverage includes behavioural tests (contract validation, subject/link presence,
@@ -222,7 +222,7 @@ styles, or the plaintext fallback. When a change is intentional, re-baseline and
 review the diff:
 
 ```sh
-bun --filter @resq-sw/email-templates test -u
+bun --filter @resq-systems/email-templates test -u
 ```
 
 Snapshots are the email-appropriate substitute for Storybook/Chromatic here:

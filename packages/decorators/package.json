@@ -1,5 +1,5 @@
 {
-	"name": "@resq-sw/decorators",
+	"name": "@resq-systems/decorators",
 	"version": "0.1.2",
 	"description": "TypeScript method and class decorators for caching, rate limiting, control flow, and observability",
 	"license": "Apache-2.0",

@@ -14,9 +14,9 @@
   limitations under the License.
 -->
 
-# ResQ Dashboard Example
+# ResQ Systems Dashboard Example
 
-A minimal React dashboard showcasing `@resq-sw/ui` components in a drone fleet management scenario.
+A minimal React dashboard showcasing `@resq-systems/ui` components in a drone fleet management scenario.
 
 ## Components Used
 

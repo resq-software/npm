@@ -92,7 +92,7 @@ Build a static Storybook:
 bun build-storybook
 ```
 
-The Storybook UI uses the ResQ dark theme by default with a toolbar toggle for light mode.
+The Storybook UI uses the ResQ Systems dark theme by default with a toolbar toggle for light mode.
 
 ## Type Checking
 

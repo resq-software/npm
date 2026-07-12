@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 /**
- * ResQ brand identity — names, domains, contact addresses, and legal details
+ * ResQ Systems brand identity — names, domains, contact addresses, and legal details
  * shared across apps (marketing site, dashboard, transactional email).
  *
  * The postal address is ResQ Systems, Inc.'s public Delaware registered-agent
@@ -24,7 +24,7 @@
  */
 export const brand = {
 	/** Short brand name. */
-	name: "ResQ",
+	name: "ResQ Systems",
 	/** Product name (marketing / app title). */
 	productName: "ResQ Tactical OS",
 	/** Registered legal entity. */
@@ -41,7 +41,7 @@ export const brand = {
 		status: "https://status.resq.software",
 	},
 	email: {
-		from: "ResQ <updates@send.resq.software>",
+		from: "ResQ Systems <updates@send.resq.software>",
 		support: "support@resq.software",
 		contact: "contact@resq.software",
 	},

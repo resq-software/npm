@@ -16,12 +16,12 @@
 
 # Example: Bun HTTP API Server
 
-A minimal Bun.serve() API server demonstrating `@resq-sw` packages working together:
+A minimal Bun.serve() API server demonstrating `@resq-systems` packages working together:
 
-- **@resq-sw/logger** — Structured request logging
-- **@resq-sw/rate-limiting** — In-memory rate limiting for API routes
-- **@resq-sw/security** — PII sanitization and secure token generation
-- **@resq-sw/http** — Request ID tracking and HTTPS redirect checks
+- **@resq-systems/logger** — Structured request logging
+- **@resq-systems/rate-limiting** — In-memory rate limiting for API routes
+- **@resq-systems/security** — PII sanitization and secure token generation
+- **@resq-systems/http** — Request ID tracking and HTTPS redirect checks
 
 ## Routes
 

@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 ResQ Software
+  Copyright 2026 ResQ Systems, Inc.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 # Email Content & Legal Guide
 
-The standards every `@resq-sw/email-templates` email follows for content, brand
+The standards every `@resq-systems/email-templates` email follows for content, brand
 identity, and legal compliance. It documents what the primitives and templates
 in `src/emails/` already enforce — treat it as the contract when adding or
 editing a template.
@@ -51,7 +51,7 @@ Every template is `Email.Shell` wrapping, in order:
 ## 3. Organization identity (single source of truth)
 
 Names, addresses, and legal URLs come from **one** place: the `brand` object in
-[`@resq-sw/constants`](../constants/src/brand.ts). `src/emails/tokens.ts` derives
+[`@resq-systems/constants`](../constants/src/brand.ts). `src/emails/tokens.ts` derives
 `emailOrg` from it, and the theme threads it to the chrome as `theme.org`
 ([`EmailOrgIdentity`](src/emails/theme.tsx)):
 
@@ -109,7 +109,7 @@ await mailer.renderEmail({
 - **No warranties the ToS disclaims.** Copy must not promise uptime,
   outcomes, or protections the AS-IS Terms exclude.
 - **No first-person promises in the signature.** `Email.Signature` is
-  role-based ("— The ResQ team"), never a personal commitment from an individual.
+  role-based ("— The ResQ Systems team"), never a personal commitment from an individual.
 
 ## 5. Implementation checklist
 

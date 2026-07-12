@@ -1,4 +1,4 @@
-// Copyright 2026 ResQ
+// Copyright 2026 ResQ Systems, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Icon, IconWeight } from "@phosphor-icons/react";
@@ -3154,7 +3154,7 @@ function IconGallery() {
 	});
 
 	function handleCopy(name: string) {
-		void navigator.clipboard.writeText(`import { ${name} } from "@resq-sw/ui/icons";`);
+		void navigator.clipboard.writeText(`import { ${name} } from "@resq-systems/ui/icons";`);
 		setCopied(name);
 		setTimeout(() => setCopied(null), 1500);
 	}

@@ -21,14 +21,14 @@
  *
  * Usage:
  *   bun ws test              # test all packages
- *   bun ws test dsa          # test @resq-sw/dsa
+ *   bun ws test dsa          # test @resq-systems/dsa
  *   bun ws test dsa ui       # test dsa and ui
  *   bun ws build             # build all packages
- *   bun ws build helpers     # build @resq-sw/helpers
+ *   bun ws build helpers     # build @resq-systems/helpers
  *   bun ws dev               # start storybook
  *   bun ws lint              # lint all
  *   bun ws typecheck         # type-check all packages
- *   bun ws typecheck dsa     # type-check @resq-sw/dsa
+ *   bun ws typecheck dsa     # type-check @resq-systems/dsa
  *   bun ws list              # list all packages
  */
 
@@ -98,7 +98,7 @@ if (resolved === "install") {
 }
 
 if (resolved === "dev") {
-	await $`bun --filter @resq-sw/ui storybook`.cwd(ROOT);
+	await $`bun --filter @resq-systems/ui storybook`.cwd(ROOT);
 	process.exit(0);
 }
 

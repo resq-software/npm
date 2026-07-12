@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ const pingTemplate = defineEmailTemplate({
 const mailer = createMailer([...resqEmailTemplates, pingTemplate]);
 
 describe("createMailer", () => {
-	it("renders a custom template composed with the ResQ set", async () => {
+	it("renders a custom template composed with the ResQ Systems set", async () => {
 		const { subject, html, text } = await mailer.renderEmail({
 			name: "ping",
 			to: "a@b.com",
@@ -54,7 +54,7 @@ describe("createMailer", () => {
 			data: { code: "999999" },
 		});
 
-		expect(subject).toBe("Your ResQ verification code: 999999");
+		expect(subject).toBe("Your ResQ Systems verification code: 999999");
 	});
 
 	it("rejects an unknown template name", async () => {

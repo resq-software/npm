@@ -1,6 +1,6 @@
 ---
 name: composition
-description: Component composition and API rules for the @resq-sw/ui library.
+description: Component composition and API rules for the @resq-systems/ui library.
 ---
 
 # Composition Rules

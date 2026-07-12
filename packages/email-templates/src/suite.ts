@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import { createMailer } from "./mailer.js";
 import { resqEmailTemplates } from "./templates.js";
 
 /**
- * The default mailer over the built-in ResQ templates — the single source of
+ * The default mailer over the built-in ResQ Systems templates — the single source of
  * truth behind the package's `EmailPayload`, `decodeEmailPayload`, `registry`,
  * and `renderEmail` exports.
  */

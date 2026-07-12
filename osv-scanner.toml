@@ -1,4 +1,4 @@
-# Copyright 2026 ResQ Software
+# Copyright 2026 ResQ Systems, Inc.
 # SPDX-License-Identifier: Apache-2.0
 #
 # OSV-Scanner configuration — scopes the commit/CI audit gate to what actually
@@ -8,7 +8,7 @@
 # transitive dependency only (Storybook -> next/vite/esbuild/ws/@babel/core/
 # markdown-it/linkify-it, markdownlint-cli + @changesets/cli -> js-yaml/
 # brace-expansion, jsdom + vitest -> undici). None is a runtime `dependencies`
-# entry of any published `@resq-sw/*` package, so these advisories cannot reach
+# entry of any published `@resq-systems/*` package, so these advisories cannot reach
 # consumers of the libraries.
 #
 # We ignore by SPECIFIC ADVISORY ID (not whole-package `ignore = true`): if a
@@ -17,7 +17,7 @@
 # upgraded, prune any ID whose advisory no longer appears.
 #
 # NOTE on dompurify: it was previously ignored here, but it is production-
-# reachable — `posthog-js` is an optional peer of `@resq-sw/analytics` and pulls
+# reachable — `posthog-js` is an optional peer of `@resq-systems/analytics` and pulls
 # dompurify into a consumer's runtime. Rather than mask it, the root package.json
 # `overrides` pins dompurify to `>=3.4.11`, which clears all 8 advisories that
 # affected 3.4.2. dompurify is therefore fully monitored again (no entry below).
@@ -130,7 +130,7 @@ reason = "dev-only: markdown-it via Storybook docs tooling; not a runtime dep of
 # --- linkify-it: markdown-it -> markdownlint-cli tooling; not shipped ---
 [[IgnoredVulns]]
 id = "GHSA-22p9-wv53-3rq4"
-reason = "dev-only: linkify-it via markdown-it -> markdownlint-cli (@resq-sw/ui devDependency); not a runtime dep of any published package"
+reason = "dev-only: linkify-it via markdown-it -> markdownlint-cli (@resq-systems/ui devDependency); not a runtime dep of any published package"
 
 # --- brace-expansion: markdownlint-cli + @storybook/nextjs-vite tooling; not shipped ---
 [[IgnoredVulns]]

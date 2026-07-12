@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import type { PostHog, PostHogConfig } from "posthog-js";
  * augmentation to get type-safe `track()` calls:
  *
  * ```ts
- * declare module "@resq-sw/analytics" {
+ * declare module "@resq-systems/analytics" {
  *   interface AnalyticsEvents {
  *     "briefing_requested": { tier: "civilian" | "defense" };
  *     "cta_clicked": { id: string; section: string };

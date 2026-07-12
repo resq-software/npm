@@ -1,4 +1,4 @@
-# Copyright 2026 ResQ Software
+# Copyright 2026 ResQ Systems, Inc.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Source-of-truth template lives in resq-software/docs:
@@ -7,7 +7,7 @@
 # Copy this file to resq-software/npm at:
 #   .github/workflows/api-docs.yml
 #
-# Renders TypeDoc API reference for every public @resq-sw/* package
+# Renders TypeDoc API reference for every public @resq-systems/* package
 # in the bun monorepo and opens a single PR in resq-software/docs
 # with generated MDX under sdks/typescript/api/<pkg>/.
 
@@ -15,11 +15,11 @@ name: api-docs
 
 on:
   push:
-    # Tag convention in resq-software/npm is "@resq-sw/<pkg>@v*"
+    # Tag convention in resq-software/npm is "@resq-systems/<pkg>@v*"
     # (driven by changesets). Trigger on any package release so the
     # docs sync stays current across the monorepo.
     tags:
-      - '@resq-sw/*@v*'
+      - '@resq-systems/*@v*'
   workflow_dispatch:
     inputs:
       ref:
@@ -67,7 +67,7 @@ jobs:
         # workflow_dispatch can pass an alternate ref via inputs.ref;
         # fall back to github.ref_name (already stripped of refs/...).
         # DOCS_REF_SLUG is branch-safe for use in PR/branch names
-        # (`@resq-sw/ui@v0.35.6` → `resq-sw-ui-v0.35.6`).
+        # (`@resq-systems/ui@v0.35.6` → `resq-systems-ui-v0.35.6`).
         #
         # The ref is routed through env: instead of being inlined via
         # ${{ }}. Inlining at template-expansion time would interpolate
@@ -447,7 +447,7 @@ jobs:
               if not pkg_dir.is_dir():
                   continue
               version = read_version(pkg_dir.name)
-              print(f"- `@resq-sw/{pkg_dir.name}` — `v{version}`")
+              print(f"- `@resq-systems/{pkg_dir.name}` — `v{version}`")
           PY
 
       - name: Build pages index
@@ -598,7 +598,7 @@ jobs:
             (run: ${{ github.run_id }}).
 
             Regenerated files under `sdks/typescript/api/`. One
-            sub-directory per `@resq-sw/*` package. Review the diff
+            sub-directory per `@resq-systems/*` package. Review the diff
             for unintended exports and merge to publish.
           branch: auto/typescript-api-${{ env.DOCS_REF_SLUG }}
           base: main

@@ -109,7 +109,7 @@ export const WithLqipString: Story = {
  * use the registry via dot-notation:
  *
  * ```tsx
- * import lqip from "@resq-sw/design/assets/lqip.json";
+ * import lqip from "@resq-systems/design/assets/lqip.json";
  * <Picture lqip={lqip.resqMarkColorPng.x16} />
  * ```
  */

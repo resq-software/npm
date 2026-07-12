@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in contributing to `@resq-sw/ui`!
+Thanks for your interest in contributing to `@resq-systems/ui`!
 
 > After this page, see [DEVELOPMENT.md](./DEVELOPMENT.md) for local development instructions.
 

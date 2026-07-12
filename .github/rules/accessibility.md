@@ -1,6 +1,6 @@
 ---
 name: accessibility
-description: Accessibility rules for components in the @resq-sw/ui library.
+description: Accessibility rules for components in the @resq-systems/ui library.
 ---
 
 # Accessibility Rules

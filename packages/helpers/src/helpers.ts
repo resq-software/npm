@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Logger } from "@resq-sw/logger";
+import { Logger } from "@resq-systems/logger";
 
 const logger = Logger.getLogger("[helpers]");
 
@@ -173,7 +173,7 @@ type ExtractAsyncArgs<Args extends Array<unknown>> =
  * Run an async function and convert thrown errors into a {@link Failure}
  * branch instead of rejecting the returned promise.
  *
- * Logs a structured `error` line via `@resq-sw/logger` whenever the inner
+ * Logs a structured `error` line via `@resq-systems/logger` whenever the inner
  * function throws — useful for keeping rejected paths visible in
  * production telemetry without forcing every caller to wrap a try/catch.
  *

@@ -1,5 +1,5 @@
 {
-	"name": "@resq-sw/security",
+	"name": "@resq-systems/security",
 	"version": "0.2.0",
 	"description": "Security utilities: encryption, input validation, schemas, and PII sanitization",
 	"license": "Apache-2.0",

@@ -14,9 +14,9 @@
   limitations under the License.
 -->
 
-# @resq-sw/security
+# @resq-systems/security
 
-[![npm](https://img.shields.io/npm/v/%40resq-sw%2Fsecurity?style=flat-square)](https://www.npmjs.com/package/@resq-sw/security)
+[![npm](https://img.shields.io/npm/v/%40resq-systems%2Fsecurity?style=flat-square)](https://www.npmjs.com/package/@resq-systems/security)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
 
 > Encryption, threat detection, input validation, PII sanitization, and Effect Schema validators.
@@ -24,7 +24,7 @@
 ## Installation
 
 ```bash
-bun add @resq-sw/security effect
+bun add @resq-systems/security effect
 ```
 
 Peer dependency: `effect`. Uses Node.js `crypto` module for encryption.
@@ -32,7 +32,7 @@ Peer dependency: `effect`. Uses Node.js `crypto` module for encryption.
 ## Quick Start
 
 ```ts
-import { encryptData, decryptData, isSafeInput, escapeHtml, redactPII } from "@resq-sw/security";
+import { encryptData, decryptData, isSafeInput, escapeHtml, redactPII } from "@resq-systems/security";
 
 // Encrypt/decrypt
 const encrypted = await encryptData("sensitive", "my-secret-key");
@@ -267,7 +267,7 @@ Exported types: `ThreatDetectionResult`, `ThreatFinding`, `ThreatType`, `ThreatD
 ## Testing
 
 ```sh
-bun --filter @resq-sw/security test
+bun --filter @resq-systems/security test
 ```
 
 ## Troubleshooting

@@ -14,9 +14,9 @@
   limitations under the License.
 -->
 
-# @resq-sw/http
+# @resq-systems/http
 
-[![npm](https://img.shields.io/npm/v/%40resq-sw%2Fhttp?style=flat-square)](https://www.npmjs.com/package/@resq-sw/http)
+[![npm](https://img.shields.io/npm/v/%40resq-systems%2Fhttp?style=flat-square)](https://www.npmjs.com/package/@resq-systems/http)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
 
 > Effect-based HTTP client with retry, timeout, schema validation, and security middleware.
@@ -24,7 +24,7 @@
 ## Installation
 
 ```bash
-bun add @resq-sw/http effect
+bun add @resq-systems/http effect
 ```
 
 Peer dependency: `effect`.
@@ -32,7 +32,7 @@ Peer dependency: `effect`.
 ## Quick Start
 
 ```ts
-import { get, post } from "@resq-sw/http";
+import { get, post } from "@resq-systems/http";
 import { Effect } from "effect";
 import { HttpClient } from "effect/unstable/http";
 
@@ -187,7 +187,7 @@ const reqId = getRequestId(headers["x-request-id"]);
 ## Testing
 
 ```sh
-bun --filter @resq-sw/http test
+bun --filter @resq-systems/http test
 ```
 
 ## Troubleshooting
