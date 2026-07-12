@@ -71,6 +71,16 @@ Creates a new Logger instance.
 
 Sets the minimum log level for all existing logger instances.
 
+#### `logger` (singleton)
+
+A ready-to-use `Logger` instance with context `[LOGGER]` is also exported for quick, app-wide logging without managing your own instance.
+
+```ts
+import { logger } from "@resq-systems/logger";
+
+logger.info("ready");
+```
+
 ### Log Levels
 
 ```ts
@@ -123,6 +133,52 @@ const result = await log.time("DB query", async () => {
 
 On error, logs the failure with duration and rethrows.
 
+## Transports
+
+Beyond console output, every log that passes its level filter is fanned out to any registered **transports** as a structured `LogEntry` (an Observer pipeline). Transports are managed with static methods on `Logger` and apply globally across all logger instances. A transport that throws or rejects is isolated -- it never breaks the originating log call or sibling transports.
+
+| Method | Description |
+|--------|-------------|
+| `Logger.addTransport(transport)` | Register a transport; returns an unsubscribe function. Adding the same transport twice is a no-op. |
+| `Logger.removeTransport(transport \| name)` | Remove a transport by identity or by its `name`. |
+| `Logger.clearTransports()` | Remove every registered transport. |
+| `Logger.getTransports()` | Read-only snapshot of registered transports. |
+
+### Built-in Transports
+
+- **`MemoryTransport`** -- buffers entries for inspection or testing. Optional `capacity` makes it a bounded ring buffer (oldest dropped). Exposes `entries` (snapshot, oldest first) and `clear()`.
+- **`JsonTransport`** -- serializes each entry to a single JSON line and hands it to a `sink` (defaults to `console.log`). Unserializable `data` is emitted with a marker instead of throwing.
+
+### Filtering
+
+- **`createFilterTransport(inner, predicate)`** -- wraps a transport so it only receives entries for which `predicate` returns `true`.
+- **`byLevel(...levels)`** -- predicate factory matching entries whose `level` is one of `levels`.
+
+```ts
+import {
+  Logger,
+  MemoryTransport,
+  JsonTransport,
+  createFilterTransport,
+  byLevel,
+} from "@resq-systems/logger";
+
+const log = Logger.getLogger("[App]");
+
+// Buffer the last 100 entries in memory
+const mem = new MemoryTransport({ capacity: 100 });
+const off = Logger.addTransport(mem);
+
+log.info("hi");
+mem.entries.at(-1)?.message; // "hi"
+off(); // unsubscribe
+
+// Structured JSON output, gated to errors + warnings only
+Logger.addTransport(createFilterTransport(new JsonTransport(), byLevel("error", "warn")));
+```
+
+Implement the `LogTransport` interface (`name` plus `write(entry: LogEntry)`) to build custom transports.
+
 ## Decorators
 
 ### `@Log(options?)`
@@ -134,7 +190,7 @@ Logs method entry and exit with optional argument and return value logging.
 | `logArgs` | `boolean` | `true` | Log method arguments |
 | `logResult` | `boolean` | `false` | Log return value |
 | `message` | `string` | method name | Custom message prefix |
-| `level` | `LogLevelString` | `"debug"` | Log level to use |
+| `level` | `SimpleLogLevel` | `"debug"` | Log level to use (excludes `"error"`, whose second arg is an error, not data) |
 
 ```ts
 class UserService {
@@ -198,7 +254,7 @@ class MyService {
 
 ## Types
 
-Exported types: `LogData`, `LoggerOptions`, `LogLevel`, `LogLevelString`, `ColorKey`, `LogEntry`, `LogTransport`, `LogMethodOptions`, `LogTimingOptions`, `LogErrorOptions`, `LogClassOptions`.
+Exported types: `LogData`, `LoggerOptions`, `LogLevel`, `LogLevelString`, `SimpleLogLevel`, `ColorKey`, `LogEntry`, `LogTransport`, `LogMethodOptions`, `LogTimingOptions`, `LogErrorOptions`, `LogClassOptions`.
 
 ## Prerequisites
 

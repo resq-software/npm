@@ -290,7 +290,7 @@ Also exported: `throttleAsyncFn(method, parallelCalls?)`, `ThrottleAsyncExecutor
 
 ## Types
 
-All decorator types are exported: `Method`, `Decorator`, `AsyncMethod`, `AsyncDecorator`.
+All decorator types are exported: `Method`, `Decorator`, `AsyncMethod`, `AsyncDecorator`. `Decorator` and `AsyncDecorator` are generic over the decorated method and return `TypedPropertyDescriptor<F>`, preserving the original method signature end-to-end instead of erasing it to `Method<any>`.
 
 ## Prerequisites
 

@@ -37,11 +37,13 @@ bun add @upstash/ratelimit @upstash/redis
 
 ```ts
 import { throttle, debounce, TokenBucketLimiter } from "@resq-systems/rate-limiting";
+import { toPositiveInt, toPositiveMillis } from "@resq-systems/types";
 
 const save = throttle(() => persist(data), 1000);
 const search = debounce((q: string) => fetchResults(q), 300);
 
-const limiter = new TokenBucketLimiter(5, 60000); // 5 per minute
+// Limiter bounds are branded numerics — mint them at the boundary.
+const limiter = new TokenBucketLimiter(toPositiveInt(5), toPositiveMillis(60000)); // 5 per minute
 await limiter.acquire();
 ```
 
@@ -115,18 +117,54 @@ perField.cancelAll();               // cancel all keys
 perField.getStats();                // { activeKeys, keys }
 ```
 
+### Strategy interfaces
+
+The concrete limiters implement one of two Strategy-pattern interfaces, so call sites can depend on the abstraction and swap algorithms without touching call sites.
+
+#### `RateLimiter`
+
+Keyless -- one bucket per instance, guarding a single stream of work. Implemented by `TokenBucketLimiter` (bursty) and `LeakyBucketLimiter` (smoothed).
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `acquire()` | `Promise<void>` | Take a slot, awaiting capacity (a bounded queue MAY reject rather than wait forever) |
+| `tryAcquire()` | `boolean` | Non-blocking probe for a free slot |
+| `getStats()` | `RateLimiterStats` | `{ availableTokens, queueSize, capacity }` |
+| `reset()` | `void` | Restore full capacity, abandoning any queued waiters |
+
+#### `KeyedRateLimiter`
+
+Per-key and non-blocking -- one independent limit per string key. Implemented by `SlidingWindowCounter`.
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `check(key)` | `RateLimitDecision` | Record a request for `key` and decide whether it is allowed |
+| `reset(key)` | `void` | Forget all state for `key` |
+| `getStats()` | `KeyedStats` | `{ activeKeys, keys }` |
+
+Limiter constructors take branded numerics from `@resq-systems/types` (`toPositiveInt`, `toPositiveMillis`, `toPositiveNumber`) so zero, negative, and fractional bounds are rejected at the boundary.
+
+### `RateLimitDecision`
+
+The single canonical shape every rate-limit check resolves to -- returned by `SlidingWindowCounter.check`, `IRateLimitStore.check`, and both stores. A discriminated union keyed on `allowed`:
+
+- `{ allowed: true, remaining, limit, resetAt }` -- under the limit; the request was counted.
+- `{ allowed: false, remaining: 0, limit, resetAt }` -- over the limit; the request was **not** counted.
+
+`RateLimitDecisionSchema` validates it at runtime. `RateLimitCheckResult` is retained as a `@deprecated` alias and will be removed in the next major.
+
 ### `TokenBucketLimiter`
 
-Token bucket algorithm -- tokens refill over time.
+Token bucket algorithm -- tokens refill over time. Implements `RateLimiter`.
 
 ```ts
-const limiter = new TokenBucketLimiter(capacity, windowMs);
+const limiter = new TokenBucketLimiter(toPositiveInt(capacity), toPositiveMillis(windowMs));
 ```
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `capacity` | `number` | Max tokens (burst size) |
-| `windowMs` | `number` | Refill window in ms |
+| `capacity` | `PositiveInt` | Max tokens (burst size) |
+| `windowMs` | `PositiveMillis` | Refill window in ms |
 
 | Method | Returns | Description |
 |--------|---------|-------------|
@@ -136,7 +174,7 @@ const limiter = new TokenBucketLimiter(capacity, windowMs);
 | `reset()` | `void` | Reset to full capacity |
 
 ```ts
-const limiter = new TokenBucketLimiter(10, 60000); // 10 req/min
+const limiter = new TokenBucketLimiter(toPositiveInt(10), toPositiveMillis(60000)); // 10 req/min
 if (limiter.tryAcquire()) {
   await handleRequest();
 } else {
@@ -146,16 +184,16 @@ if (limiter.tryAcquire()) {
 
 ### `LeakyBucketLimiter`
 
-Leaky bucket algorithm -- requests drain at a constant rate for smoother limiting.
+Leaky bucket algorithm -- requests drain at a constant rate for smoother limiting. Implements `RateLimiter`.
 
 ```ts
-const limiter = new LeakyBucketLimiter(capacity, requestsPerSecond);
+const limiter = new LeakyBucketLimiter(toPositiveInt(capacity), toPositiveNumber(requestsPerSecond));
 ```
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `capacity` | `number` | Max queue size |
-| `requestsPerSecond` | `number` | Drain rate |
+| `capacity` | `PositiveInt` | Max queue size |
+| `requestsPerSecond` | `PositiveNumber` | Drain rate (may be fractional) |
 
 | Method | Returns | Description |
 |--------|---------|-------------|
@@ -165,7 +203,7 @@ const limiter = new LeakyBucketLimiter(capacity, requestsPerSecond);
 | `reset()` | `void` | Clear the queue |
 
 ```ts
-const limiter = new LeakyBucketLimiter(100, 10); // 100 queue, 10 req/sec
+const limiter = new LeakyBucketLimiter(toPositiveInt(100), toPositiveNumber(10)); // 100 queue, 10 req/sec
 try {
   await limiter.acquire();
   await processRequest();
@@ -176,20 +214,20 @@ try {
 
 ### `SlidingWindowCounter`
 
-Sliding window counter for accurate per-key rate limiting.
+Sliding window counter for accurate per-key rate limiting. Implements `KeyedRateLimiter`.
 
 ```ts
-const counter = new SlidingWindowCounter(windowMs, maxRequests);
+const counter = new SlidingWindowCounter(toPositiveMillis(windowMs), toPositiveInt(maxRequests));
 ```
 
 | Method | Returns | Description |
 |--------|---------|-------------|
-| `check(key)` | `{ allowed, remaining, resetAt }` | Check and increment counter |
+| `check(key)` | `RateLimitDecision` | Check and increment counter (`{ allowed, remaining, limit, resetAt }`) |
 | `reset(key)` | `void` | Reset counter for a key |
 | `getStats()` | `KeyedStats` | `{ activeKeys, keys }` |
 
 ```ts
-const counter = new SlidingWindowCounter(60000, 100); // 100 per minute
+const counter = new SlidingWindowCounter(toPositiveMillis(60000), toPositiveInt(100)); // 100 per minute
 const { allowed, remaining, resetAt } = counter.check("user:123");
 if (!allowed) {
   return new Response("Rate limited", {
@@ -207,8 +245,9 @@ In-memory store implementing `IRateLimitStore`. Suitable for single-process appl
 
 ```ts
 const store = new MemoryRateLimitStore();
-const result = await store.check("key", windowMs, maxRequests);
-// { limited, remaining, resetTime, total }
+const decision = await store.check("key", windowMs, maxRequests);
+// RateLimitDecision: { allowed, remaining, limit, resetAt }
+if (!decision.allowed) { /* return 429 */ }
 ```
 
 #### `RedisRateLimitStore`
@@ -236,7 +275,7 @@ import { RATE_LIMIT_PRESETS } from "@resq-systems/rate-limiting";
 
 ### Effect Schemas
 
-Exported for runtime validation: `ThrottleOptionsSchema`, `DebounceOptionsSchema`, `RateLimiterStatsSchema`, `KeyedStatsSchema`, `RateLimitConfigSchema`, `RateLimitCheckResultSchema`.
+Exported for runtime validation: `ThrottleOptionsSchema`, `DebounceOptionsSchema`, `RateLimiterStatsSchema`, `KeyedStatsSchema`, `RateLimitConfigSchema`, `RateLimitDecisionSchema`.
 
 ## Prerequisites
 
