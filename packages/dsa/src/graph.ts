@@ -34,27 +34,35 @@ import {
 // ============================================
 
 /**
- * Edge in the graph
+ * Edge in the graph.
+ *
+ * @template T - Type of vertex identifiers.
+ * @template M - Shape of the optional structured metadata. Defaults to
+ *   `Record<string, unknown>` so unparameterised `Edge<T>` keeps the previous
+ *   loosely-typed metadata; supply a concrete `M` for typed reads.
  */
-export interface Edge<T> {
+export interface Edge<T, M = Record<string, unknown>> {
 	/** Target vertex */
 	target: T;
 	/** Edge weight (default: 1) */
 	weight: number;
-	/** Optional metadata */
-	metadata?: Record<string, unknown>;
+	/** Optional metadata, typed as `M`. */
+	metadata?: M;
 }
 
 /**
- * Vertex with adjacency list
+ * Vertex with adjacency list.
+ *
+ * @template T - Type of vertex identifiers.
+ * @template M - Shape of the optional structured metadata (see {@link Edge}).
  */
-export interface Vertex<T> {
+export interface Vertex<T, M = Record<string, unknown>> {
 	/** Vertex value/id */
 	value: T;
 	/** Outgoing edges */
-	edges: Edge<T>[];
-	/** Optional vertex metadata */
-	metadata?: Record<string, unknown>;
+	edges: Edge<T, M>[];
+	/** Optional vertex metadata, typed as `M`. */
+	metadata?: M;
 }
 
 /**
@@ -111,6 +119,11 @@ export interface GraphOptions {
  * Space Complexity: O(V + E)
  *
  * @template T - Type of vertex identifiers
+ * @template M - Shape of the optional structured metadata attached to
+ *   vertices and edges. Defaults to `Record<string, unknown>` so existing
+ *   `Graph<T>` usage keeps compiling; supply a concrete `M` (for example
+ *   `Graph<string, { lastSeen: number }>`) to get typed reads from
+ *   {@link Graph.getVertexMetadata} and {@link Graph.getNeighbors}.
  *
  * @example
  * ```typescript
@@ -121,8 +134,8 @@ export interface GraphOptions {
  * const path = graph.findShortestPath('A', 'C');
  * ```
  */
-export class Graph<T> {
-	private adjacencyList: Map<T, Vertex<T>>;
+export class Graph<T, M = Record<string, unknown>> {
+	private adjacencyList: Map<T, Vertex<T, M>>;
 	private readonly directed: boolean;
 
 	/**
@@ -178,7 +191,7 @@ export class Graph<T> {
 	 * Adds a vertex to the graph
 	 * @returns This graph for chaining
 	 */
-	addVertex(vertex: T, metadata?: Record<string, unknown>): this {
+	addVertex(vertex: T, metadata?: M): this {
 		if (!this.adjacencyList.has(vertex)) {
 			this.adjacencyList.set(vertex, { value: vertex, edges: [], metadata });
 		}
@@ -200,7 +213,7 @@ export class Graph<T> {
 	 * Adds an edge between two vertices
 	 * @returns This graph for chaining
 	 */
-	addEdge(source: T, target: T, weight = 1, metadata?: Record<string, unknown>): this {
+	addEdge(source: T, target: T, weight = 1, metadata?: M): this {
 		this.addVertex(source);
 		this.addVertex(target);
 
@@ -267,7 +280,7 @@ export class Graph<T> {
 	/**
 	 * Gets all neighbors of a vertex
 	 */
-	getNeighbors(vertex: T): Edge<T>[] {
+	getNeighbors(vertex: T): Edge<T, M>[] {
 		return this.adjacencyList.get(vertex)?.edges ?? [];
 	}
 
@@ -279,9 +292,9 @@ export class Graph<T> {
 	}
 
 	/**
-	 * Gets vertex metadata
+	 * Gets vertex metadata, typed as `M`.
 	 */
-	getVertexMetadata(vertex: T): Record<string, unknown> | undefined {
+	getVertexMetadata(vertex: T): M | undefined {
 		return this.adjacencyList.get(vertex)?.metadata;
 	}
 

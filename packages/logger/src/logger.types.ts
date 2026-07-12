@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { LogLevel, Logger } from "./logger.js";
+
 /**
  * Interface for structured data that can be attached to log messages
  * @interface
@@ -33,7 +35,7 @@ export interface LoggerOptions {
 	/**
 	 * The minimum level of messages to log
 	 */
-	minLevel?: import("./logger.js").LogLevel;
+	minLevel?: LogLevel;
 	/**
 	 * Whether to include timestamps in log messages
 	 */
@@ -72,6 +74,20 @@ export type ColorKey =
  * Log level strings for type safety
  */
 export type LogLevelString = "error" | "warn" | "info" | "debug" | "trace" | "action" | "success";
+
+/**
+ * The subset of {@link LogLevelString} whose {@link Logger} method accepts a
+ * `(message: string, data?: LogData)` call signature.
+ *
+ * Deliberately excludes `"error"`: `Logger.error`'s second parameter is an
+ * `Error`/`unknown`, not structured {@link LogData}, so routing log data
+ * through it would silently misinterpret the payload. Derived from the actual
+ * method signatures on {@link Logger} (a method's second parameter must accept
+ * only {@link LogData}), so it cannot drift from the class.
+ */
+export type SimpleLogLevel = {
+	[K in LogLevelString]: Parameters<Logger[K]>[1] extends LogData | undefined ? K : never;
+}[LogLevelString];
 
 /**
  * Structured log entry for transport/storage
@@ -114,8 +130,8 @@ export interface LogMethodOptions {
 	logResult?: boolean;
 	/** Custom message prefix */
 	message?: string;
-	/** Log level to use (default: 'debug') */
-	level?: LogLevelString;
+	/** Log level to use (default: 'debug'); `"error"` is excluded — see {@link SimpleLogLevel} */
+	level?: SimpleLogLevel;
 }
 
 /**

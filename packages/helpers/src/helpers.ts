@@ -299,11 +299,10 @@ export function railway<TInput, T1, T2, T3, T4, T5, E>(
 ): Result<T5, E>;
 export function railway<TInput, TOutput, E>(
 	input: TInput,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	...functions: Array<(input: any) => Result<any, E>>
+	...functions: Array<(input: never) => Result<unknown, E>>
 ): Result<TOutput, E> {
-	return functions.reduce<Result<any, E>>(
-		(result, fn) => (result.success ? fn(result.value) : result),
+	return functions.reduce<Result<unknown, E>>(
+		(result, fn) => (result.success ? fn(result.value as never) : result),
 		success(input),
 	) as Result<TOutput, E>;
 }
@@ -396,8 +395,8 @@ export const isString = (value: unknown): value is string => typeof value === "s
  * if (isFunction(handler)) handler(payload);
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/ban-types
-export const isFunction = (value: unknown): value is Function => typeof value === "function";
+export const isFunction = (value: unknown): value is (...args: unknown[]) => unknown =>
+	typeof value === "function";
 
 /**
  * Type guard: narrow `unknown` to a `PromiseLike` / `Promise`.

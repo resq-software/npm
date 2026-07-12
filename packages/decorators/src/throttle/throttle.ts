@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Decorator, Method } from "../types.js";
+import type { Decorator } from "../types.js";
 import { throttleFn } from "./throttle.fn.js";
 
 /**
@@ -45,14 +45,14 @@ import { throttleFn } from "./throttle.fn.js";
  * // handleResize executes at most once every 200ms during resize
  * ```
  */
-export function throttle<T = any>(delayMs: number): Decorator<T> {
-	return (
+export function throttle<T = unknown>(delayMs: number): Decorator<T> {
+	return <F extends (...args: never[]) => unknown>(
 		_target: T,
-		_propertyName: keyof T,
-		descriptor: TypedPropertyDescriptor<Method<any>>,
-	): TypedPropertyDescriptor<Method<any>> => {
+		_propertyName: PropertyKey,
+		descriptor: TypedPropertyDescriptor<F>,
+	): TypedPropertyDescriptor<F> => {
 		if (descriptor.value) {
-			descriptor.value = throttleFn(descriptor.value, delayMs);
+			descriptor.value = throttleFn(descriptor.value, delayMs) as F;
 
 			return descriptor;
 		}

@@ -51,12 +51,12 @@ import type { Method } from "../types.js";
  * });
  * ```
  */
-export function throttleFn<D = any, A extends any[] = any[]>(
+export function throttleFn<D = unknown, A extends unknown[] = unknown[]>(
 	originalMethod: Method<D, A>,
 	delayMs: number,
 ): Method<void, A> {
 	let throttling = false;
-	return function (this: any, ...args: A): void {
+	return function (this: unknown, ...args: A): void {
 		if (!throttling) {
 			throttling = true;
 			originalMethod.apply(this, args);

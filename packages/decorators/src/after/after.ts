@@ -41,7 +41,7 @@
  * @license MIT
  */
 
-import type { Decorator, Method } from "../types.js";
+import type { Decorator } from "../types.js";
 import { afterFn } from "./after.fn.js";
 import type { AfterConfig } from "./after.types.js";
 
@@ -71,14 +71,14 @@ import type { AfterConfig } from "./after.types.js";
  * }
  * ```
  */
-export function after<T = any, D = any>(config: AfterConfig<T, D>): Decorator<T> {
-	return (
+export function after<T = unknown, D = unknown>(config: AfterConfig<T, D>): Decorator<T> {
+	return <F extends (...args: never[]) => unknown>(
 		_target: T,
-		_propertyName: keyof T,
-		descriptor: TypedPropertyDescriptor<Method<any>>,
-	): TypedPropertyDescriptor<Method<D>> => {
+		_propertyName: PropertyKey,
+		descriptor: TypedPropertyDescriptor<F>,
+	): TypedPropertyDescriptor<F> => {
 		if (descriptor.value) {
-			descriptor.value = afterFn(descriptor.value, config);
+			descriptor.value = afterFn(descriptor.value, config) as F;
 
 			return descriptor;
 		}

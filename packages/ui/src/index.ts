@@ -85,4 +85,4 @@ export * from "./components/tooltip/index.js";
 export { useIsMobile } from "./hooks/use-mobile.js";
 export { cn } from "./lib/utils.js";
 export { getContrastingColor } from "./lib/get-contrasting-color.js";
-export type { RGB } from "./lib/get-contrasting-color.types.js";
+export type { Channel, Rgb, RGB } from "./lib/get-contrasting-color.types.js";

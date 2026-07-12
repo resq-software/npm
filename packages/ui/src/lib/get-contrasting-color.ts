@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-import type { RGB } from "./get-contrasting-color.types.js";
+import type { Channel, Rgb } from "./get-contrasting-color.types.js";
 
 /**
- * Copyright 2026 ResQ Systems, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Clamp an arbitrary number to a valid {@link Channel} (integer, `0–255`). Used
+ * at the parse boundary where the value is provably in range but typed `number`.
  */
+const toChannel = (n: number): Channel =>
+	(n < 0 ? 0 : n > 255 ? 255 : Math.round(n)) as Channel;
 
 /**
  * Returns a highly contrasting color (#000000 or #ffffff) for a given input color string,
@@ -64,17 +55,18 @@ export function getContrastingColor(col: string) {
  * @returns {boolean | undefined} True if black should be used, false if white; undefined if rgb is invalid
  * @see https://www.w3.org/WAI/ER/WD-AERT/#color-contrast
  */
-function getColor(rgb: RGB) {
+function getColor(rgb: Rgb | null): boolean | undefined {
 	if (!rgb) {
-		return;
+		return undefined;
 	}
 
+	// Relative luminance (perceptual, per W3C AERT), normalized to 0–1. A zero
+	// channel is a valid value: the previous `if (r && g && b)` guard treated it
+	// as "absent", so pure red/green/blue and black skipped the math and always
+	// returned white. Use black text when the background is light (luminance > 0.5).
 	const { r, g, b } = rgb;
-	if (r && g && b) {
-		const isLight = 1 - (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-		return isLight < 0.5;
-	}
-	return false;
+	const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+	return luminance > 0.5;
 }
 
 /**
@@ -107,17 +99,17 @@ function standardizeColor(str: string): string {
  * hexToRgb('336699'); // { r: 51, g: 102, b: 153 }
  * ```
  */
-function hexToRgb(hex: string): RGB {
+function hexToRgb(hex: string): Rgb | null {
 	// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
 	const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-	hex = hex.replace(shorthandRegex, (_, r, g, b) => r + r + g + g + b + b);
+	const expanded = hex.replace(shorthandRegex, (_, r, g, b) => r + r + g + g + b + b);
 
-	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(expanded);
 	return result
 		? {
-				r: Number.parseInt(result[1] ?? "0", 16),
-				g: Number.parseInt(result[2] ?? "0", 16),
-				b: Number.parseInt(result[3] ?? "0", 16),
+				r: toChannel(Number.parseInt(result[1] ?? "0", 16)),
+				g: toChannel(Number.parseInt(result[2] ?? "0", 16)),
+				b: toChannel(Number.parseInt(result[3] ?? "0", 16)),
 			}
 		: null;
 }

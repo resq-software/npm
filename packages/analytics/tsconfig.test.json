@@ -1,0 +1,10 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"rootDir": ".",
+		"lib": ["ES2023", "DOM", "DOM.Iterable"]
+	},
+	"include": ["reset.d.ts", "src", "tests/**/*.test-d.ts", "tests/**/*.test.ts"],
+	"exclude": ["node_modules", "lib"]
+}

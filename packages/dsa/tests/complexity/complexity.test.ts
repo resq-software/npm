@@ -27,6 +27,7 @@ import { BoundedHeap } from "../../src/heap.js";
 import { Graph } from "../../src/graph.js";
 import { Trie } from "../../src/trie.js";
 import { createMinHeap } from "../../src/priority-queue.js";
+import { toProbability } from "../../src/schemas.js";
 
 /**
  * Asserts that at least one estimated domain matches an expected Big-O notation.
@@ -50,7 +51,7 @@ describe("Algorithmic Complexity Verification", () => {
 		const algo: AlgorithmCandidate = {
 			name: "BloomFilter.add",
 			fn: async (size) => {
-				const bf = new BloomFilter(size * 10, 0.01);
+				const bf = new BloomFilter(size * 10, toProbability(0.01));
 				for (let i = 0; i < size; i++) {
 					bf.add(`item-${i}`);
 				}
@@ -113,7 +114,7 @@ describe("Algorithmic Complexity Verification", () => {
 		const algo: AlgorithmCandidate = {
 			name: "CountMinSketch.increment",
 			fn: async (size) => {
-				const cms = new CountMinSketch(0.01, 0.01);
+				const cms = new CountMinSketch(toProbability(0.01), toProbability(0.01));
 				for (let i = 0; i < size; i++) {
 					cms.increment(`item-${i}`, 1);
 				}

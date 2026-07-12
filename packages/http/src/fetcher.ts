@@ -34,6 +34,23 @@ import {
 type SyncSchema<T> = Schema.Codec<T, unknown, never>;
 
 /**
+ * A host-matching pattern for the SSRF allow/block lists
+ * ({@link FetcherOptions.allowedHosts}, {@link FetcherOptions.blockedHosts}).
+ *
+ * Either an exact hostname (`"api.example.com"`) or a wildcard-subdomain
+ * pattern (`` `*.example.com` ``).
+ *
+ * The two members document the supported shapes, but this is **not** a
+ * compile-time SSRF guarantee: `Lowercase<string>` evaluates to `string`, so
+ * the union widens to `string` and does not reject uppercase or otherwise
+ * malformed literals at the type level. Case-insensitive matching and host
+ * normalization are enforced at **runtime** by `matchHost` (which lowercases
+ * both the pattern and the request host before comparing), so an entry like
+ * `"API.example.com"` still matches correctly.
+ */
+export type HostPattern = Lowercase<string> | `*.${string}`;
+
+/**
  * Configuration options for the fetcher utility.
  */
 export interface FetcherOptions<T = unknown> {
@@ -60,7 +77,7 @@ export interface FetcherOptions<T = unknown> {
 	 * advanced DNS rebinding or IP-based bypasses (e.g., alternative IP encodings, IPv6 vs IPv4)
 	 * unless such filtering is enabled at the lower network transport or HttpClient layer.
 	 */
-	allowedHosts?: readonly string[];
+	allowedHosts?: readonly HostPattern[];
 	/**
 	 * Optional list of blocked hosts (e.g. `['localhost', '127.0.0.1']`).
 	 * If provided, requests to these hosts fail with FetcherError.
@@ -68,7 +85,7 @@ export interface FetcherOptions<T = unknown> {
 	 * advanced DNS rebinding or IP-based bypasses (e.g., alternative IP encodings, IPv6 vs IPv4)
 	 * unless such filtering is enabled at the lower network transport or HttpClient layer.
 	 */
-	blockedHosts?: readonly string[];
+	blockedHosts?: readonly HostPattern[];
 }
 
 /**
@@ -574,11 +591,19 @@ export function fetcher<T = unknown>(
 	// transport/HttpClient layer.
 	const host = parsedUrl.hostname.toLowerCase().replace(/^\[|\]$/g, "");
 
-	const matchHost = (targetHost: string, pattern: string): boolean => {
+	// `pattern` is a HostPattern: an exact lowercased host or a `*.`-prefixed
+	// wildcard. `targetHost` is already lowercased above; we still lowercase the
+	// pattern defensively because the `*.${string}` arm permits an uppercased
+	// suffix (e.g. `*.Example.com`).
+	const matchHost = (targetHost: string, pattern: HostPattern): boolean => {
 		const patternLower = pattern.toLowerCase();
 		if (patternLower.startsWith("*.")) {
-			const suffix = patternLower.slice(1);
-			return targetHost === patternLower.slice(2) || targetHost.endsWith(suffix);
+			const apex = patternLower.slice(2); // "example.com"
+			const dotSuffix = patternLower.slice(1); // ".example.com"
+			// Wildcard matches the apex itself and any subdomain, but not an
+			// unrelated host that merely ends with the bare label (e.g. "evil.com"
+			// vs "notexample.com" — the leading dot in `dotSuffix` prevents that).
+			return targetHost === apex || targetHost.endsWith(dotSuffix);
 		}
 		return targetHost === patternLower;
 	};
@@ -617,35 +642,46 @@ export function fetcher<T = unknown>(
 			if (body instanceof FormData) {
 				// Real FormData: safe to encode as multipart, regardless of bodyType.
 				req = HttpClientRequest.bodyFormData(body)(req);
-			} else if (bodyType === "form") {
-				// bodyType 'form' was requested but the body is not FormData — the old
-				// `as FormData` cast lied here. Fail fast rather than send a malformed body.
-				return yield* Effect.fail(
-					new FetcherError(
-						"bodyType 'form' requires a FormData body",
-						url,
-						undefined,
-						undefined,
-						attempt,
-					),
-				);
-			} else if (bodyType === "text") {
-				const textBody = typeof body === "object" ? JSON.stringify(body) : String(body);
-				req = HttpClientRequest.bodyText(textBody)(req);
 			} else {
-				req = yield* pipe(
-					HttpClientRequest.bodyJson(body)(req),
-					Effect.mapError(
-						(error: unknown) =>
+				// `body` is now narrowed to JsonValue. The remaining discriminant is
+				// `bodyType`; an exhaustive switch makes adding a future body type a
+				// compile error (via assertNever) rather than a silent JSON fallback.
+				switch (bodyType) {
+					case "form":
+						// bodyType 'form' was requested but the body is not FormData — the old
+						// `as FormData` cast lied here. Fail fast rather than send a malformed body.
+						return yield* Effect.fail(
 							new FetcherError(
-								`Failed to serialize request body: ${safeStringify(error)}`,
+								"bodyType 'form' requires a FormData body",
 								url,
 								undefined,
 								undefined,
 								attempt,
 							),
-					),
-				);
+						);
+					case "text": {
+						const textBody = typeof body === "object" ? JSON.stringify(body) : String(body);
+						req = HttpClientRequest.bodyText(textBody)(req);
+						break;
+					}
+					case "json":
+						req = yield* pipe(
+							HttpClientRequest.bodyJson(body)(req),
+							Effect.mapError(
+								(error: unknown) =>
+									new FetcherError(
+										`Failed to serialize request body: ${safeStringify(error)}`,
+										url,
+										undefined,
+										undefined,
+										attempt,
+									),
+							),
+						);
+						break;
+					default:
+						return assertNever(bodyType);
+				}
 			}
 		}
 

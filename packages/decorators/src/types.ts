@@ -27,11 +27,15 @@
  * };
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Method<D = any, A extends any[] = any[]> = (...args: A) => D;
+export type Method<D = unknown, A extends unknown[] = unknown[]> = (...args: A) => D;
 
 /**
  * A generic decorator type for method decorators.
+ *
+ * Generic over the decorated method `F`, so the descriptor's method type is
+ * **preserved** end-to-end (exactly the built-in `MethodDecorator` shape)
+ * rather than erased to `Method<any>`. `(...args: never[]) => unknown` is the
+ * correct "any function" bound (arguments are contravariant).
  *
  * @template T - The class type containing the method
  *
@@ -43,12 +47,11 @@ export type Method<D = any, A extends any[] = any[]> = (...args: A) => D;
  * };
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Decorator<T = any> = (
+export type Decorator<T = unknown> = <F extends (...args: never[]) => unknown>(
 	target: T,
-	propertyName: keyof T,
-	descriptor: TypedPropertyDescriptor<Method<any>>,
-) => TypedPropertyDescriptor<Method<any>>;
+	propertyName: PropertyKey,
+	descriptor: TypedPropertyDescriptor<F>,
+) => TypedPropertyDescriptor<F>;
 
 /**
  * A generic async method type.
@@ -63,11 +66,13 @@ export type Decorator<T = any> = (
  * };
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AsyncMethod<D = any, A extends any[] = any[]> = (...args: A) => Promise<D>;
+export type AsyncMethod<D = unknown, A extends unknown[] = unknown[]> = (...args: A) => Promise<D>;
 
 /**
  * A decorator type specifically for async methods.
+ *
+ * Generic over the decorated async method `F`, so the descriptor's method type
+ * is **preserved** end-to-end rather than erased to `AsyncMethod<any>`.
  *
  * @template T - The class type containing the method
  *
@@ -85,9 +90,8 @@ export type AsyncMethod<D = any, A extends any[] = any[]> = (...args: A) => Prom
  * };
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AsyncDecorator<T = any> = (
+export type AsyncDecorator<T = unknown> = <F extends (...args: never[]) => Promise<unknown>>(
 	target: T,
-	propertyName: keyof T,
-	descriptor: TypedPropertyDescriptor<AsyncMethod<any>>,
-) => TypedPropertyDescriptor<AsyncMethod<any>>;
+	propertyName: PropertyKey,
+	descriptor: TypedPropertyDescriptor<F>,
+) => TypedPropertyDescriptor<F>;

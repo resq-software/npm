@@ -118,20 +118,25 @@ import type { Memoizable, MemoizeConfig } from "./memoize.types.js";
  * const user2 = service.getUser('123'); // Instant, no database query
  * ```
  */
-export function memoize<T = any, D = any>(): Memoizable<T, D>;
-export function memoize<T = any, D = any>(config: MemoizeConfig<T, D>): Memoizable<T, D>;
-export function memoize<T = any, D = any>(expirationTimeMs: number): Memoizable<T, D>;
-export function memoize<T = any, D = any>(input?: MemoizeConfig<T, D> | number): Memoizable<T, D> {
+export function memoize<T = unknown, D = unknown>(): Memoizable<T, D>;
+export function memoize<T = unknown, D = unknown>(config: MemoizeConfig<T, D>): Memoizable<T, D>;
+export function memoize<T = unknown, D = unknown>(expirationTimeMs: number): Memoizable<T, D>;
+export function memoize<T = unknown, D = unknown>(
+	input?: MemoizeConfig<T, D> | number,
+): Memoizable<T, D> {
 	return (
 		_target: T,
 		_propertyName: keyof T,
 		descriptor: TypedPropertyDescriptor<Method<D>>,
 	): TypedPropertyDescriptor<Method<D>> => {
 		if (descriptor.value) {
-			descriptor.value =
-				input === undefined
-					? memoizeFn(descriptor.value)
-					: memoizeFn(descriptor.value, input as any);
+			if (input === undefined) {
+				descriptor.value = memoizeFn(descriptor.value);
+			} else if (typeof input === "number") {
+				descriptor.value = memoizeFn(descriptor.value, input);
+			} else {
+				descriptor.value = memoizeFn(descriptor.value, input);
+			}
 
 			return descriptor;
 		}

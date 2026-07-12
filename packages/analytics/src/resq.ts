@@ -24,7 +24,7 @@
  * three coordinated edits.
  */
 
-import { type Brand, unsafeBrand } from "@resq-systems/types";
+import { type Brand, brandRefiner, unsafeBrand } from "@resq-systems/types";
 
 /**
  * Cross-subdomain allow-list for GA4 cross-domain linking.
@@ -90,6 +90,74 @@ export function sanitizeGa4Id(id: string | null | undefined): Ga4MeasurementId |
 }
 
 /**
+ * A normalized cross-subdomain cookie domain in leading-dot form
+ * (e.g. `.resq.software`).
+ *
+ * The leading dot is load-bearing: it tells the browser to scope the cookie to
+ * a registrable root *and every subdomain under it* — the entire point of the
+ * cross-subdomain analytics setup. A bare `resq.software` (no dot) is silently
+ * rejected by the browser as a domain mismatch, breaking analytics with no
+ * error.
+ *
+ * Branding makes "this string has been normalized to a valid leading-dot
+ * domain" a compile-time fact: only {@link toCookieDomain} (or the guard
+ * {@link isCookieDomain}) can mint one, so an unnormalized host can never reach
+ * the PostHog / GA4 cookie sink by accident.
+ */
+export type CookieDomain = Brand<string, "CookieDomain">;
+
+/**
+ * A well-formed leading-dot cookie domain: a leading `.`, then two or more
+ * lowercase DNS labels separated by dots. Each label starts and ends
+ * alphanumeric and may contain internal hyphens (RFC 1123). Requiring ≥2 labels
+ * rejects a rootless `.localhost` while accepting `.resq.software` and
+ * `.app.example.com`.
+ */
+const COOKIE_DOMAIN_PATTERN =
+	/^\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
+
+const cookieDomainRefiner = brandRefiner<string, "CookieDomain">(
+	(value) => COOKIE_DOMAIN_PATTERN.test(value),
+	"cookie domain",
+);
+
+/**
+ * Type guard: narrows a string to {@link CookieDomain} when it is *already* in
+ * normalized leading-dot form. Does **not** normalize — reach for
+ * {@link toCookieDomain} when the input may be a bare host.
+ */
+export const isCookieDomain: (value: string) => value is CookieDomain = cookieDomainRefiner.is;
+
+/**
+ * Smart constructor for {@link CookieDomain}. Normalizes, then validates:
+ *
+ * 1. trims surrounding whitespace,
+ * 2. lowercases (hostnames are case-insensitive per RFC 3986 §3.2.2),
+ * 3. strips a trailing dot (FQDN root form),
+ * 4. prepends the leading dot when missing.
+ *
+ * @param host - A host or cookie domain, with or without a leading dot
+ *   (`"resq.software"`, `".resq.software"`, `"App.Example.com."`). `null` /
+ *   `undefined` short-circuit to `null`.
+ * @returns The branded, normalized domain, or `null` when the input is not a
+ *   valid multi-label host.
+ */
+export function toCookieDomain(host: string | null | undefined): CookieDomain | null {
+	if (typeof host !== "string") return null;
+	const trimmed = host.trim().toLowerCase().replace(/\.$/, "");
+	if (trimmed.length === 0) return null;
+	const withLeadingDot = trimmed.startsWith(".") ? trimmed : `.${trimmed}`;
+	return cookieDomainRefiner.coerce(withLeadingDot);
+}
+
+/**
+ * The production ResQ cookie domain, validated once at module load. Reused by
+ * {@link resolveResqCookieDomain} so the literal is minted through the refiner
+ * rather than an ad-hoc cast.
+ */
+const RESQ_COOKIE_DOMAIN = cookieDomainRefiner.from(".resq.software");
+
+/**
  * Resolve the production ResQ cookie domain only when the current host
  * actually lives under `resq.software`.
  *
@@ -108,15 +176,17 @@ export function sanitizeGa4Id(id: string | null | undefined): Ga4MeasurementId |
  *   `window.location.hostname`. On the server pass the `Host` header
  *   value, or `null` / `undefined` (or call without an argument) to
  *   short-circuit cleanly.
- * @returns `".resq.software"` when `host` belongs to that registrable
- *   root, otherwise `undefined` — assign the result directly to
- *   `AnalyticsConfig.cookieDomain`.
+ * @returns the branded `".resq.software"` {@link CookieDomain} when `host`
+ *   belongs to that registrable root, otherwise `undefined` — assign the result
+ *   directly to `AnalyticsConfig.cookieDomain`.
  */
-export function resolveResqCookieDomain(host?: string | null | undefined): string | undefined {
+export function resolveResqCookieDomain(
+	host?: string | null | undefined,
+): CookieDomain | undefined {
 	if (typeof host !== "string" || host.length === 0) return undefined;
 	const normalized = host.toLowerCase();
 	if (normalized === "resq.software" || normalized.endsWith(".resq.software")) {
-		return ".resq.software";
+		return RESQ_COOKIE_DOMAIN;
 	}
 	return undefined;
 }

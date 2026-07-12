@@ -18,7 +18,12 @@
 
 import type { LiteralUnion } from "@resq-systems/types";
 import type { PostHog, PostHogConfig } from "posthog-js";
-import type { Ga4MeasurementId, ResqSubdomain } from "./resq";
+import {
+	type CookieDomain,
+	type Ga4MeasurementId,
+	type ResqSubdomain,
+	toCookieDomain,
+} from "./resq";
 
 /**
  * Augmentable typed event registry. Consumers extend this via module
@@ -55,7 +60,13 @@ export interface GA4ProviderConfig {
 export interface AnalyticsConfig {
 	posthog?: PostHogProviderConfig;
 	ga4?: GA4ProviderConfig;
-	cookieDomain?: string;
+	/**
+	 * Cross-subdomain cookie domain in normalized leading-dot form. Typed as the
+	 * nominal {@link CookieDomain} so a bare host string is a compile error here:
+	 * mint one with {@link toCookieDomain} / {@link inferCookieDomain} or take it
+	 * from {@link resolveResqCookieDomain}.
+	 */
+	cookieDomain?: CookieDomain;
 	disabled?: boolean;
 	debug?: boolean;
 }
@@ -86,14 +97,59 @@ export type TrackArgs<E extends EventName> = E extends keyof AnalyticsEvents
 			: [properties: AnalyticsEvents[E]]
 	: [properties?: Record<string, unknown>];
 
+/**
+ * A single flat GA4 parameter value. GA4 rejects nested objects and arrays for
+ * event params and user properties, so the leaf type is deliberately narrow.
+ * `null` is included because clearing a value (e.g. `user_id: null` on reset) is
+ * a first-class GA4 operation.
+ */
+type GtagParamValue = string | number | boolean | null | undefined;
+
+/**
+ * Flat parameter bag for `gtag("event", …)` and `gtag("set", …)`. Values are
+ * primitives only — {@link primitivesOnly} enforces this at runtime; the type
+ * enforces it at the call site.
+ */
+export type GtagEventParams = Readonly<Record<string, GtagParamValue>>;
+
+/**
+ * Parameters for `gtag("config", id, …)`. A superset of {@link GtagEventParams}
+ * that also allows the two structured fields this package sets: the
+ * cross-subdomain `linker` allow-list and the identity `user_id`. The tail is
+ * widened to those value shapes (never `any`) so ad-hoc config keys still type.
+ */
+export interface GtagConfigParams {
+	readonly linker?: { readonly domains?: readonly string[] };
+	readonly user_id?: string | null;
+	readonly [key: string]: GtagParamValue | { readonly domains?: readonly string[] };
+}
+
+/**
+ * The discriminated union of gtag command tuples this package emits, keyed off
+ * the first element (the command verb). Modeling the calls this way turns every
+ * `gtag(...)` call site into a checked one: a wrong arity, a raw (unbranded)
+ * measurement id, or a nested event param is a compile error rather than a
+ * value silently dropped by GA4 at runtime.
+ *
+ * Covers the verbs actually used here (`js`, `config`, `event`, `set`) plus
+ * `consent`, which is part of the gtag contract and cheap to model ahead of
+ * need. Extend this union when a new verb is introduced.
+ */
+export type GtagCommand =
+	| ["js", Date]
+	| ["config", Ga4MeasurementId, GtagConfigParams?]
+	| ["event", string, GtagEventParams?]
+	| ["set", string, GtagEventParams]
+	| ["consent", "default" | "update", Readonly<Record<string, "granted" | "denied">>];
+
 interface GtagWindow {
-	gtag?: (...args: unknown[]) => void;
-	dataLayer?: unknown[];
+	gtag?: (...args: GtagCommand) => void;
+	dataLayer?: GtagCommand[];
 }
 
 const isBrowser = (): boolean => typeof window !== "undefined";
 
-const gtag = (...args: unknown[]): void => {
+const gtag = (...args: GtagCommand): void => {
 	if (!isBrowser()) return;
 	const w = window as unknown as GtagWindow;
 	w.dataLayer = w.dataLayer ?? [];
@@ -185,10 +241,9 @@ export class Analytics {
 	#initGa4(provider: GA4ProviderConfig): void {
 		loadGa4Script(provider.measurementId);
 		gtag("js", new Date());
-		const params: Record<string, unknown> = {};
-		if (provider.domains?.length) {
-			params.linker = { domains: provider.domains };
-		}
+		const params: GtagConfigParams = provider.domains?.length
+			? { linker: { domains: provider.domains } }
+			: {};
 		gtag("config", provider.measurementId, params);
 	}
 
@@ -264,13 +319,21 @@ export const pageview = (url?: string): void => analytics.pageview(url);
 // version bump instead of three coordinated edits in the consumer repos.
 export {
 	GA4_ID_PATTERN,
+	isCookieDomain,
 	RESQ_SUBDOMAIN_ALLOWLIST,
 	resolveResqCookieDomain,
 	sanitizeGa4Id,
+	toCookieDomain,
 } from "./resq";
-export type { Ga4MeasurementId, ResqSubdomain } from "./resq";
+export type { CookieDomain, Ga4MeasurementId, ResqSubdomain } from "./resq";
 
-export const inferCookieDomain = (domains: string[]): string | undefined => {
+/**
+ * Derive the shared registrable-root cookie domain from a set of hosts. Returns
+ * the longest common dot-suffix in normalized leading-dot {@link CookieDomain}
+ * form (e.g. `["research.resq.software", "viz.resq.software"]` →
+ * `".resq.software"`), or `undefined` when the hosts share no multi-label root.
+ */
+export const inferCookieDomain = (domains: string[]): CookieDomain | undefined => {
 	if (domains.length === 0) return undefined;
 	const parts = domains.map((d) => d.replace(/^\./, "").split("."));
 	const minLen = Math.min(...parts.map((p) => p.length));
@@ -284,5 +347,5 @@ export const inferCookieDomain = (domains: string[]): string | undefined => {
 		}
 	}
 	if (!shared?.includes(".")) return undefined;
-	return `.${shared}`;
+	return toCookieDomain(shared) ?? undefined;
 };

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { isFunction } from "../_utils.js";
 import type { Method } from "../types.js";
 import type { BeforeConfig } from "./before.types.js";
 
@@ -48,20 +49,30 @@ import type { BeforeConfig } from "./before.types.js";
  * await wrapped('hello'); // Logs "About to process..." then returns "HELLO"
  * ```
  */
-export function beforeFn<D = any, A extends any[] = any[]>(
+export function beforeFn<T = unknown, D = unknown, A extends unknown[] = unknown[]>(
 	originalMethod: Method<D, A>,
-	config: BeforeConfig<any>,
+	config: BeforeConfig<T>,
 ): Method<Promise<D>, A> {
-	const resolvedConfig: BeforeConfig<any> = {
+	const resolvedConfig: BeforeConfig<T> = {
 		wait: false,
 		...config,
 	};
 
-	return async function (this: any, ...args: A): Promise<D> {
-		const beforeFunc =
-			typeof resolvedConfig.func === "string"
-				? this[resolvedConfig.func].bind(this)
-				: resolvedConfig.func;
+	return async function (this: unknown, ...args: A): Promise<D> {
+		const { func } = resolvedConfig;
+		let beforeFunc: (...hookArgs: unknown[]) => unknown;
+
+		if (isFunction(func)) {
+			beforeFunc = func;
+		} else {
+			// `func` is a method name (`keyof T`); resolve it against the instance
+			// via a narrow `Record` view instead of an `any`-typed `this`.
+			const named = (this as Record<PropertyKey, unknown>)[func];
+			if (!isFunction(named)) {
+				throw new Error(`@before: "${String(func)}" is not a method on the instance`);
+			}
+			beforeFunc = named.bind(this);
+		}
 
 		if (resolvedConfig.wait) {
 			await beforeFunc();

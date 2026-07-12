@@ -92,7 +92,7 @@ interface MinimalNextConfig {
 export const withAnalyticsRewrites = <T extends MinimalNextConfig>(
 	nextConfig: T,
 	options: AnalyticsRewriteOptions = {},
-): T => {
+): T & Required<Pick<MinimalNextConfig, "rewrites" | "skipTrailingSlashRedirect">> => {
 	const prefix = (options.prefix ?? "/ingest").replace(/\/$/, "");
 	const upstream = options.upstream ?? "https://us.i.posthog.com";
 	const assetsUpstream = options.assetsUpstream ?? "https://us-assets.i.posthog.com";

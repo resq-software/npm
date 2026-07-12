@@ -43,6 +43,7 @@
  */
 
 import { assertNever } from "./_assert.js";
+import type { Latitude, Longitude } from "./schemas.js";
 
 // ============================================================================
 // Types
@@ -81,10 +82,10 @@ export type DistanceFormula =
  * @category Types
  */
 export interface Coordinates2D {
-	/** Latitude in degrees (-90 to 90) */
-	lat: number;
-	/** Longitude in degrees (-180 to 180) */
-	lng: number;
+	/** Latitude in degrees, branded to `[-90, 90]` — see {@link Latitude}. */
+	lat: Latitude;
+	/** Longitude in degrees, branded to `[-180, 180]` — see {@link Longitude}. */
+	lng: Longitude;
 }
 
 /**

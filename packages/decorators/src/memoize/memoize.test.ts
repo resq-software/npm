@@ -31,6 +31,18 @@ describe("memoize", () => {
 			expect(callCount).toBe(1);
 		});
 
+		test("caches a null return value instead of re-running", () => {
+			let callCount = 0;
+			const fn = memoizeFn((): null => {
+				callCount++;
+				return null;
+			});
+
+			expect(fn()).toBeNull();
+			expect(fn()).toBeNull();
+			expect(callCount).toBe(1);
+		});
+
 		test("computes separately for different arguments", () => {
 			let callCount = 0;
 			const fn = memoizeFn((x: number) => {

@@ -84,3 +84,10 @@ export const RateLimitDecisionSchema = S.Union([
  * ```
  */
 export type RateLimitDecision = typeof RateLimitDecisionSchema.Type;
+
+/**
+ * @deprecated Renamed to {@link RateLimitDecision}. This alias is retained for
+ * backward compatibility with consumers written before the rename and will be
+ * removed in the next major version. Prefer {@link RateLimitDecision}.
+ */
+export type RateLimitCheckResult = RateLimitDecision;

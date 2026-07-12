@@ -331,6 +331,39 @@ describe("Graph", () => {
 	});
 });
 
+describe("Graph typed metadata (Graph<T, M>)", () => {
+	interface VertexMeta {
+		readonly label: string;
+		readonly priority: number;
+	}
+
+	it("returns structured, typed vertex metadata", () => {
+		const g = new Graph<string, VertexMeta>();
+		g.addVertex("depot", { label: "Depot", priority: 1 });
+
+		const meta = g.getVertexMetadata("depot");
+		// `meta` is `VertexMeta | undefined`, so these reads are typed, not `unknown`.
+		expect(meta?.label).toBe("Depot");
+		expect(meta?.priority).toBe(1);
+	});
+
+	it("exposes typed edge metadata via getNeighbors", () => {
+		const g = new Graph<string, VertexMeta>();
+		g.addEdge("a", "b", 3, { label: "road", priority: 2 });
+
+		const [edge] = g.getNeighbors("a");
+		expect(edge?.weight).toBe(3);
+		expect(edge?.metadata?.label).toBe("road");
+		expect(edge?.metadata?.priority).toBe(2);
+	});
+
+	it("defaults metadata to a loose record for unparameterised graphs", () => {
+		const g = new Graph<string>();
+		g.addVertex("x", { anything: 123, nested: { ok: true } });
+		expect(g.getVertexMetadata("x")?.anything).toBe(123);
+	});
+});
+
 describe("isValidVertexId", () => {
 	it("returns true for non-empty strings", () => {
 		expect(isValidVertexId("A")).toBe(true);

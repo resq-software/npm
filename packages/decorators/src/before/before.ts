@@ -43,7 +43,7 @@
  * @license MIT
  */
 
-import type { Decorator, Method } from "../types.js";
+import type { Decorator } from "../types.js";
 import { beforeFn } from "./before.fn.js";
 import type { BeforeConfig } from "./before.types.js";
 
@@ -72,14 +72,14 @@ import type { BeforeConfig } from "./before.types.js";
  * }
  * ```
  */
-export function before<T = any>(config: BeforeConfig<T>): Decorator<T> {
-	return (
+export function before<T = unknown>(config: BeforeConfig<T>): Decorator<T> {
+	return <F extends (...args: never[]) => unknown>(
 		_target: T,
-		_propertyName: keyof T,
-		descriptor: TypedPropertyDescriptor<Method<any>>,
-	): TypedPropertyDescriptor<Method<any>> => {
+		_propertyName: PropertyKey,
+		descriptor: TypedPropertyDescriptor<F>,
+	): TypedPropertyDescriptor<F> => {
 		if (descriptor.value) {
-			descriptor.value = beforeFn(descriptor.value, config);
+			descriptor.value = beforeFn(descriptor.value, config) as F;
 
 			return descriptor;
 		}

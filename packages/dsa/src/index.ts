@@ -88,3 +88,12 @@ export { Queue } from "./queue.js";
 export type { QueueNode } from "./queue.js";
 export { LRUCache } from "./lru-cache.js";
 export type { LRUCacheOptions } from "./lru-cache.js";
+export {
+	isLatitude,
+	isLongitude,
+	isProbability,
+	toLatitude,
+	toLongitude,
+	toProbability,
+} from "./schemas.js";
+export type { Latitude, Longitude, Probability } from "./schemas.js";

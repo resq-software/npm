@@ -23,9 +23,13 @@
 
 export const isPromise = (value: unknown): value is Promise<unknown> =>
 	value instanceof Promise ||
-	(typeof value === "object" && value !== null && typeof (value as any).then === "function");
+	(typeof value === "object" &&
+		value !== null &&
+		"then" in value &&
+		typeof (value as { then: unknown }).then === "function");
 
-export const isFunction = (value: unknown): value is Function => typeof value === "function";
+export const isFunction = (value: unknown): value is (...args: unknown[]) => unknown =>
+	typeof value === "function";
 
 export const isNumber = (value: unknown): value is number =>
 	typeof value === "number" && !Number.isNaN(value);

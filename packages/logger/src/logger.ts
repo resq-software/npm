@@ -24,6 +24,15 @@
  *   TIMESTAMP LEVEL [CONTEXT] message { data }
  */
 
+import { assertNever } from "./_assert.js";
+import type {
+	LogData,
+	LogEntry,
+	LoggerOptions,
+	LogLevelString,
+	LogTransport,
+} from "./logger.types.js";
+
 /**
  * Enum representing different logging levels with their priority values.
  * Higher values indicate more verbose logging.
@@ -47,62 +56,10 @@ export enum LogLevel {
 }
 
 /**
- * Available color keys for log formatting
- * @typedef {'reset' | 'red' | 'yellow' | 'blue' | 'green' | 'gray' | 'bold' | 'magenta' | 'cyan' | 'white'} ColorKey
+ * The named keys of {@link LogLevel} (e.g. `"INFO"`, `"ERROR"`). Derived from
+ * the enum so the parser's accepted level names can never drift from it.
  */
-export type ColorKey =
-	| "reset"
-	| "red"
-	| "yellow"
-	| "blue"
-	| "green"
-	| "gray"
-	| "bold"
-	| "magenta"
-	| "cyan"
-	| "white";
-
-/**
- * Interface for structured data that can be attached to log messages
- * @interface
- */
-export interface LogData {
-	/**
-	 * Any key-value pairs to include in the log
-	 */
-	[key: string]: unknown;
-}
-
-/**
- * Configuration options for the Logger
- * @interface
- */
-export interface LoggerOptions {
-	/**
-	 * The minimum level of messages to log
-	 */
-	minLevel?: LogLevel;
-
-	/**
-	 * Whether to include timestamps in log messages
-	 */
-	includeTimestamp?: boolean;
-
-	/**
-	 * Whether to colorize log output
-	 */
-	colorize?: boolean;
-
-	/**
-	 * Whether to write logs to a file (server-side only)
-	 */
-	logToFile?: boolean;
-
-	/**
-	 * Path to the log file if logToFile is enabled
-	 */
-	filePath?: string;
-}
+type LogLevelName = keyof typeof LogLevel;
 
 /**
  * A versatile logging utility that works in both browser and Node.js environments.
@@ -116,12 +73,21 @@ export class Logger {
 	private minLevel: LogLevel;
 
 	/**
-	 * Parse log level from string or return default
+	 * Type guard for a valid {@link LogLevel} name. Numeric enums carry reverse
+	 * mappings (`"0".."6"`), so those are excluded — only the named keys
+	 * (`"NONE".."ALL"`) are accepted.
 	 */
-	private static parseLevel(level?: string): LogLevel | undefined {
-		if (!level) return undefined;
-		const upper = level.toUpperCase();
-		switch (upper) {
+	private static isLogLevelName(value: string): value is LogLevelName {
+		return value in LogLevel && Number.isNaN(Number(value));
+	}
+
+	/**
+	 * Map a (validated) level name to its numeric {@link LogLevel}. The
+	 * exhaustive switch — closed by {@link assertNever} — forces this mapping to
+	 * be updated in lockstep whenever the enum gains a member.
+	 */
+	private static levelFromName(name: LogLevelName): LogLevel {
+		switch (name) {
 			case "NONE":
 				return LogLevel.NONE;
 			case "ERROR":
@@ -137,8 +103,18 @@ export class Logger {
 			case "ALL":
 				return LogLevel.ALL;
 			default:
-				return undefined;
+				return assertNever(name);
 		}
+	}
+
+	/**
+	 * Parse a log level from an arbitrary string (e.g. an env var), returning
+	 * `undefined` when it is absent or not a recognised level name.
+	 */
+	private static parseLevel(level?: string): LogLevel | undefined {
+		if (!level) return undefined;
+		const upper = level.toUpperCase();
+		return Logger.isLogLevelName(upper) ? Logger.levelFromName(upper) : undefined;
 	}
 
 	/** Registry of logger instances to implement the singleton pattern */
@@ -193,6 +169,99 @@ export class Logger {
 	}
 
 	/**
+	 * Registered log transports (the Observer pattern). Every log that passes its
+	 * level filter is fanned out to each transport as a structured {@link LogEntry},
+	 * in addition to the console output.
+	 */
+	private static readonly transports: LogTransport[] = [];
+
+	/**
+	 * Register a {@link LogTransport} to receive a structured {@link LogEntry} for
+	 * every log emitted by any logger instance (after level filtering).
+	 *
+	 * @param transport - The transport to add. A transport already present (by
+	 *   identity) is not added twice.
+	 * @returns An unsubscribe function that removes this transport.
+	 *
+	 * @example
+	 * ```ts
+	 * const off = Logger.addTransport(new MemoryTransport());
+	 * // ... later
+	 * off();
+	 * ```
+	 */
+	public static addTransport(transport: LogTransport): () => void {
+		if (!Logger.transports.includes(transport)) {
+			Logger.transports.push(transport);
+		}
+		return () => {
+			Logger.removeTransport(transport);
+		};
+	}
+
+	/**
+	 * Remove a previously-registered transport, matched by identity or by its
+	 * `name`. No-op if it is not registered.
+	 */
+	public static removeTransport(transport: LogTransport | string): void {
+		const index = Logger.transports.findIndex((registered) =>
+			typeof transport === "string" ? registered.name === transport : registered === transport,
+		);
+		if (index !== -1) {
+			Logger.transports.splice(index, 1);
+		}
+	}
+
+	/** Remove every registered transport. */
+	public static clearTransports(): void {
+		Logger.transports.length = 0;
+	}
+
+	/** A read-only snapshot of the currently-registered transports. */
+	public static getTransports(): readonly LogTransport[] {
+		return [...Logger.transports];
+	}
+
+	/**
+	 * Fan a structured entry out to every registered transport. Isolation is
+	 * total: a transport that throws synchronously or rejects asynchronously must
+	 * never break the originating log call or any sibling transport — failures are
+	 * caught and swallowed here.
+	 */
+	private static dispatch(
+		level: LogLevelString,
+		context: string,
+		message: string,
+		data?: Record<string, unknown>,
+	): void {
+		if (Logger.transports.length === 0) {
+			return;
+		}
+
+		const entry: LogEntry = {
+			timestamp: new Date().toISOString(),
+			level,
+			context,
+			message,
+			environment: typeof window === "undefined" ? "server" : "client",
+			...(data && Object.keys(data).length > 0 ? { data } : {}),
+		};
+
+		for (const transport of Logger.transports) {
+			try {
+				const result = transport.write(entry);
+				if (result instanceof Promise) {
+					result.catch(() => {
+						// A rejected async transport must not become an unhandled rejection.
+					});
+				}
+			} catch {
+				// A throwing transport must not break the log call or the loop.
+			}
+		}
+	}
+
+	/**
 	 * Format a timestamp for log output
 	 */
 	private formatTimestamp(): string {
@@ -225,13 +294,15 @@ export class Logger {
 	 */
 	private emit(
 		consoleFn: (...args: unknown[]) => void,
-		level: string,
+		label: string,
+		level: LogLevelString,
 		message: string,
 		data?: Record<string, unknown>,
 	): void {
 		const ts = this.formatTimestamp();
 		const suffix = this.formatData(data);
-		consoleFn(`${ts} ${level} [${this.context}] ${message}${suffix}`);
+		consoleFn(`${ts} ${label} [${this.context}] ${message}${suffix}`);
+		Logger.dispatch(level, this.context, message, data);
 	}
 
 	/**
@@ -242,7 +313,7 @@ export class Logger {
 	 */
 	info(message: string, data?: LogData): void {
 		if (this.minLevel < LogLevel.INFO) return;
-		this.emit(console.info, "INFO", message, data);
+		this.emit(console.info, "INFO", "info", message, data);
 	}
 
 	/**
@@ -263,7 +334,7 @@ export class Logger {
 			errorObj = { name: error.name, message: errorMessage, stack: error.stack };
 		}
 
-		this.emit(console.error, "ERROR", message, { ...data, error: errorObj });
+		this.emit(console.error, "ERROR", "error", message, { ...data, error: errorObj });
 	}
 
 	/**
@@ -274,7 +345,7 @@ export class Logger {
 	 */
 	warn(message: string, data?: LogData): void {
 		if (this.minLevel < LogLevel.WARN) return;
-		this.emit(console.warn, "WARN", message, data);
+		this.emit(console.warn, "WARN", "warn", message, data);
 	}
 
 	/**
@@ -285,7 +356,7 @@ export class Logger {
 	 */
 	debug(message: string, data?: LogData): void {
 		if (this.minLevel < LogLevel.DEBUG) return;
-		this.emit(console.debug, "DEBUG", message, data);
+		this.emit(console.debug, "DEBUG", "debug", message, data);
 	}
 
 	/**
@@ -296,7 +367,7 @@ export class Logger {
 	 */
 	trace(message: string, data?: LogData): void {
 		if (this.minLevel < LogLevel.TRACE) return;
-		this.emit(console.debug, "TRACE", message, data);
+		this.emit(console.debug, "TRACE", "trace", message, data);
 	}
 
 	/**
@@ -307,7 +378,7 @@ export class Logger {
 	 */
 	action(message: string, data?: LogData): void {
 		if (this.minLevel < LogLevel.INFO) return;
-		this.emit(console.info, "ACTION", message, data);
+		this.emit(console.info, "ACTION", "action", message, data);
 	}
 
 	/**
@@ -318,7 +389,7 @@ export class Logger {
 	 */
 	success(message: string, data?: LogData): void {
 		if (this.minLevel < LogLevel.INFO) return;
-		this.emit(console.info, "SUCCESS", message, data);
+		this.emit(console.info, "SUCCESS", "success", message, data);
 	}
 
 	/**

@@ -96,8 +96,6 @@ export class ThrottleAsyncExecutor<D> {
 
 		this.tryCall();
 
-		(proms as unknown as { hell: unknown }).hell = args[0];
-
 		return proms;
 	}
 

@@ -74,7 +74,7 @@ import type { AsyncMethod } from "../types.js";
  * const [d1, d2] = await Promise.all([p1, p2]);
  * ```
  */
-export function delegateFn<D = any, A extends any[] = any[]>(
+export function delegateFn<D = unknown, A extends unknown[] = unknown[]>(
 	originalMethod: AsyncMethod<D, A>,
 	keyResolver?: (...args: A) => string,
 ): AsyncMethod<D, A> {
@@ -82,7 +82,7 @@ export function delegateFn<D = any, A extends any[] = any[]>(
 	const keyGenerator: (...args: unknown[]) => string =
 		keyResolver ?? ((...args) => JSON.stringify(args));
 
-	return function (this: any, ...args: A): Promise<D> {
+	return function (this: unknown, ...args: A): Promise<D> {
 		const key = keyGenerator(...args);
 
 		if (!delegatedKeysMap.has(key)) {

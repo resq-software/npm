@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { Method } from "../types.js";
 import type { Readonlyable } from "./index.js";
 
 /**
@@ -49,14 +48,10 @@ import type { Readonlyable } from "./index.js";
  * const url = api.getBaseUrl();
  * ```
  */
-export function readonly<T = any>(): Readonlyable<T> {
-	return (
+export function readonly<T = unknown>(): Readonlyable<T> {
+	return <F extends (...args: never[]) => unknown>(
 		_target: T,
-		_key: keyof T,
-		descriptor: TypedPropertyDescriptor<Method<any>>,
-	): TypedPropertyDescriptor<Method<any>> => {
-		descriptor.writable = false;
-
-		return descriptor;
-	};
+		_propertyName: PropertyKey,
+		descriptor: TypedPropertyDescriptor<F>,
+	): TypedPropertyDescriptor<F> => ({ ...descriptor, writable: false });
 }

@@ -87,14 +87,14 @@ import type { Delegatable } from "./delegate.types.js";
  * const user3 = await api.getUser('123', { cacheKey: 'v2' });
  * ```
  */
-export function delegate<T = any, D = any>(
+export function delegate<T = unknown, D = unknown>(
 	keyResolver?: (...args: unknown[]) => string,
 ): Delegatable<T, D> {
 	return (
 		_target: T,
 		_propertyName: keyof T,
 		descriptor: TypedPropertyDescriptor<AsyncMethod<D>>,
-	): TypedPropertyDescriptor<AsyncMethod<any>> => {
+	): TypedPropertyDescriptor<AsyncMethod<D>> => {
 		if (descriptor.value) {
 			descriptor.value = delegateFn(descriptor.value, keyResolver);
 

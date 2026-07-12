@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Decorator, Method } from "../types.js";
+import type { Decorator } from "../types.js";
 import { delayFn } from "./delay.fn.js";
 
 /**
@@ -46,13 +46,13 @@ import { delayFn } from "./delay.fn.js";
  * ```
  */
 export function delay<T = unknown>(delayMs: number): Decorator<T> {
-	return (
+	return <F extends (...args: never[]) => unknown>(
 		_target: T,
-		_propertyName: keyof T,
-		descriptor: TypedPropertyDescriptor<Method<unknown>>,
-	): TypedPropertyDescriptor<Method<unknown>> => {
+		_propertyName: PropertyKey,
+		descriptor: TypedPropertyDescriptor<F>,
+	): TypedPropertyDescriptor<F> => {
 		if (descriptor.value) {
-			descriptor.value = delayFn(descriptor.value, delayMs);
+			descriptor.value = delayFn(descriptor.value, delayMs) as F;
 
 			return descriptor;
 		}
