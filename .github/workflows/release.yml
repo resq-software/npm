@@ -50,56 +50,56 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish @resq-sw/ui to GitHub Packages
+      - name: Publish @resq-systems/ui to GitHub Packages
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/ui
           github-token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
-      - name: Publish @resq-sw/dsa to GitHub Packages
+      - name: Publish @resq-systems/dsa to GitHub Packages
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/dsa
           github-token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
-      - name: Publish @resq-sw/helpers to GitHub Packages
+      - name: Publish @resq-systems/helpers to GitHub Packages
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/helpers
           github-token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
-      - name: Publish @resq-sw/http to GitHub Packages
+      - name: Publish @resq-systems/http to GitHub Packages
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/http
           github-token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
-      - name: Publish @resq-sw/logger to GitHub Packages
+      - name: Publish @resq-systems/logger to GitHub Packages
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/logger
           github-token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
-      - name: Publish @resq-sw/decorators to GitHub Packages
+      - name: Publish @resq-systems/decorators to GitHub Packages
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/decorators
           github-token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
-      - name: Publish @resq-sw/rate-limiting to GitHub Packages
+      - name: Publish @resq-systems/rate-limiting to GitHub Packages
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/rate-limiting
           github-token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
-      - name: Publish @resq-sw/security to GitHub Packages
+      - name: Publish @resq-systems/security to GitHub Packages
         uses: ./.github/actions/publish-github-packages
         with:
           package-dir: packages/security

@@ -1,5 +1,5 @@
 {
-	"name": "@resq-sw/logger",
+	"name": "@resq-systems/logger",
 	"version": "0.1.2",
 	"description": "Structured logging with log levels for Node.js and Bun",
 	"license": "Apache-2.0",

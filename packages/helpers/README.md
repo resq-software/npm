@@ -14,9 +14,9 @@
   limitations under the License.
 -->
 
-# @resq-sw/helpers
+# @resq-systems/helpers
 
-[![npm](https://img.shields.io/npm/v/%40resq-sw%2Fhelpers?style=flat-square)](https://www.npmjs.com/package/@resq-sw/helpers)
+[![npm](https://img.shields.io/npm/v/%40resq-systems%2Fhelpers?style=flat-square)](https://www.npmjs.com/package/@resq-systems/helpers)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
 
 > Functional utilities, type guards, result types, formatting, browser detection, and async task execution.
@@ -24,20 +24,20 @@
 ## Installation
 
 ```bash
-bun add @resq-sw/helpers
+bun add @resq-systems/helpers
 ```
 
-Dependencies: `@resq-sw/logger`, `tinyqueue`.
+Dependencies: `@resq-systems/logger`, `tinyqueue`.
 
 ## Quick Start
 
 ```ts
-import { catchError, success, failure, isString, Stringify, getURL } from "@resq-sw/helpers";
+import { catchError, success, failure, isString, Stringify, getURL } from "@resq-systems/helpers";
 
 const result = await catchError(fetch, "/api/data");
 if (result.success) console.log(result.value);
 
-const json = Stringify({ name: "ResQ" });
+const json = Stringify({ name: "ResQ Systems" });
 const url = getURL("api/users"); // origin-relative URL
 ```
 
@@ -124,7 +124,7 @@ Builds a full URL from `globalThis.location.origin` (browser) or environment var
 Priority-queue-based delayed task executor. Tasks are sorted by execution time and fired in order.
 
 ```ts
-import { TaskExec } from "@resq-sw/helpers";
+import { TaskExec } from "@resq-systems/helpers";
 
 const exec = new TaskExec();
 exec.exec(() => console.log("later"), 5000);  // runs after 5s
@@ -155,7 +155,7 @@ Extended version with optional line number, ISO timestamp, and custom prefix.
 | `includeTimestamp` | `boolean` | Append ISO 8601 timestamp |
 | `customPrefix` | `string` | Replace default `"location"` prefix |
 
-### Formatting (`@resq-sw/helpers/formatting`)
+### Formatting (`@resq-systems/helpers/formatting`)
 
 #### Date Formatting
 
@@ -184,7 +184,7 @@ Extended version with optional line number, ISO timestamp, and custom prefix.
 | `truncate` | `(str: string, length: number) => string` | Truncate with `...` |
 | `slugify` | `(str: string) => string` | URL-safe slug |
 
-### Browser (`@resq-sw/helpers/browser`)
+### Browser (`@resq-systems/helpers/browser`)
 
 #### Platform Detection
 
@@ -235,7 +235,7 @@ const { href, encodedText } = obfuscateLink({
 ## Prerequisites
 
 - **Runtime**: Bun 1.1+ or Node.js 20+
-- **Peer Dependencies**: `@resq-sw/logger`
+- **Peer Dependencies**: `@resq-systems/logger`
 
 ## Configuration
 
@@ -244,7 +244,7 @@ const { href, encodedText } = obfuscateLink({
 ## Testing
 
 ```sh
-bun --filter @resq-sw/helpers test
+bun --filter @resq-systems/helpers test
 ```
 
 ## Troubleshooting

@@ -1,5 +1,5 @@
 {
-	"name": "@resq-sw/http",
+	"name": "@resq-systems/http",
 	"version": "0.2.0",
 	"description": "Effect-based HTTP client with retry, timeout, and schema validation",
 	"license": "Apache-2.0",

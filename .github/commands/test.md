@@ -5,7 +5,7 @@ description: Run Vitest tests for the component library.
 
 # /test
 
-Run tests for `@resq-sw/ui`.
+Run tests for `@resq-systems/ui`.
 
 ## Usage
 

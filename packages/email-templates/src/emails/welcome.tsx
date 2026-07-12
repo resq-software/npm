@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ export type WelcomeEmailProps = WelcomeData;
 /** Account welcome / onboarding email. */
 export function WelcomeEmail({ firstName = "there", verifyUrl }: WelcomeEmailProps) {
 	return (
-		<Email.Shell preview={`Welcome to ResQ, ${firstName}`}>
+		<Email.Shell preview={`Welcome to ResQ Systems, ${firstName}`}>
 			<Email.Header />
-			<Email.Title>Welcome to ResQ</Email.Title>
+			<Email.Title>Welcome to ResQ Systems</Email.Title>
 			<Email.Paragraph>Hi {firstName},</Email.Paragraph>
 			<Email.Paragraph>
 				Thanks for creating an account. Everything is set up and ready when you are.
@@ -40,7 +40,7 @@ export function WelcomeEmail({ firstName = "there", verifyUrl }: WelcomeEmailPro
 			<Email.Signature />
 			<Email.LegalFooter
 				category="transactional"
-				reason="You are receiving this email because you created a ResQ account."
+				reason="You are receiving this email because you created a ResQ Systems account."
 			/>
 		</Email.Shell>
 	);

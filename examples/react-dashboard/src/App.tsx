@@ -14,44 +14,51 @@
  * limitations under the License.
  */
 
-import "@resq-sw/ui/styles/globals.css";
+import "@resq-systems/ui/styles/globals.css";
 
-// ── @resq-sw/ui — Component library ────────────────────────────
-import { Badge } from "@resq-sw/ui/badge";
-import { Button } from "@resq-sw/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@resq-sw/ui/card";
-import { Progress } from "@resq-sw/ui/progress";
-import { Separator } from "@resq-sw/ui/separator";
-import { Spinner } from "@resq-sw/ui/spinner";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@resq-sw/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@resq-sw/ui/tabs";
+// ── @resq-systems/ui — Component library ────────────────────────────
+import { Badge } from "@resq-systems/ui/badge";
+import { Button } from "@resq-systems/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@resq-systems/ui/card";
+import { Progress } from "@resq-systems/ui/progress";
+import { Separator } from "@resq-systems/ui/separator";
+import { Spinner } from "@resq-systems/ui/spinner";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@resq-systems/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@resq-systems/ui/tabs";
 
-// ── @resq-sw/dsa — Distance + PriorityQueue + BloomFilter ─────
-import { Distance, BloomFilter, PriorityQueue } from "@resq-sw/dsa";
+// ── @resq-systems/dsa — Distance + PriorityQueue + BloomFilter ─────
+import { Distance, BloomFilter, PriorityQueue } from "@resq-systems/dsa";
 
-// ── @resq-sw/helpers — Formatting + type guards ────────────────
-import { capitalize, truncate } from "@resq-sw/helpers/formatting";
-import { getBrowser, getPlatform } from "@resq-sw/helpers/browser";
-import { isNumber } from "@resq-sw/helpers";
+// ── @resq-systems/helpers — Formatting + type guards ────────────────
+import { capitalize, truncate } from "@resq-systems/helpers/formatting";
+import { getBrowser, getPlatform } from "@resq-systems/helpers/browser";
+import { isNumber } from "@resq-systems/helpers";
 
-// ── @resq-sw/logger — Structured logging ───────────────────────
-import { Logger } from "@resq-sw/logger";
+// ── @resq-systems/logger — Structured logging ───────────────────────
+import { Logger } from "@resq-systems/logger";
 
-// ── @resq-sw/rate-limiting — Throttle refresh actions ──────────
-import { throttle } from "@resq-sw/rate-limiting";
+// ── @resq-systems/rate-limiting — Throttle refresh actions ──────────
+import { throttle } from "@resq-systems/rate-limiting";
 
-// ── @resq-sw/security — Sanitize log display (browser-safe subpath) ─
-import { escapeHtml } from "@resq-sw/security/sanitize";
+// ── @resq-systems/security — Sanitize log display (browser-safe subpath) ─
+import { escapeHtml } from "@resq-systems/security/sanitize";
 
-// ── @resq-sw/http — Request tracking (browser-safe subpath) ────
-import { getRequestId } from "@resq-sw/http/security";
+// ── @resq-systems/http — Request tracking (browser-safe subpath) ────
+import { getRequestId } from "@resq-systems/http/security";
 
 import { useMemo, useState } from "react";
 
 // ── Logger instance ────────────────────────────────────────────
 const logger = Logger.getLogger("[Dashboard]");
 
-// ── Session ID via @resq-sw/http ───────────────────────────────
+// ── Session ID via @resq-systems/http ───────────────────────────────
 const sessionId = getRequestId();
 
 // ── HQ coordinates (Oakland Supply Depot) ──────────────────────
@@ -106,7 +113,7 @@ const assets = [
 	},
 ];
 
-// ── Raw log entries (will be sanitized via @resq-sw/security) ──
+// ── Raw log entries (will be sanitized via @resq-systems/security) ──
 const rawLogs = [
 	"09:14 — DRN-003 triggered low-battery RTB at 18%",
 	"09:10 — DRN-005 began thermal scan of <zone-3>",
@@ -115,12 +122,12 @@ const rawLogs = [
 	"08:40 — Mission Control started shift rotation B",
 ];
 
-// ── Throttled refresh via @resq-sw/rate-limiting ───────────────
+// ── Throttled refresh via @resq-systems/rate-limiting ───────────────
 const throttledRefresh = throttle(() => {
 	logger.info("Fleet data refreshed", { sessionId });
 }, 2000);
 
-// ── Badge variant helper using @resq-sw/helpers ────────────────
+// ── Badge variant helper using @resq-systems/helpers ────────────────
 const statusVariant = (s: string) =>
 	s === "active"
 		? ("default" as const)
@@ -132,7 +139,7 @@ export function App() {
 	const [tab, setTab] = useState("overview");
 	const [refreshCount, setRefreshCount] = useState(0);
 
-	// ── @resq-sw/helpers — type guard ────────────────────────────
+	// ── @resq-systems/helpers — type guard ────────────────────────────
 	const activeCount = assets.filter((a) => {
 		const bat = a.battery;
 		return isNumber(bat) && bat > 0 && a.status === "active";
@@ -140,7 +147,7 @@ export function App() {
 
 	const avgBattery = Math.round(assets.reduce((s, a) => s + a.battery, 0) / assets.length);
 
-	// ── @resq-sw/dsa — Distance calculations ─────────────────────
+	// ── @resq-systems/dsa — Distance calculations ─────────────────────
 	const droneDistances = useMemo(
 		() =>
 			assets.map((a) => ({
@@ -150,7 +157,7 @@ export function App() {
 		[],
 	);
 
-	// ── @resq-sw/dsa — PriorityQueue for mission priority ────────
+	// ── @resq-systems/dsa — PriorityQueue for mission priority ────────
 	const missionQueue = useMemo(() => {
 		const pq = new PriorityQueue<{ id: string; urgency: number; label: string }>({
 			compare: (a, b) => a.urgency - b.urgency,
@@ -164,7 +171,7 @@ export function App() {
 		return ordered;
 	}, []);
 
-	// ── @resq-sw/dsa — BloomFilter for processed alerts ──────────
+	// ── @resq-systems/dsa — BloomFilter for processed alerts ──────────
 	const processedAlerts = useMemo(() => {
 		const bf = new BloomFilter({ expectedItems: 100, falsePositiveRate: 0.01 });
 		bf.add("DRN-003-LOW-BAT");
@@ -172,10 +179,10 @@ export function App() {
 		return bf;
 	}, []);
 
-	// ── @resq-sw/security — Sanitize logs for safe display ───────
+	// ── @resq-systems/security — Sanitize logs for safe display ───────
 	const sanitizedLogs = useMemo(() => rawLogs.map((log) => escapeHtml(log)), []);
 
-	// ── @resq-sw/helpers/browser — Platform info ─────────────────
+	// ── @resq-systems/helpers/browser — Platform info ─────────────────
 	const platform = useMemo(() => `${capitalize(getPlatform())} / ${capitalize(getBrowser())}`, []);
 
 	const handleRefresh = () => {
@@ -277,7 +284,7 @@ export function App() {
 					</Card>
 				</TabsContent>
 
-				{/* Assets — with @resq-sw/dsa Distance */}
+				{/* Assets — with @resq-systems/dsa Distance */}
 				<TabsContent value="assets" className="mt-6">
 					<Card>
 						<CardContent className="p-0">
@@ -316,7 +323,7 @@ export function App() {
 					</Card>
 				</TabsContent>
 
-				{/* Missions — @resq-sw/dsa PriorityQueue */}
+				{/* Missions — @resq-systems/dsa PriorityQueue */}
 				<TabsContent value="missions" className="mt-6">
 					<Card>
 						<CardHeader>
@@ -350,7 +357,7 @@ export function App() {
 					</Card>
 				</TabsContent>
 
-				{/* Logs — sanitized via @resq-sw/security */}
+				{/* Logs — sanitized via @resq-systems/security */}
 				<TabsContent value="logs" className="mt-6">
 					<Card>
 						<CardHeader className="flex flex-row items-center gap-2">

@@ -1,11 +1,11 @@
 ---
 name: storybook-developer
-description: Storybook 10 specialist for the @resq-sw/ui library. Activate for writing stories, configuring addons, setting up Chromatic visual regression, and debugging Storybook build issues.
+description: Storybook 10 specialist for the @resq-systems/ui library. Activate for writing stories, configuring addons, setting up Chromatic visual regression, and debugging Storybook build issues.
 ---
 
 # Storybook Developer Agent
 
-You maintain Storybook 10 for the `@resq-sw/ui` component library, with visual regression testing via Chromatic.
+You maintain Storybook 10 for the `@resq-systems/ui` component library, with visual regression testing via Chromatic.
 
 ## Story File Structure
 

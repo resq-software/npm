@@ -14,19 +14,19 @@
   limitations under the License.
 -->
 
-# @resq-sw/analytics
+# @resq-systems/analytics
 
-[![npm](https://img.shields.io/npm/v/%40resq-sw%2Fanalytics?style=flat-square)](https://www.npmjs.com/package/@resq-sw/analytics)
+[![npm](https://img.shields.io/npm/v/%40resq-systems%2Fanalytics?style=flat-square)](https://www.npmjs.com/package/@resq-systems/analytics)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
 
-Unified PostHog + GA4 analytics client for the ResQ platform. Built for cross-subdomain identity (`resq.software` ↔ `research.resq.software` ↔ `viz.resq.software`), lazy-loaded so it never sits on the LCP critical path, and typed events you can extend per-app.
+Unified PostHog + GA4 analytics client for the ResQ Systems platform. Built for cross-subdomain identity (`resq.software` ↔ `research.resq.software` ↔ `viz.resq.software`), lazy-loaded so it never sits on the LCP critical path, and typed events you can extend per-app.
 
 ## Install
 
 ```sh
-bun add @resq-sw/analytics posthog-js
+bun add @resq-systems/analytics posthog-js
 # or
-npm install @resq-sw/analytics posthog-js
+npm install @resq-systems/analytics posthog-js
 ```
 
 `posthog-js`, `react`, and `react-dom` are optional peer dependencies — only install what your consumer actually uses.
@@ -35,7 +35,7 @@ npm install @resq-sw/analytics posthog-js
 
 ```ts
 // next.config.ts
-import { withAnalyticsRewrites } from "@resq-sw/analytics/next";
+import { withAnalyticsRewrites } from "@resq-systems/analytics/next";
 
 export default withAnalyticsRewrites({
   // ...your existing config
@@ -46,7 +46,7 @@ export default withAnalyticsRewrites({
 // app/providers.tsx
 "use client";
 
-import { AnalyticsProvider } from "@resq-sw/analytics/react";
+import { AnalyticsProvider } from "@resq-systems/analytics/react";
 
 const config = {
   posthog: {
@@ -66,7 +66,7 @@ export const Providers = ({ children }: { children: React.ReactNode }) => (
 ```tsx
 "use client";
 
-import { useAnalytics } from "@resq-sw/analytics/react";
+import { useAnalytics } from "@resq-systems/analytics/react";
 
 export const RequestBriefingButton = () => {
   const { track } = useAnalytics();
@@ -83,7 +83,7 @@ export const RequestBriefingButton = () => {
 Extend `AnalyticsEvents` once per app to make `track()` calls type-safe:
 
 ```ts
-declare module "@resq-sw/analytics" {
+declare module "@resq-systems/analytics" {
   interface AnalyticsEvents {
     briefing_requested: { tier: "civilian" | "defense" | "allied" };
     cta_clicked: { id: string; section: string };
@@ -96,7 +96,7 @@ After this, `track("briefing_requested", { tier: "civilian" })` type-checks; `tr
 
 ## API
 
-### Core (`@resq-sw/analytics`)
+### Core (`@resq-systems/analytics`)
 
 | Export | Purpose |
 |---|---|
@@ -108,14 +108,14 @@ After this, `track("briefing_requested", { tier: "civilian" })` type-checks; `tr
 | `analytics` | The singleton, if you need direct access. |
 | `inferCookieDomain(domains)` | Build `.resq.software` from a domain allow-list. |
 
-### React (`@resq-sw/analytics/react`)
+### React (`@resq-systems/analytics/react`)
 
 | Export | Purpose |
 |---|---|
 | `<AnalyticsProvider config deferUntilIdle?>` | Initialises the singleton on mount. `deferUntilIdle` (default `true`) waits for `requestIdleCallback`. |
 | `useAnalytics()` | Returns `{ track, identify, reset, pageview, analytics }`. |
 
-### Next (`@resq-sw/analytics/next`)
+### Next (`@resq-systems/analytics/next`)
 
 | Export | Purpose |
 |---|---|
@@ -124,7 +124,7 @@ After this, `track("briefing_requested", { tier: "civilian" })` type-checks; `tr
 
 ## Cross-subdomain identity
 
-For ResQ's three surfaces to share a single `distinct_id`:
+For ResQ Systems's three surfaces to share a single `distinct_id`:
 
 1. **Cookie domain.** Set `cookieDomain: ".resq.software"` (or call `inferCookieDomain([...])`).
 2. **Reverse proxy.** Each subdomain's `next.config.ts` calls `withAnalyticsRewrites(...)` so events ingest at `<subdomain>/ingest/*`, not `*.posthog.com`.
@@ -150,7 +150,7 @@ For ResQ's three surfaces to share a single `distinct_id`:
 ## Testing
 
 ```sh
-bun --filter @resq-sw/analytics test
+bun --filter @resq-systems/analytics test
 ```
 
 ## Troubleshooting

@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import { createResendSender } from "../src/send/resend-sender";
 import { sendEmail } from "../src/send/send-email";
 import type { EmailSender } from "../src/send/sender";
 
-const input = { from: "ResQ <a@b.com>", to: "c@d.com", subject: "Hi", html: "<b>hi</b>" };
+const input = { from: "ResQ Systems <a@b.com>", to: "c@d.com", subject: "Hi", html: "<b>hi</b>" };
 
 describe("createResendSender", () => {
 	beforeEach(() => sendMock.mockReset());
@@ -91,7 +91,7 @@ describe("sendEmail", () => {
 		const result = await sendEmail(
 			okSender,
 			{ name: "not-a-template" },
-			{ from: "ResQ <a@b.com>" },
+			{ from: "ResQ Systems <a@b.com>" },
 		);
 		expect(result.ok).toBe(false);
 		if (!result.ok) expect(result.error.name).toBe("EmailValidationError");
@@ -99,7 +99,7 @@ describe("sendEmail", () => {
 
 	it("does not call the sender when the payload fails validation", async () => {
 		const send = vi.fn(async () => ({ ok: true, id: "msg_x" }) as const);
-		await sendEmail({ send }, {}, { from: "ResQ <a@b.com>" });
+		await sendEmail({ send }, {}, { from: "ResQ Systems <a@b.com>" });
 		expect(send).not.toHaveBeenCalled();
 	});
 
@@ -112,7 +112,7 @@ describe("sendEmail", () => {
 		const result = await sendEmail(
 			throwingSender,
 			{ name: "otp", to: "user@example.com", data: { code: "123456", firstName: "Ada" } },
-			{ from: "ResQ <a@b.com>" },
+			{ from: "ResQ Systems <a@b.com>" },
 		);
 		expect(result.ok).toBe(false);
 		if (!result.ok) {

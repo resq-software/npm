@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { colors } from "@resq-sw/constants/tokens";
+import { colors } from "@resq-systems/constants/tokens";
 import { describe, expect, it } from "vitest";
 
 /**
- * Drift guard: the shared `@resq-sw/constants` oklch tokens are the canonical
+ * Drift guard: the shared `@resq-systems/constants` oklch tokens are the canonical
  * brand values. This asserts `globals.css` carries the same values so the UI
  * CSS and the constants package (which email + other apps consume) can never
- * silently diverge. `@resq-sw/constants` is the single source; update it, then
+ * silently diverge. `@resq-systems/constants` is the single source; update it, then
  * update `globals.css` to match.
  */
 const css = readFileSync(join(process.cwd(), "src", "styles", "globals.css"), "utf8");
@@ -52,7 +52,7 @@ const mapping: Record<keyof typeof colors.oklch, string> = {
 	primary: "primary",
 };
 
-describe("globals.css brand tokens stay in sync with @resq-sw/constants", () => {
+describe("globals.css brand tokens stay in sync with @resq-systems/constants", () => {
 	for (const [token, cssName] of Object.entries(mapping) as [keyof typeof colors.oklch, string][]) {
 		it(`--${cssName} matches constants.oklch.${token}`, () => {
 			expect(cssVar(cssName)).toEqual(parseOklch(colors.oklch[token]));

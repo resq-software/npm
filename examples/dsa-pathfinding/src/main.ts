@@ -17,14 +17,14 @@
 /**
  * Drone Fleet Route Optimization — Earthquake Response
  *
- * Demonstrates @resq-sw/dsa data structures in a realistic disaster
+ * Demonstrates @resq-systems/dsa data structures in a realistic disaster
  * response scenario where drones must deliver medical supplies, survey
  * damage, and prioritize rescue requests across an affected region.
  *
  * Location data is loosely based on the San Francisco Bay Area.
  */
 
-import { Graph, Distance, PriorityQueue, BloomFilter, Trie } from "@resq-sw/dsa";
+import { Graph, Distance, PriorityQueue, BloomFilter, Trie } from "@resq-systems/dsa";
 
 // ──────────────────────────────────────────────
 // 1. LOCATION DATA — GPS coordinates of key sites

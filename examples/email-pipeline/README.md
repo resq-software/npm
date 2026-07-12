@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 ResQ
+  Copyright 2026 ResQ Systems, Inc.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 # example-email-pipeline
 
-Renders a `@resq-sw/email-templates` payload to HTML + text the way a backend
+Renders a `@resq-systems/email-templates` payload to HTML + text the way a backend
 pipeline (queue worker, cron job) would, and shows how to send it via Resend.
 
 ## Run
@@ -24,7 +24,7 @@ pipeline (queue worker, cron job) would, and shows how to send it via Resend.
 ```sh
 # from the repo root
 bun install
-bun --filter @resq-sw/email-templates build   # the example imports the built package
+bun --filter @resq-systems/email-templates build   # the example imports the built package
 bun --filter example-email-pipeline start
 ```
 

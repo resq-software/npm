@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,13 @@ export function PasswordChangedEmail({
 	secureAccountUrl,
 }: PasswordChangedEmailProps) {
 	return (
-		<Email.Shell preview="Your ResQ password was changed">
+		<Email.Shell preview="Your ResQ Systems password was changed">
 			<Email.Header />
 			<Email.Title>Your password was changed</Email.Title>
 			{firstName ? <Email.Paragraph>Hi {firstName},</Email.Paragraph> : null}
 			<Email.Paragraph>
-				The password on your ResQ account was changed{changedAt ? ` on ${changedAt}` : ""}. If you
-				made this change, no further action is needed.
+				The password on your ResQ Systems account was changed{changedAt ? ` on ${changedAt}` : ""}.
+				If you made this change, no further action is needed.
 			</Email.Paragraph>
 			{secureAccountUrl ? (
 				<>
@@ -50,7 +50,7 @@ export function PasswordChangedEmail({
 			<Email.SupportLine>Didn't change your password?</Email.SupportLine>
 			<Email.LegalFooter
 				category="transactional"
-				reason="You are receiving this email because the password on your ResQ account was changed."
+				reason="You are receiving this email because the password on your ResQ Systems account was changed."
 			/>
 		</Email.Shell>
 	);

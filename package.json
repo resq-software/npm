@@ -1,5 +1,5 @@
 {
-	"name": "resq-sw-workspace",
+	"name": "resq-systems-workspace",
 	"private": true,
 	"workspaces": [
 		"packages/*",
@@ -14,7 +14,7 @@
 		"release": "bun run build && changeset publish",
 		"build": "bun --filter '*' build",
 		"test": "bun --filter '*' test",
-		"lint": "bun --filter @resq-sw/ui lint"
+		"lint": "bun --filter @resq-systems/ui lint"
 	},
 	"packageManager": "bun@1.3.10",
 	"dependencies": {

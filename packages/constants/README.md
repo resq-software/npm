@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 ResQ
+  Copyright 2026 ResQ Systems, Inc.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,38 +14,38 @@
   limitations under the License.
 -->
 
-# @resq-sw/constants
+# @resq-systems/constants
 
-Shared, **zero-dependency** constants for ResQ apps — one source of truth reused
+Shared, **zero-dependency** constants for ResQ Systems apps — one source of truth reused
 across the marketing site, dashboard, and transactional email.
 
 ## Install
 
 ```sh
-bun add @resq-sw/constants
+bun add @resq-systems/constants
 ```
 
 ## Subpaths
 
 | Import | Contents |
 | --- | --- |
-| `@resq-sw/constants` | everything below |
-| `@resq-sw/constants/tokens` | `colors` (oklch source + email-safe hex), `fonts` (stacks + webfont href), `radii`, `themeColor` (light/dark PWA + viewport `theme-color`) |
-| `@resq-sw/constants/brand` | `brand` — name, legal name, tagline, domains, email addresses, postal address |
+| `@resq-systems/constants` | everything below |
+| `@resq-systems/constants/tokens` | `colors` (oklch source + email-safe hex), `fonts` (stacks + webfont href), `radii`, `themeColor` (light/dark PWA + viewport `theme-color`) |
+| `@resq-systems/constants/brand` | `brand` — name, legal name, tagline, domains, email addresses, postal address |
 
 Everything is `as const`, so values are literal-typed and tree-shakeable.
 
 ## Usage
 
 ```ts
-import { colors, fonts } from "@resq-sw/constants/tokens";
-import { brand } from "@resq-sw/constants/brand";
+import { colors, fonts } from "@resq-systems/constants/tokens";
+import { brand } from "@resq-systems/constants/brand";
 
 element.style.background = colors.hex.background; // "#0A0E1A"
-const from = brand.email.from; // "ResQ <updates@send.resq.software>"
+const from = brand.email.from; // "ResQ Systems <updates@send.resq.software>"
 ```
 
-`@resq-sw/email-templates` sources its default theme colors and fonts from
+`@resq-systems/email-templates` sources its default theme colors and fonts from
 `./tokens`, so rebranding the palette in one place updates every email.
 
 ## Adding constants
@@ -72,7 +72,7 @@ This package ships **TypeScript token objects, not a stylesheet** — there is n
 from the tokens at build time, or reference the hex values directly:
 
 ```ts
-import { colors, radii } from "@resq-sw/constants/tokens";
+import { colors, radii } from "@resq-systems/constants/tokens";
 
 const rootVars = `:root {
   --color-background: ${colors.hex.background}; /* #0A0E1A */
@@ -86,13 +86,13 @@ utilities resolve against the same source of truth as the rest of the platform.
 ## Testing
 
 ```sh
-bun --filter @resq-sw/constants test
+bun --filter @resq-systems/constants test
 ```
 
 ## Troubleshooting
 
-- **`Cannot find module '@resq-sw/constants/tokens.css'`**: There is no CSS export.
-  Import the token objects from `@resq-sw/constants/tokens` and emit variables yourself.
+- **`Cannot find module '@resq-systems/constants/tokens.css'`**: There is no CSS export.
+  Import the token objects from `@resq-systems/constants/tokens` and emit variables yourself.
 - **Colors look wrong in email or older targets**: use the email-safe `colors.hex.*`
   values, not the `oklch` source — many mail clients drop `oklch()`.
 

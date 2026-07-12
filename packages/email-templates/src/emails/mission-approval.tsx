@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ const severityClass: Record<"info" | "warning" | "critical", string> = {
 	critical: "text-danger",
 };
 
-/** Approver sign-off request for a ResQ mission / plan execution. */
+/** Approver sign-off request for a ResQ Systems mission / plan execution. */
 export function MissionApprovalEmail({
 	missionId,
 	title,
@@ -63,7 +63,7 @@ export function MissionApprovalEmail({
 			) : null}
 			<Email.LegalFooter
 				category="transactional"
-				reason="You are receiving this email because you are an approver for ResQ mission operations."
+				reason="You are receiving this email because you are an approver for ResQ Systems mission operations."
 			/>
 		</Email.Shell>
 	);

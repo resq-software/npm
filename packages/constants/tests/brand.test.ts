@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import { brand } from "../src/brand";
 
 describe("brand", () => {
 	it("exposes identity, domains, and email addresses", () => {
-		expect(brand.name).toBe("ResQ");
+		expect(brand.name).toBe("ResQ Systems");
 		expect(brand.domains.app).toMatch(/^https:\/\//);
 		expect(brand.domains.marketing).toMatch(/^https:\/\//);
 		expect(brand.domains.docs).toMatch(/^https:\/\//);

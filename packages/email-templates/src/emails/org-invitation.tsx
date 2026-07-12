@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import { Email } from "./primitives.js";
 
 export type OrgInvitationEmailProps = OrgInvitationData;
 
-/** Invitation to join a ResQ organization / team. */
+/** Invitation to join a ResQ Systems organization / team. */
 export function OrgInvitationEmail({
 	orgName,
 	inviterName,
@@ -29,15 +29,15 @@ export function OrgInvitationEmail({
 }: OrgInvitationEmailProps) {
 	const inviterPhrase = inviterName ? `${inviterName} invited you` : "You have been invited";
 	const reason = inviterName
-		? `You are receiving this email because ${inviterName} invited you to join ${orgName} on ResQ.`
-		: `You are receiving this email because you were invited to join ${orgName} on ResQ.`;
+		? `You are receiving this email because ${inviterName} invited you to join ${orgName} on ResQ Systems.`
+		: `You are receiving this email because you were invited to join ${orgName} on ResQ Systems.`;
 
 	return (
-		<Email.Shell preview={`You're invited to join ${orgName} on ResQ`}>
+		<Email.Shell preview={`You're invited to join ${orgName} on ResQ Systems`}>
 			<Email.Header />
 			<Email.Title>You're invited to join {orgName}</Email.Title>
 			<Email.Paragraph>
-				{inviterPhrase} to join {orgName} on ResQ{orgRole ? ` as ${orgRole}` : ""}.
+				{inviterPhrase} to join {orgName} on ResQ Systems{orgRole ? ` as ${orgRole}` : ""}.
 			</Email.Paragraph>
 			<Email.CTA href={acceptUrl}>Accept invitation</Email.CTA>
 			{expiresInDays ? (

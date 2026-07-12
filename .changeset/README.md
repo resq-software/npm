@@ -32,8 +32,8 @@ Changeset files are markdown with YAML frontmatter specifying affected packages 
 
 ```md
 ---
-"@resq-sw/dsa": minor
-"@resq-sw/helpers": patch
+"@resq-systems/dsa": minor
+"@resq-systems/helpers": patch
 ---
 
 **feat:** add LRU cache data structure with configurable capacity

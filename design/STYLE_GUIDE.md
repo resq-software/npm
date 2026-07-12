@@ -1,5 +1,5 @@
 <!--
-Copyright 2026 ResQ Software
+Copyright 2026 ResQ Systems, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# ResQ Style Guide
+# ResQ Systems Style Guide
 
-This file reflects the current engineering implementation rules derived from the `ResQ-Brand-and-Style-Guide.pdf`. It is the repo-facing source of truth for styling decisions in `@resq-sw/ui`.
+This file reflects the current engineering implementation rules derived from the `ResQ Systems-Brand-and-Style-Guide.pdf`. It is the repo-facing source of truth for styling decisions in `@resq-systems/ui`.
 
 ## Theme Policy
 
@@ -47,7 +47,7 @@ All color tokens use the **oklch** color space for perceptually uniform lightnes
 
 | Token     | oklch                                  | Role          |
 | :-------- | :------------------------------------- | :------------ |
-| `primary` | `oklch(58.50% 0.1877 24.72)`          | ResQ Red      |
+| `primary` | `oklch(58.50% 0.1877 24.72)`          | ResQ Systems Red      |
 | `info`    | `oklch(64.20% 0.1560 252.61)`         | Signal Blue   |
 | `success` | `oklch(73.39% 0.1538 161.68)`         | Status Green  |
 | `warning` | `oklch(78.37% 0.1587 72.99)`          | Warning Amber |
@@ -112,7 +112,7 @@ Three fonts, one role each:
 
 - Use `DM Mono`.
 - Use uppercase styling with visible tracking.
-- Primary actions use ResQ Red solid fill.
+- Primary actions use ResQ Systems Red solid fill.
 - Secondary actions use dark surface treatment.
 - Outline actions use red border and red text.
 - Ghost actions stay quiet and monochromatic.

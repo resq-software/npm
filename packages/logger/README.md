@@ -14,9 +14,9 @@
   limitations under the License.
 -->
 
-# @resq-sw/logger
+# @resq-systems/logger
 
-[![npm](https://img.shields.io/npm/v/%40resq-sw%2Flogger?style=flat-square)](https://www.npmjs.com/package/@resq-sw/logger)
+[![npm](https://img.shields.io/npm/v/%40resq-systems%2Flogger?style=flat-square)](https://www.npmjs.com/package/@resq-systems/logger)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
 [![deps](https://img.shields.io/badge/runtime%20deps-0-25c68a?style=flat-square)](./package.json)
 
@@ -25,7 +25,7 @@
 ## Installation
 
 ```bash
-bun add @resq-sw/logger
+bun add @resq-systems/logger
 ```
 
 Zero runtime dependencies.
@@ -33,7 +33,7 @@ Zero runtime dependencies.
 ## Quick Start
 
 ```ts
-import { Logger, LogLevel } from "@resq-sw/logger";
+import { Logger, LogLevel } from "@resq-systems/logger";
 
 const log = Logger.getLogger("[MyService]");
 
@@ -211,7 +211,7 @@ Exported types: `LogData`, `LoggerOptions`, `LogLevel`, `LogLevelString`, `Color
 ## Testing
 
 ```sh
-bun --filter @resq-sw/logger test
+bun --filter @resq-systems/logger test
 ```
 
 ## Troubleshooting

@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,21 @@
  */
 
 /**
- * @fileoverview Public API for `@resq-sw/security` — AES-256-GCM encryption,
+ * @fileoverview Public API for `@resq-systems/security` — AES-256-GCM encryption,
  * Effect-Schema input validators, threat detection, and PII sanitization.
  *
  * Subpath exports:
- * - `@resq-sw/security` — crypto, validators, sanitizer
- * - `@resq-sw/security/sanitize` — PII redaction without crypto deps
+ * - `@resq-systems/security` — crypto, validators, sanitizer
+ * - `@resq-systems/security/sanitize` — PII redaction without crypto deps
  *
  * `effect` is an optional peer dependency required only for the
  * Schema-based validators.
  *
- * @module @resq-sw/security
+ * @module @resq-systems/security
  *
  * @example PII sanitization for log lines
  * ```ts
- * import { sanitize } from "@resq-sw/security/sanitize";
+ * import { sanitize } from "@resq-systems/security/sanitize";
  *
  * logger.info(sanitize({ email: "u@x.com", ip: "1.2.3.4", note: "ok" }));
  * // → { email: "[REDACTED:email]", ip: "[REDACTED:ip]", note: "ok" }

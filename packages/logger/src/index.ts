@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
  */
 
 /**
- * @fileoverview Public API for `@resq-sw/logger` — structured logging with
+ * @fileoverview Public API for `@resq-systems/logger` — structured logging with
  * log levels, context, timing, and class/method decorators for Node.js and Bun.
  *
  * **Zero runtime dependencies.**
  *
- * @module @resq-sw/logger
+ * @module @resq-systems/logger
  *
  * @example Singleton usage
  * ```ts
- * import { logger } from "@resq-sw/logger";
+ * import { logger } from "@resq-systems/logger";
  *
  * logger.info("server started", { port: 3000 });
  * logger.error("db query failed", { query, error });
@@ -32,7 +32,7 @@
  *
  * @example Decorators
  * ```ts
- * import { logTiming, logErrors } from "@resq-sw/logger";
+ * import { logTiming, logErrors } from "@resq-systems/logger";
  *
  * class UserService {
  *   @logTiming()

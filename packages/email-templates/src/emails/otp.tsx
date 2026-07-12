@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ export type OtpEmailProps = OtpData;
  */
 export function OtpEmail({ code = "123456", firstName, expiresInMinutes = 10 }: OtpEmailProps) {
 	return (
-		<Email.Shell preview="Your ResQ verification code">
+		<Email.Shell preview="Your ResQ Systems verification code">
 			<Email.Header />
 			<Email.Title>Verification code</Email.Title>
 			{firstName ? <Email.Paragraph>Hi {firstName},</Email.Paragraph> : null}

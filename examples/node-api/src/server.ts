@@ -15,16 +15,16 @@
  */
 
 /**
- * Example Bun HTTP API server using @resq-sw packages.
+ * Example Bun HTTP API server using @resq-systems packages.
  *
  * Demonstrates: structured logging, rate limiting, input sanitization,
  * secure token generation, and request ID tracking.
  */
 
-import { Logger } from "@resq-sw/logger";
-import { MemoryRateLimitStore } from "@resq-sw/rate-limiting";
-import { sanitizeForLogging, generateSecureToken } from "@resq-sw/security";
-import { shouldRedirectToHttps, getRequestId } from "@resq-sw/http";
+import { Logger } from "@resq-systems/logger";
+import { MemoryRateLimitStore } from "@resq-systems/rate-limiting";
+import { sanitizeForLogging, generateSecureToken } from "@resq-systems/security";
+import { shouldRedirectToHttps, getRequestId } from "@resq-systems/http";
 
 const log = new Logger("api-server");
 const rateLimiter = new MemoryRateLimitStore();

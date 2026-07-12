@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  *
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import { pathToFileURL } from "node:url";
 /**
  * Rewrites a staged package manifest for GitHub Packages.
  *
- * Automatically maps `@resq-sw/<name>` → `@resq-software/<name>` so that the
+ * Automatically maps `@resq-systems/<name>` → `@resq-software/<name>` so that the
  * scope matches the GitHub organisation, sets the registry to GitHub Packages,
  * and strips the `prepare` lifecycle script.
  *
@@ -46,10 +46,10 @@ export function prepareGithubPackage(packageDirArg) {
 
 	const packageJson = JSON.parse(raw);
 
-	const match = packageJson.name.match(/^@resq-sw\/(.+)$/);
+	const match = packageJson.name.match(/^@resq-systems\/(.+)$/);
 	if (!match) {
 		throw new Error(
-			`Package name "${packageJson.name}" does not match @resq-sw/* — cannot map to GitHub Packages scope`,
+			`Package name "${packageJson.name}" does not match @resq-systems/* — cannot map to GitHub Packages scope`,
 		);
 	}
 	packageJson.name = `@resq-software/${match[1]}`;

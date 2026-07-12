@@ -15,18 +15,18 @@
  */
 
 /**
- * @fileoverview Public API for `@resq-sw/dsa` — production-grade data structures
+ * @fileoverview Public API for `@resq-systems/dsa` — production-grade data structures
  * and algorithms with zero runtime dependencies.
  *
  * Tree-shakeable: importing one collection (e.g. `BloomFilter`) does not pull in
  * the others. The `effect` peer dependency is optional; install it only to use
  * the runtime schema validators exposed via {@link addValidatedEdge}.
  *
- * @module @resq-sw/dsa
+ * @module @resq-systems/dsa
  *
  * @example Graph traversal
  * ```ts
- * import { Graph } from "@resq-sw/dsa";
+ * import { Graph } from "@resq-systems/dsa";
  *
  * const g = new Graph<string>({ directed: true });
  * g.addEdge("base", "alpha", 5);
@@ -36,7 +36,7 @@
  *
  * @example Priority dispatch
  * ```ts
- * import { createPriorityLevelQueue } from "@resq-sw/dsa";
+ * import { createPriorityLevelQueue } from "@resq-systems/dsa";
  *
  * const triage = createPriorityLevelQueue<{ id: string; severity: number }>(
  *   (item) => item.severity,
@@ -48,7 +48,7 @@
  *
  * @example Probabilistic membership
  * ```ts
- * import { BloomFilter } from "@resq-sw/dsa";
+ * import { BloomFilter } from "@resq-systems/dsa";
  *
  * const seen = new BloomFilter(100_000, 0.001);
  * seen.add("drone-04");

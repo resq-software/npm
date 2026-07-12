@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 
 /**
- * @fileoverview Public API for `@resq-sw/http` — Effect-based HTTP client with
+ * @fileoverview Public API for `@resq-systems/http` — Effect-based HTTP client with
  * retry, timeout, and schema validation.
  *
  * Subpath exports:
- * - `@resq-sw/http` — fetcher, retry, timeout, JSON helpers
- * - `@resq-sw/http/security` — HTTPS redirect helper, request-ID extraction
+ * - `@resq-systems/http` — fetcher, retry, timeout, JSON helpers
+ * - `@resq-systems/http/security` — HTTPS redirect helper, request-ID extraction
  *
  * Requires `effect` (v4) as a peer dependency — the HTTP client lives in core at
  * `effect/unstable/http`. `@effect/platform` is NOT required: it never shipped a
@@ -28,11 +28,11 @@
  * removed. `@effect/platform-bun` is an optional peer for `BunHttpClient.layer`
  * when running on Bun; `FetchHttpClient.layer` from core works everywhere else.
  *
- * @module @resq-sw/http
+ * @module @resq-systems/http
  *
  * @example
  * ```ts
- * import { get, post } from "@resq-sw/http";
+ * import { get, post } from "@resq-systems/http";
  * import { Effect } from "effect";
  *
  * const program = Effect.gen(function* () {

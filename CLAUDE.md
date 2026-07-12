@@ -1,4 +1,4 @@
-# ResQ npm Packages — Agent Guide
+# ResQ Systems npm Packages — Agent Guide
 
 @./AGENTS.md
 
@@ -18,17 +18,17 @@
 bun install                      # Install all workspace dependencies
 bun test                         # Run all workspace tests
 bun run build                    # Build all packages
-bun --filter @resq-sw/<pkg> test # Test single package
-bun --filter @resq-sw/<pkg> build # Build single package
-bun --filter @resq-sw/ui storybook  # Start Storybook dev server
-bun --filter @resq-sw/ui lint    # Lint UI package with Biome
+bun --filter @resq-systems/<pkg> test # Test single package
+bun --filter @resq-systems/<pkg> build # Build single package
+bun --filter @resq-systems/ui storybook  # Start Storybook dev server
+bun --filter @resq-systems/ui lint    # Lint UI package with Biome
 bun changeset                    # Create a changeset for your changes
 ```
 
 ## Rules
 
-- `@resq-sw/dsa` must have zero runtime dependencies (Effect is a peer dep for optional schemas only).
-- `@resq-sw/ui` uses Radix UI for interaction logic and Tailwind CSS v4 for styling.
+- `@resq-systems/dsa` must have zero runtime dependencies (Effect is a peer dep for optional schemas only).
+- `@resq-systems/ui` uses Radix UI for interaction logic and Tailwind CSS v4 for styling.
 - All packages must be tree-shakeable.
 - Zero `any` — strict typing throughout.
 - Each package has its own build and test scripts.
@@ -38,7 +38,7 @@ bun changeset                    # Create a changeset for your changes
 
 ## Safety
 
-- Don't add runtime dependencies to `@resq-sw/dsa` — it must stay zero-dep.
+- Don't add runtime dependencies to `@resq-systems/dsa` — it must stay zero-dep.
 - Don't publish without running the full test suite (`bun test`).
 - Lockfile (`bun.lock`) must be committed with dependency changes.
 - Don't commit secrets, private keys, or `.env` files.
@@ -71,8 +71,8 @@ Since `bun changeset` is interactive and cannot be used by agents, create the fi
 
 ```md
 ---
-"@resq-sw/dsa": minor
-"@resq-sw/helpers": patch
+"@resq-systems/dsa": minor
+"@resq-systems/helpers": patch
 ---
 
 Add LRU cache data structure with configurable capacity
@@ -99,7 +99,7 @@ Add LRU cache data structure with configurable capacity
 
 ```md
 ---
-"@resq-sw/ui": minor
+"@resq-systems/ui": minor
 ---
 
 Add Combobox component with keyboard navigation and filtering
@@ -107,7 +107,7 @@ Add Combobox component with keyboard navigation and filtering
 
 ```md
 ---
-"@resq-sw/dsa": patch
+"@resq-systems/dsa": patch
 ---
 
 Fix Graph.dijkstra returning incorrect path when source equals target
@@ -115,8 +115,8 @@ Fix Graph.dijkstra returning incorrect path when source equals target
 
 ```md
 ---
-"@resq-sw/security": minor
-"@resq-sw/http": patch
+"@resq-systems/security": minor
+"@resq-systems/http": patch
 ---
 
 Add HTTPS redirect utility and move it from rate-limiting to http package

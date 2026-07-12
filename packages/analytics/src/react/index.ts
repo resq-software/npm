@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  */
 
 /**
- * @fileoverview React adapter for `@resq-sw/analytics`.
+ * @fileoverview React adapter for `@resq-systems/analytics`.
  *
  * Exposes the {@link AnalyticsProvider} component and the
  * {@link useAnalytics} hook. The provider boots the singleton
@@ -25,7 +25,7 @@
  * provider-bound functions so consumers don't import the singleton
  * directly.
  *
- * @module @resq-sw/analytics/react
+ * @module @resq-systems/analytics/react
  */
 
 import { type ReactNode, useEffect, useRef } from "react";

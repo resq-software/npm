@@ -5,7 +5,7 @@ description: Run Biome lint and detect unused exports with knip.
 
 # /lint
 
-Lint the `@resq-sw/ui` library.
+Lint the `@resq-systems/ui` library.
 
 ## Steps
 

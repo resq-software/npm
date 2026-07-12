@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ const severityClass: Record<"info" | "warning" | "critical", string> = {
 	critical: "text-danger",
 };
 
-/** Incident / dispatch alert for ResQ disaster-response operators. */
+/** Incident / dispatch alert for ResQ Systems disaster-response operators. */
 export function IncidentAlertEmail({
 	incidentId,
 	title,
@@ -53,7 +53,7 @@ export function IncidentAlertEmail({
 			<Email.CTA href={dashboardUrl}>Open incident dashboard</Email.CTA>
 			<Email.LegalFooter
 				category="transactional"
-				reason="You are receiving this alert because you are on-call for ResQ disaster response."
+				reason="You are receiving this alert because you are on-call for ResQ Systems disaster response."
 			/>
 		</Email.Shell>
 	);

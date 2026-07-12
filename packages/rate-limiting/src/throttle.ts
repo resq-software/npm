@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
  */
 
 import { Schema as S } from "effect";
-import { LRUCache } from "@resq-sw/dsa";
+import { LRUCache } from "@resq-systems/dsa";
 
 // ============================================
 // Effect Schema Definitions

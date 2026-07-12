@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ describe("renderEmail", () => {
 		});
 
 		expect(to).toBe("user@example.com");
-		expect(subject).toBe("Your ResQ verification code: 123456");
+		expect(subject).toBe("Your ResQ Systems verification code: 123456");
 		expect(html).toContain("123456");
 		expect(html).toContain("Ada");
 		expect(text).toContain("123456");

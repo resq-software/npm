@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,21 +39,21 @@ import {
 export const otpTemplate = defineEmailTemplate({
 	name: "otp",
 	data: otpData,
-	subject: (data) => `Your ResQ verification code: ${data.code}`,
+	subject: (data) => `Your ResQ Systems verification code: ${data.code}`,
 	Component: (data) => <OtpEmail {...data} />,
 });
 
 export const welcomeTemplate = defineEmailTemplate({
 	name: "welcome",
 	data: welcomeData,
-	subject: (data) => `Welcome to ResQ, ${data.firstName}`,
+	subject: (data) => `Welcome to ResQ Systems, ${data.firstName}`,
 	Component: (data) => <WelcomeEmail {...data} />,
 });
 
 export const passwordResetTemplate = defineEmailTemplate({
 	name: "password-reset",
 	data: passwordResetData,
-	subject: () => "Reset your ResQ password",
+	subject: () => "Reset your ResQ Systems password",
 	Component: (data) => <PasswordResetEmail {...data} />,
 });
 
@@ -74,14 +74,14 @@ export const incidentAlertTemplate = defineEmailTemplate({
 export const passwordChangedTemplate = defineEmailTemplate({
 	name: "password-changed",
 	data: passwordChangedData,
-	subject: () => "Your ResQ password was changed",
+	subject: () => "Your ResQ Systems password was changed",
 	Component: (data) => <PasswordChangedEmail {...data} />,
 });
 
 export const newDeviceLoginTemplate = defineEmailTemplate({
 	name: "new-device-login",
 	data: newDeviceLoginData,
-	subject: () => "New sign-in to your ResQ account",
+	subject: () => "New sign-in to your ResQ Systems account",
 	Component: (data) => <NewDeviceLoginEmail {...data} />,
 });
 
@@ -95,11 +95,11 @@ export const missionApprovalTemplate = defineEmailTemplate({
 export const orgInvitationTemplate = defineEmailTemplate({
 	name: "org-invitation",
 	data: orgInvitationData,
-	subject: (data) => `You're invited to join ${data.orgName} on ResQ`,
+	subject: (data) => `You're invited to join ${data.orgName} on ResQ Systems`,
 	Component: (data) => <OrgInvitationEmail {...data} />,
 });
 
-/** The built-in ResQ template set — spread into `createMailer` to extend it. */
+/** The built-in ResQ Systems template set — spread into `createMailer` to extend it. */
 export const resqEmailTemplates = [
 	otpTemplate,
 	welcomeTemplate,

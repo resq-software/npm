@@ -140,7 +140,7 @@ namespace Picture {
 		 * <Picture lqip="data:image/png;base64,..." />
 		 *
 		 * // Registry entry (dot-notation)
-		 * import lqip from "@resq-sw/design/assets/lqip.json";
+		 * import lqip from "@resq-systems/design/assets/lqip.json";
 		 * <Picture lqip={lqip.resqMarkColorPng.x16} />
 		 */
 		lqip?: LqipValue;

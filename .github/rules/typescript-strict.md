@@ -1,6 +1,6 @@
 ---
 name: typescript-strict
-description: TypeScript strictness rules for the @resq-sw/ui component library.
+description: TypeScript strictness rules for the @resq-systems/ui component library.
 ---
 
 # TypeScript Strict Rules

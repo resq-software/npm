@@ -1,10 +1,10 @@
-// Copyright 2026 ResQ
+// Copyright 2026 ResQ Systems, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 /**
  * ResQ icon system — server-component-safe variant.
  *
- * Mirrors `@resq-sw/ui/icons` but imports from `@phosphor-icons/react/ssr`,
+ * Mirrors `@resq-systems/ui/icons` but imports from `@phosphor-icons/react/ssr`,
  * which uses SSRBase instead of IconBase and therefore does NOT call
  * React.createContext() at module initialisation time.
  *
@@ -13,7 +13,7 @@
  * during static page-data collection.
  *
  * Usage:
- *   import { ArrowLeftIcon } from "@resq-sw/ui/icons/ssr";
+ *   import { ArrowLeftIcon } from "@resq-systems/ui/icons/ssr";
  *
  * Note: context-based theming via <IconContext.Provider> is unavailable in
  * SSRBase icons. Pass weight, size, and color as props directly.

@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ import { resqMailer } from "./suite.js";
 
 export { EmailValidationError } from "./mailer.js";
 
-/** Effect Schema union for every built-in ResQ email `{ name, to, data }`. */
+/** Effect Schema union for every built-in ResQ Systems email `{ name, to, data }`. */
 export const EmailPayload = resqMailer.schema;
 
-/** The validated payload type for the built-in ResQ templates. */
+/** The validated payload type for the built-in ResQ Systems templates. */
 export type EmailPayload = ReturnType<typeof resqMailer.decode>;
 
 /** Every built-in template name (the union discriminant). */

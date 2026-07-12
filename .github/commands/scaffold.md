@@ -1,11 +1,11 @@
 ---
 name: scaffold
-description: Scaffold a new component following the @resq-sw/ui conventions.
+description: Scaffold a new component following the @resq-systems/ui conventions.
 ---
 
 # /scaffold
 
-Create a new component in the `@resq-sw/ui` library.
+Create a new component in the `@resq-systems/ui` library.
 
 ## Usage
 

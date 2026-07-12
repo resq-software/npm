@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 ResQ Software
+ * Copyright 2026 ResQ Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ export interface EmailThemeOverride {
 	fontsHref?: string | null;
 }
 
-/** The default ResQ brand theme (dark-first, red primary, Syne/DM Sans/DM Mono). */
+/** The default ResQ Systems brand theme (dark-first, red primary, Syne/DM Sans/DM Mono). */
 export const defaultEmailTheme: EmailTheme = {
 	colors: { ...emailColors },
 	fonts: {
@@ -83,7 +83,7 @@ export function resolveEmailTheme(base: EmailTheme, override?: EmailThemeOverrid
 	};
 }
 
-/** Merge an override onto the default ResQ theme. */
+/** Merge an override onto the default ResQ Systems theme. */
 export function mergeEmailTheme(override?: EmailThemeOverride): EmailTheme {
 	return resolveEmailTheme(defaultEmailTheme, override);
 }
@@ -105,7 +105,7 @@ export function buildTailwindConfig(theme: EmailTheme) {
 	};
 }
 
-/** Context carrying the active theme; defaults to the ResQ brand. */
+/** Context carrying the active theme; defaults to the ResQ Systems brand. */
 export const EmailThemeContext = createContext<EmailTheme>(defaultEmailTheme);
 
 /**

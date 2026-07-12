@@ -14,20 +14,20 @@
   limitations under the License.
 -->
 
-# @resq-sw/dsa
+# @resq-systems/dsa
 
-[![npm](https://img.shields.io/npm/v/%40resq-sw%2Fdsa?style=flat-square)](https://www.npmjs.com/package/@resq-sw/dsa)
+[![npm](https://img.shields.io/npm/v/%40resq-systems%2Fdsa?style=flat-square)](https://www.npmjs.com/package/@resq-systems/dsa)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
 [![deps](https://img.shields.io/badge/runtime%20deps-0-25c68a?style=flat-square)](./package.json)
 
-Production-grade data structures and algorithms for the ResQ platform — graph traversal, heaps, tries, bloom filters, sketches, distance math, queues, and string search. **Zero runtime dependencies.** `effect` is an optional peer dependency that unlocks runtime schema validation for hot-path inputs.
+Production-grade data structures and algorithms for the ResQ Systems platform — graph traversal, heaps, tries, bloom filters, sketches, distance math, queues, and string search. **Zero runtime dependencies.** `effect` is an optional peer dependency that unlocks runtime schema validation for hot-path inputs.
 
 ## Install
 
 ```sh
-bun add @resq-sw/dsa
+bun add @resq-systems/dsa
 # or
-npm install @resq-sw/dsa
+npm install @resq-systems/dsa
 ```
 
 ## Modules
@@ -44,14 +44,14 @@ npm install @resq-sw/dsa
 | `distance` | `Distance` | Haversine, Euclidean, Manhattan, Vincenty, Chebyshev |
 | `queue` | `Queue` | O(1) FIFO with linked-list backing |
 | `lru-cache` | `LRUCache` | O(1) get/set with capacity and optional TTL |
-| `schemas` | (subpath: `@resq-sw/dsa/schemas`) | Optional Effect schemas for input validation |
+| `schemas` | (subpath: `@resq-systems/dsa/schemas`) | Optional Effect schemas for input validation |
 
 ## Quick start
 
 ### A* pathfinding
 
 ```ts
-import { Graph } from "@resq-sw/dsa";
+import { Graph } from "@resq-systems/dsa";
 
 const g = new Graph<string>({ directed: false });
 g.addEdge("base", "alpha", 10);
@@ -75,7 +75,7 @@ const result = g.aStar(
 ### Triage queue
 
 ```ts
-import { createPriorityLevelQueue } from "@resq-sw/dsa";
+import { createPriorityLevelQueue } from "@resq-systems/dsa";
 
 const triage = createPriorityLevelQueue<{ id: string; severity: number }>(
   (item) => item.severity,
@@ -91,7 +91,7 @@ triage.dequeue(); // → { id: "charlie", severity: 5 }
 ### Bloom filter for survey deduplication
 
 ```ts
-import { BloomFilter } from "@resq-sw/dsa";
+import { BloomFilter } from "@resq-systems/dsa";
 
 const seen = new BloomFilter(/* capacity */ 100_000, /* errorRate */ 0.001);
 
@@ -104,7 +104,7 @@ if (!seen.has(droneId)) {
 ### Distance calculations
 
 ```ts
-import { Distance } from "@resq-sw/dsa";
+import { Distance } from "@resq-systems/dsa";
 
 Distance.haversine([34.052, -118.243], [40.713, -74.006]); // metres between LA and NYC
 Distance.euclidean([1, 2, 3], [4, 6, 8]);
@@ -114,7 +114,7 @@ Distance.manhattan([0, 0], [3, 4]);
 ### LRU cache
 
 ```ts
-import { LRUCache } from "@resq-sw/dsa";
+import { LRUCache } from "@resq-systems/dsa";
 
 const cache = new LRUCache<string, Buffer>({ maxSize: 1024, defaultTTL: 60_000 });
 cache.set("tile:42:17", buffer);
@@ -133,7 +133,7 @@ bun add effect
 ```
 
 ```ts
-import { addValidatedEdge, isValidVertexId } from "@resq-sw/dsa";
+import { addValidatedEdge, isValidVertexId } from "@resq-systems/dsa";
 
 if (isValidVertexId(input)) {
   addValidatedEdge(graph, input, neighbour, weight);
@@ -153,11 +153,11 @@ The validators short-circuit and return descriptive errors instead of throwing o
 ## Development
 
 ```sh
-bun --filter @resq-sw/dsa test       # vitest
-bun --filter @resq-sw/dsa build      # tsdown → lib/
+bun --filter @resq-systems/dsa test       # vitest
+bun --filter @resq-systems/dsa build      # tsdown → lib/
 ```
 
-Benchmarks live in `tests/perf/` and run via `bun --filter @resq-sw/dsa bench`.
+Benchmarks live in `tests/perf/` and run via `bun --filter @resq-systems/dsa bench`.
 
 ## Prerequisites
 
@@ -166,12 +166,12 @@ Benchmarks live in `tests/perf/` and run via `bun --filter @resq-sw/dsa bench`.
 
 ## Configuration
 
-- **Optional Schemas**: Import from `@resq-sw/dsa/schemas` to enable input constraints validation.
+- **Optional Schemas**: Import from `@resq-systems/dsa/schemas` to enable input constraints validation.
 
 ## Testing
 
 ```sh
-bun --filter @resq-sw/dsa test
+bun --filter @resq-systems/dsa test
 ```
 
 ## Troubleshooting
