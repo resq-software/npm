@@ -67,9 +67,16 @@ export function formatBytes(bytes: number): string {
 	if (!Number.isFinite(bytes) || bytes <= 0) return "0 Bytes";
 	const k = 1024;
 	const sizes = ["Bytes", "KB", "MB", "GB", "TB"] as const;
-	const rawIndex = Math.floor(Math.log(bytes) / Math.log(k));
-	const i = Math.min(Math.max(rawIndex, 0), sizes.length - 1);
-	return `${Math.round((bytes / k ** i) * 100) / 100} ${sizes[i]}`;
+	// Divide-and-count rather than Math.log(bytes)/Math.log(k): the logarithm
+	// approach is off-by-one at exact powers of 1024 on some runtimes (floating-
+	// point rounding), reporting e.g. "1024 KB" instead of "1 MB".
+	let value = bytes;
+	let i = 0;
+	while (value >= k && i < sizes.length - 1) {
+		value /= k;
+		i += 1;
+	}
+	return `${Math.round(value * 100) / 100} ${sizes[i]}`;
 }
 
 /**

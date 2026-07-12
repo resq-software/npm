@@ -33,10 +33,9 @@ export type HtmlEntityEncoded = Brand<string, "HtmlEntityEncoded">;
  */
 const toEntities = (str: string): HtmlEntityEncoded =>
 	unsafeBrand<"HtmlEntityEncoded", string>(
-		str
-			.split("")
-			.map((c) => `&#${c.codePointAt(0)};`)
-			.join(""),
+		// Spread iterates by Unicode code point (not UTF-16 code unit), so
+		// surrogate pairs (emoji, rare CJK) are encoded as one entity, not two.
+		[...str].map((c) => `&#${c.codePointAt(0)};`).join(""),
 	);
 
 /**

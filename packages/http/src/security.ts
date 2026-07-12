@@ -62,8 +62,8 @@ export function shouldRedirectToHttps(
 	protocol: LiteralUnion<"http" | "https">,
 	url: string,
 	headers: Record<string, string | undefined>,
-	nodeEnv: LiteralUnion<"development" | "test" | "production"> = process.env.NODE_ENV ||
-		"development",
+	nodeEnv: LiteralUnion<"development" | "test" | "production"> = globalThis.process?.env
+		?.NODE_ENV || "development",
 ): string | null {
 	// Skip in development/test environments
 	if (nodeEnv === "development" || nodeEnv === "test") {
