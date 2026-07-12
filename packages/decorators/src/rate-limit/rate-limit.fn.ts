@@ -36,7 +36,7 @@ type ResolvedCounter =
  * Picks the counter to use. An async (distributed) counter takes precedence when
  * provided; otherwise a sync counter is used, defaulting to an in-memory one.
  */
-function resolveCounter(config: RateLimitConfigs): ResolvedCounter {
+function resolveCounter<T>(config: RateLimitConfigs<T>): ResolvedCounter {
 	if (config.rateLimitAsyncCounter) {
 		return { kind: "async", counter: config.rateLimitAsyncCounter };
 	}
@@ -49,7 +49,7 @@ function resolveCounter(config: RateLimitConfigs): ResolvedCounter {
  */
 function resolveKey<A extends unknown[]>(
 	self: unknown,
-	keyResolver: RateLimitConfigs["keyResolver"],
+	keyResolver: ((...args: A) => string) | PropertyKey | undefined,
 	args: A,
 ): string {
 	if (typeof keyResolver === "function") {
@@ -106,9 +106,9 @@ function resolveKey<A extends unknown[]>(
  * const result = await limited('4'); // Returns undefined, logs warning
  * ```
  */
-export function rateLimitFn<D = unknown, A extends unknown[] = unknown[]>(
+export function rateLimitFn<T = unknown, D = unknown, A extends unknown[] = unknown[]>(
 	originalMethod: Method<D, A>,
-	config: RateLimitConfigs,
+	config: RateLimitConfigs<T>,
 ): Method<D | undefined | Promise<D | undefined>, A> {
 	const mode = resolveCounter(config);
 
@@ -130,10 +130,10 @@ export function rateLimitFn<D = unknown, A extends unknown[] = unknown[]>(
  * Executes a call against a synchronous (in-memory) counter, returning
  * `undefined` when the limit is exceeded.
  */
-function runSync<D, A extends unknown[]>(
+function runSync<T, D, A extends unknown[]>(
 	counter: RateLimitCounter,
 	key: string,
-	config: RateLimitConfigs,
+	config: RateLimitConfigs<T>,
 	originalMethod: Method<D, A>,
 	self: unknown,
 	args: A,
@@ -160,10 +160,10 @@ function runSync<D, A extends unknown[]>(
  * atomic primitive (e.g. a Redis `INCR` that returns the new value, or a Lua
  * script) and enforce the limit on that returned value.
  */
-async function runAsync<D, A extends unknown[]>(
+async function runAsync<T, D, A extends unknown[]>(
 	counter: RateLimitAsyncCounter,
 	key: string,
-	config: RateLimitConfigs,
+	config: RateLimitConfigs<T>,
 	originalMethod: Method<D, A>,
 	self: unknown,
 	args: A,

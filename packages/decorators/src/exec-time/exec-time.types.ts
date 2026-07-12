@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { AsyncMethod, Method } from "../types.js";
+
 /**
  * Function type for reporting execution time data.
  *
@@ -69,5 +71,6 @@ export interface ExactTimeReportData {
 export type ExactTimeReportable<T> = (
 	target: T,
 	propertyName: keyof T,
-	descriptor: TypedPropertyDescriptor<any>,
+	descriptor: TypedPropertyDescriptor<Method | AsyncMethod>,
+	// biome-ignore lint/suspicious/noExplicitAny: `execTime` is a dual legacy + Stage-3 decorator factory. The return must stay `any` so `@execTime` type-checks both as a legacy method decorator (returns a descriptor or void) and as a Stage-3 decorator (returns a replacement method). Any concrete union breaks one of the two protocols.
 ) => any;

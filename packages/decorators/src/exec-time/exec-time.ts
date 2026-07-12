@@ -78,7 +78,7 @@ import type { ExactTimeReportable, ReportFunction } from "./exec-time.types.js";
  * }
  * ```
  */
-export function execTime<T = any>(arg?: ReportFunction | string): ExactTimeReportable<T> {
+export function execTime<T = unknown>(arg?: ReportFunction | string): ExactTimeReportable<T> {
 	return (
 		targetOrValue: T | Method | AsyncMethod,
 		propertyNameOrContext: keyof T | ClassMethodDecoratorContext,

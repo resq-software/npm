@@ -73,7 +73,7 @@
  * // Service is already running when this module loads
  * ```
  */
-export const selfExecute = <T extends new (...args: any[]) => object>(constructor: T): T => {
+export const selfExecute = <T extends new (...args: never[]) => object>(constructor: T): T => {
 	const _instance = new constructor();
 	return constructor;
 };

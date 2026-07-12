@@ -102,12 +102,14 @@ import type { AsyncMemoizable, AsyncMemoizeConfig } from "./memoize-async.types.
  * ]);
  * ```
  */
-export function memoizeAsync<T = any, D = any>(): AsyncMemoizable<T, D>;
-export function memoizeAsync<T = any, D = any>(
+export function memoizeAsync<T = unknown, D = unknown>(): AsyncMemoizable<T, D>;
+export function memoizeAsync<T = unknown, D = unknown>(
 	config: AsyncMemoizeConfig<T, D>,
 ): AsyncMemoizable<T, D>;
-export function memoizeAsync<T = any, D = any>(expirationTimeMs: number): AsyncMemoizable<T, D>;
-export function memoizeAsync<T = any, D = any>(
+export function memoizeAsync<T = unknown, D = unknown>(
+	expirationTimeMs: number,
+): AsyncMemoizable<T, D>;
+export function memoizeAsync<T = unknown, D = unknown>(
 	input?: AsyncMemoizeConfig<T, D> | number,
 ): AsyncMemoizable<T, D> {
 	return (
@@ -116,10 +118,13 @@ export function memoizeAsync<T = any, D = any>(
 		descriptor: TypedPropertyDescriptor<AsyncMethod<D>>,
 	): TypedPropertyDescriptor<AsyncMethod<D>> => {
 		if (descriptor.value) {
-			descriptor.value =
-				input === undefined
-					? memoizeAsyncFn(descriptor.value)
-					: memoizeAsyncFn(descriptor.value, input as any);
+			if (input === undefined) {
+				descriptor.value = memoizeAsyncFn(descriptor.value);
+			} else if (typeof input === "number") {
+				descriptor.value = memoizeAsyncFn(descriptor.value, input);
+			} else {
+				descriptor.value = memoizeAsyncFn(descriptor.value, input);
+			}
 
 			return descriptor;
 		}

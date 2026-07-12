@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { TaskExec } from "../_utils.js";
+import { isFunction, TaskExec } from "../_utils.js";
 import type { Method } from "../types.js";
-import type { MemoizeConfig } from "./memoize.types.js";
+import type { KeyResolver, MemoizeConfig } from "./memoize.types.js";
 
 /**
  * Wraps a method to cache its results based on arguments.
@@ -31,7 +31,7 @@ import type { MemoizeConfig } from "./memoize.types.js";
  * @template D - The return type of the original method
  * @template A - The argument types of the original method
  * @param {Method<D, A>} originalMethod - The method to memoize
- * @param {MemoizeConfig<any, D>} config - Configuration for memoization
+ * @param {MemoizeConfig<Record<PropertyKey, unknown>, D>} config - Configuration for memoization
  * @returns {Method<D, A>} The memoized method
  *
  * @overload
@@ -77,29 +77,29 @@ import type { MemoizeConfig } from "./memoize.types.js";
  * );
  * ```
  */
-export function memoizeFn<D = any, A extends any[] = any[]>(
+export function memoizeFn<D = unknown, A extends unknown[] = unknown[]>(
 	originalMethod: Method<D, A>,
 ): Method<D, A>;
-export function memoizeFn<D = any, A extends any[] = any[]>(
+export function memoizeFn<T = unknown, D = unknown, A extends unknown[] = unknown[]>(
 	originalMethod: Method<D, A>,
-	config: MemoizeConfig<any, D>,
+	config: MemoizeConfig<T, D>,
 ): Method<D, A>;
-export function memoizeFn<D = any, A extends any[] = any[]>(
+export function memoizeFn<D = unknown, A extends unknown[] = unknown[]>(
 	originalMethod: Method<D, A>,
 	expirationTimeMs: number,
 ): Method<D, A>;
-export function memoizeFn<D = any, A extends any[] = any[]>(
+export function memoizeFn<T = unknown, D = unknown, A extends unknown[] = unknown[]>(
 	originalMethod: Method<D, A>,
-	input?: MemoizeConfig<any, D> | number,
+	input?: MemoizeConfig<T, D> | number,
 ): Method<D, A> {
-	const defaultConfig: MemoizeConfig<any, D> = {
+	const defaultConfig: MemoizeConfig<T, D> = {
 		cache: new Map<string, D>(),
 	};
 
 	const runner = new TaskExec();
 	let resolvedConfig = {
 		...defaultConfig,
-	} as MemoizeConfig<any, D>;
+	} as MemoizeConfig<T, D>;
 
 	if (typeof input === "number") {
 		resolvedConfig.expirationTimeMs = input;
@@ -110,11 +110,18 @@ export function memoizeFn<D = any, A extends any[] = any[]>(
 		};
 	}
 
-	return function (this: any, ...args: A): D {
-		const keyResolver =
-			typeof resolvedConfig.keyResolver === "string"
-				? this[resolvedConfig.keyResolver].bind(this)
-				: resolvedConfig.keyResolver;
+	return function (this: unknown, ...args: A): D {
+		const { keyResolver: rawKeyResolver } = resolvedConfig;
+		let keyResolver: KeyResolver | undefined;
+
+		if (isFunction(rawKeyResolver)) {
+			keyResolver = rawKeyResolver;
+		} else if (rawKeyResolver != null) {
+			// `keyResolver` is a method name; resolve it against the instance via a
+			// narrow `Record` view instead of an `any`-typed `this`.
+			const named = (this as Record<PropertyKey, unknown>)[rawKeyResolver];
+			keyResolver = isFunction(named) ? (named.bind(this) as KeyResolver) : undefined;
+		}
 
 		const key = keyResolver ? keyResolver(...args) : JSON.stringify(args);
 

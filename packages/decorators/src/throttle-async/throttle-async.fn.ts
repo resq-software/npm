@@ -51,13 +51,13 @@ import { ThrottleAsyncExecutor } from "./throttle-async-executor.js";
  * ]);
  * ```
  */
-export function throttleAsyncFn<D = any, A extends any[] = any[]>(
+export function throttleAsyncFn<D = unknown, A extends unknown[] = unknown[]>(
 	originalMethod: AsyncMethod<D, A>,
 	parallelCalls = 1,
 ): AsyncMethod<D, A> {
 	const executor = new ThrottleAsyncExecutor(originalMethod, parallelCalls);
 
-	return function (this: any, ...args: A): Promise<D> {
+	return function (this: unknown, ...args: A): Promise<D> {
 		return executor.exec(this, args);
 	};
 }

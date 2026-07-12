@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { isFunction } from "../_utils.js";
 import type { Method } from "../types.js";
 import type { AfterConfig, AfterFunc } from "./after.types.js";
 
@@ -48,20 +49,30 @@ import type { AfterConfig, AfterFunc } from "./after.types.js";
  * await wrapped('hello'); // Logs: Called with hello, returned HELLO
  * ```
  */
-export function afterFn<D = unknown, A extends unknown[] = unknown[]>(
+export function afterFn<T = unknown, D = unknown, A extends unknown[] = unknown[]>(
 	originalMethod: Method<D, A>,
-	config: AfterConfig<any, Awaited<D>>,
+	config: AfterConfig<T, Awaited<D>>,
 ): (...args: A) => Promise<Awaited<D>> {
-	const resolvedConfig: AfterConfig<any, Awaited<D>> = {
+	const resolvedConfig: AfterConfig<T, Awaited<D>> = {
 		wait: false,
 		...config,
 	};
 
-	return async function (this: any, ...args: A): Promise<Awaited<D>> {
-		const afterFunc: AfterFunc<Awaited<D>> =
-			typeof resolvedConfig.func === "string"
-				? this[resolvedConfig.func].bind(this)
-				: resolvedConfig.func;
+	return async function (this: unknown, ...args: A): Promise<Awaited<D>> {
+		const { func } = resolvedConfig;
+		let afterFunc: AfterFunc<Awaited<D>>;
+
+		if (isFunction(func)) {
+			afterFunc = func;
+		} else {
+			// `func` is a method name (`keyof T`); resolve it against the instance
+			// via a narrow `Record` view instead of an `any`-typed `this`.
+			const named = (this as Record<PropertyKey, unknown>)[func];
+			if (!isFunction(named)) {
+				throw new Error(`@after: "${String(func)}" is not a method on the instance`);
+			}
+			afterFunc = named.bind(this) as AfterFunc<Awaited<D>>;
+		}
 
 		// Always await the original result so the hook receives the resolved
 		// value (`Awaited<D>`) rather than an unsettled promise for async methods.

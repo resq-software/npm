@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { isPromise, logger } from "../_utils.js";
+import { isFunction, isPromise, logger } from "../_utils.js";
 import type { AsyncMethod, Method } from "../types.js";
 import type { ExactTimeReportData, ReportFunction } from "./exec-time.types.js";
 
@@ -70,18 +70,21 @@ const reporter: ReportFunction = (data: ExactTimeReportData): void => {
  * await custom(40); // Logs: "Took 450ms for n=40"
  * ```
  */
-export function execTimeFn<D = any, A extends any[] = any[]>(
+export function execTimeFn<D = unknown, A extends unknown[] = unknown[]>(
 	originalMethod: Method<D, A> | AsyncMethod<D, A>,
 	arg?: ReportFunction | string,
 ): AsyncMethod<void, A> {
 	const input: ReportFunction | string = arg ?? reporter;
 
-	return async function (this: any, ...args: A): Promise<void> {
+	return async function (this: unknown, ...args: A): Promise<void> {
 		let repFunc: ReportFunction;
 
 		if (typeof input === "string") {
-			if (typeof this[input] === "function") {
-				repFunc = this[input].bind(this);
+			// `input` may name a reporter method on the instance; resolve it via a
+			// narrow `Record` view instead of an `any`-typed `this`.
+			const named = (this as Record<PropertyKey, unknown>)[input];
+			if (isFunction(named)) {
+				repFunc = named.bind(this) as ReportFunction;
 			} else {
 				repFunc = (data) => {
 					logger.info(`${input} execution time`, { duration: `${data.execTime}ms` });
@@ -92,7 +95,10 @@ export function execTimeFn<D = any, A extends any[] = any[]>(
 		}
 
 		const start = Date.now();
-		let result = (originalMethod as Function).apply(this, args);
+		let result: unknown = (originalMethod as (...methodArgs: A) => D | Promise<D>).apply(
+			this,
+			args,
+		);
 
 		if (isPromise(result)) {
 			result = await result;

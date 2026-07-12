@@ -63,7 +63,7 @@ import type { Method } from "../types.js";
  * };
  * ```
  */
-export interface RateLimitConfigs<T = any> {
+export interface RateLimitConfigs<T = unknown> {
 	/** The time window in milliseconds */
 	timeSpanMs: number;
 	/** Maximum number of calls allowed in the time window */

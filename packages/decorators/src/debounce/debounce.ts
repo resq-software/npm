@@ -45,11 +45,11 @@ import { debounceFn } from "./debounce.fn.js";
  * ```
  */
 export function debounce<T = unknown>(delayMs: number): Decorator<T> {
-	return (
+	return <F extends (...args: never[]) => unknown>(
 		_target: T,
-		_propertyName: keyof T,
-		descriptor: TypedPropertyDescriptor<Method<unknown>>,
-	): TypedPropertyDescriptor<Method<unknown>> => {
+		_propertyName: PropertyKey,
+		descriptor: TypedPropertyDescriptor<F>,
+	): TypedPropertyDescriptor<F> => {
 		if (descriptor.value) {
 			const methodsMap = new WeakMap<object, Method<unknown>>();
 			const originalMethod = descriptor.value;
@@ -63,7 +63,7 @@ export function debounce<T = unknown>(delayMs: number): Decorator<T> {
 				if (method) {
 					method(...args);
 				}
-			};
+			} as F;
 
 			return descriptor;
 		}

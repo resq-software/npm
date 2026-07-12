@@ -16,6 +16,7 @@
 
 import { describe, expect, test } from "vitest";
 import { memoizeAsyncFn } from "./memoize-async.fn.js";
+import type { AsyncCache } from "./memoize-async.types.js";
 
 describe("memoizeAsync", () => {
 	describe("memoizeAsyncFn", () => {
@@ -69,6 +70,31 @@ describe("memoizeAsync", () => {
 
 			expect(await fn({ id: 1, name: "alice" })).toBe("ALICE");
 			expect(await fn({ id: 1, name: "bob" })).toBe("ALICE");
+			expect(callCount).toBe(1);
+		});
+
+		test("recomputes when the entry is evicted between cache lookups (no has()/get() race)", async () => {
+			let callCount = 0;
+			// Models the exact race the fix targets: a cache that still reports
+			// presence via has() but whose get() returns null because a TTL expiry
+			// or concurrent delete fired between the two awaits. The old has()+get()
+			// path returned that null as the value; the single-read path must treat
+			// it as a miss and recompute.
+			const evictedBetweenReads: AsyncCache<string> = {
+				has: async () => true,
+				get: async () => null,
+				set: async () => {},
+				delete: async () => {},
+			};
+			const fn = memoizeAsyncFn(
+				async () => {
+					callCount++;
+					return "fresh";
+				},
+				{ cache: evictedBetweenReads },
+			);
+
+			expect(await fn()).toBe("fresh");
 			expect(callCount).toBe(1);
 		});
 	});
