@@ -43,6 +43,10 @@ failed_packages=()
 publish_one() {
 	local pkg_dir="$1"
 
+	# Every step is guarded with `|| return 1`: bash `set -e` does not apply
+	# inside a function invoked in a conditional (`if ! publish_one ...`), so a
+	# failing `npm pack`/`tar`/manifest-rewrite would otherwise leave name and
+	# version empty and silently "skip" a package that never actually published.
 	local pack_filename
 	pack_filename="$(
 		cd "$pkg_dir" && npm pack --json --ignore-scripts | node -e '
@@ -50,23 +54,28 @@ publish_one() {
 			const payload = JSON.parse(fs.readFileSync(0, "utf8"));
 			process.stdout.write(payload[0].filename);
 		'
-	)"
+	)" || return 1
+	[ -n "$pack_filename" ] || { echo "  npm pack produced no tarball for $pkg_dir" >&2; return 1; }
 
 	local pkg_slug
-	pkg_slug="$(node -e "process.stdout.write(require('./$pkg_dir/package.json').name.replace('@resq-systems/', ''))")"
+	pkg_slug="$(node -e "process.stdout.write(require('./$pkg_dir/package.json').name.replace('@resq-systems/', ''))")" || return 1
 
 	local staging_dir="${RUNNER_TEMP:-/tmp}/resq-${pkg_slug}-github-package"
 	rm -rf "$staging_dir"
-	mkdir -p "$staging_dir"
-	tar -xzf "$pkg_dir/$pack_filename" -C "$staging_dir"
+	mkdir -p "$staging_dir" || return 1
+	tar -xzf "$pkg_dir/$pack_filename" -C "$staging_dir" || { rm -f "$pkg_dir/$pack_filename"; return 1; }
 	rm -f "$pkg_dir/$pack_filename"
 
 	local staged_dir
-	staged_dir="$(node "$REPO_ROOT/scripts/release/prepare-github-package.mjs" "$staging_dir/package")"
+	staged_dir="$(node "$REPO_ROOT/scripts/release/prepare-github-package.mjs" "$staging_dir/package")" || return 1
 
 	local name version
-	name="$(node -e "process.stdout.write(require('$staged_dir/package.json').name)")"
-	version="$(node -e "process.stdout.write(require('$staged_dir/package.json').version)")"
+	name="$(node -e "process.stdout.write(require('$staged_dir/package.json').name)")" || return 1
+	version="$(node -e "process.stdout.write(require('$staged_dir/package.json').version)")" || return 1
+	if [ -z "$name" ] || [ -z "$version" ]; then
+		echo "  Error: could not resolve name/version for $pkg_dir" >&2
+		return 1
+	fi
 
 	local existing
 	existing="$(npm view "${name}@${version}" version --registry https://npm.pkg.github.com 2>/dev/null || true)"
@@ -79,10 +88,22 @@ publish_one() {
 	npm publish "$staged_dir" --ignore-scripts --registry https://npm.pkg.github.com
 }
 
+found_any=0
 for pkg_json in packages/*/package.json; do
+	# `nullglob` is not enabled, so an unmatched glob yields the literal pattern;
+	# skip it rather than feeding a non-existent path to node.
+	[ -f "$pkg_json" ] || continue
+	found_any=1
 	pkg_dir="$(dirname "$pkg_json")"
 
-	publishable="$(node -e "const p=require('./$pkg_json'); process.stdout.write(!p.private && p.name ? '1' : '')")"
+	# A node failure here (malformed package.json) must be reported, not silently
+	# treated as "private or unnamed".
+	if ! publishable="$(node -e "const p=require('./$pkg_json'); process.stdout.write(!p.private && p.name ? '1' : '')" 2>/dev/null)"; then
+		echo "::error::Failed to read $pkg_json"
+		failed_packages+=("$pkg_dir")
+		continue
+	fi
+
 	if [ -z "$publishable" ]; then
 		echo "Skipping $pkg_dir (private or unnamed)."
 		continue
@@ -94,6 +115,11 @@ for pkg_json in packages/*/package.json; do
 		failed_packages+=("$pkg_dir")
 	fi
 done
+
+if [ "$found_any" -eq 0 ]; then
+	echo "::error::No packages found under packages/*/package.json — wrong working directory?" >&2
+	exit 1
+fi
 
 if [ "${#failed_packages[@]}" -gt 0 ]; then
 	echo "GitHub Packages publish failed for: ${failed_packages[*]}"
