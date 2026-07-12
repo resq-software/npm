@@ -1,5 +1,12 @@
 <!--
 
+## 2.0.0
+### Major Changes
+
+
+
+- [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add branded Probability/Latitude/Longitude domains at numeric boundaries and a typed Graph<T, M> metadata parameter
+
 ## 1.0.0
 ### Major Changes
 
