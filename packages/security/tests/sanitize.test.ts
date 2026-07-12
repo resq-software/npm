@@ -184,6 +184,10 @@ describe("redactPII", () => {
 		expect(redactPII("Contact john@example.com")).toBe("Contact [EMAIL]");
 	});
 
+	it("should redact email addresses with Punycode/IDN TLDs", () => {
+		expect(redactPII("Contact user@example.xn--p1ai")).toBe("Contact [EMAIL]");
+	});
+
 	it("should redact phone numbers", () => {
 		expect(redactPII("Call 555-123-4567")).toBe("Call [PHONE]");
 	});

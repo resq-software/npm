@@ -543,7 +543,16 @@ const PII_PATTERNS = {
 	ssn: { pattern: /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/g, marker: "[SSN]" },
 	creditCard: { pattern: /\b(?:\d{4}[-\s]?){3}\d{4}\b/g, marker: "[CREDIT_CARD]" },
 	creditCardAlt: { pattern: /\b\d{15,16}\b/g, marker: "[CREDIT_CARD]" },
-	email: { pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, marker: "[EMAIL]" },
+	// TLD alternation mirrors `EmailSchema` so IDN/Punycode addresses
+	// (e.g. `user@example.xn--p1ai`) are redacted, not leaked. The `xn--` branch
+	// is tried first: unlike the anchored (`$`) validators, this pattern ends in
+	// `\b`, so `[A-Za-z]{2,}` would otherwise match just `xn` and stop at the
+	// hyphen, leaving `--p1ai` unredacted. (Also drops the stray `|` from the
+	// former `[A-Z|a-z]` class.)
+	email: {
+		pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.(?:xn--[A-Za-z0-9-]+|[A-Za-z]{2,})\b/g,
+		marker: "[EMAIL]",
+	},
 	phone: { pattern: /\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, marker: "[PHONE]" },
 	ipv4: { pattern: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g, marker: "[IP_ADDRESS]" },
 	ipv6: { pattern: /\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b/g, marker: "[IP_ADDRESS]" },
