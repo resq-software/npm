@@ -23,9 +23,15 @@ import {
 	withEmailMessage,
 	withEmailTheme,
 } from "./emails/theme.js";
-import { HttpUrl, emailCategory } from "./schemas.js";
+import { EmailAddress, HttpUrl, emailCategory } from "./schemas.js";
 
-const Recipient = Schema.String;
+/**
+ * Recipient schema for every payload's `to`. Validated (not a bare
+ * `Schema.String`) so a malformed or header-injecting address is rejected at
+ * the decode boundary and the decoded `to` carries the {@link EmailAddress}
+ * brand all the way to the provider.
+ */
+const Recipient = EmailAddress;
 
 /** A template definition: its name, `data` schema, subject line, and component. */
 export interface EmailTemplateDef<Name extends string, DataSchema extends Schema.Top> {
@@ -60,7 +66,7 @@ type PayloadFor<Def> =
 	Def extends EmailTemplateDef<infer Name, infer DataSchema>
 		? {
 				readonly name: Name;
-				readonly to: string;
+				readonly to: EmailAddress;
 				readonly data: DataSchema["Type"];
 				/** Compliance class for this send; defaults to `transactional`. */
 				readonly category?: "transactional" | "marketing";
@@ -80,7 +86,8 @@ export type MailerTemplateData<
 
 /** The rendered, provider-ready email. */
 export interface RenderedEmail {
-	to: string;
+	/** Validated recipient (branded {@link EmailAddress}), carried from decode. */
+	to: EmailAddress;
 	subject: string;
 	html: string;
 	text: string;
@@ -130,6 +137,11 @@ export function createMailer<const Defs extends readonly AnyTemplateDef[]>(
 ): Mailer<MailerPayload<Defs>> {
 	type Payload = MailerPayload<Defs>;
 
+	// `Schema.Union(defs.map(...))` maps the def tuple to an array, widening each
+	// struct's literal `name` and collapsing the discriminant, so TS can't prove the
+	// union's decoded type is the `Payload` union. Assert it as a services-free
+	// `Codec<Payload, unknown>` (every field schema decodes without services — cf.
+	// `@resq-systems/http`'s `SyncSchema`); `decode` returns the narrowed value.
 	const schema = Schema.Union(
 		defs.map((def) =>
 			Schema.Struct({
@@ -140,7 +152,7 @@ export function createMailer<const Defs extends readonly AnyTemplateDef[]>(
 				unsubscribeUrl: Schema.optional(HttpUrl),
 			}),
 		),
-	);
+	) as unknown as Schema.Codec<Payload, unknown, never>;
 
 	// Entries are stored with `unknown` params; the def's data type is enforced at
 	// the call boundary by `decode`, so these casts are safe.
@@ -156,11 +168,7 @@ export function createMailer<const Defs extends readonly AnyTemplateDef[]>(
 
 	const names = defs.map((def) => def.name);
 
-	// Cast past the `Decoder` services constraint: the union's fields are concrete
-	// schemas with no decoding services at runtime.
-	const decodeExit = Schema.decodeUnknownExit(
-		schema as unknown as Parameters<typeof Schema.decodeUnknownExit>[0],
-	);
+	const decodeExit = Schema.decodeUnknownExit(schema);
 
 	function decode(input: unknown): Payload {
 		const result = decodeExit(input);
@@ -170,7 +178,7 @@ export function createMailer<const Defs extends readonly AnyTemplateDef[]>(
 				squashed instanceof Error ? squashed.message : String(squashed),
 			);
 		}
-		return result.value as Payload;
+		return result.value;
 	}
 
 	async function renderEmail(input: unknown, options?: RenderEmailOptions): Promise<RenderedEmail> {

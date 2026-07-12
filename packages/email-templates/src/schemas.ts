@@ -24,6 +24,29 @@ import { Schema as S } from "effect";
 export const HttpUrl = S.String.check(S.isPattern(/^https?:\/\/\S+$/i));
 
 /**
+ * A single, syntactically-valid recipient email address (branded).
+ *
+ * The pattern mirrors `@resq-systems/security`'s `EmailSchema` — one `@`, a
+ * dotted domain, and a 2+ character TLD, or a Punycode/IDN `xn--…` TLD (e.g.
+ * `.xn--p1ai` for `.рф`) so internationalized domains are not rejected. Because
+ * the character classes admit no whitespace or control characters and the check
+ * is anchored (`^…$`), it also rejects the CR/LF that underpins SMTP header
+ * injection: a `to` smuggling `"…\r\nBcc: attacker@evil"` into a provider that
+ * concatenates headers is a type-*and*-runtime error at the boundary, not a
+ * silent extra recipient.
+ *
+ * The {@link EmailAddress} brand marks a string that has cleared this check, so
+ * a validated address is not interchangeable with a raw `string` downstream
+ * (the `to` field on the decoded mailer payload and the rendered email).
+ */
+export const EmailAddress = S.String.check(
+	S.isPattern(/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.(?:[A-Za-z]{2,}|xn--[A-Za-z0-9-]+)$/),
+).pipe(S.brand("EmailAddress"));
+
+/** A recipient address that has passed {@link EmailAddress} validation. */
+export type EmailAddress = typeof EmailAddress.Type;
+
+/**
  * Compliance class of an email send. `transactional` skips unsubscribe UI;
  * `marketing` requires an unsubscribe affordance in the legal footer.
  */
