@@ -1,4 +1,31 @@
 <!--
+
+## 1.0.0
+### Major Changes
+
+
+
+- [#168](https://github.com/resq-software/npm/pull/168) [`1d0f73c`](https://github.com/resq-software/npm/commit/1d0f73c6b8dbb5a09e3260ad78ab1fd7ac5c4636) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Replace RequestBody `any` with a JSON/FormData union and brand request IDs as sanitized RequestId
+
+
+### Minor Changes
+
+
+
+- [#167](https://github.com/resq-software/npm/pull/167) [`c80c8b8`](https://github.com/resq-software/npm/commit/c80c8b8f0eecd3e12af3e74cdd26aac98337675b) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Rebrand to ResQ Systems: rename npm scope `@resq-sw/*` → `@resq-systems/*`
+
+  **BREAKING (npm scope rename):** every package is republished under the new
+  `@resq-systems` scope. Consumers must update imports and dependencies from
+  `@resq-sw/<pkg>` to `@resq-systems/<pkg>`; the old `@resq-sw/*` packages will be
+  deprecated on npm. Also updates the short brand name to "ResQ Systems", email
+  copy and From-name to "ResQ Systems", and standardizes copyright/author metadata
+  to "ResQ Systems, Inc." Domains (`resq.software`) and the product name
+  ("ResQ Tactical OS") are unchanged.
+
+### Patch Changes
+
+- Updated dependencies [[`1d0f73c`](https://github.com/resq-software/npm/commit/1d0f73c6b8dbb5a09e3260ad78ab1fd7ac5c4636)]:
+  - @resq-systems/types@0.1.0
   Copyright 2026 ResQ
 
   Licensed under the Apache License, Version 2.0 (the "License");

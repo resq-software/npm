@@ -1,6 +1,6 @@
 {
 	"name": "@resq-systems/types",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "Zero-dependency advanced TypeScript type toolkit: nominal brands, exhaustiveness helpers, deep object/collection/string utilities, and a type-level test kit",
 	"license": "Apache-2.0",
 	"type": "module",

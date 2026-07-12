@@ -1,6 +1,6 @@
 {
 	"name": "@resq-systems/email-templates",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "Type-safe transactional email templates: an Effect Schema contract, React Email components, headless render-to-html/text, and an optional Resend sender",
 	"license": "Apache-2.0",
 	"author": {
