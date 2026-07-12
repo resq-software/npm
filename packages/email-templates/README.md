@@ -18,7 +18,7 @@
 
 Type-safe transactional email templates for React apps and backend pipelines.
 
-- **One contract.** Every email is a validated `{ name, to, data }` payload, described by an [Effect Schema](https://effect.website) discriminated union. Nothing else can be enqueued or rendered.
+- **One contract.** Every email is a validated `{ name, to, data }` payload, described by an [Effect Schema](https://effect.website) discriminated union — including a validated, branded recipient (`EmailAddress`). Nothing else can be enqueued or rendered.
 - **React Email components.** Templates are React components built on [React Email](https://react.email) with a `<Tailwind>` theme mapped to the dark-first ResQ Systems brand — red primary, Syne/DM Sans/DM Mono — with oklch tokens converted to email-safe hex.
 - **Headless render.** `renderEmail(payload)` returns `{ to, subject, html, text }` with no DOM — safe to call from queue workers, cron jobs, and other pipelines.
 - **Pluggable sending.** A provider-agnostic `EmailSender` port with an optional Resend adapter under `@resq-systems/email-templates/send`.
@@ -37,7 +37,7 @@ bun add resend
 
 | Import | Contents | Runtime |
 | --- | --- | --- |
-| `@resq-systems/email-templates` | `EmailPayload` schema, types, `decodeEmailPayload`, `registry`, `renderEmail` | browser + server |
+| `@resq-systems/email-templates` | `EmailPayload` schema, types, `EmailAddress`, `decodeEmailPayload`, `registry`, `renderEmail` | browser + server |
 | `@resq-systems/email-templates/emails` | `Email` primitives, `emailColors`, and the template components | browser + server |
 | `@resq-systems/email-templates/send` | `EmailSender` port, `createResendSender`, `sendEmail` | **server only** |
 
@@ -76,7 +76,7 @@ const { subject, html, text } = await renderEmail({
 // pass subject/html/text to SES, Postmark, Nodemailer, etc.
 ```
 
-The payload is validated at the boundary — an unknown `name` or missing required `data` throws `EmailValidationError`.
+The payload is validated at the boundary — an unknown `name`, a missing required `data` field, or a malformed recipient `to` (including one carrying a CR/LF header-injection payload) throws `EmailValidationError`. The decoded `to` is a branded `EmailAddress`, so a validated recipient can't be confused with a raw string downstream.
 
 ## React app usage
 
@@ -97,6 +97,10 @@ import { WelcomeEmail } from "@resq-systems/email-templates/emails";
 | `password-reset` | `firstName?`, `resetUrl`, `expiresInMinutes?` |
 | `notification` | `title`, `body`, `severity?`, `actionUrl?`, `actionLabel?` |
 | `incident-alert` | `incidentId`, `title`, `severity`, `summary`, `location?`, `detectedAt?`, `dashboardUrl` |
+| `password-changed` | `firstName?`, `changedAt?`, `secureAccountUrl?` |
+| `new-device-login` | `firstName?`, `device?`, `location?`, `ipAddress?`, `at?`, `secureAccountUrl?` |
+| `mission-approval` | `missionId`, `title`, `summary?`, `requestedBy?`, `severity?`, `approveUrl`, `expiresInMinutes?` |
+| `org-invitation` | `orgName`, `inviterName?`, `orgRole?`, `acceptUrl`, `expiresInDays?` |
 
 ## Theming
 
@@ -152,7 +156,8 @@ const { html, text } = await mailer.renderEmail({
 ```
 
 `mailer` exposes `{ schema, registry, names, decode, renderEmail }`, each fully
-typed over your template set — unknown names and bad `data` are rejected at decode.
+typed over your template set — unknown names, malformed recipients, and bad `data`
+are rejected at decode.
 
 ## Adding a built-in template
 
