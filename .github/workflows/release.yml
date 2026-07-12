@@ -50,58 +50,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish @resq-systems/ui to GitHub Packages
-        uses: ./.github/actions/publish-github-packages
-        with:
-          package-dir: packages/ui
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Publish @resq-systems/dsa to GitHub Packages
-        uses: ./.github/actions/publish-github-packages
-        with:
-          package-dir: packages/dsa
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Publish @resq-systems/helpers to GitHub Packages
-        uses: ./.github/actions/publish-github-packages
-        with:
-          package-dir: packages/helpers
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Publish @resq-systems/http to GitHub Packages
-        uses: ./.github/actions/publish-github-packages
-        with:
-          package-dir: packages/http
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Publish @resq-systems/logger to GitHub Packages
-        uses: ./.github/actions/publish-github-packages
-        with:
-          package-dir: packages/logger
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Publish @resq-systems/decorators to GitHub Packages
-        uses: ./.github/actions/publish-github-packages
-        with:
-          package-dir: packages/decorators
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Publish @resq-systems/rate-limiting to GitHub Packages
-        uses: ./.github/actions/publish-github-packages
-        with:
-          package-dir: packages/rate-limiting
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Publish @resq-systems/security to GitHub Packages
-        uses: ./.github/actions/publish-github-packages
-        with:
-          package-dir: packages/security
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
+      # Mirror every published package to GitHub Packages. Runs only when
+      # Changesets actually published (so the workspace was built by
+      # `bun run release`), and discovers packages from the filesystem — no
+      # hardcoded list to drift when packages are added or removed.
+      - name: Publish to GitHub Packages
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          GH_PKG_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "@resq-software:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=$GH_PKG_TOKEN" >> ~/.npmrc
+          bash scripts/release/publish-github-packages.sh
