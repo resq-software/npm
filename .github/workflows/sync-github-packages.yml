@@ -1,0 +1,40 @@
+name: Sync GitHub Packages
+
+# Manually mirror the CURRENT version of every publishable workspace package to
+# GitHub Packages. Unlike release.yml (which only fires on a Changesets publish),
+# this backfills whatever is on the branch right now — use it to recover from
+# drift or to onboard newly added packages without waiting for a release.
+#
+# Publishing is idempotent: versions already on the GitHub registry are skipped.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: sync-github-packages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/prepare
+
+      - name: Build all packages
+        run: bun run build
+
+      - name: Publish to GitHub Packages
+        env:
+          GH_PKG_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "@resq-software:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=$GH_PKG_TOKEN" >> ~/.npmrc
+          bash scripts/release/publish-github-packages.sh
