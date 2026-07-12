@@ -48,35 +48,30 @@ import type { AfterConfig, AfterFunc } from "./after.types.js";
  * await wrapped('hello'); // Logs: Called with hello, returned HELLO
  * ```
  */
-export function afterFn<D = any, A extends any[] = any[]>(
+export function afterFn<D = unknown, A extends unknown[] = unknown[]>(
 	originalMethod: Method<D, A>,
-	config: AfterConfig<any, ReturnType<typeof originalMethod>>,
-): (...args: unknown[]) => Promise<D> {
-	const resolvedConfig: AfterConfig<any, ReturnType<typeof originalMethod>> = {
+	config: AfterConfig<any, Awaited<D>>,
+): (...args: A) => Promise<Awaited<D>> {
+	const resolvedConfig: AfterConfig<any, Awaited<D>> = {
 		wait: false,
 		...config,
 	};
 
-	return async function (this: any, ...args: A): Promise<D> {
-		const afterFunc: AfterFunc<ReturnType<typeof originalMethod>> =
+	return async function (this: any, ...args: A): Promise<Awaited<D>> {
+		const afterFunc: AfterFunc<Awaited<D>> =
 			typeof resolvedConfig.func === "string"
 				? this[resolvedConfig.func].bind(this)
 				: resolvedConfig.func;
 
+		// Always await the original result so the hook receives the resolved
+		// value (`Awaited<D>`) rather than an unsettled promise for async methods.
+		const response = await originalMethod.apply(this, args);
+		const hookResult = afterFunc({ args, response });
+
 		if (resolvedConfig.wait) {
-			const response = await originalMethod.apply(this, args);
-			afterFunc({
-				args,
-				response,
-			});
-			return response;
+			await hookResult;
 		}
 
-		const response = originalMethod.apply(this, args);
-		afterFunc({
-			args,
-			response,
-		});
 		return response;
 	};
 }

@@ -72,7 +72,7 @@
     },
     "packages/analytics": {
       "name": "@resq-systems/analytics",
-      "version": "0.4.1",
+      "version": "1.0.0",
       "dependencies": {
         "@resq-systems/types": "workspace:*",
       },
@@ -100,7 +100,7 @@
     },
     "packages/constants": {
       "name": "@resq-systems/constants",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "devDependencies": {
         "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "^26.1.1",
@@ -112,7 +112,7 @@
     },
     "packages/decorators": {
       "name": "@resq-systems/decorators",
-      "version": "0.1.2",
+      "version": "0.2.0",
       "devDependencies": {
         "@total-typescript/ts-reset": "^0.6.1",
         "tsdown": "^0.22.4",
@@ -122,7 +122,7 @@
     },
     "packages/dsa": {
       "name": "@resq-systems/dsa",
-      "version": "0.2.0",
+      "version": "1.0.0",
       "devDependencies": {
         "@jsheaven/perf": "^1.1.1",
         "@total-typescript/ts-reset": "^0.6.1",
@@ -140,7 +140,7 @@
     },
     "packages/email-templates": {
       "name": "@resq-systems/email-templates",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "dependencies": {
         "@react-email/components": "^1.0.12",
         "@react-email/render": "^2.0.10",
@@ -174,7 +174,7 @@
     },
     "packages/helpers": {
       "name": "@resq-systems/helpers",
-      "version": "0.1.3",
+      "version": "0.2.0",
       "dependencies": {
         "@resq-systems/logger": "^0.1.2",
         "@resq-systems/types": "workspace:*",
@@ -191,7 +191,7 @@
     },
     "packages/http": {
       "name": "@resq-systems/http",
-      "version": "0.2.0",
+      "version": "1.0.0",
       "dependencies": {
         "@resq-systems/types": "workspace:*",
       },
@@ -214,7 +214,7 @@
     },
     "packages/logger": {
       "name": "@resq-systems/logger",
-      "version": "0.1.2",
+      "version": "0.2.0",
       "devDependencies": {
         "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "^26.1.1",
@@ -225,7 +225,7 @@
     },
     "packages/rate-limiting": {
       "name": "@resq-systems/rate-limiting",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "dependencies": {
         "@resq-systems/dsa": "workspace:*",
         "@resq-systems/types": "workspace:*",
@@ -252,7 +252,7 @@
     },
     "packages/security": {
       "name": "@resq-systems/security",
-      "version": "0.2.0",
+      "version": "1.0.0",
       "dependencies": {
         "@resq-systems/types": "workspace:*",
         "dompurify": "^3.4.11",
@@ -287,10 +287,11 @@
     },
     "packages/ui": {
       "name": "@resq-systems/ui",
-      "version": "0.35.7",
+      "version": "0.36.0",
       "dependencies": {
         "@base-ui/react": "^1.6.0",
         "@phosphor-icons/react": "^2.1.10",
+        "@resq-systems/types": "workspace:*",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "cmdk": "^1.1.1",

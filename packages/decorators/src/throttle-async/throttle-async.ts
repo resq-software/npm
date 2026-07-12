@@ -79,12 +79,8 @@ import { throttleAsyncFn } from "./throttle-async.fn.js";
  * );
  * ```
  */
-export function throttleAsync<T = any, D = any>(parallelCalls?: number): Decorator<T> {
-	return (
-		_target: T,
-		_propertyName: keyof T,
-		descriptor: TypedPropertyDescriptor<AsyncMethod<any>>,
-	): TypedPropertyDescriptor<AsyncMethod<D>> => {
+export function throttleAsync<T = any>(parallelCalls?: number): Decorator<T> {
+	return (_target: T, _propertyName: keyof T, descriptor: TypedPropertyDescriptor<AsyncMethod>) => {
 		if (descriptor.value) {
 			descriptor.value = throttleAsyncFn(descriptor.value, parallelCalls);
 

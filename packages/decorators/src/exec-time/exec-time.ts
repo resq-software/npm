@@ -41,7 +41,7 @@
 
 import type { AsyncMethod, Method } from "../types.js";
 import { execTimeFn } from "./exec-time.fn.js";
-import type { ReportFunction } from "./exec-time.types.js";
+import type { ExactTimeReportable, ReportFunction } from "./exec-time.types.js";
 
 /**
  * Decorator that measures and reports the execution time of methods.
@@ -78,13 +78,13 @@ import type { ReportFunction } from "./exec-time.types.js";
  * }
  * ```
  */
-export function execTime<T = any>(arg?: ReportFunction | string): any {
+export function execTime<T = any>(arg?: ReportFunction | string): ExactTimeReportable<T> {
 	return (
-		targetOrValue: unknown,
+		targetOrValue: T | Method | AsyncMethod,
 		propertyNameOrContext: keyof T | ClassMethodDecoratorContext,
-		descriptor?: TypedPropertyDescriptor<any>,
-	): any => {
-		// Legacy decorator
+		descriptor?: TypedPropertyDescriptor<Method | AsyncMethod>,
+	) => {
+		// Legacy (experimentalDecorators) form: (target, propertyName, descriptor)
 		if (descriptor) {
 			if (descriptor.value) {
 				descriptor.value = execTimeFn(descriptor.value, arg);
@@ -93,9 +93,7 @@ export function execTime<T = any>(arg?: ReportFunction | string): any {
 			throw new Error("@execTime is applicable only on methods.");
 		}
 
-		// Standard decorator (Stage 3)
-		// targetOrValue is the method itself
-		// propertyNameOrContext is the context
+		// Standard (Stage 3) form: (value, context)
 		const method = targetOrValue as Method | AsyncMethod;
 		const context = propertyNameOrContext as ClassMethodDecoratorContext;
 

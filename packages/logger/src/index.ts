@@ -43,15 +43,5 @@
  */
 
 export * from "./logger.js";
-// logger.types.js re-exports types that overlap with logger.js (LogData, LoggerOptions, ColorKey)
-// Only export the additional types not already in logger.js
-export type {
-	LogLevelString,
-	LogEntry,
-	LogTransport,
-	LogMethodOptions,
-	LogTimingOptions,
-	LogErrorOptions,
-	LogClassOptions,
-} from "./logger.types.js";
+export type * from "./logger.types.js";
 export * from "./logger.decorators.js";

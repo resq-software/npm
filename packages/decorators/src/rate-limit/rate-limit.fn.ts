@@ -14,9 +14,57 @@
  * limitations under the License.
  */
 
+import { assertNever } from "../_assert.js";
+import { isFunction } from "../_utils.js";
 import type { Method } from "../types.js";
-import type { RateLimitConfigs, RateLimitCounter } from "./rate-limit.types.js";
+import type {
+	RateLimitAsyncCounter,
+	RateLimitConfigs,
+	RateLimitCounter,
+} from "./rate-limit.types.js";
 import { SimpleRateLimitCounter } from "./simple-rate-limit-counter.js";
+
+/**
+ * A counter resolved from {@link RateLimitConfigs}, discriminated by whether it
+ * operates synchronously (in-memory) or asynchronously (distributed, e.g. Redis).
+ */
+type ResolvedCounter =
+	| { readonly kind: "sync"; readonly counter: RateLimitCounter }
+	| { readonly kind: "async"; readonly counter: RateLimitAsyncCounter };
+
+/**
+ * Picks the counter to use. An async (distributed) counter takes precedence when
+ * provided; otherwise a sync counter is used, defaulting to an in-memory one.
+ */
+function resolveCounter(config: RateLimitConfigs): ResolvedCounter {
+	if (config.rateLimitAsyncCounter) {
+		return { kind: "async", counter: config.rateLimitAsyncCounter };
+	}
+	return { kind: "sync", counter: config.rateLimitCounter ?? new SimpleRateLimitCounter() };
+}
+
+/**
+ * Resolves the rate-limit bucket key for a call, honoring both a resolver
+ * function and a method name (`keyof T`) that lives on the instance.
+ */
+function resolveKey<A extends unknown[]>(
+	self: unknown,
+	keyResolver: RateLimitConfigs["keyResolver"],
+	args: A,
+): string {
+	if (typeof keyResolver === "function") {
+		return keyResolver(...args);
+	}
+
+	if (keyResolver != null) {
+		const method = (self as Record<PropertyKey, unknown>)[keyResolver];
+		if (isFunction(method)) {
+			return String(method.apply(self, args));
+		}
+	}
+
+	return "default";
+}
 
 /**
  * Creates a rate-limited version of a method.
@@ -25,7 +73,8 @@ import { SimpleRateLimitCounter } from "./simple-rate-limit-counter.js";
  * @template A - The argument types of the original method
  * @param {Method<D, A>} originalMethod - The method to rate limit
  * @param {RateLimitConfigs} config - The rate limit configuration
- * @returns {Method<D | undefined, A>} A rate-limited method
+ * @returns {Method<D | undefined | Promise<D | undefined>, A>} A rate-limited method. The
+ * result is a promise when a distributed `rateLimitAsyncCounter` is configured, otherwise sync.
  *
  * @example
  * ```typescript
@@ -56,26 +105,67 @@ import { SimpleRateLimitCounter } from "./simple-rate-limit-counter.js";
 export function rateLimitFn<D = unknown, A extends unknown[] = unknown[]>(
 	originalMethod: Method<D, A>,
 	config: RateLimitConfigs,
-): Method<D | undefined, A> {
-	const counter: RateLimitCounter = config.rateLimitCounter ?? new SimpleRateLimitCounter();
+): Method<D | undefined | Promise<D | undefined>, A> {
+	const mode = resolveCounter(config);
 
-	return function (this: unknown, ...args: A): D | undefined {
-		const key = typeof config.keyResolver === "function" ? config.keyResolver(...args) : "default";
+	return function (this: unknown, ...args: A): D | undefined | Promise<D | undefined> {
+		const key = resolveKey(this, config.keyResolver, args);
 
-		const currentCount = counter.getCount(key);
-
-		if (currentCount >= config.allowedCalls) {
-			config.exceedHandler?.();
-			return undefined;
+		switch (mode.kind) {
+			case "sync":
+				return runSync(mode.counter, key, config, originalMethod, this, args);
+			case "async":
+				return runAsync(mode.counter, key, config, originalMethod, this, args);
+			default:
+				return assertNever(mode);
 		}
-
-		counter.inc(key);
-
-		// Schedule decrement after time span
-		setTimeout(() => {
-			counter.dec(key);
-		}, config.timeSpanMs);
-
-		return originalMethod.apply(this, args);
 	};
+}
+
+/**
+ * Executes a call against a synchronous (in-memory) counter, returning
+ * `undefined` when the limit is exceeded.
+ */
+function runSync<D, A extends unknown[]>(
+	counter: RateLimitCounter,
+	key: string,
+	config: RateLimitConfigs,
+	originalMethod: Method<D, A>,
+	self: unknown,
+	args: A,
+): D | undefined {
+	if (counter.getCount(key) >= config.allowedCalls) {
+		config.exceedHandler?.();
+		return undefined;
+	}
+
+	counter.inc(key);
+	setTimeout(() => counter.dec(key), config.timeSpanMs);
+
+	return originalMethod.apply(self, args);
+}
+
+/**
+ * Executes a call against an asynchronous (distributed) counter, returning
+ * `undefined` when the limit is exceeded.
+ */
+async function runAsync<D, A extends unknown[]>(
+	counter: RateLimitAsyncCounter,
+	key: string,
+	config: RateLimitConfigs,
+	originalMethod: Method<D, A>,
+	self: unknown,
+	args: A,
+): Promise<D | undefined> {
+	if ((await counter.getCount(key)) >= config.allowedCalls) {
+		config.exceedHandler?.();
+		return undefined;
+	}
+
+	await counter.inc(key);
+	setTimeout(() => {
+		void counter.dec(key);
+	}, config.timeSpanMs);
+
+	return originalMethod.apply(self, args);
 }

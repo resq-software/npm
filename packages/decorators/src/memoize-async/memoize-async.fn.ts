@@ -132,7 +132,10 @@ export function memoizeAsyncFn<D = any, A extends any[] = any[]>(
 			const inCache = (await resolvedConfig.cache?.has(key)) ?? false;
 
 			if (inCache) {
-				return (await resolvedConfig.cache?.get(key)) as D;
+				const hit = await resolvedConfig.cache?.get(key);
+				if (hit != null) {
+					return hit;
+				}
 			}
 
 			const data = await originalMethod.apply(this, args);

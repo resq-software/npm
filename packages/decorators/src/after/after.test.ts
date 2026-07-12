@@ -39,5 +39,19 @@ describe("after", () => {
 
 			expect(await fn(5)).toBe(6);
 		});
+
+		test("awaits an async method result before invoking the hook", async () => {
+			let seen: unknown;
+			const fn = afterFn(async (x: number) => x * 3, {
+				func: (ctx?: { args: unknown[]; response: unknown }) => {
+					seen = ctx?.response;
+				},
+			});
+
+			const result = await fn(4);
+			expect(result).toBe(12);
+			// The hook must receive the resolved value, not an unsettled promise.
+			expect(seen).toBe(12);
+		});
 	});
 });

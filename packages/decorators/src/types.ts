@@ -27,8 +27,7 @@
  * };
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Method<D = any, A extends any[] = any[]> = (...args: A) => D;
+export type Method<D = unknown, A extends unknown[] = unknown[]> = (...args: A) => D;
 
 /**
  * A generic decorator type for method decorators.
@@ -63,8 +62,7 @@ export type Decorator<T = any> = (
  * };
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AsyncMethod<D = any, A extends any[] = any[]> = (...args: A) => Promise<D>;
+export type AsyncMethod<D = unknown, A extends unknown[] = unknown[]> = (...args: A) => Promise<D>;
 
 /**
  * A decorator type specifically for async methods.

@@ -52,7 +52,7 @@ export interface AsyncCache<D> {
 	/** Store a value in the cache asynchronously */
 	set: (key: string, value: D) => Promise<void>;
 	/** Retrieve a value from the cache asynchronously */
-	get: (key: string) => Promise<D> | Promise<null>;
+	get: (key: string) => Promise<D | null>;
 	/** Remove a value from the cache asynchronously */
 	delete: (key: string) => Promise<void>;
 	/** Check if a key exists in the cache asynchronously */

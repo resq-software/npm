@@ -83,5 +83,53 @@ describe("rateLimit", () => {
 			expect(fn()).toBe("ok");
 			expect(callCount).toBe(2);
 		});
+
+		test("resolves the bucket key from a method name on the instance", () => {
+			let callCount = 0;
+			const obj = {
+				bucket(id: string): string {
+					return id;
+				},
+				limited: rateLimitFn(
+					(_id: string) => {
+						callCount++;
+						return "ok";
+					},
+					{ allowedCalls: 1, timeSpanMs: 1000, keyResolver: "bucket" },
+				),
+			};
+
+			expect(obj.limited("a")).toBe("ok"); // bucket "a"
+			expect(obj.limited("b")).toBe("ok"); // bucket "b" — independent
+			expect(obj.limited("a")).toBeUndefined(); // bucket "a" exceeded
+			expect(callCount).toBe(2);
+		});
+
+		test("supports an async (distributed) counter and returns a promise", async () => {
+			const counts = new Map<string, number>();
+			const asyncCounter = {
+				inc: async (key: string): Promise<void> => {
+					counts.set(key, (counts.get(key) ?? 0) + 1);
+				},
+				dec: async (key: string): Promise<void> => {
+					counts.set(key, Math.max((counts.get(key) ?? 0) - 1, 0));
+				},
+				getCount: async (key: string): Promise<number> => counts.get(key) ?? 0,
+			};
+
+			let callCount = 0;
+			const fn = rateLimitFn(
+				() => {
+					callCount++;
+					return "ok";
+				},
+				{ allowedCalls: 2, timeSpanMs: 1000, rateLimitAsyncCounter: asyncCounter },
+			);
+
+			expect(await fn()).toBe("ok");
+			expect(await fn()).toBe("ok");
+			expect(await fn()).toBeUndefined();
+			expect(callCount).toBe(2);
+		});
 	});
 });

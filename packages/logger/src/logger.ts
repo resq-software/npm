@@ -24,6 +24,9 @@
  *   TIMESTAMP LEVEL [CONTEXT] message { data }
  */
 
+import { assertNever } from "./_assert.js";
+import type { LogData, LoggerOptions } from "./logger.types.js";
+
 /**
  * Enum representing different logging levels with their priority values.
  * Higher values indicate more verbose logging.
@@ -47,62 +50,10 @@ export enum LogLevel {
 }
 
 /**
- * Available color keys for log formatting
- * @typedef {'reset' | 'red' | 'yellow' | 'blue' | 'green' | 'gray' | 'bold' | 'magenta' | 'cyan' | 'white'} ColorKey
+ * The named keys of {@link LogLevel} (e.g. `"INFO"`, `"ERROR"`). Derived from
+ * the enum so the parser's accepted level names can never drift from it.
  */
-export type ColorKey =
-	| "reset"
-	| "red"
-	| "yellow"
-	| "blue"
-	| "green"
-	| "gray"
-	| "bold"
-	| "magenta"
-	| "cyan"
-	| "white";
-
-/**
- * Interface for structured data that can be attached to log messages
- * @interface
- */
-export interface LogData {
-	/**
-	 * Any key-value pairs to include in the log
-	 */
-	[key: string]: unknown;
-}
-
-/**
- * Configuration options for the Logger
- * @interface
- */
-export interface LoggerOptions {
-	/**
-	 * The minimum level of messages to log
-	 */
-	minLevel?: LogLevel;
-
-	/**
-	 * Whether to include timestamps in log messages
-	 */
-	includeTimestamp?: boolean;
-
-	/**
-	 * Whether to colorize log output
-	 */
-	colorize?: boolean;
-
-	/**
-	 * Whether to write logs to a file (server-side only)
-	 */
-	logToFile?: boolean;
-
-	/**
-	 * Path to the log file if logToFile is enabled
-	 */
-	filePath?: string;
-}
+type LogLevelName = keyof typeof LogLevel;
 
 /**
  * A versatile logging utility that works in both browser and Node.js environments.
@@ -116,12 +67,21 @@ export class Logger {
 	private minLevel: LogLevel;
 
 	/**
-	 * Parse log level from string or return default
+	 * Type guard for a valid {@link LogLevel} name. Numeric enums carry reverse
+	 * mappings (`"0".."6"`), so those are excluded — only the named keys
+	 * (`"NONE".."ALL"`) are accepted.
 	 */
-	private static parseLevel(level?: string): LogLevel | undefined {
-		if (!level) return undefined;
-		const upper = level.toUpperCase();
-		switch (upper) {
+	private static isLogLevelName(value: string): value is LogLevelName {
+		return value in LogLevel && Number.isNaN(Number(value));
+	}
+
+	/**
+	 * Map a (validated) level name to its numeric {@link LogLevel}. The
+	 * exhaustive switch — closed by {@link assertNever} — forces this mapping to
+	 * be updated in lockstep whenever the enum gains a member.
+	 */
+	private static levelFromName(name: LogLevelName): LogLevel {
+		switch (name) {
 			case "NONE":
 				return LogLevel.NONE;
 			case "ERROR":
@@ -137,8 +97,18 @@ export class Logger {
 			case "ALL":
 				return LogLevel.ALL;
 			default:
-				return undefined;
+				return assertNever(name);
 		}
+	}
+
+	/**
+	 * Parse a log level from an arbitrary string (e.g. an env var), returning
+	 * `undefined` when it is absent or not a recognised level name.
+	 */
+	private static parseLevel(level?: string): LogLevel | undefined {
+		if (!level) return undefined;
+		const upper = level.toUpperCase();
+		return Logger.isLogLevelName(upper) ? Logger.levelFromName(upper) : undefined;
 	}
 
 	/** Registry of logger instances to implement the singleton pattern */

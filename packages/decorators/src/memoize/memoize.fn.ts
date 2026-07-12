@@ -118,18 +118,24 @@ export function memoizeFn<D = any, A extends any[] = any[]>(
 
 		const key = keyResolver ? keyResolver(...args) : JSON.stringify(args);
 
-		if (resolvedConfig.cache && !resolvedConfig.cache.has(key)) {
-			const response = originalMethod.apply(this, args);
+		const cache = resolvedConfig.cache;
+		const hit = cache?.get(key);
+		if (hit != null) {
+			return hit;
+		}
 
+		const response = originalMethod.apply(this, args);
+
+		if (cache) {
 			if (resolvedConfig.expirationTimeMs !== undefined) {
 				runner.exec(() => {
-					resolvedConfig.cache?.delete(key);
+					cache.delete(key);
 				}, resolvedConfig.expirationTimeMs);
 			}
 
-			resolvedConfig.cache.set(key, response);
+			cache.set(key, response);
 		}
 
-		return resolvedConfig.cache?.get(key) as D;
+		return response;
 	};
 }
