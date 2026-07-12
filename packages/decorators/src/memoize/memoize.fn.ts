@@ -119,9 +119,11 @@ export function memoizeFn<D = any, A extends any[] = any[]>(
 		const key = keyResolver ? keyResolver(...args) : JSON.stringify(args);
 
 		const cache = resolvedConfig.cache;
-		const hit = cache?.get(key);
-		if (hit != null) {
-			return hit;
+		if (cache?.has(key)) {
+			// has() confirms the key is present, so a stored null/undefined is a
+			// genuine cached value — return it directly instead of treating it as a
+			// miss and re-running the method.
+			return cache.get(key) as D;
 		}
 
 		const response = originalMethod.apply(this, args);

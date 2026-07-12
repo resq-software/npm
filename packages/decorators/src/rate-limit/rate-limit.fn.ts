@@ -56,7 +56,7 @@ function resolveKey<A extends unknown[]>(
 		return keyResolver(...args);
 	}
 
-	if (keyResolver != null) {
+	if (keyResolver != null && self != null) {
 		const method = (self as Record<PropertyKey, unknown>)[keyResolver];
 		if (isFunction(method)) {
 			return String(method.apply(self, args));
@@ -75,6 +75,10 @@ function resolveKey<A extends unknown[]>(
  * @param {RateLimitConfigs} config - The rate limit configuration
  * @returns {Method<D | undefined | Promise<D | undefined>, A>} A rate-limited method. The
  * result is a promise when a distributed `rateLimitAsyncCounter` is configured, otherwise sync.
+ *
+ * @remarks With a distributed `rateLimitAsyncCounter`, limiting is **best-effort**
+ * under concurrency: the check-then-increment is not atomic, so bursts can briefly
+ * exceed `allowedCalls`. Back the counter with an atomic increment for a hard cap.
  *
  * @example
  * ```typescript
@@ -148,6 +152,13 @@ function runSync<D, A extends unknown[]>(
 /**
  * Executes a call against an asynchronous (distributed) counter, returning
  * `undefined` when the limit is exceeded.
+ *
+ * **Best-effort under concurrency.** The count is read then incremented in two
+ * awaits — {@link RateLimitAsyncCounter} exposes no atomic increment-and-read —
+ * so simultaneous callers can race between `getCount` and `inc` and briefly
+ * admit more than `allowedCalls`. For a hard guarantee, back the counter with an
+ * atomic primitive (e.g. a Redis `INCR` that returns the new value, or a Lua
+ * script) and enforce the limit on that returned value.
  */
 async function runAsync<D, A extends unknown[]>(
 	counter: RateLimitAsyncCounter,
@@ -164,7 +175,10 @@ async function runAsync<D, A extends unknown[]>(
 
 	await counter.inc(key);
 	setTimeout(() => {
-		void counter.dec(key);
+		// Swallow failures: a rejected distributed decrement must not surface as an
+		// unhandled rejection (which crashes Node 15+/Bun). The counter's own
+		// window/TTL reconciles the count if a decrement is lost.
+		counter.dec(key).catch(() => {});
 	}, config.timeSpanMs);
 
 	return originalMethod.apply(self, args);

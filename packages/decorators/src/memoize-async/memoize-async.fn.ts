@@ -132,10 +132,9 @@ export function memoizeAsyncFn<D = any, A extends any[] = any[]>(
 			const inCache = (await resolvedConfig.cache?.has(key)) ?? false;
 
 			if (inCache) {
-				const hit = await resolvedConfig.cache?.get(key);
-				if (hit != null) {
-					return hit;
-				}
+				// has() already confirmed presence, so a stored null/undefined is a
+				// genuine cached value — return it directly rather than re-running.
+				return (await resolvedConfig.cache?.get(key)) as D;
 			}
 
 			const data = await originalMethod.apply(this, args);
