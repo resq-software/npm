@@ -49,6 +49,9 @@ jobs:
           # `@resq-systems/*` deps (dependencies + peer + dev) so it can never
           # drift out of date as packages are added or rewired.
           declare -A DEPENDENTS
+          # The `${...}` inside the single-quoted `node -e` script below is JS,
+          # not shell, so it is meant to stay literal — SC2016 is a false positive.
+          # shellcheck disable=SC2016
           while IFS=$'\t' read -r consumer dep; do
             DEPENDENTS[$dep]="${DEPENDENTS[$dep]:-} $consumer"
           done < <(node -e '
