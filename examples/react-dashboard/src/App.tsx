@@ -60,7 +60,26 @@ import { escapeHtml } from "@resq-systems/security/sanitize";
 // ── @resq-systems/http — Request tracking (browser-safe subpath) ────
 import { getRequestId } from "@resq-systems/http/security";
 
-import { useMemo, useState } from "react";
+// ── @resq-systems/analytics — Typed product analytics ───────────────
+import { initAnalytics, pageview, track } from "@resq-systems/analytics";
+
+// ── @resq-systems/constants — Shared oklch design tokens ────────────
+import { colors, radii } from "@resq-systems/constants";
+
+import { useEffect, useMemo, useState } from "react";
+
+// @resq-systems/analytics — augment the event registry once per app so
+// `track()` names + payloads are type-checked. `track("fleet_refreshed", { count })`
+// compiles; a typo'd name or a wrong-shaped payload does not.
+declare module "@resq-systems/analytics" {
+	interface AnalyticsEvents {
+		fleet_refreshed: { count: number };
+	}
+}
+
+// Disabled in the example (no PostHog/GA4 keys), so every `track()` / `pageview()`
+// below is a safe no-op. Set `disabled: false` + pass a provider config to send.
+void initAnalytics({ disabled: true });
 
 // ── Logger instance ────────────────────────────────────────────
 const logger = Logger.getLogger("[Dashboard]");
@@ -146,6 +165,11 @@ export function App() {
 	const [tab, setTab] = useState("overview");
 	const [refreshCount, setRefreshCount] = useState(0);
 
+	// @resq-systems/analytics — record a page view on mount (no-op while disabled).
+	useEffect(() => {
+		pageview();
+	}, []);
+
 	// ── @resq-systems/helpers — type guard ────────────────────────────
 	const activeCount = assets.filter((a) => {
 		const bat = a.battery;
@@ -197,6 +221,8 @@ export function App() {
 	const handleRefresh = () => {
 		throttledRefresh();
 		setRefreshCount((c) => c + 1);
+		// @resq-systems/analytics — type-checked against the AnalyticsEvents registry.
+		track("fleet_refreshed", { count: assets.length });
 		logger.info("Refresh clicked", { count: refreshCount + 1 });
 	};
 
@@ -212,6 +238,16 @@ export function App() {
 					<Badge variant="outline" className="font-mono text-xs">
 						{platform}
 					</Badge>
+					{/* @resq-systems/constants — design tokens drive this status dot */}
+					<span
+						aria-hidden
+						style={{
+							width: 8,
+							height: 8,
+							borderRadius: radii.full,
+							backgroundColor: colors.hex.success,
+						}}
+					/>
 					<Badge variant="default">System Online</Badge>
 					<Button variant="outline" size="sm" onClick={handleRefresh}>
 						Refresh

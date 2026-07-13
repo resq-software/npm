@@ -6,6 +6,8 @@
 		"dev": "vite"
 	},
 	"dependencies": {
+		"@resq-systems/analytics": "workspace:*",
+		"@resq-systems/constants": "workspace:*",
 		"@resq-systems/dsa": "workspace:*",
 		"@resq-systems/helpers": "workspace:*",
 		"@resq-systems/http": "workspace:*",

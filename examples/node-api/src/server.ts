@@ -18,13 +18,16 @@
  * Example Bun HTTP API server using @resq-systems packages.
  *
  * Demonstrates: structured logging, rate limiting, input sanitization,
- * secure token generation, and request ID tracking.
+ * secure token generation, request ID tracking, method-level memoization
+ * (@resq-systems/decorators), and branded input validation (@resq-systems/types).
  */
 
+import { memoize } from "@resq-systems/decorators";
+import { getRequestId, shouldRedirectToHttps } from "@resq-systems/http";
 import { Logger } from "@resq-systems/logger";
 import { MemoryRateLimitStore } from "@resq-systems/rate-limiting";
-import { sanitizeForLogging, generateSecureToken } from "@resq-systems/security";
-import { shouldRedirectToHttps, getRequestId } from "@resq-systems/http";
+import { generateSecureToken, sanitizeForLogging } from "@resq-systems/security";
+import { type PositiveInt, toPositiveInt } from "@resq-systems/types";
 
 const log = new Logger("api-server");
 const rateLimiter = new MemoryRateLimitStore();
@@ -32,6 +35,21 @@ const rateLimiter = new MemoryRateLimitStore();
 // Rate limit config: 10 requests per 60-second window
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 10;
+
+// @resq-systems/decorators — `@memoize()` caches the first return value, so the
+// snapshot is computed once and reused on every /api/stats hit (`computeCount`
+// stays 1) until the process restarts. Swap in `@memoize(5_000)` to expire the
+// cache after 5s.
+class StatsService {
+	private computeCount = 0;
+
+	@memoize()
+	snapshot(): { startedAt: number; computeCount: number } {
+		this.computeCount += 1;
+		return { startedAt: Date.now(), computeCount: this.computeCount };
+	}
+}
+const stats = new StatsService();
 
 const server = Bun.serve({
 	port: 3000,
@@ -80,11 +98,31 @@ const server = Bun.serve({
 			);
 		}
 
-		// GET /api/token — generate a secure random token
+		// GET /api/token[?bytes=N] — generate a secure random token.
+		// @resq-systems/types: validate the optional length into a branded
+		// `PositiveInt` at the boundary so `generateSecureToken` can only ever be
+		// called with a proven-positive integer.
 		if (url.pathname === "/api/token" && req.method === "GET") {
-			const token = generateSecureToken();
+			const bytesParam = url.searchParams.get("bytes");
+			let length: PositiveInt | undefined;
+			if (bytesParam !== null) {
+				const n = Number(bytesParam);
+				if (!Number.isInteger(n) || n <= 0) {
+					return Response.json(
+						{ error: "bytes must be a positive integer" },
+						{ status: 400, headers: { "x-request-id": requestId } },
+					);
+				}
+				length = toPositiveInt(n);
+			}
+			const token = length ? generateSecureToken(length) : generateSecureToken();
 			log.info("Token generated", { requestId });
 			return Response.json({ token }, { headers: { "x-request-id": requestId } });
+		}
+
+		// GET /api/stats — a @memoize'd snapshot; recomputed only on first call.
+		if (url.pathname === "/api/stats" && req.method === "GET") {
+			return Response.json(stats.snapshot(), { headers: { "x-request-id": requestId } });
 		}
 
 		// POST /api/echo — echo back sanitized input
