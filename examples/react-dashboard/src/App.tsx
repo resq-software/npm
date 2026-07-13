@@ -34,7 +34,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@resq-systems/ui/tabs";
 
 // ── @resq-systems/dsa — Distance + PriorityQueue + BloomFilter ─────
-import { Distance, BloomFilter, PriorityQueue } from "@resq-systems/dsa";
+import {
+	BloomFilter,
+	Distance,
+	PriorityQueue,
+	toLatitude,
+	toLongitude,
+	toProbability,
+} from "@resq-systems/dsa";
 
 // ── @resq-systems/helpers — Formatting + type guards ────────────────
 import { capitalize, truncate } from "@resq-systems/helpers/formatting";
@@ -53,7 +60,26 @@ import { escapeHtml } from "@resq-systems/security/sanitize";
 // ── @resq-systems/http — Request tracking (browser-safe subpath) ────
 import { getRequestId } from "@resq-systems/http/security";
 
-import { useMemo, useState } from "react";
+// ── @resq-systems/analytics — Typed product analytics ───────────────
+import { initAnalytics, pageview, track } from "@resq-systems/analytics";
+
+// ── @resq-systems/constants — Shared oklch design tokens ────────────
+import { colors, radii } from "@resq-systems/constants";
+
+import { useEffect, useMemo, useState } from "react";
+
+// @resq-systems/analytics — augment the event registry once per app so
+// `track()` names + payloads are type-checked. `track("fleet_refreshed", { count })`
+// compiles; a typo'd name or a wrong-shaped payload does not.
+declare module "@resq-systems/analytics" {
+	interface AnalyticsEvents {
+		fleet_refreshed: { count: number };
+	}
+}
+
+// Disabled in the example (no PostHog/GA4 keys), so every `track()` / `pageview()`
+// below is a safe no-op. Set `disabled: false` + pass a provider config to send.
+void initAnalytics({ disabled: true });
 
 // ── Logger instance ────────────────────────────────────────────
 const logger = Logger.getLogger("[Dashboard]");
@@ -62,7 +88,7 @@ const logger = Logger.getLogger("[Dashboard]");
 const sessionId = getRequestId();
 
 // ── HQ coordinates (Oakland Supply Depot) ──────────────────────
-const HQ = { lat: 37.8044, lng: -122.2712 };
+const HQ = { lat: toLatitude(37.8044), lng: toLongitude(-122.2712) };
 
 // ── Fleet data ─────────────────────────────────────────────────
 const assets = [
@@ -139,6 +165,11 @@ export function App() {
 	const [tab, setTab] = useState("overview");
 	const [refreshCount, setRefreshCount] = useState(0);
 
+	// @resq-systems/analytics — record a page view on mount (no-op while disabled).
+	useEffect(() => {
+		pageview();
+	}, []);
+
 	// ── @resq-systems/helpers — type guard ────────────────────────────
 	const activeCount = assets.filter((a) => {
 		const bat = a.battery;
@@ -152,7 +183,9 @@ export function App() {
 		() =>
 			assets.map((a) => ({
 				id: a.id,
-				distKm: Distance.haversine(HQ, { lat: a.lat, lng: a.lng }).toFixed(1),
+				distKm: Distance.haversine(HQ, { lat: toLatitude(a.lat), lng: toLongitude(a.lng) }).toFixed(
+					1,
+				),
 			})),
 		[],
 	);
@@ -160,7 +193,7 @@ export function App() {
 	// ── @resq-systems/dsa — PriorityQueue for mission priority ────────
 	const missionQueue = useMemo(() => {
 		const pq = new PriorityQueue<{ id: string; urgency: number; label: string }>({
-			compare: (a, b) => a.urgency - b.urgency,
+			compareFn: (a, b) => a.urgency - b.urgency,
 		});
 		pq.enqueue({ id: "DRN-003", urgency: 0, label: "CRITICAL — RTB low battery" });
 		pq.enqueue({ id: "DRN-005", urgency: 1, label: "HIGH — Thermal anomaly detected" });
@@ -173,7 +206,7 @@ export function App() {
 
 	// ── @resq-systems/dsa — BloomFilter for processed alerts ──────────
 	const processedAlerts = useMemo(() => {
-		const bf = new BloomFilter({ expectedItems: 100, falsePositiveRate: 0.01 });
+		const bf = new BloomFilter(100, toProbability(0.01));
 		bf.add("DRN-003-LOW-BAT");
 		bf.add("DRN-005-THERMAL");
 		return bf;
@@ -188,6 +221,8 @@ export function App() {
 	const handleRefresh = () => {
 		throttledRefresh();
 		setRefreshCount((c) => c + 1);
+		// @resq-systems/analytics — type-checked against the AnalyticsEvents registry.
+		track("fleet_refreshed", { count: assets.length });
 		logger.info("Refresh clicked", { count: refreshCount + 1 });
 	};
 
@@ -203,6 +238,16 @@ export function App() {
 					<Badge variant="outline" className="font-mono text-xs">
 						{platform}
 					</Badge>
+					{/* @resq-systems/constants — design tokens drive this status dot */}
+					<span
+						aria-hidden
+						style={{
+							width: 8,
+							height: 8,
+							borderRadius: radii.full,
+							backgroundColor: colors.hex.success,
+						}}
+					/>
 					<Badge variant="default">System Online</Badge>
 					<Button variant="outline" size="sm" onClick={handleRefresh}>
 						Refresh

@@ -24,7 +24,17 @@
  * Location data is loosely based on the San Francisco Bay Area.
  */
 
-import { Graph, Distance, PriorityQueue, BloomFilter, Trie } from "@resq-systems/dsa";
+import {
+	BloomFilter,
+	type Coordinates2D,
+	Distance,
+	Graph,
+	PriorityQueue,
+	toLatitude,
+	toLongitude,
+	toProbability,
+	Trie,
+} from "@resq-systems/dsa";
 
 // ──────────────────────────────────────────────
 // 1. LOCATION DATA — GPS coordinates of key sites
@@ -58,6 +68,21 @@ const locations: Record<string, Location> = {
 	},
 };
 
+// dsa v2 brands geographic coordinates (`Latitude`/`Longitude`), so lift a raw
+// `Location`'s GPS numbers into a validated `Coordinates2D` at the call boundary.
+// The A* heuristic calls this on the same static `Location` objects many times,
+// so memoize the (schema-validated) result per location in a `WeakMap` instead
+// of re-running validation on every hot-loop invocation.
+const coordCache = new WeakMap<Location, Coordinates2D>();
+const coord = (l: Location): Coordinates2D => {
+	let cached = coordCache.get(l);
+	if (!cached) {
+		cached = { lat: toLatitude(l.lat), lng: toLongitude(l.lng) };
+		coordCache.set(l, cached);
+	}
+	return cached;
+};
+
 // ──────────────────────────────────────────────
 // 2. HAVERSINE DISTANCE — real distances between sites
 // ──────────────────────────────────────────────
@@ -72,7 +97,7 @@ console.log("── Section 1: Distance Calculations ──\n");
 const depot = locations["Supply-Depot"]!;
 for (const [id, loc] of Object.entries(locations)) {
 	if (id === "Supply-Depot") continue;
-	const km = Distance.haversine(depot, loc);
+	const km = Distance.haversine(coord(depot), coord(loc));
 	console.log(`  ${depot.name} → ${loc.name}: ${km.toFixed(2)} km`);
 }
 
@@ -105,7 +130,7 @@ const corridors: [string, string][] = [
 for (const [from, to] of corridors) {
 	const a = locations[from]!;
 	const b = locations[to]!;
-	const weight = Distance.haversine(a, b);
+	const weight = Distance.haversine(coord(a), coord(b));
 	routeGraph.addEdge(from, to, weight);
 }
 
@@ -126,7 +151,7 @@ for (const hId of hospitalIds) {
 // A* search with haversine heuristic
 console.log("  A* search (Supply Depot → Golden Gate Park Shelter):");
 const astarResult = routeGraph.astar("Supply-Depot", "Shelter-C", (a, b) => {
-	return Distance.haversine(locations[a]!, locations[b]!);
+	return Distance.haversine(coord(locations[a]!), coord(locations[b]!));
 });
 if (astarResult) {
 	const names = astarResult.path.map((id) => locations[id]!.name);
@@ -215,7 +240,7 @@ while (!rescueQueue.isEmpty) {
 console.log("\n── Section 4: Aerial Survey Tracker (BloomFilter) ──\n");
 
 // Divide the affected area into a grid of ~100 zones
-const surveyFilter = new BloomFilter(100, 0.01);
+const surveyFilter = new BloomFilter(100, toProbability(0.01));
 
 // Simulate surveying some zones
 const surveyedZones = [
