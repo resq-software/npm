@@ -29,6 +29,9 @@
 #   0  Sync succeeded or files are in sync (--check mode).
 #   1  Mismatch found or sync failed.
 
+# Ensure the script always runs from the repository root so git pathspecs match correctly
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
 set -euo pipefail
 
 # SCRIPT_DIR stores the absolute path to the directory containing this script.
