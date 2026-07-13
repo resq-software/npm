@@ -70,10 +70,18 @@ const locations: Record<string, Location> = {
 
 // dsa v2 brands geographic coordinates (`Latitude`/`Longitude`), so lift a raw
 // `Location`'s GPS numbers into a validated `Coordinates2D` at the call boundary.
-const coord = (l: Location): Coordinates2D => ({
-	lat: toLatitude(l.lat),
-	lng: toLongitude(l.lng),
-});
+// The A* heuristic calls this on the same static `Location` objects many times,
+// so memoize the (schema-validated) result per location in a `WeakMap` instead
+// of re-running validation on every hot-loop invocation.
+const coordCache = new WeakMap<Location, Coordinates2D>();
+const coord = (l: Location): Coordinates2D => {
+	let cached = coordCache.get(l);
+	if (!cached) {
+		cached = { lat: toLatitude(l.lat), lng: toLongitude(l.lng) };
+		coordCache.set(l, cached);
+	}
+	return cached;
+};
 
 // ──────────────────────────────────────────────
 // 2. HAVERSINE DISTANCE — real distances between sites

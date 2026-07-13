@@ -82,7 +82,7 @@ const server = Bun.serve({
 			if (!result.allowed) {
 				log.warn("Rate limited", { requestId, clientIp });
 				return Response.json(
-					{ error: "Too many requests", retryAfterMs: result.resetAt - Date.now() },
+					{ error: "Too many requests", retryAfterMs: Math.max(0, result.resetAt - Date.now()) },
 					{ status: 429, headers: { "x-request-id": requestId } },
 				);
 			}
