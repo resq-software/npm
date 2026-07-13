@@ -44,6 +44,9 @@ pnpm-debug.log*
 *.tsbuildinfo
 node-compile-cache/
 
+# Internal working doc (not published with the package)
+packages/email-templates/EMAIL_CONTENT_AND_LEGAL_GUIDE.md
+
 # TypeDoc
 docs/
 

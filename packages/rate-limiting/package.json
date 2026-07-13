@@ -1,6 +1,6 @@
 {
 	"name": "@resq-systems/rate-limiting",
-	"version": "0.4.0",
+	"version": "0.4.1",
 	"description": "Rate limiting algorithms, throttle/debounce utilities, and HTTP middleware",
 	"license": "Apache-2.0",
 	"type": "module",
@@ -22,8 +22,8 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@resq-systems/dsa": "workspace:*",
-		"@resq-systems/types": "workspace:*"
+		"@resq-systems/dsa": "^2.0.0",
+		"@resq-systems/types": "^0.1.0"
 	},
 	"peerDependencies": {
 		"effect": ">=4.0.0-beta.78",

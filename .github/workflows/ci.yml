@@ -44,16 +44,29 @@ jobs:
             BASE="HEAD~1"
           fi
 
-          # Dependency graph: when a package changes, include its dependents
+          # Dependency graph: when a package changes, also build+test the
+          # packages that depend on it. Derived from each package's internal
+          # `@resq-systems/*` deps (dependencies + peer + dev) so it can never
+          # drift out of date as packages are added or rewired.
           declare -A DEPENDENTS
-          DEPENDENTS[logger]="helpers"
-          DEPENDENTS[helpers]=""
-          DEPENDENTS[dsa]=""
-          DEPENDENTS[http]=""
-          DEPENDENTS[security]=""
-          DEPENDENTS[rate-limiting]=""
-          DEPENDENTS[decorators]=""
-          DEPENDENTS[ui]=""
+          # The `${...}` inside the single-quoted `node -e` script below is JS,
+          # not shell, so it is meant to stay literal — SC2016 is a false positive.
+          # shellcheck disable=SC2016
+          while IFS=$'\t' read -r consumer dep; do
+            DEPENDENTS[$dep]="${DEPENDENTS[$dep]:-} $consumer"
+          done < <(node -e '
+            const fs = require("node:fs");
+            for (const dir of fs.readdirSync("packages")) {
+              const manifest = `packages/${dir}/package.json`;
+              if (!fs.existsSync(manifest)) continue;
+              const pkg = JSON.parse(fs.readFileSync(manifest, "utf8"));
+              const deps = { ...pkg.dependencies, ...pkg.peerDependencies, ...pkg.devDependencies };
+              for (const name of Object.keys(deps)) {
+                const m = name.match(/^@resq-systems\/(.+)$/);
+                if (m && m[1] !== dir) process.stdout.write(`${dir}\t${m[1]}\n`);
+              }
+            }
+          ')
 
           CHANGED=()
           for dir in packages/*/; do
@@ -130,6 +143,8 @@ jobs:
       - name: Biome
         run: bunx biome ci .
         working-directory: packages/ui
+      - name: "No workspace: protocol in published deps"
+        run: node scripts/check-no-workspace-protocol.mjs
 
   # ── Build all changed packages ────────────────────────────────────────
 

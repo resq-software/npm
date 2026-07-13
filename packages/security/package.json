@@ -1,6 +1,6 @@
 {
 	"name": "@resq-systems/security",
-	"version": "1.0.1",
+	"version": "1.0.3",
 	"description": "Security utilities: encryption, input validation, schemas, and PII sanitization",
 	"license": "Apache-2.0",
 	"type": "module",
@@ -80,7 +80,7 @@
 		"node": ">=20.19.0"
 	},
 	"dependencies": {
-		"@resq-systems/types": "workspace:*",
+		"@resq-systems/types": "^0.1.0",
 		"dompurify": "^3.4.11"
 	}
 }

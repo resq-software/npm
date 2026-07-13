@@ -1,5 +1,12 @@
 <!--
 
+## 0.4.1
+### Patch Changes
+
+
+
+- [#179](https://github.com/resq-software/npm/pull/179) [`4a8cf9a`](https://github.com/resq-software/npm/commit/4a8cf9a1d0b8d76e9c380067c446a209117032a2) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Replace `workspace:*` internal dependency ranges with concrete semver so published packages install cleanly outside the monorepo
+
 ## 0.4.0
 ### Minor Changes
 

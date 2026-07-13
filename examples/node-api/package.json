@@ -7,10 +7,12 @@
 		"dev": "bun run src/server.ts"
 	},
 	"dependencies": {
+		"@resq-systems/decorators": "workspace:*",
 		"@resq-systems/http": "workspace:*",
 		"@resq-systems/logger": "workspace:*",
 		"@resq-systems/rate-limiting": "workspace:*",
 		"@resq-systems/security": "workspace:*",
+		"@resq-systems/types": "workspace:*",
 		"@types/bun": "^1.3.14"
 	}
 }

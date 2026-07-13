@@ -30,7 +30,7 @@ body:
 description: Report a bug trying to run the code
 
 labels:
-  - "type: bug"
+  - "C-Bug"
 
 name: 🐛 Bug
 
