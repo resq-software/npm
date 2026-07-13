@@ -42,6 +42,7 @@ pnpm-debug.log*
 .eslintcache
 .prettiercache
 *.tsbuildinfo
+node-compile-cache/
 
 # TypeDoc
 docs/
