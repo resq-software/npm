@@ -340,7 +340,7 @@
 	"dependencies": {
 		"@base-ui/react": "^1.6.0",
 		"@phosphor-icons/react": "^2.1.10",
-		"@resq-systems/types": "workspace:*",
+		"@resq-systems/types": "^0.1.0",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"cmdk": "^1.1.1",
@@ -360,7 +360,7 @@
 		"@biomejs/biome": "^2.5.3",
 		"@chromatic-com/storybook": "^5.2.1",
 		"@github-ui/storybook-addon-performance-panel": "^1.1.4",
-		"@resq-systems/constants": "workspace:*",
+		"@resq-systems/constants": "^0.3.1",
 		"@storybook/addon-a11y": "^10.5.0",
 		"@storybook/addon-docs": "^10.5.0",
 		"@storybook/addon-links": "^10.5.0",

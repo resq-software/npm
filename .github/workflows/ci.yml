@@ -130,6 +130,8 @@ jobs:
       - name: Biome
         run: bunx biome ci .
         working-directory: packages/ui
+      - name: "No workspace: protocol in published deps"
+        run: node scripts/check-no-workspace-protocol.mjs
 
   # ── Build all changed packages ────────────────────────────────────────
 
