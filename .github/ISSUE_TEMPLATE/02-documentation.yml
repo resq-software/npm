@@ -22,7 +22,7 @@ body:
 description: Report a typo or missing area of documentation
 
 labels:
-  - "area: documentation"
+  - "C-Documentation"
 
 name: 📝 Documentation
 
