@@ -1,6 +1,6 @@
 {
 	"name": "@resq-systems/security",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Security utilities: encryption, input validation, schemas, and PII sanitization",
 	"license": "Apache-2.0",
 	"type": "module",

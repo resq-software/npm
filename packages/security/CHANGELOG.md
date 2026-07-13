@@ -1,5 +1,14 @@
 <!--
 
+## 1.0.4
+### Patch Changes
+
+
+
+- [#187](https://github.com/resq-software/npm/pull/187) [`e6c5ac8`](https://github.com/resq-software/npm/commit/e6c5ac81648a5d681961d13e7faa01982b08d478) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Accept Punycode/IDN TLDs in EmailSchema / isValidEmail
+
+  `EmailSchema` (and `isValidEmail`) previously rejected valid internationalized domains whose TLD is Punycode-encoded (e.g. `user@example.xn--p1ai` for `.рф`). The TLD pattern now also accepts an `xn--…` label. Structural rejections (no `@`, empty domain, disallowed local-part characters) are unchanged. Kept in sync with `@resq-systems/email-templates`'s `EmailAddress` brand.
+
 ## 1.0.3
 ### Patch Changes
 

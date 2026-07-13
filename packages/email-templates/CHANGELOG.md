@@ -1,5 +1,16 @@
 <!--
 
+## 0.6.0
+### Minor Changes
+
+
+
+- [#187](https://github.com/resq-software/npm/pull/187) [`e6c5ac8`](https://github.com/resq-software/npm/commit/e6c5ac81648a5d681961d13e7faa01982b08d478) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Validate and brand the recipient address at the mailer boundary
+
+  `createMailer`, `decodeEmailPayload`, `renderEmail`, and `sendEmail` now decode each payload's `to` through a branded `EmailAddress` schema (exported from the package root) instead of a bare `Schema.String`. A malformed address — or one carrying the CR/LF that underpins SMTP header injection (e.g. `"ok@example.com\r\nBcc: attacker@evil"`) — is rejected with `EmailValidationError` at the decode boundary, and the validated recipient carries the `EmailAddress` brand through to `RenderedEmail["to"]`. Also replaces the opaque `decodeUnknownExit` cast with the shared `Schema.Codec<Payload, unknown, never>` idiom used across the workspace.
+
+  BREAKING: a `to` that is not a syntactically valid email now fails validation instead of passing through; `RenderedEmail["to"]` and the decoded payload `to` narrow from `string` to the branded `EmailAddress`.
+
 ## 0.5.1
 ### Patch Changes
 
