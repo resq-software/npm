@@ -44,8 +44,9 @@ const PUBLISHED_FIELDS = ["dependencies", "peerDependencies", "optionalDependenc
 
 const violations = [];
 
-for (const entry of readdirSync(PACKAGES_DIR)) {
-	const manifestPath = join(PACKAGES_DIR, entry, "package.json");
+for (const entry of readdirSync(PACKAGES_DIR, { withFileTypes: true })) {
+	if (!entry.isDirectory()) continue;
+	const manifestPath = join(PACKAGES_DIR, entry.name, "package.json");
 	if (!existsSync(manifestPath)) continue;
 
 	const pkg = JSON.parse(readFileSync(manifestPath, "utf8"));
@@ -54,7 +55,7 @@ for (const entry of readdirSync(PACKAGES_DIR)) {
 	for (const field of PUBLISHED_FIELDS) {
 		for (const [dep, range] of Object.entries(pkg[field] ?? {})) {
 			if (String(range).startsWith("workspace:")) {
-				violations.push(`packages/${entry}/package.json → ${field}.${dep} = "${range}"`);
+				violations.push(`packages/${entry.name}/package.json → ${field}.${dep} = "${range}"`);
 			}
 		}
 	}
