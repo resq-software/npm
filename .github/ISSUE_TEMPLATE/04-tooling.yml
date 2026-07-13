@@ -24,7 +24,7 @@ body:
 description: Report a bug or request an enhancement in repository tooling
 
 labels:
-  - "area: tooling"
+  - "C-Chore"
 
 name: 🛠 Tooling
 
