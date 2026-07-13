@@ -20,11 +20,14 @@
  * Run with `bun run index.ts` (after `bun run build` for @resq-systems/email-templates).
  */
 
-import { type EmailPayload, renderEmail } from "@resq-systems/email-templates";
+import { renderEmail } from "@resq-systems/email-templates";
 // Sending is server-only and needs `resend` + RESEND_API_KEY:
 // import { createResendSender, sendEmail } from "@resq-systems/email-templates/send";
 
-const payload: EmailPayload = {
+// `renderEmail` accepts raw input and validates/brands it at the boundary
+// (the recipient becomes a branded `EmailAddress`), so pass the plain payload —
+// exactly what a queue worker deserializing JSON would have.
+const payload = {
 	name: "incident-alert",
 	to: "oncall@resq.software",
 	data: {

@@ -61,10 +61,10 @@ const server = Bun.serve({
 			const clientIp = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
 			const result = await rateLimiter.check(clientIp, RATE_LIMIT_WINDOW_MS, RATE_LIMIT_MAX);
 
-			if (result.limited) {
+			if (!result.allowed) {
 				log.warn("Rate limited", { requestId, clientIp });
 				return Response.json(
-					{ error: "Too many requests", retryAfterMs: result.resetTime - Date.now() },
+					{ error: "Too many requests", retryAfterMs: result.resetAt - Date.now() },
 					{ status: 429, headers: { "x-request-id": requestId } },
 				);
 			}
@@ -82,7 +82,7 @@ const server = Bun.serve({
 
 		// GET /api/token — generate a secure random token
 		if (url.pathname === "/api/token" && req.method === "GET") {
-			const token = generateSecureToken(32);
+			const token = generateSecureToken();
 			log.info("Token generated", { requestId });
 			return Response.json({ token }, { headers: { "x-request-id": requestId } });
 		}

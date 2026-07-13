@@ -34,7 +34,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@resq-systems/ui/tabs";
 
 // ── @resq-systems/dsa — Distance + PriorityQueue + BloomFilter ─────
-import { Distance, BloomFilter, PriorityQueue } from "@resq-systems/dsa";
+import {
+	BloomFilter,
+	Distance,
+	PriorityQueue,
+	toLatitude,
+	toLongitude,
+	toProbability,
+} from "@resq-systems/dsa";
 
 // ── @resq-systems/helpers — Formatting + type guards ────────────────
 import { capitalize, truncate } from "@resq-systems/helpers/formatting";
@@ -62,7 +69,7 @@ const logger = Logger.getLogger("[Dashboard]");
 const sessionId = getRequestId();
 
 // ── HQ coordinates (Oakland Supply Depot) ──────────────────────
-const HQ = { lat: 37.8044, lng: -122.2712 };
+const HQ = { lat: toLatitude(37.8044), lng: toLongitude(-122.2712) };
 
 // ── Fleet data ─────────────────────────────────────────────────
 const assets = [
@@ -152,7 +159,9 @@ export function App() {
 		() =>
 			assets.map((a) => ({
 				id: a.id,
-				distKm: Distance.haversine(HQ, { lat: a.lat, lng: a.lng }).toFixed(1),
+				distKm: Distance.haversine(HQ, { lat: toLatitude(a.lat), lng: toLongitude(a.lng) }).toFixed(
+					1,
+				),
 			})),
 		[],
 	);
@@ -160,7 +169,7 @@ export function App() {
 	// ── @resq-systems/dsa — PriorityQueue for mission priority ────────
 	const missionQueue = useMemo(() => {
 		const pq = new PriorityQueue<{ id: string; urgency: number; label: string }>({
-			compare: (a, b) => a.urgency - b.urgency,
+			compareFn: (a, b) => a.urgency - b.urgency,
 		});
 		pq.enqueue({ id: "DRN-003", urgency: 0, label: "CRITICAL — RTB low battery" });
 		pq.enqueue({ id: "DRN-005", urgency: 1, label: "HIGH — Thermal anomaly detected" });
@@ -173,7 +182,7 @@ export function App() {
 
 	// ── @resq-systems/dsa — BloomFilter for processed alerts ──────────
 	const processedAlerts = useMemo(() => {
-		const bf = new BloomFilter({ expectedItems: 100, falsePositiveRate: 0.01 });
+		const bf = new BloomFilter(100, toProbability(0.01));
 		bf.add("DRN-003-LOW-BAT");
 		bf.add("DRN-005-THERMAL");
 		return bf;
