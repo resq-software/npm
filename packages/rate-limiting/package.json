@@ -22,8 +22,8 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@resq-systems/dsa": "workspace:*",
-		"@resq-systems/types": "workspace:*"
+		"@resq-systems/dsa": "^2.0.0",
+		"@resq-systems/types": "^0.1.0"
 	},
 	"peerDependencies": {
 		"effect": ">=4.0.0-beta.78",
