@@ -14,12 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# agent-sync.sh - Synchronize AGENTS.md and CLAUDE.md files.
+# agent-sync.sh - Synchronize package-level AGENTS.md and CLAUDE.md files.
 #
 # Usage:
 #   ./agent-sync.sh              # Sync AGENTS.md -> CLAUDE.md (AGENTS.md is source)
 #   ./agent-sync.sh --check      # Verify sync status without making changes.
 #   ./agent-sync.sh --reverse    # Sync CLAUDE.md -> AGENTS.md (CLAUDE.md is source).
+#
+# The repo-root pair is intentionally excluded: root CLAUDE.md is the canonical,
+# dominant file (it imports @./AGENTS.md and adds Claude-specific sections), so
+# the sync only manages package-level files under */.
 #
 # Exit codes:
 #   0  Sync succeeded or files are in sync (--check mode).
@@ -60,7 +64,9 @@ FOUND=0
 SYNCED=0
 MISMATCH=0
 
-# Use git ls-files to find all SOURCE_FILE instances, including untracked ones.
+# Use git ls-files to find all package-level SOURCE_FILE instances (untracked
+# ones included). The bare repo-root path is omitted so the dominant root
+# CLAUDE.md is never overwritten by the sync.
 while IFS= read -r -d '' source_path; do
     dir=$(dirname "$source_path")
     target_path="$dir/$TARGET_FILE"
@@ -82,7 +88,7 @@ while IFS= read -r -d '' source_path; do
             echo "  $source_path -> $target_path"
         fi
     fi
-done < <(git ls-files -z -c -o --exclude-standard "*/$SOURCE_FILE" "$SOURCE_FILE")
+done < <(git ls-files -z -c -o --exclude-standard "*/$SOURCE_FILE")
 
 if [[ "$CHECK_MODE" == "true" ]]; then
     echo ""
