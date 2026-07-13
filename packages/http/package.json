@@ -27,7 +27,7 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@resq-systems/types": "workspace:*"
+		"@resq-systems/types": "^0.1.0"
 	},
 	"peerDependencies": {
 		"effect": ">=4.0.0-beta.78",
