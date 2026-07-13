@@ -43,6 +43,18 @@
   color: "b60205"
   description: Breaking change to the API or behavior
 
+- name: "C-Chore"
+  color: "ededed"
+  description: "Chore: deps, tooling, or config with no public API change"
+
+- name: "C-Design"
+  color: "d4c5f9"
+  description: Design assets and tokens
+
+- name: "C-Testing"
+  color: "c2e0c6"
+  description: Tests and test tooling
+
 # --- Priority (P-) ---
 - name: "P0: critical"
   color: "b60205"
@@ -60,14 +72,30 @@
   color: "0e8a16"
   description: "Minor impact — fix when convenient"
 
-# --- Area (A-) ---
+# --- Area (A-) --- (path-based, applied by .github/labeler.yml) ---
 - name: "A-TypeScript"
   color: "3178c6"
   description: TypeScript/JavaScript code
 
-- name: "A-DevOps"
+- name: "A-CI"
   color: "000000"
-  description: "CI/CD and tooling"
+  description: "CI/CD, workflows, actions, and git hooks"
+
+- name: "A-Build"
+  color: "5319e7"
+  description: "Build configuration (tsdown, tsconfig)"
+
+- name: "A-Storybook"
+  color: "ff4785"
+  description: "Storybook stories and configuration"
+
+- name: "A-Examples"
+  color: "1d76db"
+  description: "Example applications under examples/"
+
+- name: "A-Effect"
+  color: "8250df"
+  description: "Effect-based code (Schema, fetchers, mailer)"
 
 # --- Package scope (pkg:) ---
 # Applied by .github/labeler.yml based on which packages/<name>/ changed.
