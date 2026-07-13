@@ -46,6 +46,22 @@
   - changed-files:
     - any-glob-to-any-file: packages/rate-limiting/**/*
 
+"pkg:analytics":
+  - changed-files:
+    - any-glob-to-any-file: packages/analytics/**/*
+
+"pkg:constants":
+  - changed-files:
+    - any-glob-to-any-file: packages/constants/**/*
+
+"pkg:email-templates":
+  - changed-files:
+    - any-glob-to-any-file: packages/email-templates/**/*
+
+"pkg:types":
+  - changed-files:
+    - any-glob-to-any-file: packages/types/**/*
+
 # ── Area labels ─────────────────────────────────────────────────────────
 
 "A-CI":
@@ -79,6 +95,8 @@
       - packages/http/src/fetcher.ts
       - packages/rate-limiting/src/**/*
       - packages/security/src/**/*
+      - packages/email-templates/src/schemas.ts
+      - packages/email-templates/src/mailer.tsx
 
 # ── Category labels ─────────────────────────────────────────────────────
 

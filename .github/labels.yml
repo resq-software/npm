@@ -69,6 +69,56 @@
   color: "000000"
   description: "CI/CD and tooling"
 
+# --- Package scope (pkg:) ---
+# Applied by .github/labeler.yml based on which packages/<name>/ changed.
+- name: "pkg:analytics"
+  color: "c5def5"
+  description: "Changes to @resq-systems/analytics"
+
+- name: "pkg:constants"
+  color: "c5def5"
+  description: "Changes to @resq-systems/constants"
+
+- name: "pkg:decorators"
+  color: "c5def5"
+  description: "Changes to @resq-systems/decorators"
+
+- name: "pkg:dsa"
+  color: "c5def5"
+  description: "Changes to @resq-systems/dsa"
+
+- name: "pkg:email-templates"
+  color: "c5def5"
+  description: "Changes to @resq-systems/email-templates"
+
+- name: "pkg:helpers"
+  color: "c5def5"
+  description: "Changes to @resq-systems/helpers"
+
+- name: "pkg:http"
+  color: "c5def5"
+  description: "Changes to @resq-systems/http"
+
+- name: "pkg:logger"
+  color: "c5def5"
+  description: "Changes to @resq-systems/logger"
+
+- name: "pkg:rate-limiting"
+  color: "c5def5"
+  description: "Changes to @resq-systems/rate-limiting"
+
+- name: "pkg:security"
+  color: "c5def5"
+  description: "Changes to @resq-systems/security"
+
+- name: "pkg:types"
+  color: "c5def5"
+  description: "Changes to @resq-systems/types"
+
+- name: "pkg:ui"
+  color: "c5def5"
+  description: "Changes to @resq-systems/ui"
+
 # --- Dependency automation ---
 - name: "dependencies"
   color: "0366d6"
