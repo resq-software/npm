@@ -15,20 +15,27 @@ bun --filter @resq-systems/<pkg> test     # Single package
 
 ## Architecture
 
+Each package has its own `AGENTS.md` (and synced `CLAUDE.md`) with package-specific commands, structure, and rules.
+
 | Package | Purpose | Deps |
 |---------|---------|------|
-| `@resq-systems/ui` | React component library (Radix + Tailwind v4, 57 components) | radix-ui, tailwindcss |
-| `@resq-systems/dsa` | Data structures and algorithms (graph, heap, trie, bloom, etc.) | **zero deps** |
-| `@resq-systems/helpers` | Utilities, type guards, result types, formatting | @resq-systems/logger |
-| `@resq-systems/http` | Effect-based HTTP client with retry, timeout, schema validation | effect |
-| `@resq-systems/logger` | Structured logging with levels and decorators | **zero deps** |
+| `@resq-systems/ui` | shadcn-based design system (Radix + base-ui + Tailwind v4) | radix-ui, base-ui, recharts; react, tailwindcss (peers) |
+| `@resq-systems/analytics` | Unified PostHog + GA4 client — cross-subdomain, lazy-loaded, typed events | @resq-systems/types; posthog-js, react (peers) |
+| `@resq-systems/dsa` | Data structures and algorithms (graph, heap, trie, bloom, LRU, count-min, etc.) | **zero deps** (effect peer for `./schemas`) |
+| `@resq-systems/helpers` | Utilities, type guards, result types, formatting, async tasks | @resq-systems/logger, @resq-systems/types, tinyqueue |
+| `@resq-systems/http` | Effect-based HTTP client with retry, timeout, schema validation | @resq-systems/types; effect, @effect/platform-bun (peers) |
+| `@resq-systems/logger` | Structured logging with levels and decorators (Node + Bun) | **zero deps** |
 | `@resq-systems/decorators` | TypeScript method/class decorators (memoize, throttle, bind, etc.) | **zero deps** |
-| `@resq-systems/security` | Encryption, input validation, PII sanitization | effect (peer) |
-| `@resq-systems/rate-limiting` | Token bucket, leaky bucket, sliding window, throttle/debounce | effect, @upstash/ratelimit (peers) |
+| `@resq-systems/security` | Encryption, input validation, PII sanitization | @resq-systems/types, dompurify; effect, jsdom (peers) |
+| `@resq-systems/rate-limiting` | Token bucket, leaky bucket, sliding window, throttle/debounce | @resq-systems/dsa, @resq-systems/types; effect, @upstash/* (peers) |
+| `@resq-systems/constants` | Design tokens (oklch + email-safe hex), brand identity, cross-app values | **zero deps** |
+| `@resq-systems/email-templates` | Type-safe transactional emails (Effect Schema + React Email + optional Resend) | @resq-systems/constants, @react-email/*; effect, react, resend (peers) |
+| `@resq-systems/types` | Advanced TypeScript type toolkit (nominal brands, deep utils, type-test kit) | **zero deps** |
 
 ## Key Rules
 
 - `@resq-systems/dsa` must have **zero runtime deps**. Effect is a peer dep for optional schemas only.
+- Zero-runtime-dep packages: `dsa`, `logger`, `decorators`, `constants`, `types`. Don't add dependencies to these.
 - `@resq-systems/ui` uses **dark-first oklch color system** with WCAG AA contrast.
 - All packages must be **tree-shakeable** with subpath exports.
 - **Zero `any`** — strict TypeScript throughout.
