@@ -26,6 +26,8 @@
 import type { CompiledExpr } from "./ast.js";
 import {
 	DomainError,
+	ExecutionLimitError,
+	RecursionLimitError,
 	SortError,
 	StackError,
 	UnboundVariableError,
@@ -47,149 +49,205 @@ import { asBool, asFunc, asNum, asRecord, bool, func, num } from "./value.js";
 /** An environment mapping free/global variables to values. */
 export type Env = ReadonlyMap<string, Value>;
 
+/** Options to configure execution boundaries and limits. */
+export interface EvaluateOptions {
+	readonly maxDepth?: number;
+	readonly maxSteps?: number;
+}
+
+interface EvalContext {
+	depth: number;
+	steps: number;
+	readonly maxDepth: number;
+	readonly maxSteps: number;
+}
+
 /**
  * Evaluate a compiled expression to a concrete {@link Value}.
  *
  * @param expr - The compiled expression to evaluate.
  * @param env - Global free variables. Defaults to empty.
  * @param stack - The stack of active bound lexical variables (top at the end).
+ * @param options - Configure step and depth limits to prevent DoS.
  * @returns The computed value.
  *
  * @throws {@link UnboundVariableError} if a free variable is missing in `env`.
  * @throws {@link UndefinedOpError} if no operator instance matches the types.
  * @throws {@link DomainError} if runtime boundaries (div-by-zero etc) are violated.
+ * @throws {@link ExecutionLimitError} if execution steps exceed maxSteps.
+ * @throws {@link RecursionLimitError} if recursion depth exceeds maxDepth.
  */
 export const evaluate = (
 	expr: CompiledExpr,
 	env: Env = new Map(),
 	stack: readonly Value[] = [],
+	options?: EvaluateOptions,
 ): Value => {
-	switch (expr.kind) {
-		case "lit":
-			return expr.value;
+	const ctx: EvalContext = {
+		depth: 0,
+		steps: 0,
+		maxDepth: options?.maxDepth ?? 200,
+		maxSteps: options?.maxSteps ?? 10000,
+	};
+	const mutStack = [...stack];
+	return evaluateInternal(expr, env, mutStack, ctx);
+};
 
-		case "free_var": {
-			const val = env.get(expr.name);
-			if (val === undefined) throw new UnboundVariableError(expr.name);
-			return val;
-		}
+const evaluateInternal = (
+	expr: CompiledExpr,
+	env: Env,
+	stack: Value[],
+	ctx: EvalContext,
+): Value => {
+	ctx.steps++;
+	if (ctx.steps > ctx.maxSteps) {
+		throw new ExecutionLimitError(ctx.maxSteps);
+	}
+	ctx.depth++;
+	if (ctx.depth > ctx.maxDepth) {
+		throw new RecursionLimitError(ctx.maxDepth);
+	}
 
-		case "bound_var": {
-			const idx = stack.length - 1 - expr.index;
-			if (idx < 0 || idx >= stack.length) {
-				throw new StackError(expr.index, stack.length);
-			}
-			return stack[idx]!;
-		}
+	try {
+		switch (expr.kind) {
+			case "lit":
+				return expr.value;
 
-		case "unary": {
-			const arg = evaluate(expr.arg, env, stack);
-			const key = encodeUnary(expr.op, arg.sort);
-			const impl = lookupUnary(key);
-			if (!impl) throw new UndefinedOpError(expr.op, [arg.sort]);
-			return impl(arg);
-		}
-
-		case "binary": {
-			const left = evaluate(expr.left, env, stack);
-			const right = evaluate(expr.right, env, stack);
-			const key = encodeBinary(expr.op, left.sort, right.sort);
-			const impl = lookupBinary(key);
-			if (!impl) throw new UndefinedOpError(expr.op, [left.sort, right.sort]);
-			return impl(left, right);
-		}
-
-		case "relation": {
-			const left = evaluate(expr.left, env, stack);
-			const right = evaluate(expr.right, env, stack);
-			const key = encodeRel(expr.op, left.sort, right.sort);
-			const impl = lookupRel(key);
-			if (!impl) throw new UndefinedOpError(expr.op, [left.sort, right.sort]);
-			return bool(impl(left, right));
-		}
-
-		case "logic": {
-			const left = evaluate(expr.left, env, stack);
-			const right = evaluate(expr.right, env, stack);
-			const key = encodeLogic(expr.op, left.sort, right.sort);
-			const impl = lookupLogic(key);
-			if (!impl) throw new UndefinedOpError(expr.op, [left.sort, right.sort]);
-			return bool(impl(left, right));
-		}
-
-		case "binder": {
-			const domain = evaluate(expr.domain, env, stack);
-			if (domain.sort !== "set") {
-				throw new SortError("set", domain.sort, `domain of ${expr.op}`);
+			case "free_var": {
+				const val = env.get(expr.name);
+				if (val === undefined) throw new UnboundVariableError(expr.name);
+				return val;
 			}
 
-			switch (expr.op) {
-				case "∑": {
-					let acc = 0;
-					for (const x of domain.value) {
-						const val = evaluate(expr.body, env, [...stack, num(x)]);
-						acc += asNum(val, `body of ∑`);
-					}
-					return num(acc);
+			case "bound_var": {
+				const idx = stack.length - 1 - expr.index;
+				if (idx < 0 || idx >= stack.length) {
+					throw new StackError(expr.index, stack.length);
+				}
+				return stack[idx]!;
+			}
+
+			case "unary": {
+				const arg = evaluateInternal(expr.arg, env, stack, ctx);
+				const key = encodeUnary(expr.op, arg.sort);
+				const impl = lookupUnary(key);
+				if (!impl) throw new UndefinedOpError(expr.op, [arg.sort]);
+				return impl(arg);
+			}
+
+			case "binary": {
+				const left = evaluateInternal(expr.left, env, stack, ctx);
+				const right = evaluateInternal(expr.right, env, stack, ctx);
+				const key = encodeBinary(expr.op, left.sort, right.sort);
+				const impl = lookupBinary(key);
+				if (!impl) throw new UndefinedOpError(expr.op, [left.sort, right.sort]);
+				return impl(left, right);
+			}
+
+			case "relation": {
+				const left = evaluateInternal(expr.left, env, stack, ctx);
+				const right = evaluateInternal(expr.right, env, stack, ctx);
+				const key = encodeRel(expr.op, left.sort, right.sort);
+				const impl = lookupRel(key);
+				if (!impl) throw new UndefinedOpError(expr.op, [left.sort, right.sort]);
+				return bool(impl(left, right));
+			}
+
+			case "logic": {
+				const left = evaluateInternal(expr.left, env, stack, ctx);
+				const right = evaluateInternal(expr.right, env, stack, ctx);
+				const key = encodeLogic(expr.op, left.sort, right.sort);
+				const impl = lookupLogic(key);
+				if (!impl) throw new UndefinedOpError(expr.op, [left.sort, right.sort]);
+				return bool(impl(left, right));
+			}
+
+			case "binder": {
+				const domain = evaluateInternal(expr.domain, env, stack, ctx);
+				if (domain.sort !== "set") {
+					throw new SortError("set", domain.sort, `domain of ${expr.op}`);
 				}
 
-				case "∏": {
-					let acc = 1;
-					for (const x of domain.value) {
-						const val = evaluate(expr.body, env, [...stack, num(x)]);
-						acc *= asNum(val, `body of ∏`);
+				switch (expr.op) {
+					case "∑": {
+						let acc = 0;
+						for (const x of domain.value) {
+							stack.push(num(x));
+							const val = evaluateInternal(expr.body, env, stack, ctx);
+							stack.pop();
+							acc += asNum(val, `body of ∑`);
+						}
+						return num(acc);
 					}
-					return num(acc);
-				}
 
-				case "∀": {
-					for (const x of domain.value) {
-						const val = evaluate(expr.body, env, [...stack, num(x)]);
-						if (!asBool(val, `body of ∀`)) return bool(false);
+					case "∏": {
+						let acc = 1;
+						for (const x of domain.value) {
+							stack.push(num(x));
+							const val = evaluateInternal(expr.body, env, stack, ctx);
+							stack.pop();
+							acc *= asNum(val, `body of ∏`);
+						}
+						return num(acc);
 					}
-					return bool(true);
-				}
 
-				case "∃": {
-					for (const x of domain.value) {
-						const val = evaluate(expr.body, env, [...stack, num(x)]);
-						if (asBool(val, `body of ∃`)) return bool(true);
+					case "∀": {
+						for (const x of domain.value) {
+							stack.push(num(x));
+							const val = evaluateInternal(expr.body, env, stack, ctx);
+							stack.pop();
+							if (!asBool(val, `body of ∀`)) return bool(false);
+						}
+						return bool(true);
 					}
-					return bool(false);
+
+					case "∃": {
+						for (const x of domain.value) {
+							stack.push(num(x));
+							const val = evaluateInternal(expr.body, env, stack, ctx);
+							stack.pop();
+							if (asBool(val, `body of ∃`)) return bool(true);
+						}
+						return bool(false);
+					}
 				}
+				break;
 			}
-			break;
-		}
 
-		case "cond": {
-			const test = evaluate(expr.test, env, stack);
-			const condition = asBool(test, "condition of if-then-else");
-			return condition ? evaluate(expr.then, env, stack) : evaluate(expr.else, env, stack);
-		}
-
-		case "lambda":
-			// Lexically capture the current stack in a closure
-			return func(expr.body, stack);
-
-		case "call": {
-			const fnVal = evaluate(expr.func, env, stack);
-			const argVal = evaluate(expr.arg, env, stack);
-			const { body, closure } = asFunc(fnVal, "function application");
-			// Extend stack with argument value and run compiled body
-			return evaluate(body, env, [...closure, argVal]);
-		}
-
-		case "member": {
-			const objVal = evaluate(expr.obj, env, stack);
-			const rec = asRecord(objVal, `accessing property '${expr.property}'`);
-			if (!Object.hasOwn(rec, expr.property)) {
-				throw new DomainError("member", `Property '${expr.property}' does not exist on record`);
+			case "cond": {
+				const test = evaluateInternal(expr.test, env, stack, ctx);
+				const condition = asBool(test, "condition of if-then-else");
+				return condition
+					? evaluateInternal(expr.then, env, stack, ctx)
+					: evaluateInternal(expr.else, env, stack, ctx);
 			}
-			const propVal = rec[expr.property];
-			if (propVal === undefined) {
-				throw new DomainError("member", `Property '${expr.property}' does not exist on record`);
+
+			case "lambda":
+				// Lexically capture the current stack in a closure
+				return func(expr.body, [...stack]);
+
+			case "call": {
+				const fnVal = evaluateInternal(expr.func, env, stack, ctx);
+				const argVal = evaluateInternal(expr.arg, env, stack, ctx);
+				const { body, closure } = asFunc(fnVal, "function application");
+				// Extend stack with argument value and run compiled body
+				return evaluateInternal(body, env, [...closure, argVal], ctx);
 			}
-			return propVal;
+
+			case "member": {
+				const objVal = evaluateInternal(expr.obj, env, stack, ctx);
+				const rec = asRecord(objVal, `accessing property '${expr.property}'`);
+				if (!Object.hasOwn(rec, expr.property)) {
+					throw new DomainError("member", `Property '${expr.property}' does not exist on record`);
+				}
+				const propVal = rec[expr.property];
+				if (propVal === undefined) {
+					throw new DomainError("member", `Property '${expr.property}' does not exist on record`);
+				}
+				return propVal;
+			}
 		}
+	} finally {
+		ctx.depth--;
 	}
 };

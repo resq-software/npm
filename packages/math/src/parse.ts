@@ -25,7 +25,7 @@
  */
 
 import type { BinaryOp, BinderOp, Expr, LogicOp, RelOp, UnaryOp } from "./ast.js";
-import { ParseError } from "./error.js";
+import { ParseError, RecursionLimitError } from "./error.js";
 import { bool, mkSet, num } from "./value.js";
 
 // ────────────────────────── Tokens ──────────────────────────
@@ -335,6 +335,8 @@ const FUNC_UNARY: ReadonlyMap<string, UnaryOp> = new Map([
 export function parse(input: string): Expr {
 	const tokens = tokenize(input);
 	let pos = 0;
+	let depth = 0;
+	const MAX_PARSE_DEPTH = 200;
 
 	const peek = (): Token => tokens[pos]!;
 	const advance = (): Token => tokens[pos++]!;
@@ -358,49 +360,57 @@ export function parse(input: string): Expr {
 	};
 
 	const expr = (minBp: number): Expr => {
-		let left = nud();
-
-		for (;;) {
-			const t = peek();
-
-			// Postfix: factorial
-			if (t.type === "op" && t.value === "!" && POSTFIX_BP >= minBp) {
-				advance();
-				left = { kind: "unary", op: "factorial", arg: left };
-				continue;
-			}
-
-			// Infix call application: f(arg)
-			if (t.type === "lparen" && 18 >= minBp) {
-				advance(); // consume "("
-				const arg = expr(0);
-				expect("rparen");
-				left = { kind: "call", func: left, arg };
-				continue;
-			}
-
-			// Infix member access: obj.property
-			if (t.type === "op" && t.value === "." && 20 >= minBp) {
-				advance(); // consume "."
-				const propTok = expect("ident");
-				left = { kind: "member", obj: left, property: propTok.value };
-				continue;
-			}
-
-			// Infix
-			if (t.type === "op") {
-				const bp = INFIX_BP.get(t.value);
-				if (bp === undefined || bp[0] < minBp) break;
-				advance();
-				const right = expr(bp[1]);
-				left = makeInfix(t.value, left, right);
-				continue;
-			}
-
-			break;
+		depth++;
+		if (depth > MAX_PARSE_DEPTH) {
+			throw new RecursionLimitError(MAX_PARSE_DEPTH);
 		}
+		try {
+			let left = nud();
 
-		return left;
+			for (;;) {
+				const t = peek();
+
+				// Postfix: factorial
+				if (t.type === "op" && t.value === "!" && POSTFIX_BP >= minBp) {
+					advance();
+					left = { kind: "unary", op: "factorial", arg: left };
+					continue;
+				}
+
+				// Infix call application: f(arg)
+				if (t.type === "lparen" && 18 >= minBp) {
+					advance(); // consume "("
+					const arg = expr(0);
+					expect("rparen");
+					left = { kind: "call", func: left, arg };
+					continue;
+				}
+
+				// Infix member access: obj.property
+				if (t.type === "op" && t.value === "." && 20 >= minBp) {
+					advance(); // consume "."
+					const propTok = expect("ident");
+					left = { kind: "member", obj: left, property: propTok.value };
+					continue;
+				}
+
+				// Infix
+				if (t.type === "op") {
+					const bp = INFIX_BP.get(t.value);
+					if (bp === undefined || bp[0] < minBp) break;
+					advance();
+					const right = expr(bp[1]);
+					left = makeInfix(t.value, left, right);
+					continue;
+				}
+
+				break;
+			}
+
+			return left;
+		} finally {
+			depth--;
+		}
 	};
 
 	const nud = (): Expr => {

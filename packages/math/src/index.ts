@@ -50,6 +50,8 @@ export {
 	ParseError,
 	SortError,
 	StackError,
+	ExecutionLimitError,
+	RecursionLimitError,
 	UnboundVariableError,
 	UndefinedOpError,
 } from "./error.js";

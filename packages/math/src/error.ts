@@ -133,3 +133,25 @@ export class StackError extends MathError {
 		this.depth = depth;
 	}
 }
+
+/** Thrown when evaluator execution steps exceed the configured limit. */
+export class ExecutionLimitError extends MathError {
+	readonly limit: number;
+
+	constructor(limit: number) {
+		super("EXECUTION_LIMIT", `Execution step limit exceeded: ${limit}`);
+		this.name = "ExecutionLimitError";
+		this.limit = limit;
+	}
+}
+
+/** Thrown when recursion depth exceeds the configured limit during parsing or evaluation. */
+export class RecursionLimitError extends MathError {
+	readonly limit: number;
+
+	constructor(limit: number) {
+		super("RECURSION_LIMIT", `Maximum recursion depth exceeded: ${limit}`);
+		this.name = "RecursionLimitError";
+		this.limit = limit;
+	}
+}

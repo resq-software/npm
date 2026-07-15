@@ -267,7 +267,8 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult
 		// ── Lambda ───────────────────────────────────────────
 		case "lambda": {
 			const innerCtx = new Map(ctx);
-			innerCtx.set(expr.param, "num");
+			const paramSort = ctx.get(expr.param) ?? "num";
+			innerCtx.set(expr.param, paramSort);
 			const bodyResult = checkExpr(expr.body, innerCtx);
 			if (!bodyResult.ok) return bodyResult;
 			return OK("func");

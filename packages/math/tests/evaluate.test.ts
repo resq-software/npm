@@ -18,8 +18,11 @@ import { describe, expect, it } from "vitest";
 import { evaluate as evaluateCompiled } from "../src/evaluate.js";
 import { compile } from "../src/compile.js";
 
-const evaluate = (expr: import("../src/ast.js").Expr, env?: import("../src/evaluate.js").Env) =>
-	evaluateCompiled(compile(expr), env);
+const evaluate = (
+	expr: import("../src/ast.js").Expr,
+	env?: import("../src/evaluate.js").Env,
+	options?: import("../src/evaluate.js").EvaluateOptions,
+) => evaluateCompiled(compile(expr), env, [], options);
 import {
 	N,
 	S,
@@ -74,6 +77,8 @@ import {
 	UndefinedOpError,
 	SortError,
 	StackError,
+	ExecutionLimitError,
+	RecursionLimitError,
 } from "../src/error.js";
 
 describe("Evaluator", () => {
@@ -246,6 +251,21 @@ describe("Evaluator", () => {
 		it("throws on sort errors inside control structures", () => {
 			expect(() => evaluate(sum("i", N(5), v("i")))).toThrow(SortError);
 			expect(() => evaluate(cond(N(5), N(1), N(2)))).toThrow(SortError);
+		});
+
+		it("throws RecursionLimitError on deep evaluator recursion", () => {
+			// Construct expression with nesting depth > 10
+			let expr = N(1);
+			for (let i = 0; i < 15; i++) {
+				expr = add(expr, N(1));
+			}
+			expect(() => evaluate(expr, undefined, { maxDepth: 10 })).toThrow(RecursionLimitError);
+		});
+
+		it("throws ExecutionLimitError when step limit is exceeded", () => {
+			// Construct a binder loop over 10 elements, violating maxSteps = 5
+			const expr = sum("i", S(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), v("i"));
+			expect(() => evaluate(expr, undefined, { maxSteps: 5 })).toThrow(ExecutionLimitError);
 		});
 	});
 

@@ -22,7 +22,7 @@ import { compile } from "../src/compile.js";
 const evaluate = (expr: import("../src/ast.js").Expr, env?: import("../src/evaluate.js").Env) =>
 	evaluateCompiled(compile(expr), env);
 import { num, bool, mkSet, record } from "../src/value.js";
-import { ParseError } from "../src/error.js";
+import { ParseError, RecursionLimitError } from "../src/error.js";
 
 describe("Pratt Parser", () => {
 	describe("Literals", () => {
@@ -163,6 +163,11 @@ describe("Pratt Parser", () => {
 			expect(() => parse("@")).toThrow(ParseError);
 			expect(() => parse("(2 + 3")).toThrow(ParseError);
 			expect(() => parse("sum(i in {1}, )")).toThrow(ParseError);
+		});
+
+		it("throws RecursionLimitError on deeply nested expressions", () => {
+			const nested = `${"(".repeat(250)}1${")".repeat(250)}`;
+			expect(() => parse(nested)).toThrow(RecursionLimitError);
 		});
 	});
 });
