@@ -282,13 +282,13 @@ const printUnary = (op: UnaryOp, arg: Expr, ascii: boolean, go: (e: Expr) => str
 			return `${ascii ? "not " : "¬"}${wrapIf(inner, needsWrap)}`;
 		}
 		case "sqrt":
-			return ascii ? `sqrt(${inner})` : `√(${inner})`;
+			return `sqrt(${inner})`;
 		case "abs":
-			return `|${inner}|`;
+			return `abs(${inner})`;
 		case "floor":
-			return ascii ? `floor(${inner})` : `⌊${inner}⌋`;
+			return `floor(${inner})`;
 		case "ceil":
-			return ascii ? `ceil(${inner})` : `⌈${inner}⌉`;
+			return `ceil(${inner})`;
 		case "card":
 			return `#${wrapIf(inner, exprPrec(arg) < PREC_UNARY)}`;
 		case "factorial": {
@@ -317,14 +317,8 @@ const printBinary = (
 	const leftPrec = exprPrec(left);
 	const rightPrec = exprPrec(right);
 
-	const wrapLeft =
-		op === "pow"
-			? leftPrec <= prec // right-assoc: wrap left on equal prec
-			: leftPrec < prec;
-	const wrapRight =
-		op === "pow"
-			? rightPrec < prec // right-assoc: don't wrap right on equal prec
-			: rightPrec < prec;
+	const wrapLeft = op === "pow" ? leftPrec <= prec : leftPrec < prec;
+	const wrapRight = op === "pow" ? rightPrec < prec : rightPrec <= prec;
 
 	return `${wrapIf(go(left), wrapLeft)} ${sym} ${wrapIf(go(right), wrapRight)}`;
 };
@@ -340,7 +334,7 @@ const printRel = (
 	const prec = relPrec[op];
 	const sym = ascii ? relAscii[op] : relUnicode[op];
 	const l = wrapIf(go(left), exprPrec(left) < prec);
-	const r = wrapIf(go(right), exprPrec(right) < prec);
+	const r = wrapIf(go(right), exprPrec(right) <= prec);
 	return `${l} ${sym} ${r}`;
 };
 
@@ -355,7 +349,7 @@ const printLogic = (
 	const prec = logicPrec[op];
 	const sym = ascii ? logicAscii[op] : logicUnicode[op];
 	const l = wrapIf(go(left), exprPrec(left) < prec);
-	const r = wrapIf(go(right), exprPrec(right) < prec);
+	const r = wrapIf(go(right), exprPrec(right) <= prec);
 	return `${l} ${sym} ${r}`;
 };
 

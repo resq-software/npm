@@ -87,6 +87,7 @@ const SINGLE_OPS = new Set([
 	"\\",
 	"λ",
 	".",
+	"∅",
 ]);
 
 const DOUBLE_OPS: ReadonlyMap<string, string> = new Map([
@@ -110,6 +111,7 @@ const KEYWORDS: ReadonlyMap<string, string> = new Map([
 	["diff", "∖"],
 	["symdiff", "△"],
 	["in", "∈"],
+	["notin", "∉"],
 	["subset", "⊂"],
 	["subseteq", "⊆"],
 	["sum", "∑"],
@@ -430,8 +432,11 @@ export function parse(input: string): Expr {
 			return { kind: "lit", value: mkSet(elements) };
 		}
 
-		// Unary prefix operators
+		// Unary prefix operators / operators as literals
 		if (t.type === "op") {
+			if (t.value === "∅") {
+				return { kind: "lit", value: mkSet([]) };
+			}
 			if (t.value === "\\" || t.value === "λ") {
 				const paramTok = expect("ident");
 				const param = paramTok.value;

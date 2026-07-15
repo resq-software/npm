@@ -125,11 +125,11 @@ describe("Pretty Printer", () => {
 			expect(print(card(S(1, 2)))).toBe("#{1, 2}");
 			expect(print(factorial(N(5)))).toBe("5!");
 
-			// Brackets
-			expect(print(sqrt(N(16)))).toBe("√(16)");
-			expect(print(abs(neg(N(5))))).toBe("|−5|");
-			expect(print(floor(N(3.7)))).toBe("⌊3.7⌋");
-			expect(print(ceil(N(3.2)))).toBe("⌈3.2⌉");
+			// Brackets / Functions
+			expect(print(sqrt(N(16)))).toBe("sqrt(16)");
+			expect(print(abs(neg(N(5))))).toBe("abs(−5)");
+			expect(print(floor(N(3.7)))).toBe("floor(3.7)");
+			expect(print(ceil(N(3.2)))).toBe("ceil(3.2)");
 		});
 
 		it("uses ASCII equivalents in ASCII mode", () => {

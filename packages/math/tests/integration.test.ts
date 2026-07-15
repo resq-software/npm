@@ -54,6 +54,9 @@ describe("Integration Pipeline", () => {
 			"2 ∈ {1, 2, 3}",
 			"{1} ∪ {2, 3}",
 			"2 ^ 3 ^ 2",
+			"2 notin {1, 3}",
+			"2 ∉ {1, 3}",
+			"∅",
 		];
 
 		for (const input of cases) {
