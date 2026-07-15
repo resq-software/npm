@@ -26,7 +26,7 @@
  */
 
 import type { BinaryOp, BinderOp, Expr, RelOp, UnaryOp } from "./ast.js";
-import { SortError } from "./error.js";
+import { RecursionLimitError, SortError } from "./error.js";
 import type { Sort } from "./value.js";
 
 // ────────────────────────── Public types ──────────────────────────
@@ -104,7 +104,12 @@ const fail1 = (expected: string, actual: string, context?: string): CheckResult 
  * @returns A {@link CheckResult} — either the inferred sort or an array of
  *          every {@link SortError} discovered.
  */
-export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult => {
+export const checkExpr = (expr: Expr, ctx: SortContext = new Map(), depth = 0): CheckResult => {
+	const MAX_DEPTH = 200;
+	if (depth > MAX_DEPTH) {
+		throw new RecursionLimitError(MAX_DEPTH);
+	}
+
 	switch (expr.kind) {
 		// ── Literal ──────────────────────────────────────────
 		case "lit":
@@ -121,7 +126,7 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult
 
 		// ── Unary ────────────────────────────────────────────
 		case "unary": {
-			const argResult = checkExpr(expr.arg, ctx);
+			const argResult = checkExpr(expr.arg, ctx, depth + 1);
 			if (!argResult.ok) return argResult;
 
 			const { op } = expr;
@@ -139,8 +144,8 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult
 
 		// ── Binary ───────────────────────────────────────────
 		case "binary": {
-			const leftResult = checkExpr(expr.left, ctx);
-			const rightResult = checkExpr(expr.right, ctx);
+			const leftResult = checkExpr(expr.left, ctx, depth + 1);
+			const rightResult = checkExpr(expr.right, ctx, depth + 1);
 
 			if (!leftResult.ok || !rightResult.ok) {
 				const errors: SortError[] = [];
@@ -161,8 +166,8 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult
 
 		// ── Relation ─────────────────────────────────────────
 		case "relation": {
-			const leftResult = checkExpr(expr.left, ctx);
-			const rightResult = checkExpr(expr.right, ctx);
+			const leftResult = checkExpr(expr.left, ctx, depth + 1);
+			const rightResult = checkExpr(expr.right, ctx, depth + 1);
 
 			if (!leftResult.ok || !rightResult.ok) {
 				const errors: SortError[] = [];
@@ -185,8 +190,8 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult
 
 		// ── Logic ────────────────────────────────────────────
 		case "logic": {
-			const leftResult = checkExpr(expr.left, ctx);
-			const rightResult = checkExpr(expr.right, ctx);
+			const leftResult = checkExpr(expr.left, ctx, depth + 1);
+			const rightResult = checkExpr(expr.right, ctx, depth + 1);
 
 			if (!leftResult.ok || !rightResult.ok) {
 				const errors: SortError[] = [];
@@ -207,7 +212,7 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult
 
 		// ── Binder ───────────────────────────────────────────
 		case "binder": {
-			const domainResult = checkExpr(expr.domain, ctx);
+			const domainResult = checkExpr(expr.domain, ctx, depth + 1);
 			const errors: SortError[] = [];
 
 			if (!domainResult.ok) {
@@ -220,7 +225,7 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult
 			const innerCtx = new Map(ctx);
 			innerCtx.set(expr.bound, "num");
 
-			const bodyResult = checkExpr(expr.body, innerCtx);
+			const bodyResult = checkExpr(expr.body, innerCtx, depth + 1);
 			if (!bodyResult.ok) {
 				errors.push(...bodyResult.errors);
 			} else if (BINDER_NUM.has(expr.op) && bodyResult.sort !== "num") {
@@ -236,9 +241,9 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult
 
 		// ── Conditional ──────────────────────────────────────
 		case "cond": {
-			const testResult = checkExpr(expr.test, ctx);
-			const thenResult = checkExpr(expr.then, ctx);
-			const elseResult = checkExpr(expr.else, ctx);
+			const testResult = checkExpr(expr.test, ctx, depth + 1);
+			const thenResult = checkExpr(expr.then, ctx, depth + 1);
+			const elseResult = checkExpr(expr.else, ctx, depth + 1);
 
 			// Propagate child errors first.
 			if (!testResult.ok || !thenResult.ok || !elseResult.ok) {
@@ -269,15 +274,15 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult
 			const innerCtx = new Map(ctx);
 			const paramSort = ctx.get(expr.param) ?? "num";
 			innerCtx.set(expr.param, paramSort);
-			const bodyResult = checkExpr(expr.body, innerCtx);
+			const bodyResult = checkExpr(expr.body, innerCtx, depth + 1);
 			if (!bodyResult.ok) return bodyResult;
 			return OK("func");
 		}
 
 		// ── Call ─────────────────────────────────────────────
 		case "call": {
-			const funcResult = checkExpr(expr.func, ctx);
-			const argResult = checkExpr(expr.arg, ctx);
+			const funcResult = checkExpr(expr.func, ctx, depth + 1);
+			const argResult = checkExpr(expr.arg, ctx, depth + 1);
 
 			if (!funcResult.ok || !argResult.ok) {
 				const errors: SortError[] = [];
@@ -293,7 +298,7 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult
 			if (expr.func.kind === "lambda") {
 				const innerCtx = new Map(ctx);
 				innerCtx.set(expr.func.param, argResult.sort);
-				return checkExpr(expr.func.body, innerCtx);
+				return checkExpr(expr.func.body, innerCtx, depth + 1);
 			}
 
 			// Look up call path in context (e.g. "getItem()")
@@ -308,7 +313,7 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult
 		}
 
 		case "member": {
-			const objRes = checkExpr(expr.obj, ctx);
+			const objRes = checkExpr(expr.obj, ctx, depth + 1);
 			if (!objRes.ok) return objRes;
 			if (objRes.sort !== "record") {
 				return fail1("record", objRes.sort, `accessing property '${expr.property}'`);
@@ -316,7 +321,15 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult
 
 			// Resolve sort statically from literal record values
 			if (expr.obj.kind === "lit" && expr.obj.value.sort === "record") {
-				const propVal = expr.obj.value.value[expr.property];
+				const rec = expr.obj.value.value;
+				if (!Object.hasOwn(rec, expr.property)) {
+					return fail1(
+						"existing property",
+						"undefined",
+						`property '${expr.property}' on literal record`,
+					);
+				}
+				const propVal = rec[expr.property];
 				if (propVal === undefined) {
 					return fail1(
 						"existing property",

@@ -185,9 +185,40 @@ const binaryTable = new Map<number, BinaryImpl>([
 	[encodeBinary("pow", "num", "num"), (a, b) => num(asNum(a) ** asNum(b))],
 
 	// Set operations
-	[encodeBinary("∪", "set", "set"), (a, b) => mkSet([...asSet(a), ...asSet(b)])],
-	[encodeBinary("∩", "set", "set"), (a, b) => mkSet([...asSet(a)].filter((x) => asSet(b).has(x)))],
-	[encodeBinary("∖", "set", "set"), (a, b) => mkSet([...asSet(a)].filter((x) => !asSet(b).has(x)))],
+	[
+		encodeBinary("∪", "set", "set"),
+		(a, b) => {
+			const sa = asSet(a);
+			const sb = asSet(b);
+			const res = new Set<number>(sa);
+			for (const x of sb) res.add(x);
+			return mkSet(res);
+		},
+	],
+	[
+		encodeBinary("∩", "set", "set"),
+		(a, b) => {
+			const sa = asSet(a);
+			const sb = asSet(b);
+			const res = new Set<number>();
+			for (const x of sa) {
+				if (sb.has(x)) res.add(x);
+			}
+			return mkSet(res);
+		},
+	],
+	[
+		encodeBinary("∖", "set", "set"),
+		(a, b) => {
+			const sa = asSet(a);
+			const sb = asSet(b);
+			const res = new Set<number>();
+			for (const x of sa) {
+				if (!sb.has(x)) res.add(x);
+			}
+			return mkSet(res);
+		},
+	],
 	[
 		encodeBinary("△", "set", "set"),
 		(a, b) => {
@@ -201,7 +232,16 @@ const binaryTable = new Map<number, BinaryImpl>([
 	],
 
 	// + overloaded on sets (disjoint union)
-	[encodeBinary("+", "set", "set"), (a, b) => mkSet([...asSet(a), ...asSet(b)])],
+	[
+		encodeBinary("+", "set", "set"),
+		(a, b) => {
+			const sa = asSet(a);
+			const sb = asSet(b);
+			const res = new Set<number>(sa);
+			for (const x of sb) res.add(x);
+			return mkSet(res);
+		},
+	],
 ]);
 
 const relTable = new Map<number, RelImpl>([
@@ -231,10 +271,24 @@ const relTable = new Map<number, RelImpl>([
 		(a, b) => {
 			const sa = asSet(a);
 			const sb = asSet(b);
-			return sa.size < sb.size && [...sa].every((x) => sb.has(x));
+			if (sa.size >= sb.size) return false;
+			for (const x of sa) {
+				if (!sb.has(x)) return false;
+			}
+			return true;
 		},
 	],
-	[encodeRel("⊆", "set", "set"), (a, b) => [...asSet(a)].every((x) => asSet(b).has(x))],
+	[
+		encodeRel("⊆", "set", "set"),
+		(a, b) => {
+			const sa = asSet(a);
+			const sb = asSet(b);
+			for (const x of sa) {
+				if (!sb.has(x)) return false;
+			}
+			return true;
+		},
+	],
 ]);
 
 const logicTable = new Map<number, LogicImpl>([

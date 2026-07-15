@@ -16,6 +16,7 @@
 
 import { describe, expect, it } from "vitest";
 import { print } from "../src/print.js";
+import { RecursionLimitError } from "../src/error.js";
 import {
 	N,
 	S,
@@ -214,6 +215,14 @@ describe("Pretty Printer", () => {
 			expect(print(member(v("user"), "age"))).toBe("user.age");
 			expect(print(member(add(N(2), N(3)), "prop"))).toBe("(2 + 3).prop");
 			expect(print(member(v("order"), "shipping"))).toBe("order.shipping");
+		});
+
+		it("throws RecursionLimitError on deeply nested expressions", () => {
+			let expr = N(1);
+			for (let i = 0; i < 250; i++) {
+				expr = add(expr, N(1));
+			}
+			expect(() => print(expr)).toThrow(RecursionLimitError);
 		});
 	});
 });

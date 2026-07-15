@@ -81,8 +81,7 @@ const binInstances: Partial<Record<BinKey, (a: Value, b: Value) => Value>> = {
 	"+:num:num": (a, b) => num(asNum(a) + asNum(b)),
 	"×:num:num": (a, b) => num(asNum(a) * asNum(b)),
 	"∪:set:set": (a, b) => set([...asSet(a), ...asSet(b)]),
-	"∩:set:set": (a, b) =>
-		set([...asSet(a)].filter((x) => asSet(b).has(x))),
+	"∩:set:set": (a, b) => set([...asSet(a)].filter((x) => asSet(b).has(x))),
 	// '+' overloaded onto sets (the article notes + is sometimes a disjoint union):
 	"+:set:set": (a, b) => set([...asSet(a), ...asSet(b)]),
 };
@@ -97,14 +96,13 @@ const unInstances: Partial<Record<UnKey, (a: Value) => Value>> = {
 type RelKey = `${RelOp}:${Sort}:${Sort}`;
 const setEq = (a: ReadonlySet<number>, b: ReadonlySet<number>): boolean =>
 	a.size === b.size && [...a].every((x) => b.has(x));
-const relInstances: Partial<Record<RelKey, (a: Value, b: Value) => boolean>> =
-	{
-		"=:num:num": (a, b) => asNum(a) === asNum(b),
-		"<:num:num": (a, b) => asNum(a) < asNum(b),
-		"=:set:set": (a, b) => setEq(asSet(a), asSet(b)),
-		"∈:num:set": (a, b) => asSet(b).has(asNum(a)),
-		"⊆:set:set": (a, b) => [...asSet(a)].every((x) => asSet(b).has(x)),
-	};
+const relInstances: Partial<Record<RelKey, (a: Value, b: Value) => boolean>> = {
+	"=:num:num": (a, b) => asNum(a) === asNum(b),
+	"<:num:num": (a, b) => asNum(a) < asNum(b),
+	"=:set:set": (a, b) => setEq(asSet(a), asSet(b)),
+	"∈:num:set": (a, b) => asSet(b).has(asNum(a)),
+	"⊆:set:set": (a, b) => [...asSet(a)].every((x) => asSet(b).has(x)),
+};
 
 // ---------- Evaluator: walks the AST, resolves overloads by sort ----------
 type Env = ReadonlyMap<string, Value>;
@@ -115,8 +113,7 @@ const evaluate = (e: Expr, env: Env = new Map()): Value => {
 			return e.value;
 		case "var": {
 			const bound = env.get(e.name);
-			if (bound === undefined)
-				throw new Error(`unbound variable: ${e.name}`);
+			if (bound === undefined) throw new Error(`unbound variable: ${e.name}`);
 			return bound;
 		}
 		case "unary": {
@@ -129,20 +126,14 @@ const evaluate = (e: Expr, env: Env = new Map()): Value => {
 			const a = evaluate(e.left, env);
 			const b = evaluate(e.right, env);
 			const impl = binInstances[`${e.op}:${a.sort}:${b.sort}`];
-			if (!impl)
-				throw new Error(
-					`${e.op} is undefined on ${a.sort}×${b.sort}`,
-				);
+			if (!impl) throw new Error(`${e.op} is undefined on ${a.sort}×${b.sort}`);
 			return impl(a, b);
 		}
 		case "relation": {
 			const a = evaluate(e.left, env);
 			const b = evaluate(e.right, env);
 			const impl = relInstances[`${e.op}:${a.sort}:${b.sort}`];
-			if (!impl)
-				throw new Error(
-					`${e.op} is undefined on ${a.sort}×${b.sort}`,
-				);
+			if (!impl) throw new Error(`${e.op} is undefined on ${a.sort}×${b.sort}`);
 			return bool(impl(a, b));
 		}
 		case "bigSum": {
@@ -150,14 +141,10 @@ const evaluate = (e: Expr, env: Env = new Map()): Value => {
 			// bound variable added to the environment. This is why ∑/∫/∀ can't be
 			// table entries keyed on evaluated operands.
 			const domain = evaluate(e.over, env);
-			if (domain.sort !== "set")
-				throw new Error("∑ requires a set domain");
+			if (domain.sort !== "set") throw new Error("∑ requires a set domain");
 			let acc = 0;
 			for (const x of domain.value) {
-				const r = evaluate(
-					e.body,
-					new Map(env).set(e.bound, num(x)),
-				);
+				const r = evaluate(e.body, new Map(env).set(e.bound, num(x)));
 				acc += asNum(r);
 			}
 			return num(acc);
@@ -198,20 +185,11 @@ const S = (...xs: number[]): Expr => lit(set(xs));
 const demos: ReadonlyArray<readonly [string, Expr]> = [
 	["(2 + 3) × 4", bin("×", bin("+", N(2), N(3)), N(4))], //           num arithmetic
 	["{1,2,3} ∪ {3,4}", bin("∪", S(1, 2, 3), S(3, 4))], //             same engine, set domain
-	[
-		"{1,2} + {2,3}   (+ overloaded on sets)",
-		bin("+", S(1, 2), S(2, 3)),
-	],
-	[
-		"#({1,2,3} ∩ {2,3,4})",
-		card(bin("∩", S(1, 2, 3), S(2, 3, 4))),
-	], // set -> num via #
+	["{1,2} + {2,3}   (+ overloaded on sets)", bin("+", S(1, 2), S(2, 3))],
+	["#({1,2,3} ∩ {2,3,4})", card(bin("∩", S(1, 2, 3), S(2, 3, 4)))], // set -> num via #
 	["2 ∈ {1,2,3}", rel("∈", N(2), S(1, 2, 3))], //                    relation -> bool
 	["{1} ⊆ {1,2}", rel("⊆", S(1), S(1, 2))],
-	[
-		"∑_{i ∈ {1,2,3}} i × i",
-		sum("i", S(1, 2, 3), bin("×", v("i"), v("i"))),
-	], // binder
+	["∑_{i ∈ {1,2,3}} i × i", sum("i", S(1, 2, 3), bin("×", v("i"), v("i")))], // binder
 ];
 
 for (const [label, expr] of demos) {

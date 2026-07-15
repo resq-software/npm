@@ -26,6 +26,7 @@
  */
 
 import type { CompiledExpr, Expr } from "./ast.js";
+import { RecursionLimitError } from "./error.js";
 
 /**
  * Compile a named mathematical expression AST into an index-based executable AST.
@@ -35,6 +36,15 @@ import type { CompiledExpr, Expr } from "./ast.js";
  * @returns The compiled expression node.
  */
 export function compile(expr: Expr, scope: readonly string[] = []): CompiledExpr {
+	return compileInternal(expr, scope, 0);
+}
+
+function compileInternal(expr: Expr, scope: readonly string[], depth: number): CompiledExpr {
+	const MAX_DEPTH = 200;
+	if (depth > MAX_DEPTH) {
+		throw new RecursionLimitError(MAX_DEPTH);
+	}
+
 	switch (expr.kind) {
 		case "lit":
 			return { kind: "lit", value: expr.value };
@@ -52,67 +62,67 @@ export function compile(expr: Expr, scope: readonly string[] = []): CompiledExpr
 			return {
 				kind: "unary",
 				op: expr.op,
-				arg: compile(expr.arg, scope),
+				arg: compileInternal(expr.arg, scope, depth + 1),
 			};
 
 		case "binary":
 			return {
 				kind: "binary",
 				op: expr.op,
-				left: compile(expr.left, scope),
-				right: compile(expr.right, scope),
+				left: compileInternal(expr.left, scope, depth + 1),
+				right: compileInternal(expr.right, scope, depth + 1),
 			};
 
 		case "relation":
 			return {
 				kind: "relation",
 				op: expr.op,
-				left: compile(expr.left, scope),
-				right: compile(expr.right, scope),
+				left: compileInternal(expr.left, scope, depth + 1),
+				right: compileInternal(expr.right, scope, depth + 1),
 			};
 
 		case "logic":
 			return {
 				kind: "logic",
 				op: expr.op,
-				left: compile(expr.left, scope),
-				right: compile(expr.right, scope),
+				left: compileInternal(expr.left, scope, depth + 1),
+				right: compileInternal(expr.right, scope, depth + 1),
 			};
 
 		case "binder":
 			return {
 				kind: "binder",
 				op: expr.op,
-				domain: compile(expr.domain, scope),
-				body: compile(expr.body, [...scope, expr.bound]),
+				domain: compileInternal(expr.domain, scope, depth + 1),
+				body: compileInternal(expr.body, [...scope, expr.bound], depth + 1),
 			};
 
 		case "cond":
 			return {
 				kind: "cond",
-				test: compile(expr.test, scope),
+				test: compileInternal(expr.test, scope, depth + 1),
 				// biome-ignore lint/suspicious/noThenProperty: standard AST property for conditionals
-				then: compile(expr.then, scope),
-				else: compile(expr.else, scope),
+				then: compileInternal(expr.then, scope, depth + 1),
+				else: compileInternal(expr.else, scope, depth + 1),
 			};
 
 		case "lambda":
 			return {
 				kind: "lambda",
-				body: compile(expr.body, [...scope, expr.param]),
+				body: compileInternal(expr.body, [...scope, expr.param], depth + 1),
 			};
 
 		case "call":
 			return {
 				kind: "call",
-				func: compile(expr.func, scope),
-				arg: compile(expr.arg, scope),
+				func: compileInternal(expr.func, scope, depth + 1),
+				arg: compileInternal(expr.arg, scope, depth + 1),
 			};
 
 		case "member":
 			return {
 				kind: "member",
-				obj: compile(expr.obj, scope),
+				obj: compileInternal(expr.obj, scope, depth + 1),
 				property: expr.property,
 			};
 	}

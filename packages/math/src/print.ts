@@ -26,6 +26,7 @@
  */
 
 import type { BinaryOp, BinderOp, Expr, LogicOp, RelOp, UnaryOp } from "./ast.js";
+import { RecursionLimitError } from "./error.js";
 
 // ────────────────────────── Options ──────────────────────────
 
@@ -211,30 +212,36 @@ const wrapIf = (inner: string, needsWrap: boolean): string => (needsWrap ? `(${i
 export const print = (expr: Expr, options?: PrintOptions): string => {
 	const ascii = options?.ascii === true;
 
-	const go = (node: Expr): string => {
+	const go = (node: Expr, depth = 0): string => {
+		const MAX_DEPTH = 200;
+		if (depth > MAX_DEPTH) {
+			throw new RecursionLimitError(MAX_DEPTH);
+		}
 		switch (node.kind) {
 			case "lit":
 				return printLit(node, ascii);
 			case "var":
 				return node.name;
 			case "unary":
-				return printUnary(node.op, node.arg, ascii, go);
+				return printUnary(node.op, node.arg, ascii, (n) => go(n, depth + 1));
 			case "binary":
-				return printBinary(node.op, node.left, node.right, ascii, go);
+				return printBinary(node.op, node.left, node.right, ascii, (n) => go(n, depth + 1));
 			case "relation":
-				return printRel(node.op, node.left, node.right, ascii, go);
+				return printRel(node.op, node.left, node.right, ascii, (n) => go(n, depth + 1));
 			case "logic":
-				return printLogic(node.op, node.left, node.right, ascii, go);
+				return printLogic(node.op, node.left, node.right, ascii, (n) => go(n, depth + 1));
 			case "binder":
-				return printBinder(node.op, node.bound, node.domain, node.body, ascii, go);
+				return printBinder(node.op, node.bound, node.domain, node.body, ascii, (n) =>
+					go(n, depth + 1),
+				);
 			case "cond":
-				return printCond(node.test, node.then, node.else, go);
+				return printCond(node.test, node.then, node.else, (n) => go(n, depth + 1));
 			case "lambda":
-				return printLambda(node.param, node.body, ascii, go);
+				return printLambda(node.param, node.body, ascii, (n) => go(n, depth + 1));
 			case "call":
-				return printCall(node.func, node.arg, go);
+				return printCall(node.func, node.arg, (n) => go(n, depth + 1));
 			case "member":
-				return printMember(node.obj, node.property, go);
+				return printMember(node.obj, node.property, (n) => go(n, depth + 1));
 		}
 	};
 
