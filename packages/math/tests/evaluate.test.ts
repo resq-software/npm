@@ -267,6 +267,14 @@ describe("Evaluator", () => {
 			const expr = sum("i", S(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), v("i"));
 			expect(() => evaluate(expr, undefined, { maxSteps: 5 })).toThrow(ExecutionLimitError);
 		});
+
+		it("throws RecursionLimitError on deep compiler recursion", () => {
+			let expr = N(1);
+			for (let i = 0; i < 250; i++) {
+				expr = add(expr, N(1));
+			}
+			expect(() => compile(expr)).toThrow(RecursionLimitError);
+		});
 	});
 
 	describe("First-class Functions and Closures", () => {

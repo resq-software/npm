@@ -152,5 +152,10 @@ export const showValue = (v: Value): string => {
 // ────────────────────────── Utilities ──────────────────────────
 
 /** Structural equality for finite number sets. */
-export const setEq = (a: ReadonlySet<number>, b: ReadonlySet<number>): boolean =>
-	a.size === b.size && [...a].every((x) => b.has(x));
+export const setEq = (a: ReadonlySet<number>, b: ReadonlySet<number>): boolean => {
+	if (a.size !== b.size) return false;
+	for (const x of a) {
+		if (!b.has(x)) return false;
+	}
+	return true;
+};

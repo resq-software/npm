@@ -16,6 +16,7 @@
 
 import { describe, expect, it } from "vitest";
 import { checkExpr } from "../src/check.js";
+import { RecursionLimitError } from "../src/error.js";
 import {
 	N,
 	S,
@@ -214,5 +215,13 @@ describe("Sort Checker", () => {
 		expect(checkExpr(member(lit, "active"))).toEqual({ ok: true, sort: "bool" });
 		// Should fail for non-existent property
 		expect(checkExpr(member(lit, "missing")).ok).toBe(false);
+	});
+
+	it("throws RecursionLimitError on deeply nested expressions", () => {
+		let expr = N(1);
+		for (let i = 0; i < 250; i++) {
+			expr = add(expr, N(1));
+		}
+		expect(() => checkExpr(expr)).toThrow(RecursionLimitError);
 	});
 });
