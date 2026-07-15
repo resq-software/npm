@@ -1,0 +1,52 @@
+{
+	"name": "@resq-systems/math",
+	"version": "0.1.0",
+	"description": "Type-safe mathematical expression engine with sort-based dispatch, Pratt parser, and static validation",
+	"license": "Apache-2.0",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./lib/index.d.ts",
+			"import": "./lib/index.js",
+			"default": "./lib/index.js"
+		}
+	},
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"files": [
+		"lib",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsdown",
+		"test": "vitest run"
+	},
+	"devDependencies": {
+		"@total-typescript/ts-reset": "^0.6.1",
+		"tsdown": "^0.22.4",
+		"typescript": "7.0.2",
+		"vitest": "4.1.10"
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true,
+		"registry": "https://registry.npmjs.org/"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/resq-software/npm.git",
+		"directory": "packages/math"
+	},
+	"keywords": [
+		"math",
+		"expression",
+		"ast",
+		"parser",
+		"pratt-parser",
+		"evaluator",
+		"type-safe"
+	],
+	"engines": {
+		"node": ">=20.19.0"
+	}
+}

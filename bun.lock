@@ -76,7 +76,7 @@
     },
     "packages/analytics": {
       "name": "@resq-systems/analytics",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "dependencies": {
         "@resq-systems/types": "^0.1.0",
       },
@@ -144,11 +144,11 @@
     },
     "packages/email-templates": {
       "name": "@resq-systems/email-templates",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "dependencies": {
         "@react-email/components": "^1.0.12",
         "@react-email/render": "^2.0.10",
-        "@resq-systems/constants": "workspace:*",
+        "@resq-systems/constants": "^0.3.1",
       },
       "devDependencies": {
         "@react-email/ui": "6.6.9",
@@ -178,7 +178,7 @@
     },
     "packages/helpers": {
       "name": "@resq-systems/helpers",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "dependencies": {
         "@resq-systems/logger": "^0.3.0",
         "@resq-systems/types": "^0.1.0",
@@ -195,7 +195,7 @@
     },
     "packages/http": {
       "name": "@resq-systems/http",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "dependencies": {
         "@resq-systems/types": "^0.1.0",
       },
@@ -227,9 +227,19 @@
         "vitest": "4.1.10",
       },
     },
+    "packages/math": {
+      "name": "@resq-systems/math",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@total-typescript/ts-reset": "^0.6.1",
+        "tsdown": "^0.22.4",
+        "typescript": "7.0.2",
+        "vitest": "4.1.10",
+      },
+    },
     "packages/rate-limiting": {
       "name": "@resq-systems/rate-limiting",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "dependencies": {
         "@resq-systems/dsa": "^2.0.0",
         "@resq-systems/types": "^0.1.0",
@@ -256,7 +266,7 @@
     },
     "packages/security": {
       "name": "@resq-systems/security",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "dependencies": {
         "@resq-systems/types": "^0.1.0",
         "dompurify": "^3.4.11",
@@ -291,7 +301,7 @@
     },
     "packages/ui": {
       "name": "@resq-systems/ui",
-      "version": "0.37.0",
+      "version": "0.37.1",
       "dependencies": {
         "@base-ui/react": "^1.6.0",
         "@phosphor-icons/react": "^2.1.10",
@@ -1100,6 +1110,8 @@
     "@resq-systems/http": ["@resq-systems/http@workspace:packages/http"],
 
     "@resq-systems/logger": ["@resq-systems/logger@workspace:packages/logger"],
+
+    "@resq-systems/math": ["@resq-systems/math@workspace:packages/math"],
 
     "@resq-systems/rate-limiting": ["@resq-systems/rate-limiting@workspace:packages/rate-limiting"],
 
