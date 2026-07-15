@@ -314,6 +314,19 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult
 				return fail1("record", objRes.sort, `accessing property '${expr.property}'`);
 			}
 
+			// Resolve sort statically from literal record values
+			if (expr.obj.kind === "lit" && expr.obj.value.sort === "record") {
+				const propVal = expr.obj.value.value[expr.property];
+				if (propVal === undefined) {
+					return fail1(
+						"existing property",
+						"undefined",
+						`property '${expr.property}' on literal record`,
+					);
+				}
+				return OK(propVal.sort);
+			}
+
 			const path = getMemberPath(expr);
 			if (path) {
 				const mappedSort = ctx.get(path);

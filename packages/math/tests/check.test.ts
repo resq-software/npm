@@ -63,6 +63,7 @@ import {
 	call,
 	member,
 } from "../src/builder.js";
+import { record, num, bool } from "../src/value.js";
 
 describe("Sort Checker", () => {
 	it("infers sorts for valid arithmetic expressions", () => {
@@ -200,5 +201,18 @@ describe("Sort Checker", () => {
 
 		// Fail on non-record member access
 		expect(checkExpr(member(N(5), "age"), ctx).ok).toBe(false);
+	});
+
+	it("resolves property sorts from literal record values", () => {
+		const lit = {
+			kind: "lit" as const,
+			value: record({ age: num(25), active: bool(true) }),
+		};
+		// Should infer "num" from the literal record's property
+		expect(checkExpr(member(lit, "age"))).toEqual({ ok: true, sort: "num" });
+		// Should infer "bool"
+		expect(checkExpr(member(lit, "active"))).toEqual({ ok: true, sort: "bool" });
+		// Should fail for non-existent property
+		expect(checkExpr(member(lit, "missing")).ok).toBe(false);
 	});
 });
