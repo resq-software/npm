@@ -49,6 +49,7 @@ export {
 	MathError,
 	ParseError,
 	SortError,
+	StackError,
 	UnboundVariableError,
 	UndefinedOpError,
 } from "./error.js";

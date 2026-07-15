@@ -300,6 +300,7 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult
 			if (path) {
 				const mappedSort = ctx.get(path);
 				if (mappedSort) return OK(mappedSort);
+				return fail1("declared function return sort", "untyped", path);
 			}
 
 			return OK("num");
@@ -316,9 +317,10 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map()): CheckResult
 			if (path) {
 				const mappedSort = ctx.get(path);
 				if (mappedSort) return OK(mappedSort);
+				return fail1("declared property sort", "untyped", path);
 			}
 
-			return OK("num");
+			return fail1("declared property sort", "untyped", expr.property);
 		}
 	}
 };

@@ -189,8 +189,8 @@ describe("Sort Checker", () => {
 		expect(checkExpr(member(v("user"), "age"), ctx)).toEqual({ ok: true, sort: "num" });
 		expect(checkExpr(member(v("user"), "active"), ctx)).toEqual({ ok: true, sort: "bool" });
 
-		// Defaults to num if the path is not explicitly typed in ctx
-		expect(checkExpr(member(v("user"), "name"), ctx)).toEqual({ ok: true, sort: "num" });
+		// Fails if the path is not explicitly typed in ctx
+		expect(checkExpr(member(v("user"), "name"), ctx).ok).toBe(false);
 
 		// Nested member access
 		expect(checkExpr(member(member(v("order"), "shipping"), "fee"), ctx)).toEqual({

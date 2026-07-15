@@ -68,7 +68,13 @@ import {
 	member,
 } from "../src/builder.js";
 import { num, bool, mkSet, record } from "../src/value.js";
-import { UnboundVariableError, DomainError, UndefinedOpError, SortError } from "../src/error.js";
+import {
+	UnboundVariableError,
+	DomainError,
+	UndefinedOpError,
+	SortError,
+	StackError,
+} from "../src/error.js";
 
 describe("Evaluator", () => {
 	describe("Arithmetic", () => {
@@ -203,11 +209,22 @@ describe("Evaluator", () => {
 			const env = new Map([["user", record({ age: num(30) })]]);
 			expect(() => evaluate(member(v("user"), "nonexistent"), env)).toThrow(DomainError);
 		});
+
+		it("rejects inherited properties (prototype pollution prevention)", () => {
+			const env = new Map([["user", record({ age: num(30) })]]);
+			expect(() => evaluate(member(v("user"), "toString"), env)).toThrow(DomainError);
+			expect(() => evaluate(member(v("user"), "constructor"), env)).toThrow(DomainError);
+		});
 	});
 
 	describe("Error Paths", () => {
 		it("throws on unbound variables", () => {
 			expect(() => evaluate(v("z"))).toThrow(UnboundVariableError);
+		});
+
+		it("throws StackError on out-of-bounds stack index", () => {
+			const invalidBound = { kind: "bound_var" as const, index: 99 };
+			expect(() => evaluateCompiled(invalidBound)).toThrow(StackError);
 		});
 
 		it("throws on division by zero", () => {

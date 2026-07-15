@@ -138,7 +138,7 @@ function tokenize(src: string): readonly Token[] {
 		if (ch >= "0" && ch <= "9") {
 			const start = i;
 			while (i < src.length && src[i]! >= "0" && src[i]! <= "9") i++;
-			if (i < src.length && src[i] === ".") {
+			if (i + 1 < src.length && src[i] === "." && src[i + 1]! >= "0" && src[i + 1]! <= "9") {
 				i++;
 				while (i < src.length && src[i]! >= "0" && src[i]! <= "9") i++;
 			}

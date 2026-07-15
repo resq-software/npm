@@ -183,12 +183,13 @@ const exprPrec = (expr: Expr): number => {
 			return relPrec[expr.op];
 		case "logic":
 			return logicPrec[expr.op];
-		case "binder":
-		case "cond":
-		case "lambda":
 		case "call":
 		case "member":
 			return PREC_ATOM;
+		case "binder":
+		case "cond":
+		case "lambda":
+			return 0;
 	}
 };
 
@@ -390,9 +391,9 @@ const printLambda = (
 
 /** Render a call application: func(arg) */
 const printCall = (func: Expr, arg: Expr, go: (e: Expr) => string): string => {
-	const f = go(func);
-	const a = go(arg);
-	return `${f}(${a})`;
+	const inner = go(func);
+	const needsWrap = exprPrec(func) < PREC_ATOM;
+	return `${wrapIf(inner, needsWrap)}(${go(arg)})`;
 };
 
 /** Render a member property access: obj.property */

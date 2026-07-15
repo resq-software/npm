@@ -41,7 +41,7 @@ export type Value = (
 			readonly closure: readonly Value[];
 	  }
 	| { readonly sort: "record"; readonly value: Readonly<Record<string, Value>> }
-) & { category?: ValueCategory };
+) & { readonly category?: ValueCategory };
 
 /** The discriminant tag of a {@link Value}. */
 export type Sort = Value["sort"];

@@ -27,7 +27,7 @@
  */
 
 import type { BinaryOp, LogicOp, RelOp, UnaryOp } from "./ast.js";
-import { DomainError } from "./error.js";
+import { DomainError, MathError } from "./error.js";
 import type { Sort, Value } from "./value.js";
 import { asBool, asNum, asSet, bool, mkSet, num, setEq } from "./value.js";
 
@@ -264,34 +264,56 @@ export const lookupLogic = (key: number): LogicImpl | undefined => logicTable.ge
 /** Register a custom unary operator instance. */
 export const registerUnary = (key: string, impl: UnaryImpl): void => {
 	const parts = key.split(":");
+	if (parts.length !== 2) throw new MathError("INVALID_KEY", `Invalid unary key: ${key}`);
 	const op = parts[0] as UnaryOp;
 	const sort = parts[1] as Sort;
+	if (unaryIds[op] === undefined)
+		throw new MathError("INVALID_OP", `Unknown unary operator: ${op}`);
+	if (sortIds[sort] === undefined) throw new MathError("INVALID_SORT", `Unknown sort: ${sort}`);
 	unaryTable.set(encodeUnary(op, sort), impl);
 };
 
 /** Register a custom binary operator instance. */
 export const registerBinary = (key: string, impl: BinaryImpl): void => {
 	const parts = key.split(":");
+	if (parts.length !== 3) throw new MathError("INVALID_KEY", `Invalid binary key: ${key}`);
 	const op = parts[0] as BinaryOp;
 	const sortL = parts[1] as Sort;
 	const sortR = parts[2] as Sort;
+	if (binaryIds[op] === undefined)
+		throw new MathError("INVALID_OP", `Unknown binary operator: ${op}`);
+	if (sortIds[sortL] === undefined || sortIds[sortR] === undefined) {
+		throw new MathError("INVALID_SORT", `Unknown sort in: ${key}`);
+	}
 	binaryTable.set(encodeBinary(op, sortL, sortR), impl);
 };
 
 /** Register a custom relational operator instance. */
 export const registerRelation = (key: string, impl: RelImpl): void => {
 	const parts = key.split(":");
+	if (parts.length !== 3) throw new MathError("INVALID_KEY", `Invalid relation key: ${key}`);
 	const op = parts[0] as RelOp;
 	const sortL = parts[1] as Sort;
 	const sortR = parts[2] as Sort;
+	if (relIds[op] === undefined)
+		throw new MathError("INVALID_OP", `Unknown relational operator: ${op}`);
+	if (sortIds[sortL] === undefined || sortIds[sortR] === undefined) {
+		throw new MathError("INVALID_SORT", `Unknown sort in: ${key}`);
+	}
 	relTable.set(encodeRel(op, sortL, sortR), impl);
 };
 
 /** Register a custom logic operator instance. */
 export const registerLogic = (key: string, impl: LogicImpl): void => {
 	const parts = key.split(":");
+	if (parts.length !== 3) throw new MathError("INVALID_KEY", `Invalid logic key: ${key}`);
 	const op = parts[0] as LogicOp;
 	const sortL = parts[1] as Sort;
 	const sortR = parts[2] as Sort;
+	if (logicIds[op] === undefined)
+		throw new MathError("INVALID_OP", `Unknown logical operator: ${op}`);
+	if (sortIds[sortL] === undefined || sortIds[sortR] === undefined) {
+		throw new MathError("INVALID_SORT", `Unknown sort in: ${key}`);
+	}
 	logicTable.set(encodeLogic(op, sortL, sortR), impl);
 };

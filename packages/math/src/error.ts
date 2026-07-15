@@ -120,3 +120,16 @@ export class ParseError extends MathError {
 		this.found = found ?? "";
 	}
 }
+
+/** Thrown when a lexical stack lookup is out of bounds. */
+export class StackError extends MathError {
+	readonly index: number;
+	readonly depth: number;
+
+	constructor(index: number, depth: number) {
+		super("STACK_ERROR", `Stack access out of bounds: index ${index} at depth ${depth}`);
+		this.name = "StackError";
+		this.index = index;
+		this.depth = depth;
+	}
+}

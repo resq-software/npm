@@ -4,5 +4,5 @@
 		"noEmit": true,
 		"rootDir": "."
 	},
-	"include": ["reset.d.ts", "src", "tests/**/*.test-d.ts"]
+	"include": ["reset.d.ts", "src", "tests/**/*.test.ts", "tests/**/*.test-d.ts"]
 }

@@ -24,7 +24,13 @@
  */
 
 import type { CompiledExpr } from "./ast.js";
-import { DomainError, SortError, UnboundVariableError, UndefinedOpError } from "./error.js";
+import {
+	DomainError,
+	SortError,
+	StackError,
+	UnboundVariableError,
+	UndefinedOpError,
+} from "./error.js";
 import {
 	encodeBinary,
 	encodeLogic,
@@ -71,7 +77,7 @@ export const evaluate = (
 		case "bound_var": {
 			const idx = stack.length - 1 - expr.index;
 			if (idx < 0 || idx >= stack.length) {
-				throw new Error(`Runtime Error: Lexical stack overflow accessing index ${expr.index}`);
+				throw new StackError(expr.index, stack.length);
 			}
 			return stack[idx]!;
 		}
@@ -176,6 +182,9 @@ export const evaluate = (
 		case "member": {
 			const objVal = evaluate(expr.obj, env, stack);
 			const rec = asRecord(objVal, `accessing property '${expr.property}'`);
+			if (!Object.hasOwn(rec, expr.property)) {
+				throw new DomainError("member", `Property '${expr.property}' does not exist on record`);
+			}
 			const propVal = rec[expr.property];
 			if (propVal === undefined) {
 				throw new DomainError("member", `Property '${expr.property}' does not exist on record`);
