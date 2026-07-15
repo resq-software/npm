@@ -33,15 +33,15 @@ import { asBool, asNum, asSet, bool, mkSet, num, setEq } from "./value.js";
 
 // ────────────────────────── Sort and Operator ID Maps ──────────────────────────
 
-const sortIds: Readonly<Record<Sort, number>> = {
+const sortIds: Readonly<Record<Sort, number>> = Object.assign(Object.create(null), {
 	num: 1,
 	set: 2,
 	bool: 3,
 	func: 4,
 	record: 5,
-};
+});
 
-const unaryIds: Readonly<Record<UnaryOp, number>> = {
+const unaryIds: Readonly<Record<UnaryOp, number>> = Object.assign(Object.create(null), {
 	neg: 1,
 	sqrt: 2,
 	abs: 3,
@@ -50,9 +50,9 @@ const unaryIds: Readonly<Record<UnaryOp, number>> = {
 	not: 6,
 	card: 7,
 	factorial: 8,
-};
+});
 
-const binaryIds: Readonly<Record<BinaryOp, number>> = {
+const binaryIds: Readonly<Record<BinaryOp, number>> = Object.assign(Object.create(null), {
 	"+": 1,
 	"-": 2,
 	"×": 3,
@@ -63,9 +63,9 @@ const binaryIds: Readonly<Record<BinaryOp, number>> = {
 	"∩": 8,
 	"∖": 9,
 	"△": 10,
-};
+});
 
-const relIds: Readonly<Record<RelOp, number>> = {
+const relIds: Readonly<Record<RelOp, number>> = Object.assign(Object.create(null), {
 	"=": 1,
 	"≠": 2,
 	"<": 3,
@@ -76,15 +76,15 @@ const relIds: Readonly<Record<RelOp, number>> = {
 	"∉": 8,
 	"⊂": 9,
 	"⊆": 10,
-};
+});
 
-const logicIds: Readonly<Record<LogicOp, number>> = {
+const logicIds: Readonly<Record<LogicOp, number>> = Object.assign(Object.create(null), {
 	"∧": 1,
 	"∨": 2,
 	"⊻": 3,
 	"⇒": 4,
 	"⇔": 5,
-};
+});
 
 // ────────────────────────── Bitmask Encoding ──────────────────────────
 
