@@ -25,7 +25,7 @@
  */
 
 import { Schema as S } from "effect";
-import { LRUCache } from "@resq-systems/dsa";
+import { LRUCache, Queue } from "@resq-systems/dsa";
 import type { PositiveInt, PositiveMillis, PositiveNumber } from "@resq-systems/types";
 import type { RateLimitDecision } from "./decision.js";
 
@@ -562,7 +562,7 @@ export class TokenBucketLimiter implements RateLimiter {
 	private readonly capacity: PositiveInt;
 	private readonly refillRate: PositiveInt;
 	private readonly refillInterval: PositiveMillis;
-	private queue: Array<() => void> = [];
+	private queue = new Queue<() => void>();
 
 	/**
 	 * @param capacity - Maximum bucket size (also the burst limit). Construct
@@ -615,7 +615,7 @@ export class TokenBucketLimiter implements RateLimiter {
 
 		// Wait for token to become available
 		return new Promise<void>((resolve) => {
-			this.queue.push(resolve);
+			this.queue.enqueue(resolve);
 			this.scheduleNextRelease();
 		});
 	}
@@ -646,13 +646,13 @@ export class TokenBucketLimiter implements RateLimiter {
 	 * @internal
 	 */
 	private scheduleNextRelease(): void {
-		if (this.queue.length === 0) return;
+		if (this.queue.isEmpty()) return;
 
 		const waitTime = this.refillInterval / this.refillRate;
 
 		setTimeout(() => {
 			this.refill();
-			const resolve = this.queue.shift();
+			const resolve = this.queue.dequeue();
 			if (resolve && this.tokens >= 1) {
 				this.tokens -= 1;
 				resolve();
@@ -672,7 +672,7 @@ export class TokenBucketLimiter implements RateLimiter {
 		this.refill();
 		return {
 			availableTokens: Math.floor(this.tokens),
-			queueSize: this.queue.length,
+			queueSize: this.queue.getSize(),
 			capacity: this.capacity,
 		};
 	}
@@ -688,7 +688,7 @@ export class TokenBucketLimiter implements RateLimiter {
 	public reset(): void {
 		this.tokens = this.capacity;
 		this.lastRefill = Date.now();
-		this.queue = [];
+		this.queue = new Queue<() => void>();
 	}
 }
 
@@ -717,7 +717,7 @@ export class TokenBucketLimiter implements RateLimiter {
  * ```
  */
 export class LeakyBucketLimiter implements RateLimiter {
-	private queue: Array<{ resolve: () => void; timestamp: number }> = [];
+	private queue = new Queue<{ resolve: () => void; timestamp: number }>();
 	private readonly capacity: PositiveInt;
 	private readonly leakRate: number; // ms between requests
 	private processing = false;
@@ -745,12 +745,12 @@ export class LeakyBucketLimiter implements RateLimiter {
 	 *   HTTP middleware.
 	 */
 	public async acquire(): Promise<void> {
-		if (this.queue.length >= this.capacity) {
+		if (this.queue.getSize() >= this.capacity) {
 			throw new Error("Rate limit exceeded: queue full");
 		}
 
 		return new Promise<void>((resolve) => {
-			this.queue.push({ resolve, timestamp: Date.now() });
+			this.queue.enqueue({ resolve, timestamp: Date.now() });
 			this.processQueue();
 		});
 	}
@@ -765,12 +765,12 @@ export class LeakyBucketLimiter implements RateLimiter {
 	 *   {@link acquire} would still succeed but with a wait.
 	 */
 	public tryAcquire(): boolean {
-		if (this.queue.length >= this.capacity) {
+		if (this.queue.getSize() >= this.capacity) {
 			return false;
 		}
 
 		// Check if we can process immediately
-		if (!this.processing && this.queue.length === 0) {
+		if (!this.processing && this.queue.isEmpty()) {
 			return true;
 		}
 
@@ -790,12 +790,12 @@ export class LeakyBucketLimiter implements RateLimiter {
 		this.processing = true;
 
 		const processNext = () => {
-			const item = this.queue.shift();
+			const item = this.queue.dequeue();
 			if (item) {
 				item.resolve();
 			}
 
-			if (this.queue.length > 0) {
+			if (!this.queue.isEmpty()) {
 				setTimeout(processNext, this.leakRate);
 			} else {
 				this.processing = false;
@@ -813,8 +813,8 @@ export class LeakyBucketLimiter implements RateLimiter {
 	 */
 	public getStats(): RateLimiterStats {
 		return {
-			availableTokens: this.capacity - this.queue.length,
-			queueSize: this.queue.length,
+			availableTokens: this.capacity - this.queue.getSize(),
+			queueSize: this.queue.getSize(),
 			capacity: this.capacity,
 		};
 	}
@@ -827,7 +827,7 @@ export class LeakyBucketLimiter implements RateLimiter {
 	 * sites if cancellable waits are required.
 	 */
 	public reset(): void {
-		this.queue = [];
+		this.queue = new Queue<{ resolve: () => void; timestamp: number }>();
 		this.processing = false;
 	}
 }
