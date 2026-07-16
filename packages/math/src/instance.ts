@@ -86,6 +86,12 @@ const logicIds: Readonly<Record<LogicOp, number>> = Object.assign(Object.create(
 	"⇔": 5,
 });
 
+const isSort = (s: string | undefined): s is Sort => s !== undefined && s in sortIds;
+const isUnaryOp = (s: string | undefined): s is UnaryOp => s !== undefined && s in unaryIds;
+const isBinaryOp = (s: string | undefined): s is BinaryOp => s !== undefined && s in binaryIds;
+const isRelOp = (s: string | undefined): s is RelOp => s !== undefined && s in relIds;
+const isLogicOp = (s: string | undefined): s is LogicOp => s !== undefined && s in logicIds;
+
 // ────────────────────────── Bitmask Encoding ──────────────────────────
 
 /** Encode unary operator and argument sort into a single integer key. */
@@ -319,11 +325,9 @@ export const lookupLogic = (key: number): LogicImpl | undefined => logicTable.ge
 export const registerUnary = (key: string, impl: UnaryImpl): void => {
 	const parts = key.split(":");
 	if (parts.length !== 2) throw new MathError("INVALID_KEY", `Invalid unary key: ${key}`);
-	const op = parts[0] as UnaryOp;
-	const sort = parts[1] as Sort;
-	if (unaryIds[op] === undefined)
-		throw new MathError("INVALID_OP", `Unknown unary operator: ${op}`);
-	if (sortIds[sort] === undefined) throw new MathError("INVALID_SORT", `Unknown sort: ${sort}`);
+	const [op, sort] = parts;
+	if (!isUnaryOp(op)) throw new MathError("INVALID_OP", `Unknown unary operator: ${op}`);
+	if (!isSort(sort)) throw new MathError("INVALID_SORT", `Unknown sort: ${sort}`);
 	unaryTable.set(encodeUnary(op, sort), impl);
 };
 
@@ -331,12 +335,9 @@ export const registerUnary = (key: string, impl: UnaryImpl): void => {
 export const registerBinary = (key: string, impl: BinaryImpl): void => {
 	const parts = key.split(":");
 	if (parts.length !== 3) throw new MathError("INVALID_KEY", `Invalid binary key: ${key}`);
-	const op = parts[0] as BinaryOp;
-	const sortL = parts[1] as Sort;
-	const sortR = parts[2] as Sort;
-	if (binaryIds[op] === undefined)
-		throw new MathError("INVALID_OP", `Unknown binary operator: ${op}`);
-	if (sortIds[sortL] === undefined || sortIds[sortR] === undefined) {
+	const [op, sortL, sortR] = parts;
+	if (!isBinaryOp(op)) throw new MathError("INVALID_OP", `Unknown binary operator: ${op}`);
+	if (!isSort(sortL) || !isSort(sortR)) {
 		throw new MathError("INVALID_SORT", `Unknown sort in: ${key}`);
 	}
 	binaryTable.set(encodeBinary(op, sortL, sortR), impl);
@@ -346,12 +347,9 @@ export const registerBinary = (key: string, impl: BinaryImpl): void => {
 export const registerRelation = (key: string, impl: RelImpl): void => {
 	const parts = key.split(":");
 	if (parts.length !== 3) throw new MathError("INVALID_KEY", `Invalid relation key: ${key}`);
-	const op = parts[0] as RelOp;
-	const sortL = parts[1] as Sort;
-	const sortR = parts[2] as Sort;
-	if (relIds[op] === undefined)
-		throw new MathError("INVALID_OP", `Unknown relational operator: ${op}`);
-	if (sortIds[sortL] === undefined || sortIds[sortR] === undefined) {
+	const [op, sortL, sortR] = parts;
+	if (!isRelOp(op)) throw new MathError("INVALID_OP", `Unknown relational operator: ${op}`);
+	if (!isSort(sortL) || !isSort(sortR)) {
 		throw new MathError("INVALID_SORT", `Unknown sort in: ${key}`);
 	}
 	relTable.set(encodeRel(op, sortL, sortR), impl);
@@ -361,12 +359,9 @@ export const registerRelation = (key: string, impl: RelImpl): void => {
 export const registerLogic = (key: string, impl: LogicImpl): void => {
 	const parts = key.split(":");
 	if (parts.length !== 3) throw new MathError("INVALID_KEY", `Invalid logic key: ${key}`);
-	const op = parts[0] as LogicOp;
-	const sortL = parts[1] as Sort;
-	const sortR = parts[2] as Sort;
-	if (logicIds[op] === undefined)
-		throw new MathError("INVALID_OP", `Unknown logical operator: ${op}`);
-	if (sortIds[sortL] === undefined || sortIds[sortR] === undefined) {
+	const [op, sortL, sortR] = parts;
+	if (!isLogicOp(op)) throw new MathError("INVALID_OP", `Unknown logical operator: ${op}`);
+	if (!isSort(sortL) || !isSort(sortR)) {
 		throw new MathError("INVALID_SORT", `Unknown sort in: ${key}`);
 	}
 	logicTable.set(encodeLogic(op, sortL, sortR), impl);
