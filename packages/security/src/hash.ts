@@ -32,7 +32,7 @@ export function getHashForString(string: string): string {
 /**
  * Hash an object by converting it to JSON and then hashing the resulting string.
  */
-export function getHashForObject(obj: any): string {
+export function getHashForObject(obj: unknown): string {
 	return getHashForString(JSON.stringify(obj));
 }
 
