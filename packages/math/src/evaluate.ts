@@ -23,6 +23,7 @@
  * @module @resq-systems/math/evaluate
  */
 
+import { assertNever } from "./_assert.js";
 import type { CompiledExpr } from "./ast.js";
 import {
 	DomainError,
@@ -210,8 +211,10 @@ const evaluateInternal = (
 						}
 						return bool(false);
 					}
+
+					default:
+						return assertNever(expr);
 				}
-				break;
 			}
 
 			case "cond": {
@@ -246,6 +249,9 @@ const evaluateInternal = (
 				}
 				return propVal;
 			}
+
+			default:
+				return assertNever(expr);
 		}
 	} finally {
 		ctx.depth--;

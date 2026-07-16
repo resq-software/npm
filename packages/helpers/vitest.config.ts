@@ -16,6 +16,11 @@
 
 import { defineConfig } from "vitest/config";
 export default defineConfig({
+	resolve: {
+		alias: {
+			"entities/lib/decode": "entities/lib/decode.js",
+		},
+	},
 	test: {
 		include: ["tests/**/*.test.ts"],
 	},

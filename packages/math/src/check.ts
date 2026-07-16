@@ -25,6 +25,7 @@
  * @module @resq-systems/math/check
  */
 
+import { assertNever } from "./_assert.js";
 import type { BinaryOp, BinderOp, Expr, RelOp, UnaryOp } from "./ast.js";
 import { RecursionLimitError, SortError } from "./error.js";
 import type { Sort } from "./value.js";
@@ -349,6 +350,9 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map(), depth = 0): 
 
 			return fail1("declared property sort", "untyped", expr.property);
 		}
+
+		default:
+			return assertNever(expr);
 	}
 };
 

@@ -25,6 +25,7 @@
  * @module @resq-systems/math/compile
  */
 
+import { assertNever } from "./_assert.js";
 import type { CompiledExpr, Expr } from "./ast.js";
 import { RecursionLimitError } from "./error.js";
 
@@ -125,5 +126,8 @@ function compileInternal(expr: Expr, scope: readonly string[], depth: number): C
 				obj: compileInternal(expr.obj, scope, depth + 1),
 				property: expr.property,
 			};
+
+		default:
+			return assertNever(expr);
 	}
 }

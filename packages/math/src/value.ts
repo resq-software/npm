@@ -24,6 +24,7 @@
  * @module @resq-systems/math/value
  */
 
+import { assertNever } from "./_assert.js";
 import { SortError } from "./error.js";
 
 // ────────────────────────── Value union ──────────────────────────
@@ -146,6 +147,8 @@ export const showValue = (v: Value): string => {
 			const entries = Object.entries(v.value).map(([k, val]) => `${k}: ${showValue(val)}`);
 			return `{${entries.join(", ")}}`;
 		}
+		default:
+			return assertNever(v);
 	}
 };
 

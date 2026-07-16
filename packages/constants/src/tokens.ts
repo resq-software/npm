@@ -39,7 +39,7 @@ export type StatusRole = "info" | "success" | "warning" | "danger";
 export const colors = {
 	oklch: {
 		background: "oklch(16.63% 0.0262 269.37)",
-		surface: "oklch(22.90% 0.0302 269.75)",
+		surface: "oklch(19.72% 0.0231 268.80)",
 		border: "oklch(26.45% 0.0386 270.81)",
 		foreground: "oklch(96.19% 0.0109 274.89)",
 		muted: "oklch(64.00% 0.0535 266.82)",
@@ -57,9 +57,22 @@ export const colors = {
 		warning: "#E0A100",
 		danger: "#D43E3F",
 	},
+	/**
+	 * Categorical data-visualization palette — the five `--chart-1..5` oklch
+	 * values shipped by `@resq-systems/ui` (canonical dark `:root` scale). Charts
+	 * cycle these in order for series colors. `oklch` only (not email-safe).
+	 */
+	chart: [
+		"oklch(58.50% 0.1877 24.72)",
+		"oklch(64.20% 0.1560 252.61)",
+		"oklch(73.39% 0.1538 161.68)",
+		"oklch(78.37% 0.1587 72.99)",
+		"oklch(68.62% 0.0471 261.10)",
+	],
 } as const satisfies {
 	oklch: Record<ColorRole, `oklch(${string})`>;
 	hex: Record<ColorRole | StatusRole, `#${string}`>;
+	chart: readonly `oklch(${string})`[];
 };
 
 /**
@@ -104,11 +117,15 @@ export const fonts = {
 		"https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&family=DM+Mono:wght@500&display=swap",
 } as const;
 
-/** Border radius scale (px, email-safe). */
+/**
+ * Border radius scale (px, email-safe). Mirrors the shipped `@resq-systems/ui`
+ * `--radius-*` scale: `sm`→token (3px), `md`→control (4px), `lg`→panel (6px),
+ * `xl` (panel + 4px = 10px). `full` is the pill radius (no UI counterpart).
+ */
 export const radii = {
-	sm: "6px",
-	md: "8px",
-	lg: "12px",
-	xl: "14px",
+	sm: "3px",
+	md: "4px",
+	lg: "6px",
+	xl: "10px",
 	full: "999px",
 } as const;

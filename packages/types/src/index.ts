@@ -44,3 +44,5 @@ export * from "./numeric.js";
 export * from "./object.js";
 export * from "./string.js";
 export * from "./testing.js";
+export * from "./compat.js";
+export * from "./json.js";

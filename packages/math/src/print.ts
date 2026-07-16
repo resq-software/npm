@@ -25,6 +25,7 @@
  * @module @resq-systems/math/print
  */
 
+import { assertNever } from "./_assert.js";
 import type { BinaryOp, BinderOp, Expr, LogicOp, RelOp, UnaryOp } from "./ast.js";
 import { RecursionLimitError } from "./error.js";
 
@@ -191,6 +192,8 @@ const exprPrec = (expr: Expr): number => {
 		case "cond":
 		case "lambda":
 			return 0;
+		default:
+			return assertNever(expr);
 	}
 };
 
@@ -242,6 +245,8 @@ export const print = (expr: Expr, options?: PrintOptions): string => {
 				return printCall(node.func, node.arg, (n) => go(n, depth + 1));
 			case "member":
 				return printMember(node.obj, node.property, (n) => go(n, depth + 1));
+			default:
+				return assertNever(node);
 		}
 	};
 
@@ -273,6 +278,8 @@ const printLit = (
 			);
 			return `{${entries.join(", ")}}`;
 		}
+		default:
+			return assertNever(v);
 	}
 };
 
@@ -302,6 +309,8 @@ const printUnary = (op: UnaryOp, arg: Expr, ascii: boolean, go: (e: Expr) => str
 			const needsWrap = exprPrec(arg) < PREC_UNARY;
 			return `${wrapIf(inner, needsWrap)}!`;
 		}
+		default:
+			return assertNever(op);
 	}
 };
 

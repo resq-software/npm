@@ -97,3 +97,24 @@ export {
 	toProbability,
 } from "./schemas.js";
 export type { Latitude, Longitude, Probability } from "./schemas.js";
+
+export { WeakCache } from "./weak-cache.js";
+export {
+	validateOrderKey,
+	generateNJitteredKeysBetween,
+	generateNKeysBetween,
+} from "./fractional-indexing.js";
+export {
+	ZERO_INDEX_KEY,
+	validateIndexKey,
+	getIndicesBetween,
+	getIndicesAbove,
+	getIndicesBelow,
+	getIndexBetween,
+	getIndexAbove,
+	getIndexBelow,
+	getIndices,
+	sortByIndex,
+	sortByMaybeIndex,
+} from "./reordering.js";
+export type { IndexKey } from "./reordering.js";
