@@ -45,7 +45,8 @@ function fillPool(bytes: number) {
 
 function nanoid(size = 21) {
 	// `-=` convert `size` to number to prevent `valueOf` abusing
-	fillPool((size -= 0));
+	size -= 0;
+	fillPool(size);
 	let id = "";
 	// We are reading directly from the random pool to avoid creating new array
 	for (let i = poolOffset - size; i < poolOffset; i++) {

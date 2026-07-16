@@ -66,7 +66,8 @@ export function isGIF(buffer: ArrayBuffer): boolean {
  */
 export function isGifAnimated(buffer: ArrayBuffer): boolean {
 	const view = new Uint8Array(buffer);
-	let hasColorTable, colorTableSize;
+	let hasColorTable: number;
+	let colorTableSize: number;
 	let offset = 0;
 	let imagesCount = 0;
 

@@ -132,9 +132,9 @@ export function isApngAnimated(buffer: ArrayBuffer): boolean {
 
 			const text = needle_buffer + decoded;
 
-			let match: RegExpExecArray | null;
+			const match = needle.exec(text);
 			let last_index = -1;
-			while ((match = needle.exec(text)) !== null) {
+			while (match !== null) {
 				last_index = match.index - needle_buffer.length;
 				position = full_length + last_index;
 				break outer;

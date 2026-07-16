@@ -265,7 +265,7 @@ export class MediaHelpers {
 		return new Promise((resolve, reject) => {
 			const img = Image();
 			img.onload = () => {
-				let dimensions;
+				let dimensions: { w: number; h: number };
 				if (img.naturalWidth) {
 					dimensions = {
 						w: img.naturalWidth,
