@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { assertNever } from "@resq-systems/types";
 import { omitFromStackTrace } from "./function";
 
 /**
@@ -141,6 +142,11 @@ export const Result = {
  * statements. When called, it indicates a programming error where a case was not handled.
  * The TypeScript 'never' type ensures this function is only reachable if all cases aren't covered.
  *
+ * Delegates the actual throw to `@resq-systems/types` `assertNever`, the single
+ * source of truth for exhaustiveness enforcement, while preserving this
+ * helper's original `Unknown switch case ...` message (including the optional
+ * `property` extraction) for backward compatibility.
+ *
  * @param value - The unhandled value (typed as 'never' for exhaustiveness checking)
  * @param property - Optional property name to extract from the value for better error messages
  * @returns Never returns (always throws)
@@ -163,7 +169,7 @@ export const Result = {
 export function exhaustiveSwitchError(value: never, property?: string): never {
 	const debugValue =
 		property && value && typeof value === "object" && property in value ? value[property] : value;
-	throw new Error(`Unknown switch case ${debugValue}`);
+	return assertNever(value, `Unknown switch case ${debugValue}`);
 }
 
 /**
