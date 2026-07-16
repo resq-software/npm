@@ -785,7 +785,7 @@ export class LeakyBucketLimiter implements RateLimiter {
 	 * @internal
 	 */
 	private processQueue(): void {
-		if (this.processing || this.queue.length === 0) return;
+		if (this.processing || this.queue.isEmpty()) return;
 
 		this.processing = true;
 
