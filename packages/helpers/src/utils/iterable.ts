@@ -18,7 +18,7 @@
  * Get the first item from an iterable Set or Map.
  *
  * @param value - The iterable Set or Map to get the first item from
- * @returns The first value from the Set or Map
+ * @returns The first value from the Set or Map, or `undefined` if it is empty
  * @example
  * ```ts
  * const A = getFirstFromIterable(new Set([1, 2, 3])) // 1
@@ -31,6 +31,6 @@
  * ```
  * @public
  */
-export function getFirstFromIterable<T = unknown>(set: Set<T> | Map<any, T>): T {
-	return set.values().next().value!;
+export function getFirstFromIterable<T = unknown>(set: Set<T> | Map<any, T>): T | undefined {
+	return set.values().next().value;
 }

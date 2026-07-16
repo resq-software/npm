@@ -85,6 +85,19 @@ describe("ExecutionQueue", () => {
 		await expect(result).rejects.toThrow("oh no");
 	});
 
+	it("rejects on a synchronous throw without stranding later tasks", async () => {
+		const queue = new ExecutionQueue();
+
+		const failing = queue.push(() => {
+			throw new Error("sync boom");
+		});
+
+		const following = queue.push(async () => "next");
+
+		await expect(failing).rejects.toThrow("sync boom");
+		await expect(following).resolves.toBe("next");
+	});
+
 	it("handles constructor with timeout", async () => {
 		const queue = new ExecutionQueue(10); // 10ms delay
 		const executionOrder: string[] = [];

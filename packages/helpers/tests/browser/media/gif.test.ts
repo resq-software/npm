@@ -66,4 +66,19 @@ describe("isGifAnimated", () => {
 		const buffer = new ArrayBuffer(0);
 		expect(isGifAnimated(buffer)).toBe(false);
 	});
+
+	it("should return false for a valid GIF header but truncated buffer (< 13 bytes)", () => {
+		// A GIF header is present but the buffer is shorter than the logical
+		// screen descriptor, so parsing must bail out instead of reading OOB.
+		const buffer = new ArrayBuffer(6);
+		const view = new Uint8Array(buffer);
+		view[0] = 71; // G
+		view[1] = 73; // I
+		view[2] = 70; // F
+		view[3] = 56; // 8
+		view[4] = 57; // 9
+		view[5] = 97; // a
+
+		expect(isGifAnimated(buffer)).toBe(false);
+	});
 });

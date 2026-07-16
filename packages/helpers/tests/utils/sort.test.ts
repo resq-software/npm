@@ -49,4 +49,11 @@ describe("sortById", () => {
 			{ id: 3, label: "three" },
 		]);
 	});
+
+	it("returns 0 for equal ids to satisfy strict weak ordering", () => {
+		expect(sortById({ id: "a" }, { id: "a" })).toBe(0);
+		expect(sortById({ id: 1 }, { id: 1 })).toBe(0);
+		expect(sortById({ id: "b" }, { id: "a" })).toBe(1);
+		expect(sortById({ id: "a" }, { id: "b" })).toBe(-1);
+	});
 });

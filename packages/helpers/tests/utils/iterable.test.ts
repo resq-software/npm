@@ -38,4 +38,9 @@ describe("getFirstFromIterable", () => {
 		set.add("second");
 		expect(getFirstFromIterable(set)).toBe("third");
 	});
+
+	it("should return undefined for an empty Set or Map", () => {
+		expect(getFirstFromIterable(new Set())).toBeUndefined();
+		expect(getFirstFromIterable(new Map())).toBeUndefined();
+	});
 });

@@ -20,7 +20,7 @@
  *
  * @param a - First object to compare
  * @param b - Second object to compare
- * @returns 1 if a.id \> b.id, -1 if a.id \<= b.id
+ * @returns 1 if a.id \> b.id, -1 if a.id \< b.id, 0 if a.id === b.id
  *
  * @example
  * ```ts
@@ -37,5 +37,7 @@
  * @public
  */
 export function sortById<T extends { id: any }>(a: T, b: T) {
-	return a.id > b.id ? 1 : -1;
+	if (a.id > b.id) return 1;
+	if (a.id < b.id) return -1;
+	return 0;
 }

@@ -89,4 +89,33 @@ describe("Timers", () => {
 
 		vi.unstubAllGlobals();
 	});
+
+	it("forwards handler args individually to window.setTimeout", () => {
+		const timers = new Timers();
+		const mockSetTimeout = vi.fn().mockReturnValue(1);
+		const handler = () => {};
+
+		vi.stubGlobal("setTimeout", mockSetTimeout);
+
+		timers.setTimeout("context1", handler, 1000, "a", 2, { c: 3 });
+
+		expect(mockSetTimeout).toHaveBeenCalledWith(handler, 1000, "a", 2, { c: 3 });
+
+		vi.unstubAllGlobals();
+	});
+
+	it("forwards handler args individually to window.setInterval via forContext", () => {
+		const timers = new Timers();
+		const mockSetInterval = vi.fn().mockReturnValue(1);
+		const handler = () => {};
+
+		vi.stubGlobal("setInterval", mockSetInterval);
+
+		const contextTimers = timers.forContext("context1");
+		contextTimers.setInterval(handler, 500, "x", "y");
+
+		expect(mockSetInterval).toHaveBeenCalledWith(handler, 500, "x", "y");
+
+		vi.unstubAllGlobals();
+	});
 });

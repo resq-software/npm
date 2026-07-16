@@ -60,10 +60,104 @@ describe("MediaHelpers", () => {
 		});
 	});
 
+	describe("getVideoFrameAsDataUrl seek handling", () => {
+		const HAVE_METADATA = 1;
+		const HAVE_CURRENT_DATA = 2;
+		const FAKE_DATA_URL = "data:image/png;base64,FAKE";
+
+		type Listener = (e: { type: string }) => void;
+
+		/**
+		 * Minimal fake video element. jsdom has no real canvas 2d context, so the
+		 * canvas is faked too. `set currentTime` simulates an asynchronous seek:
+		 * the "seeked" event only fires on a later microtask.
+		 */
+		function createFakeVideo(initialReadyState: number) {
+			let currentTime = 0;
+			let seekCount = 0;
+			const listeners: Record<string, Listener[]> = {};
+
+			const emit = (type: string) => {
+				for (const cb of listeners[type] ?? []) {
+					cb({ type });
+				}
+			};
+
+			const fakeCanvas = {
+				width: 0,
+				height: 0,
+				getContext: () => ({ drawImage: () => {} }),
+				toDataURL: () => FAKE_DATA_URL,
+			};
+
+			const video = {
+				readyState: initialReadyState,
+				HAVE_METADATA,
+				HAVE_CURRENT_DATA,
+				videoWidth: 4,
+				videoHeight: 2,
+				ownerDocument: {
+					createElement: () => fakeCanvas,
+				},
+				get currentTime() {
+					return currentTime;
+				},
+				set currentTime(t: number) {
+					currentTime = t;
+					seekCount += 1;
+					queueMicrotask(() => {
+						this.readyState = HAVE_CURRENT_DATA;
+						emit("seeked");
+					});
+				},
+				addEventListener(type: string, cb: Listener) {
+					if (!listeners[type]) {
+						listeners[type] = [];
+					}
+					listeners[type].push(cb);
+				},
+				removeEventListener(type: string, cb: Listener) {
+					listeners[type] = (listeners[type] ?? []).filter((fn) => fn !== cb);
+				},
+				getSeekCount: () => seekCount,
+				getListenerCount: () => Object.values(listeners).reduce((sum, arr) => sum + arr.length, 0),
+			};
+
+			return video;
+		}
+
+		it("waits for the seeked event before capturing when a non-zero time is requested", async () => {
+			const video = createFakeVideo(HAVE_CURRENT_DATA);
+
+			const result = await MediaHelpers.getVideoFrameAsDataUrl(
+				video as unknown as HTMLVideoElement,
+				5,
+			);
+
+			expect(result).toBe(FAKE_DATA_URL);
+			// A seek was initiated and the frame captured at the requested time.
+			expect(video.getSeekCount()).toBe(1);
+			expect(video.currentTime).toBe(5);
+			// All listeners cleaned up after resolution.
+			expect(video.getListenerCount()).toBe(0);
+		});
+
+		it("captures immediately without seeking when time is zero", async () => {
+			const video = createFakeVideo(HAVE_CURRENT_DATA);
+
+			const result = await MediaHelpers.getVideoFrameAsDataUrl(
+				video as unknown as HTMLVideoElement,
+			);
+
+			expect(result).toBe(FAKE_DATA_URL);
+			expect(video.getSeekCount()).toBe(0);
+			expect(video.getListenerCount()).toBe(0);
+		});
+	});
+
 	// Note: The following methods are not tested here as they require extensive DOM mocking
 	// that would test the mocking framework more than the actual business logic:
 	// - loadVideo: Complex DOM video element mocking
-	// - getVideoFrameAsDataUrl: Canvas and video interaction mocking
 	// - getImageAndDimensions: Image element and DOM manipulation mocking
 	// - getVideoSize: Depends on loadVideo
 	// - getImageSize: Complex PNG parsing logic with extensive mocking

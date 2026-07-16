@@ -65,7 +65,21 @@ export function isWebpAnimated(buffer: ArrayBuffer) {
 		return false;
 	}
 
-	if (!view || view.length < 21) {
+	if (view.length < 21) {
+		return false;
+	}
+
+	// Only Extended WebP files carry a "VP8X" chunk (bytes 12-15) whose byte 20
+	// holds the feature flags, including the animation bit. Simple WebP files
+	// (lossy "VP8 " or lossless "VP8L") have no VP8X chunk, so byte 20 is raw
+	// bitstream data and must not be interpreted as an animation flag.
+	const isExtended =
+		view[12] === 86 && // V
+		view[13] === 80 && // P
+		view[14] === 56 && // 8
+		view[15] === 88; // X
+
+	if (!isExtended) {
 		return false;
 	}
 

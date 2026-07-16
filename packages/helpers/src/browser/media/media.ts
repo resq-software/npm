@@ -191,18 +191,30 @@ export class MediaHelpers {
 	static async getVideoFrameAsDataUrl(video: HTMLVideoElement, time = 0): Promise<string> {
 		const promise = promiseWithResolve<string>();
 		let didSetTime = false;
+		let isSeeking = false;
 
-		const onReadyStateChanged = () => {
+		const onReadyStateChanged = (e?: Event) => {
 			if (!didSetTime) {
 				if (video.readyState >= video.HAVE_METADATA) {
 					didSetTime = true;
-					video.currentTime = time;
+					// Setting currentTime starts an asynchronous seek. Only seek
+					// when a non-zero frame is requested; capturing before the
+					// seek completes would grab the frame at time 0.
+					if (time !== 0) {
+						isSeeking = true;
+						video.currentTime = time;
+					}
 				} else {
 					return;
 				}
 			}
 
-			if (video.readyState >= video.HAVE_CURRENT_DATA) {
+			// The seek is only complete once the "seeked" event fires.
+			if (e?.type === "seeked") {
+				isSeeking = false;
+			}
+
+			if (!isSeeking && video.readyState >= video.HAVE_CURRENT_DATA) {
 				// eslint-disable-next-line no-restricted-globals
 				const canvas = (video.ownerDocument ?? document).createElement("canvas");
 				canvas.width = video.videoWidth;

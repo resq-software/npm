@@ -134,7 +134,17 @@ export class ExecutionQueue {
 	 */
 	async push<T>(task: () => T): Promise<Awaited<T>> {
 		return new Promise<Awaited<T>>((resolve, reject) => {
-			this.queue.push(() => Promise.resolve(task()).then(resolve).catch(reject));
+			this.queue.push(() => {
+				try {
+					// A synchronous throw from `task()` must reject this promise
+					// rather than propagate out of `run()` and strand the rest of
+					// the queue. Async rejections are handled by `.catch(reject)`.
+					return Promise.resolve(task()).then(resolve).catch(reject);
+				} catch (error) {
+					reject(error);
+					return Promise.resolve();
+				}
+			});
 			this.run();
 		});
 	}

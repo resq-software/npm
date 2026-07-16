@@ -91,6 +91,32 @@ describe("isWebpAnimated", () => {
 		expect(isWebpAnimated(buffer)).toBe(true);
 	});
 
+	it("should return false for a simple (VP8) WebP even when byte 20 has the animation bit set", () => {
+		// Simple WebP files have no VP8X chunk, so byte 20 is raw bitstream
+		// data. It must never be treated as the animation flag.
+		const buffer = new ArrayBuffer(25);
+		const view = new Uint8Array(buffer);
+		// RIFF
+		view[0] = 0x52;
+		view[1] = 0x49;
+		view[2] = 0x46;
+		view[3] = 0x46;
+		// WEBP
+		view[8] = 87;
+		view[9] = 69;
+		view[10] = 66;
+		view[11] = 80;
+		// Simple lossy chunk "VP8 " (note trailing space), not the "VP8X" chunk.
+		view[12] = 86; // V
+		view[13] = 80; // P
+		view[14] = 56; // 8
+		view[15] = 32; // (space)
+		// Byte 20 with bit 1 set: a false positive under the old logic.
+		view[20] = 0b00000010;
+
+		expect(isWebpAnimated(buffer)).toBe(false);
+	});
+
 	it("should return false for empty buffer", () => {
 		const buffer = new ArrayBuffer(0);
 		expect(isWebpAnimated(buffer)).toBe(false);

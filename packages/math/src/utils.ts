@@ -26,6 +26,7 @@ export function lerp(a: number, b: number, t: number): number {
  * 0 and 1.
  */
 export function invLerp(a: number, b: number, t: number): number {
+	if (b - a === 0) return 0;
 	return (t - a) / (b - a);
 }
 

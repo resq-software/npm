@@ -41,6 +41,11 @@ describe("invLerp", () => {
 		expect(invLerp(0, 10, 15)).toBe(1.5);
 		expect(invLerp(0, 10, -5)).toBe(-0.5);
 	});
+
+	test("should return 0 when a === b instead of dividing by zero", () => {
+		expect(invLerp(5, 5, 5)).toBe(0);
+		expect(invLerp(5, 5, 10)).toBe(0);
+	});
 });
 
 describe("rng", () => {

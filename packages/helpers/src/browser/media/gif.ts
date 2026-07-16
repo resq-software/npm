@@ -73,7 +73,9 @@ export function isGifAnimated(buffer: ArrayBuffer): boolean {
 
 	// Check if this is this image has valid GIF header.
 	// If not return false. Chrome, FF and IE doesn't handle GIFs with invalid version.
-	if (!isGIF(buffer)) {
+	// The logical screen descriptor extends through byte 12, so a shorter buffer
+	// cannot be a valid GIF and reading it would cause out-of-bounds access.
+	if (!isGIF(buffer) || view.length < 13) {
 		return false;
 	}
 
