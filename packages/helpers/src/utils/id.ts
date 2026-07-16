@@ -29,15 +29,15 @@ const urlAlphabet = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwy
 // request size by this multiplier. The pool is enlarged if subsequent
 // requests exceed the maximum buffer size.
 const POOL_SIZE_MULTIPLIER = 128;
-let pool: Uint8Array, poolOffset: number;
+let pool: Uint8Array<ArrayBuffer>, poolOffset: number;
 
 function fillPool(bytes: number) {
 	if (!pool || pool.length < bytes) {
 		pool = new Uint8Array(bytes * POOL_SIZE_MULTIPLIER);
-		crypto.getRandomValues(pool as any);
+		crypto.getRandomValues(pool);
 		poolOffset = 0;
 	} else if (poolOffset + bytes > pool.length) {
-		crypto.getRandomValues(pool as any);
+		crypto.getRandomValues(pool);
 		poolOffset = 0;
 	}
 	poolOffset += bytes;

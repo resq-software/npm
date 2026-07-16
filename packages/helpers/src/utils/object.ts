@@ -266,7 +266,13 @@ export function areObjectsShallowEqual<T extends object>(obj1: T, obj2: T): bool
 	if (keys1.length !== Object.keys(obj2).length) return false;
 	for (const key of keys1) {
 		if (!hasOwnProperty(obj2, key)) return false;
-		if (!Object.is((obj1 as any)[key], (obj2 as any)[key])) return false;
+		if (
+			!Object.is(
+				(obj1 as Record<PropertyKey, unknown>)[key],
+				(obj2 as Record<PropertyKey, unknown>)[key],
+			)
+		)
+			return false;
 	}
 	return true;
 }
@@ -294,7 +300,7 @@ export function groupBy<K extends string, V>(
 	array: ReadonlyArray<V>,
 	keySelector: (value: V) => K,
 ): Record<K, V[]> {
-	const result: Record<K, V[]> = {} as any;
+	const result = {} as Record<K, V[]>;
 	for (const value of array) {
 		const key = keySelector(value);
 		if (!result[key]) result[key] = [];

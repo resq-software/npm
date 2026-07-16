@@ -64,28 +64,30 @@ import type { Awaitable } from "@resq-systems/types";
  * @public
  * @see source - https://gist.github.com/ca0v/73a31f57b397606c9813472f7493a940
  */
+interface DebounceState<T extends unknown[], U> {
+	// eslint-disable-next-line no-restricted-globals
+	timeout?: ReturnType<typeof setTimeout>;
+	promise: Promise<U>;
+	resolve(value: U | PromiseLike<U>): void;
+	reject(reason?: unknown): void;
+	latestArgs: T;
+}
+
 export function debounce<T extends unknown[], U>(
 	callback: (...args: T) => Awaitable<U>,
 	wait: number,
 ) {
-	let state:
-		| undefined
-		| {
-				// eslint-disable-next-line no-restricted-globals
-				timeout: ReturnType<typeof setTimeout>;
-				promise: Promise<U>;
-				resolve(value: U | PromiseLike<U>): void;
-				reject(value: any): void;
-				latestArgs: T;
-		  };
+	let state: DebounceState<T, U> | undefined;
 
 	const fn = (...args: T): Promise<U> => {
 		if (!state) {
-			state = {} as any;
-			state!.promise = new Promise((resolve, reject) => {
-				state!.resolve = resolve;
-				state!.reject = reject;
+			let resolve!: (value: U | PromiseLike<U>) => void;
+			let reject!: (reason?: unknown) => void;
+			const promise = new Promise<U>((res, rej) => {
+				resolve = res;
+				reject = rej;
 			});
+			state = { promise, resolve, reject, latestArgs: args };
 		}
 		clearTimeout(state!.timeout);
 		state!.latestArgs = args;

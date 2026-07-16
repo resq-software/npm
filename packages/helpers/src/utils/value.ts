@@ -86,16 +86,18 @@ export function isNonNullish<T>(value: T): value is Exclude<T, null | undefined>
 	return value !== null && value !== undefined;
 }
 
+type MaybeStructuredClone = { structuredClone?: <T>(value: T) => T };
+
 function getStructuredClone(): [<T>(i: T) => T, boolean] {
-	if (typeof globalThis !== "undefined" && (globalThis as any).structuredClone) {
+	if (typeof globalThis !== "undefined" && (globalThis as MaybeStructuredClone).structuredClone) {
 		return [globalThis.structuredClone as <T>(i: T) => T, true];
 	}
 
-	if (typeof global !== "undefined" && (global as any).structuredClone) {
+	if (typeof global !== "undefined" && (global as MaybeStructuredClone).structuredClone) {
 		return [global.structuredClone as <T>(i: T) => T, true];
 	}
 
-	if (typeof window !== "undefined" && (window as any).structuredClone) {
+	if (typeof window !== "undefined" && (window as MaybeStructuredClone).structuredClone) {
 		return [window.structuredClone as <T>(i: T) => T, true];
 	}
 
