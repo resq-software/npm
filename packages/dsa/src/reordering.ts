@@ -20,11 +20,10 @@ import {
 	validateOrderKey,
 } from "./fractional-indexing.js";
 
+const nodeProcess = (globalThis as { process?: { env?: Record<string, string | undefined> } })
+	.process;
 const generateKeysFn =
-	typeof (globalThis as any).process !== "undefined" &&
-	(globalThis as any).process.env?.NODE_ENV === "test"
-		? generateNKeysBetween
-		: generateNJitteredKeysBetween;
+	nodeProcess?.env?.NODE_ENV === "test" ? generateNKeysBetween : generateNJitteredKeysBetween;
 
 /**
  * A string made up of an integer part followed by a fraction part.
