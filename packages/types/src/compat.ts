@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+import type { DeepPartial, Simplify } from "./object.js";
+
 /**
  * Makes all properties in a type and all nested properties optional recursively.
  */
-export type RecursivePartial<T> = {
-	[P in keyof T]?: RecursivePartial<T[P]>;
-};
+export type RecursivePartial<T> = DeepPartial<T>;
 
 /**
  * Expands a type definition to show its full structure in IDE tooltips and error messages.
  */
-export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
+export type Expand<T> = Simplify<T>;
 
 /**
  * A value that may be returned synchronously or as a `Promise` / `PromiseLike`.
@@ -34,15 +34,15 @@ export type Awaitable<T> = T | PromiseLike<T>;
 /**
  * Makes specified keys in a type required while keeping all other properties as-is.
  */
-export type Required<T, K extends keyof T> = Expand<Omit<T, K> & { [P in K]-?: T[P] }>;
+export type Required<T, K extends keyof T> = Simplify<Omit<T, K> & { [P in K]-?: T[P] }>;
 
 /**
  * Automatically makes properties optional if their type includes `undefined`.
  */
-export type MakeUndefinedOptional<T extends object> = Expand<
+export type MakeUndefinedOptional<T extends object> = Simplify<
 	{
-		[P in { [K in keyof T]: undefined extends T[K] ? never : K }[keyof T]]: T[P];
+		[K in keyof T as undefined extends T[K] ? never : K]: T[K];
 	} & {
-		[P in { [K in keyof T]: undefined extends T[K] ? K : never }[keyof T]]?: T[P];
+		[K in keyof T as undefined extends T[K] ? K : never]?: T[K];
 	}
 >;

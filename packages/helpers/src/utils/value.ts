@@ -34,7 +34,7 @@
  * ```
  * @public
  */
-export function isDefined<T>(value: T): value is typeof value extends undefined ? never : T {
+export function isDefined<T>(value: T): value is Exclude<T, undefined> {
 	return value !== undefined;
 }
 
@@ -58,7 +58,7 @@ export function isDefined<T>(value: T): value is typeof value extends undefined 
  * ```
  * @public
  */
-export function isNonNull<T>(value: T): value is typeof value extends null ? never : T {
+export function isNonNull<T>(value: T): value is Exclude<T, null> {
 	return value !== null;
 }
 
@@ -82,9 +82,7 @@ export function isNonNull<T>(value: T): value is typeof value extends null ? nev
  * ```
  * @public
  */
-export function isNonNullish<T>(
-	value: T,
-): value is typeof value extends undefined ? never : typeof value extends null ? never : T {
+export function isNonNullish<T>(value: T): value is Exclude<T, null | undefined> {
 	return value !== null && value !== undefined;
 }
 
