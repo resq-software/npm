@@ -30,3 +30,7 @@
 
 export * from "./platform.js";
 export * from "./html-entities.js";
+export * from "./storage.js";
+export * from "./network.js";
+export * from "./url.js";
+export * from "./media/media.js";

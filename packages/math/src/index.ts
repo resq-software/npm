@@ -201,3 +201,6 @@ export type { PrintOptions } from "./print.js";
 
 // ── Parser ──────────────────────────────────────────────────────────────────
 export { parse } from "./parse.js";
+
+// ── Utilities ───────────────────────────────────────────────────────────────
+export { lerp, invLerp, modulate, rng } from "./utils.js";

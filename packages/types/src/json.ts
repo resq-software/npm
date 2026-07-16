@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-import { defineConfig } from "vitest/config";
-export default defineConfig({
-	resolve: {
-		alias: {
-			"entities/lib/decode": "entities/lib/decode.js",
-		},
-	},
-	test: {
-		include: ["tests/**/*.test.ts"],
-	},
-});
+/**
+ * A type representing JSON primitive values: boolean, null, string, or number.
+ */
+export type JsonPrimitive = boolean | null | string | number;
+
+/**
+ * A type representing a JSON array containing any valid JSON values.
+ */
+export type JsonArray = JsonValue[];
+
+/**
+ * A type representing a JSON object with string keys and JSON values.
+ */
+export interface JsonObject {
+	[key: string]: JsonValue | undefined;
+}
+
+/**
+ * A type that represents any valid JSON value.
+ */
+export type JsonValue = JsonPrimitive | JsonArray | JsonObject;

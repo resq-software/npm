@@ -50,3 +50,22 @@ export * from "./task-exec.js";
 export type * from "./task-exec.types.js";
 export * from "./formatting/index.js";
 export * from "./browser/index.js";
+
+// Universal Vendored Utilities
+export * from "./utils/array.js";
+export * from "./utils/object.js";
+export * from "./utils/control.js";
+export * from "./utils/debounce.js";
+export * from "./utils/throttle.js";
+export * from "./utils/file.js";
+export * from "./utils/function.js";
+export * from "./utils/id.js";
+export * from "./utils/iterable.js";
+export * from "./utils/perf.js";
+export * from "./utils/PerformanceTracker.js";
+export * from "./utils/retry.js";
+export * from "./utils/sort.js";
+export * from "./utils/timers.js";
+export * from "./utils/value.js";
+export * from "./utils/warn.js";
+export * from "./utils/ExecutionQueue.js";
