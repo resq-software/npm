@@ -30,7 +30,8 @@ const rawCss = readFileSync(fileURLToPath(new URL("../src/tokens.css", import.me
 const canon = (s: string): string =>
 	s
 		.replace(/['"]/g, '"')
-		.replace(/(\d*\.\d+?)0+\b/g, "$1")
+		.replace(/(\d+)\.0+(?!\d)/g, "$1") // 64.00% -> 64%, 1.00 -> 1
+		.replace(/(\d*\.[1-9]+)0+(?!\d)/g, "$1") // 268.80 -> 268.8, 0.1560 -> 0.156
 		.replace(/\s+/g, " ");
 
 const css = canon(rawCss);
