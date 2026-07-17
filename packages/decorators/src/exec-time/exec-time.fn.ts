@@ -36,7 +36,9 @@ const reporter: ReportFunction = (data: ExactTimeReportData): void => {
  * @template A - The argument types of the original method
  * @param {Method<D, A> | AsyncMethod<D, A>} originalMethod - The method to wrap
  * @param {ReportFunction | string} [arg] - Optional reporter function or label
- * @returns {AsyncMethod<void, A>} The wrapped method
+ * @returns {Method<D | Promise<D>, A>} The wrapped method. Preserves the
+ *   original return value and stays synchronous for synchronous methods —
+ *   it only awaits when the wrapped method itself returns a promise.
  *
  * @example
  * ```typescript
@@ -73,41 +75,50 @@ const reporter: ReportFunction = (data: ExactTimeReportData): void => {
 export function execTimeFn<D = unknown, A extends unknown[] = unknown[]>(
 	originalMethod: Method<D, A> | AsyncMethod<D, A>,
 	arg?: ReportFunction | string,
-): AsyncMethod<void, A> {
+): Method<D | Promise<D>, A> {
 	const input: ReportFunction | string = arg ?? reporter;
 
-	return async function (this: unknown, ...args: A): Promise<void> {
-		let repFunc: ReportFunction;
-
-		if (typeof input === "string") {
-			// `input` may name a reporter method on the instance; resolve it via a
-			// narrow `Record` view instead of an `any`-typed `this`.
-			const named = (this as Record<PropertyKey, unknown>)[input];
-			if (isFunction(named)) {
-				repFunc = named.bind(this) as ReportFunction;
-			} else {
-				repFunc = (data) => {
-					logger.info(`${input} execution time`, { duration: `${data.execTime}ms` });
-				};
-			}
-		} else {
-			repFunc = input;
-		}
-
+	return function (this: unknown, ...args: A): D | Promise<D> {
+		const repFunc = resolveReporter(this, input);
 		const start = Date.now();
-		let result: unknown = (originalMethod as (...methodArgs: A) => D | Promise<D>).apply(
+		const result: D | Promise<D> = (originalMethod as (...methodArgs: A) => D | Promise<D>).apply(
 			this,
 			args,
 		);
 
+		// Preserve async-ness: for a promise-returning method, report once it
+		// settles and forward the resolved value, so callers still receive it.
 		if (isPromise(result)) {
-			result = await result;
+			const pending = result as Promise<D>;
+			return pending.then((resolved) => {
+				repFunc({ args, result: resolved, execTime: Date.now() - start });
+				return resolved;
+			});
 		}
 
-		repFunc({
-			args,
-			result,
-			execTime: Date.now() - start,
-		});
+		// Synchronous method: report immediately and return the value unchanged.
+		repFunc({ args, result, execTime: Date.now() - start });
+		return result;
+	};
+}
+
+/**
+ * Resolve the reporter for a single invocation. When `input` names a method on
+ * the instance it is bound to that instance; otherwise a label-prefixed logger
+ * reporter is used. Extracted so {@link execTimeFn}'s wrapper stays focused on
+ * timing and value forwarding.
+ */
+function resolveReporter(context: unknown, input: ReportFunction | string): ReportFunction {
+	if (typeof input !== "string") {
+		return input;
+	}
+	// `input` may name a reporter method on the instance; resolve it via a
+	// narrow `Record` view instead of an `any`-typed `this`.
+	const named = (context as Record<PropertyKey, unknown>)[input];
+	if (isFunction(named)) {
+		return named.bind(context) as ReportFunction;
+	}
+	return (data) => {
+		logger.info(`${input} execution time`, { duration: `${data.execTime}ms` });
 	};
 }

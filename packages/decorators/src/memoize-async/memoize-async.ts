@@ -39,9 +39,9 @@
  * @license MIT
  */
 
-import type { AsyncMethod } from "../types.js";
+import type { AsyncDecorator, AsyncMethod } from "../types.js";
 import { memoizeAsyncFn } from "./memoize-async.fn.js";
-import type { AsyncMemoizable, AsyncMemoizeConfig } from "./memoize-async.types.js";
+import type { AsyncMemoizeConfig } from "./memoize-async.types.js";
 
 /**
  * Decorator that caches async method results based on their arguments.
@@ -51,19 +51,19 @@ import type { AsyncMemoizable, AsyncMemoizeConfig } from "./memoize-async.types.
  * @overload
  * @template T - The type of the class containing the decorated method
  * @template D - The resolved type of the async method
- * @returns {AsyncMemoizable<T, D>} The decorator function
+ * @returns {AsyncDecorator<T>} The decorator function
  *
  * @overload
  * @template T - The type of the class containing the decorated method
  * @template D - The resolved type of the async method
  * @param {AsyncMemoizeConfig<T, D>} config - Configuration for memoization
- * @returns {AsyncMemoizable<T, D>} The decorator function
+ * @returns {AsyncDecorator<T>} The decorator function
  *
  * @overload
  * @template T - The type of the class containing the decorated method
  * @template D - The resolved type of the async method
  * @param {number} expirationTimeMs - Cache expiration time in milliseconds
- * @returns {AsyncMemoizable<T, D>} The decorator function
+ * @returns {AsyncDecorator<T>} The decorator function
  *
  * @throws {Error} When applied to a non-method property
  *
@@ -102,28 +102,30 @@ import type { AsyncMemoizable, AsyncMemoizeConfig } from "./memoize-async.types.
  * ]);
  * ```
  */
-export function memoizeAsync<T = unknown, D = unknown>(): AsyncMemoizable<T, D>;
+export function memoizeAsync<T = unknown>(): AsyncDecorator<T>;
 export function memoizeAsync<T = unknown, D = unknown>(
 	config: AsyncMemoizeConfig<T, D>,
-): AsyncMemoizable<T, D>;
-export function memoizeAsync<T = unknown, D = unknown>(
-	expirationTimeMs: number,
-): AsyncMemoizable<T, D>;
+): AsyncDecorator<T>;
+export function memoizeAsync<T = unknown>(expirationTimeMs: number): AsyncDecorator<T>;
 export function memoizeAsync<T = unknown, D = unknown>(
 	input?: AsyncMemoizeConfig<T, D> | number,
-): AsyncMemoizable<T, D> {
-	return (
+): AsyncDecorator<T> {
+	// Generic over the decorated async method `F` so the descriptor's signature
+	// is preserved end-to-end. `memoizeAsyncFn` operates structurally, so we
+	// bridge `F` to `AsyncMethod<D>` for the call and cast the result back.
+	return <F extends (...args: never[]) => Promise<unknown>>(
 		_target: T,
-		_propertyName: keyof T,
-		descriptor: TypedPropertyDescriptor<AsyncMethod<D>>,
-	): TypedPropertyDescriptor<AsyncMethod<D>> => {
+		_propertyName: PropertyKey,
+		descriptor: TypedPropertyDescriptor<F>,
+	): TypedPropertyDescriptor<F> => {
 		if (descriptor.value) {
+			const original = descriptor.value as AsyncMethod<D>;
 			if (input === undefined) {
-				descriptor.value = memoizeAsyncFn(descriptor.value);
+				descriptor.value = memoizeAsyncFn(original) as F;
 			} else if (typeof input === "number") {
-				descriptor.value = memoizeAsyncFn(descriptor.value, input);
+				descriptor.value = memoizeAsyncFn(original, input) as F;
 			} else {
-				descriptor.value = memoizeAsyncFn(descriptor.value, input);
+				descriptor.value = memoizeAsyncFn(original, input) as F;
 			}
 
 			return descriptor;

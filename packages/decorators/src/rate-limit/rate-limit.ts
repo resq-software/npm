@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Method } from "../types.js";
+import type { Decorator } from "../types.js";
 import { rateLimitFn } from "./rate-limit.fn.js";
 import type { RateLimitConfigs } from "./rate-limit.types.js";
 
@@ -24,11 +24,8 @@ import type { RateLimitConfigs } from "./rate-limit.types.js";
  *
  * @template T - The type of the class containing the decorated method
  * @param {RateLimitConfigs<T>} config - Rate limit configuration
- * @returns {(
- *   target: T,
- *   propertyName: keyof T,
- *   descriptor: TypedPropertyDescriptor<Method<unknown>>
- * ) => TypedPropertyDescriptor<Method<unknown>>} The decorator function
+ * @returns {Decorator<T>} The decorator function — generic over the decorated
+ *   method so its signature is preserved end-to-end.
  *
  * @throws {Error} When applied to a non-method property
  *
@@ -68,20 +65,17 @@ import type { RateLimitConfigs } from "./rate-limit.types.js";
  * }
  * ```
  */
-export function rateLimit<T = unknown>(
-	config: RateLimitConfigs<T>,
-): (
-	target: T,
-	propertyName: keyof T,
-	descriptor: TypedPropertyDescriptor<Method<unknown>>,
-) => TypedPropertyDescriptor<Method<unknown>> {
-	return (
+export function rateLimit<T = unknown>(config: RateLimitConfigs<T>): Decorator<T> {
+	// Generic over the decorated method `F` so the descriptor's signature is
+	// preserved (the built-in `MethodDecorator` shape). `rateLimitFn` operates
+	// structurally, so the wrapped result is cast back to `F`.
+	return <F extends (...args: never[]) => unknown>(
 		_target: T,
-		_propertyName: keyof T,
-		descriptor: TypedPropertyDescriptor<Method<unknown>>,
-	): TypedPropertyDescriptor<Method<unknown>> => {
+		_propertyName: PropertyKey,
+		descriptor: TypedPropertyDescriptor<F>,
+	): TypedPropertyDescriptor<F> => {
 		if (descriptor.value) {
-			descriptor.value = rateLimitFn(descriptor.value, config);
+			descriptor.value = rateLimitFn(descriptor.value, config) as F;
 			return descriptor;
 		}
 

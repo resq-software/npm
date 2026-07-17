@@ -41,8 +41,6 @@
  * @license MIT
  */
 
-import type { Method } from "../types.js";
-
 /**
  * Decorator that automatically binds a method to its class instance.
  * This ensures `this` always refers to the class instance, even when
@@ -85,25 +83,25 @@ import type { Method } from "../types.js";
  * const data = await fetchData();
  * ```
  */
-export function bind<T = unknown>(
-	_target: T,
+export function bind<F extends (...args: never[]) => unknown>(
+	_target: unknown,
 	propertyKey: string | symbol,
-	descriptor: TypedPropertyDescriptor<Method<unknown>>,
-): TypedPropertyDescriptor<Method<unknown>> {
+	descriptor: TypedPropertyDescriptor<F>,
+): TypedPropertyDescriptor<F> {
 	const originalMethod = descriptor.value;
 
 	if (!originalMethod) {
 		throw new Error("@bind is applicable only on methods.");
 	}
 
-	// Use a getter to lazily bind the method on first access
+	// Use a getter to lazily bind the method on first access.
 	return {
 		configurable: true,
 		enumerable: false,
-		get(this: object): Method<unknown> {
-			const boundMethod = originalMethod.bind(this);
+		get(this: object): F {
+			const boundMethod = originalMethod.bind(this) as F;
 
-			// Define the bound method directly on the instance for subsequent accesses
+			// Define the bound method directly on the instance for subsequent accesses.
 			Object.defineProperty(this, propertyKey, {
 				value: boundMethod,
 				configurable: true,

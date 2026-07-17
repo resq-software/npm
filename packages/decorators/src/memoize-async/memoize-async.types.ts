@@ -17,8 +17,14 @@
 import type { Cache, KeyResolver, Memoizable } from "../memoize/memoize.types.js";
 
 /**
- * Type for the @memoizeAsync decorator function.
- * Similar to Memoizable but for async methods.
+ * Type for the `@memoizeAsync` decorator function.
+ * Similar to `Memoizable` but for async methods.
+ *
+ * @deprecated Use `AsyncDecorator<T>` from `../types.js` instead. This shape
+ * erases the decorated method's signature, which is not assignable to a
+ * concrete async method's descriptor under strict `strictFunctionTypes`
+ * (TS1241 / TS1270 at the decoration site). `memoizeAsync` now returns
+ * `AsyncDecorator<T>`, which preserves the signature. Retained for back-compat.
  *
  * @template T - The type of the class containing the decorated method
  * @template D - The resolved type of the async method

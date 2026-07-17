@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Method } from "../types.js";
+import type { Decorator, Method } from "../types.js";
 /*
  * Copyright 2026 ResQ Systems, Inc.
  *
@@ -58,7 +58,7 @@ import type { Method } from "../types.js";
  */
 
 import { memoizeFn } from "./memoize.fn.js";
-import type { Memoizable, MemoizeConfig } from "./memoize.types.js";
+import type { MemoizeConfig } from "./memoize.types.js";
 
 /**
  * Decorator that caches method results based on their arguments.
@@ -67,19 +67,19 @@ import type { Memoizable, MemoizeConfig } from "./memoize.types.js";
  * @overload
  * @template T - The type of the class containing the decorated method
  * @template D - The return type of the decorated method
- * @returns {Memoizable<T, D>} The decorator function
+ * @returns {Decorator<T>} The decorator function
  *
  * @overload
  * @template T - The type of the class containing the decorated method
  * @template D - The return type of the decorated method
  * @param {MemoizeConfig<T, D>} config - Configuration for memoization
- * @returns {Memoizable<T, D>} The decorator function
+ * @returns {Decorator<T>} The decorator function
  *
  * @overload
  * @template T - The type of the class containing the decorated method
  * @template D - The return type of the decorated method
  * @param {number} expirationTimeMs - Cache expiration time in milliseconds
- * @returns {Memoizable<T, D>} The decorator function
+ * @returns {Decorator<T>} The decorator function
  *
  * @throws {Error} When applied to a non-method property
  *
@@ -118,24 +118,29 @@ import type { Memoizable, MemoizeConfig } from "./memoize.types.js";
  * const user2 = service.getUser('123'); // Instant, no database query
  * ```
  */
-export function memoize<T = unknown, D = unknown>(): Memoizable<T, D>;
-export function memoize<T = unknown, D = unknown>(config: MemoizeConfig<T, D>): Memoizable<T, D>;
-export function memoize<T = unknown, D = unknown>(expirationTimeMs: number): Memoizable<T, D>;
+export function memoize<T = unknown>(): Decorator<T>;
+export function memoize<T = unknown, D = unknown>(config: MemoizeConfig<T, D>): Decorator<T>;
+export function memoize<T = unknown>(expirationTimeMs: number): Decorator<T>;
 export function memoize<T = unknown, D = unknown>(
 	input?: MemoizeConfig<T, D> | number,
-): Memoizable<T, D> {
-	return (
+): Decorator<T> {
+	// Generic over the decorated method `F` so the descriptor's signature is
+	// preserved end-to-end (matches the built-in `MethodDecorator` shape). The
+	// internal `memoizeFn` operates structurally, so we bridge `F` to
+	// `Method<D>` for the call and cast the wrapped result back to `F`.
+	return <F extends (...args: never[]) => unknown>(
 		_target: T,
-		_propertyName: keyof T,
-		descriptor: TypedPropertyDescriptor<Method<D>>,
-	): TypedPropertyDescriptor<Method<D>> => {
+		_propertyName: PropertyKey,
+		descriptor: TypedPropertyDescriptor<F>,
+	): TypedPropertyDescriptor<F> => {
 		if (descriptor.value) {
+			const original = descriptor.value as Method<D>;
 			if (input === undefined) {
-				descriptor.value = memoizeFn(descriptor.value);
+				descriptor.value = memoizeFn(original) as F;
 			} else if (typeof input === "number") {
-				descriptor.value = memoizeFn(descriptor.value, input);
+				descriptor.value = memoizeFn(original, input) as F;
 			} else {
-				descriptor.value = memoizeFn(descriptor.value, input);
+				descriptor.value = memoizeFn(original, input) as F;
 			}
 
 			return descriptor;
