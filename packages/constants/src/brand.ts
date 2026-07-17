@@ -76,8 +76,8 @@ export const brand = {
 		github: "https://github.com/resq-software",
 	},
 	company: {
-		stage: "Seed Stage",
-		locations: ["New York", "Texas"],
+		stage: "Pre-Seed",
+		locations: ["Long Island, New York"],
 	},
 	logo: "https://resq.software/logo.png",
 	postalAddress: "ResQ Systems, Inc., 131 Continental Dr, Suite 305, Newark, DE 19713, USA",
