@@ -30,6 +30,7 @@ import { omitFromStackTrace } from "./function";
  *   console.log(success.value) // 'Hello World'
  * }
  * ```
+ * @deprecated Prefer `success`/`failure` from `@resq-systems/helpers` (the `{ success, value }` Result). This parallel `{ ok, value }` type is unused and slated for removal in a future major.
  * @public
  */
 export interface OkResult<T> {
@@ -49,6 +50,7 @@ export interface OkResult<T> {
  *   console.error(failure.error) // 'Something went wrong'
  * }
  * ```
+ * @deprecated Prefer `success`/`failure` from `@resq-systems/helpers` (the `{ success, value }` Result). This parallel `{ ok, value }` type is unused and slated for removal in a future major.
  * @public
  */
 export interface ErrorResult<E> {
@@ -78,6 +80,7 @@ export interface ErrorResult<E> {
  *   console.error(`Error: ${result.error}`)
  * }
  * ```
+ * @deprecated Prefer `success`/`failure` from `@resq-systems/helpers` (the `{ success, value }` Result). This parallel `{ ok, value }` type is unused and slated for removal in a future major.
  * @public
  */
 export type Result<T, E> = OkResult<T> | ErrorResult<E>;
@@ -98,6 +101,7 @@ export type Result<T, E> = OkResult<T> | ErrorResult<E>;
  * const failure = Result.err('Invalid input')
  * // failure: ErrorResult<string> = { ok: false, error: 'Invalid input' }
  * ```
+ * @deprecated Prefer `success`/`failure` from `@resq-systems/helpers`. This parallel `{ ok, value }` Result factory is unused and slated for removal in a future major.
  * @public
  */
 export const Result = {
@@ -128,10 +132,13 @@ export const Result = {
 	 * @param results - The array of results to wrap
 	 * @returns An OkResult containing the array of values
 	 */
-	all<T>(results: Result<T, any>[]): Result<T[], any> {
-		return results.every((result) => result.ok)
-			? Result.ok(results.map((result) => result.value))
-			: Result.err(results.find((result) => !result.ok)?.error);
+	all<T, E>(results: readonly Result<T, E>[]): Result<T[], E> {
+		const values: T[] = [];
+		for (const result of results) {
+			if (!result.ok) return result;
+			values.push(result.value);
+		}
+		return { ok: true, value: values };
 	},
 };
 
