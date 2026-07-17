@@ -88,6 +88,7 @@ export { Queue } from "./queue.js";
 export type { QueueNode } from "./queue.js";
 export { LRUCache } from "./lru-cache.js";
 export type { LRUCacheOptions } from "./lru-cache.js";
+export { MultiMap } from "./multi-map.js";
 export {
 	isLatitude,
 	isLongitude,
