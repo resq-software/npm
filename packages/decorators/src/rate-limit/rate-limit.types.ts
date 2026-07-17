@@ -27,6 +27,12 @@ import type { Method } from "../types.js";
 /**
  * Configuration for the `@rateLimit` decorator and {@link rateLimitFn}.
  *
+ * `timeSpanMs` and `allowedCalls` are required; supply at most one counter — when
+ * both `rateLimitCounter` and `rateLimitAsyncCounter` are set, the async one wins
+ * and the call becomes promise-returning. With no counter, an in-memory
+ * {@link RateLimitCounter} is used. With no `keyResolver`, all calls share a single
+ * `"default"` bucket.
+ *
  * @template T - The class type a `keyof T` key resolver resolves against.
  * @example
  * ```ts
@@ -41,22 +47,31 @@ import type { Method } from "../types.js";
  * ```
  */
 export interface RateLimitConfigs<T = unknown> {
-	/** The time window in milliseconds. */
+	/** Rolling window length in milliseconds; each admitted call is charged for this long. */
 	timeSpanMs: number;
-	/** Maximum number of calls allowed in the time window. */
+	/** Maximum admitted calls per key within the window. */
 	allowedCalls: number;
-	/** Function or method name that generates rate-limit keys (per user/entity). */
+	/**
+	 * How the rate-limit bucket key is derived. A function is called with the
+	 * arguments; a `keyof T` names an instance method invoked with the arguments.
+	 * When omitted, all calls share the `"default"` bucket.
+	 */
 	keyResolver?: ((...args: unknown[]) => string) | keyof T;
-	/** Custom synchronous counter implementation. */
+	/** Custom synchronous counter; ignored when `rateLimitAsyncCounter` is set. */
 	rateLimitCounter?: RateLimitCounter;
-	/** Async counter implementation for distributed limiting. */
+	/** Async counter for distributed limiting; takes precedence over `rateLimitCounter`. */
 	rateLimitAsyncCounter?: RateLimitAsyncCounter;
-	/** Handler called when the rate limit is exceeded. */
+	/** Invoked (for its side effects) when a call is dropped; a throw here propagates to the caller. */
 	exceedHandler?: () => void;
 }
 
 /**
  * Synchronous counter contract used to track call counts within time windows.
+ *
+ * `getCount` must return `0` (never negative or `undefined`) for a key that was
+ * never incremented or has been fully decremented. `rateLimitFn` increments on an
+ * admitted call and schedules a matching `dec` after the window, so `inc` and
+ * `dec` must be balanced for the count to reflect the live in-window total.
  *
  * @example
  * ```ts
@@ -95,6 +110,11 @@ export interface RateLimitCounter {
  * Asynchronous counter contract for distributed rate limiting; use it when the
  * counter performs async operations (e.g. Redis or a database).
  *
+ * `getCount` resolves `0` for an unseen or fully-decremented key. Because
+ * `rateLimitFn` reads then increments in two separate awaits, this contract alone
+ * cannot guarantee a hard cap under concurrency; back it with an atomic
+ * increment-and-read for a strict limit (see {@link rateLimitFn}).
+ *
  * @example
  * ```ts
  * class RedisCounter implements RateLimitAsyncCounter {
@@ -125,18 +145,19 @@ export interface RateLimitAsyncCounter {
 /**
  * Type for the `@rateLimit` decorator function.
  *
- * @deprecated Use `Decorator<T>` from `../types.js` instead. This shape erases
- * the decorated method's signature to `Method<D>`, which is not assignable to a
- * concrete method's descriptor under strict `strictFunctionTypes` (TS1241 /
- * TS1270 at the decoration site). `rateLimit` now returns `Decorator<T>`, which
- * preserves the method signature end-to-end. Retained only for back-compat.
- *
  * @template T - The class type that owns the decorated method.
  * @template D - The return type of the decorated method.
  * @param target - The class prototype.
  * @param propertyName - The name of the method being decorated.
  * @param descriptor - The property descriptor.
  * @returns The modified descriptor.
+ * @deprecated Use {@link Decorator} from `../types.js` instead — removed in
+ * v1.0.0. This shape erases the decorated method's signature to `Method<D>`,
+ * which is not assignable to a concrete method's descriptor under strict
+ * `strictFunctionTypes` (TS1241 / TS1270 at the decoration site). `rateLimit` now
+ * returns {@link Decorator}, which preserves the signature end-to-end. Migration:
+ * replace `RateLimitable<T, D>` annotations with `Decorator<T>` (drop the `D`
+ * parameter); no runtime change.
  */
 export type RateLimitable<T, D> = (
 	target: T,

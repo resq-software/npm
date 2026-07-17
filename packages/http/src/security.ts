@@ -52,6 +52,10 @@ import { type Brand, brandRefiner, type LiteralUnion, unsafeBrand } from "@resq-
  * @returns The redirect target (an `https://` URL) when a redirect is
  *   required, otherwise `null` (the request is already secure or in a
  *   non-prod environment).
+ * @throws {TypeError} If a redirect is required (production/non-test and
+ *   not already secure) and `url` is not a parseable absolute URL — it is
+ *   passed to the `URL` constructor to derive the target. Not thrown on
+ *   the `null` paths, which never parse `url`.
  *
  * @compliance NIST 800-53 SC-8 (Transmission Confidentiality).
  *

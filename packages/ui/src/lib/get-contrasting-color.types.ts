@@ -46,8 +46,10 @@ export interface Rgb {
 }
 
 /**
- * @deprecated Prefer {@link Rgb} for a definitely-valid color and express the
- * parse-failure state as `Rgb | null` at each boundary. Retained as an alias for
- * backwards compatibility.
+ * @deprecated Use {@link Rgb} for a definitely-valid color and express the
+ * parse-failure state as `Rgb | null` at each boundary — removed in the next
+ * major. Migration: replace `RGB` with `Rgb | null` (the `null` arm was already
+ * folded into this alias), then drop the redundant null-checks on values the
+ * parser has already narrowed to `Rgb`. Retained as an alias until then.
  */
 export type RGB = Rgb | null;

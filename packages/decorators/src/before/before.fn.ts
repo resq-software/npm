@@ -29,12 +29,21 @@ import type { BeforeConfig } from "./before.types.js";
 /**
  * Wraps a method to execute a before-hook function before the method runs.
  *
+ * The wrapper is **always async** (returns a `Promise<D>` even for a synchronous
+ * `originalMethod`). With `config.wait`, the hook is awaited first: if it throws
+ * or rejects, the returned promise rejects and `originalMethod` is never called
+ * (guard semantics). Without `wait`, the hook is invoked but not awaited — its
+ * return is ignored and the method runs regardless. Each call is independent
+ * (no shared state); there is no `AbortSignal` support.
+ *
  * @template T - The type owning the named hook when `config.func` is a method name.
  * @template D - The return type of the original method.
  * @template A - The argument types of the original method.
  * @param originalMethod - The method to wrap.
  * @param config - Configuration for the before hook.
  * @returns The wrapped method.
+ * @throws {Error} As a rejected promise, when `config.func` is a method name
+ *   that does not resolve to a callable on the invocation's `this`.
  * @example
  * ```typescript
  * class Service {

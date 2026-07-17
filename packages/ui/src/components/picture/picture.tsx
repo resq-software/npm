@@ -177,12 +177,18 @@ namespace Picture {
 		 */
 		component?: BaseRootElementType;
 
+		/**
+		 * A single art-directed `<source>` rendered inside the `<picture>`,
+		 * ahead of the image. Omit for a plain responsive image; provide `media`
+		 * to swap assets by viewport/format. Only one source is emitted.
+		 */
 		source?: {
 			srcSet?: string;
 			sizes?: string;
 			media?: string;
 		};
 
+		/** Props forwarded to the wrapping `<picture>` element (e.g. its `className`). */
 		picture?: {
 			className?: string;
 		};
@@ -191,6 +197,12 @@ namespace Picture {
 	export type Props<TRootElement extends BaseRootElementType = typeof defaultRootElement> =
 		Overwrite<ComponentProps<TRootElement>, OwnProps>;
 
+	/**
+	 * Call signatures for the public {@link Picture} component. The first overload
+	 * applies when a `component` root element is supplied, inferring the forwarded
+	 * props from it; the second is the default (`"img"`) form with `component`
+	 * omitted.
+	 */
 	export interface Type {
 		<TRootElement extends BaseRootElementType = typeof defaultRootElement>(
 			props: Overwrite<Props<TRootElement>, { component: TRootElement }>,
@@ -201,6 +213,19 @@ namespace Picture {
 //#endregion
 
 //#region Public API
+/**
+ * Generic implementation of the Picture component. Prefer the {@link Picture}
+ * alias, which carries the overloaded call signatures ({@link Picture.Type}) that
+ * infer props from the `component` root element.
+ *
+ * Tracks its own `isLoading` state to drive the blur-up placeholder and
+ * `aria-busy`. The built-in `onError` handler calls `console.warn` with the
+ * failed `src` (in addition to invoking any caller-supplied `onError`), unless
+ * the caller calls `preventDefault()` on the event.
+ *
+ * @template TRootElement - The rendered root element type (defaults to `"img"`);
+ *   set via the `component` prop and used to infer the forwarded props.
+ */
 export const PictureInternal = <
 	TRootElement extends Picture.BaseRootElementType = typeof defaultRootElement,
 >({
@@ -300,5 +325,10 @@ export const PictureInternal = <
 	);
 };
 
+/**
+ * Responsive `<picture>` component with AVIF/WebP fallbacks, blur-up LQIP, and
+ * lazy-loading. The public entry point — {@link PictureInternal} typed with the
+ * overloaded {@link Picture.Type} signatures.
+ */
 export const Picture = PictureInternal as Picture.Type;
 //#endregion

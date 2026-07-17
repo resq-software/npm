@@ -62,9 +62,13 @@ export interface AnalyticsEvents {}
  * {@link Analytics.init}.
  */
 export interface PostHogProviderConfig {
+	/** PostHog project API key (`phc_…`). The only required field. */
 	key: string;
+	/** Ingestion `api_host`; absence defaults to `https://us.i.posthog.com`. Set for EU or self-hosted regions. */
 	host?: string;
+	/** PostHog app host for toolbar/session links; absence leaves PostHog's own default. */
 	uiHost?: string;
+	/** Raw `posthog-js` init options merged *over* the package defaults, so a key set here wins. */
 	options?: Partial<PostHogConfig>;
 }
 
@@ -75,7 +79,9 @@ export interface PostHogProviderConfig {
  * `@resq-systems/analytics/next`.
  */
 export interface GA4ProviderConfig {
+	/** Branded, sanitized GA4 Measurement ID; mint via {@link sanitizeGa4Id}. */
 	measurementId: Ga4MeasurementId;
+	/** Cross-subdomain linker allow-list for gtag's `linker.domains`; absence or `[]` skips linker setup entirely. */
 	domains?: LiteralUnion<ResqSubdomain>[];
 }
 
@@ -85,7 +91,9 @@ export interface GA4ProviderConfig {
  * neither (e.g. `disabled` in preview environments).
  */
 export interface AnalyticsConfig {
+	/** PostHog provider; omit to run without PostHog. */
 	posthog?: PostHogProviderConfig;
+	/** GA4 provider; omit to run without GA4. Build one with `ga4Stream`. */
 	ga4?: GA4ProviderConfig;
 	/**
 	 * Cross-subdomain cookie domain in normalized leading-dot form. Typed as the
@@ -94,7 +102,13 @@ export interface AnalyticsConfig {
 	 * from {@link resolveResqCookieDomain}.
 	 */
 	cookieDomain?: CookieDomain;
+	/**
+	 * Kill switch: when `true`, {@link Analytics.init} boots no providers and
+	 * every dispatch method becomes a no-op (debug logging still fires). Use for
+	 * preview/CI environments.
+	 */
 	disabled?: boolean;
+	/** When `true`, `track`/`identify` log to `console.debug` before dispatch — even while `disabled`. */
 	debug?: boolean;
 }
 
@@ -265,11 +279,23 @@ export class Analytics {
 
 	/**
 	 * Initialise the client and lazily boot the configured providers.
-	 * Idempotent: the first call wins and later calls return the same promise,
-	 * so a double-mount never re-inits PostHog / GA4.
+	 *
+	 * Idempotent and not cancellable: the first call wins and every later call
+	 * returns the *same* cached promise — the second call's `config` is ignored,
+	 * so a double-mount never re-inits PostHog / GA4. Concurrent calls are safe
+	 * for this reason; there is no `AbortSignal`.
+	 *
+	 * Effects (browser only, when not `disabled`): dynamically imports
+	 * `posthog-js`, calls `posthog.init`, injects the gtag.js `<script>` into
+	 * `document.head`, pushes commands onto `window.dataLayer`, and stores the
+	 * config and PostHog client on this instance. On the server or when
+	 * `config.disabled` is set it resolves immediately with no effects.
 	 *
 	 * @param config - PostHog/GA4 credentials plus cross-subdomain and debug flags.
 	 * @returns A promise that resolves once provider bootstrapping has settled.
+	 *   It **rejects** if the `posthog-js` dynamic import fails (e.g. a chunk
+	 *   load error) or `posthog.init` throws; because the promise is cached, a
+	 *   failed init is never retried — every later call re-returns the rejection.
 	 */
 	init(config: AnalyticsConfig): Promise<void> {
 		if (this.#initPromise) return this.#initPromise;
@@ -318,6 +344,10 @@ export class Analytics {
 	 * payload; ad-hoc names accept an optional free-form bag. GA4 params are
 	 * flattened to primitives by {@link primitivesOnly} before dispatch.
 	 *
+	 * Effectful, never throws: a no-op before {@link init} and while `disabled`
+	 * (a `debug` log still fires first). Otherwise forwards to `posthog.capture`
+	 * and pushes a gtag `event` command onto `window.dataLayer`.
+	 *
 	 * @template E - The event name, narrowed to a registered key when one exists.
 	 * @param event - The event name.
 	 * @param args - The event payload, shaped by {@link TrackArgs}.
@@ -344,6 +374,10 @@ export class Analytics {
 	 * on sign-in; GA4 traits are flattened to primitives and the `user_id` is set
 	 * on the measurement config.
 	 *
+	 * Effectful, never throws: a no-op before {@link init} and while `disabled`
+	 * (a `debug` log still fires first). Otherwise calls `posthog.identify` and
+	 * emits gtag `set`/`config` commands on `window.dataLayer`.
+	 *
 	 * @param userId - The stable user identifier.
 	 * @param traits - Optional user properties / person profile fields.
 	 */
@@ -364,6 +398,11 @@ export class Analytics {
 	 * Clear the bound identity and tear down local state. Call on sign-out: it
 	 * clears GA4's `user_id`, resets PostHog, and drops the cached config so a
 	 * later {@link init} can boot cleanly.
+	 *
+	 * Effectful, never throws, and idempotent: it runs regardless of the
+	 * `disabled` flag, and mutates instance state (`config`, `posthog`, and the
+	 * cached init promise all reset to `null`). Calling it on an uninitialised
+	 * instance is a harmless no-op.
 	 */
 	reset(): void {
 		if (this.#config?.ga4) {
@@ -381,6 +420,10 @@ export class Analytics {
 	 * SPA navigation, and GA4's Enhanced Measurement (UI default) does the same
 	 * for gtag.js. Only call manually if you've disabled both auto-captures, or
 	 * for first-paint pageviews before init has resolved.
+	 *
+	 * Effectful, never throws: a no-op before {@link init} and while `disabled`
+	 * (no `debug` log here, unlike `track`/`identify`). Otherwise emits a PostHog
+	 * `$pageview` and a gtag `page_view` event.
 	 *
 	 * @param url - Explicit page URL; defaults to the current location.
 	 */
@@ -401,7 +444,9 @@ export const analytics = new Analytics();
  * {@link Analytics.init}.
  *
  * @param config - PostHog/GA4 credentials plus cross-subdomain and debug flags.
- * @returns A promise that resolves once provider bootstrapping has settled.
+ * @returns A promise that resolves once provider bootstrapping has settled, and
+ *   rejects on the same conditions as {@link Analytics.init} (failed `posthog-js`
+ *   import or `posthog.init` throw).
  */
 export const initAnalytics = (config: AnalyticsConfig): Promise<void> => analytics.init(config);
 
@@ -460,8 +505,18 @@ export type { CookieDomain, Ga4MeasurementId, ResqSubdomain } from "./resq";
  * form (e.g. `["research.resq.software", "viz.resq.software"]` →
  * `".resq.software"`), or `undefined` when the hosts share no multi-label root.
  *
+ * Pure and total: never throws. An empty input list, or hosts whose only common
+ * suffix is a single label, yields the `undefined` sentinel.
+ *
  * @param domains - The hosts to reduce to their shared registrable root.
- * @returns The branded shared cookie domain, or `undefined` when there is none.
+ * @returns The branded shared {@link CookieDomain}, or the `undefined` sentinel
+ *   when there is no shared multi-label root.
+ * @example
+ * ```ts
+ * inferCookieDomain(["research.resq.software", "viz.resq.software"]);
+ * // → branded ".resq.software"
+ * inferCookieDomain(["a.example.com", "b.other.org"]); // → undefined
+ * ```
  */
 export const inferCookieDomain = (domains: string[]): CookieDomain | undefined => {
 	if (domains.length === 0) return undefined;

@@ -52,8 +52,13 @@ export class FileHelpers {
 	 * Fetches the resource at the given URL and returns its content as an ArrayBuffer.
 	 * This is useful for loading binary data like images, videos, or other file types.
 	 *
+	 * Performs a network request as a side effect.
+	 *
 	 * @param url - The URL of the file to fetch
 	 * @returns Promise that resolves to the file content as an ArrayBuffer
+	 * @throws {TypeError} If the `fetch` fails (network error, CORS, invalid URL);
+	 *   rejects the returned promise. HTTP error statuses are *not* thrown — the
+	 *   body of a 4xx/5xx response is returned like any other.
 	 * @example
 	 * ```ts
 	 * const buffer = await FileHelpers.urlToArrayBuffer('https://example.com/image.png')
@@ -72,8 +77,12 @@ export class FileHelpers {
 	 * Fetches the resource at the given URL and returns its content as a Blob object.
 	 * Blobs are useful for handling file data in web applications.
 	 *
+	 * Performs a network request as a side effect.
+	 *
 	 * @param url - The URL of the file to fetch
 	 * @returns Promise that resolves to the file content as a Blob
+	 * @throws {TypeError} If the `fetch` fails (network error, CORS, invalid URL);
+	 *   rejects the returned promise. HTTP error statuses are not thrown.
 	 * @example
 	 * ```ts
 	 * const blob = await FileHelpers.urlToBlob('https://example.com/document.pdf')
@@ -95,7 +104,9 @@ export class FileHelpers {
 	 * resources directly in HTML or CSS.
 	 *
 	 * @param url - The URL of the file to convert, or an existing data URL
-	 * @returns Promise that resolves to a data URL string
+	 * @returns Promise that resolves to a data URL string. An input already
+	 *   starting with `data:` is returned verbatim without a fetch.
+	 * @throws {TypeError} If a non-`data:` URL is fetched and the request fails.
 	 * @example
 	 * ```ts
 	 * const dataUrl = await FileHelpers.urlToDataUrl('https://example.com/image.jpg')
@@ -120,6 +131,10 @@ export class FileHelpers {
 	 *
 	 * @param file - The Blob object to convert
 	 * @returns Promise that resolves to a base64-encoded data URL string
+	 * @throws {ProgressEvent} Rejects with the `FileReader` error event if the read
+	 *   errors or is aborted.
+	 * @remarks If `file` is falsy the read is never started, so the returned promise
+	 *   **never settles** (it hangs rather than rejecting) — always pass a real Blob.
 	 * @example
 	 * ```ts
 	 * const blob = new Blob(['Hello World'], { type: 'text/plain' })
@@ -152,6 +167,10 @@ export class FileHelpers {
 	 *
 	 * @param file - The Blob object to convert to text
 	 * @returns Promise that resolves to the text content as a string
+	 * @throws {ProgressEvent} Rejects with the `FileReader` error event if the read
+	 *   errors or is aborted.
+	 * @remarks If `file` is falsy the read is never started, so the returned promise
+	 *   **never settles** (it hangs rather than rejecting) — always pass a real Blob.
 	 * @example
 	 * ```ts
 	 * const textBlob = new Blob(['Hello World'], { type: 'text/plain' })

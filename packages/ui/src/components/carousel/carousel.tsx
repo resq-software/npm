@@ -39,7 +39,14 @@ import * as React from "react";
 import { cn } from "../../lib/utils.js";
 import { Button } from "../button/button.js";
 
-/** The Embla carousel instance handed back via the `setApi` callback. */
+/**
+ * The Embla carousel instance handed back via the {@link Carousel} `setApi`
+ * callback — the imperative handle for programmatic control (`scrollNext`,
+ * `scrollTo`, `on`, …).
+ *
+ * Is `undefined` until Embla has initialized the viewport, so guard every call
+ * (`api?.scrollNext()`); `setApi` is invoked once the instance becomes available.
+ */
 type CarouselApi = UseEmblaCarouselType[1];
 type CarouselContextProps = CarouselProps & {
 	api: ReturnType<typeof useEmblaCarousel>[1];

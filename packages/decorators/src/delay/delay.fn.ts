@@ -26,11 +26,19 @@ import type { Method } from "../types.js";
 /**
  * Wraps a method to delay its execution by the specified time.
  *
+ * Effectful: each call schedules an **independent** `setTimeout` — unlike
+ * {@link debounceFn} there is no dedup or timer reset, so N calls produce N
+ * deferred executions. The wrapper returns `undefined` immediately; the original
+ * method's return value is **discarded**, so it cannot wrap a method whose
+ * result the caller needs. A throw from the method surfaces inside the timer
+ * callback, not to the caller. No `AbortSignal` / cancellation.
+ *
  * @template D - The return type of the original method.
  * @template A - The argument types of the original method.
  * @param originalMethod - The method to delay.
  * @param delayMs - The delay time in milliseconds.
- * @returns The delayed method.
+ * @returns The delayed wrapper; it always returns `undefined` (`void`), never
+ *   the wrapped method's value.
  * @example
  * ```typescript
  * class MessageService {

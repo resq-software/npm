@@ -122,8 +122,14 @@ export class ExecutionQueue {
 	 * previously queued tasks have completed. If a timeout was specified in the constructor,
 	 * there will be a delay between this task and the next one.
 	 *
+	 * A failing task never strands the queue: whether `task` throws synchronously
+	 * or its promise rejects, only that task's returned promise rejects (with the
+	 * thrown value) and the queue proceeds to the next task. Failure is surfaced as
+	 * a rejected promise, not a synchronous throw from `push`.
+	 *
 	 * @param task - The function to execute (can be sync or async)
-	 * @returns Promise that resolves with the task's return value
+	 * @returns Promise that resolves with the task's return value, or rejects with
+	 *   whatever `task` threw / rejected with.
 	 * @example
 	 * ```ts
 	 * const queue = new ExecutionQueue(100)
@@ -161,6 +167,11 @@ export class ExecutionQueue {
 	 * Immediately removes all pending tasks from the queue. Any currently
 	 * running task will complete normally, but no additional tasks will be executed.
 	 * This method does not wait for the current task to finish.
+	 *
+	 * Discarded tasks are dropped without settling: the promise returned by the
+	 * `push` that enqueued each cleared task never resolves nor rejects, so any
+	 * `await` on it hangs forever. Only call `close()` when those pending results
+	 * are known to be unawaited.
 	 *
 	 * @example
 	 * ```ts

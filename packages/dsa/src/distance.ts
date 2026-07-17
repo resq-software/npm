@@ -110,27 +110,31 @@ export type PointFor<F extends DistanceFormula> = F extends "threed"
  */
 export interface DistanceOptions {
 	/**
-	 * Minkowski parameter (default: 2)
+	 * Minkowski norm order. Must be strictly positive (`> 0`); `Infinity` is
+	 * accepted and yields Chebyshev distance. Defaults to `2` when omitted.
 	 * - p=1: Manhattan distance
 	 * - p=2: Euclidean distance
 	 * - p=Infinity: Chebyshev distance
-	 * @minimum 0
 	 */
 	p?: number;
 }
 
 /**
- * Result of a safe distance calculation.
+ * Outcome of a non-throwing distance calculation ({@link Distance.calculateSafe}).
+ *
+ * The {@link valid} flag governs the other fields: when `valid` is `true`,
+ * `distance` holds a finite result and `error` is absent; when `valid` is
+ * `false`, `distance` is `NaN` and `error` carries the failure message.
  * @category Types
  */
 export interface DistanceResult {
-	/** Calculated distance (NaN if invalid) */
+	/** The computed distance, or `NaN` when `valid` is `false`. */
 	distance: number;
-	/** Formula used for calculation */
+	/** The formula that was requested (echoed back regardless of outcome). */
 	formula: DistanceFormula;
-	/** Whether the calculation succeeded */
+	/** `true` if the calculation succeeded; see the field constraints above. */
 	valid: boolean;
-	/** Error message if calculation failed */
+	/** Present only when `valid` is `false`: the validation failure message. */
 	error?: string;
 }
 

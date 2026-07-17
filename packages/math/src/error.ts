@@ -24,9 +24,17 @@
  * @module @resq-systems/math/error
  */
 
-/** Base class for all math engine errors. */
+/**
+ * Base class for all math engine errors.
+ *
+ * Every error the engine throws is an instance of this class, so `catch (e) { if
+ * (e instanceof MathError) … }` reliably distinguishes engine failures from
+ * unrelated exceptions. Each subclass overrides `name` to its own class name and
+ * fixes a distinct {@link code}; the pair `(name, code)` is stable across
+ * releases and safe to switch on, whereas `message` is human-facing and may change.
+ */
 export class MathError extends Error {
-	/** Stable machine-readable error code (e.g. `"SORT_ERROR"`). */
+	/** Stable machine-readable error code (e.g. `"SORT_ERROR"`); constant per subclass. */
 	readonly code: string;
 
 	/**
@@ -90,8 +98,8 @@ export class UnboundVariableError extends MathError {
  *
  * @example
  * ```ts
- * // There is no instance for "+:bool:bool", so:
- * evaluate(add(B(true), B(false))); // throws UndefinedOpError("+", ["bool", "bool"])
+ * // There is no instance for "+:bool:bool", so evaluating a bool addition:
+ * evaluate(compile(add(B(true), B(false)))); // throws UndefinedOpError("+", ["bool", "bool"])
  * ```
  */
 export class UndefinedOpError extends MathError {

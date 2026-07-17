@@ -29,16 +29,40 @@
  * The six canonical color roles present in **both** representations. `oklch`
  * (the design-system source of truth) and `hex` (the email-safe snapshot) must
  * each define every one of these.
+ *
+ * These are semantic *roles*, not raw swatches: consumers reference
+ * `colors.oklch.primary`, never the literal channel values, so a palette change
+ * updates the token once. The union has no meaningful ordering — membership, not
+ * position, is the contract.
  */
 export type ColorRole = "background" | "surface" | "border" | "foreground" | "muted" | "primary";
 
 /**
  * Status roles that exist only in the email-safe `hex` snapshot. `oklch` does
  * not define these, so they are indexable on `colors.hex` but never on
- * `colors.oklch`.
+ * {@link ColorRole} / `colors.oklch` — the type split enforces that asymmetry at
+ * compile time. In apps these four states come from the `@resq-systems/ui`
+ * theme's own status tokens rather than from here; the hex copies exist so
+ * transactional email (which can't evaluate `oklch()`) still has them.
  */
 export type StatusRole = "info" | "success" | "warning" | "danger";
 
+/**
+ * The canonical palette in its two representations. `oklch` is the source of
+ * truth; `hex` is a hand-maintained snapshot that must resolve to the same
+ * perceived color for each shared {@link ColorRole}, because email clients and
+ * older render targets can't evaluate `oklch()`. Editing one representation
+ * without the other silently drifts email away from the app — the two are only
+ * *structurally* linked by the `satisfies` clause below, not value-checked.
+ *
+ * @example
+ * ```ts
+ * import { colors } from "@resq-systems/constants/tokens";
+ *
+ * colors.oklch.primary; // → "oklch(58.50% 0.1877 24.72)"
+ * colors.hex.danger;    // → "#D43E3F" (status role — hex only)
+ * ```
+ */
 export const colors = {
 	oklch: {
 		background: "oklch(16.63% 0.0262 269.37)",
@@ -89,15 +113,28 @@ export type OklchColorRole = keyof typeof colors.oklch;
 export type ColorTokenName = keyof typeof colors.hex;
 
 /**
- * Browser + PWA `theme-color` / viewport meta colors. `dark` tracks the
- * canonical page background; `light` is the light-mode chrome color.
+ * Browser + PWA `theme-color` / viewport meta colors, keyed by
+ * `prefers-color-scheme`. `dark` is aliased to {@link colors}`.hex.background`
+ * (not a re-typed copy) so the browser chrome always matches the dark page
+ * background exactly; `light` is a standalone light-mode chrome color with no
+ * palette counterpart. Hex, not oklch, because `<meta name="theme-color">`
+ * across browsers doesn't accept `oklch()`.
  */
 export const themeColor = {
 	light: "#E8EAF0",
 	dark: colors.hex.background,
 } as const;
 
-/** Brand typefaces, ready-to-use CSS font stacks, and the webfont stylesheet. */
+/**
+ * Brand typefaces, ready-to-use CSS font stacks, and the webfont stylesheet.
+ *
+ * Within each {@link fonts.stacks} array the **first** entry is the brand face
+ * and the rest are ordered fallbacks the browser walks until one resolves;
+ * multi-word family names are pre-quoted so the array can be joined into a
+ * `font-family` value verbatim. {@link fonts.googleFontsHref} must stay in sync
+ * with these families and the weights they're actually rendered at — a face or
+ * weight used in the app but missing from the href won't load.
+ */
 export const fonts = {
 	display: "Syne",
 	body: "DM Sans",

@@ -46,12 +46,21 @@
  *
  * Uses lazy binding on first access for better performance.
  *
+ * Returns a **new** descriptor whose getter, on first read per instance, binds
+ * the method and redefines the property as a plain own value on that instance —
+ * so it mutates the instance the first time it is accessed, then serves the
+ * cached bound function (idempotent thereafter). The replacement property is
+ * non-enumerable but writable and configurable. The original prototype method is
+ * left intact.
+ *
  * @template F - The decorated method's function type, preserved end-to-end.
  * @param _target - The class prototype (unused).
  * @param propertyKey - The name of the method.
  * @param descriptor - The property descriptor.
  * @returns The modified descriptor.
- * @throws {Error} When applied to a non-method property.
+ * @throws {Error} At decoration time, when the descriptor has no method value
+ *   (applied to an accessor or field), with message
+ *   `"@bind is applicable only on methods."`.
  * @example
  * ```typescript
  * class MyClass {

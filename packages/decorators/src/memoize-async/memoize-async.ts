@@ -33,12 +33,21 @@ import type { AsyncMemoizeConfig } from "./memoize-async.types.js";
  * Call with no argument to cache forever, a number for a TTL in milliseconds, or
  * an {@link AsyncMemoizeConfig} for a custom cache, key resolver, and/or expiry.
  *
+ * The cache and in-flight promise map are built once, at decoration time, so both
+ * the cached values and the concurrent-call deduplication are shared across every
+ * instance of the class. Failure surfaces as a rejected promise — a rejection is
+ * shared by all callers deduped onto the same in-flight promise, and the entry is
+ * then cleared so a later call retries rather than replaying the error. Only
+ * resolved values are cached; rejections are not. Cancellation is not supported
+ * (no `AbortSignal`). Mutates the supplied property descriptor in place.
+ *
  * @template T - The class type that owns the decorated method.
  * @template D - The resolved type of the async method.
  * @param input - A TTL in milliseconds, an {@link AsyncMemoizeConfig}, or omitted
  * to cache indefinitely.
  * @returns The async method decorator.
- * @throws {Error} If applied to anything other than a method.
+ * @throws {Error} If applied to a member without a `value` descriptor (an
+ * accessor or plain property rather than a method).
  * @example
  * ```ts
  * class DataService {

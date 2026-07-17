@@ -37,6 +37,11 @@ import type {
  * and return value. Async methods are awaited so completion and failure are
  * logged after the promise settles.
  *
+ * Failure logging is async-only: a rejected promise is logged as `failed` and
+ * re-thrown, but a *synchronous* throw propagates without a failure log (the
+ * entry log has already fired). The returned decorator replaces
+ * `descriptor.value` in place; it does not preserve the original method's `length`.
+ *
  * @param options - Configuration options.
  * @returns The method decorator.
  *
@@ -110,6 +115,11 @@ export function Log(options: LogMethodOptions = {}): MethodDecorator {
  * A log is emitted only when the measured duration meets or exceeds
  * {@link LogTimingOptions.threshold}.
  *
+ * Async calls are timed across the whole promise via `finally`, so their timing
+ * logs even on rejection; a *synchronous* throw skips the timing log entirely
+ * (the duration line never runs). The decorator neither catches nor rethrows —
+ * errors propagate unchanged.
+ *
  * @param options - Configuration options.
  * @returns The method decorator.
  *
@@ -168,6 +178,11 @@ export function LogTiming(options: LogTimingOptions = {}): MethodDecorator {
  * Decorator that wraps a method in try/catch and logs any error, then either
  * rethrows it or swallows it (returning `undefined`) per
  * {@link LogErrorOptions.rethrow}.
+ *
+ * Both sync throws and async rejections are handled symmetrically. When
+ * `rethrow` is `false` the error is suppressed and the call resolves to
+ * `undefined` — for an async method that means a *resolved* promise, not a
+ * rejected one, so callers lose the failure signal by design.
  *
  * @param options - Configuration options.
  * @returns The method decorator.
@@ -234,6 +249,14 @@ export function LogError(options: LogErrorOptions = {}): MethodDecorator {
  * Class decorator that wraps every own prototype method with call (and optional
  * timing) logging, skipping the constructor and any names in
  * {@link LogClassOptions.exclude}.
+ *
+ * Mutates the target's prototype in place, redefining each own method via
+ * `Object.defineProperty`, then returns the same constructor reference (not a
+ * subclass). Only own, enumerable-by-`getOwnPropertyNames` function properties
+ * are wrapped: inherited methods, accessors (getters/setters), and
+ * property-assigned arrow functions are left untouched. As with {@link Log},
+ * failures are logged only on the async path; a synchronous throw propagates
+ * un-logged.
  *
  * @param options - Configuration options.
  * @returns A class decorator that returns the (mutated) constructor.

@@ -157,7 +157,13 @@ async function deriveKey(password: string, salt: Buffer): Promise<Buffer> {
  *   the salt/IV are recovered on decryption.
  *
  * @throws From the underlying Node crypto primitives if `encryptionKey`
- *   is empty or scrypt fails.
+ *   is empty or scrypt fails. Failure surfaces as a rejected `Promise`,
+ *   never a resolved error value.
+ *
+ * Draws from the platform CSPRNG (`randomBytes`) each call, so it is not
+ * a pure function and its output is non-deterministic. There is no
+ * `AbortSignal` hook — once awaited the scrypt work runs to completion.
+ * Independent calls share no state and are safe to run concurrently.
  *
  * @compliance NIST 800-53 SC-28 (Protection of Information at Rest),
  *   SC-13 (Cryptographic Protection).
@@ -198,7 +204,9 @@ export async function encryptData(
  *
  * @throws Error if the tag does not verify (wrong key, modified
  *   ciphertext, truncated payload). Catch this and treat it as a
- *   security event, not a recoverable error.
+ *   security event, not a recoverable error. The rejection comes back
+ *   as a rejected `Promise`. No `AbortSignal` is honoured; concurrent
+ *   calls are independent and share no state.
  *
  * @example
  * ```ts
@@ -339,8 +347,14 @@ export function maskEmail(email: string): Masked {
  *   key, e.g. `"token"` matches `"refreshToken"` and `"id_token"`.
  *
  * @returns A new object with sensitive fields redacted and emails
- *   masked. Nested objects are recursed; arrays and primitives pass
- *   through unchanged.
+ *   masked. Any non-null object value is recursed and comes back as a
+ *   plain object keyed by its enumerable own properties — so arrays
+ *   return as index-keyed objects (`["a"]` → `{ "0": "a" }`) and class
+ *   instances / `Date`s lose their prototype. Only primitives, `null`,
+ *   and `undefined` pass through unchanged.
+ *
+ * @throws {RangeError} On a circular reference — recursion has no cycle
+ *   guard, so a self-referential object overflows the call stack.
  *
  * @example
  * ```ts

@@ -29,6 +29,9 @@ import type { ObserverCallback } from "./index.js";
  * Builds a property decorator that observes assignments to the decorated
  * property, invoking `cb` (or logging) on each new value.
  *
+ * The single `value` closure is shared by the prototype, so every instance reads
+ * and writes the same backing slot.
+ *
  * @template T - The type of the property value.
  * @param cb - Callback to invoke on each assignment; when omitted, assignments
  * are logged to the console.
@@ -57,6 +60,11 @@ function factory<T>(cb?: ObserverCallback<T>): PropertyDecorator {
 /**
  * Observe every assignment to a property, logging each new value to the console.
  *
+ * Redefines the property on `target` (the prototype) with a getter/setter pair via
+ * `Object.defineProperty`, and writes to `console.log` on every assignment. The
+ * backing value is held in a single closure shared by the prototype, so all
+ * instances read and write the same slot rather than getting per-instance storage.
+ *
  * @param target - The class prototype.
  * @param propertyKey - The property key.
  * @example
@@ -75,6 +83,11 @@ export function observe(target: object, propertyKey: string | symbol): void;
 
 /**
  * Observe every assignment to a property and invoke `cb` with each new value.
+ *
+ * The returned decorator redefines the property on the prototype via
+ * `Object.defineProperty`; `cb` runs synchronously inside the setter, so a throw
+ * from `cb` propagates to the assigning code. As with the default form, the
+ * backing value lives in one closure shared across all instances of the class.
  *
  * @template T - The type of the property value.
  * @param cb - Callback to run on each assignment of the observed property.

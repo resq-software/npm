@@ -27,8 +27,13 @@ import type { AsyncMethod, Method } from "../types.js";
 /**
  * Function type for reporting execution time data.
  *
+ * Invoked once per timed call with the measured {@link ExactTimeReportData}. Any
+ * returned value is ignored (the signature allows non-`void` only for
+ * convenience), and it runs for its side effect — logging, metrics — after the
+ * method settles.
+ *
  * @param data - The execution time report data.
- * @returns Any value (typically `void`).
+ * @returns Any value (typically `void`); the caller discards it.
  * @example
  * ```typescript
  * const customReporter: ReportFunction = (data) => {
@@ -42,6 +47,10 @@ export type ReportFunction = (data: ExactTimeReportData) => unknown;
 /**
  * Data structure containing execution time information.
  *
+ * A snapshot handed to a {@link ReportFunction} after one invocation. For an
+ * async method the report is taken after the promise resolves, so {@link result}
+ * is the fulfilled value and {@link execTime} spans until resolution.
+ *
  * @example
  * ```typescript
  * const reportData: ExactTimeReportData = {
@@ -52,18 +61,28 @@ export type ReportFunction = (data: ExactTimeReportData) => unknown;
  * ```
  */
 export interface ExactTimeReportData {
-	/** The arguments passed to the method */
+	/** The exact positional arguments the timed method was called with. */
 	args: unknown[];
-	/** The return value of the method */
+	/** The method's return value — the resolved value for an async method. */
 	result: unknown;
-	/** The execution time in milliseconds */
+	/**
+	 * Elapsed wall-clock time in **milliseconds** (`Date.now` deltas, integer ms
+	 * resolution), measured from just before the call to just after it settles.
+	 */
 	execTime: number;
 }
 
 /**
  * Type for methods that can have their execution time reported.
  *
- * @template T - The type of the class containing the method.
+ * The **dual-protocol** shape of `@execTime`: the same callable must satisfy both
+ * the legacy (`experimentalDecorators`) three-argument method decorator and the
+ * Stage-3 `(value, context)` decorator. The two protocols disagree on the return
+ * type, which is why it is deliberately `any` (see the inline `biome-ignore`) —
+ * any concrete union would break one caller.
+ *
+ * @template T - The class owning the method; `propertyName` is a `keyof T` in the
+ *   legacy form.
  * @param target - The class prototype.
  * @param propertyName - The name of the method.
  * @param descriptor - The property descriptor.

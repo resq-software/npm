@@ -45,10 +45,18 @@ import type { ExactTimeReportable, ReportFunction } from "./exec-time.types.js";
  * Decorator that measures and reports the execution time of methods.
  * Supports both legacy (TypeScript) and standard (Stage 3) decorator formats.
  *
+ * Detects the protocol at decoration time: given a descriptor it rewrites
+ * `descriptor.value` (legacy form); otherwise it treats the arguments as the
+ * Stage-3 `(value, context)` pair and returns the wrapped method for a `method`
+ * kind. See {@link execTimeFn} for the timing, async, and reporter-resolution
+ * contract (including that rejected async methods are not reported).
+ *
  * @template T - The type of the class containing the decorated method.
  * @param arg - Optional reporter function or label string.
  * @returns The decorator function.
- * @throws {Error} When applied to a non-method property.
+ * @throws {Error} At decoration time, with message
+ *   `"@execTime is applicable only on methods."`, when the legacy descriptor has
+ *   no method value or the Stage-3 context's `kind` is not `"method"`.
  * @example
  * ```typescript
  * class PerformanceMonitor {

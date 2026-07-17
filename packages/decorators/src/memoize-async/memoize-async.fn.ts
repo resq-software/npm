@@ -36,13 +36,27 @@ import type { AsyncMemoizeConfig } from "./memoize-async.types.js";
  * to cache forever, is a number for a TTL in milliseconds, or an
  * {@link AsyncMemoizeConfig} for a custom cache, key resolver, and/or expiry.
  *
+ * Concurrency and failure contract:
+ * - Concurrent same-key calls resolve or reject together — they share one
+ *   in-flight promise, which is cleared once it settles (success or failure), so
+ *   a rejection is not cached and the next call re-runs the method.
+ * - A resolved value of `null`/`undefined` is treated as a miss on the next read
+ *   (the cache lookup gates on `!= null`), so such results are recomputed rather
+ *   than served from cache.
+ * - `TaskExec` schedules a timer to evict each entry after `expirationTimeMs`
+ *   (a clock/timer effect); the TTL runs from insertion.
+ * - Cancellation is not supported (no `AbortSignal`); failure is always a
+ *   rejected promise, never a resolved error-shaped value.
+ *
  * @template T - The class type a `keyof T` key resolver resolves against.
  * @template D - The resolved type of the async method.
  * @template A - The argument tuple of the original method.
  * @param originalMethod - The async method whose results are cached.
  * @param input - A TTL in milliseconds, an {@link AsyncMemoizeConfig}, or omitted
  * to cache indefinitely.
- * @returns The memoized async method.
+ * @returns The memoized async method; rejects with whatever `originalMethod`
+ * rejects with, and additionally with a `TypeError` when no `keyResolver` is set
+ * and the arguments are circular (the default key uses `JSON.stringify`).
  * @example
  * ```ts
  * class ApiClient {

@@ -42,6 +42,11 @@ export const brand = {
 	/** Long-form product description (metadata, manifest, store listings). */
 	description:
 		"The decentralized kinetic operating system for autonomous disaster response. Mesh-networked coordination when infrastructure fails.",
+	/**
+	 * Absolute `https://` origins with no trailing slash, so a caller can append
+	 * a path directly (`` `${brand.domains.marketing}/pricing` ``). `marketing`
+	 * is the apex domain; the others are subdomains of it.
+	 */
 	domains: {
 		app: "https://app.resq.software",
 		marketing: "https://resq.software",
@@ -49,6 +54,12 @@ export const brand = {
 		status: "https://status.resq.software",
 	},
 	email: {
+		/**
+		 * RFC 5322 display-name form (`Name <addr>`) for use as a message `From`
+		 * header verbatim. Sends from the `send.resq.software` subdomain — the
+		 * DKIM/SPF-authenticated envelope domain — which differs from the apex
+		 * reply domain used by {@link support}/{@link contact}.
+		 */
 		from: "ResQ Systems <updates@send.resq.software>",
 		support: "support@resq.software",
 		contact: "contact@resq.software",

@@ -29,12 +29,21 @@ import type { AfterConfig, AfterFunc } from "./after.types.js";
 /**
  * Wraps a method to execute an after-hook function once the method completes.
  *
+ * The wrapper is **always async**: it returns a `Promise` even when
+ * `originalMethod` is synchronous, because it awaits the result so the hook
+ * receives the resolved value. The hook runs only on success — if
+ * `originalMethod` throws or rejects, the returned promise rejects with that
+ * error and the hook is skipped. Each call is independent (no shared state), so
+ * concurrent invocations are safe; there is no `AbortSignal` support.
+ *
  * @template T - The type owning the named hook when `config.func` is a method name.
  * @template D - The return type of the original method.
  * @template A - The argument types of the original method.
  * @param originalMethod - The method to wrap.
  * @param config - Configuration for the after hook.
  * @returns The wrapped method, which resolves to the original method's value.
+ * @throws {Error} As a rejected promise, when `config.func` is a method name
+ *   that does not resolve to a callable on the invocation's `this`.
  * @example
  * ```typescript
  * class Service {

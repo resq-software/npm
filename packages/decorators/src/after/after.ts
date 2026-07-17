@@ -47,11 +47,18 @@ import type { AfterConfig } from "./after.types.js";
  * Decorator that executes a function after the decorated method completes.
  * The after function receives the method's arguments and return value.
  *
+ * Applying the decorator rewrites the property descriptor's `value` with the
+ * wrapped method, which becomes **async** (returns a `Promise`) regardless of
+ * whether the original was synchronous — callers must adjust for the added
+ * `await`. See {@link afterFn} for the per-call failure and hook semantics.
+ *
  * @template T - The type of the class containing the decorated method.
  * @template D - The return type of the decorated method.
  * @param config - Configuration for the after hook.
  * @returns The decorator function.
- * @throws {Error} When applied to a non-method property.
+ * @throws {Error} At decoration time, when applied to anything without a method
+ *   value (an accessor or field), with message
+ *   `"@after is applicable only on a methods."`.
  * @example
  * ```typescript
  * class DataProcessor {

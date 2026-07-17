@@ -332,6 +332,21 @@ function SidebarMenuItem({ className, ...props }: Readonly<React.ComponentProps<
 	);
 }
 
+/**
+ * Root provider for the sidebar family — owns open/collapsed state and exposes
+ * it via {@link useSidebar}. Supports both controlled (`open` + `onOpenChange`)
+ * and uncontrolled (`defaultOpen`) usage.
+ *
+ * Effects: every open-state change writes the `sidebar_state` cookie
+ * (`document.cookie`, one-week max-age) so the state survives reloads, and while
+ * mounted it registers a global `keydown` listener that toggles the sidebar on
+ * ⌘B / Ctrl+B (removed on unmount).
+ *
+ * @param defaultOpen - Initial open state when uncontrolled. Defaults to `true`.
+ * @param open - Controlled open state; when set, `onOpenChange` receives updates
+ *   and internal state is bypassed.
+ * @param onOpenChange - Called with the next open state on every toggle.
+ */
 function SidebarProvider({
 	children,
 	className,
@@ -494,6 +509,14 @@ function SidebarTrigger({
 	);
 }
 
+/**
+ * Read the sidebar's open/collapsed state and toggles from context.
+ *
+ * @returns The active {@link SidebarContextProps} — `open`/`state`, the mobile
+ *   flag, and the `setOpen`/`toggleSidebar` actions.
+ * @throws {Error} When called outside a {@link SidebarProvider} (the context is
+ *   `null`). Render the component tree under a provider to satisfy this.
+ */
 function useSidebar() {
 	const context = React.useContext(SidebarContext);
 	if (!context) {
@@ -567,6 +590,15 @@ function SidebarMenuBadge({ className, ...props }: Readonly<React.ComponentProps
 	);
 }
 
+/**
+ * Primary nav-item button. Must render under a {@link SidebarProvider} — it
+ * reads state via {@link useSidebar}, which throws otherwise.
+ *
+ * @param tooltip - When set, wraps the button in a tooltip that is shown *only*
+ *   while the sidebar is collapsed on desktop. A `string` is treated as the
+ *   tooltip label; an object is spread onto the underlying `TooltipContent`.
+ * @param isActive - Marks the item active (`data-active`) for styling.
+ */
 function SidebarMenuButton({
 	asChild = false,
 	className,
@@ -620,6 +652,13 @@ function SidebarMenuButton({
 	);
 }
 
+/**
+ * Loading placeholder for a menu item. Its text bar takes a random width
+ * (50–90%) chosen once per mount via `Math.random`, so successive renders and
+ * snapshots are non-deterministic by design.
+ *
+ * @param showIcon - Also render a square icon placeholder before the text bar.
+ */
 function SidebarMenuSkeleton({
 	className,
 	showIcon = false,

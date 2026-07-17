@@ -25,6 +25,11 @@
  * Compares two objects by their id property for use with Array.sort().
  * Sorts objects in ascending order based on their id values.
  *
+ * Ordering is by the `<` / `>` relational operators, so it is well-defined for
+ * string or numeric ids but yields `0` (treated as equal) whenever neither
+ * comparison is true — e.g. `NaN` ids or mutually incomparable types — which
+ * leaves such elements in their original relative order.
+ *
  * @param a - First object to compare
  * @param b - Second object to compare
  * @returns 1 if a.id \> b.id, -1 if a.id \< b.id, 0 if a.id === b.id

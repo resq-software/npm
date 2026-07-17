@@ -29,6 +29,14 @@
  *
  * Only works in platforms that support `Error.captureStackTrace` (ie v8).
  *
+ * The wrapper re-throws the *same* error instance (identity preserved, so
+ * `instanceof` checks still hold); it only rewrites the error's `stack` when the
+ * thrown value is an `Error` and `Error.captureStackTrace` exists — non-`Error`
+ * throws and non-V8 runtimes pass through untouched. The wrapped function is
+ * otherwise transparent: same arguments, same return value.
+ *
+ * @template Args - The wrapped function's positional argument tuple.
+ * @template Return - The wrapped function's return type, forwarded unchanged.
  * @param fn - The function to wrap and exclude from stack traces
  * @returns A wrapped version of the function that omits itself from error stack traces
  * @example

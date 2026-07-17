@@ -343,7 +343,11 @@ export class LRUCache<K, V> {
 	}
 
 	/**
-	 * Returns an iterator for the keys in the cache, from most-recently-used to least-recently-used.
+	 * Iterate the keys from most-recently-used to least-recently-used.
+	 *
+	 * Expired entries are skipped but — unlike {@link get}/{@link has} — **not**
+	 * evicted, so they still count toward {@link size} until a keyed access
+	 * removes them. Iterating does not change LRU order.
 	 */
 	*keys(): Generator<K> {
 		let current = this.head;
@@ -357,7 +361,8 @@ export class LRUCache<K, V> {
 	}
 
 	/**
-	 * Returns an iterator for the values in the cache, from most-recently-used to least-recently-used.
+	 * Iterate the values from most-recently-used to least-recently-used.
+	 * Skips (but does not evict) expired entries and leaves LRU order untouched.
 	 */
 	*values(): Generator<V> {
 		let current = this.head;
@@ -371,7 +376,9 @@ export class LRUCache<K, V> {
 	}
 
 	/**
-	 * Returns an iterator for the [key, value] pairs in the cache, from most-recently-used to least-recently-used.
+	 * Iterate `[key, value]` pairs from most-recently-used to
+	 * least-recently-used. Skips (but does not evict) expired entries and leaves
+	 * LRU order untouched.
 	 */
 	*entries(): Generator<[K, V]> {
 		let current = this.head;

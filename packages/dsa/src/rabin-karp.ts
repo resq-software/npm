@@ -32,16 +32,19 @@ import {
 //#region Types
 
 /**
- * Result of a single pattern match within the text.
+ * A single pattern occurrence within the searched text.
+ *
+ * `line` and `column` are populated together, and only when the matcher's
+ * `includeLineInfo` option is enabled — both are absent otherwise.
  */
 export interface PatternMatch {
-	/** Starting index of the match in the text */
+	/** Zero-based character offset of the match's first character in the text. */
 	index: number;
-	/** The matched substring */
+	/** The matched substring, sliced from the original (case-preserved) text. */
 	match: string;
-	/** Line number (if text contains newlines) */
+	/** One-based line number of the match; absent when line info is disabled. */
 	line?: number;
-	/** Column number within the line */
+	/** One-based column within {@link line}; absent when line info is disabled. */
 	column?: number;
 }
 

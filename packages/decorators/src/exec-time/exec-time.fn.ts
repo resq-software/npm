@@ -39,6 +39,18 @@ const reporter: ReportFunction = (data: ExactTimeReportData): void => {
  * Wraps a method to measure and report its execution time.
  * Handles both synchronous and asynchronous methods.
  *
+ * Effectful only through timing and reporting: it reads the clock (`Date.now`)
+ * and invokes the reporter (which logs or records metrics); it does not touch the
+ * arguments or the return value. Timing preserves async-ness — a sync method is
+ * measured and reported synchronously, a promise-returning method is measured
+ * until it resolves and the resolved value is forwarded unchanged. Because the
+ * async path attaches only a fulfillment handler, a **rejected** method is *not*
+ * reported and the rejection propagates untouched. When `arg` is a string that
+ * names a method on the receiver, that method is used as the reporter (bound to
+ * the instance); otherwise the string is a label prefix on the default logger,
+ * and a detached call (`this` nullish) falls back to that label logger. Each call
+ * is independent; concurrent calls are safe.
+ *
  * @template D - The return type of the original method.
  * @template A - The argument types of the original method.
  * @param originalMethod - The method to wrap.

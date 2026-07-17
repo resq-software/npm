@@ -28,8 +28,15 @@ import type { AsyncMethod } from "../types.js";
  * Type for the @delegate decorator function.
  * Transforms an async method into one that deduplicates concurrent calls.
  *
- * @template T - The type of the class containing the decorated method.
- * @template D - The return type of the decorated async method.
+ * The legacy (`experimentalDecorators`) method-decorator shape: it accepts and
+ * returns a descriptor over the *same* {@link AsyncMethod} type, so the
+ * decorated method keeps its resolved-value signature. It applies only to
+ * promise-returning members, since dedup is defined in terms of an in-flight
+ * promise.
+ *
+ * @template T - The class owning the decorated method; `propertyName` is a
+ *   `keyof T`.
+ * @template D - The value the decorated async method resolves to.
  * @param target - The class prototype.
  * @param propertyName - The name of the method being decorated.
  * @param descriptor - The property descriptor.

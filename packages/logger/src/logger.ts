@@ -151,6 +151,9 @@ export class Logger {
 	 * use. Subsequent calls with the same context return the same instance, so
 	 * `options` is honoured only on creation.
 	 *
+	 * On first use for a context this mutates the process-global instance
+	 * registry; the cached instance then lives for the process lifetime.
+	 *
 	 * @param context - The context name.
 	 * @param options - Optional logger configuration, applied only when creating.
 	 * @returns The logger instance for the specified context.
@@ -168,6 +171,10 @@ export class Logger {
 
 	/**
 	 * Set the global minimum log level across every existing logger instance.
+	 *
+	 * Mutates the `minLevel` of every logger currently in the registry. Instances
+	 * created *after* this call are unaffected and resolve their own level from
+	 * options/env as usual — this is a one-shot sweep, not a persistent floor.
 	 *
 	 * @param level - The minimum level to log across all loggers.
 	 */
@@ -187,6 +194,11 @@ export class Logger {
 	/**
 	 * Register a {@link LogTransport} to receive a structured {@link LogEntry} for
 	 * every log emitted by any logger instance (after level filtering).
+	 *
+	 * Mutates the process-global transport registry shared by all `Logger`
+	 * instances. Idempotent by identity: re-adding the same reference is a no-op
+	 * (but a distinct object with the same `name` *is* added again). Calling the
+	 * returned unsubscribe more than once is safe.
 	 *
 	 * @param transport - The transport to add. A transport already present (by
 	 *   identity) is not added twice.
@@ -211,6 +223,11 @@ export class Logger {
 	/**
 	 * Remove a previously-registered transport, matched by identity or by its
 	 * `name`. No-op if it is not registered.
+	 *
+	 * Mutates the process-global transport registry. When matching by `name` and
+	 * several transports share it, only the first match is removed.
+	 *
+	 * @param transport - The transport instance to remove, or the `name` to match.
 	 */
 	public static removeTransport(transport: LogTransport | string): void {
 		const index = Logger.transports.findIndex((registered) =>
@@ -426,10 +443,15 @@ export class Logger {
 	 * skipped and the function is still invoked. On failure the elapsed time is
 	 * logged via {@link Logger.error} and the error is rethrown.
 	 *
-	 * @template T - The return type of the function being timed.
+	 * Failure is surfaced as a rejected `Promise`: whatever `fn` throws or rejects
+	 * with is re-thrown unchanged after the elapsed time is logged. There is no
+	 * cancellation hook — `fn` runs to completion.
+	 *
+	 * @template T - The value the timed function resolves to (its return type).
 	 * @param label - Description of the operation being timed.
 	 * @param fn - Function to execute and time; may be sync or async.
 	 * @returns The resolved result of the function execution.
+	 * @throws The exact error `fn` threw or rejected with, re-thrown after logging.
 	 */
 	async time<T>(label: string, fn: () => Promise<T> | T): Promise<T> {
 		if (this.minLevel < LogLevel.DEBUG) return fn();

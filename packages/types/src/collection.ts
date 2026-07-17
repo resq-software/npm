@@ -92,7 +92,13 @@ export type UnionToIntersection<U> = (U extends unknown ? (k: U) => void : never
 	? I
 	: never;
 
-/** `true` when `T` is a union of two or more distinct members. */
+/**
+ * `true` when `T` is a union of two or more distinct members. `boolean` counts —
+ * it is `true | false` internally, so `IsUnion<boolean>` is `true`. `never` is
+ * not a union (`IsUnion<never>` is `false`). The `U` parameter is an internal
+ * accumulator that preserves the original union while `T` distributes; do not
+ * pass it.
+ */
 export type IsUnion<T, U = T> = [T] extends [never]
 	? false
 	: T extends unknown
@@ -166,7 +172,9 @@ export type Zip<T extends readonly unknown[], U extends readonly unknown[]> = T 
 /**
  * The union of non-negative integer literals strictly below `N` —
  * `Enumerate<3>` is `0 | 1 | 2`. The engine behind {@link NumberRange}. Bounded
- * by the TypeScript recursion limit, so keep `N` below ~1000.
+ * by the TypeScript recursion limit, so keep `N` below ~1000. `Enumerate<0>` is
+ * `never` (no literals below zero). The `Acc` parameter is an internal
+ * tuple-length accumulator; do not pass it.
  */
 export type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N
 	? Acc[number]

@@ -49,6 +49,11 @@ export const PERFORMANCE_PREFIX_COLOR = PERFORMANCE_COLORS.Good;
  * Measures and logs the execution time of a callback function.
  * Executes the provided callback and logs the duration to the console with styled output.
  *
+ * Side effect: writes one styled line to the console (`console.debug`) on every
+ * call. Timing is synchronous wall-clock (`performance.now()`); if `cb` returns a
+ * promise the measured span covers only the synchronous portion, not the awaited
+ * work. Any error thrown by `cb` propagates and no line is logged.
+ *
  * @param name - Descriptive name for the operation being measured
  * @param cb - Callback function to execute and measure
  * @returns The return value of the callback function
@@ -79,10 +84,15 @@ export function measureCbDuration(name: string, cb: () => any) {
  * Decorator that measures and logs the execution time of class methods.
  * Wraps the decorated method to automatically log its execution duration.
  *
+ * Effects: mutates `descriptor` in place (replaces `descriptor.value` with the
+ * wrapper) and returns the same descriptor; the wrapper logs one `console.debug`
+ * line per invocation. Only the synchronous return of the method is timed — an
+ * `async` method's awaited work is not included.
+ *
  * @param _target - The class prototype (unused)
  * @param propertyKey - Name of the method being decorated
- * @param descriptor - Property descriptor of the method
- * @returns Modified property descriptor with timing measurement
+ * @param descriptor - Property descriptor of the method (mutated in place)
+ * @returns The same `descriptor`, with its `value` wrapped for timing
  *
  * @example
  * ```ts
@@ -120,10 +130,16 @@ const averages = new Map<any, { total: number; count: number }>();
  * Wraps the decorated method to log both current execution time and running average.
  * Maintains a running total and count for each decorated method to calculate averages.
  *
+ * Effects: mutates `descriptor` in place and keeps per-method totals in a
+ * module-global `Map` keyed by the wrapper function — so the running average
+ * accumulates for the lifetime of the process and is never reset. Invocations
+ * whose measured duration rounds to exactly `0`ms are skipped (neither logged nor
+ * counted). Logs one `console.debug` line per counted invocation.
+ *
  * @param _target - The class prototype (unused)
  * @param propertyKey - Name of the method being decorated
- * @param descriptor - Property descriptor of the method
- * @returns Modified property descriptor with timing measurement and averaging
+ * @param descriptor - Property descriptor of the method (mutated in place)
+ * @returns The same `descriptor`, with its `value` wrapped for timing and averaging
  *
  * @example
  * ```ts

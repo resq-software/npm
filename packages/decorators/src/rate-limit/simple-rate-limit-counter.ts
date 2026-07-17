@@ -49,6 +49,9 @@ export class SimpleRateLimitCounter implements RateLimitCounter {
 	/**
 	 * Create a new counter, optionally seeded with an existing map of counts.
 	 *
+	 * The map is retained by reference and mutated in place by `inc`/`dec`, so a
+	 * shared map lets several counters observe and update the same counts.
+	 *
 	 * @param counterMap - Backing store for per-key counts; defaults to a new `Map`.
 	 */
 	constructor(private readonly counterMap = new Map<string, number>()) {}

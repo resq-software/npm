@@ -22,7 +22,10 @@
  */
 
 /**
- * Configuration options for the bind decorator.
+ * Configuration options describing a bind strategy.
+ *
+ * A single flag selecting when the binding happens; an absent {@link lazy} means
+ * "use the default strategy" rather than a distinct third mode.
  *
  * @example
  * ```typescript

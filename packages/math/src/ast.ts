@@ -97,8 +97,15 @@ export interface LogicExpr {
 export interface BinderExpr {
 	readonly kind: "binder";
 	readonly op: BinderOp;
+	/**
+	 * Name introduced into scope for `body` only — it is *not* visible in
+	 * `domain`. The evaluator iterates the domain set, binding each element to
+	 * this name in turn.
+	 */
 	readonly bound: string;
+	/** The set to iterate. Must evaluate to a `set`-sorted value, or evaluation throws. */
 	readonly domain: Expr;
+	/** Evaluated once per domain element with `bound` in scope. */
 	readonly body: Expr;
 }
 
@@ -131,7 +138,15 @@ export interface MemberExpr {
 	readonly property: string;
 }
 
-/** Named AST representation layer. */
+/**
+ * A parsed or hand-built mathematical expression — the *named* representation
+ * layer. Discriminated on the `kind` field, one variant per node interface
+ * above. Variables and binders carry string names; {@link compile} resolves
+ * those into the index-based {@link CompiledExpr}. Trees are deeply `readonly`;
+ * the constructors in `builder.ts` are the ergonomic way to build them (and
+ * perform no validation — an ill-sorted tree is rejected only by `checkExpr` or
+ * `evaluate`).
+ */
 export type Expr =
 	| LitExpr
 	| VarExpr
@@ -164,7 +179,11 @@ export interface CFreeVarExpr {
 /** Bound variable addressed by its De Bruijn index into the value stack. */
 export interface CBoundVarExpr {
 	readonly kind: "bound_var";
-	/** Stack offset from the top; index 0 is the innermost binding. */
+	/**
+	 * Stack offset from the top; index 0 is the innermost binding. Must be less
+	 * than the live stack depth at evaluation — an out-of-range index (a sign of
+	 * a malformed tree) raises a `StackError`.
+	 */
 	readonly index: number;
 }
 
@@ -237,7 +256,13 @@ export interface CMemberExpr {
 	readonly property: string;
 }
 
-/** Scoped compiled AST layer ready for execution. */
+/**
+ * A scope-resolved expression ready for {@link evaluate} — the output of
+ * {@link compile}. Shares the `kind` discriminant with {@link Expr}, but variable
+ * names are gone: {@link CBoundVarExpr} holds a De Bruijn index into the
+ * evaluation stack, and {@link CFreeVarExpr} holds a name resolved from the
+ * environment at evaluation. Deeply `readonly`.
+ */
 export type CompiledExpr =
 	| CLitExpr
 	| CFreeVarExpr

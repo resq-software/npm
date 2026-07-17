@@ -29,10 +29,16 @@ import { debounceFn } from "./debounce.fn.js";
  * Decorator that debounces method calls, ensuring the method only executes
  * after the specified delay has passed since the last call.
  *
+ * Debounce state is kept **per instance** via a `WeakMap` keyed on `this`, so
+ * two instances of the same class debounce independently and the state is
+ * garbage-collected with the instance. The decorated method returns `undefined`
+ * (the original return value is discarded — see {@link debounceFn}).
+ *
  * @template T - The type of the class containing the decorated method.
  * @param delayMs - The debounce delay in milliseconds.
  * @returns The decorator function.
- * @throws {Error} When applied to a non-method property.
+ * @throws {Error} At decoration time, when applied to anything without a method
+ *   value, with message `"@debounce is applicable only on a methods."`.
  * @example
  * ```typescript
  * class AutoSave {

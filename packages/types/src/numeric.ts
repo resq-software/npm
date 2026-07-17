@@ -31,25 +31,43 @@ import { type Brand, brandRefiner } from "./brand.js";
 
 //#region Branded numeric types
 
-/** A finite integer strictly greater than zero (`1, 2, 3, …`). */
+/**
+ * A finite integer strictly greater than zero (`1, 2, 3, …`). Excludes `0`,
+ * negatives, non-integers, `NaN`, and `±Infinity`. Mint via {@link toPositiveInt}
+ * (throws on violation), {@link coercePositiveInt} (returns `null`), or narrow an
+ * existing `number` with {@link isPositiveInt}.
+ */
 export type PositiveInt = Brand<number, "PositiveInt">;
 
-/** A finite integer greater than or equal to zero (`0, 1, 2, …`). */
+/**
+ * A finite integer greater than or equal to zero (`0, 1, 2, …`). Differs from
+ * {@link PositiveInt} only in admitting `0`. Mint via {@link toNonNegativeInt},
+ * {@link coerceNonNegativeInt}, or {@link isNonNegativeInt}.
+ */
 export type NonNegativeInt = Brand<number, "NonNegativeInt">;
 
-/** A finite duration in milliseconds, strictly greater than zero. */
+/**
+ * A finite duration in milliseconds, strictly greater than zero. Fractional
+ * values are allowed (the brand only enforces finite-and-positive, not integer);
+ * the millisecond unit is a convention the brand name carries, not a runtime
+ * check. Mint via {@link toPositiveMillis}, {@link coercePositiveMillis}, or
+ * {@link isPositiveMillis}.
+ */
 export type PositiveMillis = Brand<number, "PositiveMillis">;
 
 /**
  * A finite real number strictly greater than zero — rates, weights, and scale
  * factors that may legitimately be fractional (e.g. `0.5` requests/second),
- * unlike {@link PositiveInt}.
+ * unlike {@link PositiveInt}. Mint via {@link toPositiveNumber},
+ * {@link coercePositiveNumber}, or {@link isPositiveNumber}.
  */
 export type PositiveNumber = Brand<number, "PositiveNumber">;
 
 /**
- * A real number in the closed unit interval `[0, 1]` — probabilities, error
- * rates, fractions, ratios.
+ * A real number in the **closed** unit interval `[0, 1]` — probabilities, error
+ * rates, fractions, ratios. Both endpoints are valid (`0` and `1` pass);
+ * `±Infinity` and `NaN` do not. Mint via {@link toUnitInterval},
+ * {@link coerceUnitInterval}, or {@link isUnitInterval}.
  */
 export type UnitInterval = Brand<number, "UnitInterval">;
 
@@ -78,37 +96,57 @@ const unitInterval = brandRefiner<number, "UnitInterval">(
 	"UnitInterval ([0, 1])",
 );
 
-/** Type guard for {@link PositiveInt}. */
+/** Type guard for {@link PositiveInt}. Pure; never throws. */
 export const isPositiveInt: (n: number) => n is PositiveInt = positiveInt.is;
-/** Assert `n` is a {@link PositiveInt}, throwing `TypeError` otherwise. */
+/**
+ * Assert `n` is a {@link PositiveInt} and return it branded.
+ *
+ * @throws {TypeError} If `n` is not an integer strictly greater than zero.
+ */
 export const toPositiveInt: (n: number) => PositiveInt = positiveInt.from;
 /** Return `n` as a {@link PositiveInt}, or `null` when out of range. */
 export const coercePositiveInt: (n: number) => PositiveInt | null = positiveInt.coerce;
 
-/** Type guard for {@link NonNegativeInt}. */
+/** Type guard for {@link NonNegativeInt}. Pure; never throws. */
 export const isNonNegativeInt: (n: number) => n is NonNegativeInt = nonNegativeInt.is;
-/** Assert `n` is a {@link NonNegativeInt}, throwing `TypeError` otherwise. */
+/**
+ * Assert `n` is a {@link NonNegativeInt} and return it branded.
+ *
+ * @throws {TypeError} If `n` is not an integer greater than or equal to zero.
+ */
 export const toNonNegativeInt: (n: number) => NonNegativeInt = nonNegativeInt.from;
 /** Return `n` as a {@link NonNegativeInt}, or `null` when out of range. */
 export const coerceNonNegativeInt: (n: number) => NonNegativeInt | null = nonNegativeInt.coerce;
 
-/** Type guard for {@link PositiveMillis}. */
+/** Type guard for {@link PositiveMillis}. Pure; never throws. */
 export const isPositiveMillis: (n: number) => n is PositiveMillis = positiveMillis.is;
-/** Assert `n` is a {@link PositiveMillis}, throwing `TypeError` otherwise. */
+/**
+ * Assert `n` is a {@link PositiveMillis} and return it branded.
+ *
+ * @throws {TypeError} If `n` is not a finite number strictly greater than zero.
+ */
 export const toPositiveMillis: (n: number) => PositiveMillis = positiveMillis.from;
 /** Return `n` as a {@link PositiveMillis}, or `null` when out of range. */
 export const coercePositiveMillis: (n: number) => PositiveMillis | null = positiveMillis.coerce;
 
-/** Type guard for {@link PositiveNumber}. */
+/** Type guard for {@link PositiveNumber}. Pure; never throws. */
 export const isPositiveNumber: (n: number) => n is PositiveNumber = positiveNumber.is;
-/** Assert `n` is a {@link PositiveNumber}, throwing `TypeError` otherwise. */
+/**
+ * Assert `n` is a {@link PositiveNumber} and return it branded.
+ *
+ * @throws {TypeError} If `n` is not a finite number strictly greater than zero.
+ */
 export const toPositiveNumber: (n: number) => PositiveNumber = positiveNumber.from;
 /** Return `n` as a {@link PositiveNumber}, or `null` when out of range. */
 export const coercePositiveNumber: (n: number) => PositiveNumber | null = positiveNumber.coerce;
 
-/** Type guard for {@link UnitInterval}. */
+/** Type guard for {@link UnitInterval}. Pure; never throws. */
 export const isUnitInterval: (n: number) => n is UnitInterval = unitInterval.is;
-/** Assert `n` is a {@link UnitInterval}, throwing `TypeError` otherwise. */
+/**
+ * Assert `n` is a {@link UnitInterval} and return it branded.
+ *
+ * @throws {TypeError} If `n` is not a finite number within the closed range `[0, 1]`.
+ */
 export const toUnitInterval: (n: number) => UnitInterval = unitInterval.from;
 /** Return `n` as a {@link UnitInterval}, or `null` when out of range. */
 export const coerceUnitInterval: (n: number) => UnitInterval | null = unitInterval.coerce;

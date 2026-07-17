@@ -22,10 +22,13 @@
  */
 
 /**
- * Represents a node in the queue's linked list structure.
+ * A cell in the queue's singly-linked chain. Exposed because {@link Queue}
+ * fields reference it, but callers rarely construct one directly.
  */
 export interface QueueNode<T> {
+	/** The next node toward the back of the queue, or `null` at the tail. */
 	next: QueueNode<T> | null;
+	/** The stored element, held by reference. */
 	value: T;
 }
 

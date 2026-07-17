@@ -57,8 +57,14 @@ export const logger = {
 	/**
 	 * Log an informational message, appending JSON-encoded `data` when present.
 	 *
+	 * Writes one line to `console.info` (stdout) — an I/O side effect, not a pure
+	 * call. `data` is serialized with `JSON.stringify`, so a circular reference or
+	 * a `BigInt` value in it makes the call throw.
+	 *
 	 * @param message - The human-readable message.
 	 * @param data - Optional structured context to serialize alongside `message`.
+	 * @throws {TypeError} If `data` cannot be JSON-serialized (circular reference
+	 *   or `BigInt` value).
 	 */
 	info(message: string, data?: Record<string, unknown>): void {
 		const suffix = data ? ` ${JSON.stringify(data)}` : "";
@@ -94,6 +100,9 @@ export class Queue<T> {
 	/**
 	 * Append an item to the tail of the queue.
 	 *
+	 * Mutates the queue in place: links a new node at the tail and increments the
+	 * size. Not idempotent — each call adds a distinct entry, duplicates included.
+	 *
 	 * @param item - The value to enqueue.
 	 */
 	public enqueue(item: T): void {
@@ -112,6 +121,11 @@ export class Queue<T> {
 
 	/**
 	 * Remove and return the item at the head of the queue.
+	 *
+	 * Mutates the queue in place: unlinks the head node and decrements the size.
+	 * Signals emptiness by returning the sentinel `null` rather than throwing, so
+	 * a stored `null` value is indistinguishable from "empty" — do not enqueue
+	 * `null` if you rely on the return to detect drain.
 	 *
 	 * @returns The dequeued item, or `null` when the queue is empty.
 	 */
@@ -146,8 +160,14 @@ export class TaskExec {
 	/**
 	 * Schedule `func` to run after `ttl` milliseconds.
 	 *
+	 * Effectful: reads the wall clock (`Date.now`), pushes onto and re-sorts the
+	 * internal task list, and arms a single `setTimeout` for the nearest due task
+	 * (rescheduling the shared timer if this task is now the soonest). `ttl` is a
+	 * relative delay in milliseconds from the moment of the call, not an absolute
+	 * timestamp. Tasks fire in due-time order regardless of insertion order.
+	 *
 	 * @param func - The callback to run once its delay elapses.
-	 * @param ttl - Delay before execution, in milliseconds.
+	 * @param ttl - Delay before execution, in milliseconds from now.
 	 */
 	exec(func: (...args: unknown[]) => unknown, ttl: number): void {
 		this.tasks.push({ func, execTime: Date.now() + ttl });

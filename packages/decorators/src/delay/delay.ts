@@ -28,10 +28,15 @@ import { delayFn } from "./delay.fn.js";
 /**
  * Decorator that delays the execution of a method by the specified time.
  *
+ * Rewrites the descriptor so calls return `undefined` immediately and the body
+ * runs `delayMs` later; the original return value is discarded (see
+ * {@link delayFn}). Every call schedules its own timer — there is no dedup.
+ *
  * @template T - The type of the class containing the decorated method.
  * @param delayMs - The delay time in milliseconds.
  * @returns The decorator function.
- * @throws {Error} When applied to a non-method property.
+ * @throws {Error} At decoration time, when applied to anything without a method
+ *   value, with message `"@delay is applicable only on a methods."`.
  * @example
  * ```typescript
  * class AnimationController {

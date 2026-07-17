@@ -39,6 +39,13 @@ const getTargetTimePerFrame = (targetFps: number) =>
  * Each instance maintains its own queue and state, allowing for separate throttling contexts
  * (e.g., UI operations vs network sync operations).
  *
+ * Relies on `requestAnimationFrame`/`cancelAnimationFrame` and `Date.now()`, so it
+ * only throttles in a browser-like environment. When `NODE_ENV === "test"` (and
+ * `globalThis.__FORCE_RAF_IN_TESTS__` is unset) the frame machinery is bypassed
+ * so callbacks fire eagerly and synchronously — see the individual methods.
+ * Callback identity is the dedupe key: the same function reference queued twice
+ * before a flush runs only once.
+ *
  * @public
  */
 export class FpsScheduler {
@@ -108,6 +115,10 @@ export class FpsScheduler {
 	 * Subsequent calls within the same frame are ignored, ensuring smooth performance
 	 * for high-frequency events like mouse movements or scroll events.
 	 *
+	 * In a test environment the original `fn` is returned unchanged (invoking it runs
+	 * `fn` immediately, with no throttling); its attached `cancel` clears any pending
+	 * scheduler frames.
+	 *
 	 * @param fn - The function to throttle, optionally with a cancel method
 	 * @returns A throttled function with an optional cancel method to remove pending calls
 	 *
@@ -152,6 +163,9 @@ export class FpsScheduler {
 	 * If the same function is passed multiple times before the frame executes,
 	 * it will only be called once, effectively batching multiple calls.
 	 *
+	 * In a test environment `fn` runs synchronously before returning and the
+	 * returned cancel is a no-op (there is nothing pending to cancel).
+	 *
 	 * @param fn - The function to execute on the next frame
 	 * @returns A cancel function that can prevent execution if called before the next frame
 	 *
@@ -189,6 +203,10 @@ const defaultScheduler = new FpsScheduler(120);
  * Uses the default throttle instance for UI operations. If you need a separate
  * throttling queue (e.g., for network operations), create your own Throttle instance.
  *
+ * Delegates to a shared module-level {@link FpsScheduler} (120fps), so every caller
+ * of this function competes for the same frame queue. In a test environment it
+ * returns `fn` unchanged (no throttling) — see {@link FpsScheduler.fpsThrottle}.
+ *
  * @param fn - The function to throttle, optionally with a cancel method
  * @returns A throttled function with an optional cancel method to remove pending calls
  *
@@ -222,6 +240,10 @@ export function fpsThrottle(fn: { (): void; cancel?(): void }): {
  * it will only be called once, effectively batching multiple calls.
  *
  * Uses the default throttle instance for UI operations.
+ *
+ * Delegates to a shared module-level {@link FpsScheduler} (120fps). In a test
+ * environment `fn` runs synchronously and the returned cancel is a no-op — see
+ * {@link FpsScheduler.throttleToNextFrame}.
  *
  * @param fn - The function to execute on the next frame
  * @returns A cancel function that can prevent execution if called before the next frame

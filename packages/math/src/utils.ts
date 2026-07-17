@@ -65,8 +65,13 @@ export function invLerp(a: number, b: number, t: number): number {
  * reproducible tests and deterministic sampling. Each call to the returned
  * function produces a value in `[-1, 1)`. Adapted from seedrandom.
  *
+ * `rng` itself is pure. The **returned** generator is stateful: it holds mutable
+ * internal state and advances it on every call, so calls are order-dependent and
+ * one generator cannot back two independent streams — mint a separate generator
+ * per stream.
+ *
  * @param seed - Seed string; the empty default still produces a stable sequence.
- * @returns A generator that returns the next number on each call.
+ * @returns A stateful generator that returns the next number on each call.
  * @example
  * ```ts
  * const next = rng("seed");
@@ -104,10 +109,10 @@ export function rng(seed = ""): () => number {
  * of its direction.
  *
  * @param value - The value to remap, expressed in the input range.
- * @param rangeA - Input range as `[low, high]`.
- * @param rangeB - Output range as `[low, high]`.
- * @param clamp - When `true`, constrain the result to the output range.
- * @returns The remapped value.
+ * @param rangeA - Input range as a two-element `[low, high]` array; only indices 0 and 1 are read.
+ * @param rangeB - Output range as a two-element `[low, high]` array; `high < low` is allowed and reverses the mapping.
+ * @param clamp - When `true`, constrain the result to the output range regardless of its direction.
+ * @returns The remapped value, or `NaN` if a range array is missing an endpoint.
  * @example
  * ```ts
  * modulate(5, [0, 10], [0, 100]); // → 50

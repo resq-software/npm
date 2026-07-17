@@ -32,14 +32,25 @@ import type { Sort } from "./value.js";
 
 //#region Types
 
-/** Maps variable names to their known sort in the current scope. */
+/**
+ * Maps names to their known {@link Sort} in the current scope. Keys are plain
+ * variable names, plus synthetic dotted/call paths (`"obj.prop"`, `"f()"`) that
+ * let the checker resolve member-access and call-return sorts statically — see
+ * `getMemberPath`. A referenced name with no entry is reported as an unbound
+ * `SortError` rather than assumed.
+ */
 export type SortContext = ReadonlyMap<string, Sort>;
 
 /**
- * The result of sort-checking an expression.
+ * The outcome of sort-checking, discriminated on {@link CheckResult.ok ok}.
  *
- * On success, carries the inferred sort. On failure, carries every
- * {@link SortError} discovered during the walk.
+ * - `ok: true` carries the single inferred {@link Sort} of the whole expression.
+ * - `ok: false` carries every {@link SortError} found — the walk aggregates
+ *   diagnostics instead of stopping at the first, so `errors` is non-empty and
+ *   may list several independent mismatches.
+ *
+ * Failure is signalled through this value, not by throwing (the sole exception
+ * is `RecursionLimitError` for pathologically deep trees).
  */
 export type CheckResult =
 	| { readonly ok: true; readonly sort: Sort }

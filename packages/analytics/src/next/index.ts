@@ -77,7 +77,12 @@ interface MinimalNextConfig {
  * `skipTrailingSlashRedirect: true`, which is required for the
  * proxy to work reliably across `/ingest` and `/ingest/`.
  *
- * @template T - The user's full `next.config.{js,ts}` type.
+ * Pure: returns a new config object and never mutates `nextConfig`. The
+ * wrapped `rewrites` awaits the original `rewrites()` on each invocation, so if
+ * the user's function throws or rejects, the composed one rejects the same way.
+ *
+ * @template T - The user's full `next.config.{js,ts}` type; the return type
+ *   preserves it while marking `rewrites` and `skipTrailingSlashRedirect` present.
  * @param nextConfig - The existing Next.js config to wrap; its own `rewrites`
  *   are preserved and run after the proxy rules.
  * @param options - Proxy overrides (path `prefix`, PostHog `upstream` /

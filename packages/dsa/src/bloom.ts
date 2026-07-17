@@ -65,7 +65,7 @@ export class BloomFilter {
 	 *   rejected at the type level; the runtime check below still guards
 	 *   untrusted callers that reach this boundary via a cast.
 	 *
-	 * @throws RangeError if `capacity <= 0` or `errorRate` is outside `(0, 1)`.
+	 * @throws {RangeError} If `capacity <= 0` or `errorRate` is outside `(0, 1)`.
 	 */
 	constructor(capacity: number, errorRate?: Probability) {
 		const rate: number = errorRate ?? DEFAULT_ERROR_RATE;

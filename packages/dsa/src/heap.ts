@@ -58,7 +58,9 @@ export class BoundedHeap<T extends Distanced> {
 	/**
 	 * @param limit - Maximum number of items to retain. Once full, new
 	 *   inserts are accepted only when their `distance` is strictly less
-	 *   than the current worst-kept element's distance.
+	 *   than the current worst-kept element's distance. A non-positive
+	 *   `limit` yields a heap that retains nothing — every {@link insert} is a
+	 *   no-op.
 	 */
 	constructor(limit: number) {
 		this.limit = limit;

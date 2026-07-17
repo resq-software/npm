@@ -27,8 +27,13 @@ import type { Method } from "../types.js";
 /**
  * Resolves a cache key from a method's arguments.
  *
+ * The returned string is the cache identity: it must be deterministic and
+ * collision-free for the inputs that should share (or not share) a cached value.
+ * Two argument sets that map to the same string are treated as the same call, so
+ * an over-broad resolver silently returns stale results.
+ *
  * @param args - The method arguments.
- * @returns The cache key.
+ * @returns The cache key; equal keys are treated as the same cached call.
  * @example
  * ```ts
  * const keyResolver: KeyResolver = (userId, includeDetails) =>
@@ -40,6 +45,12 @@ export type KeyResolver = (...args: unknown[]) => string;
 /**
  * Cache contract used by the `@memoize` decorator. Any store with these four
  * synchronous operations (a plain `Map`, an LRU, etc.) can back the cache.
+ *
+ * `has` is the authority on presence, not `get`: a stored value may legitimately
+ * be `null`/`undefined`, so `memoize` calls `has` first and only then `get`. An
+ * implementation must therefore keep the two consistent for the same key. All
+ * four operations share one keyspace and run synchronously (use
+ * {@link AsyncCache} for a promise-based store).
  *
  * @template D - The type of values stored in the cache.
  * @example
@@ -53,13 +64,16 @@ export type KeyResolver = (...args: unknown[]) => string;
  * ```
  */
 export interface Cache<D> {
-	/** Store a value in the cache. */
+	/** Store a value in the cache, overwriting any existing entry for `key`. */
 	set: (key: string, value: D) => void;
-	/** Retrieve a value from the cache. */
+	/**
+	 * Retrieve a value for `key`. A `null`/`undefined` result is ambiguous — it may
+	 * be an absent key or a stored nullish value — so callers must gate on `has`.
+	 */
 	get: (key: string) => D | null | undefined;
-	/** Remove a value from the cache. */
+	/** Remove the entry for `key`; a no-op when the key is absent. */
 	delete: (key: string) => void;
-	/** Check whether a key exists in the cache. */
+	/** Whether an entry exists for `key`; the authoritative presence check. */
 	has: (key: string) => boolean;
 }
 
@@ -78,22 +92,23 @@ export interface Cache<D> {
  * ```
  */
 export interface MemoizeConfig<T, D> {
-	/** Custom cache implementation; defaults to a `Map`. */
+	/** Custom cache; when omitted, a fresh `Map` is used. */
 	cache?: Cache<D>;
-	/** Function or method name that generates cache keys. */
+	/**
+	 * How cache keys are derived. A {@link KeyResolver} is called with the
+	 * arguments; a `keyof T` names an instance method resolved and bound to `this`
+	 * at call time. When omitted, the key is `JSON.stringify` of the arguments.
+	 */
 	keyResolver?: KeyResolver | keyof T;
-	/** Time in milliseconds after which cached values expire. */
+	/**
+	 * Per-entry time-to-live in milliseconds, measured from insertion (not refreshed
+	 * on read). When omitted, entries never expire.
+	 */
 	expirationTimeMs?: number;
 }
 
 /**
  * Type for the `@memoize` decorator function.
- *
- * @deprecated Use `Decorator<T>` from `../types.js` instead. This shape erases
- * the decorated method's signature to `Method<D>`, which is not assignable to a
- * concrete method's descriptor under strict `strictFunctionTypes` (TS1241 /
- * TS1270 at the decoration site). `memoize` now returns `Decorator<T>`, which
- * preserves the method signature end-to-end. Retained only for back-compat.
  *
  * @template T - The class type that owns the decorated method.
  * @template D - The return type of the decorated method.
@@ -101,6 +116,13 @@ export interface MemoizeConfig<T, D> {
  * @param propertyName - The name of the method being decorated.
  * @param descriptor - The property descriptor.
  * @returns The modified descriptor.
+ * @deprecated Use {@link Decorator} from `../types.js` instead — removed in
+ * v1.0.0. This shape erases the decorated method's signature to `Method<D>`,
+ * which is not assignable to a concrete method's descriptor under strict
+ * `strictFunctionTypes` (TS1241 / TS1270 at the decoration site). `memoize` now
+ * returns {@link Decorator}, which preserves the signature end-to-end. Migration:
+ * replace `Memoizable<T, D>` annotations with `Decorator<T>` (drop the `D`
+ * parameter); no runtime change.
  */
 export type Memoizable<T, D> = (
 	target: T,

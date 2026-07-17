@@ -425,7 +425,11 @@ const PARSERS: { test: RegExp; parse: ParserFn }[] = [
  * digits, with or without `#`), `rgb()` / `rgba()`, `hsl()` /
  * `hsla()`, `oklch()`, `oklab()`, `lab()`, `lch()`.
  *
- * @throws Error when the input doesn't match any supported format.
+ * Pure and deterministic — no I/O or shared state; the same string always
+ * decodes to the same triplet.
+ *
+ * @throws {Error} When `raw` (after trimming/lowercasing) matches no supported
+ *   format. The message embeds the offending value.
  */
 export function toLinearRGB(raw: string): LinearRGB {
 	const trimmed = raw.trim().toLowerCase();
@@ -485,6 +489,11 @@ export function contrastRatio(lum1: number, lum2: number): number {
  * @param tokens - Theme token map (token name → CSS color value).
  * @param pairs - Pairs to evaluate. Use {@link DEFAULT_PAIRS} for the
  *   project's standard checks.
+ * @returns A {@link ThemeAudit} whose `results` omit any pair with a missing
+ *   token; `allPass` is `true` only when every included result passed.
+ * @throws {Error} Propagated from {@link toLinearRGB} when a token that *is*
+ *   present holds a CSS value in no supported color format. A missing token is
+ *   skipped, not thrown.
  */
 export function auditTheme(mode: string, tokens: ColorTokens, pairs: ContrastPair[]): ThemeAudit {
 	const lumCache = new Map<string, number>();
@@ -624,9 +633,18 @@ export const DEFAULT_PAIRS: ContrastPair[] = [
 //#region CSS Parser
 
 /**
- * Extracts color tokens from a CSS string containing :root and .light blocks.
- * Supports any color format (oklch, hex, rgb, hsl, named, etc.).
- * Returns { dark: {...}, light: {...} } with token names as keys.
+ * Extract color tokens from a CSS string containing `:root` and `.light` blocks.
+ *
+ * The `:root` block maps to the `dark` key and `.light` to the `light` key; a
+ * key is present only when its block is found, so the result may hold `dark`,
+ * `light`, both, or neither. Token names drop the `--` prefix (`--foreground`
+ * becomes `foreground`). Only the first matching block of each kind is read, and
+ * only recognised color-value formats (oklch/oklab/lab/lch/hsl/rgb/hex) are
+ * captured. Pure — no I/O; does not throw on unrecognised input, it simply
+ * yields fewer tokens.
+ *
+ * @param css - Raw stylesheet text to scan.
+ * @returns A `mode → ColorTokens` map suitable for {@link runContrastAudit}.
  */
 export function extractTokensFromCSS(css: string): Record<string, ColorTokens> {
 	const themes: Record<string, ColorTokens> = {};
@@ -672,6 +690,8 @@ function parseTokenBlock(block: string): ColorTokens {
  *
  * @returns `{ globalPass, audits }` — `globalPass` is `true` only
  *   when every theme passes every pair.
+ * @throws {Error} Propagated from {@link auditTheme}/{@link toLinearRGB} when
+ *   any present token holds an unsupported color string.
  */
 export function runContrastAudit(
 	themes: Record<string, ColorTokens>,

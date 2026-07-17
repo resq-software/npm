@@ -85,12 +85,22 @@ export const GA4_ID_PATTERN = /^G-[A-Z0-9]{6,32}$/;
 /**
  * Validate a GA4 Measurement ID against {@link GA4_ID_PATTERN}.
  *
+ * Pure and total: never throws, has no effects, and treats any non-matching or
+ * nullish input as a failed validation rather than an error.
+ *
  * @param id - The candidate ID, typically `import.meta.env.VITE_GA4_ID`
  *   or `process.env.NEXT_PUBLIC_GA4_ID`. Accepts `null`/`undefined` for
  *   convenience so call sites don't need a guard around env-var reads
  *   or nullable config fields.
- * @returns The validated ID when it matches Google's format, otherwise
- *   `null`. Skip GA4 init entirely when this returns `null`.
+ * @returns The validated {@link Ga4MeasurementId} when `id` matches Google's
+ *   format, otherwise the `null` sentinel (also returned for empty, `null`, or
+ *   `undefined` input). Skip GA4 init entirely when this returns `null`.
+ * @example
+ * ```ts
+ * sanitizeGa4Id("G-ABC123"); // → branded "G-ABC123"
+ * sanitizeGa4Id("not-an-id"); // → null
+ * sanitizeGa4Id(undefined); // → null
+ * ```
  */
 export function sanitizeGa4Id(id: string | null | undefined): Ga4MeasurementId | null {
 	if (!id) return null;
@@ -148,11 +158,21 @@ export const isCookieDomain: (value: string) => value is CookieDomain = cookieDo
  * 3. strips a trailing dot (FQDN root form),
  * 4. prepends the leading dot when missing.
  *
+ * Pure and total: never throws. A single-label host (`"localhost"`), an empty
+ * or whitespace-only string, or a non-string short-circuits to the `null`
+ * sentinel rather than an error.
+ *
  * @param host - A host or cookie domain, with or without a leading dot
  *   (`"resq.software"`, `".resq.software"`, `"App.Example.com."`). `null` /
  *   `undefined` short-circuit to `null`.
- * @returns The branded, normalized domain, or `null` when the input is not a
- *   valid multi-label host.
+ * @returns The branded, normalized {@link CookieDomain}, or the `null` sentinel
+ *   when the input is not a valid multi-label host.
+ * @example
+ * ```ts
+ * toCookieDomain("App.Example.com."); // → branded ".app.example.com"
+ * toCookieDomain(".resq.software"); // → branded ".resq.software"
+ * toCookieDomain("localhost"); // → null (single label)
+ * ```
  */
 export function toCookieDomain(host: string | null | undefined): CookieDomain | null {
 	if (typeof host !== "string") return null;
@@ -184,13 +204,22 @@ const RESQ_COOKIE_DOMAIN = cookieDomainRefiner.from(".resq.software");
  * here so a stray `RESQ.SOFTWARE` from a Workers `request.headers` read
  * still returns the cookie domain.
  *
+ * Pure and total: never throws. A host outside the `resq.software` root, an
+ * empty string, or a nullish argument yields the `undefined` sentinel.
+ *
  * @param host - The current hostname. In a browser, pass
  *   `window.location.hostname`. On the server pass the `Host` header
  *   value, or `null` / `undefined` (or call without an argument) to
  *   short-circuit cleanly.
  * @returns the branded `".resq.software"` {@link CookieDomain} when `host`
- *   belongs to that registrable root, otherwise `undefined` — assign the result
- *   directly to `AnalyticsConfig.cookieDomain`.
+ *   belongs to that registrable root, otherwise the `undefined` sentinel —
+ *   assign the result directly to `AnalyticsConfig.cookieDomain`.
+ * @example
+ * ```ts
+ * resolveResqCookieDomain("viz.resq.software"); // → branded ".resq.software"
+ * resolveResqCookieDomain("preview-abc.vercel.app"); // → undefined
+ * resolveResqCookieDomain("localhost"); // → undefined
+ * ```
  */
 export function resolveResqCookieDomain(
 	host?: string | null | undefined,

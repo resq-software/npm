@@ -28,6 +28,11 @@ import type { AsyncMethod } from "../types.js";
  * Manages the queue and execution of throttled async calls, ensuring at most a
  * fixed number run concurrently and queuing the rest until a slot frees up.
  *
+ * Queued calls dispatch in FIFO order; each slot is released once its call settles
+ * (resolve or reject), which drives the next dispatch. `parallelCalls` must be
+ * `>= 1` — the constructor does not validate it, and a value below `1` leaves
+ * `tryCall` unable to ever dispatch, so every queued call hangs.
+ *
  * @template D - The resolved type of the async method.
  * @example
  * ```ts
@@ -69,6 +74,10 @@ export class ThrottleAsyncExecutor<D> {
 	/**
 	 * Queue a method call, executing it immediately if a slot is free or deferring
 	 * it until one opens.
+	 *
+	 * Appends to the internal queue and may synchronously start the call; queued
+	 * calls preserve FIFO order. The returned promise mirrors the method outcome —
+	 * a thrown/rejected method rejects it with the same reason.
 	 *
 	 * @param context - The `this` context for the method call.
 	 * @param args - The arguments to pass to the method.

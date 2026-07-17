@@ -63,24 +63,64 @@ type SyncSchema<T> = Schema.Codec<T, unknown, never>;
 export type HostPattern = Lowercase<string> | `*.${string}`;
 
 /**
- * Configuration options for the fetcher utility.
+ * Configuration for a single {@link fetcher} call (and the verb helpers built on
+ * it). Every field is optional; the defaults listed per member apply when it is
+ * omitted.
+ *
+ * @typeParam T - The decoded response type. Bound to {@link schema} when one is
+ *   supplied (the schema's output type), otherwise defaults to `unknown`.
  */
 export interface FetcherOptions<T = unknown> {
-	/** Number of times to retry the request on failure */
+	/**
+	 * Number of **additional** attempts after the first, per Effect's
+	 * `Schedule.recurs`; total attempts are `retries + 1`. Non-negative; defaults
+	 * to `0` (no retry). Retries are filtered: a `429` is always retried, other
+	 * `4xx` responses and {@link FetcherValidationError} are never retried
+	 * regardless of this value.
+	 */
 	retries?: number;
-	/** Delay in milliseconds between retries */
+	/**
+	 * Base delay in **milliseconds** for the exponential backoff schedule
+	 * (`Schedule.exponential`) — the wait grows geometrically per attempt, not a
+	 * fixed gap. Defaults to `1000`. Ignored when {@link retries} is `0`.
+	 */
 	retryDelay?: number;
-	/** Optional callback invoked on error */
+	/**
+	 * Callback fired with the failing error. May be invoked **more than once** for
+	 * a single call: once per rejected schema decode inside the retry cycle (see
+	 * {@link schema}) and once again when the effect ultimately fails. Runs
+	 * synchronously for its side effects; its return value is discarded and it is
+	 * never awaited. Throwing from it propagates out of the fetch.
+	 */
 	onError?: (error: unknown) => void;
-	/** Timeout in milliseconds for the request */
+	/**
+	 * Per-attempt timeout in **milliseconds** — applied to each retry attempt
+	 * independently, not to the call as a whole. Defaults to `10000`. Elapsing it
+	 * fails the attempt with a {@link FetcherError} (`status` absent).
+	 */
 	timeout?: number;
-	/** Additional headers to include in the request */
+	/** Extra request headers, merged onto the built request. Later duplicate keys win over defaults. */
 	headers?: Record<string, string>;
-	/** Effect/Schema for runtime validation of the response */
+	/**
+	 * Effect Schema used to decode and validate the response body. When present,
+	 * the resolved value is the schema's output type and a decode failure fails
+	 * the effect with {@link FetcherValidationError}; when absent, the raw parsed
+	 * body is returned unchecked as `T`.
+	 */
 	schema?: SyncSchema<T>;
-	/** Abortsignal */
+	/**
+	 * Reserved for request cancellation. **Currently accepted but not wired into
+	 * request execution** — the effect does not abort when this signal fires.
+	 * Cancel by interrupting the Effect fiber instead.
+	 */
 	signal?: AbortSignal;
-	/** Body type - defaults to 'json', use 'text' for raw data, 'form' for FormData */
+	/**
+	 * Encoding for a request body on `POST`/`PUT`/`PATCH`. `"json"` (default)
+	 * serialises via `bodyJson`; `"text"` sends `JSON.stringify` of objects or
+	 * `String(...)` of primitives; `"form"` **requires** a {@link FormData} body
+	 * and fails with {@link FetcherError} otherwise. A {@link FormData} body is
+	 * always sent as multipart regardless of this field.
+	 */
 	bodyType?: "json" | "text" | "form";
 	/**
 	 * Optional list of allowed hosts (e.g. `['api.example.com']` or `['*.example.com']`).
@@ -101,12 +141,19 @@ export interface FetcherOptions<T = unknown> {
 }
 
 /**
- * Represents all supported HTTP methods for the fetcher utility.
+ * The HTTP verbs {@link fetcher} can issue: `GET`, `POST`, `PUT`, `PATCH`,
+ * `DELETE`, `OPTIONS`, `HEAD`. Always upper-case — {@link buildRequest} matches
+ * these literals exactly and has no case-folding fallback.
  */
 export type HttpMethod = Schema.Schema.Type<typeof HttpMethod>;
 /**
- * Represents a type-safe map of query parameters.
- * Each value can be a string, number, boolean, null, undefined, or an array of those types.
+ * Query parameters as a flat string-keyed map. Each value is a scalar
+ * (`string | number | boolean`), `null`/`undefined`, or an array of scalars.
+ *
+ * Serialisation invariants ({@link buildQueryString}): `null`/`undefined` values
+ * — and `null`/`undefined` array elements — are dropped entirely (no empty
+ * `key=`); an array emits one repeated `key=value` pair per surviving element;
+ * scalars are stringified via `String(...)`.
  */
 export type QueryParams = Schema.Schema.Type<typeof QueryParams>;
 /**
@@ -131,7 +178,9 @@ export type JsonValue =
  */
 export type RequestBody = JsonValue | FormData;
 /**
- * Represents HTTP headers as key-value string pairs.
+ * HTTP headers as a flat map of string names to single string values. Multi-value
+ * headers are not modelled here — pass a pre-joined string. Header-name case is
+ * preserved as given; no normalisation is applied at this layer.
  */
 export type Headers = Schema.Schema.Type<typeof Headers>;
 
@@ -549,6 +598,19 @@ export function fetcher<T = unknown>(
  * {@link head}) — they have nicer overloads and avoid you specifying
  * the method string by hand. Reach for `fetcher` directly only when
  * the method is dynamic.
+ *
+ * Failure is signalled through the `Effect` error channel (a failed
+ * effect), never a resolved error-shaped value. The returned effect is
+ * a cold description: building it performs no I/O, and each `runFork`/
+ * `runPromise` executes an independent request, so the same effect
+ * value may be run concurrently. Cancellation follows Effect fiber
+ * interruption; `options.signal` is **not** honoured (see
+ * {@link FetcherOptions.signal}). The `timeout` applies per attempt, so
+ * a retried call can outlive a single `timeout` window. As side
+ * effects, the call performs network I/O, reads the runtime environment
+ * and base-URL globals ({@link getBaseURL}), and invokes
+ * `options.onError` — possibly more than once (see
+ * {@link FetcherOptions.onError}).
  *
  * @typeParam T - Response shape inferred from `options.schema` when
  *   provided, otherwise `unknown`.

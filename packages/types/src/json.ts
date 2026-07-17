@@ -25,24 +25,37 @@
  */
 
 /**
- * A JSON primitive value: `boolean`, `null`, `string`, or `number`.
+ * A JSON primitive value: `boolean`, `null`, `string`, or `number`. Note that
+ * `undefined` is **not** a primitive here — it is not representable in JSON, and
+ * `number` nominally excludes `NaN` / `±Infinity` (which `JSON.stringify` emits
+ * as `null`), though the type cannot enforce that finiteness.
  */
 export type JsonPrimitive = boolean | null | string | number;
 
 /**
- * A JSON array holding any valid JSON values.
+ * A JSON array holding any valid JSON values. Elements are always present (no
+ * holes); a sparse slot serializes as `null`, so treat the type as dense.
  */
 export type JsonArray = JsonValue[];
 
 /**
- * A JSON object keyed by strings, with JSON values. Optional (`undefined`)
- * members model keys omitted from the serialized form.
+ * A JSON object keyed by strings, with JSON values.
+ *
+ * The `| undefined` in the value type models keys that may be **absent** from
+ * the serialized form: `JSON.stringify` drops a property whose value is
+ * `undefined` entirely rather than emitting `"key": undefined`. So a member
+ * typed `undefined` means "may be omitted", not "serializes to a literal
+ * undefined" — round-tripping such a key through `stringify`/`parse` yields an
+ * object without it.
  */
 export interface JsonObject {
 	[key: string]: JsonValue | undefined;
 }
 
 /**
- * Any valid JSON value: a primitive, an array, or an object.
+ * Any valid JSON value: a primitive, an array, or an object. This is the closed
+ * set that survives a `JSON.parse(JSON.stringify(x))` round-trip — it excludes
+ * `undefined`, functions, `symbol`, `bigint`, and class instances, none of which
+ * JSON can represent. Use it in place of `any` for anything that must serialize.
  */
 export type JsonValue = JsonPrimitive | JsonArray | JsonObject;

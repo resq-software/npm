@@ -29,13 +29,27 @@ import { sleep } from "./control";
  * Executes the provided async function repeatedly until it succeeds or the maximum number of attempts is reached.
  * Includes support for abort signals and custom error matching to determine which errors should trigger retries.
  *
+ * Cancellation is cooperative and coarse: `abortSignal` is polled only at the top
+ * of each attempt, so aborting does not interrupt an in-flight `fn` or a wait in
+ * progress — it takes effect before the next attempt. The inter-attempt wait runs
+ * after every failure, including the final one, so a run that exhausts all
+ * attempts still sleeps once more before rejecting. `fn` receives 0-based
+ * `attempt`, `remaining` (`attempts - attempt`), and `total` (`attempts`).
+ *
  * @param fn - The async function to retry on failure
  * @param options - Configuration options for retry behavior:
  *   - `attempts`: Maximum number of retry attempts (default: 3)
  *   - `waitDuration`: Milliseconds to wait between retry attempts (default: 1000)
  *   - `abortSignal`: Optional AbortSignal to cancel the retry operation
  *   - `matchError`: Optional function to determine if an error should trigger a retry
- * @returns Promise that resolves with the function's return value on success
+ * @returns Promise that resolves with the function's return value on the first
+ *   successful attempt.
+ * @throws {Error} `"aborted"` if `abortSignal` is already aborted when an attempt
+ *   is about to start.
+ * @throws The last error thrown by `fn` once `attempts` is exhausted (re-thrown
+ *   as-is, so it may be any value, not necessarily an `Error`).
+ * @throws Immediately re-throws `fn`'s error, without retrying, when `matchError`
+ *   is provided and returns `false` for it.
  *
  * @example
  * ```ts

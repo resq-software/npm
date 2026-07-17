@@ -33,12 +33,20 @@ import type { MemoizeConfig } from "./memoize.types.js";
  * Call with no argument to cache forever, a number for a TTL in milliseconds, or
  * a {@link MemoizeConfig} for a custom cache, key resolver, and/or expiry.
  *
+ * The cache is built once, when the method is decorated, so it is shared across
+ * every instance of the class rather than being per-instance. The default key is
+ * `JSON.stringify` of the arguments, which omits the instance identity — calls on
+ * different instances with equal arguments therefore collide on one entry. Supply
+ * a `keyResolver` that encodes the instance (or per-instance state) to isolate
+ * caches. Mutates the supplied property descriptor in place.
+ *
  * @template T - The class type that owns the decorated method.
  * @template D - The return type of the decorated method.
  * @param input - A TTL in milliseconds, a {@link MemoizeConfig}, or omitted to
  * cache indefinitely.
  * @returns The method decorator.
- * @throws {Error} If applied to anything other than a method.
+ * @throws {Error} If applied to a member without a `value` descriptor (an
+ * accessor or plain property rather than a method).
  * @example
  * ```ts
  * class DataService {

@@ -378,6 +378,10 @@ export const lookupLogic = (key: number): LogicImpl | undefined => logicTable.ge
 /**
  * Register a custom unary operator instance.
  *
+ * Mutates the process-wide unary dispatch table, so every subsequent
+ * {@link evaluate} sees the change; registering an existing key (including a
+ * built-in like `"neg:num"`) overwrites its instance. Not a pure function.
+ *
  * @param key - A `"op:sort"` string (e.g. `"neg:num"`).
  * @param impl - The implementation to invoke for that operator and sort.
  * @throws {MathError} If the key is malformed or names an unknown operator or sort.
@@ -393,6 +397,10 @@ export const registerUnary = (key: string, impl: UnaryImpl): void => {
 
 /**
  * Register a custom binary operator instance.
+ *
+ * Mutates the process-wide binary dispatch table, so every subsequent
+ * {@link evaluate} sees the change; registering an existing key (including a
+ * built-in like `"+:num:num"`) overwrites its instance. Not a pure function.
  *
  * @param key - An `"op:leftSort:rightSort"` string (e.g. `"+:num:num"`).
  * @param impl - The implementation to invoke for that operator and sort pair.
@@ -412,6 +420,10 @@ export const registerBinary = (key: string, impl: BinaryImpl): void => {
 /**
  * Register a custom relational operator instance.
  *
+ * Mutates the process-wide relational dispatch table, so every subsequent
+ * {@link evaluate} sees the change; registering an existing key (including a
+ * built-in like `"=:num:num"`) overwrites its instance. Not a pure function.
+ *
  * @param key - An `"op:leftSort:rightSort"` string (e.g. `"=:num:num"`).
  * @param impl - The implementation to invoke for that operator and sort pair.
  * @throws {MathError} If the key is malformed or names an unknown operator or sort.
@@ -429,6 +441,10 @@ export const registerRelation = (key: string, impl: RelImpl): void => {
 
 /**
  * Register a custom logic operator instance.
+ *
+ * Mutates the process-wide logic dispatch table, so every subsequent
+ * {@link evaluate} sees the change; registering an existing key (including a
+ * built-in like `"∧:bool:bool"`) overwrites its instance. Not a pure function.
  *
  * @param key - An `"op:leftSort:rightSort"` string (e.g. `"∧:bool:bool"`).
  * @param impl - The implementation to invoke for that operator and sort pair.

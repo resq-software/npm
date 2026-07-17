@@ -24,7 +24,14 @@
 /**
  * Get the first item from an iterable Set or Map.
  *
- * @param value - The iterable Set or Map to get the first item from
+ * "First" is defined by iteration order, which for both `Set` and `Map` is
+ * insertion order — so this returns the earliest-inserted value. For a `Map` the
+ * value (not the key) is returned. Reads a single element without materializing
+ * an array.
+ *
+ * @template T - The element type for a `Set`, or the value type for a `Map` (its
+ *   key type is intentionally unconstrained).
+ * @param set - The iterable Set or Map to get the first item from
  * @returns The first value from the Set or Map, or `undefined` if it is empty
  * @example
  * ```ts

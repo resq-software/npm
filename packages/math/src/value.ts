@@ -31,12 +31,27 @@ import { SortError } from "./error.js";
 
 /**
  * Value-category tag borrowed from C++ terminology: `prvalue` for freshly
- * computed results and `lvalue` for addressable operands. Currently advisory
- * metadata carried on {@link Value}.
+ * computed results and `lvalue` for addressable operands. Purely advisory
+ * metadata carried on {@link Value} — the evaluator never reads it, so it does
+ * not affect any result. Every constructor here stamps `"prvalue"`.
  */
 export type ValueCategory = "lvalue" | "prvalue";
 
-/** A tagged runtime value in one of the supported sorts. */
+/**
+ * A tagged runtime value, the output of evaluation. `sort` is the discriminant:
+ * it selects which remaining fields are present and which operator instances the
+ * evaluator dispatches to.
+ *
+ * - `"num"`, `"bool"`, and `"record"` carry a matching `value` payload; `"set"`
+ *   carries a `ReadonlySet<number>` (finite integer sets only).
+ * - `"func"` is the exception — it has no `value`. It carries a compiled `body`
+ *   plus the `closure` (the lexical value stack captured where the lambda was
+ *   evaluated); the two together *are* the function. See {@link func} and
+ *   {@link asFunc}.
+ *
+ * All payloads are deeply `readonly`; `category` is optional advisory metadata
+ * (see {@link ValueCategory}).
+ */
 export type Value = (
 	| { readonly sort: "num"; readonly value: number }
 	| { readonly sort: "set"; readonly value: ReadonlySet<number> }
@@ -59,7 +74,12 @@ export type Sort = Value["sort"];
 /** Wrap a JS number as a `num`-sorted value. */
 export const num = (n: number): Value => ({ sort: "num", value: n, category: "prvalue" });
 
-/** Wrap an iterable of numbers as a `set`-sorted value. */
+/**
+ * Wrap an iterable of numbers as a `set`-sorted value.
+ *
+ * Copies `xs` into a fresh `Set`, so the value is a snapshot: later mutation of
+ * the source is not observable through it, and duplicate elements collapse.
+ */
 export const mkSet = (xs: Iterable<number>): Value => ({
 	sort: "set",
 	value: new Set(xs),
@@ -77,7 +97,13 @@ export const func = (body: import("./ast.js").CompiledExpr, closure: readonly Va
 	category: "prvalue",
 });
 
-/** Wrap a JS record as a `record`-sorted value. */
+/**
+ * Wrap a JS record as a `record`-sorted value.
+ *
+ * Stores `val` by reference — unlike {@link mkSet}, it does not copy or freeze —
+ * so the caller retains ownership and any later mutation of `val` is visible
+ * through the returned value. Pass a fresh object if you need isolation.
+ */
 export const record = (val: Record<string, Value>): Value => ({
 	sort: "record",
 	value: val,

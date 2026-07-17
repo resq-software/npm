@@ -81,13 +81,18 @@ function resolveKey<A extends unknown[]>(
  * concurrency: the check-then-increment is not atomic, so bursts can briefly
  * exceed `allowedCalls`. Back the counter with an atomic increment for a hard cap.
  *
+ * On an admitted call it increments the counter and schedules a `setTimeout` to
+ * decrement it after `timeSpanMs` (a clock/timer effect); on a dropped call it
+ * invokes `config.exceedHandler` (if any) for its side effects.
+ *
  * @template T - The class type a `keyof T` key resolver resolves against.
  * @template D - The return type of the original method.
  * @template A - The argument tuple of the original method.
  * @param originalMethod - The method to rate limit.
  * @param config - The rate-limit configuration.
- * @returns A rate-limited method; the result is a promise when a distributed
- * `rateLimitAsyncCounter` is configured, otherwise synchronous.
+ * @returns A rate-limited method that yields the original result when admitted and
+ * the sentinel `undefined` when dropped; the result is wrapped in a promise when a
+ * distributed `rateLimitAsyncCounter` is configured, otherwise it is synchronous.
  * @example
  * ```ts
  * class ApiService {

@@ -28,20 +28,27 @@ import type { Cache, KeyResolver, Memoizable } from "../memoize/memoize.types.js
  * Legacy signature type for the `@memoizeAsync` decorator (async counterpart of
  * `Memoizable`).
  *
- * @deprecated Use `AsyncDecorator<T>` from `../types.js` instead. This shape
- * erases the decorated method's signature, which is not assignable to a
- * concrete async method's descriptor under strict `strictFunctionTypes`
- * (TS1241 / TS1270 at the decoration site). `memoizeAsync` now returns
- * `AsyncDecorator<T>`, which preserves the signature. Retained for back-compat.
- *
  * @template T - The class type that owns the decorated method.
  * @template D - The resolved type of the async method.
+ * @deprecated Use {@link AsyncDecorator} from `../types.js` instead — removed in
+ * v1.0.0. This shape erases the decorated method's signature, which is not
+ * assignable to a concrete async method's descriptor under strict
+ * `strictFunctionTypes` (TS1241 / TS1270 at the decoration site). `memoizeAsync`
+ * now returns {@link AsyncDecorator}, which preserves the signature. Migration:
+ * replace `AsyncMemoizable<T, D>` annotations with `AsyncDecorator<T>` (drop the
+ * `D` parameter); no runtime change.
  */
 export type AsyncMemoizable<T, D> = Memoizable<T, Promise<D>>;
 
 /**
  * Async cache contract used by the `@memoizeAsync` decorator. Any store exposing
  * these four promise-returning operations (e.g. a Redis-backed cache) qualifies.
+ *
+ * `get` must resolve `null` for an absent key: `memoizeAsync` distinguishes hit
+ * from miss with a single `get` (never a separate `has` + `get`) to stay race-free
+ * against TTL eviction, so a nullish resolution is read as "not cached". A value
+ * that is itself `null`/`undefined` therefore cannot be cached and is recomputed
+ * each call. All operations share one keyspace.
  *
  * @template D - The type of values stored in the cache.
  * @example
@@ -58,13 +65,13 @@ export type AsyncMemoizable<T, D> = Memoizable<T, Promise<D>>;
  * ```
  */
 export interface AsyncCache<D> {
-	/** Store a value in the cache asynchronously. */
+	/** Store a value for `key`, overwriting any existing entry. */
 	set: (key: string, value: D) => Promise<void>;
-	/** Retrieve a value from the cache asynchronously. */
+	/** Retrieve the value for `key`, resolving `null` when the key is absent. */
 	get: (key: string) => Promise<D | null>;
-	/** Remove a value from the cache asynchronously. */
+	/** Remove the entry for `key`; resolves regardless of prior presence. */
 	delete: (key: string) => Promise<void>;
-	/** Check whether a key exists in the cache asynchronously. */
+	/** Whether an entry exists for `key`. Not used on the `memoizeAsync` hot path. */
 	has: (key: string) => Promise<boolean>;
 }
 
@@ -84,10 +91,20 @@ export interface AsyncCache<D> {
  * ```
  */
 export interface AsyncMemoizeConfig<T, D> {
-	/** Custom cache implementation, synchronous or asynchronous. */
+	/**
+	 * Custom cache, synchronous ({@link Cache}) or asynchronous ({@link AsyncCache});
+	 * when omitted, a fresh `Map` is used.
+	 */
 	cache?: Cache<D> | AsyncCache<D>;
-	/** Function or method name that generates cache keys. */
+	/**
+	 * How cache keys are derived. A {@link KeyResolver} is called with the
+	 * arguments; a `keyof T` names an instance method resolved and bound to `this`
+	 * at call time. When omitted, the key is `JSON.stringify` of the arguments.
+	 */
 	keyResolver?: KeyResolver | keyof T;
-	/** Time in milliseconds after which cached values expire. */
+	/**
+	 * Per-entry time-to-live in milliseconds, measured from insertion. When omitted,
+	 * entries never expire.
+	 */
 	expirationTimeMs?: number;
 }

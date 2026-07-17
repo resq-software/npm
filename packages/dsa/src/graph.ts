@@ -65,26 +65,40 @@ export interface Vertex<T, M = Record<string, unknown>> {
 }
 
 /**
- * Path result from shortest-path algorithms.
+ * Result of a shortest-path search.
+ *
+ * The fields move together: when {@link found} is `false` (no route exists),
+ * `path` is empty and `distance` is `Number.POSITIVE_INFINITY`. When `found`
+ * is `true`, `path` runs from source to target inclusive and `distance` is its
+ * summed edge weight (`0` for a source-equals-target path).
  */
 export interface PathResult<T> {
-	/** Ordered list of vertices in the path */
+	/** Vertices from source to target inclusive; empty when `found` is `false`. */
 	path: T[];
-	/** Total distance/weight of the path */
+	/** Total summed edge weight; `Infinity` when `found` is `false`. */
 	distance: number;
-	/** Whether a path was found */
+	/** Whether a path from source to target was found. */
 	found: boolean;
 }
 
 /**
- * Graph traversal result.
+ * Result of a graph traversal (BFS or DFS).
+ *
+ * All three collections cover exactly the vertices reachable from the start,
+ * and are empty when the start vertex is not in the graph.
  */
 export interface TraversalResult<T> {
-	/** Vertices in traversal order */
+	/** Reachable vertices in the order they were visited. */
 	vertices: T[];
-	/** Parent map for path reconstruction */
+	/**
+	 * Maps each visited vertex to the vertex it was reached from; the start
+	 * vertex maps to `null`. Follow it back to reconstruct a path.
+	 */
 	parents: Map<T, T | null>;
-	/** Distance from source (for BFS) */
+	/**
+	 * Maps each visited vertex to its distance from the start: hop count for
+	 * {@link Graph.bfs}, recursion depth for {@link Graph.dfs}.
+	 */
 	distances: Map<T, number>;
 }
 

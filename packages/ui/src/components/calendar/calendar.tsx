@@ -179,7 +179,13 @@ function Calendar({
 	);
 }
 
-/** Renders one day cell as a button, reflecting today/selected/range-edge states. */
+/**
+ * Renders one day cell as a button, reflecting today/selected/range-edge states.
+ *
+ * Moves DOM focus to its own button whenever react-day-picker marks the day as
+ * `modifiers.focused`, keeping keyboard navigation in sync with the rendered
+ * grid.
+ */
 function CalendarDayButton({
 	className,
 	day,

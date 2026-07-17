@@ -29,10 +29,20 @@ import { throttleAsyncFn } from "./throttle-async.fn.js";
  * Limit an async method to `parallelCalls` concurrent executions; excess calls
  * queue and run in FIFO order as slots free up.
  *
+ * The queue/executor is created once, at decoration time, so the concurrency limit
+ * spans every instance of the class, not each instance separately. A call's promise
+ * settles with its own method result — a rejection rejects only that promise and
+ * frees its slot so the queue keeps draining. The queue is unbounded and there is
+ * no cancellation (`AbortSignal` is not honoured). `parallelCalls` must be at least
+ * `1`; a value below `1` never dispatches and calls queue forever. Mutates the
+ * supplied property descriptor in place.
+ *
  * @template T - The class type that owns the decorated method.
- * @param parallelCalls - Maximum number of concurrent calls; defaults to `1`.
+ * @param parallelCalls - Maximum number of concurrent calls; defaults to `1`. Must
+ * be `>= 1`.
  * @returns The async method decorator.
- * @throws {Error} If applied to anything other than a method.
+ * @throws {Error} If applied to a member without a `value` descriptor (an accessor
+ * or plain property rather than a method).
  * @example
  * ```ts
  * class BatchProcessor {

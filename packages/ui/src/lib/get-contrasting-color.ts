@@ -32,14 +32,24 @@ const toChannel = (n: number): Channel =>
 	(n < 0 ? 0 : n > 255 ? 255 : Math.round(n)) as Channel;
 
 /**
- * Returns a highly contrasting color (#000000 or #ffffff) for a given input color string,
- * useful for ensuring text or UI elements remain visible against varying backgrounds.
+ * Returns a highly contrasting color (`"#000000"` or `"#ffffff"`) for a given
+ * input color string, useful for ensuring text or UI elements remain visible
+ * against varying backgrounds.
  *
- * This function only runs in the browser; on the server, it returns undefined.
+ * Requires a DOM: it normalizes `col` through a detached `<canvas>` 2D context
+ * (`document.createElement`), so it returns `undefined` in any non-browser
+ * environment where `window` is absent. The canvas is transient — nothing is
+ * attached to the document and no state persists across calls.
  *
- * @param {string} col - The input color (any valid CSS color string, e.g. "#f00", "rgb(255,0,0)", "blue").
- * @returns {string | undefined} The hex color string for the contrasting color ("#000000" or "#ffffff"), or undefined if not in browser environment.
- * @throws {Error} May throw if standardization or parsing of color fails, but usually falls back silently.
+ * Never throws: an unparseable or unsupported `col`, or a missing canvas
+ * context, silently falls back to `"#ffffff"` rather than surfacing an error.
+ *
+ * @param col - The input color (any valid CSS color string, e.g. `"#f00"`,
+ *   `"rgb(255,0,0)"`, `"blue"`).
+ * @returns `"#000000"` when dark text reads best (light background) or
+ *   `"#ffffff"` when light text reads best (dark background); the sentinel
+ *   `undefined` when called during server-side rendering (no `window`).
+ *   Unparseable input resolves to `"#ffffff"`.
  * @example
  * ```ts
  * getContrastingColor('#FFFFFF'); // → "#000000"
@@ -81,9 +91,10 @@ function getColor(rgb: Rgb | null): boolean | undefined {
  * Standardizes any valid CSS color string to its computed form (e.g. converts "red" to "#ff0000").
  * Uses Canvas 2D context for browser-based color parsing.
  *
- * @param {string} str - CSS color input
- * @returns {string} The standardized hex color string, or an empty string on failure
- * @throws {Error} If Canvas context creation fails
+ * @param str - CSS color input.
+ * @returns The standardized hex color string, or an empty string when the
+ *   canvas 2D context is unavailable. Does not throw: an invalid `str` is
+ *   ignored by the canvas and the previous `fillStyle` is returned instead.
  */
 function standardizeColor(str: string): string {
 	const ctx = document.createElement("canvas").getContext("2d");

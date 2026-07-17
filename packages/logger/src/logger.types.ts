@@ -28,6 +28,12 @@ import type { LogLevel, Logger } from "./logger.js";
 
 /**
  * Structured data attached to a log message — an open bag of key-value pairs.
+ *
+ * Values should be JSON-serializable: the console formatter and
+ * {@link JsonTransport} render this bag via `JSON.stringify`, and a value that
+ * cannot be stringified (circular references, `BigInt`, …) is replaced with an
+ * unserializable marker rather than throwing. Keys are not namespaced, so a
+ * caller-supplied `error` key collides with the one {@link Logger.error} injects.
  */
 export interface LogData {
 	/** Arbitrary key-value pairs to include in the log. */
@@ -36,17 +42,26 @@ export interface LogData {
 
 /**
  * Configuration options for a {@link Logger} instance.
+ *
+ * Only {@link LoggerOptions.minLevel} currently influences behavior; the
+ * remaining fields are accepted but not yet applied by the console formatter —
+ * timestamps are always emitted and output is never colorized regardless of what
+ * is passed. Treat the formatting/file fields as reserved surface.
  */
 export interface LoggerOptions {
-	/** The minimum level of messages to log. */
+	/**
+	 * Minimum level a message must meet to be emitted. When omitted, the
+	 * constructor falls back to the `LOG_LEVEL`/`BUN_LOG_LEVEL` env var, then to a
+	 * `NODE_ENV`-based default (`ERROR` in production, `ALL` otherwise).
+	 */
 	minLevel?: LogLevel;
-	/** Whether to include timestamps in log messages. */
+	/** Reserved: timestamps are currently emitted unconditionally. */
 	includeTimestamp?: boolean;
-	/** Whether to colorize log output. */
+	/** Reserved: console output is not currently colorized. */
 	colorize?: boolean;
-	/** Whether to write logs to a file (server-side only). */
+	/** Reserved: file output is not currently implemented (server-side intent). */
 	logToFile?: boolean;
-	/** Path to the log file when {@link LoggerOptions.logToFile} is enabled. */
+	/** Reserved: only meaningful alongside {@link LoggerOptions.logToFile}. */
 	filePath?: string;
 }
 
@@ -86,9 +101,13 @@ export type SimpleLogLevel = {
 
 /**
  * A structured log entry as delivered to every registered {@link LogTransport}.
+ *
+ * Assembled fresh per emitted log after level filtering; the same object
+ * instance is handed to every transport, so a transport must treat it as
+ * read-only rather than mutate the shared entry.
  */
 export interface LogEntry {
-	/** ISO-8601 timestamp of the log. */
+	/** UTC timestamp in ISO-8601 (`Date#toISOString`), captured at dispatch time. */
 	timestamp: string;
 	/** Severity level of the entry. */
 	level: LogLevelString;
@@ -96,20 +115,36 @@ export interface LogEntry {
 	context: string;
 	/** Human-readable log message. */
 	message: string;
-	/** Optional structured data payload. */
+	/**
+	 * Structured payload. Absent when no data was passed *or* the passed object
+	 * was empty — an empty bag is dropped rather than emitted as `{}`.
+	 */
 	data?: LogData;
-	/** Environment the entry originated in. */
+	/**
+	 * Where the entry originated, derived from `typeof window`: `"server"` when
+	 * `window` is undefined, otherwise `"client"`.
+	 */
 	environment: "client" | "server";
 }
 
 /**
  * Contract for a custom log transport that receives structured {@link LogEntry}
  * values (see {@link Logger.addTransport}).
+ *
+ * A transport's {@link LogTransport.write} runs inside the emitting log call.
+ * Errors are isolated by {@link Logger}: a synchronous throw is caught and a
+ * rejected promise is swallowed, so a failing transport never breaks the log
+ * call or sibling transports — but it also means write failures are silent, so a
+ * transport that needs delivery guarantees must handle its own errors.
  */
 export interface LogTransport {
 	/** Transport name, used for identification and removal by name. */
 	name: string;
-	/** Write a single entry; may be synchronous or return a promise. */
+	/**
+	 * Write a single entry. May run synchronously or return a promise; the
+	 * returned promise is not awaited by the logger, only guarded against
+	 * rejection, so ordering across async transports is not guaranteed.
+	 */
 	write(entry: LogEntry): void | Promise<void>;
 }
 

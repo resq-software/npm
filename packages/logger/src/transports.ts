@@ -128,6 +128,12 @@ export class JsonTransport implements LogTransport {
  * a composable filter (Decorator over Observer). Compose with {@link byLevel}
  * for the common "only these levels" case.
  *
+ * The wrapper is transparent to the write channel: for a matching entry it
+ * returns exactly what `inner.write` returns (forwarding its promise when the
+ * inner transport is async); for a non-matching entry it returns `undefined`
+ * without invoking `inner`. The wrapper is stateless — `predicate` owns any
+ * state — and its `name` is derived as `filter(<inner.name>)`.
+ *
  * @param inner - The transport that receives entries passing the predicate.
  * @param predicate - Returns `true` for entries that should reach `inner`.
  * @returns A transport that forwards only matching entries to `inner`.

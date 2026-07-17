@@ -50,8 +50,11 @@ export interface PerfViolation {
 		| "style-writes"
 		| "input-responsiveness"
 		| "element-timing";
+	/** Stable machine-readable rule id (e.g. `"no-transition-all"`). */
 	rule: string;
+	/** Human-readable, file-prefixed explanation for reports. */
 	message: string;
+	/** The offending substring, when the rule matched a specific literal; absent for count/threshold rules that have no single culprit. */
 	match?: string;
 	/** Severity: 'error' blocks CI, 'warning' shows up in reports. */
 	severity: "error" | "warning";
@@ -146,6 +149,8 @@ const BLOCKING_LISTENER_RE =
  * burning frame budget on layout-bound properties that should stay
  * static. Use specific transitions (`transition-colors`,
  * `transition-transform`, …) instead.
+ *
+ * @throws {Error} When `source` contains the `transition-all` utility.
  */
 export function assertNoTransitionAll(source: string, file: string): void {
 	if (TRANSITION_ALL_RE.test(source)) {
@@ -162,6 +167,8 @@ export function assertNoTransitionAll(source: string, file: string): void {
  * pins radii to specific pixel values per `STYLE_GUIDE.md`; the
  * generic utilities sneak through Tailwind's defaults and break
  * visual consistency.
+ *
+ * @throws {Error} When `source` uses `rounded-xl`/`rounded-2xl`/`rounded-3xl`.
  */
 export function assertNoGenericRadius(source: string, file: string): void {
 	const match = source.match(GENERIC_RADIUS_RE);
@@ -182,6 +189,9 @@ export function assertNoGenericRadius(source: string, file: string): void {
  *
  * Sidebar component files are exempted because their resize anim is
  * unavoidably layout-bound and is gated by user input.
+ *
+ * @throws {Error} When a non-exempt `file` transitions a layout-bound
+ *   property. Sidebar files (matched by name) return without checking.
  */
 export function assertNoLayoutTransitions(source: string, file: string): void {
 	if (SIDEBAR_LAYOUT_EXEMPT_RE.test(file)) return;
@@ -202,6 +212,8 @@ export function assertNoLayoutTransitions(source: string, file: string): void {
  * These cause synchronous layout when called after a style write,
  * destroying frame budget. Batch reads before writes or replace
  * with `ResizeObserver` / `IntersectionObserver`.
+ *
+ * @throws {Error} When `source` reads a layout-triggering DOM property.
  */
 export function assertNoForcedReflowTriggers(source: string, file: string): void {
 	const match = source.match(FORCED_REFLOW_TRIGGER_RE);
@@ -440,6 +452,14 @@ export function countInlineStyles(element: unknown): number {
 /**
  * Checks whether replaced elements (img, video, iframe, canvas) have
  * explicit dimensions — missing dimensions are the #1 cause of CLS.
+ *
+ * Mutates and returns the `acc` accumulator: a caller-supplied array is
+ * appended to in place (it is not copied). Omit `acc` to collect into a fresh
+ * array. Does not throw.
+ *
+ * @param element - Tree to walk; non-element values are traversed but ignored.
+ * @param acc - Accumulator appended to in place; defaults to a new array.
+ * @returns The same `acc`, now holding one message per unsized media element.
  */
 export function collectUnsizedMedia(element: unknown, acc: string[] = []): string[] {
 	if (!isReactElement(element)) {
@@ -512,6 +532,9 @@ function collectClassNamesInto(element: unknown, acc: string[]): void {
  * attribute. The design system uses `data-slot` as the stable hook
  * for Performance API Element Timing instrumentation; without it,
  * field RUM can't time the component.
+ *
+ * @throws {Error} When `element` is not a React-like element or its root has
+ *   no `data-slot` prop.
  */
 export function assertHasDataSlot(element: unknown, componentName: string): void {
 	if (!isReactElement(element) || !element.props?.["data-slot"]) {
@@ -526,6 +549,8 @@ export function assertHasDataSlot(element: unknown, componentName: string): void
  * Render-time variant of {@link assertNoTransitionAll}. Pass the
  * concatenated `className` string from a rendered tree (collected
  * via {@link collectClassNames}).
+ *
+ * @throws {Error} When `classes` contains the `transition-all` utility.
  */
 export function assertRenderedNoTransitionAll(classes: string, componentName: string): void {
 	if (TRANSITION_ALL_RE.test(classes)) {
@@ -539,6 +564,8 @@ export function assertRenderedNoTransitionAll(classes: string, componentName: st
 /**
  * Render-time variant of {@link assertNoGenericRadius}. Pass the
  * concatenated `className` string from a rendered tree.
+ *
+ * @throws {Error} When `classes` contains a generic radius utility.
  */
 export function assertRenderedNoGenericRadius(classes: string, componentName: string): void {
 	const match = classes.match(GENERIC_RADIUS_RE);
@@ -764,6 +791,9 @@ export const DIV_ONCLICK_RE = /<(?:div|span)\s[^>]*onClick[^>]*(?!role=)/;
  * `focus-visible:*` styling and does not delegate to a primitive
  * (`Button`, `Pressable`, native `button`/`input`) that brings its
  * own focus ring.
+ *
+ * @throws {Error} When `source` has interactive handlers but neither a
+ *   `focus-visible:*` class nor a delegated interactive primitive.
  */
 export function assertInteractiveHasFocusVisible(source: string, file: string): void {
 	// Only check files that have interactive elements (onClick, onKeyDown, role="button", etc.)
@@ -830,7 +860,8 @@ const FONT_RULES: Record<string, { pattern: RegExp; requiredClasses: string[] }>
  * (`font-mono uppercase` for buttons/badges/labels, `font-display`
  * for titles).
  *
- * @throws Error listing the first missing class.
+ * @throws {Error} Naming the first required class missing from a file that
+ *   matches a {@link FONT_RULES} entry.
  */
 export function assertFontCompliance(source: string, file: string): void {
 	for (const [suffix, rule] of Object.entries(FONT_RULES)) {
@@ -864,6 +895,9 @@ const RAW_HEX_IN_CLASSNAME_RE = /className[^=]*=\{?[^}]*#[0-9a-fA-F]{3,8}\b/;
  * tokens (`bg-primary`, `text-foreground`, `border-destructive`, …)
  * instead. Chart files are exempt because Recharts' config takes
  * raw hex.
+ *
+ * @throws {Error} When a raw hex color appears inside a `className` prop in a
+ *   non-chart `file`.
  */
 export function assertNoRawHexInClassNames(source: string, file: string): void {
 	// chart.tsx has hex in config objects and regex, not classNames — exempt
@@ -895,6 +929,9 @@ export function assertNoRawHexInClassNames(source: string, file: string): void {
  * Heuristic: presence of any hook is treated as proof that browser
  * accesses are guarded. False negatives are acceptable here — this
  * is a fast-fail tripwire, not a sound type system.
+ *
+ * @throws {Error} When `source` reads a `window.*`/`document.*` global and the
+ *   file contains no `useEffect`/`useLayoutEffect`/`useCallback` hook.
  */
 export function assertSSRSafe(source: string, file: string): void {
 	// If the file wraps all browser globals in hooks, it's safe.
@@ -941,6 +978,10 @@ const TW_ANIMATE_SLIDE_FADE_ZOOM_RE =
  * `motion-reduce:*` / `motion-safe:*` / `prefers-reduced-motion`
  * handling. Prevents shipping animations that ignore the user's
  * accessibility preference.
+ *
+ * @throws {Error} When `source` declares a non-`tw-animate-css` `animate-*`
+ *   class and has no `motion-reduce`/`motion-safe`/`prefers-reduced-motion`
+ *   handling.
  */
 export function assertReducedMotion(source: string, file: string): void {
 	const animateMatches = source.match(/\banimate-[\w-]+\b/g);
@@ -978,6 +1019,9 @@ export function assertReducedMotion(source: string, file: string): void {
  * Exemptions: barrel files with no `className` usage, and wrappers
  * that pass `className` straight to a non-relative third-party
  * import (where the vendor handles merging).
+ *
+ * @throws {Error} When a component `file` uses `className` but never calls
+ *   `cn()` and is not one of the exempt cases above.
  */
 export function assertClassNameMerging(source: string, file: string): void {
 	// Only check component files that export functions

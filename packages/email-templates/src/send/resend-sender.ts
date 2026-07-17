@@ -31,6 +31,17 @@ import type { EmailSender, SendEmailInput, SendResult } from "./sender.js";
  * The key is read from the explicit argument or the `RESEND_API_KEY` env var and
  * validated up front (fail fast). Resend returns `{ data, error }` for API-level
  * failures rather than throwing, so we branch on `error` instead of try/catch.
+ *
+ * Reads `process.env.RESEND_API_KEY` when no key is passed, and constructs a
+ * Resend HTTP client. The returned `send` upholds the never-throws contract of
+ * {@link EmailSender.send}: API errors, an empty response, and transport-level
+ * throws (fetch rejection, DNS, aborted request) all become `{ ok: false, error }`
+ * with a distinguishing `error.name` (the Resend error name, `"unknown_error"`,
+ * or `"transport_error"`). It does not honour an `AbortSignal`.
+ *
+ * @param apiKey - Resend API key; defaults to `process.env.RESEND_API_KEY`.
+ * @returns An {@link EmailSender} that delivers through Resend.
+ * @throws {Error} If no API key is available from the argument or the environment.
  */
 export function createResendSender(
 	apiKey: string | undefined = process.env.RESEND_API_KEY,

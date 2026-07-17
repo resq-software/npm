@@ -28,10 +28,17 @@ import { throttleFn } from "./throttle.fn.js";
  * Throttle a method to at most one call per `delayMs`; calls made during the
  * cooldown are dropped.
  *
+ * Leading-edge only: the first call runs immediately and there is no trailing call
+ * for anything dropped during the cooldown. The throttled method returns `void` —
+ * the original's return value is discarded. The cooldown flag is created once, at
+ * decoration time, so it is shared across every instance of the class. Mutates the
+ * supplied property descriptor in place.
+ *
  * @template T - The class type that owns the decorated method.
  * @param delayMs - The minimum interval between executions, in milliseconds.
  * @returns The method decorator.
- * @throws {Error} If applied to anything other than a method.
+ * @throws {Error} If applied to a member without a `value` descriptor (an accessor
+ * or plain property rather than a method).
  * @example
  * ```ts
  * class ResizeHandler {

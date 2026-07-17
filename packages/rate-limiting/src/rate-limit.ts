@@ -36,9 +36,15 @@ import type { RateLimitDecision } from "./decision.js";
  * useful at framework boundaries where the config arrives as untyped
  * JSON (env-var parsing, admin endpoints, feature-flag payloads).
  *
+ * Invariant the type can't state: `windowMs` and `maxRequests` are both
+ * strictly-positive **integers** (`0` and negatives are rejected), and
+ * `headers` absent is treated the same as `false` by middleware. Decoding
+ * a value that violates these throws — see the example.
+ *
  * @example
  * ```ts
  * import { Schema } from "effect";
+ * // Throws a ParseError if `input` is missing a field or has a non-positive value.
  * const config = Schema.decodeUnknownSync(RateLimitConfigSchema)(input);
  * ```
  */
@@ -51,7 +57,14 @@ export const RateLimitConfigSchema = S.Struct({
 	headers: S.optional(S.Boolean),
 });
 
-/** TypeScript type inferred from {@link RateLimitConfigSchema}. */
+/**
+ * TypeScript type inferred from {@link RateLimitConfigSchema}.
+ *
+ * The static type only guarantees `number`; the positive-integer bounds on
+ * `windowMs`/`maxRequests` are enforced solely by decoding through the schema,
+ * so trust these fields only after validation, not when hand-constructing the
+ * object.
+ */
 export type RateLimitConfig = typeof RateLimitConfigSchema.Type;
 
 //#endregion
@@ -72,10 +85,19 @@ export interface IRateLimitStore {
 	 * Atomically increment the counter for `key` within a sliding window
 	 * of `windowMs` and decide whether to allow the request.
 	 *
+	 * This is **not** a pure query: an allowed request is recorded (the
+	 * counter is advanced) as a side effect, so calling `check` twice
+	 * consumes two slots. Reads the wall clock to place the window.
+	 * Distributed implementations reach out to their backend and may
+	 * therefore reject; a rejected `Promise` signals an infrastructure
+	 * failure, distinct from a resolved `{ allowed: false }` decision.
+	 *
 	 * @param key - Caller-chosen identity key (e.g. `"user:42"`).
 	 * @param windowMs - Window length in milliseconds.
 	 * @param maxRequests - Maximum requests permitted in the window.
-	 * @returns A {@link RateLimitDecision} describing the decision.
+	 * @returns A {@link RateLimitDecision} describing the decision; a
+	 *   rejected `Promise` (implementation-dependent) signals that the
+	 *   decision could not be reached, not that the request was denied.
 	 */
 	check(key: string, windowMs: number, maxRequests: number): Promise<RateLimitDecision>;
 	/**
@@ -132,7 +154,19 @@ export class RedisRateLimitStore implements IRateLimitStore {
 		return limiter;
 	}
 
-	/** @inheritdoc */
+	/**
+	 * @inheritdoc
+	 *
+	 * Performs a network round-trip to Redis and records the request there;
+	 * the counter update is atomic across all processes sharing the client.
+	 * Failure is surfaced as a **rejected** `Promise`, not a decision — a
+	 * `false` result means "rate limited", never "Redis was unreachable".
+	 *
+	 * @throws {Error} If the underlying Redis call fails (connection refused,
+	 *   auth failure, timeout). Propagated from `@upstash/ratelimit`; decide
+	 *   per route whether to fail open (admit) or closed (reject) in a
+	 *   surrounding `catch`.
+	 */
 	async check(key: string, windowMs: number, maxRequests: number): Promise<RateLimitDecision> {
 		const limiter = this.getLimiter(windowMs, maxRequests);
 		const result = await limiter.limit(key);
@@ -188,7 +222,16 @@ export class MemoryRateLimitStore implements IRateLimitStore {
 		this.store = new LRUCache({ maxSize: options?.maxSize ?? 10000 });
 	}
 
-	/** @inheritdoc */
+	/**
+	 * @inheritdoc
+	 *
+	 * Purely process-local: reads the wall clock, mutates the backing LRU
+	 * entry for `key` in place, and always **resolves** — there is no I/O to
+	 * fail on, so it never rejects. The `async` signature exists only to
+	 * satisfy {@link IRateLimitStore}. Concurrent calls are safe within a
+	 * single JS event loop, but two processes each keep independent counters
+	 * (hence the single-process caveat on the class).
+	 */
 	async check(key: string, windowMs: number, maxRequests: number): Promise<RateLimitDecision> {
 		const now = Date.now();
 		const windowStart = Math.floor(now / windowMs) * windowMs;

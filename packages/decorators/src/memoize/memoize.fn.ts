@@ -34,13 +34,24 @@ import type { KeyResolver, MemoizeConfig } from "./memoize.types.js";
  * a number for a TTL in milliseconds, or pass a {@link MemoizeConfig} for a
  * custom cache, key resolver, and/or expiry.
  *
+ * Each call to `memoizeFn` owns its own cache (closed over by the returned
+ * function), so binding the method per instance yields independent caches. A
+ * stored `null`/`undefined` is a genuine hit — presence is checked with the
+ * cache's `has`, not by inspecting the value — so falsy results are cached
+ * correctly. When `expirationTimeMs` is set, each written entry schedules a timer
+ * that deletes it after the delay (a clock/timer effect); the entry is not
+ * refreshed on read, so the TTL runs from insertion.
+ *
  * @template T - The class type a `keyof T` key resolver resolves against.
  * @template D - The return type of the original method.
  * @template A - The argument tuple of the original method.
  * @param originalMethod - The method whose results are cached.
  * @param input - A TTL in milliseconds, a {@link MemoizeConfig}, or omitted to
  * cache indefinitely.
- * @returns The memoized method.
+ * @returns The memoized method, sharing one cache across all its invocations.
+ * @throws {TypeError} When no `keyResolver` is configured and the arguments
+ * contain a circular reference — the default key is `JSON.stringify(args)`, which
+ * throws on circular input.
  * @example
  * ```ts
  * class ExpensiveOperations {

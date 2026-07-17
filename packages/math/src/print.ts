@@ -219,6 +219,7 @@ const wrapIf = (inner: string, needsWrap: boolean): string => (needsWrap ? `(${i
  * @param expr - The expression tree to print.
  * @param options - Optional formatting configuration.
  * @returns A string representation with minimal parentheses.
+ * @throws {RecursionLimitError} If the tree nests deeper than the internal limit (200).
  */
 export const print = (expr: Expr, options?: PrintOptions): string => {
 	const ascii = options?.ascii === true;

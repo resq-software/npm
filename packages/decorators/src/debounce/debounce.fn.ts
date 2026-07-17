@@ -29,11 +29,21 @@ import type { Method } from "../types.js";
  * The method will only execute after the specified delay has passed
  * since the last time it was called.
  *
+ * Effectful and trailing-edge only: each call clears the shared pending
+ * `setTimeout` and arms a new one, so a single wrapper collapses *all* its
+ * calls (regardless of arguments) into the last one. The wrapper returns
+ * `undefined` immediately — the original method's return value is **discarded**,
+ * so this cannot wrap a method whose result the caller needs. The deferred
+ * invocation uses the `this` and arguments of the most recent call; if the
+ * method throws, it throws inside the timer callback (unobservable to the
+ * caller). No `AbortSignal` / cancellation.
+ *
  * @template D - The return type of the original method.
  * @template A - The argument types of the original method.
  * @param originalMethod - The method to debounce.
  * @param delayMs - The debounce delay in milliseconds.
- * @returns The debounced method.
+ * @returns The debounced wrapper; it always returns `undefined` (`void`), never
+ *   the wrapped method's value.
  * @example
  * ```typescript
  * class SearchService {

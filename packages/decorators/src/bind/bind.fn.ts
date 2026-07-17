@@ -26,6 +26,10 @@ import type { Method } from "../types.js";
 /**
  * Creates a bound version of a method.
  *
+ * Pure with respect to its inputs: returns a **new** function from
+ * `Function.prototype.bind` and neither mutates `originalMethod` nor `context`.
+ * The binding is permanent — a later `.call`/`.apply` cannot re-point `this`.
+ *
  * @template D - The return type of the original method.
  * @template A - The argument types of the original method.
  * @param originalMethod - The method to bind.

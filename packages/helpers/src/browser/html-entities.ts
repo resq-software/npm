@@ -26,8 +26,14 @@ import { type Brand, unsafeBrand } from "@resq-systems/types";
 
 /**
  * A string whose every character has been replaced by its decimal HTML
- * character reference (e.g. `"a"` → `"&#97;"`). Produced by
- * {@link toEntities}; safe to embed as text content in HTML.
+ * character reference (e.g. `"a"` → `"&#97;"`); safe to embed as text content
+ * in HTML.
+ *
+ * The brand guarantees the string was produced by full entity-encoding (every
+ * code point escaped), not merely typed as encoded. Mint one through the
+ * exported {@link obfuscateLink} — its `encodedText` field carries this brand;
+ * the encoder itself is internal, so callers cannot brand an arbitrary string
+ * without going through it.
  */
 export type HtmlEntityEncoded = Brand<string, "HtmlEntityEncoded">;
 

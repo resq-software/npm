@@ -27,6 +27,11 @@ import { PERFORMANCE_COLORS, PERFORMANCE_PREFIX_COLOR } from "./perf";
  * A utility class for measuring and tracking frame rate performance during operations.
  * Provides visual feedback in the browser console with color-coded FPS indicators.
  *
+ * Requires a browser-like environment: relies on `requestAnimationFrame`,
+ * `cancelAnimationFrame`, and `performance.now()`. Not concurrency-safe within one
+ * instance — {@link start} resets counters, so overlapping start/stop pairs on the
+ * same tracker measure only the most recent run.
+ *
  * @example
  * ```ts
  * const tracker = new PerformanceTracker()
@@ -91,6 +96,14 @@ export class PerformanceTracker {
 	 * - Green background: \> 55 FPS (good performance)
 	 * - Yellow background: 30-55 FPS (moderate performance)
 	 * - Red background: \< 30 FPS (poor performance)
+	 *
+	 * Side effect: writes one styled line to the console (`console.debug`) and
+	 * cancels the pending animation frame. Must be preceded by a {@link start}
+	 * call.
+	 *
+	 * @throws {TypeError} If called before {@link start} — the operation name is
+	 *   still the empty string, so capitalising its first character dereferences
+	 *   `undefined`.
 	 *
 	 * @example
 	 * ```ts

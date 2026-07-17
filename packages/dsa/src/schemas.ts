@@ -117,7 +117,11 @@ export type RabinKarpMultiSearch = S.Schema.Type<typeof RabinKarpMultiSearchSche
 
 //#region Graph Schemas
 
-/** Construction options for {@link Graph} — `directed` defaults to false. */
+/**
+ * Construction options for {@link Graph}. The schema leaves `directed`
+ * optional (no schema-level default); {@link Graph} itself treats an omitted
+ * value as `true` (directed).
+ */
 export const GraphOptionsSchema = S.Struct({
 	directed: S.optional(S.Boolean),
 });
@@ -209,6 +213,12 @@ export function validateSafe<T extends AnySchema>(
  * Build a reusable, throwing decoder bound to one schema. Equivalent
  * to currying {@link validate}.
  *
+ * The returned function decodes its input synchronously and **throws** the
+ * Effect parse error on invalid input, exactly like {@link validate}. Reach for
+ * {@link validateSafe} when you want a non-throwing result instead.
+ *
+ * @returns A decoder that maps trusted input to `T["Type"]`, throwing on a
+ *   parse failure.
  * @example
  * ```ts
  * const parseEdge = createValidator(GraphEdgeSchema);
@@ -273,16 +283,20 @@ export function toProbability(value: number): Probability {
 }
 
 /**
- * Smart constructor for {@link Latitude}; throws when `value` is non-finite
- * or outside `[-90, 90]`.
+ * Smart constructor for {@link Latitude}.
+ *
+ * @throws The Effect parse error when `value` is non-finite or outside the
+ *   closed interval `[-90, 90]`.
  */
 export function toLatitude(value: number): Latitude {
 	return validate(LatitudeSchema, value);
 }
 
 /**
- * Smart constructor for {@link Longitude}; throws when `value` is non-finite
- * or outside `[-180, 180]`.
+ * Smart constructor for {@link Longitude}.
+ *
+ * @throws The Effect parse error when `value` is non-finite or outside the
+ *   closed interval `[-180, 180]`.
  */
 export function toLongitude(value: number): Longitude {
 	return validate(LongitudeSchema, value);

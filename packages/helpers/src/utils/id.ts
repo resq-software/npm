@@ -74,6 +74,11 @@ let impl = nanoid;
  * Replaces the internal ID generation function with a custom one. This is useful
  * for testing scenarios where you need predictable or deterministic IDs.
  *
+ * Mutates module-global generator state: every subsequent {@link uniqueId} call
+ * process-wide routes through `fn` until {@link restoreUniqueId} is called. Not
+ * scoped or nestable — a second `mockUniqueId` simply overwrites the first, so
+ * restore in a test teardown to avoid leaking the mock into other tests.
+ *
  * @param fn - The mock function that should return a string ID. Takes optional size parameter.
  * @example
  * ```ts
@@ -97,6 +102,9 @@ export function mockUniqueId(fn: (size?: number) => string) {
  * Resets the ID generation function back to the original nanoid implementation.
  * This should be called after testing to restore normal ID generation behavior.
  *
+ * Mutates module-global generator state, undoing any {@link mockUniqueId}. Safe
+ * to call when no mock is active — it just reasserts the default generator.
+ *
  * @example
  * ```ts
  * // After mocking for tests
@@ -119,21 +127,25 @@ export function restoreUniqueId() {
  * The default size is 21 characters, which provides a good balance of uniqueness
  * and brevity. Uses the global crypto API for secure random number generation.
  *
+ * Draws from a shared, lazily-refilled random pool (module state), so output is
+ * non-deterministic — the values shown below are illustrative, not reproducible.
+ * Under a {@link mockUniqueId} override this delegates to the mock instead.
+ *
  * @param size - Optional length of the generated ID (defaults to 21 characters)
  * @returns A unique string identifier
  * @example
  * ```ts
  * // Generate default 21-character ID
  * const id = uniqueId()
- * console.log(id) // 'V1StGXR8_Z5jdHi6B-myT'
+ * console.log(id) // e.g. 'V1StGXR8_Z5jdHi6B-myT'
  *
  * // Generate shorter ID
  * const shortId = uniqueId(10)
- * console.log(shortId) // 'V1StGXR8_Z'
+ * console.log(shortId) // e.g. 'V1StGXR8_Z'
  *
  * // Generate longer ID
  * const longId = uniqueId(32)
- * console.log(longId) // 'V1StGXR8_Z5jdHi6B-myTVKahvjdx...'
+ * console.log(longId) // e.g. 'V1StGXR8_Z5jdHi6B-myTVKahvjdx...'
  * ```
  * @public
  */

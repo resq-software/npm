@@ -48,9 +48,19 @@
  * Class decorator that automatically instantiates the class when decorated.
  * Creates an instance immediately and returns the constructor.
  *
- * @template T - The type of the class constructor.
+ * The instantiation is a **side effect that runs at decoration time** — i.e. as
+ * the class's module is evaluated — so the constructor's effects (registering
+ * listeners, singleton wiring, telemetry init) fire on import. The created
+ * instance is discarded, not returned or retained here; only what the
+ * constructor does persists (e.g. a static singleton it stores on itself). The
+ * constructor is returned **unchanged**, so the class's own type is preserved.
+ * Anything the constructor throws propagates out of module evaluation.
+ *
+ * @template T - The class constructor type; the `new (...args: never[]) => object`
+ *   bound requires a constructor callable with no required arguments.
  * @param constructor - The class constructor.
  * @returns The constructor (with the instance created as a side effect).
+ * @throws Whatever `constructor` throws, at decoration/module-load time.
  * @example
  * ```typescript
  * @selfExecute

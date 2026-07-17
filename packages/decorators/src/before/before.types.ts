@@ -24,7 +24,14 @@
 /**
  * Configuration options for the `@before` decorator.
  *
- * @template T - The type of the class containing the decorated method.
+ * {@link func} is resolved at call time: an inline function is invoked directly,
+ * whereas a `keyof T` string names a method looked up on the instance (`this`)
+ * each call — if it does not resolve to a callable, the wrapped call rejects.
+ * With {@link wait} set, a throwing hook aborts the method (guard pattern),
+ * making the two fields interdependent rather than orthogonal.
+ *
+ * @template T - The class owning the decorated method; constrains the `keyof T`
+ *   method names accepted by {@link func}.
  * @example
  * ```typescript
  * // Using a function reference
@@ -41,8 +48,13 @@
  * ```
  */
 export interface BeforeConfig<T> {
-	/** The before function to execute, or a method name on the class */
+	/** The before function to execute, or the name of a method on the instance. */
 	func: ((...args: unknown[]) => unknown) | keyof T;
-	/** Whether to wait for the before function to complete before executing the method */
+	/**
+	 * When `true`, the wrapper awaits the hook before running the method, so a
+	 * hook that throws or rejects prevents the method from running (a guard).
+	 * When `false` or absent (the default), the hook is fired without awaiting and
+	 * the method runs regardless of the hook's outcome.
+	 */
 	wait?: boolean;
 }

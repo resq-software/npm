@@ -52,16 +52,35 @@ const SAFE_COLOR_RE =
 
 //#region Types
 /**
- * Per-series chart configuration: maps each data key to its label and icon plus
- * either a single `color` or a per-theme `theme` color map.
+ * Per-series chart configuration, keyed by the data key a Recharts series is
+ * bound to (its `dataKey` or `name`). Each entry carries presentation metadata
+ * for that series plus, at most, one of two mutually-exclusive coloring modes.
+ *
+ * The color union is enforced by the type: an entry sets **either** a flat
+ * `color` **or** a per-theme `theme` map (keyed by the `THEMES` names,
+ * `"dark"` | `"light"`), never both — and may set neither, in which case the
+ * series keeps Recharts' own default color. {@link ChartContainer} reads this
+ * map to emit the `--color-<key>` CSS variable each series pulls from; a key or
+ * color that fails the container's allowlist is silently skipped rather than
+ * emitted.
  */
 export type ChartConfig = {
 	[k in string]: {
+		/** Optional glyph component rendered beside this series in the tooltip and legend. */
 		icon?: React.ComponentType;
+		/** Display name shown in the tooltip and legend; the raw config key is used when absent. */
 		label?: React.ReactNode;
 	} & (
-		| { color?: never; theme: Record<keyof typeof THEMES, string> }
-		| { color?: string; theme?: never }
+		| {
+				color?: never;
+				/** Per-theme color map keyed by the `THEMES` names (`"dark"` / `"light"`); mutually exclusive with `color`. */
+				theme: Record<keyof typeof THEMES, string>;
+		  }
+		| {
+				/** Single color applied across every theme (must pass the container's safe-color allowlist); mutually exclusive with `theme`. */
+				color?: string;
+				theme?: never;
+		  }
 	);
 };
 
@@ -94,6 +113,12 @@ ${colorConfig
 /**
  * Wraps a Recharts `ResponsiveContainer` and emits scoped CSS variables from the
  * `config` map so each series pulls its color from the design system.
+ *
+ * Provides `config` on context for descendant {@link ChartTooltipContent} /
+ * {@link ChartLegendContent}, and renders a scoped `<style>` element (via
+ * {@link ChartStyle}) holding the `--color-<key>` variables — built only from
+ * allowlist-validated keys and colors, so a malicious `config` value cannot
+ * inject arbitrary CSS.
  *
  * @see {@link ChartStyle}
  */
@@ -140,7 +165,15 @@ function useChart() {
 	return context;
 }
 
-/** Injects a scoped `<style>` tag defining each series' color CSS variables; auto-rendered by {@link ChartContainer}. */
+/**
+ * Injects a scoped `<style>` tag defining each series' color CSS variables;
+ * auto-rendered by {@link ChartContainer}.
+ *
+ * Renders nothing (returns `null`) when no config entry defines a `color` or
+ * `theme`. The emitted CSS is assembled only from keys and colors that pass the
+ * `SAFE_KEY_RE` / `SAFE_COLOR_RE` allowlists, which is why the
+ * `dangerouslySetInnerHTML` here is safe.
+ */
 const ChartStyle = React.memo(function ChartStyle({
 	config,
 	id,
@@ -170,7 +203,16 @@ const ChartStyle = React.memo(function ChartStyle({
 /** Recharts `Tooltip` re-export; render {@link ChartTooltipContent} as its content. */
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
-/** Themed tooltip surface that resolves labels and colors from the chart `config`. */
+/**
+ * Themed tooltip surface that resolves labels and colors from the chart `config`.
+ *
+ * Renders nothing (returns `null`) while the tooltip is inactive or its `payload`
+ * is empty, so it is safe to mount unconditionally as a Recharts tooltip content
+ * component.
+ *
+ * @throws {Error} If rendered outside a {@link ChartContainer} — it reads the
+ * chart config from context via `useChart`.
+ */
 function ChartTooltipContent({
 	active,
 	className,
@@ -335,7 +377,16 @@ function ChartTooltipContent({
 /** Recharts `Legend` re-export; render {@link ChartLegendContent} as its content. */
 const ChartLegend = RechartsPrimitive.Legend;
 
-/** Themed legend content that resolves labels, icons, and colors from the chart `config`. */
+/**
+ * Themed legend content that resolves labels, icons, and colors from the chart
+ * `config`.
+ *
+ * Renders nothing (returns `null`) when `payload` is empty, so it is safe to
+ * mount unconditionally as a Recharts legend content component.
+ *
+ * @throws {Error} If rendered outside a {@link ChartContainer} — it reads the
+ * chart config from context via `useChart`.
+ */
 function ChartLegendContent({
 	className,
 	hideIcon = false,

@@ -183,7 +183,7 @@ export interface ThreatDetectionResult {
  * finding per call (one example is enough to reject the input).
  */
 export interface ThreatFinding {
-	/** Which detector matched. */
+	/** Discriminant: which detector matched. See {@link ThreatType}. */
 	type: ThreatType;
 	/** Human-readable description suitable for log lines (not for end users — use {@link getThreatErrorMessage} instead). */
 	description: string;
@@ -192,8 +192,11 @@ export interface ThreatFinding {
 }
 
 /**
- * The closed set of threat categories the validators recognize. Add
- * new categories here when adding a new detector.
+ * The closed set of threat categories the validators recognize. Serves as the
+ * discriminant of {@link ThreatFinding} (its `type` field) and drives the
+ * exhaustive `switch` in {@link getThreatErrorMessage} — adding a variant here
+ * without a matching `case` there becomes a compile error via `assertNever`.
+ * Add new categories here when adding a new detector.
  */
 export type ThreatType =
 	| "xss"

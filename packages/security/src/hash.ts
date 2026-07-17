@@ -55,6 +55,10 @@ export function getHashForString(string: string): string {
  *
  * @param obj - Any JSON-serializable value.
  * @returns The 32-bit hash of the serialized form, as a decimal string.
+ * @throws {TypeError} When `obj` cannot be serialized: a circular
+ *   reference or a `BigInt` makes `JSON.stringify` throw, and a value
+ *   that stringifies to `undefined` (a bare function, `symbol`, or
+ *   `undefined`) makes the downstream `.length` access throw.
  */
 export function getHashForObject(obj: unknown): string {
 	return getHashForString(JSON.stringify(obj));
@@ -86,8 +90,13 @@ export function getHashForBuffer(buffer: ArrayBuffer): string {
  * `d < 5 ? d + 5 : d > 5 ? d - 5 : d`. Provides obscurity, not security — do not
  * use it to protect secrets.
  *
+ * Despite "scramble", the transform is **not a true inverse**: the digit map sends
+ * both `0` and `5` to `5`, so any input containing those digits cannot be
+ * recovered unambiguously. Non-digit characters (including whitespace) are only
+ * reordered, never substituted. Deterministic and free of side effects.
+ *
  * @param str - The string to transform.
- * @returns The transformed string.
+ * @returns The transformed string, same length as `str`.
  */
 export function lns(str: string): string {
 	const result = str.split("");

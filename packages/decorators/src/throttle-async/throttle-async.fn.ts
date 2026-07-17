@@ -28,11 +28,18 @@ import { ThrottleAsyncExecutor } from "./throttle-async-executor.js";
  * Wrap an async method to limit concurrent executions (function form of
  * {@link throttleAsync}). Calls beyond the limit queue and run in FIFO order.
  *
+ * Each call to `throttleAsyncFn` owns its own {@link ThrottleAsyncExecutor} and
+ * queue. The queue is unbounded; a rejected call frees its slot so later calls
+ * still run. There is no cancellation. `parallelCalls` must be `>= 1` — a value
+ * below `1` never dispatches and every call queues indefinitely.
+ *
  * @template D - The resolved type of the async method.
  * @template A - The argument tuple of the original method.
  * @param originalMethod - The async method to throttle.
- * @param parallelCalls - Maximum number of concurrent calls; defaults to `1`.
- * @returns The throttled async method.
+ * @param parallelCalls - Maximum number of concurrent calls; defaults to `1`. Must
+ * be `>= 1`.
+ * @returns The throttled async method; each returned promise settles with its own
+ * call's result or rejection.
  * @example
  * ```ts
  * class ApiClient {

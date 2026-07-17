@@ -32,11 +32,11 @@
  *
  * @example Decorators
  * ```ts
- * import { logTiming, logErrors } from "@resq-systems/logger";
+ * import { LogTiming, LogError } from "@resq-systems/logger";
  *
  * class UserService {
- *   @logTiming()
- *   @logErrors()
+ *   @LogTiming()
+ *   @LogError()
  *   async findById(id: string) { ... }
  * }
  * ```

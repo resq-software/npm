@@ -48,11 +48,18 @@ import type { Delegatable } from "./delegate.types.js";
  * Multiple calls with the same arguments will share the same promise
  * until the first one resolves or rejects.
  *
+ * Dedup state (the in-flight-promise map) lives in the wrapper installed on the
+ * descriptor, shared across all instances of the class. The default key is
+ * `JSON.stringify(args)`; supply `keyResolver` for arguments that do not
+ * serialize cleanly. See {@link delegateFn} for the settle-then-evict lifecycle
+ * and the synchronous key-generation failure mode.
+ *
  * @template T - The type of the class containing the decorated method.
  * @template D - The return type of the decorated method (wrapped in a promise).
  * @param keyResolver - Optional function to generate cache keys from arguments.
  * @returns The decorator function.
- * @throws {Error} When applied to a non-method property.
+ * @throws {Error} At decoration time, when applied to anything without a method
+ *   value, with message `"@delegate is applicable only on a methods."`.
  * @example
  * ```typescript
  * class ApiService {

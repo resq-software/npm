@@ -27,12 +27,12 @@
  *
  * @module @resq-systems/security
  *
- * @example PII sanitization for log lines
+ * @example PII redaction for log lines
  * ```ts
- * import { sanitize } from "@resq-systems/security/sanitize";
+ * import { redactPII } from "@resq-systems/security/sanitize";
  *
- * logger.info(sanitize({ email: "u@x.com", ip: "1.2.3.4", note: "ok" }));
- * // → { email: "[REDACTED:email]", ip: "[REDACTED:ip]", note: "ok" }
+ * redactPII("Contact john@example.com from 1.2.3.4");
+ * // → "Contact [EMAIL] from [IP_ADDRESS]"
  * ```
  */
 

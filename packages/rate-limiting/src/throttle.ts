@@ -67,7 +67,17 @@ const RateLimiterStatsSchema = S.Struct({
 	capacity: S.Number,
 });
 
-/** Capacity snapshot for a keyless limiter, inferred from {@link RateLimiterStatsSchema}. */
+/**
+ * Capacity snapshot for a keyless limiter, inferred from
+ * {@link RateLimiterStatsSchema}.
+ *
+ * A read-only, point-in-time copy — not a live view; re-call `getStats()` for
+ * a fresh reading. `availableTokens` is interpreted **per implementation**:
+ * for {@link TokenBucketLimiter} it is the floored count of withdrawable
+ * tokens, while for {@link LeakyBucketLimiter} it is the number of free queue
+ * slots (`capacity − queueSize`). `queueSize` is the count of waiters parked
+ * in {@link RateLimiter.acquire}.
+ */
 export type RateLimiterStats = typeof RateLimiterStatsSchema.Type;
 
 /**
@@ -79,7 +89,15 @@ const KeyedStatsSchema = S.Struct({
 	keys: S.Array(S.String),
 });
 
-/** Key snapshot for a keyed limiter/manager, inferred from {@link KeyedStatsSchema}. */
+/**
+ * Key snapshot for a keyed limiter/manager, inferred from
+ * {@link KeyedStatsSchema}.
+ *
+ * A read-only, point-in-time copy — the `keys` array is materialised once and
+ * does **not** stay in sync with later mutations. Invariant: `activeKeys`
+ * equals `keys.length` at the moment of capture, i.e. the number of keys with
+ * live state (an evicted or {@link KeyedThrottle.cancel}led key drops out).
+ */
 export type KeyedStats = typeof KeyedStatsSchema.Type;
 
 //#endregion
@@ -96,11 +114,22 @@ type AnyFunction = (...args: never[]) => unknown;
 /**
  * Throttle a function so it executes at most once per `wait` interval.
  *
+ * The returned wrapper is **stateful**: it closes over the last-fire
+ * timestamp, the cached result, and a pending trailing-edge timer. Reads the
+ * wall clock (`Date.now`) and schedules a `setTimeout` for the trailing call,
+ * so it is neither pure nor deterministic — do not share one wrapper across
+ * unrelated call streams that should throttle independently (reach for
+ * {@link KeyedThrottle}). `cancel()` clears any pending trailing call and
+ * resets the window. `func` is invoked with the `this` and arguments of the
+ * call that triggers it.
+ *
  * @param func - Function to throttle.
  * @param wait - Minimum interval between invocations, in milliseconds.
  * @param options - Leading/trailing edge behaviour.
  * @returns The throttled wrapper, with a `cancel()` to clear any pending
- *   trailing call.
+ *   trailing call. Each call returns the most recent result — the value from
+ *   the invocation just made, or the cached prior result, or `undefined`
+ *   before `func` has ever run.
  *
  * @example
  * ```ts
@@ -169,6 +198,13 @@ export function throttle<T extends AnyFunction>(
 /**
  * Debounce a function so it executes only after `wait` ms have elapsed with no
  * further calls.
+ *
+ * The returned wrapper is **stateful**: it closes over the last-call and
+ * last-invoke timestamps plus a live `setTimeout`. Reads the wall clock and
+ * (re)arms a timer on every call, so it is effectful and non-deterministic.
+ * `func`'s return value is discarded — the wrapper returns `void`. `cancel()`
+ * drops any pending fire; `flush()` clears the pending timer **without**
+ * invoking `func` (it cancels rather than forces — see the body).
  *
  * @param func - Function to debounce.
  * @param wait - Quiet interval, in milliseconds, that must pass before firing.
@@ -610,6 +646,12 @@ export class TokenBucketLimiter implements RateLimiter {
 	 * Calls are released in FIFO order. Resolved promises consume one
 	 * token each — the resolver `await`s and proceeds with the protected
 	 * work without further bookkeeping.
+	 *
+	 * Never rejects and is **not cancellable**: there is no `AbortSignal`
+	 * hook, so a waiter enqueued while the bucket is empty resolves only
+	 * once a token refills — or, if {@link reset} runs in the meantime,
+	 * **never** (see {@link reset}). Reads the wall clock and arms a
+	 * `setTimeout` per queued waiter.
 	 */
 	public async acquire(): Promise<void> {
 		this.refill();
@@ -746,8 +788,15 @@ export class LeakyBucketLimiter implements RateLimiter {
 	/**
 	 * Enqueue and await release.
 	 *
-	 * @throws Error `"Rate limit exceeded: queue full"` when the queue
-	 *   is already at `capacity`. Catch and translate to a 429 in
+	 * Because it is `async`, the overflow failure surfaces as a **rejected**
+	 * `Promise` (await/`.catch`), not a synchronous throw. Not cancellable:
+	 * no `AbortSignal` hook, and a waiter that made it into the queue resolves
+	 * on its scheduled leak — or never, if {@link reset} runs first (see
+	 * {@link reset}). Reads the wall clock and arms a `setTimeout` between
+	 * leaks.
+	 *
+	 * @throws {Error} With message `"Rate limit exceeded: queue full"` when
+	 *   the queue is already at `capacity`. Catch and translate to a 429 in
 	 *   HTTP middleware.
 	 */
 	public async acquire(): Promise<void> {

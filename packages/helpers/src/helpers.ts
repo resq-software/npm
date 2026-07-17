@@ -55,8 +55,13 @@ export const Stringify = (obj: object): string => {
  * and returns `""` when no origin can be resolved. Intended for same-origin
  * client-side use, not as a fixed cross-environment API base.
  *
+ * Reads global/environment state only; the sole side effect is a `warn` log
+ * (via `@resq-systems/logger`) emitted on the empty-string fallback path when
+ * neither an origin nor an env base URL is available.
+ *
  * @param path - Path to append to the origin; leading slashes are trimmed.
- * @returns The combined URL, or `""` when no origin is available.
+ * @returns The combined URL, or `""` (the sentinel for "no origin resolvable")
+ *   — check for it rather than assuming a usable absolute URL.
  * @example
  * ```ts
  * // On "http://localhost:5173/dashboard":
@@ -123,7 +128,11 @@ type Failure<E> = {
 
 /**
  * Discriminated union representing either a successful value or an error.
- * Discriminate with the `success` boolean field.
+ *
+ * Discriminate on the boolean `success` tag: `true` narrows to {@link Success}
+ * (read `.value`), `false` narrows to {@link Failure} (read `.error`). The two
+ * branches are mutually exclusive — `value` and `error` never coexist — and
+ * both branches are frozen by {@link success} / {@link failure}.
  *
  * @template T - Type of the value on success.
  * @template E - Type of the error on failure.
@@ -174,10 +183,16 @@ export const failure = <E>(error: E): Failure<E> => Object.freeze({ success: fal
  * Non-`Error` thrown values are coerced to `new Error(String(value))` so
  * the failure branch always carries a real `Error` instance with a stack.
  *
+ * The returned promise **always resolves** — the failure path is a resolved
+ * `Failure`, never a rejection — so callers never need a surrounding
+ * `try`/`catch` or `.catch()`. No `AbortSignal` handling is added here; pass one
+ * through `args` if `asyncFunction` honours it.
+ *
  * @param asyncFunction - The async function to invoke.
  * @param args - Arguments forwarded to `asyncFunction`.
  * @returns A `Result<T, Error>` resolving to `success(returnValue)` on
- *   resolve, or `failure(err)` on throw / reject.
+ *   resolve, or `failure(err)` on throw / reject. Emits one structured `error`
+ *   log per failure as a side effect.
  *
  * @example
  * ```ts

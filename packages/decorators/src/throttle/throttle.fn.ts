@@ -27,11 +27,17 @@ import type { Method } from "../types.js";
  * Wrap a method so it executes at most once per `delayMs` (function form of
  * {@link throttle}). Calls made during the cooldown are dropped.
  *
+ * Leading-edge only — the first call runs synchronously and dropped calls are not
+ * replayed on the trailing edge. Each admitted call schedules a `setTimeout` that
+ * reopens the gate after `delayMs` (a clock/timer effect); the cooldown cannot be
+ * cancelled. Every call to `throttleFn` owns its own cooldown state.
+ *
  * @template D - The return type of the original method.
  * @template A - The argument tuple of the original method.
  * @param originalMethod - The method to throttle.
  * @param delayMs - The minimum interval between executions, in milliseconds.
- * @returns The throttled method.
+ * @returns The throttled method. It always returns `void`; the wrapped method's
+ * return value is discarded.
  * @example
  * ```ts
  * class ScrollTracker {

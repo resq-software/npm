@@ -30,6 +30,12 @@ import type { RateLimitConfigs } from "./rate-limit.types.js";
  * Rate limit a method to at most `allowedCalls` invocations per `timeSpanMs`
  * window; calls beyond the allowance are dropped and routed to `exceedHandler`.
  *
+ * The counter is built once, at decoration time, so the limit spans every instance
+ * of the class (unless a `keyResolver` partitions it). A dropped call returns
+ * `undefined` in place of the method's value — see {@link rateLimitFn} for the
+ * sync-vs-async return shape and the best-effort caveat under concurrency. Mutates
+ * the supplied property descriptor in place.
+ *
  * @template T - The class type that owns the decorated method.
  * @param config - Rate-limit configuration: window size, allowance, and optional
  * key resolver, counter, and exceed handler.

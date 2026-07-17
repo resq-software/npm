@@ -49,10 +49,17 @@ import type { BeforeConfig } from "./before.types.js";
  * Decorator that executes a function before the decorated method.
  * The before function is called before the method body executes.
  *
+ * Applying the decorator rewrites the property descriptor's `value` with the
+ * wrapped method, which becomes **async** (returns a `Promise`) even if the
+ * original was synchronous. With `config.wait`, a throwing hook aborts the call;
+ * see {@link beforeFn} for the full per-call contract.
+ *
  * @template T - The type of the class containing the decorated method.
  * @param config - Configuration for the before hook.
  * @returns The decorator function.
- * @throws {Error} When applied to a non-method property.
+ * @throws {Error} At decoration time, when applied to anything without a method
+ *   value (an accessor or field), with message
+ *   `"@before is applicable only on a methods."`.
  * @example
  * ```typescript
  * class DataProcessor {

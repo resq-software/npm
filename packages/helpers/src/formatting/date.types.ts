@@ -22,18 +22,24 @@
  */
 
 /**
- * Format options for date display.
+ * Format options for date display — the subset of `Intl.DateTimeFormat`
+ * component options the formatters expose.
  *
- * @property month - Month display format.
- * @property year - Year display format.
- * @property day - Day display format.
- * @property hour - Hour display format.
- * @property minute - Minute display format.
+ * Every field is optional and passed straight through to `Intl`: only the
+ * components you set appear in the output, and the set of present fields
+ * determines the shape of the result (e.g. `month` + `year` yields `"Jan 2023"`,
+ * adding `hour` + `minute` yields a date-time). The token values match `Intl`'s
+ * own vocabulary.
  */
 export interface DateFormatOptions {
+	/** `"short"` → `Jan`, `"long"` → `January`, `"numeric"` → `1`. */
 	month?: "short" | "long" | "numeric";
+	/** `"numeric"` → `2023`, `"2-digit"` → `23`. */
 	year?: "numeric" | "2-digit";
+	/** `"numeric"` → `5`, `"2-digit"` → `05`. */
 	day?: "numeric" | "2-digit";
+	/** Hour digits; rendered in the formatter's fixed UTC zone. */
 	hour?: "numeric" | "2-digit";
+	/** Minute digits, e.g. `"2-digit"` → `07`. */
 	minute?: "numeric" | "2-digit";
 }

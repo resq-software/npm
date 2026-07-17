@@ -28,27 +28,71 @@
 import type { DeepPartial, Simplify } from "./object.js";
 
 /**
- * Makes all properties in a type and all nested properties optional recursively.
+ * Legacy alias of {@link DeepPartial} — recursively marks every property
+ * optional. Kept only so code using the `RecursivePartial` name from other
+ * toolkits compiles unchanged; new code should import {@link DeepPartial}.
+ *
+ * @typeParam T - The object type to make deeply optional.
  */
 export type RecursivePartial<T> = DeepPartial<T>;
 
 /**
- * Expands a type definition to show its full structure in IDE tooltips and error messages.
+ * Legacy alias of {@link Simplify} — flattens a type into a single object
+ * literal so IDE tooltips and error messages show the resolved shape instead of
+ * a chain of intersections. Purely cosmetic; assignability is unchanged.
+ *
+ * @typeParam T - The type to expand for display.
  */
 export type Expand<T> = Simplify<T>;
 
 /**
- * A value that may be returned synchronously or as a `Promise` / `PromiseLike`.
+ * A value that may be delivered synchronously or asynchronously: `T` itself, or
+ * anything `await`-able that resolves to `T`. Use it to type a parameter or
+ * return that a caller is free to make either sync or `async` — `await`-ing an
+ * `Awaitable<T>` always yields `T`.
+ *
+ * @typeParam T - The resolved value type.
  */
 export type Awaitable<T> = T | PromiseLike<T>;
 
 /**
- * Makes specified keys in a type required while keeping all other properties as-is.
+ * Make the keys `K` of `T` required while leaving the rest untouched — the
+ * partial-application counterpart of the global `Required`, which has no
+ * key-selecting overload.
+ *
+ * This intentionally **shadows** the global `Required<T>` within any module that
+ * imports it: the second `K` parameter is required, so a bare `Required<T>` will
+ * no longer type-check where this alias is in scope. Import it deliberately.
+ *
+ * @typeParam T - The source object type.
+ * @typeParam K - The subset of `T`'s keys to force required.
+ *
+ * @example
+ * ```ts
+ * type Config = { host?: string; port?: number; tls?: boolean };
+ * type Connectable = Required<Config, "host" | "port">;
+ * //   ^? { host: string; port: number; tls?: boolean }
+ * ```
  */
 export type Required<T, K extends keyof T> = Simplify<Omit<T, K> & { [P in K]-?: T[P] }>;
 
 /**
- * Automatically makes properties optional if their type includes `undefined`.
+ * Rewrite `T` so that any property whose type includes `undefined` becomes
+ * genuinely **optional** (`?`), while properties that cannot be `undefined` stay
+ * required. Bridges the gap between "value may be `undefined`" and "key may be
+ * omitted", which TypeScript otherwise treats as distinct.
+ *
+ * The `extends object` bound is required because the mapping keys over `T`; pass
+ * an object shape, not a primitive or union.
+ *
+ * @typeParam T - The object type to relax; must be an object shape.
+ *
+ * @example
+ * ```ts
+ * type Raw = { id: string; note: string | undefined };
+ * type Relaxed = MakeUndefinedOptional<Raw>;
+ * //   ^? { id: string; note?: string | undefined }
+ * ```
  */
 export type MakeUndefinedOptional<T extends object> = Simplify<
 	{

@@ -30,10 +30,16 @@
  *
  * Useful for debugging, developer logging, and traceability.
  *
+ * Effectively non-throwing for ordinary entities: {@link getFilePath} swallows
+ * any stack-trace parse failure and falls back to a sentinel path, and
+ * {@link extractEntityName} handles every input kind. Reads the current call
+ * stack / `__filename` but has no side effects.
+ *
  * @param context - A description, situation, or custom value relevant to this code path.
  * @param entity - The entity whose name is included: a function, class, or instance, a string, or a symbol.
  * @returns A formatted string of the form `"location: <path> @<entity>: <context>"`.
- * @throws {Error} Does not throw directly, but see {@link getFilePath}, which may throw on rare stack-trace parsing errors.
+ *   When the location cannot be determined, `<path>` degrades to
+ *   `"unknown-location"` rather than the call failing.
  * @example
  * ```ts
  * function myFunction() {}
@@ -147,14 +153,19 @@ function getFilePath(): string {
  * Build a detailed code-location string with optional line number, ISO
  * timestamp, and a custom prefix. Useful for enhanced debugging or audit logs.
  *
+ * Effectively non-throwing: line-number extraction is wrapped in its own
+ * try/catch and {@link getFilePath} never throws. When `includeTimestamp` is
+ * set the output reads the clock (`new Date()`), so the result is
+ * **non-deterministic** across calls; `includeLineNumber` likewise varies with
+ * the call site.
+ *
  * @param context - Context description of the operation or location.
  * @param entity - The entity whose name is included: a function, class, or instance, a string, or a symbol.
  * @param options - Optional configuration for the output string.
- * @param options.includeLineNumber - When true, appends the call-site line number.
- * @param options.includeTimestamp - When true, appends an ISO 8601 timestamp.
+ * @param options.includeLineNumber - When true, appends the call-site line number; silently omitted if the stack cannot be parsed.
+ * @param options.includeTimestamp - When true, appends a live ISO 8601 timestamp (makes output time-dependent).
  * @param options.customPrefix - Prefix to use instead of the default `"location"`.
  * @returns The detailed formatted location string.
- * @throws {Error} Does not throw directly, but relies on {@link getFilePath}.
  * @example
  * ```ts
  * parseCodePathDetailed("init", MyClass, { includeLineNumber: true, includeTimestamp: true });

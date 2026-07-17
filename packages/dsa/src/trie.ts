@@ -316,11 +316,14 @@ export class Trie<T> {
 //#region Rabin-Karp String Search
 
 /**
- * Finds all occurrences of a pattern in text using the Rabin-Karp rolling hash algorithm.
+ * Finds all occurrences of a pattern in text using the Rabin-Karp rolling hash
+ * algorithm. Matching is exact and case-sensitive.
  *
- * @param text - The text to search in
- * @param pattern - The pattern to search for
- * @returns Array of starting indices where the pattern is found
+ * @param text - The text to search in.
+ * @param pattern - The pattern to search for.
+ * @returns The zero-based starting indices of every occurrence, in ascending
+ *   order. Returns an empty array when `pattern` is empty or longer than
+ *   `text` — the sentinel for "no matches".
  */
 export function rabinKarp(text: string, pattern: string): number[] {
 	const n = text.length;
