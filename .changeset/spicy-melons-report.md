@@ -18,20 +18,4 @@
 "@resq-systems/decorators": minor
 ---
 
-Fix decorator signature preservation and execTime return value
-
-- `@execTime` / `execTimeFn` now return the wrapped method's original value and
-  stay synchronous for synchronous methods. Previously the wrapper returned
-  `Promise<void>`, discarding the result and forcing every decorated method to
-  become async — so downstream callers that consume the return value (e.g.
-  passing the result into `Array.prototype.filter`) silently received a promise
-  instead of their data. Async methods still report timing after they settle and
-  now forward the resolved value.
-- `@memoize`, `@memoizeAsync`, `@rateLimit`, and `@bind` now return the
-  signature-preserving `Decorator<T>` / `AsyncDecorator<T>` shape instead of a
-  `Method<D>`-erased descriptor. Applying them to concretely-typed methods under
-  strict `strictFunctionTypes` no longer fails to type-check with TS1241 /
-  TS1270 at the decoration site.
-- Deprecate the now-superseded `Memoizable`, `AsyncMemoizable`, and
-  `RateLimitable` types in favor of `Decorator` / `AsyncDecorator`. They remain
-  exported for back-compat.
+Fix `@execTime`/`execTimeFn` to return the wrapped method's value and stay synchronous for sync methods (was returning `Promise<void>`), and make `@memoize`/`@memoizeAsync`/`@rateLimit`/`@bind` return signature-preserving `Decorator`/`AsyncDecorator` so decorating concretely-typed methods no longer fails under strict `strictFunctionTypes` (TS1241/TS1270); deprecate `Memoizable`/`AsyncMemoizable`/`RateLimitable`

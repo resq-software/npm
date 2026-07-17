@@ -72,6 +72,14 @@ const reporter: ReportFunction = (data: ExactTimeReportData): void => {
  * await custom(40); // Logs: "Took 450ms for n=40"
  * ```
  */
+export function execTimeFn<D, A extends unknown[] = unknown[]>(
+	originalMethod: AsyncMethod<D, A>,
+	arg?: ReportFunction | string,
+): AsyncMethod<D, A>;
+export function execTimeFn<D, A extends unknown[] = unknown[]>(
+	originalMethod: Method<D, A>,
+	arg?: ReportFunction | string,
+): Method<D, A>;
 export function execTimeFn<D = unknown, A extends unknown[] = unknown[]>(
 	originalMethod: Method<D, A> | AsyncMethod<D, A>,
 	arg?: ReportFunction | string,
@@ -113,8 +121,10 @@ function resolveReporter(context: unknown, input: ReportFunction | string): Repo
 		return input;
 	}
 	// `input` may name a reporter method on the instance; resolve it via a
-	// narrow `Record` view instead of an `any`-typed `this`.
-	const named = (context as Record<PropertyKey, unknown>)[input];
+	// narrow `Record` view instead of an `any`-typed `this`. Guard `context`:
+	// a decorated method detached from its instance is invoked with `this`
+	// undefined, and indexing that would throw.
+	const named = context != null ? (context as Record<PropertyKey, unknown>)[input] : undefined;
 	if (isFunction(named)) {
 		return named.bind(context) as ReportFunction;
 	}
