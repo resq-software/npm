@@ -46,7 +46,7 @@
 		"@upstash/ratelimit": "^2.0.5",
 		"@upstash/redis": "^1.38.0",
 		"effect": "4.0.0-beta.98",
-		"tsdown": "^0.22.4",
+		"tsdown": "^0.22.9",
 		"typescript": "7.0.2",
 		"vitest": "4.1.10"
 	},

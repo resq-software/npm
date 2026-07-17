@@ -23,7 +23,7 @@
 	},
 	"devDependencies": {
 		"@changesets/changelog-github": "^0.7.0",
-		"@changesets/cli": "^2.31.0"
+		"@changesets/cli": "^2.31.1"
 	},
 	"overrides": {
 		"effect": "4.0.0-beta.93",

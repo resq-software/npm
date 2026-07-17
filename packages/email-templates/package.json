@@ -41,7 +41,7 @@
 	},
 	"dependencies": {
 		"@react-email/components": "^1.0.12",
-		"@react-email/render": "^2.0.10",
+		"@react-email/render": "^2.1.0",
 		"@resq-systems/constants": "^0.4.0"
 	},
 	"peerDependencies": {
@@ -56,7 +56,7 @@
 		}
 	},
 	"devDependencies": {
-		"@react-email/ui": "6.6.9",
+		"@react-email/ui": "6.9.0",
 		"@total-typescript/ts-reset": "^0.6.1",
 		"@types/node": "^26.1.1",
 		"@types/react": "^19.2.16",
@@ -65,9 +65,9 @@
 		"effect": "4.0.0-beta.98",
 		"react": "^19.2.7",
 		"react-dom": "^19.2.7",
-		"react-email": "6.6.9",
+		"react-email": "6.9.0",
 		"resend": "6.17.2",
-		"tsdown": "^0.22.4",
+		"tsdown": "^0.22.9",
 		"typescript": "7.0.2",
 		"vitest": "4.1.8"
 	},
