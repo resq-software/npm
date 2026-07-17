@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from "vitest";
 import { promiseWithResolve, sleep } from "../../src/utils/control.js";
-import { ExecutionQueue } from "../../src/utils/ExecutionQueue.js";
+import { ExecutionQueue } from "../../src/utils/execution-queue.js";
 
 const tick = () => Promise.resolve();
 
