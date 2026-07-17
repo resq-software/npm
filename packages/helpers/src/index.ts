@@ -65,6 +65,7 @@ export * from "./utils/perf.js";
 export * from "./utils/performance-tracker.js";
 export * from "./utils/retry.js";
 export * from "./utils/sort.js";
+export * from "./utils/string-utils.js";
 export * from "./utils/timers.js";
 export * from "./utils/value.js";
 export * from "./utils/warn.js";
