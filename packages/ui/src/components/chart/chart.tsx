@@ -248,8 +248,13 @@ function ChartTooltipContent({
 									indicator === "dot" && "items-center",
 								)}
 								// recharts `dataKey` is `string | number | fn`; React keys must be
-								// string/number, so coerce exactly as React does internally.
-								key={String(item.dataKey)}
+								// string/number. Use it directly when it already is one; otherwise
+								// (undefined or fn) fall back to the item index so keys stay unique.
+								key={
+									typeof item.dataKey === "string" || typeof item.dataKey === "number"
+										? item.dataKey
+										: index
+								}
 							>
 								{formatter && item?.value !== undefined && item.name ? (
 									formatter(item.value, item.name, item, index, item.payload)
