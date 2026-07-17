@@ -1,6 +1,6 @@
 {
 	"name": "@resq-systems/ui",
-	"version": "0.37.1",
+	"version": "0.37.2",
 	"description": "ResQ Systems shared UI component library — shadcn-based design system for the ResQ Systems platform",
 	"repository": {
 		"type": "git",
@@ -360,7 +360,7 @@
 		"@biomejs/biome": "^2.5.3",
 		"@chromatic-com/storybook": "^5.2.1",
 		"@github-ui/storybook-addon-performance-panel": "^1.1.4",
-		"@resq-systems/constants": "^0.3.1",
+		"@resq-systems/constants": "^0.4.0",
 		"@storybook/addon-a11y": "^10.5.0",
 		"@storybook/addon-docs": "^10.5.0",
 		"@storybook/addon-links": "^10.5.0",

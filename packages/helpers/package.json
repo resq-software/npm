@@ -1,6 +1,6 @@
 {
 	"name": "@resq-systems/helpers",
-	"version": "0.3.1",
+	"version": "0.4.0",
 	"description": "Functional utilities, type guards, result types, performance measurement, and async task execution",
 	"license": "Apache-2.0",
 	"type": "module",
@@ -32,7 +32,7 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@resq-systems/dsa": "^2.0.0",
+		"@resq-systems/dsa": "^2.1.0",
 		"@resq-systems/logger": "^0.3.0",
 		"@resq-systems/types": "^0.1.0",
 		"lodash.isequal": "^4.5.0",

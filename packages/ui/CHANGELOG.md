@@ -1,4 +1,15 @@
 <!--
+
+## 0.37.2
+### Patch Changes
+
+
+
+- [#195](https://github.com/resq-software/npm/pull/195) [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Extend design-token drift guard to radii, fonts, chart, and surface
+
+
+
+- [#197](https://github.com/resq-software/npm/pull/197) [`7269bda`](https://github.com/resq-software/npm/commit/7269bdad52363247477163490a8d8af9b1672316) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Remove file-wide @ts-nocheck from chart.tsx and type recharts 3.x usage properly (scoped @ts-expect-error only where unavoidable)
   Copyright 2026 ResQ
 
   Licensed under the Apache License, Version 2.0 (the "License");

@@ -1,4 +1,11 @@
 <!--
+
+## 0.4.0
+### Minor Changes
+
+
+
+- [#201](https://github.com/resq-software/npm/pull/201) [`13ead7e`](https://github.com/resq-software/npm/commit/13ead7ed21c9165b3b13014c1b88f4af02c42c76) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Fix `@execTime`/`execTimeFn` to return the wrapped method's value and stay synchronous for sync methods (was returning `Promise<void>`), and make `@memoize`/`@memoizeAsync`/`@rateLimit`/`@bind` return signature-preserving `Decorator`/`AsyncDecorator` so decorating concretely-typed methods no longer fails under strict `strictFunctionTypes` (TS1241/TS1270); deprecate `Memoizable`/`AsyncMemoizable`/`RateLimitable`
   Copyright 2026 ResQ
 
   Licensed under the Apache License, Version 2.0 (the "License");
