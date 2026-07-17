@@ -70,3 +70,5 @@ export * from "./utils/timers.js";
 export * from "./utils/value.js";
 export * from "./utils/warn.js";
 export * from "./utils/execution-queue.js";
+export * from "./utils/manual-promise.js";
+export * from "./utils/semaphore.js";
