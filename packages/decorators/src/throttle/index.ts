@@ -23,4 +23,4 @@
  * @module @resq-systems/decorators/throttle
  */
 
-export * from "./throttle.js";
+export { throttle } from "./throttle.js";

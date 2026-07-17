@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/checkbox
  */
 
-export * from "./checkbox.js";
+export { Checkbox } from "./checkbox.js";

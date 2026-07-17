@@ -23,4 +23,15 @@
  * @module @resq-systems/ui/components/dialog
  */
 
-export * from "./dialog.js";
+export {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogOverlay,
+	DialogPortal,
+	DialogTitle,
+	DialogTrigger,
+} from "./dialog.js";

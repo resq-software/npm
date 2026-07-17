@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/tooltip
  */
 
-export * from "./tooltip.js";
+export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip.js";

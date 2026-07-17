@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/skeleton
  */
 
-export * from "./skeleton.js";
+export { Skeleton } from "./skeleton.js";

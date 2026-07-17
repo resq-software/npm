@@ -21,4 +21,9 @@
  * @module @resq-systems/ui/components/button-group
  */
 
-export * from "./button-group.js";
+export {
+	ButtonGroup,
+	ButtonGroupSeparator,
+	ButtonGroupText,
+	buttonGroupVariants,
+} from "./button-group.js";

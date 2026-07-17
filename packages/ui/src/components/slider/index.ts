@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/slider
  */
 
-export * from "./slider.js";
+export { Slider } from "./slider.js";

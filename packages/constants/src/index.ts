@@ -21,5 +21,6 @@
  * @module @resq-systems/constants
  */
 
-export * from "./tokens.js";
-export * from "./brand.js";
+export { colors, fonts, radii, themeColor } from "./tokens.js";
+export type { ColorRole, ColorTokenName, OklchColorRole, StatusRole } from "./tokens.js";
+export { brand } from "./brand.js";

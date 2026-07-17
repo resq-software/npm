@@ -21,5 +21,5 @@
  * @module @resq-systems/ui/components/picture
  */
 
-export * from "./picture.js";
-export * from "./types.js";
+export { Picture, PictureInternal } from "./picture.js";
+export type { DistributiveOmit, LqipEntry, LqipValue, Overwrite } from "./types.js";

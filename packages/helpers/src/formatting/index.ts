@@ -31,7 +31,14 @@
  * @module @resq-systems/helpers/formatting
  */
 
-export * from "./date.js";
+export {
+	formatDate,
+	formatDateOnly,
+	formatDatePeriod,
+	formatDateTime,
+	formatMonthYear,
+	formatRelativeTime,
+} from "./date.js";
 export type * from "./date.types.js";
-export * from "./number.js";
-export * from "./string.js";
+export { formatBytes, formatNumber, formatPercent } from "./number.js";
+export { capitalize, slugify, truncate } from "./string.js";

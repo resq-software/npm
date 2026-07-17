@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/calendar
  */
 
-export * from "./calendar.js";
+export { Calendar, CalendarDayButton } from "./calendar.js";

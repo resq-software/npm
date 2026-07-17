@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/toggle-group
  */
 
-export * from "./toggle-group.js";
+export { ToggleGroup, ToggleGroupItem } from "./toggle-group.js";

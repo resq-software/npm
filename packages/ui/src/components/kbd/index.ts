@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/kbd
  */
 
-export * from "./kbd.js";
+export { Kbd, KbdGroup } from "./kbd.js";

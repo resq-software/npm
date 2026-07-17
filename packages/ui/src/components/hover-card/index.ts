@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/hover-card
  */
 
-export * from "./hover-card.js";
+export { HoverCard, HoverCardContent, HoverCardTrigger } from "./hover-card.js";

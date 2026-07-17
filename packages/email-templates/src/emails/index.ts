@@ -21,15 +21,41 @@
  * @module @resq-systems/email-templates/emails
  */
 
-export * from "./tokens.js";
-export * from "./primitives.js";
-export * from "./otp.js";
-export * from "./welcome.js";
-export * from "./password-reset.js";
-export * from "./notification.js";
-export * from "./incident-alert.js";
-export * from "./password-changed.js";
-export * from "./new-device-login.js";
-export * from "./mission-approval.js";
-export * from "./org-invitation.js";
-export * from "./theme.js";
+export { emailColors, emailFonts, emailOrg } from "./tokens.js";
+export type { EmailColorToken } from "./tokens.js";
+export { Email } from "./primitives.js";
+export { OtpEmail } from "./otp.js";
+export type { OtpEmailProps } from "./otp.js";
+export { WelcomeEmail } from "./welcome.js";
+export type { WelcomeEmailProps } from "./welcome.js";
+export { PasswordResetEmail } from "./password-reset.js";
+export type { PasswordResetEmailProps } from "./password-reset.js";
+export { NotificationEmail } from "./notification.js";
+export type { NotificationEmailProps } from "./notification.js";
+export { IncidentAlertEmail } from "./incident-alert.js";
+export type { IncidentAlertEmailProps } from "./incident-alert.js";
+export { PasswordChangedEmail } from "./password-changed.js";
+export type { PasswordChangedEmailProps } from "./password-changed.js";
+export { NewDeviceLoginEmail } from "./new-device-login.js";
+export type { NewDeviceLoginEmailProps } from "./new-device-login.js";
+export { MissionApprovalEmail } from "./mission-approval.js";
+export type { MissionApprovalEmailProps } from "./mission-approval.js";
+export { OrgInvitationEmail } from "./org-invitation.js";
+export type { OrgInvitationEmailProps } from "./org-invitation.js";
+export {
+	buildTailwindConfig,
+	defaultEmailTheme,
+	EmailMessageContext,
+	EmailThemeContext,
+	mergeEmailTheme,
+	resolveEmailTheme,
+	withEmailMessage,
+	withEmailTheme,
+} from "./theme.js";
+export type {
+	EmailMessage,
+	EmailOrgIdentity,
+	EmailTheme,
+	EmailThemeFonts,
+	EmailThemeOverride,
+} from "./theme.js";

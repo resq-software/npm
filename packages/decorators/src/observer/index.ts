@@ -23,5 +23,5 @@
  * @module @resq-systems/decorators/observer
  */
 
-export * from "./observer.js";
-export * from "./observer.types.js";
+export { observe } from "./observer.js";
+export type { ObserverCallback } from "./observer.types.js";

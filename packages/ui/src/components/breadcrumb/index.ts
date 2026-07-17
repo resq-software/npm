@@ -21,4 +21,12 @@
  * @module @resq-systems/ui/components/breadcrumb
  */
 
-export * from "./breadcrumb.js";
+export {
+	Breadcrumb,
+	BreadcrumbEllipsis,
+	BreadcrumbItem,
+	BreadcrumbLink,
+	BreadcrumbList,
+	BreadcrumbPage,
+	BreadcrumbSeparator,
+} from "./breadcrumb.js";

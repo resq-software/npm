@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/separator
  */
 
-export * from "./separator.js";
+export { Separator } from "./separator.js";

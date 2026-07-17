@@ -23,5 +23,5 @@
  * @module @resq-systems/decorators/readonly
  */
 
-export * from "./readonly.js";
-export * from "./readonly.types.js";
+export { readonly } from "./readonly.js";
+export type { Readonlyable } from "./readonly.types.js";

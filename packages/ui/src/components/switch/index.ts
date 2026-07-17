@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/switch
  */
 
-export * from "./switch.js";
+export { Switch } from "./switch.js";

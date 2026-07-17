@@ -24,6 +24,10 @@
  * @module @resq-systems/decorators/exec-time
  */
 
-export * from "./exec-time.fn.js";
-export * from "./exec-time.js";
-export * from "./exec-time.types.js";
+export { execTimeFn } from "./exec-time.fn.js";
+export { execTime } from "./exec-time.js";
+export type {
+	ExactTimeReportable,
+	ExactTimeReportData,
+	ReportFunction,
+} from "./exec-time.types.js";

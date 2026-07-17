@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/input-otp
  */
 
-export * from "./input-otp.js";
+export { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "./input-otp.js";

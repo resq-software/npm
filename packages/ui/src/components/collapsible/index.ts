@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/collapsible
  */
 
-export * from "./collapsible.js";
+export { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./collapsible.js";

@@ -21,4 +21,12 @@
  * @module @resq-systems/ui/components/pagination
  */
 
-export * from "./pagination.js";
+export {
+	Pagination,
+	PaginationContent,
+	PaginationEllipsis,
+	PaginationItem,
+	PaginationLink,
+	PaginationNext,
+	PaginationPrevious,
+} from "./pagination.js";

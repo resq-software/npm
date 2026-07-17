@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/native-select
  */
 
-export * from "./native-select.js";
+export { NativeSelect, NativeSelectOptGroup, NativeSelectOption } from "./native-select.js";

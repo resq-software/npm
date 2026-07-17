@@ -28,4 +28,4 @@
  * @module @resq-systems/decorators/throttle-async
  */
 
-export * from "./throttle-async.js";
+export { throttleAsync } from "./throttle-async.js";

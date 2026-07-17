@@ -34,5 +34,5 @@
  * ```
  */
 
-export * from "./bind.js";
-export * from "./bind.types.js";
+export { bind } from "./bind.js";
+export type { BindConfig } from "./bind.types.js";

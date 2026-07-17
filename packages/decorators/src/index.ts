@@ -40,19 +40,38 @@
  * ```
  */
 
-export * from "./after/index.js";
-export * from "./before/index.js";
-export * from "./bind/index.js";
-export * from "./debounce/index.js";
-export * from "./delay/index.js";
-export * from "./delegate/index.js";
-export * from "./exec-time/index.js";
-export * from "./execute/index.js";
-export * from "./memoize/index.js";
-export * from "./memoize-async/index.js";
-export * from "./observer/index.js";
-export * from "./rate-limit/index.js";
-export * from "./readonly/index.js";
-export * from "./throttle/index.js";
-export * from "./throttle-async/index.js";
-export * from "./types.js";
+export { after } from "./after/index.js";
+export type { AfterConfig, AfterFunc, AfterParams } from "./after/index.js";
+export { before } from "./before/index.js";
+export type { BeforeConfig } from "./before/index.js";
+export { bind } from "./bind/index.js";
+export type { BindConfig } from "./bind/index.js";
+export { debounceFn } from "./debounce/index.js";
+export { delay } from "./delay/index.js";
+export { delegate } from "./delegate/index.js";
+export type { Delegatable } from "./delegate/index.js";
+export { execTime, execTimeFn } from "./exec-time/index.js";
+export type {
+	ExactTimeReportable,
+	ExactTimeReportData,
+	ReportFunction,
+} from "./exec-time/index.js";
+export { selfExecute } from "./execute/index.js";
+export { memoize } from "./memoize/index.js";
+export type { Cache, KeyResolver, Memoizable, MemoizeConfig } from "./memoize/index.js";
+export { memoizeAsync, memoizeAsyncFn } from "./memoize-async/index.js";
+export type { AsyncCache, AsyncMemoizable, AsyncMemoizeConfig } from "./memoize-async/index.js";
+export { observe } from "./observer/index.js";
+export type { ObserverCallback } from "./observer/index.js";
+export { rateLimit, SimpleRateLimitCounter } from "./rate-limit/index.js";
+export type {
+	RateLimitable,
+	RateLimitAsyncCounter,
+	RateLimitConfigs,
+	RateLimitCounter,
+} from "./rate-limit/index.js";
+export { readonly } from "./readonly/index.js";
+export type { Readonlyable } from "./readonly/index.js";
+export { throttle } from "./throttle/index.js";
+export { throttleAsync } from "./throttle-async/index.js";
+export type { AsyncDecorator, AsyncMethod, Decorator, Method } from "./types.js";

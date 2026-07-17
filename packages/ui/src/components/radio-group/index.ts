@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/radio-group
  */
 
-export * from "./radio-group.js";
+export { RadioGroup, RadioGroupItem } from "./radio-group.js";

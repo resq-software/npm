@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/accordion
  */
 
-export * from "./accordion.js";
+export { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./accordion.js";

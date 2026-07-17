@@ -21,4 +21,14 @@
  * @module @resq-systems/ui/components/navigation-menu
  */
 
-export * from "./navigation-menu.js";
+export {
+	NavigationMenu,
+	NavigationMenuContent,
+	NavigationMenuIndicator,
+	NavigationMenuItem,
+	NavigationMenuLink,
+	NavigationMenuList,
+	NavigationMenuTrigger,
+	navigationMenuTriggerStyle,
+	NavigationMenuViewport,
+} from "./navigation-menu.js";

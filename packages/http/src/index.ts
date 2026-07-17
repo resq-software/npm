@@ -42,7 +42,29 @@
  * ```
  */
 
-export * from "./fetcher.js";
+export {
+	createApiResponseSchema,
+	createPaginatedSchema,
+	del,
+	fetcher,
+	FetcherError,
+	FetcherValidationError,
+	get,
+	head,
+	options,
+	patch,
+	post,
+	put,
+} from "./fetcher.js";
+export type {
+	FetcherOptions,
+	Headers,
+	HostPattern,
+	HttpMethod,
+	JsonValue,
+	QueryParams,
+	RequestBody,
+} from "./fetcher.js";
 export {
 	getRequestId,
 	isRequestId,

@@ -21,4 +21,11 @@
  * @module @resq-systems/ui/components/input-group
  */
 
-export * from "./input-group.js";
+export {
+	InputGroup,
+	InputGroupAddon,
+	InputGroupButton,
+	InputGroupInput,
+	InputGroupText,
+	InputGroupTextarea,
+} from "./input-group.js";

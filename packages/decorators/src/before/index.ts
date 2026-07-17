@@ -24,5 +24,5 @@
  * @module @resq-systems/decorators/before
  */
 
-export * from "./before.js";
-export * from "./before.types.js";
+export { before } from "./before.js";
+export type { BeforeConfig } from "./before.types.js";

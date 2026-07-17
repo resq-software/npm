@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/spinner
  */
 
-export * from "./spinner.js";
+export { Spinner } from "./spinner.js";

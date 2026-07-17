@@ -23,5 +23,5 @@
  * @module @resq-systems/decorators/delegate
  */
 
-export * from "./delegate.js";
-export * from "./delegate.types.js";
+export { delegate } from "./delegate.js";
+export type { Delegatable } from "./delegate.types.js";

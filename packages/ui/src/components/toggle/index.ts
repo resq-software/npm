@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/toggle
  */
 
-export * from "./toggle.js";
+export { Toggle, toggleVariants } from "./toggle.js";

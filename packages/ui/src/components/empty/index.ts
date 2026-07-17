@@ -21,4 +21,11 @@
  * @module @resq-systems/ui/components/empty
  */
 
-export * from "./empty.js";
+export {
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from "./empty.js";

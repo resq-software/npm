@@ -23,4 +23,4 @@
  * @module @resq-systems/decorators/delay
  */
 
-export * from "./delay.js";
+export { delay } from "./delay.js";

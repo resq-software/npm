@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/aspect-ratio
  */
 
-export * from "./aspect-ratio.js";
+export { AspectRatio } from "./aspect-ratio.js";

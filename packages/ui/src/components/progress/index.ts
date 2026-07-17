@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/progress
  */
 
-export * from "./progress.js";
+export { Progress } from "./progress.js";

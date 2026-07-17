@@ -21,4 +21,12 @@
  * @module @resq-systems/ui/components/carousel
  */
 
-export * from "./carousel.js";
+export {
+	Carousel,
+	CarouselContent,
+	CarouselItem,
+	CarouselNext,
+	CarouselPrevious,
+	useCarousel,
+} from "./carousel.js";
+export type { CarouselApi } from "./carousel.js";

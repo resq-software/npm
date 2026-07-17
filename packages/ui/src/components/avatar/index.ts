@@ -21,4 +21,11 @@
  * @module @resq-systems/ui/components/avatar
  */
 
-export * from "./avatar.js";
+export {
+	Avatar,
+	AvatarBadge,
+	AvatarFallback,
+	AvatarGroup,
+	AvatarGroupCount,
+	AvatarImage,
+} from "./avatar.js";

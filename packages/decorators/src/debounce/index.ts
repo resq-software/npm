@@ -23,4 +23,4 @@
  * @module @resq-systems/decorators/debounce
  */
 
-export * from "./debounce.fn.js";
+export { debounceFn } from "./debounce.fn.js";

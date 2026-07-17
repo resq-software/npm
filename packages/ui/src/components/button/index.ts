@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/button
  */
 
-export * from "./button.js";
+export { Button, buttonVariants } from "./button.js";

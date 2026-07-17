@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/alert
  */
 
-export * from "./alert.js";
+export { Alert, AlertAction, AlertDescription, AlertTitle } from "./alert.js";

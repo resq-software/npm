@@ -21,4 +21,12 @@
  * @module @resq-systems/ui/components/card
  */
 
-export * from "./card.js";
+export {
+	Card,
+	CardAction,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "./card.js";

@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/badge
  */
 
-export * from "./badge.js";
+export { Badge, badgeVariants } from "./badge.js";

@@ -42,7 +42,7 @@
  * ```
  */
 
-export * from "./logger.js";
+export { Logger, LogLevel, logger } from "./logger.js";
 export type * from "./logger.types.js";
-export * from "./logger.decorators.js";
-export * from "./transports.js";
+export { Log, LogClass, LogError, LogTiming } from "./logger.decorators.js";
+export { byLevel, createFilterTransport, JsonTransport, MemoryTransport } from "./transports.js";

@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/textarea
  */
 
-export * from "./textarea.js";
+export { Textarea } from "./textarea.js";

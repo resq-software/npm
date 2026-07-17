@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/input
  */
 
-export * from "./input.js";
+export { Input } from "./input.js";

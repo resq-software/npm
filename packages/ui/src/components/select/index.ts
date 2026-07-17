@@ -21,4 +21,15 @@
  * @module @resq-systems/ui/components/select
  */
 
-export * from "./select.js";
+export {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectScrollDownButton,
+	SelectScrollUpButton,
+	SelectSeparator,
+	SelectTrigger,
+	SelectValue,
+} from "./select.js";

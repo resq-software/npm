@@ -24,5 +24,5 @@
  * @module @resq-systems/decorators/memoize
  */
 
-export * from "./memoize.js";
-export * from "./memoize.types.js";
+export { memoize } from "./memoize.js";
+export type { Cache, KeyResolver, Memoizable, MemoizeConfig } from "./memoize.types.js";

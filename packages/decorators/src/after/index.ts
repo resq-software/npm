@@ -24,5 +24,5 @@
  * @module @resq-systems/decorators/after
  */
 
-export * from "./after.js";
-export * from "./after.types.js";
+export { after } from "./after.js";
+export type { AfterConfig, AfterFunc, AfterParams } from "./after.types.js";

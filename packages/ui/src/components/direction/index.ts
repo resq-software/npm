@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/direction
  */
 
-export * from "./direction.js";
+export { DirectionProvider, useDirection } from "./direction.js";

@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/resizable
  */
 
-export * from "./resizable.js";
+export { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./resizable.js";

@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/tabs
  */
 
-export * from "./tabs.js";
+export { Tabs, TabsContent, TabsList, tabsListVariants, TabsTrigger } from "./tabs.js";

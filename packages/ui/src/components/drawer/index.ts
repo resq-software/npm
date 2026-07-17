@@ -21,4 +21,15 @@
  * @module @resq-systems/ui/components/drawer
  */
 
-export * from "./drawer.js";
+export {
+	Drawer,
+	DrawerClose,
+	DrawerContent,
+	DrawerDescription,
+	DrawerFooter,
+	DrawerHeader,
+	DrawerOverlay,
+	DrawerPortal,
+	DrawerTitle,
+	DrawerTrigger,
+} from "./drawer.js";

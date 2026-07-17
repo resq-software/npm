@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/label
  */
 
-export * from "./label.js";
+export { Label } from "./label.js";

@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/scroll-area
  */
 
-export * from "./scroll-area.js";
+export { ScrollArea, ScrollBar } from "./scroll-area.js";

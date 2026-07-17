@@ -21,4 +21,12 @@
  * @module @resq-systems/ui/components/chart
  */
 
-export * from "./chart.js";
+export {
+	ChartContainer,
+	ChartLegend,
+	ChartLegendContent,
+	ChartStyle,
+	ChartTooltip,
+	ChartTooltipContent,
+} from "./chart.js";
+export type { ChartConfig } from "./chart.js";

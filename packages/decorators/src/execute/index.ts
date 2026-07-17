@@ -23,4 +23,4 @@
  * @module @resq-systems/decorators/execute
  */
 
-export * from "./execute.js";
+export { selfExecute } from "./execute.js";

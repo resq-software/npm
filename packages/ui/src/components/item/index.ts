@@ -21,4 +21,15 @@
  * @module @resq-systems/ui/components/item
  */
 
-export * from "./item.js";
+export {
+	Item,
+	ItemActions,
+	ItemContent,
+	ItemDescription,
+	ItemFooter,
+	ItemGroup,
+	ItemHeader,
+	ItemMedia,
+	ItemSeparator,
+	ItemTitle,
+} from "./item.js";

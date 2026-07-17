@@ -21,4 +21,4 @@
  * @module @resq-systems/ui/components/sonner
  */
 
-export * from "./sonner.js";
+export { Toaster } from "./sonner.js";

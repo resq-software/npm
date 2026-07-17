@@ -21,4 +21,12 @@
  * @module @resq-systems/ui/components/popover
  */
 
-export * from "./popover.js";
+export {
+	Popover,
+	PopoverAnchor,
+	PopoverContent,
+	PopoverDescription,
+	PopoverHeader,
+	PopoverTitle,
+	PopoverTrigger,
+} from "./popover.js";
