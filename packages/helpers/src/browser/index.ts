@@ -28,6 +28,7 @@
  * `@resq-systems/helpers` entry for SSR-safe utilities.
  */
 
+export * from "./dom-utils.js";
 export * from "./platform.js";
 export * from "./html-entities.js";
 export * from "./storage.js";
