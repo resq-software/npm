@@ -1,4 +1,18 @@
 <!--
+
+## 0.4.0
+### Minor Changes
+
+
+
+- [#203](https://github.com/resq-software/npm/pull/203) [`848e667`](https://github.com/resq-software/npm/commit/848e667e0467e4663a6684fad00244070b11b01c) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add a `./tokens.css` export — the design tokens (`oklch` color roles, `--resq-chart-1..5` palette, `--resq-radius-*`, `--resq-font-*` stacks) as CSS custom properties on `:root`, importable via `@import "@resq-systems/constants/tokens.css"`; a test keeps it in sync with `./tokens`
+
+
+### Patch Changes
+
+
+
+- [#195](https://github.com/resq-software/npm/pull/195) [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Align radii/fonts/oklch-surface tokens and add chart palette to match the shipped @resq-systems/ui values
   Copyright 2026 ResQ
 
   Licensed under the Apache License, Version 2.0 (the "License");

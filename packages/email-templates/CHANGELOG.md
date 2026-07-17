@@ -1,4 +1,10 @@
 <!--
+
+## 0.6.1
+### Patch Changes
+
+- Updated dependencies [[`848e667`](https://github.com/resq-software/npm/commit/848e667e0467e4663a6684fad00244070b11b01c), [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998)]:
+  - @resq-systems/constants@0.4.0
   Copyright 2026 ResQ
 
   Licensed under the Apache License, Version 2.0 (the "License");

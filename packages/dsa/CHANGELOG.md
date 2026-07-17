@@ -1,4 +1,18 @@
 <!--
+
+## 2.1.0
+### Minor Changes
+
+
+
+- [#202](https://github.com/resq-software/npm/pull/202) [`f2af02b`](https://github.com/resq-software/npm/commit/f2af02b534e9cf86a940fad487032d5453a789ce) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add `MultiMap` to `@resq-systems/dsa` and `ManualPromise`/`signalToPromise`/`Semaphore` async primitives to `@resq-systems/helpers`, adapted from Microsoft Playwright with attribution
+
+
+### Patch Changes
+
+
+
+- [#195](https://github.com/resq-software/npm/pull/195) [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Replace `globalThis as any` process access in reordering with a typed narrow (zero `any`)
   Copyright 2026 ResQ
 
   Licensed under the Apache License, Version 2.0 (the "License");

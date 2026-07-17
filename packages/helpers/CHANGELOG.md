@@ -1,4 +1,41 @@
 <!--
+
+## 0.4.0
+### Minor Changes
+
+
+
+- [#202](https://github.com/resq-software/npm/pull/202) [`f2af02b`](https://github.com/resq-software/npm/commit/f2af02b534e9cf86a940fad487032d5453a789ce) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add `MultiMap` to `@resq-systems/dsa` and `ManualPromise`/`signalToPromise`/`Semaphore` async primitives to `@resq-systems/helpers`, adapted from Microsoft Playwright with attribution
+
+
+
+- [#200](https://github.com/resq-software/npm/pull/200) [`1eca8c1`](https://github.com/resq-software/npm/commit/1eca8c187e6a5736d1044390c38a7a0299a91602) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add DOM element utilities (`@resq-systems/helpers/browser` — shadow-DOM-aware traversal, visibility, computed-style caching, box computation) and general string helpers (`escapeHTML`/`escapeHTMLAttribute`/`escapeRegExp`/`normalizeWhiteSpace`/`toSnakeCase`/`trim*`/`truncateDataUrl`/…), adapted from Microsoft Playwright with attribution
+
+
+### Patch Changes
+
+
+
+- [#195](https://github.com/resq-software/npm/pull/195) [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Remove internal any casts in object/value/id/debounce utils
+
+
+
+- [#199](https://github.com/resq-software/npm/pull/199) [`72dc32c`](https://github.com/resq-software/npm/commit/72dc32c2e49df3590f67439a7c593850df94a983) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Rename internal utils modules to kebab-case (`ExecutionQueue` → `execution-queue`, `PerformanceTracker` → `performance-tracker`); exports unchanged
+
+
+
+- [#197](https://github.com/resq-software/npm/pull/197) [`7269bda`](https://github.com/resq-software/npm/commit/7269bdad52363247477163490a8d8af9b1672316) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Use @resq-systems/dsa priority queue in task-exec instead of the external tinyqueue dependency
+
+
+
+- [#195](https://github.com/resq-software/npm/pull/195) [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Deduplicate exhaustiveSwitchError to delegate to @resq-systems/types assertNever
+
+
+
+- [#196](https://github.com/resq-software/npm/pull/196) [`f0df2f8`](https://github.com/resq-software/npm/commit/f0df2f8d197b1519e02959a9a7540aaab0f2d76b) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Type `Result.all` generically (`Result<T, E>` instead of `any`) and short-circuit on the first error; deprecate the unused `control.ts` `Result`/`OkResult`/`ErrorResult` in favor of `success`/`failure`
+
+- Updated dependencies [[`f2af02b`](https://github.com/resq-software/npm/commit/f2af02b534e9cf86a940fad487032d5453a789ce), [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998)]:
+  - @resq-systems/dsa@2.1.0
   Copyright 2026 ResQ
 
   Licensed under the Apache License, Version 2.0 (the "License");

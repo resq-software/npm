@@ -1,5 +1,11 @@
 # @resq-systems/math
 
+## 0.2.1
+
+### Patch Changes
+
+- [#195](https://github.com/resq-software/npm/pull/195) [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add exhaustive assertNever guards to all AST/value dispatch switches and replace unsafe `as` casts in register* with validated type guards
+
 ## 0.2.0
 
 ### Minor Changes
