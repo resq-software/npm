@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { noop } from "../utils/function.js";
+
 /* eslint-disable tldraw/no-direct-storage */
 
 /**
@@ -55,7 +57,7 @@ export function setInLocalStorage(key: string, value: string) {
 	try {
 		localStorage.setItem(key, value);
 	} catch {
-		// noop
+		noop();
 	}
 }
 
@@ -75,7 +77,7 @@ export function deleteFromLocalStorage(key: string) {
 	try {
 		localStorage.removeItem(key);
 	} catch {
-		// noop
+		noop();
 	}
 }
 
@@ -94,7 +96,7 @@ export function clearLocalStorage() {
 	try {
 		localStorage.clear();
 	} catch {
-		// noop
+		noop();
 	}
 }
 
@@ -137,7 +139,7 @@ export function setInSessionStorage(key: string, value: string) {
 	try {
 		sessionStorage.setItem(key, value);
 	} catch {
-		// noop
+		noop();
 	}
 }
 
@@ -157,7 +159,7 @@ export function deleteFromSessionStorage(key: string) {
 	try {
 		sessionStorage.removeItem(key);
 	} catch {
-		// noop
+		noop();
 	}
 }
 
@@ -176,6 +178,6 @@ export function clearSessionStorage() {
 	try {
 		sessionStorage.clear();
 	} catch {
-		// noop
+		noop();
 	}
 }
