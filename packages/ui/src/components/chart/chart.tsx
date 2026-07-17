@@ -28,13 +28,7 @@
  * - `ChartLegend` / `ChartLegendContent` — themed legend surface.
  * - `ChartStyle` — internal style-tag helper (auto-rendered by
  *   `ChartContainer`).
- *
- * `// @ts-nocheck` is set because recharts 3.x types don't align
- * with `React.ComponentProps` inference; the runtime contract is
- * still type-safe via the explicit prop interfaces in this file.
  */
-
-// @ts-nocheck -- recharts 3.x type exports don't align with ComponentProps inference
 
 "use client";
 
@@ -172,7 +166,9 @@ function ChartTooltipContent({
 	nameKey,
 	payload,
 }: React.ComponentProps<"div"> &
-	React.ComponentProps<typeof RechartsPrimitive.Tooltip> & {
+	// recharts 3.x moved payload/label/active off `TooltipProps` (context-read) into
+	// `TooltipContentProps` — the shape recharts passes to a custom tooltip content component.
+	Partial<RechartsPrimitive.TooltipContentProps> & {
 		hideIndicator?: boolean;
 		hideLabel?: boolean;
 		indicator?: "dashed" | "dot" | "line";
@@ -251,7 +247,9 @@ function ChartTooltipContent({
 									"[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5",
 									indicator === "dot" && "items-center",
 								)}
-								key={item.dataKey}
+								// recharts `dataKey` is `string | number | fn`; React keys must be
+								// string/number, so coerce exactly as React does internally.
+								key={String(item.dataKey)}
 							>
 								{formatter && item?.value !== undefined && item.name ? (
 									formatter(item.value, item.name, item, index, item.payload)
@@ -317,7 +315,9 @@ function ChartLegendContent({
 	nameKey,
 	payload,
 	verticalAlign = "bottom",
-}: Partial<Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign">> &
+}: // recharts 3.x omits `payload` from `LegendProps`; the custom-content shape that
+// carries both `payload` and `verticalAlign` is `DefaultLegendContentProps`.
+Partial<Pick<RechartsPrimitive.DefaultLegendContentProps, "payload" | "verticalAlign">> &
 	React.ComponentProps<"div"> & {
 		hideIcon?: boolean;
 		nameKey?: string;
