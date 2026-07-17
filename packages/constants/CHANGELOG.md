@@ -1,5 +1,12 @@
 <!--
 
+## 0.4.1
+### Patch Changes
+
+
+
+- [#210](https://github.com/resq-software/npm/pull/210) [`b85dbb2`](https://github.com/resq-software/npm/commit/b85dbb29baf675cb5e44dab37c8dd809f4cc400c) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Correct `brand.company` to match the current pitch: funding `stage` is now `"Pre-Seed"` (was `"Seed Stage"`) and `locations` is `["Long Island, New York"]` (was `["New York", "Texas"]`) — one founder, one HQ.
+
 ## 0.4.0
 ### Minor Changes
 
