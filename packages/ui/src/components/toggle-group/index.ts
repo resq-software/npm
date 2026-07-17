@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./toggle-group.js";
+/**
+ * @fileoverview Public barrel for the Toggle Group component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/toggle-group`.
+ *
+ * @module @resq-systems/ui/components/toggle-group
+ */
+
+export { ToggleGroup, ToggleGroupItem } from "./toggle-group.js";

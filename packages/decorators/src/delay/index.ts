@@ -19,6 +19,8 @@
  * defer the decorated method by `ms` milliseconds before it actually
  * runs. Useful for sequencing, animation timing, and exponential
  * back-off helpers.
+ *
+ * @module @resq-systems/decorators/delay
  */
 
-export * from "./delay.js";
+export { delay } from "./delay.js";

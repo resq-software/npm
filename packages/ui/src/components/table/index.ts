@@ -14,4 +14,20 @@
  * limitations under the License.
  */
 
-export * from "./table.js";
+/**
+ * @fileoverview Public barrel for the Table component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/table`.
+ *
+ * @module @resq-systems/ui/components/table
+ */
+
+export {
+	Table,
+	TableBody,
+	TableCaption,
+	TableCell,
+	TableFooter,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "./table.js";

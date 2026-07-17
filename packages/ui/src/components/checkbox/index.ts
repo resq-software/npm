@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./checkbox.js";
+/**
+ * @fileoverview Public barrel for the Checkbox component (accessible tri-state checkbox)
+ * — re-exports `./checkbox` as the `@resq-systems/ui/checkbox` entry.
+ *
+ * @module @resq-systems/ui/components/checkbox
+ */
+
+export { Checkbox } from "./checkbox.js";

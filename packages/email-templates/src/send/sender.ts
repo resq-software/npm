@@ -14,12 +14,29 @@
  * limitations under the License.
  */
 
-/** Provider-agnostic input for sending a single email. */
+/**
+ * @fileoverview Provider-agnostic email transport port — the `EmailSender` interface
+ * plus its normalized input and result shapes.
+ *
+ * @module @resq-systems/email-templates/send/sender
+ */
+
+/**
+ * Provider-agnostic input for sending a single email.
+ *
+ * At least one of {@link SendEmailInput.html} or {@link SendEmailInput.text} should
+ * be present, or the message has no body — the pipeline (`renderEmail`) always
+ * supplies both. `to`, `cc`, and `bcc` accept one address or a list.
+ */
 export interface SendEmailInput {
+	/** Verified sender address, e.g. "ResQ Systems <ops@send.resq.software>". */
 	from: string;
+	/** Primary recipient(s); at least one address. */
 	to: string | string[];
 	subject: string;
+	/** HTML body; omit only if `text` is provided. */
 	html?: string;
+	/** Plain-text body; omit only if `html` is provided. */
 	text?: string;
 	replyTo?: string | string[];
 	cc?: string | string[];
@@ -30,7 +47,15 @@ export interface SendEmailInput {
 	headers?: Record<string, string>;
 }
 
-/** Normalized send result. Providers map their responses onto this shape. */
+/**
+ * Normalized send result — a discriminated union keyed by the `ok` boolean.
+ * Providers map their responses onto this shape so callers branch on `ok` rather
+ * than on provider specifics.
+ *
+ * When `ok` is `true`, `id` is the provider's message id. When `ok` is `false`,
+ * `error.name` is a stable, machine-branchable tag and `error.message` is a
+ * human-readable detail.
+ */
 export type SendResult =
 	| { ok: true; id: string }
 	| { ok: false; error: { name: string; message: string } };

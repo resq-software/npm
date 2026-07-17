@@ -29,7 +29,7 @@ import { assertNever } from "./_assert.js";
 import type { BinaryOp, BinderOp, Expr, LogicOp, RelOp, UnaryOp } from "./ast.js";
 import { RecursionLimitError } from "./error.js";
 
-// ────────────────────────── Options ──────────────────────────
+//#region Options
 
 /** Configuration for the expression pretty-printer. */
 export interface PrintOptions {
@@ -37,7 +37,9 @@ export interface PrintOptions {
 	readonly ascii?: boolean;
 }
 
-// ────────────────────────── Precedence table ──────────────────────────
+//#endregion
+
+//#region Precedence Table
 
 /** Precedence levels — higher binds tighter. */
 const PREC_IFF = 1;
@@ -85,7 +87,9 @@ const logicPrec: Readonly<Record<LogicOp, number>> = {
 	"∧": PREC_AND,
 };
 
-// ────────────────────────── Symbol tables ──────────────────────────
+//#endregion
+
+//#region Symbol Tables
 
 const binaryUnicode: Readonly<Record<BinaryOp, string>> = {
 	"+": "+",
@@ -169,7 +173,9 @@ const binderAscii: Readonly<Record<BinderOp, string>> = {
 	"∃": "exists",
 };
 
-// ────────────────────────── Helpers ──────────────────────────
+//#endregion
+
+//#region Helpers
 
 /** Return the precedence level for any expression node. */
 const exprPrec = (expr: Expr): number => {
@@ -203,7 +209,9 @@ const exprPrec = (expr: Expr): number => {
  */
 const wrapIf = (inner: string, needsWrap: boolean): string => (needsWrap ? `(${inner})` : inner);
 
-// ────────────────────────── Core printer ──────────────────────────
+//#endregion
+
+//#region Public API
 
 /**
  * Render an expression AST to readable mathematical notation.
@@ -211,6 +219,7 @@ const wrapIf = (inner: string, needsWrap: boolean): string => (needsWrap ? `(${i
  * @param expr - The expression tree to print.
  * @param options - Optional formatting configuration.
  * @returns A string representation with minimal parentheses.
+ * @throws {RecursionLimitError} If the tree nests deeper than the internal limit (200).
  */
 export const print = (expr: Expr, options?: PrintOptions): string => {
 	const ascii = options?.ascii === true;
@@ -253,7 +262,9 @@ export const print = (expr: Expr, options?: PrintOptions): string => {
 	return go(expr);
 };
 
-// ────────────────────────── Node printers ──────────────────────────
+//#endregion
+
+//#region Node Printers
 
 /** Render a literal value. */
 const printLit = (
@@ -412,3 +423,5 @@ const printMember = (obj: Expr, property: string, go: (e: Expr) => string): stri
 	const needsWrap = exprPrec(obj) < PREC_ATOM;
 	return `${wrapIf(inner, needsWrap)}.${property}`;
 };
+
+//#endregion

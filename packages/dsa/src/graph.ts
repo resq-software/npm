@@ -15,10 +15,11 @@
  */
 
 /**
- * @file Graph Data Structure with BFS/DFS, Shortest Path, and A*
- * @module dsa/graph
- * @description Weighted directed/undirected graph for hierarchy modeling and routing.
- *              Supports BFS, DFS, Dijkstra's shortest path, A* search, and topological sort.
+ * @fileoverview Weighted directed/undirected graph for hierarchy modeling and
+ * routing. Supports BFS, DFS, Dijkstra's shortest path, A* search, and
+ * topological sort.
+ *
+ * @module @resq-systems/dsa/graph
  */
 
 import {
@@ -29,9 +30,7 @@ import {
 	validateSafe,
 } from "./schemas.js";
 
-// ============================================
-// Types & Interfaces
-// ============================================
+//#region Types
 
 /**
  * Edge in the graph.
@@ -66,40 +65,54 @@ export interface Vertex<T, M = Record<string, unknown>> {
 }
 
 /**
- * Path result from shortest path algorithms
+ * Result of a shortest-path search.
+ *
+ * The fields move together: when {@link found} is `false` (no route exists),
+ * `path` is empty and `distance` is `Number.POSITIVE_INFINITY`. When `found`
+ * is `true`, `path` runs from source to target inclusive and `distance` is its
+ * summed edge weight (`0` for a source-equals-target path).
  */
 export interface PathResult<T> {
-	/** Ordered list of vertices in the path */
+	/** Vertices from source to target inclusive; empty when `found` is `false`. */
 	path: T[];
-	/** Total distance/weight of the path */
+	/** Total summed edge weight; `Infinity` when `found` is `false`. */
 	distance: number;
-	/** Whether a path was found */
+	/** Whether a path from source to target was found. */
 	found: boolean;
 }
 
 /**
- * Graph traversal result
+ * Result of a graph traversal (BFS or DFS).
+ *
+ * All three collections cover exactly the vertices reachable from the start,
+ * and are empty when the start vertex is not in the graph.
  */
 export interface TraversalResult<T> {
-	/** Vertices in traversal order */
+	/** Reachable vertices in the order they were visited. */
 	vertices: T[];
-	/** Parent map for path reconstruction */
+	/**
+	 * Maps each visited vertex to the vertex it was reached from; the start
+	 * vertex maps to `null`. Follow it back to reconstruct a path.
+	 */
 	parents: Map<T, T | null>;
-	/** Distance from source (for BFS) */
+	/**
+	 * Maps each visited vertex to its distance from the start: hop count for
+	 * {@link Graph.bfs}, recursion depth for {@link Graph.dfs}.
+	 */
 	distances: Map<T, number>;
 }
 
 /**
- * Options for graph creation
+ * Options for graph creation.
  */
 export interface GraphOptions {
 	/** Whether the graph is directed (default: true) */
 	directed?: boolean;
 }
 
-// ============================================
-// Graph Implementation
-// ============================================
+//#endregion
+
+//#region Public API
 
 /**
  * Weighted Graph with Adjacency List representation
@@ -126,7 +139,7 @@ export interface GraphOptions {
  *   {@link Graph.getVertexMetadata} and {@link Graph.getNeighbors}.
  *
  * @example
- * ```typescript
+ * ```ts
  * const graph = new Graph<string>();
  * graph.addVertex('A').addVertex('B').addVertex('C');
  * graph.addEdge('A', 'B', 1);
@@ -139,9 +152,10 @@ export class Graph<T, M = Record<string, unknown>> {
 	private readonly directed: boolean;
 
 	/**
-	 * Creates a new Graph
-	 * @param options - Configuration options
-	 * @throws Error if options validation fails
+	 * Creates a new graph.
+	 *
+	 * @param options - Configuration options.
+	 * @throws {Error} If options validation fails.
 	 */
 	constructor(options: GraphOptions = {}) {
 		const validation = validateSafe(GraphOptionsSchema, options);
@@ -154,14 +168,14 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Returns the number of vertices in the graph
+	 * Returns the number of vertices in the graph.
 	 */
 	get vertexCount(): number {
 		return this.adjacencyList.size;
 	}
 
 	/**
-	 * Returns the total number of edges in the graph
+	 * Returns the total number of edges in the graph.
 	 */
 	get edgeCount(): number {
 		let count = 0;
@@ -172,14 +186,14 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Checks if the graph has a vertex
+	 * Checks whether the graph contains a vertex.
 	 */
 	hasVertex(vertex: T): boolean {
 		return this.adjacencyList.has(vertex);
 	}
 
 	/**
-	 * Checks if an edge exists between two vertices
+	 * Checks whether an edge exists from `source` to `target`.
 	 */
 	hasEdge(source: T, target: T): boolean {
 		const vertex = this.adjacencyList.get(source);
@@ -188,8 +202,9 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Adds a vertex to the graph
-	 * @returns This graph for chaining
+	 * Adds a vertex to the graph. A no-op if the vertex already exists.
+	 *
+	 * @returns This graph, for chaining.
 	 */
 	addVertex(vertex: T, metadata?: M): this {
 		if (!this.adjacencyList.has(vertex)) {
@@ -199,8 +214,9 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Adds multiple vertices at once
-	 * @returns This graph for chaining
+	 * Adds multiple vertices at once.
+	 *
+	 * @returns This graph, for chaining.
 	 */
 	addVertices(vertices: T[]): this {
 		for (const vertex of vertices) {
@@ -210,8 +226,11 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Adds an edge between two vertices
-	 * @returns This graph for chaining
+	 * Adds (or updates) a weighted edge between two vertices, creating either
+	 * endpoint if it is missing. For an undirected graph the reverse edge is
+	 * added too. Re-adding an existing edge overwrites its weight and metadata.
+	 *
+	 * @returns This graph, for chaining.
 	 */
 	addEdge(source: T, target: T, weight = 1, metadata?: M): this {
 		this.addVertex(source);
@@ -242,8 +261,9 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Removes a vertex and all its edges
-	 * @returns True if vertex was removed
+	 * Removes a vertex and every edge that touches it.
+	 *
+	 * @returns `true` if the vertex existed and was removed.
 	 */
 	removeVertex(vertex: T): boolean {
 		if (!this.adjacencyList.has(vertex)) return false;
@@ -257,8 +277,10 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Removes an edge between two vertices
-	 * @returns True if edge was removed
+	 * Removes the edge from `source` to `target` (and its reverse in an
+	 * undirected graph).
+	 *
+	 * @returns `true` if a matching edge existed and was removed.
 	 */
 	removeEdge(source: T, target: T): boolean {
 		const sourceVertex = this.adjacencyList.get(source);
@@ -278,14 +300,14 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Gets all neighbors of a vertex
+	 * Gets the outgoing edges of a vertex, or an empty array if it is unknown.
 	 */
 	getNeighbors(vertex: T): Edge<T, M>[] {
 		return this.adjacencyList.get(vertex)?.edges ?? [];
 	}
 
 	/**
-	 * Gets all vertices in the graph
+	 * Gets all vertices in the graph.
 	 */
 	getVertices(): T[] {
 		return Array.from(this.adjacencyList.keys());
@@ -299,10 +321,11 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Breadth-First Search traversal
+	 * Breadth-first traversal from `start`, visiting nearer vertices first.
 	 *
-	 * @param start - Starting vertex
-	 * @returns Traversal result with vertices, parents, and distances
+	 * @param start - Starting vertex.
+	 * @returns Traversal result with vertices, parents, and hop distances. All
+	 *   three collections are empty when `start` is not in the graph.
 	 */
 	bfs(start: T): TraversalResult<T> {
 		const vertices: T[] = [];
@@ -340,10 +363,12 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Depth-First Search traversal
+	 * Depth-first traversal from `start`, following each branch to its end
+	 * before backtracking.
 	 *
-	 * @param start - Starting vertex
-	 * @returns Traversal result with vertices and parents
+	 * @param start - Starting vertex.
+	 * @returns Traversal result with vertices, parents, and depth per vertex.
+	 *   All three collections are empty when `start` is not in the graph.
 	 */
 	dfs(start: T): TraversalResult<T> {
 		const vertices: T[] = [];
@@ -375,11 +400,13 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Finds the shortest path between two vertices using Dijkstra's algorithm
+	 * Finds the shortest path between two vertices with Dijkstra's algorithm.
+	 * Assumes non-negative edge weights.
 	 *
-	 * @param start - Starting vertex
-	 * @param end - Ending vertex
-	 * @returns Path result with vertices and total distance
+	 * @param start - Starting vertex.
+	 * @param end - Ending vertex.
+	 * @returns A path result; `found` is `false` with an empty path and
+	 *   infinite distance when no route exists.
 	 */
 	findShortestPath(start: T, end: T): PathResult<T> {
 		if (!this.adjacencyList.has(start) || !this.adjacencyList.has(end)) {
@@ -443,12 +470,13 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Finds the shortest path using A* search with a heuristic function
+	 * Finds the shortest path using A* search guided by a heuristic. Returns an
+	 * optimal path when `h` is admissible (never overestimates the true cost).
 	 *
-	 * @param start - Starting vertex
-	 * @param end - Ending vertex
-	 * @param h - Heuristic function estimating cost from a vertex to end
-	 * @returns Path and cost, or null if no path exists
+	 * @param start - Starting vertex.
+	 * @param end - Ending vertex.
+	 * @param h - Heuristic estimating the cost from a vertex to `end`.
+	 * @returns The path and its cost, or `null` if no path exists.
 	 */
 	astar(start: T, end: T, h: (a: T, b: T) => number): { path: T[]; cost: number } | null {
 		if (!this.adjacencyList.has(start) || !this.adjacencyList.has(end)) return null;
@@ -489,12 +517,13 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Finds all paths between two vertices (limited by max depth)
+	 * Finds every simple path between two vertices, bounded by `maxDepth` to
+	 * keep the search finite on large or cyclic graphs.
 	 *
-	 * @param start - Starting vertex
-	 * @param end - Ending vertex
-	 * @param maxDepth - Maximum path depth (default: 10)
-	 * @returns Array of all paths found
+	 * @param start - Starting vertex.
+	 * @param end - Ending vertex.
+	 * @param maxDepth - Maximum path length in edges. Defaults to `10`.
+	 * @returns All paths found, each an ordered list of vertices.
 	 */
 	findAllPaths(start: T, end: T, maxDepth = 10): T[][] {
 		const paths: T[][] = [];
@@ -529,10 +558,12 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Performs topological sort on a directed acyclic graph (DAG)
+	 * Performs a topological sort (Kahn's algorithm) of a directed acyclic
+	 * graph.
 	 *
-	 * @returns Topologically sorted vertices or null if cycle detected
-	 * @throws Error if called on an undirected graph
+	 * @returns The vertices in a valid topological order, or `null` if the
+	 *   graph contains a cycle.
+	 * @throws {Error} If called on an undirected graph.
 	 */
 	topologicalSort(): T[] | null {
 		if (!this.directed) {
@@ -576,7 +607,8 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Detects if the graph contains a cycle
+	 * Detects whether the graph contains a cycle. Uses topological sorting for
+	 * directed graphs and a parent-aware DFS for undirected ones.
 	 */
 	hasCycle(): boolean {
 		if (this.directed) {
@@ -609,8 +641,11 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Gets connected components in an undirected graph
-	 * @returns Array of connected components (each component is an array of vertices)
+	 * Groups vertices into connected components. Intended for undirected
+	 * graphs; on a directed graph it treats edges as bidirectional and so
+	 * yields weakly-connected components.
+	 *
+	 * @returns One array of vertices per component.
 	 */
 	getConnectedComponents(): T[][] {
 		const visited = new Set<T>();
@@ -641,14 +676,17 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 
 	/**
-	 * Clears all vertices and edges
+	 * Clears all vertices and edges.
 	 */
 	clear(): void {
 		this.adjacencyList.clear();
 	}
 
 	/**
-	 * Converts graph to adjacency matrix representation
+	 * Converts the graph to a dense adjacency-matrix representation. Absent
+	 * edges are `Infinity` and the diagonal is `0`.
+	 *
+	 * @returns The vertex order and the corresponding weight matrix.
 	 */
 	toAdjacencyMatrix(): { vertices: T[]; matrix: number[][] } {
 		const vertices = this.getVertices();
@@ -685,14 +723,19 @@ export class Graph<T, M = Record<string, unknown>> {
 	}
 }
 
-// ============================================
-// Utility Functions
-// ============================================
+//#endregion
+
+//#region Utilities
 
 /**
- * Validates and adds an edge using Effect Schema (for string graphs)
+ * Validates an edge with Effect Schema before adding it to a string-keyed
+ * graph, so malformed input is rejected instead of silently corrupting it.
  *
- * @returns True if edge was added successfully
+ * @param graph - The target graph.
+ * @param source - Source vertex id.
+ * @param target - Target vertex id.
+ * @param weight - Edge weight. Defaults to `1`.
+ * @returns `true` if the edge passed validation and was added.
  */
 export function addValidatedEdge(
 	graph: Graph<string>,
@@ -707,11 +750,14 @@ export function addValidatedEdge(
 }
 
 /**
- * Validates a vertex ID using Effect Schema
+ * Type guard that validates a vertex id with Effect Schema and narrows it to
+ * the branded {@link VertexId} type.
  *
- * @returns True if valid
+ * @param id - The value to check.
+ * @returns `true` if `id` is a valid vertex id.
  */
 export function isValidVertexId(id: unknown): id is VertexId {
 	const validation = validateSafe(VertexIdSchema, id);
 	return validation.success;
 }
+//#endregion

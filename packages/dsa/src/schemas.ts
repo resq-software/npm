@@ -15,18 +15,17 @@
  */
 
 /**
- * @file Effect Schema Definitions for DSA Module
- * @module dsa/schemas
- * @description Effect Schema validation schemas for data structure configurations
- *              and inputs. Provides type-safe validation at runtime.
+ * @fileoverview Effect Schema validation schemas for data structure
+ * configurations and inputs, plus branded numeric domains. Provides type-safe
+ * validation at runtime for the optional `./schemas` entry point.
+ *
+ * @module @resq-systems/dsa/schemas
  */
 
 import { Effect } from "effect";
 import { Schema as S } from "effect";
 
-// ============================================
-// Trie Schemas
-// ============================================
+//#region Trie Schemas
 
 /**
  * Construction options for {@link Trie}.
@@ -56,9 +55,9 @@ export const TrieSearchSchema = S.Struct({
 /** Inferred TS type for {@link TrieSearchSchema}. */
 export type TrieSearch = S.Schema.Type<typeof TrieSearchSchema>;
 
-// ============================================
-// Priority Queue Schemas
-// ============================================
+//#endregion
+
+//#region Priority Queue Schemas
 
 /** Construction options for {@link PriorityQueue}. */
 export const PriorityQueueOptionsSchema = S.Struct({
@@ -85,9 +84,9 @@ export const PriorityItemSchema = S.Struct({
 /** Inferred TS type for {@link PriorityItemSchema}. */
 export type PriorityItemInput = S.Schema.Type<typeof PriorityItemSchema>;
 
-// ============================================
-// Rabin-Karp Schemas
-// ============================================
+//#endregion
+
+//#region Rabin-Karp Schemas
 
 /** Construction options for {@link RabinKarp}. */
 export const RabinKarpOptionsSchema = S.Struct({
@@ -114,11 +113,15 @@ export const RabinKarpMultiSearchSchema = S.Struct({
 /** Inferred TS type for {@link RabinKarpMultiSearchSchema}. */
 export type RabinKarpMultiSearch = S.Schema.Type<typeof RabinKarpMultiSearchSchema>;
 
-// ============================================
-// Graph Schemas
-// ============================================
+//#endregion
 
-/** Construction options for {@link Graph} — `directed` defaults to false. */
+//#region Graph Schemas
+
+/**
+ * Construction options for {@link Graph}. The schema leaves `directed`
+ * optional (no schema-level default); {@link Graph} itself treats an omitted
+ * value as `true` (directed).
+ */
 export const GraphOptionsSchema = S.Struct({
 	directed: S.optional(S.Boolean),
 });
@@ -147,9 +150,9 @@ export const VertexIdSchema = S.String.check(S.isMinLength(1)).pipe(S.brand("Ver
 /** Inferred TS type for {@link VertexIdSchema} — `string & Brand<"VertexId">`. */
 export type VertexId = S.Schema.Type<typeof VertexIdSchema>;
 
-// ============================================
-// Validation Helpers
-// ============================================
+//#endregion
+
+//#region Validation Helpers
 
 /**
  * Marker constraint for "any schema decoding with no service context".
@@ -210,6 +213,12 @@ export function validateSafe<T extends AnySchema>(
  * Build a reusable, throwing decoder bound to one schema. Equivalent
  * to currying {@link validate}.
  *
+ * The returned function decodes its input synchronously and **throws** the
+ * Effect parse error on invalid input, exactly like {@link validate}. Reach for
+ * {@link validateSafe} when you want a non-throwing result instead.
+ *
+ * @returns A decoder that maps trusted input to `T["Type"]`, throwing on a
+ *   parse failure.
  * @example
  * ```ts
  * const parseEdge = createValidator(GraphEdgeSchema);
@@ -220,9 +229,9 @@ export function createValidator<T extends AnySchema>(schema: T): (input: unknown
 	return (input: unknown) => S.decodeUnknownSync(schema)(input);
 }
 
-// ============================================
-// Branded Numeric Domains
-// ============================================
+//#endregion
+
+//#region Branded Numeric Domains
 
 /**
  * A probability / unit-interval value in the OPEN interval `(0, 1)`.
@@ -274,16 +283,20 @@ export function toProbability(value: number): Probability {
 }
 
 /**
- * Smart constructor for {@link Latitude}; throws when `value` is non-finite
- * or outside `[-90, 90]`.
+ * Smart constructor for {@link Latitude}.
+ *
+ * @throws The Effect parse error when `value` is non-finite or outside the
+ *   closed interval `[-90, 90]`.
  */
 export function toLatitude(value: number): Latitude {
 	return validate(LatitudeSchema, value);
 }
 
 /**
- * Smart constructor for {@link Longitude}; throws when `value` is non-finite
- * or outside `[-180, 180]`.
+ * Smart constructor for {@link Longitude}.
+ *
+ * @throws The Effect parse error when `value` is non-finite or outside the
+ *   closed interval `[-180, 180]`.
  */
 export function toLongitude(value: number): Longitude {
 	return validate(LongitudeSchema, value);
@@ -303,3 +316,4 @@ export function isLatitude(value: unknown): value is Latitude {
 export function isLongitude(value: unknown): value is Longitude {
 	return validateSafe(LongitudeSchema, value).success;
 }
+//#endregion

@@ -20,8 +20,14 @@
  * argument selects how the duration is reported (default `console`,
  * a string label, a method name on `this`, or a custom reporter
  * function). Supports both legacy and Stage-3 decorators.
+ *
+ * @module @resq-systems/decorators/exec-time
  */
 
-export * from "./exec-time.fn.js";
-export * from "./exec-time.js";
-export * from "./exec-time.types.js";
+export { execTimeFn } from "./exec-time.fn.js";
+export { execTime } from "./exec-time.js";
+export type {
+	ExactTimeReportable,
+	ExactTimeReportData,
+	ReportFunction,
+} from "./exec-time.types.js";

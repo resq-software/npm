@@ -15,10 +15,11 @@
  */
 
 /**
- * @fileoverview Bind decorator - automatically binds class methods to their
- * instance context. Ensures `this` always refers to the class instance.
+ * @fileoverview `@bind` decorator — auto-bind a class method to its instance so
+ * `this` stays correct even when the method is detached and passed as a
+ * callback. Binds lazily on first access.
  *
- * @module @resq/typescript/decorators/bind
+ * @module @resq-systems/decorators/bind/bind
  *
  * @example
  * ```typescript
@@ -27,18 +28,15 @@
  *
  *   @bind
  *   handleClick(event: MouseEvent): void {
- *     this.count++; // `this` correctly refers to EventHandler instance
+ *     this.count++; // `this` correctly refers to the EventHandler instance.
  *     console.log(`Clicked ${this.count} times`);
  *   }
  * }
  *
  * const handler = new EventHandler();
- * button.addEventListener('click', handler.handleClick);
- * // Works correctly even when passed as callback
+ * // Works correctly even when passed as a bare callback.
+ * button.addEventListener("click", handler.handleClick);
  * ```
- *
- * @copyright Copyright (c) 2026 ResQ
- * @license MIT
  */
 
 /**
@@ -48,14 +46,21 @@
  *
  * Uses lazy binding on first access for better performance.
  *
- * @template T - The type of the class containing the decorated method
- * @param {T} _target - The class prototype (unused)
- * @param {string | symbol} propertyKey - The name of the method
- * @param {TypedPropertyDescriptor<Method<unknown>>} descriptor - The property descriptor
- * @returns {TypedPropertyDescriptor<Method<unknown>>} The modified descriptor
+ * Returns a **new** descriptor whose getter, on first read per instance, binds
+ * the method and redefines the property as a plain own value on that instance —
+ * so it mutates the instance the first time it is accessed, then serves the
+ * cached bound function (idempotent thereafter). The replacement property is
+ * non-enumerable but writable and configurable. The original prototype method is
+ * left intact.
  *
- * @throws {Error} When applied to a non-method property
- *
+ * @template F - The decorated method's function type, preserved end-to-end.
+ * @param _target - The class prototype (unused).
+ * @param propertyKey - The name of the method.
+ * @param descriptor - The property descriptor.
+ * @returns The modified descriptor.
+ * @throws {Error} At decoration time, when the descriptor has no method value
+ *   (applied to an accessor or field), with message
+ *   `"@bind is applicable only on methods."`.
  * @example
  * ```typescript
  * class MyClass {

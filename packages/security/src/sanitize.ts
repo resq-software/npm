@@ -15,12 +15,12 @@
  */
 
 /**
- * @file Input sanitization utilities for XSS prevention and data validation
- * @module utils/sanitize
- * @author ResQ
- * @description Provides type-safe input sanitization using Effect Schema for validation.
- *              Includes utilities for HTML escaping, URL validation, PII redaction, and more.
- * @compliance NIST 800-53 SI-10 (Information Input Validation)
+ * @fileoverview Type-safe input sanitization built on Effect Schema — HTML escaping
+ * and DOMPurify-backed HTML sanitization, safe-URL validation, prototype-pollution-
+ * hardened JSON parsing, PII redaction, and branded validators for email, phone, SSN,
+ * and more. Supports NIST 800-53 SI-10 (input validation) and AU-3 (audit content).
+ *
+ * @module @resq-systems/security/sanitize
  */
 
 import type { Brand } from "@resq-systems/types";
@@ -28,24 +28,27 @@ import { Exit, Option, Schema as S } from "effect";
 import DOMPurify from "dompurify";
 import type { Config, WindowLike } from "dompurify";
 
+//#region Types
+
 /**
- * A Schema with DecodingServices constrained to `never`, allowing synchronous decoding.
+ * A Schema whose decoding services are constrained to `never`, allowing synchronous
+ * decoding without an Effect runtime.
  */
 type SyncSchema<T> = S.Codec<T, unknown, never>;
+//#endregion
 
-// ============================================
-// Effect Schema Definitions
-// ============================================
+//#region Schemas
 
 /**
- * Schema for URL protocol validation
+ * Schema constraining a URL protocol to the recognized safe set.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const UrlProtocolSchema = S.Literals(["http:", "https:", "mailto:", "tel:", "ftp:"]);
+/** One of the protocols accepted by {@link UrlProtocolSchema}. */
 export type UrlProtocol = typeof UrlProtocolSchema.Type;
 
 /**
- * Schema for PII redaction options
+ * Schema for the per-category toggles that drive {@link redactPII}.
  * @compliance NIST 800-53 AU-3 (Content of Audit Records)
  */
 export const PIIRedactionOptionsSchema = S.Struct({
@@ -56,10 +59,11 @@ export const PIIRedactionOptionsSchema = S.Struct({
 	redactIPs: S.optional(S.Boolean),
 	redactDates: S.optional(S.Boolean),
 });
+/** Decoded options accepted by {@link redactPIIEffect} / {@link redactPII}. */
 export type PIIRedactionOptions = typeof PIIRedactionOptionsSchema.Type;
 
 /**
- * Schema for user input validation options
+ * Schema for the options controlling {@link validateUserInputEffect}.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const UserInputOptionsSchema = S.Struct({
@@ -68,10 +72,11 @@ export const UserInputOptionsSchema = S.Struct({
 	allowNewlines: S.optional(S.Boolean),
 	trimWhitespace: S.optional(S.Boolean),
 });
+/** Decoded options accepted by {@link validateUserInputEffect}. */
 export type UserInputOptions = typeof UserInputOptionsSchema.Type;
 
 /**
- * Schema for safe URL - validates URL format and protocol
+ * Schema for a safe URL — validates URL format and restricts to safe protocols.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const SafeUrlSchema = S.String.check(
@@ -90,14 +95,28 @@ export const SafeUrlSchema = S.String.check(
 		{ message: "Invalid or unsafe URL" },
 	),
 );
-/** A string that has passed {@link isValidUrl} — a validated, injection-safe URL. */
+/**
+ * A URL string vouched safe against scheme-based injection. Mint one by
+ * narrowing through the {@link isValidUrl} type guard (backed by
+ * {@link SafeUrlSchema}); the brand guarantees the value is either a
+ * root-relative path or an absolute URL restricted to `http:`/`https:`/
+ * `mailto:`. It does **not** guarantee the host is reachable or trusted.
+ */
 export type SafeUrl = Brand<string, "SafeUrl">;
 
 /**
- * Schema for sanitized HTML-safe string (validates as string; escaping done at runtime)
+ * Schema for a sanitized HTML-safe string — validates the value is a string; the
+ * actual escaping is applied at runtime by the sanitization helpers.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const SanitizedStringSchema = S.String;
+/**
+ * A string carrying the {@link SanitizedStringSchema} contract. The schema is
+ * `S.String` alone, so decoding asserts only that the value is a string —
+ * the actual escaping is applied separately by the sanitization helpers
+ * (e.g. {@link escapeHtml}). The type name signals intent, not a proof of
+ * escaping.
+ */
 export type SanitizedString = typeof SanitizedStringSchema.Type;
 
 /**
@@ -111,47 +130,72 @@ export type SanitizedString = typeof SanitizedStringSchema.Type;
 export const EmailSchema = S.String.check(
 	S.isPattern(/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.(?:[A-Za-z]{2,}|xn--[A-Za-z0-9-]+)$/),
 );
-/** A string that has passed {@link isValidEmail}. */
+/**
+ * An email address that matches {@link EmailSchema}. Mint one by narrowing
+ * through the {@link isValidEmail} type guard. The brand guarantees only
+ * syntactic well-formedness (including IDN/Punycode TLDs) — not that the
+ * mailbox exists or is deliverable.
+ */
 export type Email = Brand<string, "Email">;
 
 /**
- * Schema for phone number validation (US format)
+ * Schema for phone number validation (US format).
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const PhoneNumberSchema = S.String.check(
 	S.isPattern(/^(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/),
 );
-/** A string that has passed {@link isValidPhone} (US format). */
+/**
+ * A US-format phone number matching {@link PhoneNumberSchema}. Mint one by
+ * narrowing through the {@link isValidPhone} type guard. The brand asserts
+ * the digit/separator shape only; it neither normalizes formatting nor
+ * confirms the number is assigned.
+ */
 export type PhoneNumber = Brand<string, "PhoneNumber">;
 
 /**
- * Schema for SSN validation (US format)
+ * Schema for SSN validation (US format).
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const SSNSchema = S.String.check(S.isPattern(/^\d{3}[-\s]?\d{2}[-\s]?\d{4}$/));
-/** A string that has passed {@link isValidSSN} (US format). */
+/**
+ * A US Social Security Number matching {@link SSNSchema}. Mint one by
+ * narrowing through the {@link isValidSSN} type guard. The brand asserts
+ * the `NNN-NN-NNNN` shape only — it does not validate area/group ranges or
+ * confirm the number was ever issued. Treat any value as sensitive PII.
+ */
 export type SSN = Brand<string, "SSN">;
 
 /**
- * Schema for credit card number validation
+ * Schema for credit card number validation.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const CreditCardSchema = S.String.check(
 	S.isPattern(/^(?:\d{4}[-\s]?){3}\d{4}$|^\d{15,16}$/),
 );
-/** A string matching the {@link CreditCardSchema} pattern. */
+/**
+ * A card number matching the {@link CreditCardSchema} pattern (13–16 digits
+ * with optional group separators). No exported type guard mints this brand;
+ * decode {@link CreditCardSchema} directly at the boundary. The pattern is a
+ * shape check only — it performs **no** Luhn checksum and does not identify
+ * the issuer. Treat any value as sensitive PII.
+ */
 export type CreditCard = Brand<string, "CreditCard">;
 
 /**
- * Schema for IPv4 address validation
+ * Schema for IPv4 address validation.
  */
 export const IPv4Schema = S.String.check(S.isPattern(/^(?:\d{1,3}\.){3}\d{1,3}$/));
-/** A string matching the {@link IPv4Schema} dotted-quad pattern. */
+/**
+ * A dotted-quad string matching {@link IPv4Schema}. No exported type guard
+ * mints this brand; decode {@link IPv4Schema} directly. The pattern checks
+ * four dot-separated groups of 1–3 digits only — it does **not** bound each
+ * octet to `0–255`, so `999.0.0.1` still matches.
+ */
 export type IPv4 = Brand<string, "IPv4">;
+//#endregion
 
-// ============================================
-// Sanitization Functions
-// ============================================
+//#region Sanitization
 
 /**
  * Escapes special HTML characters in a string to their corresponding HTML entities,
@@ -184,9 +228,14 @@ export const escapeHtml = (text: string): string => {
  * Validates and sanitizes a user-supplied URL using Effect Schema.
  * Returns an Exit with the sanitized URL or an error.
  *
+ * Pure and total — failure is encoded as a resolved {@link Exit.Exit} failure
+ * (an `Exit.fail` carrying a {@link S.SchemaError}), never a thrown exception.
+ *
  * @param url - The URL to be validated and sanitized.
- * @param allowedProtocols - Array of allowed URL protocols.
- * @returns Exit containing the sanitized URL or an error.
+ * @param allowedProtocols - Allowed URL protocols; a root-relative path
+ *   (`/foo`, not `//foo`) is always accepted regardless of this list.
+ * @returns An {@link Exit.Exit}: success carries the accepted URL string,
+ *   failure carries a {@link S.SchemaError}.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  *
  * @example
@@ -301,9 +350,16 @@ const getPurify = (): typeof DOMPurify | null => {
  * NOTE: Server-side HTML sanitization requires `jsdom` to be installed in the consuming application
  * environment; otherwise, it will fall back to escaping HTML characters.
  *
+ * On the first server-side call this lazily resolves `node:module` and
+ * `require`s `jsdom` to build a DOMPurify instance; the instance is cached at
+ * module scope, so subsequent calls incur no further module loading. Returns
+ * `""` for non-string or empty input and never throws — any loader failure is
+ * swallowed and downgraded to {@link escapeHtml}.
+ *
  * @param html - The HTML string to sanitize.
  * @param options - Optional DOMPurify configuration.
- * @returns The sanitized HTML string.
+ * @returns The sanitized HTML string, or the escaped string when no DOM is
+ *   available.
  */
 export const sanitizeHtml = (html: string, options?: Config): string => {
 	if (!html || typeof html !== "string") {
@@ -321,9 +377,17 @@ export const sanitizeHtml = (html: string, options?: Config): string => {
 /**
  * Validates user input using Effect Schema and returns an Exit.
  *
+ * Strips HTML (unless `allowHtml`), collapses whitespace, and repeatedly
+ * removes dangerous URI schemes and inline handlers until the string
+ * stabilizes — the fixed-point loop defeats nested-payload bypasses such as
+ * `javascrjavascript:ipt:`. Failure is a resolved {@link Exit.Exit} failure,
+ * never a throw; the only failure path is a non-string reaching `S.String`.
+ *
  * @param input - User input to validate and sanitize.
- * @param options - Validation options.
- * @returns Exit containing sanitized input or error.
+ * @param options - Validation options. Defaults: `maxLength` 500, `allowHtml`
+ *   false, `allowNewlines` false, `trimWhitespace` true.
+ * @returns An {@link Exit.Exit}: success carries the sanitized string truncated
+ *   to `maxLength`; failure carries a {@link S.SchemaError}.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const validateUserInputEffect = (
@@ -402,7 +466,15 @@ export const validateUserInput = (input: string, maxLength = 500, allowHtml = fa
 };
 
 /**
- * Recursively removes dangerous prototype pollution keys from an object.
+ * Recursively strip prototype-pollution keys (`__proto__`, `constructor`,
+ * `prototype`) from an object.
+ *
+ * **Mutates `val` in place** (deletes offending keys) and returns nothing;
+ * callers pass a freshly `JSON.parse`d value they own. Recursion is bounded
+ * at a depth of 50, so deeply nested or cyclic structures stop rather than
+ * overflowing the stack — keys below that depth are left untouched.
+ *
+ * @internal
  */
 const sanitizeObject = (val: unknown, depth = 0): void => {
 	if (depth > 50) {
@@ -432,10 +504,19 @@ const sanitizeObject = (val: unknown, depth = 0): void => {
 /**
  * Safely parses JSON with Effect Schema validation and prototype pollution protection.
  *
- * @template A - The expected schema type
+ * Never throws: malformed JSON, a non-string argument, and schema-validation
+ * failure all resolve to {@link Option.none} rather than a thrown error, so the
+ * failure channel is the `Option` itself. As a side effect the parsed value is
+ * stripped of prototype-pollution keys in place before validation (the value is
+ * freshly created by `JSON.parse`, so no caller state is mutated).
+ *
+ * @template A - The decoded value type the `schema` produces on success; the
+ *   returned `Option` carries this type.
  * @param jsonString - The JSON string to parse.
- * @param schema - Effect Schema to validate against.
- * @returns Option containing the parsed and validated object.
+ * @param schema - Effect Schema to validate against; its decode must require no
+ *   services ({@link SyncSchema}) so parsing stays synchronous.
+ * @returns {@link Option.some} with the parsed, validated value, or
+ *   {@link Option.none} on any parse or validation failure.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  *
  * @example
@@ -531,12 +612,13 @@ export const stripAnsi = (text: string): string => {
 	return text.replaceAll(/\x1b\[[0-9;]*m/g, "");
 };
 
-// ============================================
-// PII Redaction Functions
-// ============================================
+//#endregion
+
+//#region PII Redaction
 
 /**
- * PII pattern definitions with Effect Schema validation
+ * PII pattern catalog: each entry pairs a global-match regex with the marker that
+ * replaces every hit during redaction.
  * @compliance NIST 800-53 AU-3 (Content of Audit Records)
  */
 const PII_PATTERNS = {
@@ -565,9 +647,15 @@ const PII_PATTERNS = {
 /**
  * Redacts PII from text using Effect Schema validated options.
  *
+ * Total — never throws. Failure to decode `options` is returned as a resolved
+ * {@link Exit.Exit} failure carrying the {@link S.SchemaError}. By default
+ * dates are **not** redacted (`redactDates` defaults to `false`); every other
+ * category defaults to `true`.
+ *
  * @param text - The text to redact PII from.
  * @param options - Configuration options for redaction.
- * @returns Exit containing redacted text or error.
+ * @returns An {@link Exit.Exit}: success carries the redacted text, failure
+ *   carries a {@link S.SchemaError} from invalid `options`.
  * @compliance NIST 800-53 AU-3 (Content of Audit Records)
  */
 export const redactPIIEffect = (
@@ -624,9 +712,15 @@ export const redactPIIEffect = (
  * Redacts common PII patterns in a string for safe logging.
  * Detects and masks SSNs, credit cards, emails, phone numbers, etc.
  *
- * @param text - The text to redact PII from.
- * @param options - Configuration options for redaction.
- * @returns The text with PII patterns replaced with redaction markers.
+ * @param text - The text to redact PII from. Non-string input yields `""`.
+ * @param options - Configuration options for redaction, plus optional
+ *   `customPatterns` applied after the built-ins. Each `pattern` **must** be a
+ *   global (`/g`) RegExp.
+ * @returns The text with PII patterns replaced with redaction markers, or `""`
+ *   for non-string input. If the built-in options fail schema validation the
+ *   original `text` is returned unredacted rather than throwing.
+ * @throws {TypeError} If any `customPatterns` entry uses a non-global RegExp —
+ *   `String.prototype.replaceAll` rejects non-global patterns.
  * @compliance NIST 800-53 AU-3 (Content of Audit Records)
  *
  * @example
@@ -680,10 +774,17 @@ export const redactPII = (
  * Creates a safe string representation of an object for logging,
  * automatically redacting sensitive fields.
  *
+ * Never throws: any serialization failure — a circular reference, a `BigInt`
+ * value, a throwing `toJSON` — is caught and returned as the sentinel string
+ * `"[Unable to stringify object]"`. Key matching is case-insensitive and
+ * compares the full key name (not substrings), so `apiKey` matches only the
+ * literal `"apiKey"`, not `"apiKeyId"`.
+ *
  * @param obj - The object to stringify.
- * @param sensitiveKeys - Array of key names to redact.
+ * @param sensitiveKeys - Key names to redact, compared case-insensitively.
  * @param indent - JSON indentation (default: 2).
- * @returns A JSON string with sensitive values redacted.
+ * @returns A JSON string with sensitive values redacted, or the sentinel
+ *   `"[Unable to stringify object]"` when serialization fails.
  * @compliance NIST 800-53 AU-3 (Content of Audit Records)
  *
  * @example
@@ -722,9 +823,9 @@ export const safeStringify = (
 	}
 };
 
-// ============================================
-// Validation Helpers
-// ============================================
+//#endregion
+
+//#region Validation Helpers
 
 /**
  * Validates if a string is a valid email address using Effect Schema.
@@ -774,3 +875,4 @@ export const isValidSSN = (ssn: string): ssn is SSN => {
 export const isValidUrl = (url: string): url is SafeUrl => {
 	return Exit.isSuccess(S.decodeUnknownExit(SafeUrlSchema)(url));
 };
+//#endregion

@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Earliest-deadline-first task scheduler backed by a binary heap,
+ * keeping a single armed timer instead of one `setTimeout` per queued task.
+ *
+ * @module @resq-systems/helpers/task-exec
+ */
+
 import { PriorityQueue } from "@resq-systems/dsa";
 import type { TimedTask } from "./task-exec.types.js";
 
@@ -50,9 +57,15 @@ export class TaskExec {
 	 * Schedule a callback to run no sooner than `ttl` milliseconds from
 	 * now. Multiple tasks can be queued; each fires at its own deadline.
 	 *
+	 * Mutates the internal heap and arms/re-arms a single `setTimeout`, so
+	 * this is an effectful call tied to the event loop and the clock.
+	 *
 	 * @param func - Callback to run; receives no arguments. Return value
-	 *   is ignored. Synchronous throws will bubble out of the timer
-	 *   callback per `setTimeout` semantics.
+	 *   is ignored. A synchronous throw bubbles out of the timer callback
+	 *   (per `setTimeout` semantics) **before** the scheduler re-arms — so
+	 *   the timer is left un-armed and any still-queued tasks stay pending
+	 *   until the next `exec` call re-arms it. Keep task bodies
+	 *   self-guarding if later tasks must still fire.
 	 * @param ttl - Delay in milliseconds. Pass `0` for "run on the next
 	 *   tick". Negative values are clamped to `0`.
 	 */

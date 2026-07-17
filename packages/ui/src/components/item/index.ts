@@ -14,4 +14,22 @@
  * limitations under the License.
  */
 
-export * from "./item.js";
+/**
+ * @fileoverview Public barrel for the Item component family (generic list-row primitive)
+ * — re-exports `./item` as the `@resq-systems/ui/item` entry.
+ *
+ * @module @resq-systems/ui/components/item
+ */
+
+export {
+	Item,
+	ItemActions,
+	ItemContent,
+	ItemDescription,
+	ItemFooter,
+	ItemGroup,
+	ItemHeader,
+	ItemMedia,
+	ItemSeparator,
+	ItemTitle,
+} from "./item.js";

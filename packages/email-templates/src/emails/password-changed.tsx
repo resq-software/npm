@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Security-notice email component confirming an account password change.
+ *
+ * @module @resq-systems/email-templates/emails/password-changed
+ */
+
 import type { PasswordChangedData } from "../schemas.js";
 import { Email } from "./primitives.js";
 
+/** Props for {@link PasswordChangedEmail} — the password-changed template's validated `data`. */
 export type PasswordChangedEmailProps = PasswordChangedData;
 
 /** Security notice confirming the account password was changed. */

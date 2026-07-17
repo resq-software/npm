@@ -23,6 +23,8 @@
  * Composition: `ToggleGroup > ToggleGroupItem*`. Items inherit
  * size/variant from the parent group via context, so the entire
  * cluster styles consistently with one prop.
+ *
+ * @module @resq-systems/ui/components/toggle-group/toggle-group
  */
 
 "use client";

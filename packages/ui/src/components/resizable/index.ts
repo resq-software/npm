@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./resizable.js";
+/**
+ * @fileoverview Public barrel for the Resizable component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/resizable`.
+ *
+ * @module @resq-systems/ui/components/resizable
+ */
+
+export { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./resizable.js";

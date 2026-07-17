@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Email-safe brand tokens — the hex color palette, font stacks, and
+ * organization identity, sourced from `@resq-systems/constants` so branding stays
+ * centralized across apps.
+ *
+ * @module @resq-systems/email-templates/emails/tokens
+ */
+
 import { brand } from "@resq-systems/constants/brand";
 import { colors, fonts } from "@resq-systems/constants/tokens";
 
@@ -27,6 +35,7 @@ export const emailColors = colors.hex;
 /** Brand font stacks + webfont stylesheet href, from the shared design tokens. */
 export const emailFonts = fonts;
 
+/** Union of the available email-safe color token names. */
 export type EmailColorToken = keyof typeof emailColors;
 
 /**

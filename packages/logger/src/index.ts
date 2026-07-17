@@ -32,17 +32,17 @@
  *
  * @example Decorators
  * ```ts
- * import { logTiming, logErrors } from "@resq-systems/logger";
+ * import { LogTiming, LogError } from "@resq-systems/logger";
  *
  * class UserService {
- *   @logTiming()
- *   @logErrors()
+ *   @LogTiming()
+ *   @LogError()
  *   async findById(id: string) { ... }
  * }
  * ```
  */
 
-export * from "./logger.js";
+export { Logger, LogLevel, logger } from "./logger.js";
 export type * from "./logger.types.js";
-export * from "./logger.decorators.js";
-export * from "./transports.js";
+export { Log, LogClass, LogError, LogTiming } from "./logger.decorators.js";
+export { byLevel, createFilterTransport, JsonTransport, MemoryTransport } from "./transports.js";

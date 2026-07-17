@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Detects animated AVIF buffers by parsing the ISOBMFF `ftyp` box
+ * for an image-sequence brand (`avis`/`msf1`), preferring false negatives over
+ * false positives.
+ *
+ * @module @resq-systems/helpers/browser/media/avif
+ */
+
 /** Reads a big-endian unsigned 32-bit integer at the given offset. */
 function readUint32BE(view: Uint8Array, offset: number): number {
 	return (
@@ -60,7 +68,7 @@ function isImageSequenceBrand(view: Uint8Array, offset: number): boolean {
  * @returns True if the buffer is detected as an animated AVIF, false otherwise
  *
  * @example
- * ```typescript
+ * ```ts
  * // Check if an AVIF file is animated
  * const response = await fetch('image.avif')
  * const buffer = await response.arrayBuffer()
@@ -71,7 +79,7 @@ function isImageSequenceBrand(view: Uint8Array, offset: number): boolean {
  * ```
  *
  * @example
- * ```typescript
+ * ```ts
  * // Use with file input
  * const fileInput = document.querySelector('input[type="file"]')
  * fileInput.addEventListener('change', async (event) => {

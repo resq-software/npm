@@ -14,4 +14,19 @@
  * limitations under the License.
  */
 
-export * from "./chart.js";
+/**
+ * @fileoverview Public barrel for the Chart component family (Recharts wrappers themed
+ * to the design system) — re-exports `./chart` as the `@resq-systems/ui/chart` entry.
+ *
+ * @module @resq-systems/ui/components/chart
+ */
+
+export {
+	ChartContainer,
+	ChartLegend,
+	ChartLegendContent,
+	ChartStyle,
+	ChartTooltip,
+	ChartTooltipContent,
+} from "./chart.js";
+export type { ChartConfig } from "./chart.js";

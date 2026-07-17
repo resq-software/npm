@@ -23,9 +23,10 @@
  */
 
 /**
- * @file A promise whose `resolve`/`reject` are callable from the outside
- *       (a "deferred"), plus an `AbortSignal` → promise bridge.
- * @module @resq-systems/helpers/manual-promise
+ * @fileoverview `ManualPromise`, a deferred whose `resolve`/`reject` are callable
+ * from the outside, plus a `signalToPromise` bridge from an `AbortSignal`.
+ *
+ * @module @resq-systems/helpers/utils/manual-promise
  */
 
 /**

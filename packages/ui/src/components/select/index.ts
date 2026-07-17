@@ -14,4 +14,22 @@
  * limitations under the License.
  */
 
-export * from "./select.js";
+/**
+ * @fileoverview Public barrel for the Select component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/select`.
+ *
+ * @module @resq-systems/ui/components/select
+ */
+
+export {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectScrollDownButton,
+	SelectScrollUpButton,
+	SelectSeparator,
+	SelectTrigger,
+	SelectValue,
+} from "./select.js";

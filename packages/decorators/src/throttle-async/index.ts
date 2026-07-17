@@ -24,6 +24,8 @@
  *
  * Also exports `ThrottleAsyncExecutor` for callers that need
  * direct queue access.
+ *
+ * @module @resq-systems/decorators/throttle-async
  */
 
-export * from "./throttle-async.js";
+export { throttleAsync } from "./throttle-async.js";

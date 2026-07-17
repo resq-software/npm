@@ -37,12 +37,104 @@
  * ```
  */
 
-export * from "./assert.js";
-export * from "./brand.js";
-export * from "./collection.js";
-export * from "./numeric.js";
-export * from "./object.js";
-export * from "./string.js";
-export * from "./testing.js";
-export * from "./compat.js";
-export * from "./json.js";
+export { assertNever, assertUnreachable } from "./assert.js";
+export { brandRefiner, unsafeBrand } from "./brand.js";
+export type { Brand, BrandRefiner, Opaque, Tag } from "./brand.js";
+export type {
+	Concat,
+	Enumerate,
+	Flatten,
+	Head,
+	Includes,
+	IsEmpty,
+	IsUnion,
+	Last,
+	LastInUnion,
+	Length,
+	NonEmptyArray,
+	NumberRange,
+	Push,
+	ReadonlyNonEmptyArray,
+	Reverse,
+	Tail,
+	TupleToUnion,
+	UnionToIntersection,
+	UnionToTuple,
+	Unshift,
+	Zip,
+} from "./collection.js";
+export {
+	coerceNonNegativeInt,
+	coercePositiveInt,
+	coercePositiveMillis,
+	coercePositiveNumber,
+	coerceUnitInterval,
+	isNonNegativeInt,
+	isPositiveInt,
+	isPositiveMillis,
+	isPositiveNumber,
+	isUnitInterval,
+	toNonNegativeInt,
+	toPositiveInt,
+	toPositiveMillis,
+	toPositiveNumber,
+	toUnitInterval,
+} from "./numeric.js";
+export type {
+	NonNegativeInt,
+	PositiveInt,
+	PositiveMillis,
+	PositiveNumber,
+	UnitInterval,
+} from "./numeric.js";
+export type {
+	DeepMutable,
+	DeepNonNullable,
+	DeepPartial,
+	DeepReadonly,
+	DeepRequired,
+	Entries,
+	Merge,
+	Mutable,
+	OmitByType,
+	PickByType,
+	RemoveIndexSignature,
+	RequireAtLeastOne,
+	RequireExactlyOne,
+	Simplify,
+	ValueOf,
+	Without,
+	XOR,
+} from "./object.js";
+export type {
+	EndsWith,
+	Join,
+	LiteralUnion,
+	ParseInt,
+	Replace,
+	ReplaceAll,
+	Split,
+	StartsWith,
+	Trim,
+	TrimLeft,
+	TrimRight,
+} from "./string.js";
+export type {
+	Equal,
+	Expect,
+	ExpectFalse,
+	ExpectTrue,
+	IsAny,
+	IsNever,
+	IsUnknown,
+	NotEqual,
+	Verify,
+} from "./testing.js";
+export type {
+	Awaitable,
+	Expand,
+	MakeUndefinedOptional,
+	RecursivePartial,
+	Required,
+} from "./compat.js";
+export type { JsonArray, JsonObject, JsonPrimitive, JsonValue } from "./json.js";

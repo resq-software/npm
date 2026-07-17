@@ -24,6 +24,8 @@
  * filled-circle indicator on the active option; full keyboard
  * navigation (arrow keys, Tab) and `aria-checked` wiring come
  * from Radix.
+ *
+ * @module @resq-systems/ui/components/radio-group/radio-group
  */
 
 "use client";

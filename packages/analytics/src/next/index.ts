@@ -77,7 +77,17 @@ interface MinimalNextConfig {
  * `skipTrailingSlashRedirect: true`, which is required for the
  * proxy to work reliably across `/ingest` and `/ingest/`.
  *
- * @typeParam T - The user's full `next.config.{js,ts}` type.
+ * Pure: returns a new config object and never mutates `nextConfig`. The
+ * wrapped `rewrites` awaits the original `rewrites()` on each invocation, so if
+ * the user's function throws or rejects, the composed one rejects the same way.
+ *
+ * @template T - The user's full `next.config.{js,ts}` type; the return type
+ *   preserves it while marking `rewrites` and `skipTrailingSlashRedirect` present.
+ * @param nextConfig - The existing Next.js config to wrap; its own `rewrites`
+ *   are preserved and run after the proxy rules.
+ * @param options - Proxy overrides (path `prefix`, PostHog `upstream` /
+ *   `assetsUpstream`); defaults target PostHog US ingestion.
+ * @returns The config with proxy rewrites and `skipTrailingSlashRedirect` set.
  *
  * @example `next.config.ts`
  * ```ts
@@ -123,20 +133,21 @@ export const withAnalyticsRewrites = <T extends MinimalNextConfig>(
 };
 
 /**
- * Build a {@link GA4ProviderConfig} with cross-subdomain linker
- * domains. Drop into `AnalyticsConfig.ga4`:
- *
- * ```ts
- * const config: AnalyticsConfig = {
- *   posthog: { ... },
- *   ga4: ga4Stream("G-XXXXXXX", ["resq.software", "research.resq.software", "viz.resq.software"]),
- * };
- * ```
+ * Build a {@link GA4ProviderConfig} with cross-subdomain linker domains. Drop
+ * the result into `AnalyticsConfig.ga4`.
  *
  * @param measurementId - GA4 Measurement ID (`G-…`).
  * @param domains - Domain allow-list passed to gtag's `linker.domains`,
  *   so cross-subdomain navigation no longer counts as referral
  *   traffic.
+ * @returns A GA4 provider config carrying the ID and linker domains.
+ * @example
+ * ```ts
+ * const config: AnalyticsConfig = {
+ *   posthog: { key: "phc_…" },
+ *   ga4: ga4Stream(sanitizeGa4Id("G-XXXXXXX")!, ["resq.software", "research.resq.software"]),
+ * };
+ * ```
  */
 export const ga4Stream = (
 	measurementId: Ga4MeasurementId,

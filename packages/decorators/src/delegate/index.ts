@@ -19,7 +19,9 @@
  * function form — deduplicate concurrent async calls. Calls that
  * map to the same key share a single in-flight promise, so a burst
  * of `getUser("42")` calls only hits the network once.
+ *
+ * @module @resq-systems/decorators/delegate
  */
 
-export * from "./delegate.js";
-export * from "./delegate.types.js";
+export { delegate } from "./delegate.js";
+export type { Delegatable } from "./delegate.types.js";

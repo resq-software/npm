@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Render-and-send convenience wiring — validates and renders a payload,
+ * then hands it to an `EmailSender`, preserving the never-throws `SendResult`
+ * contract.
+ *
+ * @module @resq-systems/email-templates/send/send-email
+ */
+
 import { EmailValidationError } from "../mailer.js";
 import { renderEmail } from "../render.js";
 import type { EmailSender, SendResult } from "./sender.js";
 
+/** Delivery options for {@link sendEmail} — everything the render step can't supply. */
 export interface SendEmailOptions {
 	/** Verified sender address, e.g. "ResQ Systems <updates@send.resq.software>". */
 	from: string;
+	/** Reply-To address(es); absent means the provider default applies. */
 	replyTo?: string | string[];
 	/** Stable key so Resend de-dupes identical sends for 24h. */
 	idempotencyKey?: string;
@@ -31,6 +41,25 @@ export interface SendEmailOptions {
 /**
  * Render a validated payload and hand it to a sender in one call. Convenience
  * wiring for the common pipeline case: `sendEmail(sender, payload, { from })`.
+ *
+ * Never throws or rejects: every failure — an invalid payload, a render error, or
+ * a throwing/failing sender — is normalized into a `{ ok: false, error }`
+ * {@link SendResult}. Distinguish failures by `error.name`: `"EmailValidationError"`
+ * (payload failed schema validation), `"render_error"` (any other render failure),
+ * `"sender_error"` (the sender threw instead of returning a result), or whatever
+ * `name` the sender itself reports on a normal `{ ok: false }` return. The
+ * `idempotencyKey` is passed through to the sender and only takes effect insofar
+ * as the sender honours it.
+ *
+ * @param sender - The transport port that performs delivery.
+ * @param payload - Untrusted `{ name, to, data }` payload to validate and render.
+ * @param options - Delivery options; `from` is required.
+ * @returns A promise resolving to the send outcome — never a rejection.
+ * @example
+ * ```ts
+ * const result = await sendEmail(sender, badPayload, { from: "ResQ <ops@resq.software>" });
+ * result.ok; // → false
+ * ```
  */
 export async function sendEmail(
 	sender: EmailSender,

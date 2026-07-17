@@ -14,17 +14,31 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Function form of `@delay` — `delayFn(method, delayMs)` returns a
+ * wrapper that schedules `method` via `setTimeout` after `delayMs`.
+ *
+ * @module @resq-systems/decorators/delay/delay.fn
+ */
+
 import type { Method } from "../types.js";
 
 /**
  * Wraps a method to delay its execution by the specified time.
  *
- * @template D - The return type of the original method
- * @template A - The argument types of the original method
- * @param {Method<D, A>} originalMethod - The method to delay
- * @param {number} delayMs - The delay time in milliseconds
- * @returns {Method<void, A>} The delayed method
+ * Effectful: each call schedules an **independent** `setTimeout` — unlike
+ * {@link debounceFn} there is no dedup or timer reset, so N calls produce N
+ * deferred executions. The wrapper returns `undefined` immediately; the original
+ * method's return value is **discarded**, so it cannot wrap a method whose
+ * result the caller needs. A throw from the method surfaces inside the timer
+ * callback, not to the caller. No `AbortSignal` / cancellation.
  *
+ * @template D - The return type of the original method.
+ * @template A - The argument types of the original method.
+ * @param originalMethod - The method to delay.
+ * @param delayMs - The delay time in milliseconds.
+ * @returns The delayed wrapper; it always returns `undefined` (`void`), never
+ *   the wrapped method's value.
  * @example
  * ```typescript
  * class MessageService {

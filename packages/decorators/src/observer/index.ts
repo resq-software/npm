@@ -19,7 +19,9 @@
  * to a class property and run a callback (default: log; optional
  * custom handler) for each new value. Useful for state-tracking,
  * analytics, and debugging.
+ *
+ * @module @resq-systems/decorators/observer
  */
 
-export * from "./observer.js";
-export * from "./observer.types.js";
+export { observe } from "./observer.js";
+export type { ObserverCallback } from "./observer.types.js";

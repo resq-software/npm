@@ -15,6 +15,13 @@
  */
 
 /**
+ * @fileoverview String presentation helpers: first-character capitalization,
+ * additive-ellipsis truncation, and URL-safe slugification. ASCII/UTF-16 aware.
+ *
+ * @module @resq-systems/helpers/formatting/string
+ */
+
+/**
  * Upper-case the first character of a string and leave the rest
  * unchanged. ASCII-aware; for full Unicode title-casing use
  * `Intl.Segmenter` plus locale-aware case mapping.

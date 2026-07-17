@@ -14,20 +14,33 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@throttle` decorator — caps a method to at most one call per
+ * `delayMs`, dropping calls made during the cooldown.
+ *
+ * @module @resq-systems/decorators/throttle/throttle
+ */
+
 import type { Decorator } from "../types.js";
 import { throttleFn } from "./throttle.fn.js";
 
 /**
- * Decorator that throttles method calls to once per specified time period.
+ * Throttle a method to at most one call per `delayMs`; calls made during the
+ * cooldown are dropped.
  *
- * @template T - The type of the class containing the decorated method
- * @param {number} delayMs - The throttle interval in milliseconds
- * @returns {Decorator<T>} The decorator function
+ * Leading-edge only: the first call runs immediately and there is no trailing call
+ * for anything dropped during the cooldown. The throttled method returns `void` —
+ * the original's return value is discarded. The cooldown flag is created once, at
+ * decoration time, so it is shared across every instance of the class. Mutates the
+ * supplied property descriptor in place.
  *
- * @throws {Error} When applied to a non-method property
- *
+ * @template T - The class type that owns the decorated method.
+ * @param delayMs - The minimum interval between executions, in milliseconds.
+ * @returns The method decorator.
+ * @throws {Error} If applied to a member without a `value` descriptor (an accessor
+ * or plain property rather than a method).
  * @example
- * ```typescript
+ * ```ts
  * class ResizeHandler {
  *   private width = window.innerWidth;
  *   private height = window.innerHeight;
@@ -41,9 +54,10 @@ import { throttleFn } from "./throttle.fn.js";
  * }
  *
  * const handler = new ResizeHandler();
- * window.addEventListener('resize', () => handler.handleResize());
- * // handleResize executes at most once every 200ms during resize
+ * window.addEventListener("resize", () => handler.handleResize());
+ * // handleResize executes at most once every 200ms during a resize.
  * ```
+ * @see {@link throttleFn} for the function form.
  */
 export function throttle<T = unknown>(delayMs: number): Decorator<T> {
 	return <F extends (...args: never[]) => unknown>(

@@ -15,7 +15,21 @@
  */
 
 /**
+ * @fileoverview Thin `window.fetch` / `Image` wrappers that pin `referrerPolicy`
+ * to `strict-origin-when-cross-origin`, so cross-origin requests never leak the
+ * full referrer URL.
+ *
+ * @module @resq-systems/helpers/browser/network
+ */
+
+/**
  * Just a wrapper around `window.fetch` that sets the `referrerPolicy` to `strict-origin-when-cross-origin`.
+ *
+ * Performs a network request (side effect). `init` is spread after the default
+ * `referrerPolicy`, so a caller-supplied `init.signal` is forwarded and native
+ * cancellation is honoured — but a caller-supplied `referrerPolicy` also
+ * overrides the secure default. Failure surfaces as a rejected promise, exactly
+ * as `window.fetch` rejects.
  *
  * @param input - A Request object or string containing the URL to fetch
  * @param init - Optional request initialization options

@@ -14,4 +14,36 @@
  * limitations under the License.
  */
 
-export * from "./sidebar.js";
+/**
+ * @fileoverview Public barrel for the Sidebar component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/sidebar`.
+ *
+ * @module @resq-systems/ui/components/sidebar
+ */
+
+export {
+	Sidebar,
+	SidebarContent,
+	SidebarFooter,
+	SidebarGroup,
+	SidebarGroupAction,
+	SidebarGroupContent,
+	SidebarGroupLabel,
+	SidebarHeader,
+	SidebarInput,
+	SidebarInset,
+	SidebarMenu,
+	SidebarMenuAction,
+	SidebarMenuBadge,
+	SidebarMenuButton,
+	SidebarMenuItem,
+	SidebarMenuSkeleton,
+	SidebarMenuSub,
+	SidebarMenuSubButton,
+	SidebarMenuSubItem,
+	SidebarProvider,
+	SidebarRail,
+	SidebarSeparator,
+	SidebarTrigger,
+	useSidebar,
+} from "./sidebar.js";

@@ -27,16 +27,94 @@
  *
  * @module @resq-systems/security
  *
- * @example PII sanitization for log lines
+ * @example PII redaction for log lines
  * ```ts
- * import { sanitize } from "@resq-systems/security/sanitize";
+ * import { redactPII } from "@resq-systems/security/sanitize";
  *
- * logger.info(sanitize({ email: "u@x.com", ip: "1.2.3.4", note: "ok" }));
- * // → { email: "[REDACTED:email]", ip: "[REDACTED:ip]", note: "ok" }
+ * redactPII("Contact john@example.com from 1.2.3.4");
+ * // → "Contact [EMAIL] from [IP_ADDRESS]"
  * ```
  */
 
-export * from "./crypto.js";
-export * from "./validators.js";
-export * from "./sanitize.js";
-export * from "./hash.js";
+export {
+	coerceCiphertext,
+	coerceEncryptionKey,
+	decryptData,
+	encryptData,
+	generateSecureToken,
+	hashData,
+	isCiphertext,
+	isEncryptionKey,
+	maskEmail,
+	maskPII,
+	sanitizeForLogging,
+	toCiphertext,
+	toEncryptionKey,
+	unsafeCiphertext,
+	unsafeEncryptionKey,
+} from "./crypto.js";
+export type { Ciphertext, EncryptionKey, Masked, SecureToken, Sha256Hex } from "./crypto.js";
+export {
+	containsCommandInjection,
+	containsHomoglyphs,
+	containsNoSQLInjection,
+	containsPathTraversal,
+	containsSQLInjection,
+	containsXSSPatterns,
+	detectThreatPatterns,
+	getThreatErrorMessage,
+	isSafeInput,
+	normalizeUnicode,
+	sanitizeForDisplay,
+	THREAT_DETECTED_MESSAGE,
+	validateSafeEmail,
+	validateSafeName,
+	validateSafeText,
+} from "./validators.js";
+export type {
+	ThreatDetectionConfig,
+	ThreatDetectionResult,
+	ThreatFinding,
+	ThreatType,
+} from "./validators.js";
+export {
+	CreditCardSchema,
+	EmailSchema,
+	escapeHtml,
+	IPv4Schema,
+	isValidEmail,
+	isValidPhone,
+	isValidSSN,
+	isValidUrl,
+	parseJsonWithSchema,
+	PhoneNumberSchema,
+	PIIRedactionOptionsSchema,
+	redactPII,
+	redactPIIEffect,
+	safeStringify,
+	SafeUrlSchema,
+	sanitizeHtml,
+	sanitizeJson,
+	SanitizedStringSchema,
+	sanitizeUrl,
+	sanitizeUrlEffect,
+	SSNSchema,
+	stripAnsi,
+	UrlProtocolSchema,
+	UserInputOptionsSchema,
+	validateUserInput,
+	validateUserInputEffect,
+} from "./sanitize.js";
+export type {
+	CreditCard,
+	Email,
+	IPv4,
+	PhoneNumber,
+	PIIRedactionOptions,
+	SafeUrl,
+	SanitizedString,
+	SSN,
+	UrlProtocol,
+	UserInputOptions,
+} from "./sanitize.js";
+export { getHashForBuffer, getHashForObject, getHashForString, lns } from "./hash.js";

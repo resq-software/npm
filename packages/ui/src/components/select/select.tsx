@@ -25,6 +25,8 @@
  * > (SelectItem | SelectGroup > SelectLabel + SelectItem)*`, with
  * `SelectSeparator` between sections and `SelectScrollUp/Down`
  * buttons auto-rendered for long lists.
+ *
+ * @module @resq-systems/ui/components/select/select
  */
 
 "use client";

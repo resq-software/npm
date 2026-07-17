@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./textarea.js";
+/**
+ * @fileoverview Public barrel for the Textarea component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/textarea`.
+ *
+ * @module @resq-systems/ui/components/textarea
+ */
+
+export { Textarea } from "./textarea.js";

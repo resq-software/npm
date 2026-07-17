@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./spinner.js";
+/**
+ * @fileoverview Public barrel for the Spinner component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/spinner`.
+ *
+ * @module @resq-systems/ui/components/spinner
+ */
+
+export { Spinner } from "./spinner.js";

@@ -28,6 +28,8 @@
  *
  * Built on Radix UI's `Avatar` primitive so image-loading state is
  * exposed via `data-state` for animation hooks.
+ *
+ * @module @resq-systems/ui/components/avatar/avatar
  */
 
 "use client";
@@ -37,6 +39,10 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
+/**
+ * Circular avatar container; `size` selects `sm`/`default`/`lg`. Wraps
+ * `AvatarImage` with an `AvatarFallback` for load/error states.
+ */
 function Avatar({
 	className,
 	size = "default",
@@ -59,6 +65,7 @@ function Avatar({
 	);
 }
 
+/** Status pip anchored to the avatar's corner (e.g. an online dot). */
 function AvatarBadge({ className, ...props }: Readonly<React.ComponentProps<"span">>) {
 	return (
 		<span
@@ -75,6 +82,7 @@ function AvatarBadge({ className, ...props }: Readonly<React.ComponentProps<"spa
 	);
 }
 
+/** Initials/text shown when the avatar image is missing or still loading. */
 function AvatarFallback({
 	className,
 	...props
@@ -91,6 +99,7 @@ function AvatarFallback({
 	);
 }
 
+/** Lays out several avatars as an overlapping stack. */
 function AvatarGroup({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -104,6 +113,7 @@ function AvatarGroup({ className, ...props }: Readonly<React.ComponentProps<"div
 	);
 }
 
+/** Overflow counter that caps an `AvatarGroup` (e.g. "+5"). */
 function AvatarGroupCount({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -117,6 +127,7 @@ function AvatarGroupCount({ className, ...props }: Readonly<React.ComponentProps
 	);
 }
 
+/** The avatar photo; hides itself and defers to `AvatarFallback` on error. */
 function AvatarImage({
 	className,
 	...props

@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Account welcome / onboarding email component.
+ *
+ * @module @resq-systems/email-templates/emails/welcome
+ */
+
 import type { WelcomeData } from "../schemas.js";
 import { Email } from "./primitives.js";
 
+/** Props for {@link WelcomeEmail} — the welcome template's validated `data`. */
 export type WelcomeEmailProps = WelcomeData;
 
 /** Account welcome / onboarding email. */

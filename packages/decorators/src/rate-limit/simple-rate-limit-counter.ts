@@ -14,53 +14,59 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Default in-memory {@link RateLimitCounter} — the counter the
+ * `@rateLimit` decorator uses when no custom or distributed counter is supplied.
+ *
+ * @module @resq-systems/decorators/rate-limit/simple-rate-limit-counter
+ */
+
 import type { RateLimitCounter } from "./index.js";
 
 /**
- * Simple in-memory implementation of RateLimitCounter.
- * Uses a Map to store counts for each key.
- *
- * @class SimpleRateLimitCounter
- * @implements {RateLimitCounter}
+ * In-memory {@link RateLimitCounter} backed by a `Map` of per-key counts. This is
+ * the default counter when a {@link RateLimitConfigs} supplies none.
  *
  * @example
- * ```typescript
+ * ```ts
  * const counter = new SimpleRateLimitCounter();
  *
- * // Track API calls per user
- * counter.inc('user-1');
- * counter.inc('user-1');
- * counter.inc('user-2');
+ * // Track API calls per user.
+ * counter.inc("user-1");
+ * counter.inc("user-1");
+ * counter.inc("user-2");
  *
- * console.log(counter.getCount('user-1')); // 2
- * console.log(counter.getCount('user-2')); // 1
- * console.log(counter.getCount('user-3')); // 0
+ * counter.getCount("user-1"); // → 2
+ * counter.getCount("user-2"); // → 1
+ * counter.getCount("user-3"); // → 0
  *
- * // After some time, decrement
- * counter.dec('user-1');
- * console.log(counter.getCount('user-1')); // 1
+ * // After some time, decrement.
+ * counter.dec("user-1");
+ * counter.getCount("user-1"); // → 1
  * ```
  */
 export class SimpleRateLimitCounter implements RateLimitCounter {
 	/**
-	 * Creates a new SimpleRateLimitCounter instance.
+	 * Create a new counter, optionally seeded with an existing map of counts.
 	 *
-	 * @param {Map<string, number>} [counterMap=new Map()] - Optional existing Map to use for storage
+	 * The map is retained by reference and mutated in place by `inc`/`dec`, so a
+	 * shared map lets several counters observe and update the same counts.
+	 *
+	 * @param counterMap - Backing store for per-key counts; defaults to a new `Map`.
 	 */
 	constructor(private readonly counterMap = new Map<string, number>()) {}
 
 	/**
-	 * Gets the current count for a key.
+	 * Get the current count for a key.
 	 *
-	 * @param {string} key - The key to get count for
-	 * @returns {number} The current count (0 if key doesn't exist)
-	 *
+	 * @param key - The key to read.
+	 * @returns The current count, or `0` when the key is absent.
 	 * @example
-	 * ```typescript
+	 * ```ts
 	 * const counter = new SimpleRateLimitCounter();
-	 * console.log(counter.getCount('key')); // 0
-	 * counter.inc('key');
-	 * console.log(counter.getCount('key')); // 1
+	 * counter.getCount("key"); // → 0
+	 * counter.inc("key");
+	 * counter.getCount("key"); // → 1
 	 * ```
 	 */
 	getCount(key: string): number {
@@ -68,17 +74,15 @@ export class SimpleRateLimitCounter implements RateLimitCounter {
 	}
 
 	/**
-	 * Increments the count for a key.
+	 * Increment the count for a key.
 	 *
-	 * @param {string} key - The key to increment
-	 * @returns {void}
-	 *
+	 * @param key - The key to increment.
 	 * @example
-	 * ```typescript
+	 * ```ts
 	 * const counter = new SimpleRateLimitCounter();
-	 * counter.inc('user-123');
-	 * counter.inc('user-123');
-	 * console.log(counter.getCount('user-123')); // 2
+	 * counter.inc("user-123");
+	 * counter.inc("user-123");
+	 * counter.getCount("user-123"); // → 2
 	 * ```
 	 */
 	inc(key: string): void {
@@ -90,21 +94,18 @@ export class SimpleRateLimitCounter implements RateLimitCounter {
 	}
 
 	/**
-	 * Decrements the count for a key.
-	 * Removes the key from the map if count reaches 0.
+	 * Decrement the count for a key, removing the key entirely when it reaches `0`.
 	 *
-	 * @param {string} key - The key to decrement
-	 * @returns {void}
-	 *
+	 * @param key - The key to decrement.
 	 * @example
-	 * ```typescript
+	 * ```ts
 	 * const counter = new SimpleRateLimitCounter();
-	 * counter.inc('key');
-	 * counter.inc('key');
-	 * counter.dec('key');
-	 * console.log(counter.getCount('key')); // 1
-	 * counter.dec('key');
-	 * console.log(counter.getCount('key')); // 0 (key removed from map)
+	 * counter.inc("key");
+	 * counter.inc("key");
+	 * counter.dec("key");
+	 * counter.getCount("key"); // → 1
+	 * counter.dec("key");
+	 * counter.getCount("key"); // → 0 (key removed from the map)
 	 * ```
 	 */
 	dec(key: string): void {

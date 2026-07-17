@@ -34,6 +34,8 @@
  *
  * `Item` supports `asChild` so it can render as a routing link via
  * Radix Slot.
+ *
+ * @module @resq-systems/ui/components/item/item
  */
 
 import { cva, type VariantProps } from "class-variance-authority";
@@ -43,6 +45,7 @@ import type * as React from "react";
 import { cn } from "../../lib/utils.js";
 import { Separator } from "../separator/separator.js";
 
+/** Vertical list container for related `Item`s. */
 function ItemGroup({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -57,6 +60,7 @@ function ItemGroup({ className, ...props }: Readonly<React.ComponentProps<"div">
 	);
 }
 
+/** Divider drawn between items in an `ItemGroup`. */
 function ItemSeparator({ className, ...props }: Readonly<React.ComponentProps<typeof Separator>>) {
 	return (
 		<Separator
@@ -90,6 +94,7 @@ const itemVariants = cva(
 	},
 );
 
+/** A single row combining media, content, and actions; `variant` sets its emphasis. */
 function Item({
 	asChild = false,
 	className,
@@ -129,12 +134,14 @@ const itemMediaVariants = cva(
 	},
 );
 
+/** Trailing controls slot (e.g. buttons or a menu) for an `Item`. */
 function ItemActions({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div className={cn("gap-2 flex items-center", className)} data-slot="item-actions" {...props} />
 	);
 }
 
+/** Main text column holding the item's title and description. */
 function ItemContent({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -148,6 +155,7 @@ function ItemContent({ className, ...props }: Readonly<React.ComponentProps<"div
 	);
 }
 
+/** Muted secondary line beneath the `ItemTitle`. */
 function ItemDescription({ className, ...props }: Readonly<React.ComponentProps<"p">>) {
 	return (
 		<p
@@ -161,6 +169,7 @@ function ItemDescription({ className, ...props }: Readonly<React.ComponentProps<
 	);
 }
 
+/** Bottom row of an `Item` for supplementary metadata or actions. */
 function ItemFooter({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -171,6 +180,7 @@ function ItemFooter({ className, ...props }: Readonly<React.ComponentProps<"div"
 	);
 }
 
+/** Top row of an `Item`, above the main content. */
 function ItemHeader({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -181,6 +191,7 @@ function ItemHeader({ className, ...props }: Readonly<React.ComponentProps<"div"
 	);
 }
 
+/** Leading icon/avatar/image slot; the `variant` sets its framing. */
 function ItemMedia({
 	className,
 	variant = "default",
@@ -196,6 +207,7 @@ function ItemMedia({
 	);
 }
 
+/** Primary label line of an `Item`. */
 function ItemTitle({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div

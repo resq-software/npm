@@ -33,6 +33,8 @@
  *
  * Generates and threads the `aria-describedby` IDs so screen readers
  * announce description and error text alongside the control.
+ *
+ * @module @resq-systems/ui/components/field/field
  */
 
 "use client";
@@ -44,6 +46,7 @@ import { cn } from "../../lib/utils.js";
 import { Label } from "../label/label.js";
 import { Separator } from "../separator/separator.js";
 
+/** Vertical stack that spaces multiple `Field`s within a form section. */
 function FieldGroup({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -57,6 +60,7 @@ function FieldGroup({ className, ...props }: Readonly<React.ComponentProps<"div"
 	);
 }
 
+/** Legend heading for a `FieldSet` grouping related fields. */
 function FieldLegend({
 	className,
 	variant = "legend",
@@ -75,6 +79,7 @@ function FieldLegend({
 	);
 }
 
+/** Native `<fieldset>` wrapper grouping related fields under a `FieldLegend`. */
 function FieldSet({ className, ...props }: Readonly<React.ComponentProps<"fieldset">>) {
 	return (
 		<fieldset
@@ -106,6 +111,7 @@ const fieldVariants = cva(
 	},
 );
 
+/** A single form row grouping a label, control, description, and error; `orientation` sets layout. */
 function Field({
 	className,
 	orientation = "vertical",
@@ -122,6 +128,7 @@ function Field({
 	);
 }
 
+/** Wraps the control and its supporting text within a `Field`. */
 function FieldContent({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -132,6 +139,7 @@ function FieldContent({ className, ...props }: Readonly<React.ComponentProps<"di
 	);
 }
 
+/** Muted helper text describing the field's expected input. */
 function FieldDescription({ className, ...props }: Readonly<React.ComponentProps<"p">>) {
 	return (
 		<p
@@ -147,6 +155,7 @@ function FieldDescription({ className, ...props }: Readonly<React.ComponentProps
 	);
 }
 
+/** Validation message for the field; renders nothing when there is no error. */
 function FieldError({
 	children,
 	className,
@@ -196,6 +205,7 @@ function FieldError({
 	);
 }
 
+/** Label for the field's control, built on the shared `Label` component. */
 function FieldLabel({ className, ...props }: Readonly<React.ComponentProps<typeof Label>>) {
 	return (
 		<Label
@@ -210,6 +220,7 @@ function FieldLabel({ className, ...props }: Readonly<React.ComponentProps<typeo
 	);
 }
 
+/** Divider between fields, optionally labeling the boundary. */
 function FieldSeparator({
 	children,
 	className,
@@ -242,6 +253,7 @@ function FieldSeparator({
 	);
 }
 
+/** Emphasized title line within a `Field`, e.g. for a grouped choice. */
 function FieldTitle({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div

@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Space-efficient probabilistic set-membership filter (Bloom
+ * filter) with no false negatives and a configurable false-positive rate.
+ *
+ * @module @resq-systems/dsa/bloom
+ */
+
 import type { Probability } from "./schemas.js";
 
 /** Default target false-positive rate (1%) used when none is supplied. */
@@ -58,7 +65,7 @@ export class BloomFilter {
 	 *   rejected at the type level; the runtime check below still guards
 	 *   untrusted callers that reach this boundary via a cast.
 	 *
-	 * @throws RangeError if `capacity <= 0` or `errorRate` is outside `(0, 1)`.
+	 * @throws {RangeError} If `capacity <= 0` or `errorRate` is outside `(0, 1)`.
 	 */
 	constructor(capacity: number, errorRate?: Probability) {
 		const rate: number = errorRate ?? DEFAULT_ERROR_RATE;

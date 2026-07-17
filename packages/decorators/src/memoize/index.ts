@@ -20,7 +20,9 @@
  * arguments. Accepts a TTL number, a full `MemoizeConfig` (custom
  * cache, key resolver, expiry), or no args for cache-forever. Use
  * {@link memoizeAsync} for promise-returning methods.
+ *
+ * @module @resq-systems/decorators/memoize
  */
 
-export * from "./memoize.js";
-export * from "./memoize.types.js";
+export { memoize } from "./memoize.js";
+export type { Cache, KeyResolver, Memoizable, MemoizeConfig } from "./memoize.types.js";

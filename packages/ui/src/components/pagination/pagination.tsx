@@ -28,6 +28,8 @@
  * Active state is opt-in via the `isActive` prop on
  * `PaginationLink`; the helper renders `aria-current="page"`
  * automatically.
+ *
+ * @module @resq-systems/ui/components/pagination/pagination
  */
 
 import { CaretLeftIcon, CaretRightIcon, DotsThreeIcon } from "@phosphor-icons/react";

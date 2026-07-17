@@ -15,31 +15,28 @@
  */
 
 /**
- * @fileoverview Delegate decorator - deduplicates concurrent async method calls
- * with the same arguments. If a method is called while another identical call
- * is in progress, it returns the same promise instead of making a new call.
+ * @fileoverview `@delegate(keyResolver?)` decorator — deduplicate concurrent
+ * async method calls with the same arguments. A call made while an identical one
+ * is in flight shares that promise instead of issuing a new request.
  *
- * @module @resq/typescript/decorators/delegate
+ * @module @resq-systems/decorators/delegate/delegate
  *
  * @example
  * ```typescript
  * class DataService {
  *   @delegate()
  *   async fetchUser(userId: string): Promise<User> {
- *     return fetch(`/api/users/${userId}`).then(r => r.json());
+ *     return fetch(`/api/users/${userId}`).then((r) => r.json());
  *   }
  * }
  *
  * const service = new DataService();
  *
- * // These two calls will share the same promise
- * const promise1 = service.fetchUser('123');
- * const promise2 = service.fetchUser('123');
- * console.log(promise1 === promise2); // true
+ * // These two calls share the same in-flight promise.
+ * const promise1 = service.fetchUser("123");
+ * const promise2 = service.fetchUser("123");
+ * console.log(promise1 === promise2); // → true
  * ```
- *
- * @copyright Copyright (c) 2026 ResQ
- * @license MIT
  */
 
 import type { AsyncMethod } from "../types.js";
@@ -51,13 +48,18 @@ import type { Delegatable } from "./delegate.types.js";
  * Multiple calls with the same arguments will share the same promise
  * until the first one resolves or rejects.
  *
- * @template T - The type of the class containing the decorated method
- * @template D - The return type of the decorated method (wrapped in Promise)
- * @param {(...args: any[]) => string} [keyResolver] - Optional function to generate cache keys from arguments
- * @returns {Delegatable<T, D>} The decorator function
+ * Dedup state (the in-flight-promise map) lives in the wrapper installed on the
+ * descriptor, shared across all instances of the class. The default key is
+ * `JSON.stringify(args)`; supply `keyResolver` for arguments that do not
+ * serialize cleanly. See {@link delegateFn} for the settle-then-evict lifecycle
+ * and the synchronous key-generation failure mode.
  *
- * @throws {Error} When applied to a non-method property
- *
+ * @template T - The type of the class containing the decorated method.
+ * @template D - The return type of the decorated method (wrapped in a promise).
+ * @param keyResolver - Optional function to generate cache keys from arguments.
+ * @returns The decorator function.
+ * @throws {Error} At decoration time, when applied to anything without a method
+ *   value, with message `"@delegate is applicable only on a methods."`.
  * @example
  * ```typescript
  * class ApiService {

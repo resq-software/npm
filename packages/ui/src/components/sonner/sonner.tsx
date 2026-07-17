@@ -25,6 +25,8 @@
  * error / info / warning / loading severity tiers, and design-token
  * CSS variables are forwarded so border, surface, and text colors
  * match the rest of the design system.
+ *
+ * @module @resq-systems/ui/components/sonner/sonner
  */
 
 "use client";

@@ -15,10 +15,11 @@
  */
 
 /**
- * @file Rabin-Karp String Matching Algorithm
- * @module dsa/rabin-karp
- * @description Efficient pattern matching using rolling hash for document search.
- *              O(n+m) average case, O(nm) worst case.
+ * @fileoverview Rabin-Karp pattern matching using a rolling hash for document
+ * search — O(n+m) average case, O(nm) worst case — with single/multi-pattern
+ * search, statistics, and repeated-phrase detection.
+ *
+ * @module @resq-systems/dsa/rabin-karp
  */
 
 import {
@@ -28,26 +29,27 @@ import {
 	validateSafe,
 } from "./schemas.js";
 
-// ============================================
-// Types & Interfaces
-// ============================================
+//#region Types
 
 /**
- * Result of a pattern match
+ * A single pattern occurrence within the searched text.
+ *
+ * `line` and `column` are populated together, and only when the matcher's
+ * `includeLineInfo` option is enabled — both are absent otherwise.
  */
 export interface PatternMatch {
-	/** Starting index of the match in the text */
+	/** Zero-based character offset of the match's first character in the text. */
 	index: number;
-	/** The matched substring */
+	/** The matched substring, sliced from the original (case-preserved) text. */
 	match: string;
-	/** Line number (if text contains newlines) */
+	/** One-based line number of the match; absent when line info is disabled. */
 	line?: number;
-	/** Column number within the line */
+	/** One-based column within {@link line}; absent when line info is disabled. */
 	column?: number;
 }
 
 /**
- * Options for Rabin-Karp search
+ * Options for Rabin-Karp search.
  */
 export interface RabinKarpOptions {
 	/** Whether to perform case-insensitive search (default: false) */
@@ -59,7 +61,7 @@ export interface RabinKarpOptions {
 }
 
 /**
- * Statistics for search operation
+ * Statistics gathered during a single search operation.
  */
 export interface SearchStats {
 	/** Total characters processed */
@@ -72,25 +74,25 @@ export interface SearchStats {
 	timeTakenMs: number;
 }
 
-// ============================================
-// Constants
-// ============================================
+//#endregion
+
+//#region Constants
 
 /**
- * Base for polynomial rolling hash (number of characters in the input alphabet)
- * Using 256 for extended ASCII support
+ * Base for the polynomial rolling hash: `256` covers the extended-ASCII
+ * alphabet, so every input byte maps to a distinct digit.
  */
 const BASE = 256;
 
 /**
- * Modulus for hash to prevent integer overflow
- * Using a large prime number
+ * Large-prime modulus that keeps rolling-hash values within safe integer range
+ * to prevent overflow.
  */
 const MOD = 1_000_000_007;
 
-// ============================================
-// Rabin-Karp Implementation
-// ============================================
+//#endregion
+
+//#region Public API
 
 /**
  * Rabin-Karp string matching algorithm implementation
@@ -105,7 +107,7 @@ const MOD = 1_000_000_007;
  * Space Complexity: O(1) for single pattern, O(k) for k patterns
  *
  * @example
- * ```typescript
+ * ```ts
  * const matcher = new RabinKarp();
  *
  * // Single pattern search
@@ -125,9 +127,10 @@ export class RabinKarp {
 	private readonly includeLineInfo: boolean;
 
 	/**
-	 * Creates a new Rabin-Karp matcher
-	 * @param options - Configuration options
-	 * @throws Error if options validation fails
+	 * Creates a new Rabin-Karp matcher.
+	 *
+	 * @param options - Configuration options.
+	 * @throws {Error} If options validation fails.
 	 */
 	constructor(options: RabinKarpOptions = {}) {
 		// Validate options using Effect Schema
@@ -143,11 +146,11 @@ export class RabinKarp {
 	}
 
 	/**
-	 * Searches for a pattern in text using Rabin-Karp algorithm
+	 * Searches for a single pattern in text using the Rabin-Karp algorithm.
 	 *
-	 * @param text - The text to search in
-	 * @param pattern - The pattern to search for
-	 * @returns Array of matches found
+	 * @param text - The text to search in.
+	 * @param pattern - The pattern to search for.
+	 * @returns The matches found, capped at the `maxMatches` option.
 	 */
 	search(text: string, pattern: string): PatternMatch[] {
 		// Validate search input
@@ -216,11 +219,12 @@ export class RabinKarp {
 	}
 
 	/**
-	 * Searches for multiple patterns simultaneously
+	 * Searches for multiple patterns in a single pass, grouping them by length
+	 * so each length shares one rolling hash.
 	 *
-	 * @param text - The text to search in
-	 * @param patterns - Array of patterns to search for
-	 * @returns Map of pattern to matches
+	 * @param text - The text to search in.
+	 * @param patterns - The patterns to search for.
+	 * @returns A map from each pattern to its matches.
 	 */
 	searchMultiple(text: string, patterns: string[]): Map<string, PatternMatch[]> {
 		const results = new Map<string, PatternMatch[]>();
@@ -256,11 +260,12 @@ export class RabinKarp {
 	}
 
 	/**
-	 * Searches with statistics for performance monitoring
+	 * Searches for a pattern while recording performance statistics such as
+	 * hash collisions and elapsed time.
 	 *
-	 * @param text - The text to search in
-	 * @param pattern - The pattern to search for
-	 * @returns Object containing matches and statistics
+	 * @param text - The text to search in.
+	 * @param pattern - The pattern to search for.
+	 * @returns The matches together with the collected {@link SearchStats}.
 	 */
 	searchWithStats(text: string, pattern: string): { matches: PatternMatch[]; stats: SearchStats } {
 		const startTime = performance.now();
@@ -341,13 +346,13 @@ export class RabinKarp {
 	}
 
 	/**
-	 * Finds all unique patterns of a given length that appear more than once
-	 * Useful for finding duplicate phrases in documents
+	 * Finds every fixed-length substring that repeats, useful for detecting
+	 * duplicate phrases in a document.
 	 *
-	 * @param text - The text to analyze
-	 * @param patternLength - Length of patterns to find
-	 * @param minOccurrences - Minimum occurrences to include (default: 2)
-	 * @returns Map of patterns to their occurrence count
+	 * @param text - The text to analyze.
+	 * @param patternLength - Length of the substrings to consider.
+	 * @param minOccurrences - Minimum repeat count to include. Defaults to `2`.
+	 * @returns A map from each repeated substring to its occurrence count.
 	 */
 	findRepeatedPatterns(
 		text: string,
@@ -414,9 +419,7 @@ export class RabinKarp {
 		return result;
 	}
 
-	// ============================================
-	// Private Helper Methods
-	// ============================================
+	// Private rolling-hash helpers.
 
 	private calculateHash(str: string, length: number): number {
 		let hash = 0;
@@ -553,19 +556,21 @@ export class RabinKarp {
 	}
 }
 
-// ============================================
-// Utility Functions
-// ============================================
+//#endregion
+
+//#region Utilities
 
 /**
- * Quick search function for simple use cases
+ * Convenience wrapper around {@link RabinKarp.search} for simple one-off
+ * lookups that only need match positions.
  *
- * @param text - Text to search in
- * @param pattern - Pattern to find
- * @param caseInsensitive - Whether to ignore case
- * @returns Array of match indices
+ * @param text - Text to search in.
+ * @param pattern - Pattern to find.
+ * @param caseInsensitive - Whether to ignore case. Defaults to `true`.
+ * @returns The starting indices of each match.
  */
 export function quickSearch(text: string, pattern: string, caseInsensitive = true): number[] {
 	const matcher = new RabinKarp({ caseInsensitive, includeLineInfo: false });
 	return matcher.search(text, pattern).map((m) => m.index);
 }
+//#endregion

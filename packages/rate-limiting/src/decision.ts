@@ -15,12 +15,12 @@
  */
 
 /**
- * @file Rate Limit Decision
+ * @fileoverview The single, canonical shape every rate-limit check returns — a
+ * discriminated union so both the store layer ({@link IRateLimitStore.check}) and
+ * the in-process {@link SlidingWindowCounter.check} resolve to the same shape and
+ * callers branch on one consistent `allowed` field.
+ *
  * @module @resq-systems/rate-limiting/decision
- * @description The single, canonical shape every rate-limit check returns.
- *              Both the store layer ({@link IRateLimitStore.check}) and the
- *              in-process {@link SlidingWindowCounter.check} resolve to this
- *              discriminated union so callers branch on one consistent field.
  */
 
 import { Schema as S } from "effect";
@@ -31,9 +31,13 @@ import { Schema as S } from "effect";
  * while a rejected request pins `remaining` to `0`. Useful when serialising
  * decisions to inter-service queues or persisting them for audit.
  *
+ * Invariant the union encodes: the rejected variant's `remaining` is the
+ * literal `0`, so a `remaining > 0` value can only appear on `allowed: true`.
+ *
  * @example
  * ```ts
  * import { Schema } from "effect";
+ * // Throws a ParseError if `input` doesn't match either variant.
  * const decision = Schema.decodeUnknownSync(RateLimitDecisionSchema)(input);
  * if (decision.allowed) { ... } // narrowed to the permitted variant
  * ```

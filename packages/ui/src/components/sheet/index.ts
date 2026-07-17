@@ -14,4 +14,20 @@
  * limitations under the License.
  */
 
-export * from "./sheet.js";
+/**
+ * @fileoverview Public barrel for the Sheet component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/sheet`.
+ *
+ * @module @resq-systems/ui/components/sheet
+ */
+
+export {
+	Sheet,
+	SheetClose,
+	SheetContent,
+	SheetDescription,
+	SheetFooter,
+	SheetHeader,
+	SheetTitle,
+	SheetTrigger,
+} from "./sheet.js";

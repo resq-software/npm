@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./button.js";
+/**
+ * @fileoverview Public barrel for the Button component (the primary interactive control)
+ * — re-exports `./button` as the `@resq-systems/ui/button` entry.
+ *
+ * @module @resq-systems/ui/components/button
+ */
+
+export { Button, buttonVariants } from "./button.js";

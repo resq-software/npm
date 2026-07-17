@@ -20,6 +20,12 @@
  * Every function returns an {@link Expr} node. Names are chosen so that
  * test code and consumer code read close to mathematical notation.
  *
+ * These builders are pure and allocate only — they perform **no** sort checking
+ * or domain validation. `add(B(true), S(1))` builds happily; such a tree is
+ * rejected only later by `checkExpr` (statically) or `evaluate` (at runtime).
+ * Where a doc below mentions a `DomainError`, it is thrown at *evaluation* of the
+ * built node, never by the builder itself.
+ *
  * @module @resq-systems/math/builder
  *
  * @example
@@ -101,7 +107,7 @@ export const sub = (a: Expr, b: Expr): Expr => binary("-", a, b);
 /** Multiplication: `a × b`. */
 export const mul = (a: Expr, b: Expr): Expr => binary("×", a, b);
 
-/** Division: `a ÷ b`. Throws {@link DomainError} on zero. */
+/** Division: `a ÷ b`. The built node throws {@link DomainError} at evaluation when the divisor is `0`. */
 export const div = (a: Expr, b: Expr): Expr => binary("÷", a, b);
 
 /** Modulo: `a mod b`. */
@@ -113,7 +119,7 @@ export const pow = (a: Expr, b: Expr): Expr => binary("pow", a, b);
 /** Arithmetic negation: `−a`. */
 export const neg = (a: Expr): Expr => unary("neg", a);
 
-/** Square root: `√a`. Throws {@link DomainError} on negative. */
+/** Square root: `√a`. The built node throws {@link DomainError} at evaluation on a negative argument. */
 export const sqrt = (a: Expr): Expr => unary("sqrt", a);
 
 /** Absolute value: `|a|`. */
@@ -125,7 +131,7 @@ export const floor = (a: Expr): Expr => unary("floor", a);
 /** Ceiling: `⌈a⌉`. */
 export const ceil = (a: Expr): Expr => unary("ceil", a);
 
-/** Factorial: `a!`. Throws {@link DomainError} on negative or non-integer. */
+/** Factorial: `a!`. The built node throws {@link DomainError} at evaluation on a negative, non-integer, or `>170` argument. */
 export const factorial = (a: Expr): Expr => unary("factorial", a);
 
 // ────────────────────────── Set operations ──────────────────────────

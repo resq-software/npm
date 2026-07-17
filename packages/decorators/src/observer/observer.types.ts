@@ -15,22 +15,28 @@
  */
 
 /**
- * Callback function type for property observers.
- * Called whenever the observed property value changes.
+ * @fileoverview Types for the `@observe` property decorator: the callback invoked
+ * on each observed assignment.
  *
- * @template T - The type of the property value
- * @param {T} value - The new value of the property
- * @returns {unknown} Can return any value (typically void)
+ * @module @resq-systems/decorators/observer/observer.types
+ */
+
+/**
+ * Callback invoked whenever an observed property is assigned a new value. Any
+ * return value is ignored.
  *
+ * @template T - The type of the property value.
+ * @param value - The newly assigned value.
+ * @returns Any value; the return is ignored.
  * @example
- * ```typescript
+ * ```ts
  * const onCountChange: ObserverCallback<number> = (newValue) => {
  *   console.log(`Count is now: ${newValue}`);
  * };
  *
  * const onNameChange: ObserverCallback<string> = (newValue) => {
  *   if (newValue.length < 3) {
- *     console.warn('Name is too short!');
+ *     console.warn("Name is too short!");
  *   }
  * };
  * ```

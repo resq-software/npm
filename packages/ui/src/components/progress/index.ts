@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./progress.js";
+/**
+ * @fileoverview Public barrel for the Progress component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/progress`.
+ *
+ * @module @resq-systems/ui/components/progress
+ */
+
+export { Progress } from "./progress.js";

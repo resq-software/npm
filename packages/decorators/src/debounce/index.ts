@@ -19,6 +19,8 @@
  * function form — collapse rapid calls into a single fire after
  * `delayMs` milliseconds of inactivity. Typical use: form-input
  * validation, autosave, search-as-you-type.
+ *
+ * @module @resq-systems/decorators/debounce
  */
 
-export * from "./debounce.fn.js";
+export { debounceFn } from "./debounce.fn.js";

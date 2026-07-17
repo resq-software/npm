@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Safe `localStorage` / `sessionStorage` accessors that swallow
+ * access errors (private-mode, disabled storage, quota) instead of throwing, so
+ * callers never need a try/catch around persistence.
+ *
+ * @module @resq-systems/helpers/browser/storage
+ */
+
 import { noop } from "../utils/function.js";
 
 /* eslint-disable tldraw/no-direct-storage */
+
+//#region Local Storage
 
 /**
  * Get a value from local storage.
@@ -45,7 +55,6 @@ export function getFromLocalStorage(key: string) {
  *
  * @param key - The key to set.
  * @param value - The value to set.
- * @returns void
  * @example
  * ```ts
  * const preferences = { theme: 'dark', language: 'en' }
@@ -65,7 +74,6 @@ export function setInLocalStorage(key: string, value: string) {
  * Remove a value from local storage. Will not throw an error if localStorage is not available.
  *
  * @param key - The key to remove.
- * @returns void
  * @example
  * ```ts
  * deleteFromLocalStorage('user-preferences')
@@ -84,7 +92,6 @@ export function deleteFromLocalStorage(key: string) {
 /**
  * Clear all values from local storage. Will not throw an error if localStorage is not available.
  *
- * @returns void
  * @example
  * ```ts
  * clearLocalStorage()
@@ -99,6 +106,10 @@ export function clearLocalStorage() {
 		noop();
 	}
 }
+
+//#endregion
+
+//#region Session Storage
 
 /**
  * Get a value from session storage.
@@ -127,7 +138,6 @@ export function getFromSessionStorage(key: string) {
  *
  * @param key - The key to set.
  * @param value - The value to set.
- * @returns void
  * @example
  * ```ts
  * setInSessionStorage('current-tool', 'select')
@@ -147,7 +157,6 @@ export function setInSessionStorage(key: string, value: string) {
  * Remove a value from session storage. Will not throw an error if sessionStorage is not available.
  *
  * @param key - The key to remove.
- * @returns void
  * @example
  * ```ts
  * deleteFromSessionStorage('temp-data')
@@ -166,7 +175,6 @@ export function deleteFromSessionStorage(key: string) {
 /**
  * Clear all values from session storage. Will not throw an error if sessionStorage is not available.
  *
- * @returns void
  * @example
  * ```ts
  * clearSessionStorage()
@@ -181,3 +189,5 @@ export function clearSessionStorage() {
 		noop();
 	}
 }
+
+//#endregion

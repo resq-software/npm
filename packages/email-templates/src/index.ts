@@ -14,8 +14,33 @@
  * limitations under the License.
  */
 
-export * from "./contract.js";
-export * from "./emails/theme.js";
+/**
+ * @fileoverview Public entry barrel for the transactional email package — re-exports
+ * the schema contract, theme, mailer factory, registry, headless renderer, and the
+ * built-in templates.
+ *
+ * @module @resq-systems/email-templates
+ */
+
+export { EmailPayload, EmailValidationError, decodeEmailPayload } from "./contract.js";
+export type { EmailName, EmailTemplateData } from "./contract.js";
+export {
+	buildTailwindConfig,
+	defaultEmailTheme,
+	EmailMessageContext,
+	EmailThemeContext,
+	mergeEmailTheme,
+	resolveEmailTheme,
+	withEmailMessage,
+	withEmailTheme,
+} from "./emails/theme.js";
+export type {
+	EmailMessage,
+	EmailOrgIdentity,
+	EmailTheme,
+	EmailThemeFonts,
+	EmailThemeOverride,
+} from "./emails/theme.js";
 export {
 	createMailer,
 	defineEmailTemplate,
@@ -25,7 +50,44 @@ export {
 	type MailerPayload,
 	type MailerTemplateData,
 } from "./mailer.js";
-export * from "./registry.js";
-export * from "./render.js";
-export * from "./schemas.js";
-export * from "./templates.js";
+export { registry } from "./registry.js";
+export { renderEmail } from "./render.js";
+export type { RenderEmailOptions, RenderedEmail } from "./render.js";
+export {
+	EmailAddress,
+	emailCategory,
+	HttpUrl,
+	incidentAlertData,
+	missionApprovalData,
+	newDeviceLoginData,
+	notificationData,
+	orgInvitationData,
+	otpData,
+	passwordChangedData,
+	passwordResetData,
+	welcomeData,
+} from "./schemas.js";
+export type {
+	EmailCategory,
+	IncidentAlertData,
+	MissionApprovalData,
+	NewDeviceLoginData,
+	NotificationData,
+	OrgInvitationData,
+	OtpData,
+	PasswordChangedData,
+	PasswordResetData,
+	WelcomeData,
+} from "./schemas.js";
+export {
+	incidentAlertTemplate,
+	missionApprovalTemplate,
+	newDeviceLoginTemplate,
+	notificationTemplate,
+	orgInvitationTemplate,
+	otpTemplate,
+	passwordChangedTemplate,
+	passwordResetTemplate,
+	resqEmailTemplates,
+	welcomeTemplate,
+} from "./templates.js";

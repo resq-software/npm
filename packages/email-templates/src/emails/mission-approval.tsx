@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Approver sign-off request email component for a ResQ Systems mission.
+ *
+ * @module @resq-systems/email-templates/emails/mission-approval
+ */
+
 import type { MissionApprovalData } from "../schemas.js";
 import { Email } from "./primitives.js";
 
+/** Props for {@link MissionApprovalEmail} — the mission-approval template's validated `data`. */
 export type MissionApprovalEmailProps = MissionApprovalData;
 
 const severityClass: Record<"info" | "warning" | "critical", string> = {

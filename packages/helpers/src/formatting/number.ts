@@ -15,6 +15,13 @@
  */
 
 /**
+ * @fileoverview Number presentation helpers: locale thousands separators,
+ * human-readable byte sizes (binary prefixes), and fixed-precision percentages.
+ *
+ * @module @resq-systems/helpers/formatting/number
+ */
+
+/**
  * Format a number with US-English thousands separators using
  * `Intl.NumberFormat` (default options).
  *

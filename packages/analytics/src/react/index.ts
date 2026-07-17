@@ -39,6 +39,8 @@ import {
 	track,
 } from "../index";
 
+//#region Provider
+
 /**
  * Props for {@link AnalyticsProvider}.
  */
@@ -85,6 +87,11 @@ const requestIdle = (cb: () => void): void => {
  * Idempotent — repeat mounts (e.g. fast-refresh, tree-rebuild) are
  * detected via a ref guard and do not re-initialise PostHog / GA4.
  *
+ * The boot is fire-and-forget: the init promise is not awaited, so a rejected
+ * init (see {@link Analytics.init}) surfaces as an unhandled rejection rather
+ * than an error thrown from render. Toggling `deferUntilIdle` after mount has no
+ * effect — init runs at most once.
+ *
  * @example Default (idle-deferred boot)
  * ```tsx
  * <AnalyticsProvider config={config}>
@@ -123,6 +130,10 @@ export const AnalyticsProvider = ({
 
 	return children;
 };
+
+//#endregion
+
+//#region Hook
 
 /**
  * Return type of {@link useAnalytics}.
@@ -164,3 +175,5 @@ export const useAnalytics = (): UseAnalyticsReturn => ({
 	pageview,
 	analytics,
 });
+
+//#endregion

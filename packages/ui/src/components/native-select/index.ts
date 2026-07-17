@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./native-select.js";
+/**
+ * @fileoverview Public barrel for the Native Select component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/native-select`.
+ *
+ * @module @resq-systems/ui/components/native-select
+ */
+
+export { NativeSelect, NativeSelectOptGroup, NativeSelectOption } from "./native-select.js";

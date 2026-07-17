@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Built-in ResQ Systems template definitions — each pairs a `data`
+ * schema with a subject builder and a React Email component, collected into
+ * `resqEmailTemplates` for `createMailer`.
+ *
+ * @module @resq-systems/email-templates/templates
+ */
+
 import { IncidentAlertEmail } from "./emails/incident-alert.js";
 import { MissionApprovalEmail } from "./emails/mission-approval.js";
 import { NewDeviceLoginEmail } from "./emails/new-device-login.js";
@@ -36,6 +44,7 @@ import {
 	welcomeData,
 } from "./schemas.js";
 
+/** One-time verification code (OTP) template. */
 export const otpTemplate = defineEmailTemplate({
 	name: "otp",
 	data: otpData,
@@ -43,6 +52,7 @@ export const otpTemplate = defineEmailTemplate({
 	Component: (data) => <OtpEmail {...data} />,
 });
 
+/** Account welcome / onboarding template. */
 export const welcomeTemplate = defineEmailTemplate({
 	name: "welcome",
 	data: welcomeData,
@@ -50,6 +60,7 @@ export const welcomeTemplate = defineEmailTemplate({
 	Component: (data) => <WelcomeEmail {...data} />,
 });
 
+/** Password-reset template. */
 export const passwordResetTemplate = defineEmailTemplate({
 	name: "password-reset",
 	data: passwordResetData,
@@ -57,6 +68,7 @@ export const passwordResetTemplate = defineEmailTemplate({
 	Component: (data) => <PasswordResetEmail {...data} />,
 });
 
+/** Generic notification / alert template. */
 export const notificationTemplate = defineEmailTemplate({
 	name: "notification",
 	data: notificationData,
@@ -64,6 +76,7 @@ export const notificationTemplate = defineEmailTemplate({
 	Component: (data) => <NotificationEmail {...data} />,
 });
 
+/** Incident / dispatch alert template. */
 export const incidentAlertTemplate = defineEmailTemplate({
 	name: "incident-alert",
 	data: incidentAlertData,
@@ -71,6 +84,7 @@ export const incidentAlertTemplate = defineEmailTemplate({
 	Component: (data) => <IncidentAlertEmail {...data} />,
 });
 
+/** Password-changed security-notice template. */
 export const passwordChangedTemplate = defineEmailTemplate({
 	name: "password-changed",
 	data: passwordChangedData,
@@ -78,6 +92,7 @@ export const passwordChangedTemplate = defineEmailTemplate({
 	Component: (data) => <PasswordChangedEmail {...data} />,
 });
 
+/** New-device sign-in security-alert template. */
 export const newDeviceLoginTemplate = defineEmailTemplate({
 	name: "new-device-login",
 	data: newDeviceLoginData,
@@ -85,6 +100,7 @@ export const newDeviceLoginTemplate = defineEmailTemplate({
 	Component: (data) => <NewDeviceLoginEmail {...data} />,
 });
 
+/** Mission-approval sign-off request template. */
 export const missionApprovalTemplate = defineEmailTemplate({
 	name: "mission-approval",
 	data: missionApprovalData,
@@ -92,6 +108,7 @@ export const missionApprovalTemplate = defineEmailTemplate({
 	Component: (data) => <MissionApprovalEmail {...data} />,
 });
 
+/** Organization / team invitation template. */
 export const orgInvitationTemplate = defineEmailTemplate({
 	name: "org-invitation",
 	data: orgInvitationData,

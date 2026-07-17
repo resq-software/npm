@@ -14,4 +14,19 @@
  * limitations under the License.
  */
 
-export * from "./pagination.js";
+/**
+ * @fileoverview Public barrel for the Pagination component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/pagination`.
+ *
+ * @module @resq-systems/ui/components/pagination
+ */
+
+export {
+	Pagination,
+	PaginationContent,
+	PaginationEllipsis,
+	PaginationItem,
+	PaginationLink,
+	PaginationNext,
+	PaginationPrevious,
+} from "./pagination.js";

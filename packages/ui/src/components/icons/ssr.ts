@@ -2,21 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * ResQ icon system — server-component-safe variant.
+ * @fileoverview ResQ icon system, server-component-safe variant. Mirrors
+ * `@resq-systems/ui/icons` but imports from `@phosphor-icons/react/ssr`, which
+ * uses `SSRBase` instead of `IconBase` and therefore does not call
+ * `React.createContext()` at module init — the CSR variant otherwise throws
+ * "createContext is not a function" during static page-data collection in
+ * React Server Components (Next.js App Router, etc.).
  *
- * Mirrors `@resq-systems/ui/icons` but imports from `@phosphor-icons/react/ssr`,
- * which uses SSRBase instead of IconBase and therefore does NOT call
- * React.createContext() at module initialisation time.
+ * Context-based theming via `<IconContext.Provider>` is unavailable with
+ * `SSRBase` icons, so pass `weight`, `size`, and `color` as props directly.
  *
- * Use this subpath in React Server Components (Next.js App Router, etc.)
- * where the CSR variant causes "createContext is not a function" errors
- * during static page-data collection.
- *
- * Usage:
- *   import { ArrowLeftIcon } from "@resq-systems/ui/icons/ssr";
- *
- * Note: context-based theming via <IconContext.Provider> is unavailable in
- * SSRBase icons. Pass weight, size, and color as props directly.
+ * @module @resq-systems/ui/components/icons/ssr
+ * @example
+ * ```ts
+ * import { ArrowLeftIcon } from "@resq-systems/ui/icons/ssr";
+ * ```
  */
 
 // ── Types ─────────────────────────────────────────────────────────────────────

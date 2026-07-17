@@ -1,6 +1,13 @@
 // Copyright 2026 ResQ Systems, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @fileoverview Storybook stories for the Radio Group component — showcases its
+ * variants and composition for visual review and Chromatic regression.
+ *
+ * @module @resq-systems/ui/components/radio-group/radio-group.stories
+ */
+
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { Label } from "../label";

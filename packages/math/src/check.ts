@@ -30,22 +30,35 @@ import type { BinaryOp, BinderOp, Expr, RelOp, UnaryOp } from "./ast.js";
 import { RecursionLimitError, SortError } from "./error.js";
 import type { Sort } from "./value.js";
 
-// ────────────────────────── Public types ──────────────────────────
+//#region Types
 
-/** Maps variable names to their known sort in the current scope. */
+/**
+ * Maps names to their known {@link Sort} in the current scope. Keys are plain
+ * variable names, plus synthetic dotted/call paths (`"obj.prop"`, `"f()"`) that
+ * let the checker resolve member-access and call-return sorts statically — see
+ * `getMemberPath`. A referenced name with no entry is reported as an unbound
+ * `SortError` rather than assumed.
+ */
 export type SortContext = ReadonlyMap<string, Sort>;
 
 /**
- * The result of sort-checking an expression.
+ * The outcome of sort-checking, discriminated on {@link CheckResult.ok ok}.
  *
- * On success, carries the inferred sort. On failure, carries every
- * {@link SortError} discovered during the walk.
+ * - `ok: true` carries the single inferred {@link Sort} of the whole expression.
+ * - `ok: false` carries every {@link SortError} found — the walk aggregates
+ *   diagnostics instead of stopping at the first, so `errors` is non-empty and
+ *   may list several independent mismatches.
+ *
+ * Failure is signalled through this value, not by throwing (the sole exception
+ * is `RecursionLimitError` for pathologically deep trees).
  */
 export type CheckResult =
 	| { readonly ok: true; readonly sort: Sort }
 	| { readonly ok: false; readonly errors: readonly SortError[] };
 
-// ────────────────────────── Operator → sort tables ──────────────────────────
+//#endregion
+
+//#region Constants
 
 /**
  * Unary operators that accept `num` and produce `num`.
@@ -84,7 +97,9 @@ const BINDER_NUM: ReadonlySet<BinderOp> = new Set<BinderOp>(["∑", "∏"]);
 /** Binder operators whose body must be `bool` and whose result is `bool`. */
 const BINDER_BOOL: ReadonlySet<BinderOp> = new Set<BinderOp>(["∀", "∃"]);
 
-// ────────────────────────── Helpers ──────────────────────────
+//#endregion
+
+//#region Helpers
 
 const OK = (sort: Sort): CheckResult => ({ ok: true, sort });
 const FAIL = (errors: readonly SortError[]): CheckResult => ({ ok: false, errors });
@@ -93,17 +108,21 @@ const FAIL = (errors: readonly SortError[]): CheckResult => ({ ok: false, errors
 const fail1 = (expected: string, actual: string, context?: string): CheckResult =>
 	FAIL([new SortError(expected, actual, context)]);
 
-// ────────────────────────── Core checker ──────────────────────────
+//#endregion
+
+//#region Public API
 
 /**
  * Infer the sort of `expr` under the given variable context, collecting
  * **all** sort errors encountered during the recursive walk.
  *
  * @param expr - The expression AST node to check.
- * @param ctx  - An optional mapping from variable names to their sorts.
- *               Defaults to an empty context.
+ * @param ctx - An optional mapping from variable names to their sorts.
+ * Defaults to an empty context.
+ * @param depth - Current recursion depth; used internally to bound the walk.
  * @returns A {@link CheckResult} — either the inferred sort or an array of
- *          every {@link SortError} discovered.
+ * every {@link SortError} discovered.
+ * @throws {RecursionLimitError} If the expression nests deeper than the internal limit.
  */
 export const checkExpr = (expr: Expr, ctx: SortContext = new Map(), depth = 0): CheckResult => {
 	const MAX_DEPTH = 200;
@@ -356,6 +375,10 @@ export const checkExpr = (expr: Expr, ctx: SortContext = new Map(), depth = 0): 
 	}
 };
 
+//#endregion
+
+//#region Internal
+
 /** Helper to extract a dotted property path or call path for static type resolution. */
 const getMemberPath = (expr: Expr): string | null => {
 	if (expr.kind === "var") return expr.name;
@@ -369,3 +392,5 @@ const getMemberPath = (expr: Expr): string | null => {
 	}
 	return null;
 };
+
+//#endregion

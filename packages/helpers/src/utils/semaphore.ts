@@ -23,8 +23,10 @@
  */
 
 /**
- * @file An async counting semaphore for bounding concurrency.
- * @module @resq-systems/helpers/semaphore
+ * @fileoverview An async counting semaphore that bounds concurrency, releasing
+ * FIFO-ordered waiters as slots free up.
+ *
+ * @module @resq-systems/helpers/utils/semaphore
  */
 
 import { ManualPromise } from "./manual-promise.js";

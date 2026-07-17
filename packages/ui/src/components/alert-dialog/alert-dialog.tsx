@@ -29,6 +29,8 @@
  * Accessibility: focus trap, escape-to-close, and inert background
  * via Radix. Title and description are wired through `aria-labelledby`
  * / `aria-describedby` automatically.
+ *
+ * @module @resq-systems/ui/components/alert-dialog/alert-dialog
  */
 
 "use client";
@@ -39,12 +41,14 @@ import type * as React from "react";
 import { cn } from "../../lib/utils.js";
 import { Button } from "../button/button.js";
 
+/** Root of the confirmation dialog; owns open/closed state. */
 function AlertDialog({
 	...props
 }: Readonly<React.ComponentProps<typeof AlertDialogPrimitive.Root>>) {
 	return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />;
 }
 
+/** Primary confirm button; styled as a `Button` and closes the dialog. */
 function AlertDialogAction({
 	className,
 	size = "default",
@@ -63,6 +67,7 @@ function AlertDialogAction({
 	);
 }
 
+/** Dismiss button that closes the dialog without taking the action. */
 function AlertDialogCancel({
 	className,
 	size = "default",
@@ -81,6 +86,7 @@ function AlertDialogCancel({
 	);
 }
 
+/** Centered modal panel over an overlay, holding the confirmation copy and actions. */
 function AlertDialogContent({
 	className,
 	size = "default",
@@ -106,6 +112,7 @@ function AlertDialogContent({
 	);
 }
 
+/** Accessible description wired to the dialog via `aria-describedby`. */
 function AlertDialogDescription({
 	className,
 	...props
@@ -122,6 +129,7 @@ function AlertDialogDescription({
 	);
 }
 
+/** Action row holding the cancel and confirm buttons. */
 function AlertDialogFooter({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -135,6 +143,7 @@ function AlertDialogFooter({ className, ...props }: Readonly<React.ComponentProp
 	);
 }
 
+/** Groups the `AlertDialogTitle` and `AlertDialogDescription`. */
 function AlertDialogHeader({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -148,6 +157,7 @@ function AlertDialogHeader({ className, ...props }: Readonly<React.ComponentProp
 	);
 }
 
+/** Optional illustration/icon slot above the dialog heading. */
 function AlertDialogMedia({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -161,6 +171,7 @@ function AlertDialogMedia({ className, ...props }: Readonly<React.ComponentProps
 	);
 }
 
+/** Dimmed backdrop rendered behind the dialog content. */
 function AlertDialogOverlay({
 	className,
 	...props
@@ -177,12 +188,14 @@ function AlertDialogOverlay({
 	);
 }
 
+/** Portals the dialog subtree to the document body. */
 function AlertDialogPortal({
 	...props
 }: Readonly<React.ComponentProps<typeof AlertDialogPrimitive.Portal>>) {
 	return <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />;
 }
 
+/** Accessible heading wired to the dialog via `aria-labelledby`. */
 function AlertDialogTitle({
 	className,
 	...props
@@ -199,6 +212,7 @@ function AlertDialogTitle({
 	);
 }
 
+/** Element that opens the confirmation dialog when activated. */
 function AlertDialogTrigger({
 	...props
 }: Readonly<React.ComponentProps<typeof AlertDialogPrimitive.Trigger>>) {

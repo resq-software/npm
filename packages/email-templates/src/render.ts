@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Headless render entry — validates a payload and renders it to
+ * `{ to, subject, html, text }` without a browser, so it is safe from queue workers
+ * and cron jobs.
+ *
+ * @module @resq-systems/email-templates/render
+ */
+
 import { resqMailer } from "./suite.js";
 
 export type { RenderEmailOptions, RenderedEmail } from "./mailer.js";
@@ -21,8 +29,15 @@ export type { RenderEmailOptions, RenderedEmail } from "./mailer.js";
 /**
  * Validate an untrusted payload and render it to `{ to, subject, html, text }`.
  *
- * Runs headlessly (no browser/DOM) via `@react-email/render`, so it is safe from
- * queue workers, cron jobs, and other pipeline contexts. Pass `{ theme }` to
+ * Runs headlessly (no browser/DOM, no network, no clock) via
+ * `@react-email/render`, so it is safe from queue workers, cron jobs, and other
+ * pipeline contexts. Pure and stateless — concurrent calls are safe and there is
+ * no ordering guarantee; it does not honour an `AbortSignal`. Pass `{ theme }` to
  * rebrand a single render.
+ *
+ * @param input - Untrusted `{ name, to, data }` payload to validate and render.
+ * @param options - Optional per-render theme override.
+ * @returns A promise resolving to the rendered `{ to, subject, html, text }`.
+ * @throws {EmailValidationError} As a rejected promise, when `input` fails validation.
  */
 export const renderEmail = resqMailer.renderEmail;

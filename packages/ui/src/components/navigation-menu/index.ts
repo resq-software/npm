@@ -14,4 +14,21 @@
  * limitations under the License.
  */
 
-export * from "./navigation-menu.js";
+/**
+ * @fileoverview Public barrel for the Navigation Menu component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/navigation-menu`.
+ *
+ * @module @resq-systems/ui/components/navigation-menu
+ */
+
+export {
+	NavigationMenu,
+	NavigationMenuContent,
+	NavigationMenuIndicator,
+	NavigationMenuItem,
+	NavigationMenuLink,
+	NavigationMenuList,
+	NavigationMenuTrigger,
+	navigationMenuTriggerStyle,
+	NavigationMenuViewport,
+} from "./navigation-menu.js";

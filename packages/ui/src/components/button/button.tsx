@@ -34,6 +34,8 @@
  *
  * Exports `buttonVariants` (the CVA) for composing button-styled
  * non-button elements.
+ *
+ * @module @resq-systems/ui/components/button/button
  */
 
 import { cva, type VariantProps } from "class-variance-authority";
@@ -42,6 +44,12 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
+/**
+ * Class-variance-authority definition for button styling; exported so
+ * non-button elements (e.g. a `<Link>`) can adopt the button look.
+ *
+ * @see {@link Button}
+ */
 const buttonVariants = cva(
 	"focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 aria-invalid:border-destructive rounded-md border border-transparent bg-clip-padding font-mono text-[11px] font-medium leading-none uppercase tracking-[0.1em] focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none",
 	{
@@ -79,6 +87,10 @@ const buttonVariants = cva(
 	},
 );
 
+/**
+ * Primary interactive control of the design system. Pass `asChild` to render
+ * the styles onto a delegated element (e.g. a router link) via Radix `Slot`.
+ */
 function Button({
 	asChild = false,
 	className,

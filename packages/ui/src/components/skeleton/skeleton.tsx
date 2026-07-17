@@ -22,6 +22,8 @@
  *
  * Animation uses `animate-pulse` (compositor-friendly opacity), so
  * many skeletons can render at once without dropping frames.
+ *
+ * @module @resq-systems/ui/components/skeleton/skeleton
  */
 
 import { cn } from "../../lib/utils.js";

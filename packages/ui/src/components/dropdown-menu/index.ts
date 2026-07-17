@@ -14,4 +14,27 @@
  * limitations under the License.
  */
 
-export * from "./dropdown-menu.js";
+/**
+ * @fileoverview Public barrel for the DropdownMenu component family (click-triggered
+ * popover menus) — re-exports `./dropdown-menu` as the `@resq-systems/ui/dropdown-menu` entry.
+ *
+ * @module @resq-systems/ui/components/dropdown-menu
+ */
+
+export {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuPortal,
+	DropdownMenuRadioGroup,
+	DropdownMenuRadioItem,
+	DropdownMenuSeparator,
+	DropdownMenuShortcut,
+	DropdownMenuSub,
+	DropdownMenuSubContent,
+	DropdownMenuSubTrigger,
+	DropdownMenuTrigger,
+} from "./dropdown-menu.js";

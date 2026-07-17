@@ -15,10 +15,10 @@
  */
 
 /**
- * @file Exhaustiveness assertion helper
- * @module dsa/_assert
- * @description Local, zero-dependency exhaustiveness guard for `switch` default
- *              arms and other spots that must never be reached at the type level.
+ * @fileoverview Local, zero-dependency exhaustiveness guard for `switch` default
+ * arms and other spots that must never be reached at the type level.
+ *
+ * @module @resq-systems/dsa/_assert
  */
 
 /**
@@ -27,7 +27,8 @@
  * unhandled, because a non-`never` value cannot be passed here.
  *
  * @param value - The value the type system has narrowed to `never`.
- * @throws Always throws at runtime if somehow reached (e.g. untyped input).
+ * @throws {Error} Always, if reached at runtime (e.g. an untyped value slipped
+ *   past the compiler); the message includes the offending value.
  */
 export function assertNever(value: never): never {
 	throw new Error(`Unexpected value: ${String(value)}`);

@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Incident / dispatch alert email component for ResQ Systems
+ * disaster-response operators.
+ *
+ * @module @resq-systems/email-templates/emails/incident-alert
+ */
+
 import type { IncidentAlertData } from "../schemas.js";
 import { Email } from "./primitives.js";
 
+/** Props for {@link IncidentAlertEmail} — the incident-alert template's validated `data`. */
 export type IncidentAlertEmailProps = IncidentAlertData;
 
 const severityClass: Record<"info" | "warning" | "critical", string> = {

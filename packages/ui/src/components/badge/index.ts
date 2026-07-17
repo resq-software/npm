@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./badge.js";
+/**
+ * @fileoverview Public barrel for the Badge component (status / category pills) —
+ * re-exports `./badge` as the `@resq-systems/ui/badge` entry.
+ *
+ * @module @resq-systems/ui/components/badge
+ */
+
+export { Badge, badgeVariants } from "./badge.js";

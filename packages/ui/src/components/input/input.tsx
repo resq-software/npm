@@ -23,12 +23,18 @@
  *
  * Pair with `Field` / `FieldLabel` / `FieldError` for fully
  * accessible form rows, or `InputGroup` for affixed icons / addons.
+ *
+ * @module @resq-systems/ui/components/input/input
  */
 
 import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
+/**
+ * Themed drop-in for a native `<input>` — forwards every native prop and adds
+ * the design system's surface, focus-ring, invalid, and disabled styling.
+ */
 function Input({ className, type, ...props }: Readonly<React.ComponentProps<"input">>) {
 	return (
 		<input

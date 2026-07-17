@@ -15,12 +15,24 @@
  */
 
 /**
+ * @fileoverview Types for the `@after` decorator — the hook signature
+ * (`AfterFunc`), its configuration (`AfterConfig`), and the payload the hook
+ * receives (`AfterParams`).
+ *
+ * @module @resq-systems/decorators/after/after.types
+ */
+
+/**
  * Function signature for after hooks.
  *
- * @template D - The return type of the decorated method
- * @param {AfterParams<D>} [x] - Parameters containing args and response
- * @returns {void}
+ * The payload is **optional** so a hook that ignores the call context can be a
+ * zero-arg function. The declared return is `void` and the hook's return value
+ * is ignored unless {@link AfterConfig.wait} is set — in which case a returned
+ * promise is awaited before the decorated method resolves.
  *
+ * @template D - The decorated method's resolved return type, surfaced as
+ *   {@link AfterParams.response}.
+ * @param x - Parameters containing the call arguments and the response.
  * @example
  * ```typescript
  * const afterHook: AfterFunc<string> = ({ args, response }) => {
@@ -31,14 +43,18 @@
 export type AfterFunc<D> = (x?: AfterParams<D>) => void;
 
 /**
- * Configuration options for the @after decorator.
+ * Configuration options for the `@after` decorator.
  *
- * @interface AfterConfig
- * @template T - The type of the class containing the decorated method
- * @template D - The return type of the decorated method
- * @property {AfterFunc<D> | keyof T} func - The after function to execute, or a method name on the class
- * @property {boolean} [wait=false] - Whether to wait for the after function to complete before returning
+ * {@link func} is a two-way choice resolved at call time: an inline
+ * {@link AfterFunc} is invoked directly, whereas a `keyof T` string names a
+ * method looked up on the instance (`this`) each call — if that name does not
+ * resolve to a callable, the wrapped call rejects. When `func` is a method name,
+ * the class must actually be the receiver, since the lookup is against `this`.
  *
+ * @template T - The class owning the decorated method; constrains the `keyof T`
+ *   method names accepted by {@link func}.
+ * @template D - The decorated method's resolved return type, forwarded to the
+ *   hook as {@link AfterParams.response}.
  * @example
  * ```typescript
  * // Using a function reference
@@ -55,20 +71,20 @@ export type AfterFunc<D> = (x?: AfterParams<D>) => void;
  * ```
  */
 export interface AfterConfig<T = unknown, D = unknown> {
-	/** The after function to execute, or a method name on the class */
+	/** The after function to execute, or the name of a method on the instance. */
 	func: AfterFunc<D> | keyof T;
-	/** Whether to wait for the after function to complete before returning */
+	/**
+	 * When `true`, the wrapper awaits the hook (and any promise it returns) before
+	 * resolving to the method's value; when `false` or absent (the default), the
+	 * hook is fired without awaiting, so its rejection goes unobserved.
+	 */
 	wait?: boolean;
 }
 
 /**
  * Parameters passed to the after hook function.
  *
- * @interface AfterParams
- * @template D - The return type of the decorated method
- * @property {any[]} args - The arguments passed to the decorated method
- * @property {D} response - The return value of the decorated method
- *
+ * @template D - The return type of the decorated method.
  * @example
  * ```typescript
  * const params: AfterParams<number> = {
@@ -78,8 +94,12 @@ export interface AfterConfig<T = unknown, D = unknown> {
  * ```
  */
 export interface AfterParams<D = unknown> {
-	/** The arguments passed to the decorated method */
+	/** The exact positional arguments the decorated method was called with. */
 	args: unknown[];
-	/** The return value of the decorated method */
+	/**
+	 * The method's **resolved** return value (`Awaited<D>`) — for an async method
+	 * the fulfilled value, not the pending promise. The hook only runs on success,
+	 * so this is never a rejection.
+	 */
 	response: D;
 }

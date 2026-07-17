@@ -14,7 +14,33 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Type helpers for the Picture component — prop-merging utilities
+ * and the LQIP (low-quality image placeholder) registry shapes its `lqip` prop
+ * accepts.
+ *
+ * @module @resq-systems/ui/components/picture/types
+ */
+
+/**
+ * `T` with any keys also present in `U` replaced by `U`'s versions.
+ *
+ * Used to layer the Picture-specific props (`U`) over a host element's props
+ * (`T`), letting the component's own typings win on any name collision.
+ *
+ * @template T - The base shape whose colliding members are dropped.
+ * @template U - The overriding shape; its members are kept as-is.
+ */
 export type Overwrite<T, U> = Omit<T, keyof U> & U;
+
+/**
+ * Like `Omit<T, K>`, but distributes over a union so each member is stripped
+ * independently — `Omit` on a union would collapse to the shared keys and lose
+ * per-variant properties.
+ *
+ * @template T - The (possibly union) shape to omit from.
+ * @template K - The property key(s) to remove from every union member.
+ */
 export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 
 /** A single entry from the LQIP registry (design/assets/lqip.json). */

@@ -14,4 +14,18 @@
  * limitations under the License.
  */
 
-export * from "./input-group.js";
+/**
+ * @fileoverview Public barrel for the InputGroup component family (affixed input clusters)
+ * — re-exports `./input-group` as the `@resq-systems/ui/input-group` entry.
+ *
+ * @module @resq-systems/ui/components/input-group
+ */
+
+export {
+	InputGroup,
+	InputGroupAddon,
+	InputGroupButton,
+	InputGroupInput,
+	InputGroupText,
+	InputGroupTextarea,
+} from "./input-group.js";

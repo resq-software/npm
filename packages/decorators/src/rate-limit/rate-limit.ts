@@ -14,56 +14,70 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@rateLimit` decorator — caps a method to a fixed number of calls
+ * per rolling time window, dropping (and optionally handling) calls that exceed
+ * the allowance.
+ *
+ * @module @resq-systems/decorators/rate-limit/rate-limit
+ */
+
 import type { Decorator } from "../types.js";
 import { rateLimitFn } from "./rate-limit.fn.js";
 import type { RateLimitConfigs } from "./rate-limit.types.js";
 
 /**
- * Decorator that rate limits method calls.
- * Only allows a specified number of calls within a time window.
+ * Rate limit a method to at most `allowedCalls` invocations per `timeSpanMs`
+ * window; calls beyond the allowance are dropped and routed to `exceedHandler`.
  *
- * @template T - The type of the class containing the decorated method
- * @param {RateLimitConfigs<T>} config - Rate limit configuration
- * @returns {Decorator<T>} The decorator function — generic over the decorated
- *   method so its signature is preserved end-to-end.
+ * The counter is built once, at decoration time, so the limit spans every instance
+ * of the class (unless a `keyResolver` partitions it). A dropped call returns
+ * `undefined` in place of the method's value — see {@link rateLimitFn} for the
+ * sync-vs-async return shape and the best-effort caveat under concurrency. Mutates
+ * the supplied property descriptor in place.
  *
- * @throws {Error} When applied to a non-method property
- *
+ * @template T - The class type that owns the decorated method.
+ * @param config - Rate-limit configuration: window size, allowance, and optional
+ * key resolver, counter, and exceed handler.
+ * @returns The method decorator, generic over the decorated method so its
+ * signature is preserved end-to-end.
+ * @throws {Error} If applied to anything other than a method.
  * @example
- * ```typescript
+ * ```ts
  * class Api {
  *   @rateLimit({
- *     timeSpanMs: 1000,  // 1 second
- *     allowedCalls: 5,   // Max 5 calls
- *     exceedHandler: () => console.warn('Rate limit exceeded!')
+ *     timeSpanMs: 1000, // One second.
+ *     allowedCalls: 5, // At most five calls.
+ *     exceedHandler: () => console.warn("Rate limit exceeded!"),
  *   })
  *   fetchData() {
- *     // Only 5 calls allowed per second
+ *     // Only five calls are allowed per second.
  *   }
  *
- *   // With custom key resolver for per-user limiting
+ *   // With a custom key resolver for per-user limiting.
  *   @rateLimit({
- *     timeSpanMs: 60000,  // 1 minute
- *     allowedCalls: 100,  // Max 100 calls per user per minute
- *     keyResolver: (userId) => userId  // Limit per user
+ *     timeSpanMs: 60000, // One minute.
+ *     allowedCalls: 100, // At most 100 calls per user per minute.
+ *     keyResolver: (userId) => userId, // Limit per user.
  *   })
  *   getUserData(userId: string) {
  *     return database.getUser(userId);
  *   }
  * }
  *
- * // With custom counter implementation
+ * // With a custom counter implementation.
  * class DistributedApi {
  *   @rateLimit({
  *     timeSpanMs: 1000,
  *     allowedCalls: 10,
- *     rateLimitCounter: new RedisRateLimitCounter()  // Distributed counter
+ *     rateLimitCounter: new RedisRateLimitCounter(), // Distributed counter.
  *   })
  *   async heavyOperation(): Promise<void> {
- *     // Rate limited across all instances
+ *     // Rate limited across all instances.
  *   }
  * }
  * ```
+ * @see {@link rateLimitFn} for the function form.
  */
 export function rateLimit<T = unknown>(config: RateLimitConfigs<T>): Decorator<T> {
 	// Generic over the decorated method `F` so the descriptor's signature is

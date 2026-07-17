@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./skeleton.js";
+/**
+ * @fileoverview Public barrel for the Skeleton component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/skeleton`.
+ *
+ * @module @resq-systems/ui/components/skeleton
+ */
+
+export { Skeleton } from "./skeleton.js";

@@ -14,27 +14,61 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Email theming system — the resolved `EmailTheme` shape, override
+ * merging, the Tailwind config builder, and React contexts carrying the active theme
+ * and per-send message policy.
+ *
+ * @module @resq-systems/email-templates/emails/theme
+ */
+
 import { pixelBasedPreset } from "@react-email/components";
 import { type ReactElement, createContext, createElement } from "react";
 import type { EmailCategory } from "../schemas.js";
 import { emailColors, emailFonts, emailOrg } from "./tokens.js";
 
+//#region Types
+
+/**
+ * Font stacks the theme exposes to Tailwind's `fontFamily` extension. Each array
+ * is a CSS font-family stack in priority order (preferred face first, generic
+ * fallback last); multi-word names are pre-quoted so they drop straight into a
+ * `font-family` value.
+ */
 export interface EmailThemeFonts {
+	/** Stack for display/heading text. */
 	display: string[];
+	/** Stack for body/sans text. */
 	sans: string[];
+	/** Stack for monospace text (codes, metadata). */
 	mono: string[];
 }
 
-/** Organization identity rendered into email chrome (header, signature, footer). */
+/**
+ * Organization identity rendered into email chrome (header, signature, footer).
+ *
+ * All `*Url` fields are absolute URLs. {@link EmailOrgIdentity.registeredAddress}
+ * leads with the legal entity name, so it stands alone as a complete CAN-SPAM
+ * postal line without a separate `legalName` line in the footer.
+ */
 export interface EmailOrgIdentity {
+	/** Short brand name used in sign-offs, e.g. "— The {brandName} team". */
 	brandName: string;
+	/** Product name shown in the header lockup beside the logo. */
 	productName: string;
+	/** Full legal entity name. */
 	legalName: string;
+	/** Registered postal address, prefixed with the legal name; a complete CAN-SPAM line. */
 	registeredAddress: string;
+	/** Support inbox address, rendered as a `mailto:` link. */
 	supportEmail: string;
+	/** Marketing/website URL (absolute). Never used as an unsubscribe target. */
 	websiteUrl: string;
+	/** Absolute URL of the Terms page. */
 	termsUrl: string;
+	/** Absolute URL of the Privacy page. */
 	privacyUrl: string;
+	/** Absolute URL of the header logo image. */
 	logoUrl: string;
 }
 
@@ -50,15 +84,26 @@ export interface EmailTheme {
 	fontsHref?: string;
 }
 
-/** A partial theme a consumer supplies to rebrand; unset keys fall back to the base. */
+/**
+ * A partial theme a consumer supplies to rebrand; unset keys fall back to the
+ * base. All object fields are **shallow**-merged over the base one level deep (see
+ * {@link resolveEmailTheme}), so supplying `colors` replaces only the named color
+ * tokens, not the whole palette.
+ */
 export interface EmailThemeOverride {
+	/** Color tokens to override (email-safe hex); merged over the base palette. */
 	colors?: Record<string, string>;
+	/** Font stacks to override; unspecified stacks keep the base. */
 	fonts?: Partial<EmailThemeFonts>;
 	/** Override organization identity fields (shallow-merged over the base). */
 	org?: Partial<EmailOrgIdentity>;
-	/** Pass `null` to drop the webfont link entirely. */
+	/** Replace the webfont `<link>` href, or pass `null` to drop it entirely. */
 	fontsHref?: string | null;
 }
+
+//#endregion
+
+//#region Public API
 
 /** The default ResQ Systems brand theme (dark-first, red primary, Syne/DM Sans/DM Mono). */
 export const defaultEmailTheme: EmailTheme = {
@@ -72,7 +117,19 @@ export const defaultEmailTheme: EmailTheme = {
 	fontsHref: emailFonts.googleFontsHref,
 };
 
-/** Merge an override onto a base theme (colors/fonts shallow-merge; `fontsHref: null` removes it). */
+/**
+ * Merge an override onto a base theme, producing a new resolved theme.
+ *
+ * Pure — never mutates `base`. `colors`, `fonts`, and `org` are **shallow**-merged
+ * (override keys replace base keys one level deep), so a partial `fonts` override
+ * keeps the base's other stacks. `fontsHref` follows a three-way rule: `null`
+ * drops the webfont link entirely, absent/`undefined` keeps the base href, and any
+ * string replaces it.
+ *
+ * @param base - The theme to start from.
+ * @param override - Fields to overlay; when omitted, `base` is returned by reference.
+ * @returns The merged theme, or `base` itself when there is no override.
+ */
 export function resolveEmailTheme(base: EmailTheme, override?: EmailThemeOverride): EmailTheme {
 	if (!override) return base;
 	return {
@@ -83,12 +140,29 @@ export function resolveEmailTheme(base: EmailTheme, override?: EmailThemeOverrid
 	};
 }
 
-/** Merge an override onto the default ResQ Systems theme. */
+/**
+ * Merge an override onto the default ResQ Systems theme.
+ *
+ * Pure convenience wrapper over {@link resolveEmailTheme} with
+ * {@link defaultEmailTheme} as the base.
+ *
+ * @param override - Fields to overlay on the default theme.
+ * @returns The resolved theme.
+ */
 export function mergeEmailTheme(override?: EmailThemeOverride): EmailTheme {
 	return resolveEmailTheme(defaultEmailTheme, override);
 }
 
-/** Build the `<Tailwind config>` object from a resolved theme. */
+/**
+ * Build the `<Tailwind config>` object from a resolved theme.
+ *
+ * Pure — projects the theme's colors and font stacks into a Tailwind
+ * `theme.extend` config atop the pixel-based preset (email clients need px units,
+ * not rem).
+ *
+ * @param theme - The resolved theme to project.
+ * @returns The config object to pass to react-email's `<Tailwind>`.
+ */
 export function buildTailwindConfig(theme: EmailTheme) {
 	return {
 		presets: [pixelBasedPreset],
@@ -112,17 +186,29 @@ export const EmailThemeContext = createContext<EmailTheme>(defaultEmailTheme);
  * Wrap an element so it renders against a theme override (used by `renderEmail`).
  * Returns the element unchanged when there is no override, so the default theme
  * flows through context.
+ *
+ * Pure — builds a new provider element and does not mutate `element`.
+ *
+ * @param element - The email element tree to wrap.
+ * @param override - Theme fields to overlay; when omitted, `element` is returned unchanged.
+ * @returns `element`, wrapped in an {@link EmailThemeContext} provider when an override is given.
  */
 export function withEmailTheme(element: ReactElement, override?: EmailThemeOverride): ReactElement {
 	if (!override) return element;
 	return createElement(EmailThemeContext.Provider, { value: mergeEmailTheme(override) }, element);
 }
 
-/** Per-send message policy carried through context to the legal footer. */
+/**
+ * Per-send message policy carried through context to the legal footer.
+ *
+ * The unsubscribe affordance renders only when {@link EmailMessage.category} is
+ * `"marketing"` **and** {@link EmailMessage.unsubscribeUrl} is set; a marketing
+ * send with no `unsubscribeUrl` simply omits it (there is no homepage fallback).
+ */
 export interface EmailMessage {
 	/** Compliance class; defaults to `transactional`. */
 	category: EmailCategory;
-	/** Where the unsubscribe/preferences link points (used for `marketing`). */
+	/** Absolute unsubscribe/preferences URL; only consulted for `marketing` sends. */
 	unsubscribeUrl?: string;
 }
 
@@ -133,8 +219,16 @@ export const EmailMessageContext = createContext<EmailMessage>({ category: "tran
  * Wrap an element so it renders against a message policy (used by `renderEmail`).
  * Returns the element unchanged when no message is given, so the default
  * transactional policy flows through context.
+ *
+ * Pure — builds a new provider element and does not mutate `element`.
+ *
+ * @param element - The email element tree to wrap.
+ * @param message - The per-send policy; when omitted, `element` is returned unchanged.
+ * @returns `element`, wrapped in an {@link EmailMessageContext} provider when a message is given.
  */
 export function withEmailMessage(element: ReactElement, message?: EmailMessage): ReactElement {
 	if (!message) return element;
 	return createElement(EmailMessageContext.Provider, { value: message }, element);
 }
+
+//#endregion

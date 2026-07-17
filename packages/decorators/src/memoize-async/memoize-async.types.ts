@@ -14,35 +14,45 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Types for the `@memoizeAsync` decorator and its function form:
+ * the async cache contract, the configuration object, and the legacy decorator
+ * signature.
+ *
+ * @module @resq-systems/decorators/memoize-async/memoize-async.types
+ */
+
 import type { Cache, KeyResolver, Memoizable } from "../memoize/memoize.types.js";
 
 /**
- * Type for the `@memoizeAsync` decorator function.
- * Similar to `Memoizable` but for async methods.
+ * Legacy signature type for the `@memoizeAsync` decorator (async counterpart of
+ * `Memoizable`).
  *
- * @deprecated Use `AsyncDecorator<T>` from `../types.js` instead. This shape
- * erases the decorated method's signature, which is not assignable to a
- * concrete async method's descriptor under strict `strictFunctionTypes`
- * (TS1241 / TS1270 at the decoration site). `memoizeAsync` now returns
- * `AsyncDecorator<T>`, which preserves the signature. Retained for back-compat.
- *
- * @template T - The type of the class containing the decorated method
- * @template D - The resolved type of the async method
+ * @template T - The class type that owns the decorated method.
+ * @template D - The resolved type of the async method.
+ * @deprecated Use {@link AsyncDecorator} from `../types.js` instead — removed in
+ * v1.0.0. This shape erases the decorated method's signature, which is not
+ * assignable to a concrete async method's descriptor under strict
+ * `strictFunctionTypes` (TS1241 / TS1270 at the decoration site). `memoizeAsync`
+ * now returns {@link AsyncDecorator}, which preserves the signature. Migration:
+ * replace `AsyncMemoizable<T, D>` annotations with `AsyncDecorator<T>` (drop the
+ * `D` parameter); no runtime change.
  */
 export type AsyncMemoizable<T, D> = Memoizable<T, Promise<D>>;
 
 /**
- * Interface for async cache implementations used by the memoizeAsync decorator.
+ * Async cache contract used by the `@memoizeAsync` decorator. Any store exposing
+ * these four promise-returning operations (e.g. a Redis-backed cache) qualifies.
  *
- * @interface AsyncCache
- * @template D - The type of values stored in the cache
- * @property {(key: string, value: D) => Promise<void>} set - Store a value in the cache asynchronously
- * @property {(key: string) => Promise<D> | Promise<null>} get - Retrieve a value from the cache asynchronously
- * @property {(key: string) => Promise<void>} delete - Remove a value from the cache asynchronously
- * @property {(key: string) => Promise<boolean>} has - Check if a key exists in the cache asynchronously
+ * `get` must resolve `null` for an absent key: `memoizeAsync` distinguishes hit
+ * from miss with a single `get` (never a separate `has` + `get`) to stay race-free
+ * against TTL eviction, so a nullish resolution is read as "not cached". A value
+ * that is itself `null`/`undefined` therefore cannot be cached and is recomputed
+ * each call. All operations share one keyspace.
  *
+ * @template D - The type of values stored in the cache.
  * @example
- * ```typescript
+ * ```ts
  * const redisCache: AsyncCache<User> = {
  *   set: async (key, value) => await redis.set(key, JSON.stringify(value)),
  *   get: async (key) => {
@@ -50,45 +60,51 @@ export type AsyncMemoizable<T, D> = Memoizable<T, Promise<D>>;
  *     return data ? JSON.parse(data) : null;
  *   },
  *   delete: async (key) => await redis.del(key),
- *   has: async (key) => await redis.exists(key) > 0
+ *   has: async (key) => (await redis.exists(key)) > 0,
  * };
  * ```
  */
 export interface AsyncCache<D> {
-	/** Store a value in the cache asynchronously */
+	/** Store a value for `key`, overwriting any existing entry. */
 	set: (key: string, value: D) => Promise<void>;
-	/** Retrieve a value from the cache asynchronously */
+	/** Retrieve the value for `key`, resolving `null` when the key is absent. */
 	get: (key: string) => Promise<D | null>;
-	/** Remove a value from the cache asynchronously */
+	/** Remove the entry for `key`; resolves regardless of prior presence. */
 	delete: (key: string) => Promise<void>;
-	/** Check if a key exists in the cache asynchronously */
+	/** Whether an entry exists for `key`. Not used on the `memoizeAsync` hot path. */
 	has: (key: string) => Promise<boolean>;
 }
 
 /**
- * Configuration options for the @memoizeAsync decorator.
+ * Configuration for the `@memoizeAsync` decorator and {@link memoizeAsyncFn}. The
+ * cache may be synchronous or asynchronous.
  *
- * @interface AsyncMemoizeConfig
- * @template T - The type of the class containing the decorated method
- * @template D - The resolved type of the async method
- * @property {Cache<D> | AsyncCache<D>} [cache] - Custom cache implementation (sync or async)
- * @property {KeyResolver | keyof T} [keyResolver] - Function or method name for generating cache keys
- * @property {number} [expirationTimeMs] - Time in milliseconds after which cached values expire
- *
+ * @template T - The class type a `keyof T` key resolver resolves against.
+ * @template D - The resolved type of the async method.
  * @example
- * ```typescript
+ * ```ts
  * const config: AsyncMemoizeConfig<ApiService, User> = {
  *   cache: redisCache,
  *   keyResolver: (userId) => `user:${userId}`,
- *   expirationTimeMs: 300000
+ *   expirationTimeMs: 300000,
  * };
  * ```
  */
 export interface AsyncMemoizeConfig<T, D> {
-	/** Custom cache implementation (sync or async) */
+	/**
+	 * Custom cache, synchronous ({@link Cache}) or asynchronous ({@link AsyncCache});
+	 * when omitted, a fresh `Map` is used.
+	 */
 	cache?: Cache<D> | AsyncCache<D>;
-	/** Function or method name for generating cache keys */
+	/**
+	 * How cache keys are derived. A {@link KeyResolver} is called with the
+	 * arguments; a `keyof T` names an instance method resolved and bound to `this`
+	 * at call time. When omitted, the key is `JSON.stringify` of the arguments.
+	 */
 	keyResolver?: KeyResolver | keyof T;
-	/** Time in milliseconds after which cached values expire */
+	/**
+	 * Per-entry time-to-live in milliseconds, measured from insertion. When omitted,
+	 * entries never expire.
+	 */
 	expirationTimeMs?: number;
 }

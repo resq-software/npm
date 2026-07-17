@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./label.js";
+/**
+ * @fileoverview Public barrel for the Label component (accessible form labels) —
+ * re-exports `./label` as the `@resq-systems/ui/label` entry.
+ *
+ * @module @resq-systems/ui/components/label
+ */
+
+export { Label } from "./label.js";

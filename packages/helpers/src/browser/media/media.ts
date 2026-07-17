@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Media type tables and `MediaHelpers`: supported image/video MIME
+ * lists plus browser helpers for loading images and videos, measuring
+ * dimensions (honoring PNG pHYs DPI), extracting video frames, and detecting
+ * animation.
+ *
+ * @module @resq-systems/helpers/browser/media/media
+ */
+
 import { promiseWithResolve } from "../../utils/control.js";
 import { Image } from "../network.js";
 import { isApngAnimated } from "./apng.js";
@@ -22,12 +31,14 @@ import { isGifAnimated } from "./gif.js";
 import { PngHelpers } from "./png.js";
 import { isWebpAnimated } from "./webp.js";
 
+//#region Constants
+
 /**
  * Array of supported vector image MIME types.
  *
  * @example
  * ```ts
- * import { DEFAULT_SUPPORTED_VECTOR_IMAGE_TYPES } from '@tldraw/utils'
+ * import { DEFAULT_SUPPORTED_VECTOR_IMAGE_TYPES } from '@resq-systems/helpers/browser'
  *
  * const isSvg = DEFAULT_SUPPORTED_VECTOR_IMAGE_TYPES.includes('image/svg+xml')
  * console.log(isSvg) // true
@@ -40,7 +51,7 @@ export const DEFAULT_SUPPORTED_VECTOR_IMAGE_TYPES = Object.freeze(["image/svg+xm
  *
  * @example
  * ```ts
- * import { DEFAULT_SUPPORTED_STATIC_IMAGE_TYPES } from '@tldraw/utils'
+ * import { DEFAULT_SUPPORTED_STATIC_IMAGE_TYPES } from '@resq-systems/helpers/browser'
  *
  * const isStatic = DEFAULT_SUPPORTED_STATIC_IMAGE_TYPES.includes('image/jpeg')
  * console.log(isStatic) // true
@@ -57,7 +68,7 @@ export const DEFAULT_SUPPORTED_STATIC_IMAGE_TYPES = Object.freeze([
  *
  * @example
  * ```ts
- * import { DEFAULT_SUPPORTED_ANIMATED_IMAGE_TYPES } from '@tldraw/utils'
+ * import { DEFAULT_SUPPORTED_ANIMATED_IMAGE_TYPES } from '@resq-systems/helpers/browser'
  *
  * const isAnimated = DEFAULT_SUPPORTED_ANIMATED_IMAGE_TYPES.includes('image/gif')
  * console.log(isAnimated) // true
@@ -74,7 +85,7 @@ export const DEFAULT_SUPPORTED_ANIMATED_IMAGE_TYPES = Object.freeze([
  *
  * @example
  * ```ts
- * import { DEFAULT_SUPPORTED_IMAGE_TYPES } from '@tldraw/utils'
+ * import { DEFAULT_SUPPORTED_IMAGE_TYPES } from '@resq-systems/helpers/browser'
  *
  * const isSupported = DEFAULT_SUPPORTED_IMAGE_TYPES.includes('image/png')
  * console.log(isSupported) // true
@@ -91,7 +102,7 @@ export const DEFAULT_SUPPORTED_IMAGE_TYPES = Object.freeze([
  *
  * @example
  * ```ts
- * import { DEFAULT_SUPPORT_VIDEO_TYPES } from '@tldraw/utils'
+ * import { DEFAULT_SUPPORT_VIDEO_TYPES } from '@resq-systems/helpers/browser'
  *
  * const isVideo = DEFAULT_SUPPORT_VIDEO_TYPES.includes('video/mp4')
  * console.log(isVideo) // true
@@ -108,7 +119,7 @@ export const DEFAULT_SUPPORT_VIDEO_TYPES = Object.freeze([
  *
  * @example
  * ```ts
- * import { DEFAULT_SUPPORTED_MEDIA_TYPES } from '@tldraw/utils'
+ * import { DEFAULT_SUPPORTED_MEDIA_TYPES } from '@resq-systems/helpers/browser'
  *
  * const isMediaFile = DEFAULT_SUPPORTED_MEDIA_TYPES.includes('video/mp4')
  * console.log(isMediaFile) // true
@@ -124,7 +135,7 @@ export const DEFAULT_SUPPORTED_MEDIA_TYPES = Object.freeze([
  *
  * @example
  * ```ts
- * import { DEFAULT_SUPPORTED_MEDIA_TYPE_LIST } from '@tldraw/utils'
+ * import { DEFAULT_SUPPORTED_MEDIA_TYPE_LIST } from '@resq-systems/helpers/browser'
  *
  * // Use in HTML file input for media uploads
  * const input = document.createElement('input')
@@ -139,6 +150,10 @@ export const DEFAULT_SUPPORTED_MEDIA_TYPES = Object.freeze([
  */
 export const DEFAULT_SUPPORTED_MEDIA_TYPE_LIST = DEFAULT_SUPPORTED_MEDIA_TYPES.join(",");
 
+//#endregion
+
+//#region Public API
+
 /**
  * Helpers for media
  *
@@ -148,9 +163,15 @@ export class MediaHelpers {
 	/**
 	 * Load a video element from a URL with cross-origin support.
 	 *
+	 * Creates a detached `<video>` element and starts a cross-origin network
+	 * load (side effects). Failure is a **rejected** promise, not a resolved
+	 * error value.
+	 *
 	 * @param src - The URL of the video to load
 	 * @param doc - Optional document to create the video element in
 	 * @returns Promise that resolves to the loaded HTMLVideoElement
+	 * @throws {Error} Rejects with `"Could not load video"` if the element emits
+	 *   an `error` event (bad URL, decode failure, CORS denial).
 	 * @example
 	 * ```ts
 	 * const video = await MediaHelpers.loadVideo('https://example.com/video.mp4')
@@ -175,9 +196,19 @@ export class MediaHelpers {
 	/**
 	 * Extract a frame from a video element as a data URL.
 	 *
+	 * For a non-zero `time` this **mutates the passed `video`**: it sets
+	 * `video.currentTime` to seek, then captures once the `seeked` event fires.
+	 * Event listeners are attached and removed internally, so the element is left
+	 * as found apart from its playback position. Failure is a **rejected**
+	 * promise.
+	 *
 	 * @param video - The HTMLVideoElement to extract frame from
 	 * @param time - The time in seconds to extract the frame from (default: 0)
 	 * @returns Promise that resolves to a data URL of the video frame
+	 * @throws {Error} Rejects with `"Could not get video frame"` on the video's
+	 *   `error` / `stalled` events. If a 2D canvas context cannot be obtained, an
+	 *   `Error("Could not get 2d context")` is thrown inside the event handler and
+	 *   the promise never settles.
 	 * @example
 	 * ```ts
 	 * const video = await MediaHelpers.loadVideo('https://example.com/video.mp4')
@@ -258,9 +289,16 @@ export class MediaHelpers {
 	/**
 	 * Load an image from a URL and get its dimensions along with the image element.
 	 *
+	 * Starts a cross-origin image load. When the image reports no
+	 * `naturalWidth` (Firefox with SVGs), it briefly appends the element to
+	 * `doc.body` to measure `clientWidth`/`clientHeight`, then removes it — a
+	 * transient DOM mutation. Failure is a **rejected** promise.
+	 *
 	 * @param src - The URL of the image to load
 	 * @param doc - Optional document to use for DOM operations (e.g. measuring SVG dimensions)
 	 * @returns Promise that resolves to an object with width, height, and the image element
+	 * @throws {Error} Rejects with `"Could not load image"` if the element emits
+	 *   an `error` event (bad URL, decode failure, CORS denial).
 	 * @example
 	 * ```ts
 	 * const { w, h, image } = await MediaHelpers.getImageAndDimensions('https://example.com/image.png')
@@ -314,9 +352,13 @@ export class MediaHelpers {
 	/**
 	 * Get the size of a video blob
 	 *
+	 * Creates and revokes a temporary object URL around a {@link loadVideo} call.
+	 *
 	 * @param blob - A Blob containing the video
 	 * @param doc - Optional document to create elements in
 	 * @returns Promise that resolves to an object with width and height properties
+	 * @throws {Error} Rejects with `"Could not load video"` when the blob cannot
+	 *   be decoded as a playable video.
 	 * @example
 	 * ```ts
 	 * const file = new File([...], 'video.mp4', { type: 'video/mp4' })
@@ -335,9 +377,16 @@ export class MediaHelpers {
 	/**
 	 * Get the size of an image blob
 	 *
+	 * For PNGs, inspects the `pHYs` chunk to recover a device pixel ratio and
+	 * divides the raw pixel dimensions by it; any error while parsing the chunk
+	 * is swallowed and the raw size with `pixelRatio: 1` is returned instead.
+	 *
 	 * @param blob - A Blob containing the image
 	 * @param doc - Optional document to use for DOM operations
-	 * @returns Promise that resolves to an object with width and height properties
+	 * @returns Promise that resolves to an object with `w`, `h`, and the resolved
+	 *   `pixelRatio` (`1` when no high-DPI metadata applies or parsing failed).
+	 * @throws {Error} Rejects with `"Could not load image"` when the blob cannot
+	 *   be decoded (the image-load step; the PNG-metadata step never rejects).
 	 * @example
 	 * ```ts
 	 * const file = new File([...], 'image.png', { type: 'image/png' })
@@ -491,6 +540,10 @@ export class MediaHelpers {
 	/**
 	 * Utility function to create an object URL from a blob, execute a function with it, and automatically clean it up.
 	 *
+	 * `URL.revokeObjectURL` runs in a `finally`, so the URL is released whether
+	 * `fn` resolves or rejects. A rejection from `fn` propagates unchanged.
+	 *
+	 * @template T - The value `fn` resolves to and this method returns.
 	 * @param blob - The Blob to create an object URL for
 	 * @param fn - Function to execute with the object URL
 	 * @returns Promise that resolves to the result of the function
@@ -514,3 +567,5 @@ export class MediaHelpers {
 		}
 	}
 }
+
+//#endregion

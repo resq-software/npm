@@ -17,6 +17,8 @@
 /**
  * @fileoverview Template-literal string type utilities.
  *
+ * @module @resq-systems/types/string
+ *
  * Operating on string *types* (not values): trimming, splitting, joining, and
  * prefix/suffix predicates. Useful for typed key paths, structured log-prefix
  * or event-name schemes, and validating string-shaped configuration (e.g. a
@@ -38,7 +40,9 @@ export type Trim<S extends string> = TrimLeft<TrimRight<S>>;
 
 /**
  * Split a string literal on a delimiter into a tuple of segments —
- * `Split<"a.b.c", ".">` is `["a", "b", "c"]`.
+ * `Split<"a.b.c", ".">` is `["a", "b", "c"]`. When the delimiter never occurs
+ * the whole string is returned as a single-element tuple (`Split<"abc", ".">` is
+ * `["abc"]`), so the result is never the empty tuple.
  */
 export type Split<S extends string, D extends string> = S extends `${infer Head}${D}${infer Tail}`
 	? [Head, ...Split<Tail, D>]
@@ -46,7 +50,8 @@ export type Split<S extends string, D extends string> = S extends `${infer Head}
 
 /**
  * Join a tuple of string literals with a delimiter —
- * `Join<["a", "b", "c"], ".">` is `"a.b.c"`.
+ * `Join<["a", "b", "c"], ".">` is `"a.b.c"`. The empty tuple joins to the empty
+ * string, and a single-element tuple joins to that element with no delimiter.
  */
 export type Join<T extends readonly string[], D extends string> = T extends readonly [
 	infer Head extends string,
@@ -65,14 +70,22 @@ export type StartsWith<S extends string, P extends string> = S extends `${P}${st
 /** `true` when string literal `S` ends with `P`. */
 export type EndsWith<S extends string, P extends string> = S extends `${string}${P}` ? true : false;
 
-/** Replace the **first** occurrence of `From` with `To` in `S`. */
+/**
+ * Replace the **first** occurrence of `From` with `To` in `S`, returning `S`
+ * unchanged when `From` does not occur. An empty `From` is a no-op (returns `S`),
+ * guarding against an otherwise non-terminating match.
+ */
 export type Replace<S extends string, From extends string, To extends string> = From extends ""
 	? S
 	: S extends `${infer H}${From}${infer T}`
 		? `${H}${To}${T}`
 		: S;
 
-/** Replace **every** occurrence of `From` with `To` in `S`. */
+/**
+ * Replace **every** occurrence of `From` with `To` in `S`, returning `S`
+ * unchanged when `From` does not occur. An empty `From` is a no-op (returns `S`),
+ * so the recursion always terminates.
+ */
 export type ReplaceAll<S extends string, From extends string, To extends string> = From extends ""
 	? S
 	: S extends `${infer H}${From}${infer T}`

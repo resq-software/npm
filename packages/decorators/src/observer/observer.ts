@@ -15,41 +15,27 @@
  */
 
 /**
- * @fileoverview Observer decorator - observes property changes and invokes
- * a callback when the property value changes.
+ * @fileoverview `@observe` property decorator — intercepts assignments to a class
+ * property and runs a callback (default: log to the console; optional custom
+ * handler) for each new value.
  *
- * @module @resq/typescript/decorators/observer
- *
- * @example
- * ```typescript
- * class Component {
- *   @observe
- *   count: number = 0;
- *
- *   @observe((newValue) => {
- *     console.log('Name changed to:', newValue);
- *   })
- *   name: string = '';
- * }
- *
- * const comp = new Component();
- * comp.count = 5; // Logs: "setting property Component#count = 5"
- * comp.name = 'John'; // Logs: "Name changed to: John"
- * ```
- *
- * @copyright Copyright (c) 2026 ResQ
- * @license MIT
+ * @module @resq-systems/decorators/observer/observer
  */
 
 import { isFunction } from "../_utils.js";
 import type { ObserverCallback } from "./index.js";
 
 /**
- * Creates a property decorator factory that observes property changes.
+ * Builds a property decorator that observes assignments to the decorated
+ * property, invoking `cb` (or logging) on each new value.
  *
- * @template T - The type of the property value
- * @param {ObserverCallback<T>} [cb] - Optional callback to invoke on changes
- * @returns {PropertyDecorator} The property decorator
+ * The single `value` closure is shared by the prototype, so every instance reads
+ * and writes the same backing slot.
+ *
+ * @template T - The type of the property value.
+ * @param cb - Callback to invoke on each assignment; when omitted, assignments
+ * are logged to the console.
+ * @returns The property decorator.
  */
 function factory<T>(cb?: ObserverCallback<T>): PropertyDecorator {
 	return (target: object, propertyKey: string | symbol) => {
@@ -72,64 +58,72 @@ function factory<T>(cb?: ObserverCallback<T>): PropertyDecorator {
 }
 
 /**
- * Observe all changes of a property. All assignments will be logged to the console.
+ * Observe every assignment to a property, logging each new value to the console.
  *
- * @param {object} target - The class prototype
- * @param {string | symbol} propertyKey - The property key
- * @returns {void}
+ * Redefines the property on `target` (the prototype) with a getter/setter pair via
+ * `Object.defineProperty`, and writes to `console.log` on every assignment. The
+ * backing value is held in a single closure shared by the prototype, so all
+ * instances read and write the same slot rather than getting per-instance storage.
  *
+ * @param target - The class prototype.
+ * @param propertyKey - The property key.
  * @example
- * ```typescript
+ * ```ts
  * class Counter {
  *   @observe
  *   value: number = 0;
  * }
  *
  * const counter = new Counter();
- * counter.value = 5; // Logs: "setting property Counter#value = 5"
- * counter.value = 10; // Logs: "setting property Counter#value = 10"
+ * counter.value = 5; // Logs: "setting property Counter#value = 5".
+ * counter.value = 10; // Logs: "setting property Counter#value = 10".
  * ```
  */
 export function observe(target: object, propertyKey: string | symbol): void;
 
 /**
- * Observe all changes of a property and invoke a provided callback on each assignment.
+ * Observe every assignment to a property and invoke `cb` with each new value.
  *
- * @template T - The type of the property value
- * @param {ObserverCallback<T>} cb - Callback to execute on assignment of observed variable
- * @returns {PropertyDecorator} The property decorator
+ * The returned decorator redefines the property on the prototype via
+ * `Object.defineProperty`; `cb` runs synchronously inside the setter, so a throw
+ * from `cb` propagates to the assigning code. As with the default form, the
+ * backing value lives in one closure shared across all instances of the class.
  *
+ * @template T - The type of the property value.
+ * @param cb - Callback to run on each assignment of the observed property.
+ * @returns The property decorator.
  * @example
- * ```typescript
+ * ```ts
  * class User {
  *   @observe((value) => {
- *     console.log('Email changed:', value);
+ *     console.log("Email changed:", value);
  *     validateEmail(value);
  *   })
- *   email: string = '';
+ *   email: string = "";
  *
  *   @observe((value) => {
- *     metrics.gauge('user.age', value);
+ *     metrics.gauge("user.age", value);
  *   })
  *   age: number = 0;
  * }
  *
  * const user = new User();
- * user.email = 'test@example.com'; // Logs and validates
- * user.age = 25; // Records metric
+ * user.email = "test@example.com"; // Logs and validates.
+ * user.age = 25; // Records a metric.
  * ```
  */
 export function observe<T>(cb: ObserverCallback<T>): PropertyDecorator;
 
 /**
- * Overloaded function for observing property changes.
- * Can be used with or without a custom callback.
+ * Implementation for the {@link observe} overloads: usable directly as a
+ * decorator or as a decorator factory that takes a custom callback.
  *
- * @param {object | ObserverCallback<T>} targetOrCb - Either the class prototype or a callback function
- * @param {string | symbol} [propertyKey] - The property key (when used without callback)
- * @returns {void | PropertyDecorator} Either void or the decorator function
- *
- * @throws {TypeError} When used with incorrect parameters
+ * @template T - The type of the property value.
+ * @param targetOrCb - Either the class prototype (direct decorator use) or a
+ * callback function (factory use).
+ * @param propertyKey - The property key, present only for direct decorator use.
+ * @returns Nothing for direct use, or the property decorator for factory use.
+ * @throws {TypeError} If called with an unsupported argument combination.
  */
 export function observe<T>(
 	targetOrCb: object | ObserverCallback<T>,

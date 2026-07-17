@@ -19,6 +19,8 @@
  * function form — cap the decorated method to at most one call
  * per `delayMs` milliseconds. Excess calls are dropped. Typical
  * use: scroll handlers, resize handlers, polling endpoints.
+ *
+ * @module @resq-systems/decorators/throttle
  */
 
-export * from "./throttle.js";
+export { throttle } from "./throttle.js";

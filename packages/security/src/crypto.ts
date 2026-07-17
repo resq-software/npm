@@ -15,15 +15,13 @@
  */
 
 /**
- * @file Security Utilities
- * @module utils/security
- * @author ResQ
- * @description Provides encryption, hashing, and security functions
- *              for compliance with SOC2, ISO 27001, NIST 800-53.
- *              Includes AES-256-GCM encryption, secure token generation,
- *              and PII masking utilities.
- * @compliance NIST 800-53 SC-28 (Protection of Information at Rest)
- * @compliance NIST 800-53 SC-13 (Cryptographic Protection)
+ * @fileoverview Server-side cryptographic utilities — AES-256-GCM authenticated
+ * encryption, SHA-256 hashing, secure token generation, and PII masking — guarded
+ * by nominal branded types for keys, ciphertext, and masked output. Supports SOC 2,
+ * ISO 27001, and NIST 800-53 SC-28 (data at rest) / SC-13 (cryptographic protection)
+ * controls.
+ *
+ * @module @resq-systems/security/crypto
  */
 
 import {
@@ -36,22 +34,22 @@ import {
 import { createCipheriv, createDecipheriv, createHash, randomBytes, scrypt } from "node:crypto";
 import { promisify } from "node:util";
 
+//#region Constants
 const scryptAsync = promisify(scrypt);
 
-/** AES-256-GCM encryption algorithm */
+/** AES-256-GCM encryption algorithm. */
 const ALGORITHM = "aes-256-gcm";
-/** Initialization vector length in bytes */
+/** Initialization vector length in bytes. */
 const IV_LENGTH = 16;
-/** Authentication tag length in bytes */
+/** Authentication tag length in bytes. */
 const AUTH_TAG_LENGTH = 16;
-/** Salt length for key derivation */
+/** Salt length for key derivation, in bytes. */
 const SALT_LENGTH = 32;
-/** Derived key length (256 bits for AES-256) */
+/** Derived key length in bytes (256 bits for AES-256). */
 const KEY_LENGTH = 32;
+//#endregion
 
-// ============================================
-// Nominal (branded) types
-// ============================================
+//#region Branded Types
 
 /**
  * Base64 AES-256-GCM payload produced by {@link encryptData} — the
@@ -119,6 +117,9 @@ export const toCiphertext = CiphertextBrand.from;
 export const coerceCiphertext = CiphertextBrand.coerce;
 /** Brand `value` as a {@link Ciphertext} without checking. */
 export const unsafeCiphertext = CiphertextBrand.unsafe;
+//#endregion
+
+//#region Internal
 
 /**
  * Derive a 32-byte (AES-256) key from a password and per-record salt
@@ -133,6 +134,9 @@ export const unsafeCiphertext = CiphertextBrand.unsafe;
 async function deriveKey(password: string, salt: Buffer): Promise<Buffer> {
 	return (await scryptAsync(password, salt, KEY_LENGTH)) as Buffer;
 }
+//#endregion
+
+//#region Public API
 
 /**
  * Encrypt a UTF-8 string with AES-256-GCM authenticated encryption.
@@ -153,7 +157,13 @@ async function deriveKey(password: string, salt: Buffer): Promise<Buffer> {
  *   the salt/IV are recovered on decryption.
  *
  * @throws From the underlying Node crypto primitives if `encryptionKey`
- *   is empty or scrypt fails.
+ *   is empty or scrypt fails. Failure surfaces as a rejected `Promise`,
+ *   never a resolved error value.
+ *
+ * Draws from the platform CSPRNG (`randomBytes`) each call, so it is not
+ * a pure function and its output is non-deterministic. There is no
+ * `AbortSignal` hook — once awaited the scrypt work runs to completion.
+ * Independent calls share no state and are safe to run concurrently.
  *
  * @compliance NIST 800-53 SC-28 (Protection of Information at Rest),
  *   SC-13 (Cryptographic Protection).
@@ -194,7 +204,9 @@ export async function encryptData(
  *
  * @throws Error if the tag does not verify (wrong key, modified
  *   ciphertext, truncated payload). Catch this and treat it as a
- *   security event, not a recoverable error.
+ *   security event, not a recoverable error. The rejection comes back
+ *   as a rejected `Promise`. No `AbortSignal` is honoured; concurrent
+ *   calls are independent and share no state.
  *
  * @example
  * ```ts
@@ -335,8 +347,14 @@ export function maskEmail(email: string): Masked {
  *   key, e.g. `"token"` matches `"refreshToken"` and `"id_token"`.
  *
  * @returns A new object with sensitive fields redacted and emails
- *   masked. Nested objects are recursed; arrays and primitives pass
- *   through unchanged.
+ *   masked. Any non-null object value is recursed and comes back as a
+ *   plain object keyed by its enumerable own properties — so arrays
+ *   return as index-keyed objects (`["a"]` → `{ "0": "a" }`) and class
+ *   instances / `Date`s lose their prototype. Only primitives, `null`,
+ *   and `undefined` pass through unchanged.
+ *
+ * @throws {RangeError} On a circular reference — recursion has no cycle
+ *   guard, so a self-referential object overflows the call stack.
  *
  * @example
  * ```ts
@@ -376,3 +394,4 @@ export function sanitizeForLogging(
 
 	return sanitized;
 }
+//#endregion

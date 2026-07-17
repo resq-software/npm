@@ -22,6 +22,8 @@
  *
  * Forwards every native textarea prop. Pair with `Field` for label
  * + helper-text / error wiring.
+ *
+ * @module @resq-systems/ui/components/textarea/textarea
  */
 
 import type * as React from "react";

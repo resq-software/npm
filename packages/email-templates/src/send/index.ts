@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
-export * from "./sender.js";
-export * from "./resend-sender.js";
-export * from "./send-email.js";
+/**
+ * @fileoverview Optional sender entry barrel — re-exports the transport port, the
+ * Resend adapter, and the render-and-send convenience wiring.
+ *
+ * @module @resq-systems/email-templates/send
+ */
+
+export type { EmailSender, SendEmailInput, SendResult } from "./sender.js";
+export { createResendSender } from "./resend-sender.js";
+export { sendEmail } from "./send-email.js";
+export type { SendEmailOptions } from "./send-email.js";

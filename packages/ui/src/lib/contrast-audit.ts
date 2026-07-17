@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Multi-Format WCAG Contrast Ratio Checker
+ * @fileoverview Multi-format WCAG contrast-ratio checker supporting hex, rgb(),
+ * hsl(), oklch(), oklab(), lab(), lch(), and CSS named colors. Used by
+ * contrast-audit.test.ts to keep every design-token pair compliant.
  *
- * Supports: hex, rgb(), hsl(), oklch(), oklab(), lab(), lch(), CSS named colors.
- * Used by contrast-audit.test.ts to ensure all token pairs stay compliant.
+ * @module @resq-systems/ui/lib/contrast-audit
  */
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+//#region Types
 
 /**
  * Linear-RGB triplet (each channel `0..1`, gamma-decoded). The
@@ -74,7 +75,9 @@ export interface ThemeAudit {
 	allPass: boolean;
 }
 
-// ─── CSS Named Colors (full CSS Level 4 set) ───────────────────────────────
+//#endregion
+
+//#region CSS Named Colors (full CSS Level 4 set)
 
 const NAMED_COLORS: Record<string, string> = {
 	aliceblue: "#f0f8ff",
@@ -227,7 +230,9 @@ const NAMED_COLORS: Record<string, string> = {
 	yellowgreen: "#9acd32",
 };
 
-// ─── Parsers ────────────────────────────────────────────────────────────────
+//#endregion
+
+//#region Parsers
 
 /** sRGB gamma decode: normalized [0,1] channel -> linear [0,1]. */
 function srgbChannelToLinear(s: number): number {
@@ -307,7 +312,9 @@ function parseHsl(raw: string): LinearRGB | null {
 	};
 }
 
-// ─── OKLab family ───────────────────────────────────────────────────────────
+//#endregion
+
+//#region OKLab family
 
 function oklabToLinear(lNorm: number, a: number, b: number): LinearRGB {
 	const l_ = lNorm + 0.3963377774 * a + 0.2158037573 * b;
@@ -347,7 +354,9 @@ function parseOklab(raw: string): LinearRGB | null {
 	);
 }
 
-// ─── CIE Lab family ─────────────────────────────────────────────────────────
+//#endregion
+
+//#region CIE Lab family
 
 function cieLabToLinear(L: number, a: number, bVal: number): LinearRGB {
 	const fy = (L + 16) / 116;
@@ -393,7 +402,9 @@ function parseLch(raw: string): LinearRGB | null {
 	);
 }
 
-// ─── Unified Parser ─────────────────────────────────────────────────────────
+//#endregion
+
+//#region Unified Parser
 
 type ParserFn = (raw: string) => LinearRGB | null;
 
@@ -414,7 +425,11 @@ const PARSERS: { test: RegExp; parse: ParserFn }[] = [
  * digits, with or without `#`), `rgb()` / `rgba()`, `hsl()` /
  * `hsla()`, `oklch()`, `oklab()`, `lab()`, `lch()`.
  *
- * @throws Error when the input doesn't match any supported format.
+ * Pure and deterministic — no I/O or shared state; the same string always
+ * decodes to the same triplet.
+ *
+ * @throws {Error} When `raw` (after trimming/lowercasing) matches no supported
+ *   format. The message embeds the offending value.
  */
 export function toLinearRGB(raw: string): LinearRGB {
 	const trimmed = raw.trim().toLowerCase();
@@ -441,7 +456,9 @@ export function toLinearRGB(raw: string): LinearRGB {
 	throw new Error(`Unsupported color format: "${raw}"`);
 }
 
-// ─── Contrast Math ──────────────────────────────────────────────────────────
+//#endregion
+
+//#region Contrast Math
 
 /** Relative luminance per WCAG 2.x (linear sRGB weights). */
 export function relativeLuminance({ r, g, b }: LinearRGB): number {
@@ -455,7 +472,9 @@ export function contrastRatio(lum1: number, lum2: number): number {
 	return (lighter + 0.05) / (darker + 0.05);
 }
 
-// ─── Audit Engine ───────────────────────────────────────────────────────────
+//#endregion
+
+//#region Audit Engine
 
 /**
  * Run every {@link ContrastPair} against the theme's `tokens` and
@@ -470,6 +489,11 @@ export function contrastRatio(lum1: number, lum2: number): number {
  * @param tokens - Theme token map (token name → CSS color value).
  * @param pairs - Pairs to evaluate. Use {@link DEFAULT_PAIRS} for the
  *   project's standard checks.
+ * @returns A {@link ThemeAudit} whose `results` omit any pair with a missing
+ *   token; `allPass` is `true` only when every included result passed.
+ * @throws {Error} Propagated from {@link toLinearRGB} when a token that *is*
+ *   present holds a CSS value in no supported color format. A missing token is
+ *   skipped, not thrown.
  */
 export function auditTheme(mode: string, tokens: ColorTokens, pairs: ContrastPair[]): ThemeAudit {
 	const lumCache = new Map<string, number>();
@@ -530,7 +554,9 @@ export function formatAudit(audit: ThemeAudit): string {
 	return lines.join("\n");
 }
 
-// ─── Default WCAG Pair Definitions ──────────────────────────────────────────
+//#endregion
+
+//#region Default WCAG Pair Definitions
 // Text pairs -> Number.parseFloat("4.5"):1, UI elements -> 3:1, large text -> 3:1
 
 /**
@@ -602,12 +628,23 @@ export const DEFAULT_PAIRS: ContrastPair[] = [
 	{ fg: "warning-text", bg: "card", minRatio: Number.parseFloat("4.5"), label: "text" },
 ];
 
-// ─── CSS Parser ─────────────────────────────────────────────────────────────
+//#endregion
+
+//#region CSS Parser
 
 /**
- * Extracts color tokens from a CSS string containing :root and .light blocks.
- * Supports any color format (oklch, hex, rgb, hsl, named, etc.).
- * Returns { dark: {...}, light: {...} } with token names as keys.
+ * Extract color tokens from a CSS string containing `:root` and `.light` blocks.
+ *
+ * The `:root` block maps to the `dark` key and `.light` to the `light` key; a
+ * key is present only when its block is found, so the result may hold `dark`,
+ * `light`, both, or neither. Token names drop the `--` prefix (`--foreground`
+ * becomes `foreground`). Only the first matching block of each kind is read, and
+ * only recognised color-value formats (oklch/oklab/lab/lch/hsl/rgb/hex) are
+ * captured. Pure — no I/O; does not throw on unrecognised input, it simply
+ * yields fewer tokens.
+ *
+ * @param css - Raw stylesheet text to scan.
+ * @returns A `mode → ColorTokens` map suitable for {@link runContrastAudit}.
  */
 export function extractTokensFromCSS(css: string): Record<string, ColorTokens> {
 	const themes: Record<string, ColorTokens> = {};
@@ -638,7 +675,9 @@ function parseTokenBlock(block: string): ColorTokens {
 	return tokens;
 }
 
-// ─── Full Audit Runner ──────────────────────────────────────────────────────
+//#endregion
+
+//#region Full Audit Runner
 
 /**
  * Run {@link auditTheme} across every theme in `themes` and return
@@ -651,6 +690,8 @@ function parseTokenBlock(block: string): ColorTokens {
  *
  * @returns `{ globalPass, audits }` — `globalPass` is `true` only
  *   when every theme passes every pair.
+ * @throws {Error} Propagated from {@link auditTheme}/{@link toLinearRGB} when
+ *   any present token holds an unsupported color string.
  */
 export function runContrastAudit(
 	themes: Record<string, ColorTokens>,
@@ -667,3 +708,4 @@ export function runContrastAudit(
 
 	return { globalPass, audits };
 }
+//#endregion

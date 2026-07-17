@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./aspect-ratio.js";
+/**
+ * @fileoverview Public barrel for the AspectRatio component (ratio-locked layout
+ * container) — re-exports `./aspect-ratio` as the `@resq-systems/ui/aspect-ratio` entry.
+ *
+ * @module @resq-systems/ui/components/aspect-ratio
+ */
+
+export { AspectRatio } from "./aspect-ratio.js";

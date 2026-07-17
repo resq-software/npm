@@ -26,6 +26,8 @@
  * + NavigationMenuContent)`. Animated `NavigationMenuIndicator`
  * follows the active trigger; `NavigationMenuViewport` is the
  * shared content container under the bar.
+ *
+ * @module @resq-systems/ui/components/navigation-menu/navigation-menu
  */
 
 import { CaretDownIcon } from "@phosphor-icons/react";

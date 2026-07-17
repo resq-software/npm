@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Function form of `@debounce` — `debounceFn(method, delayMs)`
+ * returns a debounced wrapper that fires `method` only after `delayMs` of
+ * quiet, resetting the timer on each call.
+ *
+ * @module @resq-systems/decorators/debounce/debounce.fn
+ */
+
 import type { Method } from "../types.js";
 
 /**
@@ -21,12 +29,21 @@ import type { Method } from "../types.js";
  * The method will only execute after the specified delay has passed
  * since the last time it was called.
  *
- * @template D - The return type of the original method
- * @template A - The argument types of the original method
- * @param {Method<D, A>} originalMethod - The method to debounce
- * @param {number} delayMs - The debounce delay in milliseconds
- * @returns {Method<void, A>} The debounced method
+ * Effectful and trailing-edge only: each call clears the shared pending
+ * `setTimeout` and arms a new one, so a single wrapper collapses *all* its
+ * calls (regardless of arguments) into the last one. The wrapper returns
+ * `undefined` immediately — the original method's return value is **discarded**,
+ * so this cannot wrap a method whose result the caller needs. The deferred
+ * invocation uses the `this` and arguments of the most recent call; if the
+ * method throws, it throws inside the timer callback (unobservable to the
+ * caller). No `AbortSignal` / cancellation.
  *
+ * @template D - The return type of the original method.
+ * @template A - The argument types of the original method.
+ * @param originalMethod - The method to debounce.
+ * @param delayMs - The debounce delay in milliseconds.
+ * @returns The debounced wrapper; it always returns `undefined` (`void`), never
+ *   the wrapped method's value.
  * @example
  * ```typescript
  * class SearchService {

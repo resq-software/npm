@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./separator.js";
+/**
+ * @fileoverview Public barrel for the Separator component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/separator`.
+ *
+ * @module @resq-systems/ui/components/separator
+ */
+
+export { Separator } from "./separator.js";

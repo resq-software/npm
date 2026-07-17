@@ -23,10 +23,13 @@
  */
 
 /**
- * @file DOM element utilities: shadow-DOM-aware traversal, visibility checks,
- *       cached computed styles, and box computation. Browser-only.
+ * @fileoverview DOM element utilities: shadow-DOM-aware traversal, visibility
+ * checks, cached computed styles, and box computation. Browser-only.
+ *
  * @module @resq-systems/helpers/browser/dom-utils
  */
+
+//#region Global Options
 
 /** Options that tweak DOM heuristics for specific browser quirks. */
 export type GlobalOptions = {
@@ -44,6 +47,10 @@ export function setGlobalOptions(options: GlobalOptions): void {
 export function getGlobalOptions(): GlobalOptions {
 	return globalOptions;
 }
+
+//#endregion
+
+//#region DOM Traversal & Visibility
 
 /**
  * Whether `element` is contained within `scope`, crossing shadow boundaries.
@@ -220,6 +227,10 @@ export function elementSafeTagName(element: Element): string {
 	return element.nodeName.toUpperCase();
 }
 
+//#endregion
+
+//#region Style Caching
+
 let cacheStyle: WeakMap<Element, CSSStyleDeclaration | undefined> | undefined;
 let cacheStyleBefore: WeakMap<Element, CSSStyleDeclaration | undefined> | undefined;
 let cacheStyleAfter: WeakMap<Element, CSSStyleDeclaration | undefined> | undefined;
@@ -244,3 +255,5 @@ export function endDOMCaches(): void {
 		cacheStyleAfter = undefined;
 	}
 }
+
+//#endregion

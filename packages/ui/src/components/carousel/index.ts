@@ -14,4 +14,19 @@
  * limitations under the License.
  */
 
-export * from "./carousel.js";
+/**
+ * @fileoverview Public barrel for the Carousel component family (scrollable item sets)
+ * — re-exports `./carousel` as the `@resq-systems/ui/carousel` entry.
+ *
+ * @module @resq-systems/ui/components/carousel
+ */
+
+export {
+	Carousel,
+	CarouselContent,
+	CarouselItem,
+	CarouselNext,
+	CarouselPrevious,
+	useCarousel,
+} from "./carousel.js";
+export type { CarouselApi } from "./carousel.js";

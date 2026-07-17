@@ -15,6 +15,13 @@
  */
 
 /**
+ * @fileoverview Fixed-capacity max-heap that retains the N smallest items by
+ * `distance` — a top-K nearest-neighbour primitive in O(N) memory.
+ *
+ * @module @resq-systems/dsa/heap
+ */
+
+/**
  * Anything with a numeric `distance` field — the only constraint
  * {@link BoundedHeap} places on its elements.
  */
@@ -33,7 +40,7 @@ export interface Distanced {
  * kept N sits at the root. New entries are accepted only when they are
  * strictly closer than the current worst.
  *
- * @typeParam T - Element type; must expose a numeric `distance` field.
+ * @template T - Element type; must expose a numeric `distance` field.
  *
  * @example Keep the 5 nearest survey points
  * ```ts
@@ -51,7 +58,9 @@ export class BoundedHeap<T extends Distanced> {
 	/**
 	 * @param limit - Maximum number of items to retain. Once full, new
 	 *   inserts are accepted only when their `distance` is strictly less
-	 *   than the current worst-kept element's distance.
+	 *   than the current worst-kept element's distance. A non-positive
+	 *   `limit` yields a heap that retains nothing — every {@link insert} is a
+	 *   no-op.
 	 */
 	constructor(limit: number) {
 		this.limit = limit;

@@ -27,6 +27,8 @@
  *
  * Exports `badgeVariants` (the CVA) for downstream composition
  * (e.g. polymorphic links styled like badges).
+ *
+ * @module @resq-systems/ui/components/badge/badge
  */
 
 import { cva, type VariantProps } from "class-variance-authority";
@@ -35,6 +37,12 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
+/**
+ * Class-variance-authority definition for badge styling; exported for composing
+ * badge-styled elements outside the `Badge` component.
+ *
+ * @see {@link Badge}
+ */
 const badgeVariants = cva(
 	"h-5 gap-1 rounded-sm border px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.1em] transition-colors has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive overflow-hidden group/badge",
 	{
@@ -54,6 +62,10 @@ const badgeVariants = cva(
 	},
 );
 
+/**
+ * Compact status/label pill. Pass `asChild` to project the badge styling onto a
+ * link or other element via Radix `Slot`.
+ */
 function Badge({
 	asChild = false,
 	className,

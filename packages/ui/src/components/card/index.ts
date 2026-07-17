@@ -14,4 +14,19 @@
  * limitations under the License.
  */
 
-export * from "./card.js";
+/**
+ * @fileoverview Public barrel for the Card component family (generic content surfaces)
+ * — re-exports `./card` as the `@resq-systems/ui/card` entry.
+ *
+ * @module @resq-systems/ui/components/card
+ */
+
+export {
+	Card,
+	CardAction,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "./card.js";

@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./alert.js";
+/**
+ * @fileoverview Public barrel for the Alert component family (inline status / error
+ * banners) — re-exports `./alert` as the `@resq-systems/ui/alert` entry.
+ *
+ * @module @resq-systems/ui/components/alert
+ */
+
+export { Alert, AlertAction, AlertDescription, AlertTitle } from "./alert.js";

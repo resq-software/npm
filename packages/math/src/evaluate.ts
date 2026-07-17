@@ -47,12 +47,16 @@ import {
 import type { Value } from "./value.js";
 import { asBool, asFunc, asNum, asRecord, bool, func, num } from "./value.js";
 
+//#region Types
+
 /** An environment mapping free/global variables to values. */
 export type Env = ReadonlyMap<string, Value>;
 
 /** Options to configure execution boundaries and limits. */
 export interface EvaluateOptions {
+	/** Maximum recursion depth before a {@link RecursionLimitError} is thrown. Defaults to 200. */
 	readonly maxDepth?: number;
+	/** Maximum evaluation steps before an {@link ExecutionLimitError} is thrown. Defaults to 10000. */
 	readonly maxSteps?: number;
 }
 
@@ -63,6 +67,10 @@ interface EvalContext {
 	readonly maxSteps: number;
 }
 
+//#endregion
+
+//#region Public API
+
 /**
  * Evaluate a compiled expression to a concrete {@link Value}.
  *
@@ -72,11 +80,19 @@ interface EvalContext {
  * @param options - Configure step and depth limits to prevent DoS.
  * @returns The computed value.
  *
- * @throws {@link UnboundVariableError} if a free variable is missing in `env`.
- * @throws {@link UndefinedOpError} if no operator instance matches the types.
- * @throws {@link DomainError} if runtime boundaries (div-by-zero etc) are violated.
- * @throws {@link ExecutionLimitError} if execution steps exceed maxSteps.
- * @throws {@link RecursionLimitError} if recursion depth exceeds maxDepth.
+ * Pure with respect to its arguments: `stack` is copied before use and `env` is
+ * only read, so neither is mutated. Results do, however, depend on the shared
+ * operator registry — a prior {@link registerBinary} (or sibling) call can change
+ * what this returns for the same inputs. Failure is always a thrown `Error`
+ * subclass, never a resolved error value.
+ *
+ * @throws {UnboundVariableError} If a `free_var` is absent from `env`.
+ * @throws {StackError} If a `bound_var` index falls outside the live stack — a sign of a malformed compiled tree.
+ * @throws {SortError} If an operand has the wrong sort: a binder `domain` that is not a `set`, or a binder body of the wrong sort (`∑`/`∏` need `num`, `∀`/`∃` need `bool`), a non-`func` in a call position, or a non-`record` in a member access.
+ * @throws {UndefinedOpError} If no operator instance is registered for the operand sorts.
+ * @throws {DomainError} If an operation is sort-valid but mathematically invalid (division/modulo by zero, `√` of a negative, factorial out of range, or a missing record property).
+ * @throws {ExecutionLimitError} If the evaluated-step count exceeds `maxSteps`.
+ * @throws {RecursionLimitError} If recursion depth exceeds `maxDepth`.
  */
 export const evaluate = (
 	expr: CompiledExpr,
@@ -93,6 +109,10 @@ export const evaluate = (
 	const mutStack = [...stack];
 	return evaluateInternal(expr, env, mutStack, ctx);
 };
+
+//#endregion
+
+//#region Internal
 
 const evaluateInternal = (
 	expr: CompiledExpr,
@@ -257,3 +277,5 @@ const evaluateInternal = (
 		ctx.depth--;
 	}
 };
+
+//#endregion

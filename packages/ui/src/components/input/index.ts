@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./input.js";
+/**
+ * @fileoverview Public barrel for the Input component (themed text input) — re-exports
+ * `./input` as the `@resq-systems/ui/input` entry.
+ *
+ * @module @resq-systems/ui/components/input
+ */
+
+export { Input } from "./input.js";

@@ -24,6 +24,8 @@
  * `DrawerHeader > (DrawerTitle + DrawerDescription)`, `DrawerFooter`,
  * and `DrawerClose`. Per `STYLE_GUIDE.md`, `DrawerTitle` renders
  * `font-display`.
+ *
+ * @module @resq-systems/ui/components/drawer/drawer
  */
 
 "use client";
@@ -33,14 +35,17 @@ import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "../../lib/utils.js";
 
+/** Root of the drawer (edge-anchored sheet); owns open/closed state. */
 function Drawer({ ...props }: Readonly<React.ComponentProps<typeof DrawerPrimitive.Root>>) {
 	return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
 }
 
+/** Element that dismisses the drawer when activated. */
 function DrawerClose({ ...props }: Readonly<React.ComponentProps<typeof DrawerPrimitive.Close>>) {
 	return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />;
 }
 
+/** Sliding panel anchored to a screen edge, rendered over the overlay. */
 function DrawerContent({
 	children,
 	className,
@@ -64,6 +69,7 @@ function DrawerContent({
 	);
 }
 
+/** Accessible description wired to the drawer via `aria-describedby`. */
 function DrawerDescription({
 	className,
 	...props
@@ -77,6 +83,7 @@ function DrawerDescription({
 	);
 }
 
+/** Action row of the drawer, typically holding buttons. */
 function DrawerFooter({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -87,6 +94,7 @@ function DrawerFooter({ className, ...props }: Readonly<React.ComponentProps<"di
 	);
 }
 
+/** Groups the `DrawerTitle` and `DrawerDescription`. */
 function DrawerHeader({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -100,6 +108,7 @@ function DrawerHeader({ className, ...props }: Readonly<React.ComponentProps<"di
 	);
 }
 
+/** Dimmed backdrop rendered behind the drawer content. */
 function DrawerOverlay({
 	className,
 	...props
@@ -116,10 +125,12 @@ function DrawerOverlay({
 	);
 }
 
+/** Portals the drawer subtree to the document body. */
 function DrawerPortal({ ...props }: Readonly<React.ComponentProps<typeof DrawerPrimitive.Portal>>) {
 	return <DrawerPrimitive.Portal data-slot="drawer-portal" {...props} />;
 }
 
+/** Accessible heading wired to the drawer via `aria-labelledby`. */
 function DrawerTitle({
 	className,
 	...props
@@ -133,6 +144,7 @@ function DrawerTitle({
 	);
 }
 
+/** Element that opens the drawer when activated. */
 function DrawerTrigger({
 	...props
 }: Readonly<React.ComponentProps<typeof DrawerPrimitive.Trigger>>) {

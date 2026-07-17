@@ -14,4 +14,27 @@
  * limitations under the License.
  */
 
-export * from "./context-menu.js";
+/**
+ * @fileoverview Public barrel for the ContextMenu component family (right-click menus)
+ * — re-exports `./context-menu` as the `@resq-systems/ui/context-menu` entry.
+ *
+ * @module @resq-systems/ui/components/context-menu
+ */
+
+export {
+	ContextMenu,
+	ContextMenuCheckboxItem,
+	ContextMenuContent,
+	ContextMenuGroup,
+	ContextMenuItem,
+	ContextMenuLabel,
+	ContextMenuPortal,
+	ContextMenuRadioGroup,
+	ContextMenuRadioItem,
+	ContextMenuSeparator,
+	ContextMenuShortcut,
+	ContextMenuSub,
+	ContextMenuSubContent,
+	ContextMenuSubTrigger,
+	ContextMenuTrigger,
+} from "./context-menu.js";

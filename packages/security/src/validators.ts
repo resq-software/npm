@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Signature-based threat detection for untrusted input — regex/glyph
+ * catalogs and detectors for XSS, SQL/NoSQL injection, command injection, path
+ * traversal, and Unicode homoglyphs, plus field-level refinements and user-facing
+ * error messages. Defense-in-depth signal only; never a substitute for parameterized
+ * queries, output encoding, or a vetted HTML sanitizer.
+ *
+ * @module @resq-systems/security/validators
+ */
+
 import { assertNever } from "@resq-systems/types";
 
-// ============================================
-// Threat Pattern Definitions
-// ============================================
+//#region Constants
 
 /**
- * XSS attack patterns
- * Detects script injection, event handlers, and dangerous URIs
+ * XSS attack patterns — detect script injection, event handlers, and dangerous URIs.
  */
 const XSS_PATTERNS = [
 	// Script tags (opening only — avoids ReDoS from greedy cross-tag matching)
@@ -60,8 +67,7 @@ const XSS_PATTERNS = [
 ];
 
 /**
- * SQL injection patterns
- * Detects common SQL attack vectors
+ * SQL injection patterns — detect common SQL attack vectors.
  */
 const SQL_INJECTION_PATTERNS = [
 	// UNION-based injection
@@ -95,8 +101,7 @@ const SQL_INJECTION_PATTERNS = [
 ];
 
 /**
- * NoSQL injection patterns
- * Detects MongoDB and other NoSQL attack vectors
+ * NoSQL injection patterns — detect MongoDB and other NoSQL attack vectors.
  */
 const NOSQL_INJECTION_PATTERNS = [
 	// MongoDB operators
@@ -111,8 +116,7 @@ const NOSQL_INJECTION_PATTERNS = [
 ];
 
 /**
- * Path traversal patterns
- * Detects directory traversal attacks
+ * Path traversal patterns — detect directory traversal attacks.
  */
 const PATH_TRAVERSAL_PATTERNS = [
 	// Directory traversal
@@ -134,9 +138,9 @@ const PATH_TRAVERSAL_PATTERNS = [
 ];
 
 /**
- * Homoglyph patterns
- * Detects Unicode characters that look like ASCII but aren't
- * Used in phishing and IDN homograph attacks
+ * Homoglyph map — Unicode characters that render like ASCII letters but are not,
+ * as used in phishing and IDN homograph attacks. Maps each ASCII letter to its known
+ * lookalikes.
  */
 const HOMOGLYPH_MAP: Record<string, string[]> = {
 	a: ["а", "ɑ", "α", "а"], // Cyrillic а, Latin alpha, Greek alpha
@@ -155,9 +159,9 @@ const HOMOGLYPH_MAP: Record<string, string[]> = {
 	T: ["Т", "Τ"], // Cyrillic Т, Greek Tau
 };
 
-// ============================================
-// Detection Functions
-// ============================================
+//#endregion
+
+//#region Detection
 
 /**
  * Outcome of {@link detectThreatPatterns}.
@@ -179,7 +183,7 @@ export interface ThreatDetectionResult {
  * finding per call (one example is enough to reject the input).
  */
 export interface ThreatFinding {
-	/** Which detector matched. */
+	/** Discriminant: which detector matched. See {@link ThreatType}. */
 	type: ThreatType;
 	/** Human-readable description suitable for log lines (not for end users — use {@link getThreatErrorMessage} instead). */
 	description: string;
@@ -188,8 +192,11 @@ export interface ThreatFinding {
 }
 
 /**
- * The closed set of threat categories the validators recognize. Add
- * new categories here when adding a new detector.
+ * The closed set of threat categories the validators recognize. Serves as the
+ * discriminant of {@link ThreatFinding} (its `type` field) and drives the
+ * exhaustive `switch` in {@link getThreatErrorMessage} — adding a variant here
+ * without a matching `case` there becomes a compile error via `assertNever`.
+ * Add new categories here when adding a new detector.
  */
 export type ThreatType =
 	| "xss"
@@ -397,9 +404,9 @@ export function containsHomoglyphs(input: string): ThreatFinding[] {
 	return findings;
 }
 
-// ============================================
-// Main Validation Functions
-// ============================================
+//#endregion
+
+//#region Validation
 
 /**
  * Per-detector toggles for {@link detectThreatPatterns}.
@@ -567,9 +574,9 @@ export function normalizeUnicode(input: string): string {
 	return normalized;
 }
 
-// ============================================
-// Zod Validation Helpers
-// ============================================
+//#endregion
+
+//#region Validation Helpers
 
 /**
  * Generic user-facing fallback message. Render this verbatim when a
@@ -682,3 +689,4 @@ export function getThreatErrorMessage(result: ThreatDetectionResult): string {
 			return assertNever(threat.type);
 	}
 }
+//#endregion

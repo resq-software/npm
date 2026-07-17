@@ -19,6 +19,8 @@
  * the decorated class when its module loads. Useful for singletons
  * with side-effectful constructors (event listener registration,
  * runtime patching, telemetry init).
+ *
+ * @module @resq-systems/decorators/execute
  */
 
-export * from "./execute.js";
+export { selfExecute } from "./execute.js";

@@ -15,37 +15,45 @@
  */
 
 /**
- * Parses and constructs a formatted string representing the code location, including the file path,
- * associated entity name (such as a function, class, component, or decorator), and human context.
+ * @fileoverview Formats a code-location string (file path, entity name, and
+ * caller-supplied context) for debugging, developer logging, and traceability.
  *
- * The result is useful for debugging, developer logging, and traceability—matching the entity (function, class, etc.)
- * and the context in source code references.
+ * @module @resq-systems/helpers/parse-code-path
+ */
+
+//#region Public API
+
+/**
+ * Build a formatted string describing a code location: the file path, the
+ * associated entity name (function, class, instance, string, or symbol), and a
+ * human-readable context.
  *
- * @param {string | number} context - A description, situation, or custom value relevant to this code path.
- * @param {object | string | symbol} entity - The entity whose name is included; a function, class, or instance (all `object`), a string, or a symbol.
- * @returns {string} A formatted string: "location: <path> @<entity>: <context>".
- * @throws {Error} This function does not throw directly, but see {@link getFilePath}, which may throw in rare stack-trace parsing errors.
+ * Useful for debugging, developer logging, and traceability.
+ *
+ * Effectively non-throwing for ordinary entities: {@link getFilePath} swallows
+ * any stack-trace parse failure and falls back to a sentinel path, and
+ * {@link extractEntityName} handles every input kind. Reads the current call
+ * stack / `__filename` but has no side effects.
+ *
+ * @param context - A description, situation, or custom value relevant to this code path.
+ * @param entity - The entity whose name is included: a function, class, or instance, a string, or a symbol.
+ * @returns A formatted string of the form `"location: <path> @<entity>: <context>"`.
+ *   When the location cannot be determined, `<path>` degrades to
+ *   `"unknown-location"` rather than the call failing.
  * @example
- * // Function usage
+ * ```ts
  * function myFunction() {}
- * parseCodePath('initialization', myFunction);
- * // => "location: /current/dir/file.js @myFunction: initialization"
+ * parseCodePath("initialization", myFunction);
+ * // → "location: /current/dir/file.js @myFunction: initialization"
  *
- * // Class usage
  * class MyClass {}
- * parseCodePath('instantiating MyClass', MyClass);
- * // => "location: ... @MyClass: instantiating MyClass"
+ * parseCodePath("instantiating MyClass", MyClass);
+ * // → "location: ... @MyClass: instantiating MyClass"
  *
- * // String as entity
- * parseCodePath('some context', 'EntityAsString');
- * // => "location: ... @EntityAsString: some context"
- *
-
- * @see parseCodePathDetailed
-
- * @readonly
- * @public
- * @version 1.0.0
+ * parseCodePath("some context", "EntityAsString");
+ * // → "location: ... @EntityAsString: some context"
+ * ```
+ * @see {@link parseCodePathDetailed}
  */
 export const parseCodePath = (
 	context: string | number,
@@ -57,27 +65,30 @@ export const parseCodePath = (
 	return `location: ${filePath} @${entityName}: ${context}`;
 };
 
-/**
- * Extracts a standardized name from an entity, supporting functions, classes, instances, symbols, and strings.
- *
- * - For functions or classes, returns the function's/class's `name` or 'AnonymousFunction'
- * - For instances, extracts the class/constructor name
- * - For string entities, returns the string itself
- * - For symbols, returns their string representation
- * - Returns 'UnknownEntity' if no name is found
- *
- * @param {unknown} entity - The entity to extract a name from.
- * @returns {string} The extracted name or 'UnknownEntity' if not determinable.
- * @example
- * extractEntityName(function test() {}); // 'test'
- * extractEntityName(class MyClass {}); // 'MyClass'
- * extractEntityName('ManualName'); // 'ManualName'
- * extractEntityName(Symbol('sym')); // 'Symbol(sym)'
- *
+//#endregion
 
- * @readonly
- * @public
- * @version 1.0.0
+//#region Internal
+
+/**
+ * Extract a standardized name from an entity, supporting functions, classes,
+ * instances, symbols, and strings.
+ *
+ * - For functions or classes, returns the `name` or `"AnonymousFunction"`.
+ * - For instances, extracts the class/constructor name.
+ * - For string entities, returns the string itself.
+ * - For symbols, returns their string representation.
+ * - Returns `"UnknownEntity"` if no name is found.
+ *
+ * @param entity - The entity to extract a name from.
+ * @returns The extracted name, or `"UnknownEntity"` if not determinable.
+ * @example
+ * ```ts
+ * extractEntityName(function test() {}); // → "test"
+ * extractEntityName(class MyClass {});   // → "MyClass"
+ * extractEntityName("ManualName");       // → "ManualName"
+ * extractEntityName(Symbol("sym"));      // → "Symbol(sym)"
+ * ```
+ * @internal
  */
 function extractEntityName(entity: unknown): string {
 	if (typeof entity === "function") {
@@ -99,20 +110,16 @@ function extractEntityName(entity: unknown): string {
 }
 
 /**
- * Attempts to determine the current file path in both Node.js and browser-like environments.
- * Utilizes `__filename` if available (Node), or parses the call stack when not.
- * Falls back to process.cwd() or 'unknown-location' if all else fails.
+ * Determine the current file path in both Node.js and browser-like
+ * environments. Uses `__filename` when available (Node), otherwise parses the
+ * call stack, and falls back to `process.cwd()` or `"unknown-location"`.
  *
- * @returns {string} The current file path, URL, or 'unknown-location'.
- * @throws {Error} Throws if unexpected errors occur in stack trace parsing (caught internally, returns 'unknown-location').
+ * @returns The current file path, URL, or `"unknown-location"`.
  * @example
- * getFilePath(); // "/Users/user/project/src/utils/formatting/parse-code-path.js"
- *
-
- * @web
- * @readonly
- * @private
- * @version 1.0.0
+ * ```ts
+ * getFilePath(); // → "/Users/user/project/src/utils/formatting/parse-code-path.js"
+ * ```
+ * @internal
  */
 function getFilePath(): string {
 	try {
@@ -138,28 +145,33 @@ function getFilePath(): string {
 	}
 }
 
+//#endregion
+
+//#region Detailed Public API
+
 /**
- * Parses and constructs a detailed formatted location string, including file path, entity, and context,
- * with optional line number, ISO timestamp, and custom prefix control. Useful for enhanced debugging or audit logs.
+ * Build a detailed code-location string with optional line number, ISO
+ * timestamp, and a custom prefix. Useful for enhanced debugging or audit logs.
  *
- * @param {string | number} context - Context description of the operation or location.
- * @param {object | string | symbol} entity - The entity whose name is included; a function, class, or instance (all `object`), a string, or a symbol.
- * @param {object} [options] - Optional configuration for output.
- * @param {boolean} [options.includeLineNumber] - If true, appends the call site line number.
- * @param {boolean} [options.includeTimestamp] - If true, appends an ISO 8601 timestamp.
- * @param {string}  [options.customPrefix] - Custom prefix instead of default "location".
- * @returns {string} Detailed formatted location string.
- * @throws {Error} Does not throw directly but relies on internal getFilePath logic.
+ * Effectively non-throwing: line-number extraction is wrapped in its own
+ * try/catch and {@link getFilePath} never throws. When `includeTimestamp` is
+ * set the output reads the clock (`new Date()`), so the result is
+ * **non-deterministic** across calls; `includeLineNumber` likewise varies with
+ * the call site.
+ *
+ * @param context - Context description of the operation or location.
+ * @param entity - The entity whose name is included: a function, class, or instance, a string, or a symbol.
+ * @param options - Optional configuration for the output string.
+ * @param options.includeLineNumber - When true, appends the call-site line number; silently omitted if the stack cannot be parsed.
+ * @param options.includeTimestamp - When true, appends a live ISO 8601 timestamp (makes output time-dependent).
+ * @param options.customPrefix - Prefix to use instead of the default `"location"`.
+ * @returns The detailed formatted location string.
  * @example
- * parseCodePathDetailed('init', MyClass, {includeLineNumber: true, includeTimestamp: true});
- * // => "location: ...:42 [2024-06-01T08:00:00.000Z] @MyClass: init"
- *
-
- * @see parseCodePath
-
- * @readonly
- * @public
- * @version 1.0.0
+ * ```ts
+ * parseCodePathDetailed("init", MyClass, { includeLineNumber: true, includeTimestamp: true });
+ * // → "location: ...:42 [2024-06-01T08:00:00.000Z] @MyClass: init"
+ * ```
+ * @see {@link parseCodePath}
  */
 export const parseCodePathDetailed = (
 	context: string | number,
@@ -195,3 +207,5 @@ export const parseCodePathDetailed = (
 
 	return `${locationInfo} @${entityName}: ${context}`;
 };
+
+//#endregion

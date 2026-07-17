@@ -14,4 +14,16 @@
  * limitations under the License.
  */
 
-export * from "./button-group.js";
+/**
+ * @fileoverview Public barrel for the ButtonGroup component family (visually-joined
+ * control clusters) — re-exports `./button-group` as the `@resq-systems/ui/button-group` entry.
+ *
+ * @module @resq-systems/ui/components/button-group
+ */
+
+export {
+	ButtonGroup,
+	ButtonGroupSeparator,
+	ButtonGroupText,
+	buttonGroupVariants,
+} from "./button-group.js";

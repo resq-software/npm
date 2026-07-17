@@ -14,4 +14,22 @@
  * limitations under the License.
  */
 
-export * from "./drawer.js";
+/**
+ * @fileoverview Public barrel for the Drawer component family (bottom-sheet modals) —
+ * re-exports `./drawer` as the `@resq-systems/ui/drawer` entry.
+ *
+ * @module @resq-systems/ui/components/drawer
+ */
+
+export {
+	Drawer,
+	DrawerClose,
+	DrawerContent,
+	DrawerDescription,
+	DrawerFooter,
+	DrawerHeader,
+	DrawerOverlay,
+	DrawerPortal,
+	DrawerTitle,
+	DrawerTrigger,
+} from "./drawer.js";

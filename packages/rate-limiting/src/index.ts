@@ -42,6 +42,33 @@
  * ```
  */
 
-export * from "./decision.js";
-export * from "./throttle.js";
-export * from "./rate-limit.js";
+export { RateLimitDecisionSchema } from "./decision.js";
+export type { RateLimitCheckResult, RateLimitDecision } from "./decision.js";
+export {
+	debounce,
+	DebounceOptionsSchema,
+	KeyedDebounce,
+	KeyedStatsSchema,
+	KeyedThrottle,
+	LeakyBucketLimiter,
+	RateLimiterStatsSchema,
+	SlidingWindowCounter,
+	throttle,
+	ThrottleOptionsSchema,
+	TokenBucketLimiter,
+} from "./throttle.js";
+export type {
+	DebounceOptions,
+	KeyedRateLimiter,
+	KeyedStats,
+	RateLimiter,
+	RateLimiterStats,
+	ThrottleOptions,
+} from "./throttle.js";
+export {
+	MemoryRateLimitStore,
+	RATE_LIMIT_PRESETS,
+	RateLimitConfigSchema,
+	RedisRateLimitStore,
+} from "./rate-limit.js";
+export type { IRateLimitStore, RateLimitConfig } from "./rate-limit.js";

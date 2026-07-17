@@ -15,8 +15,11 @@
  */
 
 /**
- * @fileoverview TypeScript decorators for logging method calls, timing, and errors.
- * These decorators integrate with the Logger class to provide declarative logging.
+ * @fileoverview Method and class decorators for declarative logging of calls,
+ * timing, and errors — each routes through {@link Logger} using a per-class
+ * context so instrumentation stays out of method bodies.
+ *
+ * @module @resq-systems/logger/logger.decorators
  */
 
 import { Logger } from "./logger.js";
@@ -27,19 +30,27 @@ import type {
 	LogTimingOptions,
 } from "./logger.types.js";
 
+//#region Public API
+
 /**
- * Decorator that logs method entry and exit.
- * Can optionally log arguments and return values.
+ * Decorator that logs method entry and exit, optionally including the arguments
+ * and return value. Async methods are awaited so completion and failure are
+ * logged after the promise settles.
  *
- * @param {LogMethodOptions} [options={}] - Configuration options
- * @returns {MethodDecorator} The decorator function
+ * Failure logging is async-only: a rejected promise is logged as `failed` and
+ * re-thrown, but a *synchronous* throw propagates without a failure log (the
+ * entry log has already fired). The returned decorator replaces
+ * `descriptor.value` in place; it does not preserve the original method's `length`.
+ *
+ * @param options - Configuration options.
+ * @returns The method decorator.
  *
  * @example
- * ```typescript
+ * ```ts
  * class UserService {
  *   @Log({ logArgs: true, logResult: true })
  *   async getUser(id: string) {
- *     return { id, name: 'John' };
+ *     return { id, name: "John" };
  *   }
  * }
  * ```
@@ -60,17 +71,15 @@ export function Log(options: LogMethodOptions = {}): MethodDecorator {
 			const logger = Logger.getLogger(`[${className}]`);
 			const prefix = message || `${methodName}`;
 
-			// Log method entry
 			if (logArgs && args.length > 0) {
 				logger[level](`${prefix} called`, { arguments: args });
 			} else {
 				logger[level](`${prefix} called`);
 			}
 
-			// Execute the original method
 			const result = originalMethod.apply(this, args);
 
-			// Handle async methods
+			// Async methods are logged when the promise settles, not when it is returned.
 			if (result instanceof Promise) {
 				return result.then(
 					(value: unknown) => {
@@ -88,7 +97,6 @@ export function Log(options: LogMethodOptions = {}): MethodDecorator {
 				);
 			}
 
-			// Log sync method result
 			if (logResult) {
 				logger[level](`${prefix} returned`, { result });
 			} else {
@@ -103,16 +111,22 @@ export function Log(options: LogMethodOptions = {}): MethodDecorator {
 }
 
 /**
- * Decorator that logs method execution time.
- * Useful for performance monitoring.
+ * Decorator that logs method execution time, useful for performance monitoring.
+ * A log is emitted only when the measured duration meets or exceeds
+ * {@link LogTimingOptions.threshold}.
  *
- * @param {LogTimingOptions} [options={}] - Configuration options
- * @returns {MethodDecorator} The decorator function
+ * Async calls are timed across the whole promise via `finally`, so their timing
+ * logs even on rejection; a *synchronous* throw skips the timing log entirely
+ * (the duration line never runs). The decorator neither catches nor rethrows —
+ * errors propagate unchanged.
+ *
+ * @param options - Configuration options.
+ * @returns The method decorator.
  *
  * @example
- * ```typescript
+ * ```ts
  * class DataService {
- *   @LogTiming({ threshold: 100 }) // Only log if execution > 100ms
+ *   @LogTiming({ threshold: 100 }) // Only log if execution > 100ms.
  *   async fetchData() {
  *     // ... slow operation
  *   }
@@ -136,10 +150,9 @@ export function LogTiming(options: LogTimingOptions = {}): MethodDecorator {
 			const timerLabel = label || `${className}.${methodName}`;
 			const startTime = performance.now();
 
-			// Execute the original method
 			const result = originalMethod.apply(this, args);
 
-			// Handle async methods
+			// Async methods are timed across the full promise lifetime via `finally`.
 			if (result instanceof Promise) {
 				return result.finally(() => {
 					const duration = performance.now() - startTime;
@@ -149,7 +162,6 @@ export function LogTiming(options: LogTimingOptions = {}): MethodDecorator {
 				});
 			}
 
-			// Log sync method timing
 			const duration = performance.now() - startTime;
 			if (duration >= threshold) {
 				logger[level](`${timerLabel} completed in ${duration.toFixed(2)}ms`);
@@ -163,18 +175,24 @@ export function LogTiming(options: LogTimingOptions = {}): MethodDecorator {
 }
 
 /**
- * Decorator that wraps method in try/catch and logs errors.
- * Can optionally suppress the error or rethrow it.
+ * Decorator that wraps a method in try/catch and logs any error, then either
+ * rethrows it or swallows it (returning `undefined`) per
+ * {@link LogErrorOptions.rethrow}.
  *
- * @param {LogErrorOptions} [options={}] - Configuration options
- * @returns {MethodDecorator} The decorator function
+ * Both sync throws and async rejections are handled symmetrically. When
+ * `rethrow` is `false` the error is suppressed and the call resolves to
+ * `undefined` — for an async method that means a *resolved* promise, not a
+ * rejected one, so callers lose the failure signal by design.
+ *
+ * @param options - Configuration options.
+ * @returns The method decorator.
  *
  * @example
- * ```typescript
+ * ```ts
  * class ApiService {
- *   @LogError({ rethrow: false, message: 'API call failed' })
+ *   @LogError({ rethrow: false, message: "API call failed" })
  *   async callApi() {
- *     throw new Error('Network error');
+ *     throw new Error("Network error");
  *   }
  * }
  * ```
@@ -198,7 +216,7 @@ export function LogError(options: LogErrorOptions = {}): MethodDecorator {
 			try {
 				const result = originalMethod.apply(this, args);
 
-				// Handle async methods
+				// Async rejections are caught on the returned promise, mirroring the sync catch below.
 				if (result instanceof Promise) {
 					return result.catch((error: unknown) => {
 						const errorData: Record<string, unknown> = { method: methodName };
@@ -228,18 +246,27 @@ export function LogError(options: LogErrorOptions = {}): MethodDecorator {
 }
 
 /**
- * Class decorator that applies logging to all methods of a class.
- * Can be configured to exclude specific methods.
+ * Class decorator that wraps every own prototype method with call (and optional
+ * timing) logging, skipping the constructor and any names in
+ * {@link LogClassOptions.exclude}.
  *
- * @param {LogClassOptions} [options={}] - Configuration options
- * @returns {ClassDecorator} The decorator function
+ * Mutates the target's prototype in place, redefining each own method via
+ * `Object.defineProperty`, then returns the same constructor reference (not a
+ * subclass). Only own, enumerable-by-`getOwnPropertyNames` function properties
+ * are wrapped: inherited methods, accessors (getters/setters), and
+ * property-assigned arrow functions are left untouched. As with {@link Log},
+ * failures are logged only on the async path; a synchronous throw propagates
+ * un-logged.
+ *
+ * @param options - Configuration options.
+ * @returns A class decorator that returns the (mutated) constructor.
  *
  * @example
- * ```typescript
- * @LogClass({ exclude: ['privateMethod'], timing: true })
+ * ```ts
+ * @LogClass({ exclude: ["privateMethod"], timing: true })
  * class MyService {
- *   publicMethod() { ... }
- *   privateMethod() { ... } // Won't be logged
+ *   publicMethod() {}
+ *   privateMethod() {} // Won't be logged.
  * }
  * ```
  */
@@ -252,9 +279,7 @@ export function LogClass(
 		const className = target.name;
 		const prototype = target.prototype;
 
-		// Only apply decorators if prototype exists
 		if (prototype) {
-			// Get all method names from the prototype
 			const methodNames = Object.getOwnPropertyNames(prototype).filter(
 				(name) =>
 					name !== "constructor" &&
@@ -262,7 +287,6 @@ export function LogClass(
 					!exclude.includes(name),
 			);
 
-			// Apply decorators to each method
 			for (const methodName of methodNames) {
 				const descriptor = Object.getOwnPropertyDescriptor(prototype, methodName);
 				if (!descriptor) continue;
@@ -314,3 +338,5 @@ export function LogClass(
 		return target;
 	};
 }
+
+//#endregion

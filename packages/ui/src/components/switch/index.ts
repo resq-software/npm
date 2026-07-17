@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./switch.js";
+/**
+ * @fileoverview Public barrel for the Switch component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/switch`.
+ *
+ * @module @resq-systems/ui/components/switch
+ */
+
+export { Switch } from "./switch.js";

@@ -14,4 +14,21 @@
  * limitations under the License.
  */
 
-export * from "./command.js";
+/**
+ * @fileoverview Public barrel for the Command component family (keyboard-first command
+ * palette) — re-exports `./command` as the `@resq-systems/ui/command` entry.
+ *
+ * @module @resq-systems/ui/components/command
+ */
+
+export {
+	Command,
+	CommandDialog,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+	CommandSeparator,
+	CommandShortcut,
+} from "./command.js";

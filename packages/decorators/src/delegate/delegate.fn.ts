@@ -14,45 +14,42 @@
  * limitations under the License.
  */
 
-import type { AsyncMethod } from "../types.js";
-
-/*
- * Copyright 2026 ResQ Systems, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /**
- * @fileoverview Delegate function implementation - wraps an async method to
- * deduplicate concurrent calls with the same arguments.
+ * @fileoverview Function form of `@delegate` — `delegateFn(method, keyResolver?)`
+ * wraps an async method so concurrent calls that map to the same key share a
+ * single in-flight promise instead of issuing duplicate requests.
  *
- * @module @resq/typescript/decorators/delegate.fn
- *
- * @copyright Copyright (c) 2026 ResQ
- * @license MIT
+ * @module @resq-systems/decorators/delegate/delegate.fn
  */
+
+import type { AsyncMethod } from "../types.js";
 
 /**
  * Wraps an async method to deduplicate concurrent calls.
  * Multiple calls with the same key will share the same promise
  * until the first one completes.
  *
- * @template D - The resolved type of the promise
- * @template A - The argument types of the original method
- * @param {AsyncMethod<D, A>} originalMethod - The async method to wrap
- * @param {(...args: A) => string} [keyResolver] - Optional function to generate cache keys
- * @returns {AsyncMethod<D, A>} The delegated method
+ * Keeps a per-wrapper `Map` of in-flight promises keyed by `keyResolver` (or, by
+ * default, `JSON.stringify(args)`). The entry is removed via `.finally` once the
+ * promise **settles** — resolve *or* reject — so dedup only spans overlapping
+ * in-flight calls; a call after settlement re-invokes the method. Concurrent
+ * callers sharing a key share its fate: one rejection rejects them all. Distinct
+ * keys never dedup. There is no `AbortSignal` support and no ordering guarantee
+ * across keys.
  *
+ * The key is computed **synchronously** before the method is called, so a
+ * throwing key generator (the default `JSON.stringify` on a circular or `BigInt`
+ * argument, or a custom `keyResolver` that throws) propagates as a synchronous
+ * exception, not a rejected promise. Failures from `originalMethod` itself are
+ * rejected promises.
+ *
+ * @template D - The resolved type of the promise.
+ * @template A - The argument types of the original method.
+ * @param originalMethod - The async method to wrap.
+ * @param keyResolver - Optional function to generate cache keys from arguments.
+ * @returns The delegated method that shares in-flight promises by key.
+ * @throws {TypeError} Synchronously, when the default key generator cannot
+ *   `JSON.stringify` the arguments (circular reference or `BigInt`).
  * @example
  * ```typescript
  * class Service {

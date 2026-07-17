@@ -21,24 +21,29 @@
  * the multi-section coordination of `Accordion`.
  *
  * Composition: `Collapsible > CollapsibleTrigger + CollapsibleContent`.
+ *
+ * @module @resq-systems/ui/components/collapsible/collapsible
  */
 
 "use client";
 
 import { Collapsible as CollapsiblePrimitive } from "radix-ui";
 
+/** Root of a single-panel disclosure; owns the open/closed state. */
 function Collapsible({
 	...props
 }: Readonly<React.ComponentProps<typeof CollapsiblePrimitive.Root>>) {
 	return <CollapsiblePrimitive.Root data-slot="collapsible" {...props} />;
 }
 
+/** The region shown or hidden as the collapsible toggles. */
 function CollapsibleContent({
 	...props
 }: Readonly<React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleContent>>) {
 	return <CollapsiblePrimitive.CollapsibleContent data-slot="collapsible-content" {...props} />;
 }
 
+/** Control that toggles the collapsible open or closed. */
 function CollapsibleTrigger({
 	...props
 }: Readonly<React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleTrigger>>) {

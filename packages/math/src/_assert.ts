@@ -15,19 +15,19 @@
  */
 
 /**
- * @file Exhaustiveness assertion helper
- * @module math/_assert
- * @description Local, zero-dependency exhaustiveness guard for `switch` default
- *              arms and other spots that must never be reached at the type level.
+ * @fileoverview Local, zero-dependency exhaustiveness guard for `switch` default
+ * arms and other spots that must never be reached at the type level.
+ *
+ * @module @resq-systems/math/_assert
  */
 
 /**
- * Asserts that a code path is unreachable. Placing this in a `switch` default
- * arm makes the compiler reject the switch if any union member is left
- * unhandled, because a non-`never` value cannot be passed here.
+ * Assert that a code path is unreachable. Placing this in a `switch` default arm
+ * makes the compiler reject the switch if any union member is left unhandled,
+ * because a non-`never` value cannot be passed here.
  *
  * @param value - The value the type system has narrowed to `never`.
- * @throws Always throws at runtime if somehow reached (e.g. untyped input).
+ * @throws {Error} Always, if somehow reached at runtime (e.g. untyped input).
  */
 export function assertNever(value: never): never {
 	throw new Error(`Unexpected value: ${String(value)}`);

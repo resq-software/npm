@@ -32,9 +32,15 @@ import { RecursionLimitError } from "./error.js";
 /**
  * Compile a named mathematical expression AST into an index-based executable AST.
  *
+ * Pure: returns a fresh tree and does not mutate `expr` or `scope`. It never
+ * fails on unknown variables — a name not bound by an enclosing binder or lambda
+ * becomes a {@link CFreeVarExpr}, deferred to {@link evaluate} to resolve (or
+ * reject) against the environment.
+ *
  * @param expr - The named AST node to compile.
  * @param scope - The stack of active lexical variable names (innermost binder at the end).
  * @returns The compiled expression node.
+ * @throws {RecursionLimitError} When the expression nests deeper than the internal limit (200).
  */
 export function compile(expr: Expr, scope: readonly string[] = []): CompiledExpr {
 	return compileInternal(expr, scope, 0);

@@ -14,15 +14,28 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Locale-aware date/time formatting built on `Intl.DateTimeFormat`
+ * (fixed to UTC to avoid SSR hydration mismatches): absolute dates, periods, and
+ * relative time.
+ *
+ * @module @resq-systems/helpers/formatting/date
+ */
+
 import type { DateFormatOptions } from "./date.types.js";
 
 /**
- * Formats a date string to a consistent format to prevent hydration mismatches.
+ * Format a date to a consistent, UTC-fixed string to prevent hydration
+ * mismatches. Invalid dates return `"Invalid date"` rather than throwing.
  *
- * @param {string | Date} date - The date to format (ISO string or Date object).
- * @param {DateFormatOptions} [options] - Optional formatting options.
- * @returns {string} The formatted date string.
- * @throws {Error} If the date is invalid.
+ * Pure aside from a `console.error` emitted on the unexpected-`Intl`-failure
+ * path before the sentinel is returned.
+ *
+ * @param date - The date to format (ISO string or `Date` object).
+ * @param options - Optional formatting options.
+ * @returns The formatted date string, or the `"Invalid date"` sentinel when the
+ *   input cannot be parsed or `Intl` formatting throws — branch on this string
+ *   rather than assuming a valid result.
  * @example
  * ```ts
  * formatDate('2023-01-15T10:00:00Z', { month: 'short', year: 'numeric' })
@@ -58,10 +71,15 @@ export function formatDate(
 /**
  * Formats a date period (start to end or start to present).
  *
- * @param {string | Date} startDate - The start date.
- * @param {string | Date | null} [endDate] - The end date, or null for ongoing.
- * @param {boolean} [isCurrent=false] - Whether the period is current/ongoing.
- * @returns {string} The formatted date period string.
+ * The period is treated as ongoing (`"… - Present"`) when `isCurrent` is `true`
+ * **or** when `endDate` is omitted/`null` — so a missing end date always reads
+ * as "Present" regardless of `isCurrent`.
+ *
+ * @param startDate - The start date.
+ * @param endDate - The end date; `null`/omitted means ongoing ("Present").
+ * @param isCurrent - Forces the ongoing ("Present") rendering even when an
+ *   `endDate` is supplied.
+ * @returns The formatted date period string.
  * @example
  * ```ts
  * formatDatePeriod('2023-01-01', '2023-12-31')
@@ -93,8 +111,8 @@ export function formatDatePeriod(
 /**
  * Formats a full date with time for display.
  *
- * @param {string | Date} date - The date to format.
- * @returns {string} The formatted date and time string.
+ * @param date - The date to format.
+ * @returns The formatted date and time string.
  * @example
  * ```ts
  * formatDateTime('2023-01-15T14:30:00Z')
@@ -114,8 +132,8 @@ export function formatDateTime(date: string | Date): string {
 /**
  * Formats a date for display without time.
  *
- * @param {string | Date} date - The date to format.
- * @returns {string} The formatted date string.
+ * @param date - The date to format.
+ * @returns The formatted date string.
  * @example
  * ```ts
  * formatDateOnly('2023-01-15')
@@ -133,8 +151,8 @@ export function formatDateOnly(date: string | Date): string {
 /**
  * Formats a month and year for display.
  *
- * @param {string | Date} date - The date to format.
- * @returns {string} The formatted month and year string.
+ * @param date - The date to format.
+ * @returns The formatted month and year string.
  * @example
  * ```ts
  * formatMonthYear('2023-01-15')
@@ -151,8 +169,14 @@ export function formatMonthYear(date: string | Date): string {
 /**
  * Formats a relative time string (e.g. "2 days ago").
  *
- * @param {string | Date} date - The date to format.
- * @returns {string} The relative time string.
+ * Reads the current clock (`new Date()`), so the result is **non-deterministic**
+ * and depends on when it is called. Only past instants are described: a `date`
+ * in the future yields a negative delta that falls through every branch and
+ * returns `"Just now"`. Granularity tops out at days (no weeks/months/years).
+ *
+ * @param date - The date to compare against now (ISO string or `Date`).
+ * @returns The relative time string — one of `"Just now"`, `"N minute(s) ago"`,
+ *   `"N hour(s) ago"`, or `"N day(s) ago"`.
  */
 export function formatRelativeTime(date: Date | string): string {
 	const d = typeof date === "string" ? new Date(date) : date;

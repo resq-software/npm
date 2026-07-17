@@ -14,5 +14,13 @@
  * limitations under the License.
  */
 
-export * from "./tokens.js";
-export * from "./brand.js";
+/**
+ * @fileoverview Package barrel that re-exports the design tokens and brand
+ * identity constants, so consumers can import everything from the package root.
+ *
+ * @module @resq-systems/constants
+ */
+
+export { colors, fonts, radii, themeColor } from "./tokens.js";
+export type { ColorRole, ColorTokenName, OklchColorRole, StatusRole } from "./tokens.js";
+export { brand } from "./brand.js";

@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./toggle.js";
+/**
+ * @fileoverview Public barrel for the Toggle component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/toggle`.
+ *
+ * @module @resq-systems/ui/components/toggle
+ */
+
+export { Toggle, toggleVariants } from "./toggle.js";

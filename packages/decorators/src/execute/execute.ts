@@ -15,10 +15,11 @@
  */
 
 /**
- * @fileoverview Execute decorator - automatically instantiates a class
- * when it's decorated. Useful for singleton pattern implementation.
+ * @fileoverview `@selfExecute` class decorator — automatically instantiates a
+ * class when it is decorated, so its side-effectful constructor runs as the
+ * module loads. Useful for singleton-pattern implementations.
  *
- * @module @resq/typescript/decorators/execute
+ * @module @resq-systems/decorators/execute/execute
  *
  * @example
  * ```typescript
@@ -41,19 +42,25 @@
  * // The class is automatically instantiated
  * // SingletonService.doSomething(); // If methods were static
  * ```
- *
- * @copyright Copyright (c) 2026 ResQ
- * @license MIT
  */
 
 /**
  * Class decorator that automatically instantiates the class when decorated.
  * Creates an instance immediately and returns the constructor.
  *
- * @template T - The type of the class constructor
- * @param {T} constructor - The class constructor
- * @returns {T} The constructor (with instance created as side effect)
+ * The instantiation is a **side effect that runs at decoration time** — i.e. as
+ * the class's module is evaluated — so the constructor's effects (registering
+ * listeners, singleton wiring, telemetry init) fire on import. The created
+ * instance is discarded, not returned or retained here; only what the
+ * constructor does persists (e.g. a static singleton it stores on itself). The
+ * constructor is returned **unchanged**, so the class's own type is preserved.
+ * Anything the constructor throws propagates out of module evaluation.
  *
+ * @template T - The class constructor type; the `new (...args: never[]) => object`
+ *   bound requires a constructor callable with no required arguments.
+ * @param constructor - The class constructor.
+ * @returns The constructor (with the instance created as a side effect).
+ * @throws Whatever `constructor` throws, at decoration/module-load time.
  * @example
  * ```typescript
  * @selfExecute

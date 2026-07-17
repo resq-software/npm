@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./direction.js";
+/**
+ * @fileoverview Public barrel for the Direction provider (RTL/LTR direction context) —
+ * re-exports `./direction` as the `@resq-systems/ui/direction` entry.
+ *
+ * @module @resq-systems/ui/components/direction
+ */
+
+export { DirectionProvider, useDirection } from "./direction.js";

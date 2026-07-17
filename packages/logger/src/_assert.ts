@@ -15,6 +15,13 @@
  */
 
 /**
+ * @fileoverview Compile-time exhaustiveness helper — {@link assertNever} forces
+ * TypeScript to flag any unhandled union case in a `switch` default arm.
+ *
+ * @module @resq-systems/logger/_assert
+ */
+
+/**
  * Compile-time exhaustiveness guard. Placing a call in the `default` arm of a
  * `switch` over a finite union makes TypeScript error if a case is ever left
  * unhandled, keeping the mapping in sync with the union it switches over.
@@ -22,8 +29,8 @@
  * If reached at runtime, it throws — signalling an unhandled value slipped past
  * the type system.
  *
- * @param value - The value that should have been narrowed to `never`
- * @throws {Error} Always, when invoked at runtime
+ * @param value - The value that should have been narrowed to `never`.
+ * @throws {Error} Always, when invoked at runtime.
  */
 export function assertNever(value: never): never {
 	throw new Error(`Unhandled case: ${String(value)}`);

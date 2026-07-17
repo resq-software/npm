@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Security-alert email component for a new device or location signing in.
+ *
+ * @module @resq-systems/email-templates/emails/new-device-login
+ */
+
 import type { NewDeviceLoginData } from "../schemas.js";
 import { Email } from "./primitives.js";
 
+/** Props for {@link NewDeviceLoginEmail} — the new-device-login template's validated `data`. */
 export type NewDeviceLoginEmailProps = NewDeviceLoginData;
 
 /** Security alert: a new device or location signed in to the account. */

@@ -15,6 +15,14 @@
  */
 
 /**
+ * @fileoverview Value guards and cloning — `isDefined`/`isNonNull`/`isNonNullish`
+ * narrowing type guards and a `structuredClone` with a JSON fallback for older
+ * runtimes.
+ *
+ * @module @resq-systems/helpers/utils/value
+ */
+
+/**
  * Get whether a value is not undefined.
  *
  * @param value - The value to check.
@@ -109,8 +117,20 @@ const _structuredClone = getStructuredClone();
 /**
  * Create a deep copy of a value. Uses the structuredClone API if available, otherwise uses JSON.parse(JSON.stringify()).
  *
+ * The two backends are **not** equivalent, and which one is active is fixed at
+ * module load (see {@link isNativeStructuredClone}):
+ * - Native: preserves `Date`, `Map`, `Set`, `ArrayBuffer`, cyclic references, etc.
+ * - JSON fallback: only round-trips JSON-representable data — `Date` becomes a
+ *   string, `Map`/`Set`/functions/`undefined` are dropped, and a falsy input is
+ *   returned as-is without copying. The example below is faithful under the native
+ *   backend; under the fallback the `date` field would come back as a string.
+ *
  * @param i - The value to clone.
  * @returns A deep copy of the input value.
+ * @throws {DataCloneError} (native backend) if `i` holds a non-cloneable value
+ *   such as a function or symbol.
+ * @throws {TypeError} (JSON fallback) if `i` contains a circular reference or a
+ *   `BigInt`, since `JSON.stringify` cannot serialize either.
  * @example
  * ```ts
  * const original = { a: 1, b: { c: 2 } }
@@ -134,6 +154,11 @@ export const structuredClone = _structuredClone[0];
 
 /**
  * Whether the current environment has native structuredClone support.
+ *
+ * Resolved once at module load. When `false`, {@link structuredClone} uses the
+ * JSON fallback with all its limitations (no `Date`/`Map`/`Set`/functions, throws
+ * on cycles and `BigInt`) — branch on this when clone fidelity matters.
+ *
  * @returns True if using native structuredClone, false if using JSON fallback.
  * @internal
  */

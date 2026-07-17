@@ -14,19 +14,32 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Function form of the `@throttle` decorator — wraps a method so it
+ * runs at most once per interval, dropping excess calls.
+ *
+ * @module @resq-systems/decorators/throttle/throttle.fn
+ */
+
 import type { Method } from "../types.js";
 
 /**
- * Wraps a method to throttle its execution to once per time period.
+ * Wrap a method so it executes at most once per `delayMs` (function form of
+ * {@link throttle}). Calls made during the cooldown are dropped.
  *
- * @template D - The return type of the original method
- * @template A - The argument types of the original method
- * @param {Method<D, A>} originalMethod - The method to throttle
- * @param {number} delayMs - The throttle interval in milliseconds
- * @returns {Method<void, A>} The throttled method
+ * Leading-edge only — the first call runs synchronously and dropped calls are not
+ * replayed on the trailing edge. Each admitted call schedules a `setTimeout` that
+ * reopens the gate after `delayMs` (a clock/timer effect); the cooldown cannot be
+ * cancelled. Every call to `throttleFn` owns its own cooldown state.
  *
+ * @template D - The return type of the original method.
+ * @template A - The argument tuple of the original method.
+ * @param originalMethod - The method to throttle.
+ * @param delayMs - The minimum interval between executions, in milliseconds.
+ * @returns The throttled method. It always returns `void`; the wrapped method's
+ * return value is discarded.
  * @example
- * ```typescript
+ * ```ts
  * class ScrollTracker {
  *   scrollY = 0;
  *

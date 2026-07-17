@@ -15,14 +15,17 @@
  */
 
 /**
- * @file Security Middleware Utilities
+ * @fileoverview Framework-agnostic security middleware helpers: deciding whether a
+ * request must be redirected to HTTPS, and safe request-ID sanitization/minting.
+ * Supports NIST 800-53 SC-8 (transmission confidentiality) and SC-23 (session
+ * authenticity).
+ *
  * @module @resq-systems/http/security
- * @author ResQ
- * @description Framework-agnostic security middleware logic.
- * @compliance NIST 800-53 SC-8 (Transmission Confidentiality), SC-23 (Session Authenticity)
  */
 
 import { type Brand, brandRefiner, type LiteralUnion, unsafeBrand } from "@resq-systems/types";
+
+//#region HTTPS Redirect
 
 /**
  * Decide whether an inbound HTTP request must be redirected to HTTPS,
@@ -49,6 +52,10 @@ import { type Brand, brandRefiner, type LiteralUnion, unsafeBrand } from "@resq-
  * @returns The redirect target (an `https://` URL) when a redirect is
  *   required, otherwise `null` (the request is already secure or in a
  *   non-prod environment).
+ * @throws {TypeError} If a redirect is required (production/non-test and
+ *   not already secure) and `url` is not a parseable absolute URL — it is
+ *   passed to the `URL` constructor to derive the target. Not thrown on
+ *   the `null` paths, which never parse `url`.
  *
  * @compliance NIST 800-53 SC-8 (Transmission Confidentiality).
  *
@@ -88,6 +95,10 @@ export function shouldRedirectToHttps(
 
 	return null;
 }
+
+//#endregion
+
+//#region Request ID
 
 /**
  * A correlation ID that is safe to write into log lines, response headers, and
@@ -175,3 +186,5 @@ export function getRequestId(existingId?: string): RequestId {
 		? sanitizeRequestId(existingId)
 		: unsafeBrand<"RequestId", string>(crypto.randomUUID());
 }
+
+//#endregion

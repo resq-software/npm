@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Typed object helpers — own-property access, key/value/entry maps
+ * that preserve literal types, shallow and float-tolerant deep equality, grouping,
+ * and omit.
+ *
+ * @module @resq-systems/helpers/utils/object
+ */
+
 import isEqualWith from "lodash.isequalwith";
 
 /**
@@ -185,6 +193,10 @@ export function objectMapFromEntries<Key extends string, Value>(
 /**
  * Filters an object using a predicate function, returning a new object with only the entries
  * that pass the predicate. Optimized to return the original object if no changes are needed.
+ *
+ * When nothing is filtered out, the **same** object reference is returned (not a
+ * copy) — callers relying on referential equality for memoization can depend on
+ * this. Only own enumerable string keys are considered.
  *
  * @param object - The object to filter
  * @param predicate - Function that tests each key-value pair
@@ -367,9 +379,16 @@ export function getChangedKeys<T extends object>(obj1: T, obj2: T): (keyof T)[] 
  * Numbers are considered equal if they differ by less than the threshold.
  * Uses lodash.isequalwith internally for the deep comparison logic.
  *
+ * Only the numeric leaves are tolerance-compared (`Math.abs(a - b) < threshold`,
+ * a strict `<`); every other value falls back to lodash's deep structural
+ * equality. Because the comparison is `NaN`-unaware, two `NaN` leaves are treated
+ * as unequal.
+ *
  * @param obj1 - First object to compare
  * @param obj2 - Second object to compare
- * @param threshold - Maximum difference allowed between numbers (default: 0.000001)
+ * @param threshold - Maximum absolute difference two numbers may have and still
+ *   count as equal (default: `0.000001`). Must be non-negative; a `0` threshold
+ *   makes numbers effectively exact (any difference fails).
  * @returns True if objects are deeply equal with floating-point tolerance
  * @example
  * ```ts

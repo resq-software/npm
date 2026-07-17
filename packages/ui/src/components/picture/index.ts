@@ -14,5 +14,12 @@
  * limitations under the License.
  */
 
-export * from "./picture.js";
-export * from "./types.js";
+/**
+ * @fileoverview Public barrel for the Picture component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/picture`.
+ *
+ * @module @resq-systems/ui/components/picture
+ */
+
+export { Picture, PictureInternal } from "./picture.js";
+export type { DistributiveOmit, LqipEntry, LqipValue, Overwrite } from "./types.js";

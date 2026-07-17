@@ -23,6 +23,8 @@
  * Touch target extends 8/12 pixels beyond the visual hit area via
  * a transparent `::after` pseudo-element so mobile taps land
  * reliably on smaller screens.
+ *
+ * @module @resq-systems/ui/components/switch/switch
  */
 
 "use client";

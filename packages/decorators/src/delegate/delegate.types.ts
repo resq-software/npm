@@ -14,45 +14,33 @@
  * limitations under the License.
  */
 
-import type { AsyncMethod } from "../types.js";
-/*
- * Copyright 2026 ResQ Systems, Inc.
+/**
+ * @fileoverview Type for the `@delegate` decorator — `Delegatable` describes a
+ * method decorator that transforms an async method into one that deduplicates
+ * concurrent calls with the same key.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * @module @resq-systems/decorators/delegate/delegate.types
  */
 
-/**
- * @fileoverview Type definitions for the Delegate decorator.
- * Provides the Delegatable type for method decorators that deduplicate async calls.
- *
- * @module @resq/typescript/decorators/delegate/types
- *
- * @copyright Copyright (c) 2026 ResQ
- * @license MIT
- */
+import type { AsyncMethod } from "../types.js";
 
 /**
  * Type for the @delegate decorator function.
  * Transforms an async method into one that deduplicates concurrent calls.
  *
- * @template T - The type of the class containing the decorated method
- * @template D - The return type of the decorated async method
+ * The legacy (`experimentalDecorators`) method-decorator shape: it accepts and
+ * returns a descriptor over the *same* {@link AsyncMethod} type, so the
+ * decorated method keeps its resolved-value signature. It applies only to
+ * promise-returning members, since dedup is defined in terms of an in-flight
+ * promise.
  *
- * @param {T} target - The class prototype
- * @param {keyof T} propertyName - The name of the method being decorated
- * @param {TypedPropertyDescriptor<AsyncMethod<D>>} descriptor - The property descriptor
- * @returns {TypedPropertyDescriptor<AsyncMethod<D>>} The modified descriptor
- *
+ * @template T - The class owning the decorated method; `propertyName` is a
+ *   `keyof T`.
+ * @template D - The value the decorated async method resolves to.
+ * @param target - The class prototype.
+ * @param propertyName - The name of the method being decorated.
+ * @param descriptor - The property descriptor.
+ * @returns The modified descriptor.
  * @example
  * ```typescript
  * type MyDelegatable = Delegatable<MyService, User>;

@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `Timers` — tracks timeouts, intervals, and animation frames by
+ * named context so they can be disposed together, preventing leaks.
+ *
+ * @module @resq-systems/helpers/utils/timers
+ */
+
 /* eslint-disable tldraw/no-restricted-properties */
 
 /**
  * A utility class for managing timeouts, intervals, and animation frames with context-based organization and automatic cleanup.
  * Helps prevent memory leaks by organizing timers into named contexts that can be cleared together.
+ *
+ * Browser-only: schedules through `window.setTimeout` / `window.setInterval` /
+ * `window.requestAnimationFrame`, so it requires a `window` global. Each schedule
+ * call mutates the instance's internal per-context registries; {@link dispose} and
+ * {@link disposeAll} cancel and forget them.
  * @example
  * ```ts
  * const timers = new Timers()
@@ -126,7 +138,6 @@ export class Timers {
 	 * Disposes of all timers associated with the specified context.
 	 * Clears all timeouts, intervals, and animation frames for the given context ID.
 	 * @param contextId - The context identifier whose timers should be cleared.
-	 * @returns void
 	 * @example
 	 * ```ts
 	 * const timers = new Timers()
@@ -151,7 +162,12 @@ export class Timers {
 	/**
 	 * Disposes of all timers across all contexts.
 	 * Clears every timeout, interval, and animation frame managed by this instance.
-	 * @returns void
+	 *
+	 * Caveat: iteration is driven by the timeout registry's keys, so only contexts
+	 * that registered at least one timeout via {@link setTimeout} are visited. A
+	 * context that registered *only* intervals or animation frames (never a
+	 * timeout) is not cleared by this method — dispose it explicitly with
+	 * {@link dispose}.
 	 * @example
 	 * ```ts
 	 * const timers = new Timers()

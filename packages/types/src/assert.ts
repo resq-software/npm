@@ -17,6 +17,8 @@
 /**
  * @fileoverview Compile-time exhaustiveness enforcement.
  *
+ * @module @resq-systems/types/assert
+ *
  * A `switch` (or `if`/`else` chain) over a discriminated union should handle
  * every case. {@link assertNever} turns "someone added a new union member and
  * forgot to handle it" from a silent runtime fall-through into a **compile

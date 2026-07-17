@@ -15,13 +15,12 @@
  */
 
 /**
- * @fileoverview A comprehensive logging utility for both client and server environments.
- * Provides structured logging with support for different log levels, colorization,
- * and contextual information.
+ * @fileoverview Structured logger for both client and server environments —
+ * level-filtered console output plus a fan-out to registered transports. Uses
+ * native console methods with no external dependencies; output follows the
+ * pattern `TIMESTAMP LEVEL [CONTEXT] message { data }`.
  *
- * This logger uses native console methods with structured formatting — no external
- * dependencies are required. Log output follows the pattern:
- *   TIMESTAMP LEVEL [CONTEXT] message { data }
+ * @module @resq-systems/logger/logger
  */
 
 import { assertNever } from "./_assert.js";
@@ -33,10 +32,12 @@ import type {
 	LogTransport,
 } from "./logger.types.js";
 
+//#region Types
+
 /**
- * Enum representing different logging levels with their priority values.
- * Higher values indicate more verbose logging.
- * @enum {number}
+ * Logging levels with their priority values; higher values enable more verbose
+ * logging. A message is emitted only when its level is at or below the logger's
+ * configured minimum.
  */
 export enum LogLevel {
 	/** No logging */
@@ -60,6 +61,10 @@ export enum LogLevel {
  * the enum so the parser's accepted level names can never drift from it.
  */
 type LogLevelName = keyof typeof LogLevel;
+
+//#endregion
+
+//#region Public API
 
 /**
  * A versatile logging utility that works in both browser and Node.js environments.
@@ -121,14 +126,17 @@ export class Logger {
 	private static readonly instances: Map<string, Logger> = new Map();
 
 	/**
-	 * Create a new Logger instance or return an existing one for the given context
-	 * @param {string} context - The context name for this logger (e.g., component or service name)
-	 * @param {LoggerOptions} [options={}] - Optional logger configuration
+	 * Create a new logger for the given context. Prefer {@link Logger.getLogger}
+	 * to reuse a shared instance per context.
+	 *
+	 * @param context - The context name for this logger (e.g. component or service name).
+	 * @param options - Optional logger configuration.
 	 */
 	constructor(context: string, options: LoggerOptions = {}) {
 		this.context = context;
 
-		// Priority: options.minLevel > LOG_LEVEL env > BUN_LOG_LEVEL env > Default
+		// Resolve the minimum level by precedence: explicit option, then the
+		// LOG_LEVEL / BUN_LOG_LEVEL env vars, then a NODE_ENV-based default.
 		const env = typeof process !== "undefined" ? process.env : {};
 		const envLevel = Logger.parseLevel(env.LOG_LEVEL || env.BUN_LOG_LEVEL);
 
@@ -139,12 +147,16 @@ export class Logger {
 	}
 
 	/**
-	 * Get a logger instance for the given context.
-	 * If a logger with this context already exists, returns the existing instance.
+	 * Get the shared logger instance for the given context, creating it on first
+	 * use. Subsequent calls with the same context return the same instance, so
+	 * `options` is honoured only on creation.
 	 *
-	 * @param {string} context - The context name
-	 * @param {LoggerOptions} [options] - Optional logger configuration
-	 * @returns {Logger} A logger instance for the specified context
+	 * On first use for a context this mutates the process-global instance
+	 * registry; the cached instance then lives for the process lifetime.
+	 *
+	 * @param context - The context name.
+	 * @param options - Optional logger configuration, applied only when creating.
+	 * @returns The logger instance for the specified context.
 	 */
 	public static getLogger(context: string, options?: LoggerOptions): Logger {
 		let instance = Logger.instances.get(context);
@@ -158,9 +170,13 @@ export class Logger {
 	}
 
 	/**
-	 * Set global minimum log level for all logger instances
+	 * Set the global minimum log level across every existing logger instance.
 	 *
-	 * @param {LogLevel} level - The minimum level to log across all loggers
+	 * Mutates the `minLevel` of every logger currently in the registry. Instances
+	 * created *after* this call are unaffected and resolve their own level from
+	 * options/env as usual — this is a one-shot sweep, not a persistent floor.
+	 *
+	 * @param level - The minimum level to log across all loggers.
 	 */
 	public static setGlobalLogLevel(level: LogLevel): void {
 		Logger.instances.forEach((logger) => {
@@ -178,6 +194,11 @@ export class Logger {
 	/**
 	 * Register a {@link LogTransport} to receive a structured {@link LogEntry} for
 	 * every log emitted by any logger instance (after level filtering).
+	 *
+	 * Mutates the process-global transport registry shared by all `Logger`
+	 * instances. Idempotent by identity: re-adding the same reference is a no-op
+	 * (but a distinct object with the same `name` *is* added again). Calling the
+	 * returned unsubscribe more than once is safe.
 	 *
 	 * @param transport - The transport to add. A transport already present (by
 	 *   identity) is not added twice.
@@ -202,6 +223,11 @@ export class Logger {
 	/**
 	 * Remove a previously-registered transport, matched by identity or by its
 	 * `name`. No-op if it is not registered.
+	 *
+	 * Mutates the process-global transport registry. When matching by `name` and
+	 * several transports share it, only the first match is removed.
+	 *
+	 * @param transport - The transport instance to remove, or the `name` to match.
 	 */
 	public static removeTransport(transport: LogTransport | string): void {
 		const index = Logger.transports.findIndex((registered) =>
@@ -306,10 +332,10 @@ export class Logger {
 	}
 
 	/**
-	 * Log an informational message
+	 * Log an informational message.
 	 *
-	 * @param {string} message - The message to log
-	 * @param {LogData} [data] - Optional data to include
+	 * @param message - The message to log.
+	 * @param data - Optional structured data to include.
 	 */
 	info(message: string, data?: LogData): void {
 		if (this.minLevel < LogLevel.INFO) return;
@@ -317,11 +343,13 @@ export class Logger {
 	}
 
 	/**
-	 * Log an error message
+	 * Log an error message. An `Error` value is flattened to `{ name, message,
+	 * stack }` (falling back to `error.cause.message` when the top-level message
+	 * is empty) before being attached under `data.error`.
 	 *
-	 * @param {string} message - The error message
-	 * @param {Error|unknown} [error] - Optional Error object or unknown error
-	 * @param {LogData} [data] - Optional additional data
+	 * @param message - The error message.
+	 * @param error - Optional `Error` or otherwise-unknown error value.
+	 * @param data - Optional additional structured data.
 	 */
 	error(message: string, error?: unknown, data?: LogData): void {
 		if (this.minLevel < LogLevel.ERROR) return;
@@ -338,10 +366,10 @@ export class Logger {
 	}
 
 	/**
-	 * Log a warning message
+	 * Log a warning message.
 	 *
-	 * @param {string} message - The warning message
-	 * @param {LogData} [data] - Optional data to include
+	 * @param message - The warning message.
+	 * @param data - Optional structured data to include.
 	 */
 	warn(message: string, data?: LogData): void {
 		if (this.minLevel < LogLevel.WARN) return;
@@ -349,10 +377,10 @@ export class Logger {
 	}
 
 	/**
-	 * Log a debug message
+	 * Log a debug message.
 	 *
-	 * @param {string} message - The debug message
-	 * @param {LogData} [data] - Optional data to include
+	 * @param message - The debug message.
+	 * @param data - Optional structured data to include.
 	 */
 	debug(message: string, data?: LogData): void {
 		if (this.minLevel < LogLevel.DEBUG) return;
@@ -360,10 +388,10 @@ export class Logger {
 	}
 
 	/**
-	 * Log a trace message (most verbose level)
+	 * Log a trace message (the most verbose level).
 	 *
-	 * @param {string} message - The trace message
-	 * @param {LogData} [data] - Optional data to include
+	 * @param message - The trace message.
+	 * @param data - Optional structured data to include.
 	 */
 	trace(message: string, data?: LogData): void {
 		if (this.minLevel < LogLevel.TRACE) return;
@@ -371,10 +399,10 @@ export class Logger {
 	}
 
 	/**
-	 * Log an action message (for server actions or important user interactions)
+	 * Log an action message (for server actions or important user interactions).
 	 *
-	 * @param {string} message - The action message
-	 * @param {LogData} [data] - Optional data to include
+	 * @param message - The action message.
+	 * @param data - Optional structured data to include.
 	 */
 	action(message: string, data?: LogData): void {
 		if (this.minLevel < LogLevel.INFO) return;
@@ -382,10 +410,10 @@ export class Logger {
 	}
 
 	/**
-	 * Log a success message
+	 * Log a success message.
 	 *
-	 * @param {string} message - The success message
-	 * @param {LogData} [data] - Optional data to include
+	 * @param message - The success message.
+	 * @param data - Optional structured data to include.
 	 */
 	success(message: string, data?: LogData): void {
 		if (this.minLevel < LogLevel.INFO) return;
@@ -393,9 +421,9 @@ export class Logger {
 	}
 
 	/**
-	 * Group related log messages (console.group wrapper)
+	 * Open a console group for related log messages (a `console.group` wrapper).
 	 *
-	 * @param {string} label - The group label
+	 * @param label - The group label.
 	 */
 	group(label: string): void {
 		if (this.minLevel < LogLevel.INFO) return;
@@ -403,7 +431,7 @@ export class Logger {
 	}
 
 	/**
-	 * End a log group (console.groupEnd wrapper)
+	 * Close the current console group (a `console.groupEnd` wrapper).
 	 */
 	groupEnd(): void {
 		if (this.minLevel < LogLevel.INFO) return;
@@ -411,12 +439,19 @@ export class Logger {
 	}
 
 	/**
-	 * Log execution time of a function
+	 * Run a function and log how long it took. Below `DEBUG` level the timing is
+	 * skipped and the function is still invoked. On failure the elapsed time is
+	 * logged via {@link Logger.error} and the error is rethrown.
 	 *
-	 * @template T - The return type of the function being timed
-	 * @param {string} label - Description of the operation being timed
-	 * @param {() => Promise<T> | T} fn - Function to execute and time
-	 * @returns {Promise<T>} The result of the function execution
+	 * Failure is surfaced as a rejected `Promise`: whatever `fn` throws or rejects
+	 * with is re-thrown unchanged after the elapsed time is logged. There is no
+	 * cancellation hook — `fn` runs to completion.
+	 *
+	 * @template T - The value the timed function resolves to (its return type).
+	 * @param label - Description of the operation being timed.
+	 * @param fn - Function to execute and time; may be sync or async.
+	 * @returns The resolved result of the function execution.
+	 * @throws The exact error `fn` threw or rejected with, re-thrown after logging.
 	 */
 	async time<T>(label: string, fn: () => Promise<T> | T): Promise<T> {
 		if (this.minLevel < LogLevel.DEBUG) return fn();
@@ -437,7 +472,13 @@ export class Logger {
 	}
 }
 
+/**
+ * The default shared logger, bound to the `[LOGGER]` context — the convenient
+ * entry point for ad-hoc logging without managing a per-context instance.
+ */
 export const logger = new Logger("[LOGGER]", {
 	includeTimestamp: true,
 	colorize: true,
 });
+
+//#endregion

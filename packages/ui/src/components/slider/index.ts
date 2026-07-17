@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from "./slider.js";
+/**
+ * @fileoverview Public barrel for the Slider component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/slider`.
+ *
+ * @module @resq-systems/ui/components/slider
+ */
+
+export { Slider } from "./slider.js";

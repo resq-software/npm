@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Control-flow primitives — a `Result` discriminated union with
+ * factories, exhaustiveness and truthiness assertions, and small promise helpers
+ * (`promiseWithResolve`, `sleep`).
+ *
+ * @module @resq-systems/helpers/utils/control
+ */
+
 import { assertNever } from "@resq-systems/types";
 import { omitFromStackTrace } from "./function";
 
+//#region Types
 /**
  * Represents a successful result containing a value.
  *
@@ -30,10 +39,14 @@ import { omitFromStackTrace } from "./function";
  *   console.log(success.value) // 'Hello World'
  * }
  * ```
- * @deprecated Prefer `success`/`failure` from `@resq-systems/helpers` (the `{ success, value }` Result). This parallel `{ ok, value }` type is unused and slated for removal in a future major.
+ * @deprecated Superseded by {@link success} / {@link failure} from
+ * `@resq-systems/helpers` (the `{ success, value }` Result). Not a drop-in: the
+ * discriminant is renamed `ok` → `success` when migrating. This parallel
+ * `{ ok, value }` type is unused; removed in the next major.
  * @public
  */
 export interface OkResult<T> {
+	/** Discriminant marking the success branch; always `true`. Narrow on this to reach {@link value}. */
 	readonly ok: true;
 	readonly value: T;
 }
@@ -50,10 +63,14 @@ export interface OkResult<T> {
  *   console.error(failure.error) // 'Something went wrong'
  * }
  * ```
- * @deprecated Prefer `success`/`failure` from `@resq-systems/helpers` (the `{ success, value }` Result). This parallel `{ ok, value }` type is unused and slated for removal in a future major.
+ * @deprecated Superseded by {@link success} / {@link failure} from
+ * `@resq-systems/helpers` (the `{ success, value }` Result). Not a drop-in: the
+ * discriminant is renamed `ok` → `success` when migrating. This parallel
+ * `{ ok, value }` type is unused; removed in the next major.
  * @public
  */
 export interface ErrorResult<E> {
+	/** Discriminant marking the failure branch; always `false`. Narrow on this to reach {@link error}. */
 	readonly ok: false;
 	readonly error: E;
 }
@@ -61,8 +78,10 @@ export interface ErrorResult<E> {
  * A discriminated union type for handling success and error cases.
  *
  * Represents either a successful result with a value or a failed result with an error.
- * This pattern provides type-safe error handling without throwing exceptions. The 'ok' property
- * serves as the discriminant for type narrowing.
+ * This pattern provides type-safe error handling without throwing exceptions. The
+ * {@link OkResult.ok | ok} property is the discriminant: `true` selects the
+ * {@link OkResult} variant (read `value`), `false` the {@link ErrorResult}
+ * variant (read `error`).
  *
  * @example
  * ```ts
@@ -80,11 +99,16 @@ export interface ErrorResult<E> {
  *   console.error(`Error: ${result.error}`)
  * }
  * ```
- * @deprecated Prefer `success`/`failure` from `@resq-systems/helpers` (the `{ success, value }` Result). This parallel `{ ok, value }` type is unused and slated for removal in a future major.
+ * @deprecated Superseded by {@link success} / {@link failure} from
+ * `@resq-systems/helpers` (the `{ success, value }` Result). Not a drop-in: the
+ * discriminant is renamed `ok` → `success` when migrating. This parallel
+ * `{ ok, value }` type is unused; removed in the next major.
  * @public
  */
 export type Result<T, E> = OkResult<T> | ErrorResult<E>;
+//#endregion
 
+//#region Public API
 /**
  * Utility object for creating Result instances.
  *
@@ -101,7 +125,10 @@ export type Result<T, E> = OkResult<T> | ErrorResult<E>;
  * const failure = Result.err('Invalid input')
  * // failure: ErrorResult<string> = { ok: false, error: 'Invalid input' }
  * ```
- * @deprecated Prefer `success`/`failure` from `@resq-systems/helpers`. This parallel `{ ok, value }` Result factory is unused and slated for removal in a future major.
+ * @deprecated Superseded by {@link success} / {@link failure} from
+ * `@resq-systems/helpers`. Not a drop-in: the discriminant is renamed
+ * `ok` → `success` when migrating. This parallel `{ ok, value }` Result factory
+ * is unused; removed in the next major.
  * @public
  */
 export const Result = {
@@ -127,10 +154,13 @@ export const Result = {
 	/**
 	 * Create a successful result containing an array of values.
 	 *
-	 * If any of the results are errors, the returned result will be an error containing the first error.
+	 * Short-circuits: iteration stops at the first {@link ErrorResult}, which is
+	 * returned as-is (same reference), so later results are neither inspected nor
+	 * collected. Values preserve input order.
 	 *
 	 * @param results - The array of results to wrap
-	 * @returns An OkResult containing the array of values
+	 * @returns An {@link OkResult} of all values in order, or the first
+	 *   {@link ErrorResult} encountered.
 	 */
 	all<T, E>(results: readonly Result<T, E>[]): Result<T[], E> {
 		const values: T[] = [];
@@ -157,6 +187,9 @@ export const Result = {
  * @param value - The unhandled value (typed as 'never' for exhaustiveness checking)
  * @param property - Optional property name to extract from the value for better error messages
  * @returns Never returns (always throws)
+ * @throws {Error} Always — reaching this at runtime means a union member went
+ *   unhandled. The message is `Unknown switch case <value>` (or the extracted
+ *   `property` when provided and present on an object `value`).
  *
  * @example
  * ```ts
@@ -188,6 +221,9 @@ export function exhaustiveSwitchError(value: never, property?: string): never {
  *
  * @param value - The value to assert as truthy
  * @param message - Optional custom error message
+ * @throws {Error} If `value` is falsy. The message is `message` when supplied,
+ *   otherwise `Assertion Error`. The wrapper's own frame is stripped from the
+ *   stack (V8 only), so the trace points at the call site.
  *
  * @example
  * ```ts
@@ -215,6 +251,10 @@ export const assert: (value: unknown, message?: string) => asserts value = omitF
  * @param value - The value to check for null/undefined
  * @param message - Optional custom error message
  * @returns The value with null and undefined excluded from the type
+ * @throws {Error} If `value` is `null` or `undefined` (loose `== null` check, so
+ *   `0`, `''`, and `false` pass). The message is `message` when supplied,
+ *   otherwise `value must be defined`. The wrapper's own frame is stripped from
+ *   the stack (V8 only).
  *
  * @example
  * ```ts
@@ -280,6 +320,10 @@ export function promiseWithResolve<T>(): Promise<T> & {
  * that resolves with undefined after the specified number of milliseconds. Useful for
  * implementing timeouts, rate limiting, or adding delays in testing scenarios.
  *
+ * Schedules a `setTimeout` (touches the clock). There is no cancellation hook —
+ * the returned promise always resolves, never rejects, and honours no
+ * `AbortSignal`; the underlying timer cannot be cleared by the caller.
+ *
  * @param ms - The delay in milliseconds
  * @returns A Promise that resolves after the specified delay
  *
@@ -302,3 +346,4 @@ export function sleep(ms: number): Promise<void> {
 	// eslint-disable-next-line no-restricted-globals
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
+//#endregion

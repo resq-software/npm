@@ -14,56 +14,57 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `ThrottleAsyncExecutor` — the queue engine behind `@throttleAsync`
+ * that caps concurrent executions and dispatches queued calls as slots free up.
+ *
+ * @module @resq-systems/decorators/throttle-async/throttle-async-executor
+ */
+
 import { Queue } from "../_utils.js";
 import type { AsyncMethod } from "../types.js";
 
 /**
- * Manages the queue and execution of throttled async method calls.
- * Ensures that only a specified number of calls run concurrently,
- * queueing additional calls until slots become available.
+ * Manages the queue and execution of throttled async calls, ensuring at most a
+ * fixed number run concurrently and queuing the rest until a slot frees up.
  *
- * @class ThrottleAsyncExecutor
- * @template D - The resolved type of the async method
+ * Queued calls dispatch in FIFO order; each slot is released once its call settles
+ * (resolve or reject), which drives the next dispatch. `parallelCalls` must be
+ * `>= 1` — the constructor does not validate it, and a value below `1` leaves
+ * `tryCall` unable to ever dispatch, so every queued call hangs.
  *
+ * @template D - The resolved type of the async method.
  * @example
- * ```typescript
+ * ```ts
  * const executor = new ThrottleAsyncExecutor(
  *   async (data) => await fetchData(data),
- *   3 // Max 3 concurrent calls
+ *   3, // At most three concurrent calls.
  * );
  *
- * // Execute multiple calls
+ * // Execute multiple calls.
  * const promises = [
- *   executor.exec(this, ['arg1']),
- *   executor.exec(this, ['arg2']),
- *   executor.exec(this, ['arg3']),
- *   executor.exec(this, ['arg4']), // Queued
- *   executor.exec(this, ['arg5']), // Queued
+ *   executor.exec(this, ["arg1"]),
+ *   executor.exec(this, ["arg2"]),
+ *   executor.exec(this, ["arg3"]),
+ *   executor.exec(this, ["arg4"]), // Queued.
+ *   executor.exec(this, ["arg5"]), // Queued.
  * ];
  *
  * const results = await Promise.all(promises);
  * ```
  */
 export class ThrottleAsyncExecutor<D> {
-	/**
-	 * Number of calls currently executing.
-	 * @private
-	 * @type {number}
-	 */
+	/** Number of calls currently executing. */
 	private onGoingCallsCount = 0;
 
-	/**
-	 * Queue of pending calls waiting to execute.
-	 * @private
-	 * @type {Queue<CallArgs<D>>}
-	 */
+	/** Queue of pending calls waiting for a free slot. */
 	private readonly callsToRun = new Queue<CallArgs<D>>();
 
 	/**
-	 * Creates a new ThrottleAsyncExecutor instance.
+	 * Create a new executor.
 	 *
-	 * @param {AsyncMethod<D>} fun - The async method to throttle
-	 * @param {number} parallelCalls - Maximum number of concurrent calls allowed
+	 * @param fun - The async method to throttle.
+	 * @param parallelCalls - Maximum number of concurrent calls allowed.
 	 */
 	constructor(
 		private readonly fun: AsyncMethod<D>,
@@ -71,18 +72,22 @@ export class ThrottleAsyncExecutor<D> {
 	) {}
 
 	/**
-	 * Queues a method call for execution.
+	 * Queue a method call, executing it immediately if a slot is free or deferring
+	 * it until one opens.
 	 *
-	 * @param {any} context - The `this` context for the method call
-	 * @param {any[]} args - The arguments to pass to the method
-	 * @returns {Promise<D>} A promise that resolves with the method result
+	 * Appends to the internal queue and may synchronously start the call; queued
+	 * calls preserve FIFO order. The returned promise mirrors the method outcome —
+	 * a thrown/rejected method rejects it with the same reason.
 	 *
+	 * @param context - The `this` context for the method call.
+	 * @param args - The arguments to pass to the method.
+	 * @returns A promise that resolves (or rejects) with the method's result.
 	 * @example
-	 * ```typescript
+	 * ```ts
 	 * const executor = new ThrottleAsyncExecutor(myAsyncMethod, 2);
 	 *
-	 * // Queue a call
-	 * const result = await executor.exec(this, ['arg1', 'arg2']);
+	 * // Queue a call.
+	 * const result = await executor.exec(this, ["arg1", "arg2"]);
 	 * ```
 	 */
 	exec(context: unknown, args: unknown[]): Promise<D> {
@@ -100,10 +105,9 @@ export class ThrottleAsyncExecutor<D> {
 	}
 
 	/**
-	 * Attempts to execute the next queued call if capacity allows.
-	 *
-	 * @private
-	 * @returns {void}
+	 * Dispatch the next queued call when a concurrency slot is available; a no-op
+	 * when the queue is empty or all slots are busy. Re-invoked after each call
+	 * settles to drain the queue.
 	 */
 	private tryCall(): void {
 		if (this.callsToRun.getSize() > 0 && this.onGoingCallsCount < this.parallelCalls) {
@@ -125,18 +129,18 @@ export class ThrottleAsyncExecutor<D> {
 }
 
 /**
- * Arguments for a queued async call.
+ * A queued async call plus the deferred promise handles used to settle it once
+ * the executor dispatches it.
  *
- * @interface CallArgs
- * @template T - The resolved type of the async call
- * @property {unknown} context - The `this` context
- * @property {unknown[]} args - The method arguments
- * @property {(value: T | PromiseLike<T>) => void} resolve - Promise resolve function
- * @property {(reason?: unknown) => void} reject - Promise reject function
+ * @template T - The resolved type of the async call.
  */
 interface CallArgs<T> {
+	/** The `this` context to invoke the method with. */
 	context: unknown;
+	/** The arguments to pass to the method. */
 	args: unknown[];
+	/** Resolves the caller's promise with the method result. */
 	resolve: (value: T | PromiseLike<T>) => void;
+	/** Rejects the caller's promise on failure. */
 	reject: (reason?: unknown) => void;
 }

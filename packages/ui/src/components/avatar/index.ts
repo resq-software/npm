@@ -14,4 +14,18 @@
  * limitations under the License.
  */
 
-export * from "./avatar.js";
+/**
+ * @fileoverview Public barrel for the Avatar component family (profile-image containers
+ * with fallbacks) — re-exports `./avatar` as the `@resq-systems/ui/avatar` entry.
+ *
+ * @module @resq-systems/ui/components/avatar
+ */
+
+export {
+	Avatar,
+	AvatarBadge,
+	AvatarFallback,
+	AvatarGroup,
+	AvatarGroupCount,
+	AvatarImage,
+} from "./avatar.js";

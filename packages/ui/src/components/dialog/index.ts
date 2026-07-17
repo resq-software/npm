@@ -16,4 +16,22 @@
  *
  */
 
-export * from "./dialog.js";
+/**
+ * @fileoverview Public barrel for the Dialog component family (content-bearing modal
+ * overlays) — re-exports `./dialog` as the `@resq-systems/ui/dialog` entry.
+ *
+ * @module @resq-systems/ui/components/dialog
+ */
+
+export {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogOverlay,
+	DialogPortal,
+	DialogTitle,
+	DialogTrigger,
+} from "./dialog.js";

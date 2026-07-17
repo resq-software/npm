@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * ResQ icon system — powered by @phosphor-icons/react.
+ * @fileoverview ResQ icon system — powered by @phosphor-icons/react.
  *
  * All icons follow the Phosphor naming convention (`*Icon` suffix).
  * The `weight` prop controls stroke weight: "thin" | "light" | "regular" | "bold" | "fill" | "duotone".
@@ -15,6 +15,8 @@
  *
  * Server Components: import from `@resq-systems/ui/icons/ssr` instead to avoid
  * the React.createContext call at module-init time.
+ *
+ * @module @resq-systems/ui/components/icons
  */
 
 // ── Types ─────────────────────────────────────────────────────────────────────

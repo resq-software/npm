@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Deduplicated warnings — `warnOnce` logs a message a single time via
+ * the structured logger, and `warnDeprecatedGetter` builds a standard
+ * getter-deprecation message.
+ *
+ * @module @resq-systems/helpers/utils/warn
+ */
+
 import { Logger } from "@resq-systems/logger";
 
 const logger = Logger.getLogger("helpers");
@@ -22,6 +30,10 @@ const usedWarnings = new Set<string>();
 /**
  * Issues a deprecation warning for deprecated getter properties, advising users to use
  * the equivalent getter method instead. The warning is shown only once per property name.
+ *
+ * Delegates to {@link warnOnce}, so it inherits the same logger side effect and
+ * process-lifetime dedup: the composed message (which suggests `get<Name>`) is
+ * logged at most once.
  *
  * @param name - The name of the deprecated property (e.g., 'viewport')
  *
@@ -51,6 +63,11 @@ export function warnDeprecatedGetter(name: string) {
  * Issues a warning message to the console, but only once per unique message.
  * Subsequent calls with the same message are ignored, preventing console spam.
  * All messages are logged using the resq structured logger under the "helpers" context.
+ *
+ * Effects: writes through the shared `helpers` logger and records `message` in a
+ * module-global set of already-seen strings. Dedup is by exact string equality and
+ * persists for the process lifetime (never cleared), so a message logs at most
+ * once; repeat calls with the same string are no-ops.
  *
  * @param message - The warning message to display
  *

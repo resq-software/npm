@@ -15,10 +15,20 @@
  */
 
 /**
- * Represents a node in the queue's linked list structure.
+ * @fileoverview Generic FIFO queue backed by a singly-linked list for O(1)
+ * enqueue and dequeue.
+ *
+ * @module @resq-systems/dsa/queue
+ */
+
+/**
+ * A cell in the queue's singly-linked chain. Exposed because {@link Queue}
+ * fields reference it, but callers rarely construct one directly.
  */
 export interface QueueNode<T> {
+	/** The next node toward the back of the queue, or `null` at the tail. */
 	next: QueueNode<T> | null;
+	/** The stored element, held by reference. */
 	value: T;
 }
 
@@ -26,8 +36,7 @@ export interface QueueNode<T> {
  * A generic FIFO (First In, First Out) queue data structure.
  * Implements queue operations using a linked list for efficient O(1) enqueue and dequeue.
  *
- * @class Queue
- * @template T - The type of elements stored in the queue
+ * @template T - The type of elements stored in the queue.
  */
 export class Queue<T> {
 	private firstItem: QueueNode<T> | null = null;

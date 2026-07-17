@@ -23,6 +23,8 @@
  * Composition: `InputOTP > InputOTPGroup > InputOTPSlot*`, with
  * optional `InputOTPSeparator` (rendered as a minus icon between
  * groups, e.g. `XXX-XXX`).
+ *
+ * @module @resq-systems/ui/components/input-otp/input-otp
  */
 
 "use client";
@@ -33,6 +35,12 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
+/**
+ * Root of the segmented one-time-pin input; a single hidden field drives
+ * autofill while `containerClassName` styles the slot row.
+ *
+ * @see {@link InputOTPSlot}
+ */
 function InputOTP({
 	className,
 	containerClassName,
@@ -56,6 +64,7 @@ function InputOTP({
 	);
 }
 
+/** Visually groups a run of `InputOTPSlot`s (e.g. one triad of `XXX-XXX`). */
 function InputOTPGroup({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -69,6 +78,7 @@ function InputOTPGroup({ className, ...props }: Readonly<React.ComponentProps<"d
 	);
 }
 
+/** Minus-icon divider rendered between two `InputOTPGroup`s. */
 function InputOTPSeparator({ ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -82,6 +92,12 @@ function InputOTPSeparator({ ...props }: Readonly<React.ComponentProps<"div">>) 
 	);
 }
 
+/**
+ * Renders one digit cell, reading its character, active state, and fake caret
+ * from the OTP context by `index`.
+ *
+ * @param index - Zero-based position of this slot within the OTP value.
+ */
 function InputOTPSlot({
 	className,
 	index,

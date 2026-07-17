@@ -15,6 +15,16 @@
  */
 
 /**
+ * @fileoverview Sub-linear-memory frequency estimator (count-min sketch) for
+ * heavy-hitter detection, request-rate estimation, and log-rollup counts where
+ * exact per-key counters are not affordable.
+ *
+ * @module @resq-systems/dsa/count-min
+ */
+
+import type { Probability } from "./schemas.js";
+
+/**
  * Sub-linear-memory frequency estimator.
  *
  * Estimates the number of times a string has been observed using
@@ -26,9 +36,6 @@
  * - `width = ⌈ e / epsilon ⌉` (columns per row)
  * - `depth = ⌈ ln(1 / delta) ⌉`  (independent hash rows)
  *
- * Use cases: heavy-hitter detection, request-rate estimation, log-rollup
- * counts where exact counts are not affordable.
- *
  * @example
  * ```ts
  * const sketch = new CountMinSketch(0.001, 0.01); // ~2718 × 5
@@ -36,9 +43,6 @@
  * sketch.estimate("203.0.113.7"); // approximate count
  * ```
  */
-
-import type { Probability } from "./schemas.js";
-
 export class CountMinSketch {
 	readonly #table: Uint32Array[];
 	readonly #width: number;
@@ -52,7 +56,7 @@ export class CountMinSketch {
 	 * @param delta - Probability that the error bound is exceeded, as a branded
 	 *   {@link Probability} in `(0, 1)`. Smaller ⇒ more rows.
 	 *
-	 * @throws RangeError if either parameter is outside `(0, 1)`.
+	 * @throws {RangeError} If either parameter is outside `(0, 1)`.
 	 */
 	constructor(epsilon: Probability, delta: Probability) {
 		if (epsilon <= 0 || epsilon >= 1) {
@@ -76,11 +80,15 @@ export class CountMinSketch {
 	}
 
 	/**
-	 * Add `count` to the running tally for `key`.
+	 * Add `count` to the running tally for `key`. Mutates the sketch in place.
+	 *
+	 * Counters live in unsigned 32-bit lanes, so a tally that passes
+	 * `2³² − 1` wraps around rather than saturating.
 	 *
 	 * @param key - The item being counted.
 	 * @param count - Increment amount; defaults to `1`. Negative counts are
-	 *   permitted but break the upper-bound guarantee.
+	 *   permitted but break the upper-bound guarantee (and can wrap a lane to a
+	 *   large value).
 	 */
 	increment(key: string, count = 1): void {
 		for (let i = 0; i < this.#depth; i++) {

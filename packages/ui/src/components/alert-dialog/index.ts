@@ -16,4 +16,25 @@
  *
  */
 
-export * from "./alert-dialog.js";
+/**
+ * @fileoverview Public barrel for the AlertDialog component family (modal confirmation
+ * dialogs for destructive actions) — re-exports `./alert-dialog` as the
+ * `@resq-systems/ui/alert-dialog` entry.
+ *
+ * @module @resq-systems/ui/components/alert-dialog
+ */
+
+export {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogMedia,
+	AlertDialogOverlay,
+	AlertDialogPortal,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "./alert-dialog.js";

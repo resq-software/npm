@@ -25,6 +25,8 @@
  * Accessibility: keyboard-navigable (arrow keys, Home, End), full
  * ARIA semantics from Radix. Open/close animations are wired via
  * `data-open:animate-accordion-down` / `data-closed:animate-accordion-up`.
+ *
+ * @module @resq-systems/ui/components/accordion/accordion
  */
 
 "use client";
@@ -35,6 +37,12 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
+/**
+ * Root of the accordion family — owns open/close state and forwards Radix
+ * props. Set `type="multiple"` to allow several panels open at once.
+ *
+ * @see {@link AccordionItem}
+ */
 function Accordion({
 	className,
 	...props
@@ -48,6 +56,10 @@ function Accordion({
 	);
 }
 
+/**
+ * Collapsible panel body revealed when its `AccordionItem` is open; animates
+ * open/closed via the `data-open` / `data-closed` height transitions.
+ */
 function AccordionContent({
 	children,
 	className,
@@ -71,6 +83,10 @@ function AccordionContent({
 	);
 }
 
+/**
+ * A single disclosure unit pairing an `AccordionTrigger` with its
+ * `AccordionContent`; renders a bottom border except on the last item.
+ */
 function AccordionItem({
 	className,
 	...props
@@ -84,6 +100,10 @@ function AccordionItem({
 	);
 }
 
+/**
+ * Clickable header that toggles its panel; swaps a caret-down/up icon to
+ * signal the expanded state and carries the full ARIA wiring from Radix.
+ */
 function AccordionTrigger({
 	children,
 	className,

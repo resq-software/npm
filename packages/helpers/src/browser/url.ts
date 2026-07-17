@@ -15,12 +15,19 @@
  */
 
 /**
- * Safely parses a URL string without throwing exceptions on invalid input.
- * Returns a URL object for valid URLs or undefined for invalid ones.
+ * @fileoverview Non-throwing URL parsing: wraps the `URL` constructor and
+ * returns `undefined` instead of throwing on invalid input.
  *
- * @param url - The URL string to parse
- * @param baseUrl - Optional base URL to resolve relative URLs against
- * @returns A URL object if parsing succeeds, undefined if it fails
+ * @module @resq-systems/helpers/browser/url
+ */
+
+/**
+ * Safely parse a URL string, returning `undefined` instead of throwing on
+ * invalid input.
+ *
+ * @param url - The URL string to parse.
+ * @param baseUrl - Optional base URL to resolve relative URLs against.
+ * @returns A `URL` object if parsing succeeds, or `undefined` if it fails.
  *
  * @example
  * ```ts
@@ -51,8 +58,6 @@
  *   }
  * }
  * ```
- *
- * @public
  */
 export function safeParseUrl(url: string, baseUrl?: string | URL) {
 	try {

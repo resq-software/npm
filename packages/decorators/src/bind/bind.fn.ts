@@ -1,10 +1,24 @@
 /**
- * @fileoverview Bind function implementation - creates a bound version of a method.
+ * Copyright 2026 ResQ
  *
- * @module @resq/typescript/decorators/bind.fn
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * @copyright Copyright (c) 2026 ResQ
- * @license MIT
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @fileoverview Function form of `@bind` — `bindFn(method, context)` returns a
+ * copy of `method` permanently bound to `context`.
+ *
+ * @module @resq-systems/decorators/bind/bind.fn
  */
 
 import type { Method } from "../types.js";
@@ -12,12 +26,15 @@ import type { Method } from "../types.js";
 /**
  * Creates a bound version of a method.
  *
- * @template D - The return type of the original method
- * @template A - The argument types of the original method
- * @param {Method<D, A>} originalMethod - The method to bind
- * @param {unknown} context - The context (`this`) to bind to
- * @returns {Method<D, A>} The bound method
+ * Pure with respect to its inputs: returns a **new** function from
+ * `Function.prototype.bind` and neither mutates `originalMethod` nor `context`.
+ * The binding is permanent — a later `.call`/`.apply` cannot re-point `this`.
  *
+ * @template D - The return type of the original method.
+ * @template A - The argument types of the original method.
+ * @param originalMethod - The method to bind.
+ * @param context - The context (`this`) to bind to.
+ * @returns The bound method.
  * @example
  * ```typescript
  * class Calculator {

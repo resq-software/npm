@@ -15,6 +15,13 @@
  */
 
 /**
+ * @fileoverview Immutable array helpers — rotate, dedupe, compact, partition,
+ * min/max-by, shallow equality, and default-merging over plain arrays.
+ *
+ * @module @resq-systems/helpers/utils/array
+ */
+
+/**
  * Rotate the contents of an array by a specified offset.
  *
  * Creates a new array with elements shifted to the left by the specified number of positions.
@@ -49,6 +56,10 @@ export function rotateArray<T>(arr: T[], offset: number): T[] {
  *
  * Creates a new array with duplicate items removed. Uses strict equality by default,
  * or a custom equality function if provided. Order of first occurrence is preserved.
+ *
+ * Comparison is pairwise against every item already kept, so runtime is O(n²);
+ * for large arrays with cheap identity semantics prefer a `Set`. `equals` is
+ * invoked as `equals(candidate, kept)`.
  *
  * @param input - The array to deduplicate
  * @param equals - Optional custom equality function to compare items (defaults to strict equality)
@@ -125,9 +136,16 @@ export function last<T>(arr: readonly T[]): T | undefined {
  * Finds the array item that produces the smallest value when passed through
  * the provided function. Returns undefined for empty arrays.
  *
+ * Selection uses `<`, so an item is only chosen when it is strictly smaller than
+ * the running minimum. Items whose `fn` returns `NaN` are never selected (any
+ * comparison with `NaN` is false); likewise a non-empty array returns
+ * `undefined` when every `fn` result is `Infinity`. On ties the first-seen item
+ * wins.
+ *
  * @param arr - The array to search
  * @param fn - Function to compute the comparison value for each item
- * @returns The item with the minimum value, or undefined if the array is empty
+ * @returns The item with the minimum value, or `undefined` if the array is empty
+ *   (or nothing compares smaller than the initial `Infinity`).
  *
  * @example
  * ```ts
@@ -158,9 +176,16 @@ export function minBy<T>(arr: readonly T[], fn: (item: T) => number): T | undefi
  * Finds the array item that produces the largest value when passed through
  * the provided function. Returns undefined for empty arrays.
  *
+ * Selection uses `>`, so an item is only chosen when it is strictly greater than
+ * the running maximum. Items whose `fn` returns `NaN` are never selected (any
+ * comparison with `NaN` is false); likewise a non-empty array returns
+ * `undefined` when every `fn` result is `-Infinity`. On ties the first-seen item
+ * wins.
+ *
  * @param arr - The array to search
  * @param fn - Function to compute the comparison value for each item
- * @returns The item with the maximum value, or undefined if the array is empty
+ * @returns The item with the maximum value, or `undefined` if the array is empty
+ *   (or nothing compares greater than the initial `-Infinity`).
  *
  * @example
  * ```ts
@@ -263,6 +288,14 @@ export function areArraysShallowEqual<T>(arr1: readonly T[], arr2: readonly T[])
  * that don't have a matching key in the custom entries. Custom entries always override defaults.
  * The result contains remaining defaults first, followed by all custom entries.
  *
+ * Matching is by the value at `key`, deduped through a `Set`; a default is
+ * dropped when any custom entry shares its key. Custom entries are appended
+ * verbatim, so duplicates among the custom entries themselves are preserved.
+ *
+ * @template Key - The literal name of the identity property (captured `const` so
+ *   the key type is preserved).
+ * @template T - The entry shape; the `extends { [K in Key]: string }` bound
+ *   requires every entry to carry a string-valued property named `Key`.
  * @param key - The property name to use as the unique identifier
  * @param customEntries - Array of custom entries that will override defaults
  * @param defaults - Array of default entries

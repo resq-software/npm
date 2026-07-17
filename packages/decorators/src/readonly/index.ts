@@ -19,7 +19,9 @@
  * descriptor's `writable: false` so consumers cannot reassign the
  * method on instances. Useful for sealing security-sensitive
  * methods (auth tokens, signature checks) against monkey-patching.
+ *
+ * @module @resq-systems/decorators/readonly
  */
 
-export * from "./readonly.js";
-export * from "./readonly.types.js";
+export { readonly } from "./readonly.js";
+export type { Readonlyable } from "./readonly.types.js";
