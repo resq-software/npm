@@ -180,13 +180,13 @@
       "name": "@resq-systems/helpers",
       "version": "0.3.1",
       "dependencies": {
+        "@resq-systems/dsa": "^2.0.0",
         "@resq-systems/logger": "^0.3.0",
         "@resq-systems/types": "^0.1.0",
         "lodash.isequal": "^4.5.0",
         "lodash.isequalwith": "^4.4.0",
         "lodash.throttle": "^4.1.1",
         "lodash.uniq": "^4.5.0",
-        "tinyqueue": "^3.0.0",
       },
       "devDependencies": {
         "@total-typescript/ts-reset": "^0.6.1",
@@ -237,7 +237,7 @@
     },
     "packages/math": {
       "name": "@resq-systems/math",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "devDependencies": {
         "@total-typescript/ts-reset": "^0.6.1",
         "tsdown": "^0.22.4",
@@ -2321,8 +2321,6 @@
     "tinyexec": ["tinyexec@1.2.4", "", {}, "sha512-SHf/r48b7vOrjve9PxJo3MN5v5yuyjHvdUcrQffT3WXMUfnGmHDVbC4k3sHJaJTgZCwpUplIaAo5ANtMyp3YHg=="],
 
     "tinyglobby": ["tinyglobby@0.2.17", "", { "dependencies": { "fdir": "^6.5.0", "picomatch": "^4.0.4" } }, "sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g=="],
-
-    "tinyqueue": ["tinyqueue@3.0.0", "", {}, "sha512-gRa9gwYU3ECmQYv3lslts5hxuIa90veaEcxDYuu3QGOIAEM2mOZkVHp48ANJuu1CURtRdHKUBY5Lm1tHV+sD4g=="],
 
     "tinyrainbow": ["tinyrainbow@3.1.0", "", {}, "sha512-Bf+ILmBgretUrdJxzXM0SgXLZ3XfiaUuOj/IKQHuTXip+05Xn+uyEYdVg0kYDipTBcLrCVyUzAPz7QmArb0mmw=="],
 

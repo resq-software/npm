@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import TinyQueue from "tinyqueue";
+import { PriorityQueue } from "@resq-systems/dsa";
 import type { TimedTask } from "./task-exec.types.js";
 
 /**
@@ -39,7 +39,9 @@ import type { TimedTask } from "./task-exec.types.js";
  * ```
  */
 export class TaskExec {
-	private readonly tasks = new TinyQueue<TimedTask>([], (a, b) => a.execTime - b.execTime);
+	private readonly tasks = new PriorityQueue<TimedTask>({
+		compareFn: (a, b) => a.execTime - b.execTime,
+	});
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private handler: ReturnType<typeof setTimeout> | undefined;
@@ -55,7 +57,7 @@ export class TaskExec {
 	 *   tick". Negative values are clamped to `0`.
 	 */
 	exec(func: () => unknown, ttl: number): void {
-		this.tasks.push({ func, execTime: Date.now() + ttl });
+		this.tasks.enqueue({ func, execTime: Date.now() + ttl });
 		this.handleNext();
 	}
 
@@ -66,7 +68,7 @@ export class TaskExec {
 	 * @internal
 	 */
 	private handleNext(): void {
-		if (!this.tasks.length) {
+		if (!this.tasks.size) {
 			return;
 		}
 
@@ -84,7 +86,7 @@ export class TaskExec {
 	private execNext(ttl: number): void {
 		clearTimeout(this.handler);
 		this.handler = setTimeout(() => {
-			const { func } = this.tasks.pop()!;
+			const { func } = this.tasks.dequeue()!;
 			func();
 			this.handleNext();
 		}, ttl);
