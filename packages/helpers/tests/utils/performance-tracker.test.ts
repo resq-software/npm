@@ -16,7 +16,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from "vitest";
 import { PERFORMANCE_COLORS, PERFORMANCE_PREFIX_COLOR } from "../../src/utils/perf.js";
-import { PerformanceTracker } from "../../src/utils/PerformanceTracker.js";
+import { PerformanceTracker } from "../../src/utils/performance-tracker.js";
 
 describe("PerformanceTracker", () => {
 	let tracker: PerformanceTracker;
