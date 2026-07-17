@@ -27,6 +27,7 @@
 	},
 	"overrides": {
 		"effect": "4.0.0-beta.93",
+		"get-tsconfig": "5.0.0-beta.5",
 		"vite": "^8.1.4",
 		"defu": ">=6.1.5",
 		"next": "^16.2.10",
