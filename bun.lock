@@ -208,7 +208,7 @@
         "@resq-systems/types": "^0.1.0",
       },
       "devDependencies": {
-        "@effect/platform-bun": "4.0.0-beta.97",
+        "@effect/platform-bun": "4.0.0-beta.98",
         "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "^26.1.1",
         "effect": "4.0.0-beta.97",
@@ -654,9 +654,9 @@
 
     "@date-fns/tz": ["@date-fns/tz@1.4.1", "", {}, "sha512-P5LUNhtbj6YfI3iJjw5EL9eUAG6OitD0W3fWQcpQjDRc/QIsL0tRNuO1PcDvPccWL1fSTXXdE1ds+l95DV/OFA=="],
 
-    "@effect/platform-bun": ["@effect/platform-bun@4.0.0-beta.97", "", { "dependencies": { "@effect/platform-node-shared": "^4.0.0-beta.97" }, "peerDependencies": { "effect": "^4.0.0-beta.97" } }, "sha512-WYjC7nKiWfNywIz1zeBEXnrpuHJM86DOi3lSZSSBeHCPz8HYw7IT2FL7u+aaJHHsJCyFiZVAgg2KFS8aMFSJBQ=="],
+    "@effect/platform-bun": ["@effect/platform-bun@4.0.0-beta.98", "", { "dependencies": { "@effect/platform-node-shared": "^4.0.0-beta.98" }, "peerDependencies": { "effect": "^4.0.0-beta.98" } }, "sha512-QorRKhvwHDPwvE8lH5lE0r0dI2z+zj12VUN4h7hfoIunKUiXSoSOMZqF3w13W30RpV6ivsvJywUycaa/18yMPA=="],
 
-    "@effect/platform-node-shared": ["@effect/platform-node-shared@4.0.0-beta.97", "", { "dependencies": { "@types/ws": "^8.18.1", "ws": "^8.21.0" }, "peerDependencies": { "effect": "^4.0.0-beta.97" } }, "sha512-sAlygOlDLLERk7fC24f7Aa4G3wkEbGyyMEileHTHU2fThiPYSGMqNRK1LLnNr17m2+JR7BHbycwXkJkM18BAQw=="],
+    "@effect/platform-node-shared": ["@effect/platform-node-shared@4.0.0-beta.98", "", { "dependencies": { "@types/ws": "^8.18.1", "ws": "^8.21.0" }, "peerDependencies": { "effect": "^4.0.0-beta.98" } }, "sha512-iySXaffnCJX1sNAIp79ghhIeui9E5qwUQyqd1VLPkB9UNO4vdpd9B5fTEXwe7S/GusL4jsk9vSvX38XJgRFG1w=="],
 
     "@emnapi/core": ["@emnapi/core@1.11.1", "", { "dependencies": { "@emnapi/wasi-threads": "1.2.2", "tslib": "^2.4.0" } }, "sha512-RSvbQmHzdKzNsLYa/wHrbc3KN4sYLKAdPZxqiM2HATqv/SBk2/ENSHpvXGaLOMcsAyz0poEGqkmmKYG3OWiJEQ=="],
 
