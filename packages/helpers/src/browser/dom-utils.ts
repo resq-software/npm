@@ -215,13 +215,14 @@ export function elementSafeTagName(element: Element): string {
 	// Named inputs (e.g. <input name=tagName>) are exposed as fields on the
 	// parent <form> and can override its properties.
 	if (element instanceof HTMLFormElement) return "FORM";
-	// Elements in the SVG namespace do not have an upper-case tagName right away.
-	return element.tagName.toUpperCase();
+	// Fallback: `nodeName` is always the string tag name and cannot be shadowed
+	// on a non-form element.
+	return element.nodeName.toUpperCase();
 }
 
-let cacheStyle: Map<Element, CSSStyleDeclaration | undefined> | undefined;
-let cacheStyleBefore: Map<Element, CSSStyleDeclaration | undefined> | undefined;
-let cacheStyleAfter: Map<Element, CSSStyleDeclaration | undefined> | undefined;
+let cacheStyle: WeakMap<Element, CSSStyleDeclaration | undefined> | undefined;
+let cacheStyleBefore: WeakMap<Element, CSSStyleDeclaration | undefined> | undefined;
+let cacheStyleAfter: WeakMap<Element, CSSStyleDeclaration | undefined> | undefined;
 let cachesCounter = 0;
 
 /**
@@ -230,9 +231,9 @@ let cachesCounter = 0;
  */
 export function beginDOMCaches(): void {
 	++cachesCounter;
-	cacheStyle ??= new Map();
-	cacheStyleBefore ??= new Map();
-	cacheStyleAfter ??= new Map();
+	cacheStyle ??= new WeakMap();
+	cacheStyleBefore ??= new WeakMap();
+	cacheStyleAfter ??= new WeakMap();
 }
 
 /** End a computed-style caching scope opened with {@link beginDOMCaches}. */

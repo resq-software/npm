@@ -76,6 +76,9 @@ describe("trimString", () => {
 	it("truncates with a suffix accounted for in the cap", () => {
 		expect(trimString("hello world", 8, "...")).toBe("hello...");
 	});
+	it("stays capped when the suffix is longer than the cap (no negative slice)", () => {
+		expect(trimString("hello world", 2, "...")).toBe("...");
+	});
 	it("trimStringWithEllipsis uses a single-char ellipsis", () => {
 		expect(trimStringWithEllipsis("hello", 4)).toBe("hel…");
 	});

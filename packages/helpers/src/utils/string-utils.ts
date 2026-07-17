@@ -39,7 +39,8 @@ export function escapeWithQuotes(text: string, char = "'"): string {
 	const escapedText = stringified.substring(1, stringified.length - 1).replace(/\\"/g, '"');
 	if (char === "'") return char + escapedText.replace(/[']/g, "\\'") + char;
 	if (char === '"') return char + escapedText.replace(/["]/g, '\\"') + char;
-	if (char === "`") return char + escapedText.replace(/[`]/g, "\\`") + char;
+	if (char === "`")
+		return char + escapedText.replace(/[`]/g, "\\`").replace(/\$\{/g, "\\${") + char;
 	throw new Error("Invalid escape char");
 }
 
@@ -73,7 +74,7 @@ export function normalizeWhiteSpace(text: string): string {
 export function trimString(input: string, cap: number, suffix = ""): string {
 	if (input.length <= cap) return input;
 	const chars = [...input];
-	if (chars.length > cap) return chars.slice(0, cap - suffix.length).join("") + suffix;
+	if (chars.length > cap) return chars.slice(0, Math.max(0, cap - suffix.length)).join("") + suffix;
 	return chars.join("");
 }
 
