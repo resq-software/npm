@@ -35,6 +35,20 @@ describe("Semaphore", () => {
 		expect(thirdEntered).toBe(true); // freed slot admits the waiter
 	});
 
+	it("ignores a stray release with no matching acquire (no underflow)", async () => {
+		const gate = new Semaphore(1);
+		gate.release(); // stray — must not drive the counter negative
+
+		await gate.acquire();
+		let secondEntered = false;
+		void gate.acquire().then(() => {
+			secondEntered = true;
+		});
+		await Promise.resolve();
+		// An underflowed counter would have wrongly admitted the second acquirer.
+		expect(secondEntered).toBe(false);
+	});
+
 	it("releases waiters in FIFO order", async () => {
 		const gate = new Semaphore(1);
 		await gate.acquire();

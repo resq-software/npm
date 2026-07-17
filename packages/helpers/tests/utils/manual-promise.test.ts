@@ -33,6 +33,13 @@ describe("ManualPromise", () => {
 		expect(promise.isDone()).toBe(true);
 	});
 
+	it("rejects with a non-Error reason, matching native Promise", async () => {
+		const promise = new ManualPromise<number>();
+		promise.reject("nope");
+		await expect(promise).rejects.toBe("nope");
+		expect(promise.isDone()).toBe(true);
+	});
+
 	it("is chainable, yielding a plain promise from then()", async () => {
 		const promise = new ManualPromise<number>();
 		const chained = promise.then((n) => n + 1);

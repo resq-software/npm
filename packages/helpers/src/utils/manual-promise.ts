@@ -51,12 +51,12 @@
  */
 export class ManualPromise<T = void> extends Promise<T> {
 	#resolve!: (value: T) => void;
-	#reject!: (error: Error) => void;
+	#reject!: (reason?: unknown) => void;
 	#isDone = false;
 
 	constructor() {
 		let resolve!: (value: T) => void;
-		let reject!: (error: Error) => void;
+		let reject!: (reason?: unknown) => void;
 		super((f, r) => {
 			resolve = f;
 			reject = r;
@@ -76,10 +76,10 @@ export class ManualPromise<T = void> extends Promise<T> {
 		this.#resolve(value);
 	}
 
-	/** Reject the promise with `error`. */
-	public reject(error: Error): void {
+	/** Reject the promise with `reason` (any value, matching native `Promise`). */
+	public reject(reason?: unknown): void {
 		this.#isDone = true;
-		this.#reject(error);
+		this.#reject(reason);
 	}
 
 	// Chained operations should yield plain promises, not `ManualPromise`s
@@ -119,11 +119,25 @@ export function signalToPromise(signal: AbortSignal): {
 	if (signal.aborted) {
 		return { promise: Promise.resolve(), dispose: () => {} };
 	}
-	let dispose: () => void = () => {};
+	// `cleanup` is nulled once the signal aborts (the `{ once: true }` listener
+	// has already detached itself by then), so `dispose` releases its references
+	// promptly and is a no-op if called afterwards.
+	let cleanup: (() => void) | null = null;
 	const promise = new Promise<void>((resolve) => {
-		const onAbort = (): void => resolve();
+		const onAbort = (): void => {
+			cleanup = null;
+			resolve();
+		};
 		signal.addEventListener("abort", onAbort, { once: true });
-		dispose = (): void => signal.removeEventListener("abort", onAbort);
+		cleanup = (): void => signal.removeEventListener("abort", onAbort);
 	});
-	return { promise, dispose };
+	return {
+		promise,
+		dispose: (): void => {
+			if (cleanup) {
+				cleanup();
+				cleanup = null;
+			}
+		},
+	};
 }

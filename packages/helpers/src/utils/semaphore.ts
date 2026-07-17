@@ -82,8 +82,18 @@ export class Semaphore {
 		return lock;
 	}
 
-	/** Release a previously-acquired slot, letting the next waiter proceed. */
+	/**
+	 * Release a previously-acquired slot, letting the next waiter proceed.
+	 *
+	 * Guarded against underflow: a stray release with no matching acquire is
+	 * ignored rather than driving the counter negative, which would silently
+	 * admit more than `max` concurrent holders. Ignoring (instead of throwing)
+	 * keeps `release()` safe to call from a `finally` block.
+	 */
 	public release(): void {
+		if (this.#acquired <= 0) {
+			return;
+		}
 		--this.#acquired;
 		this.#flush();
 	}
