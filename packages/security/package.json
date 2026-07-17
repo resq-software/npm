@@ -52,7 +52,7 @@
 	"devDependencies": {
 		"@total-typescript/ts-reset": "^0.6.1",
 		"@types/node": "^26.1.1",
-		"effect": "4.0.0-beta.97",
+		"effect": "4.0.0-beta.98",
 		"jsdom": "^29.1.1",
 		"tsdown": "^0.22.4",
 		"typescript": "7.0.2",
