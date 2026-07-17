@@ -157,7 +157,13 @@ export interface RateLimitAsyncCounter {
 }
 
 /**
- * Type for the @rateLimit decorator function.
+ * Type for the `@rateLimit` decorator function.
+ *
+ * @deprecated Use `Decorator<T>` from `../types.js` instead. This shape erases
+ * the decorated method's signature to `Method<D>`, which is not assignable to a
+ * concrete method's descriptor under strict `strictFunctionTypes` (TS1241 /
+ * TS1270 at the decoration site). `rateLimit` now returns `Decorator<T>`, which
+ * preserves the method signature end-to-end. Retained only for back-compat.
  *
  * @template T - The type of the class containing the decorated method
  * @template D - The return type of the decorated method
