@@ -32,6 +32,7 @@ bun add @resq-systems/constants
 | `@resq-systems/constants` | everything below |
 | `@resq-systems/constants/tokens` | `colors` (`oklch` source + email-safe `hex` snapshot, incl. `info`/`success`/`warning`/`danger` status roles), `fonts` (stacks + webfont href), `radii`, `themeColor` (light/dark PWA + viewport `theme-color`), plus the color-role types `ColorRole`, `StatusRole`, `OklchColorRole`, `ColorTokenName` |
 | `@resq-systems/constants/brand` | `brand` — name, product name, legal name, tagline, description, domains, email addresses, legal URLs, socials, company info, logo, postal address |
+| `@resq-systems/constants/tokens.css` | Stylesheet mirroring `./tokens`: the `oklch` color roles, `--resq-chart-1..5` palette, `--resq-radius-*`, and `--resq-font-*` stacks as CSS custom properties on `:root`. `@import` it directly. |
 
 Everything is `as const`, so values are literal-typed and tree-shakeable.
 
@@ -57,7 +58,7 @@ place by being reused across apps, not by being convenient to dump here.
 ## Rules
 
 - **Zero runtime dependencies.** This package must stay dependency-free.
-- Values are data only — no logic, no side effects (`sideEffects: false`).
+- Values are data only — no logic; the JS is side-effect-free. Only the stylesheet (`tokens.css`) is a side-effectful import, declared via `sideEffects`.
 - A change here ripples to every dependent; prefer additive, stable edits.
 
 ## Prerequisites
@@ -67,21 +68,25 @@ place by being reused across apps, not by being convenient to dump here.
 
 ## Consuming in CSS
 
-This package ships **TypeScript token objects, not a stylesheet** — there is no
-`tokens.css` export. To expose the palette as CSS custom properties, generate them
-from the tokens at build time, or reference the hex values directly:
+Import the ready-made stylesheet — it declares the `oklch` color roles, the
+`--resq-chart-1..5` palette, `--resq-radius-*`, and `--resq-font-*` stacks as CSS
+custom properties on `:root`:
 
-```ts
-import { colors, radii } from "@resq-systems/constants/tokens";
+```css
+@import "@resq-systems/constants/tokens.css";
 
-const rootVars = `:root {
-  --color-background: ${colors.hex.background}; /* #0A0E1A */
-  --radius-md: ${radii.md};                     /* 8px */
-}`;
+.panel {
+  background: var(--resq-color-surface);
+  border: 1px solid var(--resq-color-border);
+  border-radius: var(--resq-radius-lg);
+  font-family: var(--resq-font-body);
+}
 ```
 
-For Tailwind v4, map the tokens into your `@theme` block (or a generated file) so
-utilities resolve against the same source of truth as the rest of the platform.
+The stylesheet mirrors `./tokens` (a test fails if the two drift). For Tailwind
+v4, alias these custom properties inside your `@theme` block so utilities resolve
+against the same source of truth. If you need the raw values in TypeScript — or
+the email-safe `hex` snapshot — import the objects from `./tokens` instead.
 
 ## Testing
 

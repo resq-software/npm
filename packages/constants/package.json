@@ -22,14 +22,18 @@
 			"types": "./lib/brand.d.ts",
 			"import": "./lib/brand.js",
 			"default": "./lib/brand.js"
-		}
+		},
+		"./tokens.css": "./src/tokens.css"
 	},
 	"main": "lib/index.js",
 	"module": "lib/index.js",
 	"types": "lib/index.d.ts",
-	"sideEffects": false,
+	"sideEffects": [
+		"**/*.css"
+	],
 	"files": [
 		"lib",
+		"src/tokens.css",
 		"README.md"
 	],
 	"scripts": {
