@@ -20,7 +20,7 @@ bun --filter @resq-systems/helpers test
 
 ## Dependencies
 
-- **Runtime:** `@resq-systems/logger`, `@resq-systems/types`, `tinyqueue`.
+- **Runtime:** `@resq-systems/dsa`, `@resq-systems/logger`, `@resq-systems/types`.
 - **Peers:** none.
 
 ## Rules
