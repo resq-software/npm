@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Generic notification / alert email component with an optional
+ * call-to-action and severity-colored eyebrow.
+ *
+ * @module @resq-systems/email-templates/emails/notification
+ */
+
 import type { NotificationData } from "../schemas.js";
 import { Email } from "./primitives.js";
 
+/** Props for {@link NotificationEmail} — the notification template's validated `data`. */
 export type NotificationEmailProps = NotificationData;
 
 const severityClass: Record<"info" | "success" | "warning" | "error", string> = {

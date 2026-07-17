@@ -28,6 +28,8 @@
  * - `ChartLegend` / `ChartLegendContent` — themed legend surface.
  * - `ChartStyle` — internal style-tag helper (auto-rendered by
  *   `ChartContainer`).
+ *
+ * @module @resq-systems/ui/components/chart/chart
  */
 
 "use client";
@@ -37,6 +39,7 @@ import * as RechartsPrimitive from "recharts";
 
 import { cn } from "../../lib/utils.js";
 
+//#region Constants
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { dark: "", light: ".light" } as const;
 
@@ -45,6 +48,13 @@ const SAFE_KEY_RE = /^[a-zA-Z0-9_-]+$/;
 const SAFE_COLOR_RE =
 	/^(#[0-9a-fA-F]{3,8}|[a-zA-Z]+|\d+(\.\d+)?\s+\d+(\.\d+)?%?\s+\d+(\.\d+)?%?|(rgb|hsl|oklch|color)\([^)]{0,100}\)|var\(--[a-zA-Z0-9_-]+\))$/;
 
+//#endregion
+
+//#region Types
+/**
+ * Per-series chart configuration: maps each data key to its label and icon plus
+ * either a single `color` or a per-theme `theme` color map.
+ */
 export type ChartConfig = {
 	[k in string]: {
 		icon?: React.ComponentType;
@@ -58,6 +68,7 @@ export type ChartConfig = {
 type ChartContextProps = {
 	config: ChartConfig;
 };
+//#endregion
 
 const ChartContext = React.createContext<ChartContextProps | null>(null);
 
@@ -80,6 +91,12 @@ ${colorConfig
 		.join("\n");
 }
 
+/**
+ * Wraps a Recharts `ResponsiveContainer` and emits scoped CSS variables from the
+ * `config` map so each series pulls its color from the design system.
+ *
+ * @see {@link ChartStyle}
+ */
 function ChartContainer({
 	children,
 	className,
@@ -123,6 +140,7 @@ function useChart() {
 	return context;
 }
 
+/** Injects a scoped `<style>` tag defining each series' color CSS variables; auto-rendered by {@link ChartContainer}. */
 const ChartStyle = React.memo(function ChartStyle({
 	config,
 	id,
@@ -149,8 +167,10 @@ const ChartStyle = React.memo(function ChartStyle({
 	return <style dangerouslySetInnerHTML={{ __html: css }} />;
 });
 
+/** Recharts `Tooltip` re-export; render {@link ChartTooltipContent} as its content. */
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
+/** Themed tooltip surface that resolves labels and colors from the chart `config`. */
 function ChartTooltipContent({
 	active,
 	className,
@@ -312,8 +332,10 @@ function ChartTooltipContent({
 	);
 }
 
+/** Recharts `Legend` re-export; render {@link ChartLegendContent} as its content. */
 const ChartLegend = RechartsPrimitive.Legend;
 
+/** Themed legend content that resolves labels, icons, and colors from the chart `config`. */
 function ChartLegendContent({
 	className,
 	hideIcon = false,

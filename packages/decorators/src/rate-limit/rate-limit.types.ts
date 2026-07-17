@@ -14,81 +14,52 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Types for the `@rateLimit` decorator and its function form: the
+ * configuration object, the synchronous and asynchronous counter contracts, and
+ * the legacy decorator signature.
+ *
+ * @module @resq-systems/decorators/rate-limit/rate-limit.types
+ */
+
 import type { Method } from "../types.js";
-/*
- * Copyright 2026 ResQ Systems, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 /**
- * @fileoverview Type definitions for the RateLimit decorator.
- * Provides types for rate limiting configuration and counter implementations.
+ * Configuration for the `@rateLimit` decorator and {@link rateLimitFn}.
  *
- * @module @resq/typescript/decorators/rate-limit/types
- *
- * @copyright Copyright (c) 2026 ResQ
- * @license MIT
- */
-
-/**
- * Configuration options for rate limiting.
- *
- * @interface RateLimitConfigs
- * @template T - The type of the class containing the decorated method
- * @property {number} timeSpanMs - The time window in milliseconds
- * @property {number} allowedCalls - Maximum number of calls allowed in the time window
- * @property {((...args: any[]) => string) | keyof T} [keyResolver] - Function to generate rate limit keys (for per-user/entity limiting)
- * @property {RateLimitCounter} [rateLimitCounter] - Custom counter implementation
- * @property {RateLimitAsyncCounter} [rateLimitAsyncCounter] - Async counter implementation
- * @property {() => void} [exceedHandler] - Handler called when rate limit is exceeded
- *
+ * @template T - The class type a `keyof T` key resolver resolves against.
  * @example
- * ```typescript
+ * ```ts
  * const config: RateLimitConfigs<ApiService> = {
- *   timeSpanMs: 60000,     // 1 minute
- *   allowedCalls: 100,     // 100 calls per minute
+ *   timeSpanMs: 60000, // One minute.
+ *   allowedCalls: 100, // 100 calls per minute.
  *   keyResolver: (userId) => `user-${userId}`,
- *   exceedHandler: () => { throw new Error('Rate limit exceeded'); }
+ *   exceedHandler: () => {
+ *     throw new Error("Rate limit exceeded");
+ *   },
  * };
  * ```
  */
 export interface RateLimitConfigs<T = unknown> {
-	/** The time window in milliseconds */
+	/** The time window in milliseconds. */
 	timeSpanMs: number;
-	/** Maximum number of calls allowed in the time window */
+	/** Maximum number of calls allowed in the time window. */
 	allowedCalls: number;
-	/** Function to generate rate limit keys (for per-user/entity limiting) */
+	/** Function or method name that generates rate-limit keys (per user/entity). */
 	keyResolver?: ((...args: unknown[]) => string) | keyof T;
-	/** Custom counter implementation */
+	/** Custom synchronous counter implementation. */
 	rateLimitCounter?: RateLimitCounter;
-	/** Async counter implementation */
+	/** Async counter implementation for distributed limiting. */
 	rateLimitAsyncCounter?: RateLimitAsyncCounter;
-	/** Handler called when rate limit is exceeded */
+	/** Handler called when the rate limit is exceeded. */
 	exceedHandler?: () => void;
 }
 
 /**
- * Interface for rate limit counter implementations.
- * Used to track call counts within time windows.
- *
- * @interface RateLimitCounter
- * @property {(key: string) => void} inc - Increment the count for a key
- * @property {(key: string) => void} dec - Decrement the count for a key
- * @property {(key: string) => number} getCount - Get the current count for a key
+ * Synchronous counter contract used to track call counts within time windows.
  *
  * @example
- * ```typescript
+ * ```ts
  * class InMemoryCounter implements RateLimitCounter {
  *   private counts = new Map<string, number>();
  *
@@ -112,25 +83,20 @@ export interface RateLimitConfigs<T = unknown> {
  * ```
  */
 export interface RateLimitCounter {
-	/** Increment the count for a key */
+	/** Increment the count for a key. */
 	inc: (key: string) => void;
-	/** Decrement the count for a key */
+	/** Decrement the count for a key. */
 	dec: (key: string) => void;
-	/** Get the current count for a key */
+	/** Get the current count for a key. */
 	getCount: (key: string) => number;
 }
 
 /**
- * Interface for async rate limit counter implementations.
- * Use this when the counter needs to perform async operations (e.g., Redis, database).
- *
- * @interface RateLimitAsyncCounter
- * @property {(key: string) => Promise<void>} inc - Increment the count for a key asynchronously
- * @property {(key: string) => Promise<void>} dec - Decrement the count for a key asynchronously
- * @property {(key: string) => Promise<number>} getCount - Get the current count for a key asynchronously
+ * Asynchronous counter contract for distributed rate limiting; use it when the
+ * counter performs async operations (e.g. Redis or a database).
  *
  * @example
- * ```typescript
+ * ```ts
  * class RedisCounter implements RateLimitAsyncCounter {
  *   async inc(key: string): Promise<void> {
  *     await redis.incr(`ratelimit:${key}`);
@@ -148,11 +114,11 @@ export interface RateLimitCounter {
  * ```
  */
 export interface RateLimitAsyncCounter {
-	/** Increment the count for a key asynchronously */
+	/** Increment the count for a key asynchronously. */
 	inc: (key: string) => Promise<void>;
-	/** Decrement the count for a key asynchronously */
+	/** Decrement the count for a key asynchronously. */
 	dec: (key: string) => Promise<void>;
-	/** Get the current count for a key asynchronously */
+	/** Get the current count for a key asynchronously. */
 	getCount: (key: string) => Promise<number>;
 }
 
@@ -165,13 +131,12 @@ export interface RateLimitAsyncCounter {
  * TS1270 at the decoration site). `rateLimit` now returns `Decorator<T>`, which
  * preserves the method signature end-to-end. Retained only for back-compat.
  *
- * @template T - The type of the class containing the decorated method
- * @template D - The return type of the decorated method
- *
- * @param {T} target - The class prototype
- * @param {keyof T} propertyName - The name of the method being decorated
- * @param {TypedPropertyDescriptor<Method<D>>} descriptor - The property descriptor
- * @returns {TypedPropertyDescriptor<Method<D>>} The modified descriptor
+ * @template T - The class type that owns the decorated method.
+ * @template D - The return type of the decorated method.
+ * @param target - The class prototype.
+ * @param propertyName - The name of the method being decorated.
+ * @param descriptor - The property descriptor.
+ * @returns The modified descriptor.
  */
 export type RateLimitable<T, D> = (
 	target: T,

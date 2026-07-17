@@ -26,6 +26,8 @@
  * and `SheetClose`. Per `STYLE_GUIDE.md`, `SheetTitle` renders
  * `font-display`. Use `Drawer` for swipe-friendly mobile
  * variants.
+ *
+ * @module @resq-systems/ui/components/sheet/sheet
  */
 
 "use client";

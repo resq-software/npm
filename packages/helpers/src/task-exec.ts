@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Earliest-deadline-first task scheduler backed by a binary heap,
+ * keeping a single armed timer instead of one `setTimeout` per queued task.
+ *
+ * @module @resq-systems/helpers/task-exec
+ */
+
 import { PriorityQueue } from "@resq-systems/dsa";
 import type { TimedTask } from "./task-exec.types.js";
 

@@ -19,6 +19,8 @@
  * `SpinnerGapIcon` with a CSS spin animation, `role="status"`, and
  * `aria-label="Loading"` for screen readers. For determinate
  * progress, use `Progress` instead.
+ *
+ * @module @resq-systems/ui/components/spinner/spinner
  */
 
 import { SpinnerGapIcon } from "@phosphor-icons/react";

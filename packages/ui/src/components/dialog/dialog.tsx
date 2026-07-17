@@ -29,6 +29,8 @@
  *
  * Accessibility: focus trap, escape-to-close, scroll-lock, and
  * `aria-labelledby` / `aria-describedby` wiring all handled by Radix.
+ *
+ * @module @resq-systems/ui/components/dialog/dialog
  */
 
 "use client";
@@ -40,14 +42,17 @@ import type * as React from "react";
 import { cn } from "../../lib/utils.js";
 import { Button } from "../button/button.js";
 
+/** Root of the modal dialog; owns open/closed state. */
 function Dialog({ ...props }: Readonly<React.ComponentProps<typeof DialogPrimitive.Root>>) {
 	return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
+/** Element that dismisses the dialog when activated. */
 function DialogClose({ ...props }: Readonly<React.ComponentProps<typeof DialogPrimitive.Close>>) {
 	return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
+/** Centered modal panel over an overlay; `showCloseButton` toggles the corner close control. */
 function DialogContent({
 	children,
 	className,
@@ -83,6 +88,7 @@ function DialogContent({
 	);
 }
 
+/** Accessible description wired to the dialog via `aria-describedby`. */
 function DialogDescription({
 	className,
 	...props
@@ -99,6 +105,7 @@ function DialogDescription({
 	);
 }
 
+/** Action row of the dialog, typically holding confirm/cancel buttons. */
 function DialogFooter({
 	children,
 	className,
@@ -128,12 +135,14 @@ function DialogFooter({
 	);
 }
 
+/** Groups the `DialogTitle` and `DialogDescription`. */
 function DialogHeader({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div className={cn("gap-2 flex flex-col", className)} data-slot="dialog-header" {...props} />
 	);
 }
 
+/** Dimmed backdrop rendered behind the dialog content. */
 function DialogOverlay({
 	className,
 	...props
@@ -150,10 +159,12 @@ function DialogOverlay({
 	);
 }
 
+/** Portals the dialog subtree to the document body. */
 function DialogPortal({ ...props }: Readonly<React.ComponentProps<typeof DialogPrimitive.Portal>>) {
 	return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 }
 
+/** Accessible heading wired to the dialog via `aria-labelledby`. */
 function DialogTitle({
 	className,
 	...props
@@ -167,6 +178,7 @@ function DialogTitle({
 	);
 }
 
+/** Element that opens the dialog when activated. */
 function DialogTrigger({
 	...props
 }: Readonly<React.ComponentProps<typeof DialogPrimitive.Trigger>>) {

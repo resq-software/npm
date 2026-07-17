@@ -26,6 +26,8 @@
  * group case also blocks pointer events; the peer case shows a
  * `not-allowed` cursor without disabling clicks (so the label
  * still focuses its associated input).
+ *
+ * @module @resq-systems/ui/components/label/label
  */
 
 "use client";
@@ -35,6 +37,10 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
+/**
+ * Form label that focuses its associated control on click and auto-dims when
+ * its peer input or group ancestor is disabled.
+ */
 function Label({
 	className,
 	...props

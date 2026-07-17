@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Empty component family (empty-state surfaces) —
+ * re-exports `./empty` as the `@resq-systems/ui/empty` entry.
+ *
+ * @module @resq-systems/ui/components/empty
+ */
+
 export * from "./empty.js";

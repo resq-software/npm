@@ -15,55 +15,28 @@
  */
 
 /**
- * @fileoverview ThrottleAsync decorator - limits the number of concurrent
- * async method calls. Additional calls are queued and executed when slots
- * become available.
+ * @fileoverview `@throttleAsync` decorator — caps the number of concurrent
+ * in-flight executions of an async method, queuing excess calls and running them
+ * in FIFO order as slots free up.
  *
- * @module @resq/typescript/decorators/throttle-async
- *
- * @example
- * ```typescript
- * class ApiService {
- *   @throttleAsync(3) // Max 3 concurrent requests
- *   async fetchData(endpoint: string): Promise<Data> {
- *     return fetch(endpoint).then(r => r.json());
- *   }
- * }
- *
- * const api = new ApiService();
- *
- * // These will execute 3 at a time
- * const results = await Promise.all([
- *   api.fetchData('/api/data1'),
- *   api.fetchData('/api/data2'),
- *   api.fetchData('/api/data3'),
- *   api.fetchData('/api/data4'), // Queued until a slot frees up
- *   api.fetchData('/api/data5'), // Queued until a slot frees up
- * ]);
- * ```
- *
- * @copyright Copyright (c) 2026 ResQ
- * @license MIT
+ * @module @resq-systems/decorators/throttle-async/throttle-async
  */
 
 import type { AsyncDecorator } from "../types.js";
 import { throttleAsyncFn } from "./throttle-async.fn.js";
 
 /**
- * Decorator that limits concurrent async method calls.
- * Excess calls are queued and executed when slots become available.
+ * Limit an async method to `parallelCalls` concurrent executions; excess calls
+ * queue and run in FIFO order as slots free up.
  *
- * @template T - The type of the class containing the decorated method
- * @template D - The resolved type of the async method
- * @param {number} [parallelCalls=1] - Maximum number of concurrent calls allowed
- * @returns {Decorator<T>} The decorator function
- *
- * @throws {Error} When applied to a non-method property
- *
+ * @template T - The class type that owns the decorated method.
+ * @param parallelCalls - Maximum number of concurrent calls; defaults to `1`.
+ * @returns The async method decorator.
+ * @throws {Error} If applied to anything other than a method.
  * @example
- * ```typescript
+ * ```ts
  * class BatchProcessor {
- *   // Process up to 5 items concurrently
+ *   // Process up to five items concurrently.
  *   @throttleAsync(5)
  *   async processItem(item: Item): Promise<Result> {
  *     return await this.performHeavyProcessing(item);
@@ -73,11 +46,10 @@ import { throttleAsyncFn } from "./throttle-async.fn.js";
  * const processor = new BatchProcessor();
  * const items = Array.from({ length: 100 }, (_, i) => ({ id: i }));
  *
- * // Process 100 items, 5 at a time
- * const results = await Promise.all(
- *   items.map(item => processor.processItem(item))
- * );
+ * // Process 100 items, five at a time.
+ * const results = await Promise.all(items.map((item) => processor.processItem(item)));
  * ```
+ * @see {@link throttleAsyncFn} for the function form.
  */
 export function throttleAsync<T = unknown>(parallelCalls?: number): AsyncDecorator<T> {
 	return <F extends (...args: never[]) => Promise<unknown>>(

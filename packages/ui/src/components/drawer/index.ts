@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Drawer component family (bottom-sheet modals) —
+ * re-exports `./drawer` as the `@resq-systems/ui/drawer` entry.
+ *
+ * @module @resq-systems/ui/components/drawer
+ */
+
 export * from "./drawer.js";

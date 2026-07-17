@@ -23,12 +23,18 @@
  * Built on Radix UI's `AspectRatio` primitive, which uses the
  * `padding-bottom: %` trick under the hood for layout-stable
  * preservation of ratio across viewport sizes.
+ *
+ * @module @resq-systems/ui/components/aspect-ratio/aspect-ratio
  */
 
 "use client";
 
 import { AspectRatio as AspectRatioPrimitive } from "radix-ui";
 
+/**
+ * Constrains its child to a fixed `ratio` (width ÷ height) so media reserves
+ * layout space before it loads, avoiding cumulative layout shift.
+ */
 function AspectRatio({
 	...props
 }: Readonly<React.ComponentProps<typeof AspectRatioPrimitive.Root>>) {

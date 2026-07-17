@@ -39,6 +39,8 @@ import {
 	track,
 } from "../index";
 
+//#region Provider
+
 /**
  * Props for {@link AnalyticsProvider}.
  */
@@ -124,6 +126,10 @@ export const AnalyticsProvider = ({
 	return children;
 };
 
+//#endregion
+
+//#region Hook
+
 /**
  * Return type of {@link useAnalytics}.
  *
@@ -164,3 +170,5 @@ export const useAnalytics = (): UseAnalyticsReturn => ({
 	pageview,
 	analytics,
 });
+
+//#endregion

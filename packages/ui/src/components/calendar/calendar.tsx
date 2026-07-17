@@ -24,6 +24,8 @@
  * Exports `Calendar` (the surface) and `CalendarDayButton` (the
  * individual day cell, exposed for callers that need to render a
  * custom day with the same hover/focus/selected states).
+ *
+ * @module @resq-systems/ui/components/calendar/calendar
  */
 
 "use client";
@@ -35,6 +37,12 @@ import { type DayButton, DayPicker, getDefaultClassNames, type Locale } from "re
 import { cn } from "../../lib/utils.js";
 import { Button, buttonVariants } from "../button/button.js";
 
+/**
+ * Themed month grid built on `react-day-picker`; forwards its props and applies
+ * the design system's navigation icons, day styling, and range/selection states.
+ *
+ * @see {@link CalendarDayButton}
+ */
 function Calendar({
 	buttonVariant = "outline",
 	captionLayout = "label",
@@ -171,6 +179,7 @@ function Calendar({
 	);
 }
 
+/** Renders one day cell as a button, reflecting today/selected/range-edge states. */
 function CalendarDayButton({
 	className,
 	day,

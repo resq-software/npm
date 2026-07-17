@@ -22,6 +22,8 @@
  * with a default `SimpleRateLimitCounter`; supply a custom counter
  * via the `rateLimitCounter` option for distributed / Redis-backed
  * limiting.
+ *
+ * @module @resq-systems/decorators/rate-limit
  */
 
 export * from "./rate-limit.js";

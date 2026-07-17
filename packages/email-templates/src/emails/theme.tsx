@@ -14,11 +14,22 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Email theming system — the resolved `EmailTheme` shape, override
+ * merging, the Tailwind config builder, and React contexts carrying the active theme
+ * and per-send message policy.
+ *
+ * @module @resq-systems/email-templates/emails/theme
+ */
+
 import { pixelBasedPreset } from "@react-email/components";
 import { type ReactElement, createContext, createElement } from "react";
 import type { EmailCategory } from "../schemas.js";
 import { emailColors, emailFonts, emailOrg } from "./tokens.js";
 
+//#region Types
+
+/** Font stacks the theme exposes to Tailwind's `fontFamily` extension. */
 export interface EmailThemeFonts {
 	display: string[];
 	sans: string[];
@@ -59,6 +70,10 @@ export interface EmailThemeOverride {
 	/** Pass `null` to drop the webfont link entirely. */
 	fontsHref?: string | null;
 }
+
+//#endregion
+
+//#region Public API
 
 /** The default ResQ Systems brand theme (dark-first, red primary, Syne/DM Sans/DM Mono). */
 export const defaultEmailTheme: EmailTheme = {
@@ -138,3 +153,5 @@ export function withEmailMessage(element: ReactElement, message?: EmailMessage):
 	if (!message) return element;
 	return createElement(EmailMessageContext.Provider, { value: message }, element);
 }
+
+//#endregion

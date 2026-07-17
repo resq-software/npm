@@ -14,13 +14,22 @@
  * limitations under the License.
  */
 
-// Fractional indexing, specialized to tldraw's needs.
-//
-// This is a vendored and trimmed version of the `fractional-indexing` (by
-// arv@rocicorp.dev) and `jittered-fractional-indexing` (by
-// github@nathanhleung.com) packages, both released under CC0-1.0 (public
-// domain). See https://observablehq.com/@dgreensp/implementing-fractional-indexing
-// for the original algorithm.
+/*!
+ * Adapted from tldraw's fractional indexing — itself a vendored and trimmed
+ * version of the `fractional-indexing` (by arv@rocicorp.dev) and
+ * `jittered-fractional-indexing` (by github@nathanhleung.com) packages, both
+ * released under CC0-1.0 (public domain).
+ * https://observablehq.com/@dgreensp/implementing-fractional-indexing
+ */
+
+/**
+ * @fileoverview Fractional (order-key) indexing: mints compact string keys that
+ * sort lexicographically, so a list item can be reordered by generating a key
+ * between its two neighbours without renumbering the rest. Optional jitter
+ * spreads concurrently-generated keys apart to reduce collisions.
+ *
+ * @module @resq-systems/dsa/fractional-indexing
+ */
 
 // Digits must be in ascending character-code order.
 const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";

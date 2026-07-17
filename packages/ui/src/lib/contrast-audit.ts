@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Multi-Format WCAG Contrast Ratio Checker
+ * @fileoverview Multi-format WCAG contrast-ratio checker supporting hex, rgb(),
+ * hsl(), oklch(), oklab(), lab(), lch(), and CSS named colors. Used by
+ * contrast-audit.test.ts to keep every design-token pair compliant.
  *
- * Supports: hex, rgb(), hsl(), oklch(), oklab(), lab(), lch(), CSS named colors.
- * Used by contrast-audit.test.ts to ensure all token pairs stay compliant.
+ * @module @resq-systems/ui/lib/contrast-audit
  */
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+//#region Types
 
 /**
  * Linear-RGB triplet (each channel `0..1`, gamma-decoded). The
@@ -74,7 +75,9 @@ export interface ThemeAudit {
 	allPass: boolean;
 }
 
-// ─── CSS Named Colors (full CSS Level 4 set) ───────────────────────────────
+//#endregion
+
+//#region CSS Named Colors (full CSS Level 4 set)
 
 const NAMED_COLORS: Record<string, string> = {
 	aliceblue: "#f0f8ff",
@@ -227,7 +230,9 @@ const NAMED_COLORS: Record<string, string> = {
 	yellowgreen: "#9acd32",
 };
 
-// ─── Parsers ────────────────────────────────────────────────────────────────
+//#endregion
+
+//#region Parsers
 
 /** sRGB gamma decode: normalized [0,1] channel -> linear [0,1]. */
 function srgbChannelToLinear(s: number): number {
@@ -307,7 +312,9 @@ function parseHsl(raw: string): LinearRGB | null {
 	};
 }
 
-// ─── OKLab family ───────────────────────────────────────────────────────────
+//#endregion
+
+//#region OKLab family
 
 function oklabToLinear(lNorm: number, a: number, b: number): LinearRGB {
 	const l_ = lNorm + 0.3963377774 * a + 0.2158037573 * b;
@@ -347,7 +354,9 @@ function parseOklab(raw: string): LinearRGB | null {
 	);
 }
 
-// ─── CIE Lab family ─────────────────────────────────────────────────────────
+//#endregion
+
+//#region CIE Lab family
 
 function cieLabToLinear(L: number, a: number, bVal: number): LinearRGB {
 	const fy = (L + 16) / 116;
@@ -393,7 +402,9 @@ function parseLch(raw: string): LinearRGB | null {
 	);
 }
 
-// ─── Unified Parser ─────────────────────────────────────────────────────────
+//#endregion
+
+//#region Unified Parser
 
 type ParserFn = (raw: string) => LinearRGB | null;
 
@@ -441,7 +452,9 @@ export function toLinearRGB(raw: string): LinearRGB {
 	throw new Error(`Unsupported color format: "${raw}"`);
 }
 
-// ─── Contrast Math ──────────────────────────────────────────────────────────
+//#endregion
+
+//#region Contrast Math
 
 /** Relative luminance per WCAG 2.x (linear sRGB weights). */
 export function relativeLuminance({ r, g, b }: LinearRGB): number {
@@ -455,7 +468,9 @@ export function contrastRatio(lum1: number, lum2: number): number {
 	return (lighter + 0.05) / (darker + 0.05);
 }
 
-// ─── Audit Engine ───────────────────────────────────────────────────────────
+//#endregion
+
+//#region Audit Engine
 
 /**
  * Run every {@link ContrastPair} against the theme's `tokens` and
@@ -530,7 +545,9 @@ export function formatAudit(audit: ThemeAudit): string {
 	return lines.join("\n");
 }
 
-// ─── Default WCAG Pair Definitions ──────────────────────────────────────────
+//#endregion
+
+//#region Default WCAG Pair Definitions
 // Text pairs -> Number.parseFloat("4.5"):1, UI elements -> 3:1, large text -> 3:1
 
 /**
@@ -602,7 +619,9 @@ export const DEFAULT_PAIRS: ContrastPair[] = [
 	{ fg: "warning-text", bg: "card", minRatio: Number.parseFloat("4.5"), label: "text" },
 ];
 
-// ─── CSS Parser ─────────────────────────────────────────────────────────────
+//#endregion
+
+//#region CSS Parser
 
 /**
  * Extracts color tokens from a CSS string containing :root and .light blocks.
@@ -638,7 +657,9 @@ function parseTokenBlock(block: string): ColorTokens {
 	return tokens;
 }
 
-// ─── Full Audit Runner ──────────────────────────────────────────────────────
+//#endregion
+
+//#region Full Audit Runner
 
 /**
  * Run {@link auditTheme} across every theme in `themes` and return
@@ -667,3 +688,4 @@ export function runContrastAudit(
 
 	return { globalPass, audits };
 }
+//#endregion

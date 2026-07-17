@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview One-time verification code (OTP) email component.
+ *
+ * @module @resq-systems/email-templates/emails/otp
+ */
+
 import type { OtpData } from "../schemas.js";
 import { Email } from "./primitives.js";
 
+/** Props for {@link OtpEmail} — the OTP template's validated `data`. */
 export type OtpEmailProps = OtpData;
 
 /**

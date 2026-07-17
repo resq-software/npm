@@ -23,7 +23,9 @@
  */
 
 /**
- * @file A one-to-many map: each key holds an ordered list of values.
+ * @fileoverview A one-to-many map: each key holds an ordered list of values.
+ * Adapted from Playwright's isomorphic MultiMap (see attribution above).
+ *
  * @module @resq-systems/dsa/multi-map
  */
 

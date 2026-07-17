@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Menubar component family (desktop-style menu bars)
+ * — re-exports `./menubar` as the `@resq-systems/ui/menubar` entry.
+ *
+ * @module @resq-systems/ui/components/menubar
+ */
+
 export * from "./menubar.js";

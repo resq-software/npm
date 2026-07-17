@@ -15,6 +15,13 @@
  */
 
 /**
+ * @fileoverview Type describing a single unit of deferred work scheduled by the
+ * `TaskExec` earliest-deadline-first scheduler.
+ *
+ * @module @resq-systems/helpers/task-exec.types
+ */
+
+/**
  * A unit of deferred work tracked by {@link TaskExec}.
  *
  * Tasks are ordered by `execTime` (a Unix epoch millisecond) — the

@@ -22,10 +22,16 @@
  *
  * When nested inside a `Tooltip`, the styling auto-inverts to read
  * against the tooltip surface.
+ *
+ * @module @resq-systems/ui/components/kbd/kbd
  */
 
 import { cn } from "../../lib/utils.js";
 
+/**
+ * Renders a single keyboard key hint in a semantic `<kbd>`; inverts its styling
+ * automatically when nested inside a `Tooltip`.
+ */
 function Kbd({ className, ...props }: Readonly<React.ComponentProps<"kbd">>) {
 	return (
 		<kbd
@@ -39,6 +45,7 @@ function Kbd({ className, ...props }: Readonly<React.ComponentProps<"kbd">>) {
 	);
 }
 
+/** Groups several `Kbd` keys to display a chord such as `Cmd + Shift + K`. */
 function KbdGroup({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<kbd

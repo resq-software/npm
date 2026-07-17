@@ -25,6 +25,8 @@
  * (TableBody > TableRow > TableCell*) + TableFooter? +
  * TableCaption?`. Each piece is a thin wrapper preserving native
  * semantics for accessibility (rows, cells, scope, role).
+ *
+ * @module @resq-systems/ui/components/table/table
  */
 
 "use client";

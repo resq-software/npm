@@ -24,6 +24,8 @@
  * TooltipContent`. The provider can be mounted once at the app
  * root with a global `delayDuration`; individual `Tooltip` roots
  * can override the delay locally.
+ *
+ * @module @resq-systems/ui/components/tooltip/tooltip
  */
 
 "use client";

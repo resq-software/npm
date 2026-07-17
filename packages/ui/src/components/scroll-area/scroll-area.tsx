@@ -25,6 +25,8 @@
  * Radix renders the bars only when scrolling is needed and uses
  * pointer-events targeting that doesn't intercept clicks on the
  * content.
+ *
+ * @module @resq-systems/ui/components/scroll-area/scroll-area
  */
 
 "use client";

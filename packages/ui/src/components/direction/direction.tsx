@@ -24,6 +24,8 @@
  *
  * Re-exports `useDirection()` for components that need to read the
  * resolved direction.
+ *
+ * @module @resq-systems/ui/components/direction/direction
  */
 
 "use client";
@@ -31,6 +33,13 @@
 import { Direction } from "radix-ui";
 import type * as React from "react";
 
+/**
+ * Provides RTL/LTR direction to every Radix component beneath it. Accepts both
+ * `dir` (Radix native) and the `direction` alias; `direction` wins when both
+ * are supplied.
+ *
+ * @see {@link useDirection}
+ */
 function DirectionProvider({
 	children,
 	dir,
@@ -45,6 +54,7 @@ function DirectionProvider({
 	);
 }
 
+/** Reads the resolved text direction from the nearest {@link DirectionProvider}. */
 const useDirection = Direction.useDirection;
 
 export { DirectionProvider, useDirection };

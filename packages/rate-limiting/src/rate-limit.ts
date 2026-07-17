@@ -15,8 +15,12 @@
  */
 
 /**
- * @file Rate Limiting Utilities
- * @module @resq/typescript/utils/middleware/rate-limit
+ * @fileoverview HTTP-oriented rate-limit stores — an Effect Schema for validating
+ * limiter config plus pluggable sliding-window backends (in-memory LRU and Upstash
+ * Redis) that share one {@link RateLimitDecision} contract, alongside conservative
+ * per-route presets.
+ *
+ * @module @resq-systems/rate-limiting/rate-limit
  */
 
 import { Ratelimit } from "@upstash/ratelimit";
@@ -25,9 +29,7 @@ import { Schema as S } from "effect";
 import { LRUCache } from "@resq-systems/dsa";
 import type { RateLimitDecision } from "./decision.js";
 
-// ============================================
-// Effect Schema Definitions
-// ============================================
+//#region Schemas
 
 /**
  * Effect Schema for runtime-validating a rate-limit configuration —
@@ -52,9 +54,9 @@ export const RateLimitConfigSchema = S.Struct({
 /** TypeScript type inferred from {@link RateLimitConfigSchema}. */
 export type RateLimitConfig = typeof RateLimitConfigSchema.Type;
 
-// ============================================
-// Rate Limit Store Interfaces
-// ============================================
+//#endregion
+
+//#region Public API
 
 /**
  * Pluggable backend for rate-limit state.
@@ -157,8 +159,8 @@ export class RedisRateLimitStore implements IRateLimitStore {
 	 * matching keys.
 	 */
 	async reset(_key: string): Promise<void> {
-		// Note: @upstash/ratelimit reset is complex as it uses multiple keys.
-		// For now, we clear the main key if possible.
+		// A single delete cannot clear the multiple sliding-window keys that
+		// @upstash/ratelimit maintains per limiter, so reset is intentionally a no-op.
 	}
 }
 
@@ -206,7 +208,8 @@ export class MemoryRateLimitStore implements IRateLimitStore {
 			counter.windowStart = windowStart;
 		}
 
-		// Calculate weighted count
+		// Interpolate between the previous and current window so the count decays
+		// smoothly across the boundary instead of resetting in one step.
 		const windowPosition = (now - windowStart) / windowMs;
 		const weightedCount = counter.previous * (1 - windowPosition) + counter.current;
 
@@ -224,7 +227,7 @@ export class MemoryRateLimitStore implements IRateLimitStore {
 			return { allowed: false, remaining: 0, limit: maxRequests, resetAt };
 		}
 
-		// Calculate final count and remaining after the increment
+		// Recompute after the increment so `remaining` reflects the slot just taken.
 		const finalWeightedCount = counter.previous * (1 - windowPosition) + counter.current;
 		const remaining = Math.max(0, maxRequests - Math.floor(finalWeightedCount));
 
@@ -237,9 +240,9 @@ export class MemoryRateLimitStore implements IRateLimitStore {
 	}
 }
 
-// ============================================
-// Rate Limit Presets
-// ============================================
+//#endregion
+
+//#region Constants
 
 /**
  * Pre-tuned `(windowMs, maxRequests)` pairs for common traffic shapes.
@@ -284,3 +287,5 @@ export const RATE_LIMIT_PRESETS = {
 		maxRequests: 20,
 	},
 } as const;
+
+//#endregion

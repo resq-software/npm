@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Function form of the `@memoize` decorator — wraps a synchronous
+ * method so its results are cached by argument key, with an optional TTL and a
+ * custom cache or key resolver.
+ *
+ * @module @resq-systems/decorators/memoize/memoize.fn
+ */
+
 import { isFunction, TaskExec } from "../_utils.js";
 import type { Method } from "../types.js";
 import type { KeyResolver, MemoizeConfig } from "./memoize.types.js";
 
 /**
- * Wraps a method to cache its results based on arguments.
+ * Wrap a method so its results are cached by argument key (function form of
+ * {@link memoize}).
  *
- * @overload
- * @template D - The return type of the original method
- * @template A - The argument types of the original method
- * @param {Method<D, A>} originalMethod - The method to memoize
- * @returns {Method<D, A>} The memoized method
+ * The second argument selects the caching policy: omit it to cache forever, pass
+ * a number for a TTL in milliseconds, or pass a {@link MemoizeConfig} for a
+ * custom cache, key resolver, and/or expiry.
  *
- * @overload
- * @template D - The return type of the original method
- * @template A - The argument types of the original method
- * @param {Method<D, A>} originalMethod - The method to memoize
- * @param {MemoizeConfig<Record<PropertyKey, unknown>, D>} config - Configuration for memoization
- * @returns {Method<D, A>} The memoized method
- *
- * @overload
- * @template D - The return type of the original method
- * @template A - The argument types of the original method
- * @param {Method<D, A>} originalMethod - The method to memoize
- * @param {number} expirationTimeMs - Cache expiration time in milliseconds
- * @returns {Method<D, A>} The memoized method
- *
+ * @template T - The class type a `keyof T` key resolver resolves against.
+ * @template D - The return type of the original method.
+ * @template A - The argument tuple of the original method.
+ * @param originalMethod - The method whose results are cached.
+ * @param input - A TTL in milliseconds, a {@link MemoizeConfig}, or omitted to
+ * cache indefinitely.
+ * @returns The memoized method.
  * @example
- * ```typescript
+ * ```ts
  * class ExpensiveOperations {
  *   calculatePrimes(max: number): number[] {
  *     const primes = [];
@@ -55,26 +55,20 @@ import type { KeyResolver, MemoizeConfig } from "./memoize.types.js";
  *
  * const ops = new ExpensiveOperations();
  *
- * // Basic memoization
+ * // Basic memoization.
  * const memoized = memoizeFn(ops.calculatePrimes.bind(ops));
- * const primes1 = memoized(1000); // Computes
- * const primes2 = memoized(1000); // Returns cached result
+ * const primes1 = memoized(1000); // Computes.
+ * const primes2 = memoized(1000); // Returns the cached result.
  *
- * // With TTL
- * const withTTL = memoizeFn(
- *   ops.calculatePrimes.bind(ops),
- *   60000 // Cache for 60 seconds
- * );
+ * // With a TTL of 60 seconds.
+ * const withTTL = memoizeFn(ops.calculatePrimes.bind(ops), 60000);
  *
- * // With custom config
- * const withConfig = memoizeFn(
- *   ops.calculatePrimes.bind(ops),
- *   {
- *     cache: new Map(),
- *     keyResolver: (max) => `primes-${max}`,
- *     expirationTimeMs: 300000
- *   }
- * );
+ * // With a custom config.
+ * const withConfig = memoizeFn(ops.calculatePrimes.bind(ops), {
+ *   cache: new Map(),
+ *   keyResolver: (max) => `primes-${max}`,
+ *   expirationTimeMs: 300000,
+ * });
  * ```
  */
 export function memoizeFn<D = unknown, A extends unknown[] = unknown[]>(

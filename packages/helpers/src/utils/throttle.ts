@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Frame-rate throttling — an `FpsScheduler` that batches callbacks to
+ * a target FPS, plus `fpsThrottle` and `throttleToNextFrame` bound to a shared
+ * default scheduler.
+ *
+ * @module @resq-systems/helpers/utils/throttle
+ */
+
 const isTest = () =>
 	typeof process !== "undefined" &&
 	process.env.NODE_ENV === "test" &&

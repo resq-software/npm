@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Function form of the `@rateLimit` decorator — wraps a method so it
+ * runs at most `allowedCalls` times per window, backed by either an in-memory or
+ * a distributed (async) counter.
+ *
+ * @module @resq-systems/decorators/rate-limit/rate-limit.fn
+ */
+
 import { assertNever } from "../_assert.js";
 import { isFunction } from "../_utils.js";
 import type { Method } from "../types.js";
@@ -67,43 +75,40 @@ function resolveKey<A extends unknown[]>(
 }
 
 /**
- * Creates a rate-limited version of a method.
+ * Create a rate-limited version of a method (function form of {@link rateLimit}).
  *
- * @template D - The return type of the original method
- * @template A - The argument types of the original method
- * @param {Method<D, A>} originalMethod - The method to rate limit
- * @param {RateLimitConfigs} config - The rate limit configuration
- * @returns {Method<D | undefined | Promise<D | undefined>, A>} A rate-limited method. The
- * result is a promise when a distributed `rateLimitAsyncCounter` is configured, otherwise sync.
- *
- * @remarks With a distributed `rateLimitAsyncCounter`, limiting is **best-effort**
- * under concurrency: the check-then-increment is not atomic, so bursts can briefly
+ * With a distributed `rateLimitAsyncCounter`, limiting is best-effort under
+ * concurrency: the check-then-increment is not atomic, so bursts can briefly
  * exceed `allowedCalls`. Back the counter with an atomic increment for a hard cap.
  *
+ * @template T - The class type a `keyof T` key resolver resolves against.
+ * @template D - The return type of the original method.
+ * @template A - The argument tuple of the original method.
+ * @param originalMethod - The method to rate limit.
+ * @param config - The rate-limit configuration.
+ * @returns A rate-limited method; the result is a promise when a distributed
+ * `rateLimitAsyncCounter` is configured, otherwise synchronous.
  * @example
- * ```typescript
+ * ```ts
  * class ApiService {
  *   async fetchData(id: string): Promise<Data> {
- *     return await fetch(`/api/data/${id}`).then(r => r.json());
+ *     return await fetch(`/api/data/${id}`).then((r) => r.json());
  *   }
  * }
  *
  * const service = new ApiService();
  *
- * // Rate limit to 3 calls per 5 seconds
- * const limited = rateLimitFn(
- *   service.fetchData.bind(service),
- *   {
- *     timeSpanMs: 5000,
- *     allowedCalls: 3,
- *     exceedHandler: () => console.warn('Too many requests!')
- *   }
- * );
+ * // Rate limit to three calls per five seconds.
+ * const limited = rateLimitFn(service.fetchData.bind(service), {
+ *   timeSpanMs: 5000,
+ *   allowedCalls: 3,
+ *   exceedHandler: () => console.warn("Too many requests!"),
+ * });
  *
- * await limited('1'); // Executes
- * await limited('2'); // Executes
- * await limited('3'); // Executes
- * const result = await limited('4'); // Returns undefined, logs warning
+ * await limited("1"); // Executes.
+ * await limited("2"); // Executes.
+ * await limited("3"); // Executes.
+ * const result = await limited("4"); // → undefined; logs the warning.
  * ```
  */
 export function rateLimitFn<T = unknown, D = unknown, A extends unknown[] = unknown[]>(

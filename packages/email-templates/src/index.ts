@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public entry barrel for the transactional email package — re-exports
+ * the schema contract, theme, mailer factory, registry, headless renderer, and the
+ * built-in templates.
+ *
+ * @module @resq-systems/email-templates
+ */
+
 export * from "./contract.js";
 export * from "./emails/theme.js";
 export {

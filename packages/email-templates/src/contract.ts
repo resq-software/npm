@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public payload contract for the built-in email templates — the
+ * validated `{ name, to, data }` union plus name/data type helpers and the boundary
+ * decoder.
+ *
+ * @module @resq-systems/email-templates/contract
+ */
+
 import { resqMailer } from "./suite.js";
 
 export { EmailValidationError } from "./mailer.js";

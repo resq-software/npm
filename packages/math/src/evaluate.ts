@@ -47,12 +47,16 @@ import {
 import type { Value } from "./value.js";
 import { asBool, asFunc, asNum, asRecord, bool, func, num } from "./value.js";
 
+//#region Types
+
 /** An environment mapping free/global variables to values. */
 export type Env = ReadonlyMap<string, Value>;
 
 /** Options to configure execution boundaries and limits. */
 export interface EvaluateOptions {
+	/** Maximum recursion depth before a {@link RecursionLimitError} is thrown. Defaults to 200. */
 	readonly maxDepth?: number;
+	/** Maximum evaluation steps before an {@link ExecutionLimitError} is thrown. Defaults to 10000. */
 	readonly maxSteps?: number;
 }
 
@@ -62,6 +66,10 @@ interface EvalContext {
 	readonly maxDepth: number;
 	readonly maxSteps: number;
 }
+
+//#endregion
+
+//#region Public API
 
 /**
  * Evaluate a compiled expression to a concrete {@link Value}.
@@ -93,6 +101,10 @@ export const evaluate = (
 	const mutStack = [...stack];
 	return evaluateInternal(expr, env, mutStack, ctx);
 };
+
+//#endregion
+
+//#region Internal
 
 const evaluateInternal = (
 	expr: CompiledExpr,
@@ -257,3 +269,5 @@ const evaluateInternal = (
 		ctx.depth--;
 	}
 };
+
+//#endregion

@@ -20,6 +20,8 @@
  * promise resolves). Useful for logging, telemetry, and cache
  * eviction. Companion `afterFn(method, config)` wraps a plain
  * function with the same semantics.
+ *
+ * @module @resq-systems/decorators/after
  */
 
 export * from "./after.js";

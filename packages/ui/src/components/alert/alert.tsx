@@ -23,6 +23,8 @@
  * Composition: `Alert > (AlertTitle + AlertDescription + AlertAction?)`.
  * An optional leading SVG icon is auto-laid-out via `:has` selectors
  * so callers can drop in a Phosphor icon without writing grid CSS.
+ *
+ * @module @resq-systems/ui/components/alert/alert
  */
 
 import { cva, type VariantProps } from "class-variance-authority";
@@ -46,6 +48,13 @@ const alertVariants = cva(
 	},
 );
 
+/**
+ * Callout surface for contextual messages; `role="alert"` announces it to
+ * assistive tech. Use the `destructive` variant for error states.
+ *
+ * @see {@link AlertTitle}
+ * @see {@link AlertDescription}
+ */
 function Alert({
 	className,
 	variant,
@@ -61,12 +70,14 @@ function Alert({
 	);
 }
 
+/** Top-right slot for an action affordance (e.g. a dismiss button). */
 function AlertAction({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div className={cn("absolute top-2 right-2", className)} data-slot="alert-action" {...props} />
 	);
 }
 
+/** Supporting body copy beneath the `AlertTitle`. */
 function AlertDescription({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -80,6 +91,7 @@ function AlertDescription({ className, ...props }: Readonly<React.ComponentProps
 	);
 }
 
+/** Short, emphasized heading line for the alert. */
 function AlertTitle({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div

@@ -17,6 +17,8 @@
 /**
  * @fileoverview Branded bounded numerics.
  *
+ * @module @resq-systems/types/numeric
+ *
  * Raw `number` says nothing about its range. A rate-limit window of `-1`, a
  * bloom-filter error rate of `2`, a `0`-byte secure token, a retry count that
  * is secretly a float — all pass `: number` and blow up (or silently misbehave)

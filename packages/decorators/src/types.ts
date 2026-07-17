@@ -15,6 +15,14 @@
  */
 
 /**
+ * @fileoverview Shared method and decorator type aliases used across the package.
+ * These keep the decorated member's signature preserved end-to-end rather than
+ * erased to `any`, so `type-preservation.test.ts` stays green.
+ *
+ * @module @resq-systems/decorators/types
+ */
+
+/**
  * A generic method type used throughout decorators.
  *
  * @template D - The return type of the method

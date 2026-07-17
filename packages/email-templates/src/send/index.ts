@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Optional sender entry barrel — re-exports the transport port, the
+ * Resend adapter, and the render-and-send convenience wiring.
+ *
+ * @module @resq-systems/email-templates/send
+ */
+
 export * from "./sender.js";
 export * from "./resend-sender.js";
 export * from "./send-email.js";

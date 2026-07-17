@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Accordion component family (vertically-stacked
+ * disclosure surfaces) — re-exports `./accordion` as the `@resq-systems/ui/accordion` entry.
+ *
+ * @module @resq-systems/ui/components/accordion
+ */
+
 export * from "./accordion.js";

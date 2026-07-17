@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the HoverCard component family (hover-triggered preview
+ * popovers) — re-exports `./hover-card` as the `@resq-systems/ui/hover-card` entry.
+ *
+ * @module @resq-systems/ui/components/hover-card
+ */
+
 export * from "./hover-card.js";

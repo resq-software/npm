@@ -15,8 +15,16 @@
  */
 
 /**
- * ResQ Systems brand identity — names, domains, contact addresses, and legal details
- * shared across apps (marketing site, dashboard, transactional email).
+ * @fileoverview ResQ Systems brand identity constants — names, domains, contact
+ * addresses, and legal details shared across apps (marketing site, dashboard,
+ * transactional email).
+ *
+ * @module @resq-systems/constants/brand
+ */
+
+/**
+ * ResQ Systems brand identity — names, domains, contact addresses, and legal
+ * details shared across apps (marketing site, dashboard, transactional email).
  *
  * The postal address is ResQ Systems, Inc.'s public Delaware registered-agent
  * address (already public on the DE filing), included so commercial email stays

@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Kbd component family (keyboard-shortcut hint
+ * elements) — re-exports `./kbd` as the `@resq-systems/ui/kbd` entry.
+ *
+ * @module @resq-systems/ui/components/kbd
+ */
+
 export * from "./kbd.js";

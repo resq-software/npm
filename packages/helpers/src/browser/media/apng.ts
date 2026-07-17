@@ -20,6 +20,13 @@
  */
 
 /**
+ * @fileoverview Detects animated PNG (APNG) buffers by locating an animation
+ * control (`acTL`) chunk before the first image data (`IDAT`) chunk.
+ *
+ * @module @resq-systems/helpers/browser/media/apng
+ */
+
+/**
  * Determines whether an ArrayBuffer contains an animated PNG (APNG) image.
  *
  * This function checks if the provided buffer contains a valid PNG file with animation
@@ -30,7 +37,7 @@
  * @returns True if the buffer contains an animated PNG, false otherwise
  *
  * @example
- * ```typescript
+ * ```ts
  * // Check if an uploaded file contains an animated PNG
  * if (file.type === 'image/apng') {
  *   const isAnimated = isApngAnimated(await file.arrayBuffer())
@@ -39,7 +46,7 @@
  * ```
  *
  * @example
- * ```typescript
+ * ```ts
  * // Use with fetch to check remote images
  * const response = await fetch('image.png')
  * const buffer = await response.arrayBuffer()
@@ -168,16 +175,3 @@ export function isApngAnimated(buffer: ArrayBuffer): boolean {
 
 	return false;
 }
-
-// globalThis.isApng = isApng
-
-// (new TextEncoder()).encode('IDAT')
-// Decimal: [73, 68, 65, 84]
-// Hex: [0x49, 0x44, 0x41, 0x54]
-
-// (new TextEncoder()).encode('acTL')
-// Decimal: [97, 99, 84, 76]
-// Hex: [0x61, 0x63, 0x54, 0x4C]
-
-// const idatIdx = buffer.indexOf('IDAT')
-// const actlIdx = buffer.indexOf('acTL')

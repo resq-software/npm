@@ -27,6 +27,8 @@
  *
  * The trigger is styled to match `Button` for visual consistency
  * across form rows.
+ *
+ * @module @resq-systems/ui/components/combobox/combobox
  */
 
 "use client";
@@ -44,8 +46,10 @@ import {
 	InputGroupInput,
 } from "../input-group/input-group.js";
 
+/** Root of the combobox (base-ui) — owns value, open, and filter state. */
 const Combobox = ComboboxPrimitive.Root;
 
+/** A single removable token representing one selected value in multi-select mode. */
 function ComboboxChip({
 	children,
 	className,
@@ -77,6 +81,7 @@ function ComboboxChip({
 	);
 }
 
+/** Container that lays out the selected `ComboboxChip`s alongside the input. */
 function ComboboxChips({
 	className,
 	...props
@@ -93,6 +98,7 @@ function ComboboxChips({
 	);
 }
 
+/** Text input nested within `ComboboxChips` for filtering while chips are shown. */
 function ComboboxChipsInput({ className, ...props }: Readonly<ComboboxPrimitive.Input.Props>) {
 	return (
 		<ComboboxPrimitive.Input
@@ -103,6 +109,7 @@ function ComboboxChipsInput({ className, ...props }: Readonly<ComboboxPrimitive.
 	);
 }
 
+/** Button that clears the current selection. */
 function ComboboxClear({ className, ...props }: Readonly<ComboboxPrimitive.Clear.Props>) {
 	return (
 		<ComboboxPrimitive.Clear
@@ -116,10 +123,12 @@ function ComboboxClear({ className, ...props }: Readonly<ComboboxPrimitive.Clear
 	);
 }
 
+/** Maps an items collection to rendered `ComboboxItem`s. */
 function ComboboxCollection({ ...props }: Readonly<ComboboxPrimitive.Collection.Props>) {
 	return <ComboboxPrimitive.Collection data-slot="combobox-collection" {...props} />;
 }
 
+/** Floating popup surface holding the list, portalled and positioned. */
 function ComboboxContent({
 	align = "start",
 	alignOffset = 0,
@@ -157,6 +166,7 @@ function ComboboxContent({
 	);
 }
 
+/** Placeholder shown when no option matches the query. */
 function ComboboxEmpty({ className, ...props }: Readonly<ComboboxPrimitive.Empty.Props>) {
 	return (
 		<ComboboxPrimitive.Empty
@@ -170,10 +180,12 @@ function ComboboxEmpty({ className, ...props }: Readonly<ComboboxPrimitive.Empty
 	);
 }
 
+/** Semantic grouping of related options with an optional `ComboboxLabel`. */
 function ComboboxGroup({ className, ...props }: Readonly<ComboboxPrimitive.Group.Props>) {
 	return <ComboboxPrimitive.Group className={className} data-slot="combobox-group" {...props} />;
 }
 
+/** Single-select text input that filters the option list. */
 function ComboboxInput({
 	children,
 	className,
@@ -208,6 +220,7 @@ function ComboboxInput({
 	);
 }
 
+/** A selectable option row; shows a check when selected. */
 function ComboboxItem({ children, className, ...props }: Readonly<ComboboxPrimitive.Item.Props>) {
 	return (
 		<ComboboxPrimitive.Item
@@ -230,6 +243,7 @@ function ComboboxItem({ children, className, ...props }: Readonly<ComboboxPrimit
 	);
 }
 
+/** Non-interactive heading for a `ComboboxGroup`. */
 function ComboboxLabel({ className, ...props }: Readonly<ComboboxPrimitive.GroupLabel.Props>) {
 	return (
 		<ComboboxPrimitive.GroupLabel
@@ -240,6 +254,7 @@ function ComboboxLabel({ className, ...props }: Readonly<ComboboxPrimitive.Group
 	);
 }
 
+/** Scrollable container for the filtered options. */
 function ComboboxList({ className, ...props }: Readonly<ComboboxPrimitive.List.Props>) {
 	return (
 		<ComboboxPrimitive.List
@@ -253,6 +268,7 @@ function ComboboxList({ className, ...props }: Readonly<ComboboxPrimitive.List.P
 	);
 }
 
+/** Divider between option groups. */
 function ComboboxSeparator({ className, ...props }: Readonly<ComboboxPrimitive.Separator.Props>) {
 	return (
 		<ComboboxPrimitive.Separator
@@ -263,6 +279,7 @@ function ComboboxSeparator({ className, ...props }: Readonly<ComboboxPrimitive.S
 	);
 }
 
+/** Button that toggles the combobox popup open or closed. */
 function ComboboxTrigger({
 	children,
 	className,
@@ -280,10 +297,16 @@ function ComboboxTrigger({
 	);
 }
 
+/** Renders the currently selected value(s) in the trigger. */
 function ComboboxValue({ ...props }: Readonly<ComboboxPrimitive.Value.Props>) {
 	return <ComboboxPrimitive.Value data-slot="combobox-value" {...props} />;
 }
 
+/**
+ * Creates a ref to attach as the combobox popup's positioning anchor.
+ *
+ * @returns A mutable ref to assign to the anchor element.
+ */
 function useComboboxAnchor() {
 	return React.useRef<HTMLDivElement | null>(null);
 }

@@ -25,6 +25,8 @@
  * with `ContextMenuItem`, `ContextMenuCheckboxItem`,
  * `ContextMenuRadioGroup` + `ContextMenuRadioItem`,
  * `ContextMenuSub`, and label/separator helpers.
+ *
+ * @module @resq-systems/ui/components/context-menu/context-menu
  */
 
 "use client";
@@ -35,12 +37,14 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
+/** Root of the right-click context menu; owns open state. */
 function ContextMenu({
 	...props
 }: Readonly<React.ComponentProps<typeof ContextMenuPrimitive.Root>>) {
 	return <ContextMenuPrimitive.Root data-slot="context-menu" {...props} />;
 }
 
+/** Menu row with a toggle checkmark bound to its `checked` state. */
 function ContextMenuCheckboxItem({
 	checked,
 	children,
@@ -67,6 +71,7 @@ function ContextMenuCheckboxItem({
 	);
 }
 
+/** Floating menu surface, portalled and positioned at the pointer. */
 function ContextMenuContent({
 	className,
 	...props
@@ -89,12 +94,14 @@ function ContextMenuContent({
 	);
 }
 
+/** Semantic grouping of related menu items. */
 function ContextMenuGroup({
 	...props
 }: Readonly<React.ComponentProps<typeof ContextMenuPrimitive.Group>>) {
 	return <ContextMenuPrimitive.Group data-slot="context-menu-group" {...props} />;
 }
 
+/** A selectable menu row; `variant` and `inset` adjust its styling. */
 function ContextMenuItem({
 	className,
 	inset,
@@ -120,6 +127,7 @@ function ContextMenuItem({
 	);
 }
 
+/** Non-interactive section label within the menu. */
 function ContextMenuLabel({
 	className,
 	inset,
@@ -142,18 +150,21 @@ function ContextMenuLabel({
 	);
 }
 
+/** Portals the menu subtree to the document body. */
 function ContextMenuPortal({
 	...props
 }: Readonly<React.ComponentProps<typeof ContextMenuPrimitive.Portal>>) {
 	return <ContextMenuPrimitive.Portal data-slot="context-menu-portal" {...props} />;
 }
 
+/** Groups mutually-exclusive `ContextMenuRadioItem`s. */
 function ContextMenuRadioGroup({
 	...props
 }: Readonly<React.ComponentProps<typeof ContextMenuPrimitive.RadioGroup>>) {
 	return <ContextMenuPrimitive.RadioGroup data-slot="context-menu-radio-group" {...props} />;
 }
 
+/** Single-select menu row rendering a radio indicator. */
 function ContextMenuRadioItem({
 	children,
 	className,
@@ -178,6 +189,7 @@ function ContextMenuRadioItem({
 	);
 }
 
+/** Divider between menu sections. */
 function ContextMenuSeparator({
 	className,
 	...props
@@ -191,6 +203,7 @@ function ContextMenuSeparator({
 	);
 }
 
+/** Right-aligned keyboard-shortcut hint for a menu item. */
 function ContextMenuShortcut({ className, ...props }: Readonly<React.ComponentProps<"span">>) {
 	return (
 		<span
@@ -204,12 +217,14 @@ function ContextMenuShortcut({ className, ...props }: Readonly<React.ComponentPr
 	);
 }
 
+/** Root of a nested submenu. */
 function ContextMenuSub({
 	...props
 }: Readonly<React.ComponentProps<typeof ContextMenuPrimitive.Sub>>) {
 	return <ContextMenuPrimitive.Sub data-slot="context-menu-sub" {...props} />;
 }
 
+/** Floating panel for a submenu's items. */
 function ContextMenuSubContent({
 	className,
 	...props
@@ -226,6 +241,7 @@ function ContextMenuSubContent({
 	);
 }
 
+/** Menu row that opens its submenu on hover or focus. */
 function ContextMenuSubTrigger({
 	children,
 	className,
@@ -252,6 +268,7 @@ function ContextMenuSubTrigger({
 	);
 }
 
+/** Element whose right-click (context) event opens the menu. */
 function ContextMenuTrigger({
 	className,
 	...props

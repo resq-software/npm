@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Breadcrumb component family (hierarchical
+ * navigation trails) — re-exports `./breadcrumb` as the `@resq-systems/ui/breadcrumb` entry.
+ *
+ * @module @resq-systems/ui/components/breadcrumb
+ */
+
 export * from "./breadcrumb.js";

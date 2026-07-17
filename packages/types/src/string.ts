@@ -17,6 +17,8 @@
 /**
  * @fileoverview Template-literal string type utilities.
  *
+ * @module @resq-systems/types/string
+ *
  * Operating on string *types* (not values): trimming, splitting, joining, and
  * prefix/suffix predicates. Useful for typed key paths, structured log-prefix
  * or event-name schemes, and validating string-shaped configuration (e.g. a

@@ -26,6 +26,8 @@
  *
  * Pass an `opts` object to forward Embla options (loop, align,
  * containScroll, …) and a `plugins` array for autoplay/wheel/etc.
+ *
+ * @module @resq-systems/ui/components/carousel/carousel
  */
 
 "use client";
@@ -37,6 +39,7 @@ import * as React from "react";
 import { cn } from "../../lib/utils.js";
 import { Button } from "../button/button.js";
 
+/** The Embla carousel instance handed back via the `setApi` callback. */
 type CarouselApi = UseEmblaCarouselType[1];
 type CarouselContextProps = CarouselProps & {
 	api: ReturnType<typeof useEmblaCarousel>[1];
@@ -60,6 +63,13 @@ type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null);
 
+/**
+ * Root of the carousel — initializes Embla, tracks scroll state, and provides
+ * it to descendants via context. Forwards `opts`/`plugins` to Embla and exposes
+ * the instance through `setApi` for programmatic control.
+ *
+ * @see {@link useCarousel}
+ */
 function Carousel({
 	children,
 	className,
@@ -159,6 +169,7 @@ function Carousel({
 	);
 }
 
+/** Scroll viewport that lays out the `CarouselItem` slides along the axis. */
 function CarouselContent({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	const { carouselRef, orientation } = useCarousel();
 
@@ -172,6 +183,7 @@ function CarouselContent({ className, ...props }: Readonly<React.ComponentProps<
 	);
 }
 
+/** A single full-width slide within `CarouselContent`. */
 function CarouselItem({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	const { orientation } = useCarousel();
 
@@ -190,6 +202,7 @@ function CarouselItem({ className, ...props }: Readonly<React.ComponentProps<"di
 	);
 }
 
+/** Chevron button that advances to the next slide; disables at the end. */
 function CarouselNext({
 	className,
 	size = "icon-sm",
@@ -220,6 +233,7 @@ function CarouselNext({
 	);
 }
 
+/** Chevron button that returns to the previous slide; disables at the start. */
 function CarouselPrevious({
 	className,
 	size = "icon-sm",
@@ -250,6 +264,12 @@ function CarouselPrevious({
 	);
 }
 
+/**
+ * Reads carousel state and scroll controls from the nearest {@link Carousel}.
+ *
+ * @returns The carousel context (API, scroll flags, and scroll callbacks).
+ * @throws {Error} If called outside a `<Carousel />`.
+ */
 function useCarousel() {
 	const context = React.useContext(CarouselContext);
 

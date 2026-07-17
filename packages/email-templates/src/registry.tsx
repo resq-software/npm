@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Name-to-renderer registry for the built-in templates, derived from
+ * the default mailer so it always matches the contract.
+ *
+ * @module @resq-systems/email-templates/registry
+ */
+
 import { resqMailer } from "./suite.js";
 
 /**

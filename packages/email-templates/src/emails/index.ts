@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Component entry barrel — re-exports the theme, the compound
+ * primitives, and every built-in email React component.
+ *
+ * @module @resq-systems/email-templates/emails
+ */
+
 export * from "./tokens.js";
 export * from "./primitives.js";
 export * from "./otp.js";

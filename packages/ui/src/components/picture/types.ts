@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Type helpers for the Picture component — prop-merging utilities
+ * and the LQIP (low-quality image placeholder) registry shapes its `lqip` prop
+ * accepts.
+ *
+ * @module @resq-systems/ui/components/picture/types
+ */
+
 export type Overwrite<T, U> = Omit<T, keyof U> & U;
 export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 

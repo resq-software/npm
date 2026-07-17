@@ -28,7 +28,7 @@ import type { BinaryOp, BinderOp, Expr, LogicOp, RelOp, UnaryOp } from "./ast.js
 import { ParseError, RecursionLimitError } from "./error.js";
 import { bool, mkSet, num } from "./value.js";
 
-// ────────────────────────── Tokens ──────────────────────────
+//#region Tokens
 
 type TokenType =
 	| "number"
@@ -47,7 +47,9 @@ interface Token {
 	readonly pos: number;
 }
 
-// ────────────────────────── Tokenizer ──────────────────────────
+//#endregion
+
+//#region Tokenizer
 
 const SINGLE_OPS = new Set([
 	"+",
@@ -235,7 +237,9 @@ function tokenize(src: string): readonly Token[] {
 	return tokens;
 }
 
-// ────────────────────────── Precedence tables ──────────────────────────
+//#endregion
+
+//#region Precedence Tables
 
 const INFIX_BP: ReadonlyMap<string, readonly [number, number]> = new Map([
 	// [left bp, right bp] — equal for left-assoc, right < left for right-assoc
@@ -276,7 +280,9 @@ const INFIX_BP: ReadonlyMap<string, readonly [number, number]> = new Map([
 const PREFIX_BP = 17; // unary prefix binding power (right bp)
 const POSTFIX_BP = 19; // postfix left bp
 
-// ────────────────────────── Operator classification ──────────────────────────
+//#endregion
+
+//#region Operator Classification
 
 const CANON_BINARY: ReadonlyMap<string, BinaryOp> = new Map([
 	["+", "+"],
@@ -329,9 +335,25 @@ const FUNC_UNARY: ReadonlyMap<string, UnaryOp> = new Map([
 	["ceil", "ceil"],
 ]);
 
-// ────────────────────────── Parser ──────────────────────────
+//#endregion
 
-/** Parse a math expression string into an {@link Expr} AST. */
+//#region Parser
+
+/**
+ * Parse a math expression string into an {@link Expr} AST.
+ *
+ * Accepts both Unicode operators (`×`, `∪`, `∀`) and their ASCII equivalents
+ * (`*`, `union`, `forall`).
+ *
+ * @param input - The source expression to parse.
+ * @returns The parsed named AST.
+ * @throws {ParseError} On unexpected characters, tokens, or trailing input.
+ * @throws {RecursionLimitError} When the expression nests deeper than the parser limit.
+ * @example
+ * ```ts
+ * parse("sum(i in {1, 2, 3}, i * i)");
+ * ```
+ */
 export function parse(input: string): Expr {
 	const tokens = tokenize(input);
 	let pos = 0;
@@ -547,3 +569,5 @@ export function parse(input: string): Expr {
 	}
 	return result;
 }
+
+//#endregion

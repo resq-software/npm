@@ -15,13 +15,16 @@
  */
 
 /**
- * ResQ Systems design tokens — the single source of truth shared by `@resq-systems/ui`,
- * `@resq-systems/email-templates`, and app surfaces.
+ * @fileoverview ResQ Systems design tokens (colors, theme colors, fonts, radii) —
+ * the single source of truth shared by `@resq-systems/ui`,
+ * `@resq-systems/email-templates`, and app surfaces. `oklch` is the design-system
+ * source of truth; `hex` is the email/legacy-safe snapshot (email clients and
+ * older targets do not support `oklch()`), so keep the two representations in sync
+ * when the palette changes.
  *
- * `oklch` is the design-system source of truth; `hex` is the email/legacy-safe
- * snapshot (email clients and older targets do not support `oklch()`). Keep the
- * two representations in sync when the palette changes.
+ * @module @resq-systems/constants/tokens
  */
+
 /**
  * The six canonical color roles present in **both** representations. `oklch`
  * (the design-system source of truth) and `hex` (the email-safe snapshot) must

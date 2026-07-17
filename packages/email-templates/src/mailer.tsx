@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Mailer factory — composes template definitions into a typed,
+ * discriminated `{ name, to, data }` contract with a boundary decoder, a registry,
+ * and a headless renderer.
+ *
+ * @module @resq-systems/email-templates/mailer
+ */
+
 import { render } from "@react-email/render";
 import { Cause, Exit, Schema } from "effect";
 import type { ReactElement } from "react";
@@ -25,6 +33,8 @@ import {
 } from "./emails/theme.js";
 import { EmailAddress, HttpUrl, emailCategory } from "./schemas.js";
 
+//#region Constants
+
 /**
  * Recipient schema for every payload's `to`. Validated (not a bare
  * `Schema.String`) so a malformed or header-injecting address is rejected at
@@ -32,6 +42,10 @@ import { EmailAddress, HttpUrl, emailCategory } from "./schemas.js";
  * brand all the way to the provider.
  */
 const Recipient = EmailAddress;
+
+//#endregion
+
+//#region Types
 
 /** A template definition: its name, `data` schema, subject line, and component. */
 export interface EmailTemplateDef<Name extends string, DataSchema extends Schema.Top> {
@@ -126,6 +140,10 @@ export interface Mailer<
 	renderEmail(input: unknown, options?: RenderEmailOptions): Promise<RenderedEmail>;
 }
 
+//#endregion
+
+//#region Public API
+
 /**
  * Compose template definitions into a typed mailer: a discriminated
  * `{ name, to, data }` contract, a boundary decoder, a registry, and a headless
@@ -204,3 +222,5 @@ export function createMailer<const Defs extends readonly AnyTemplateDef[]>(
 		renderEmail,
 	};
 }
+
+//#endregion

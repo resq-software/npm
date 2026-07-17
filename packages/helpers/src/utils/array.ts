@@ -15,6 +15,13 @@
  */
 
 /**
+ * @fileoverview Immutable array helpers — rotate, dedupe, compact, partition,
+ * min/max-by, shallow equality, and default-merging over plain arrays.
+ *
+ * @module @resq-systems/helpers/utils/array
+ */
+
+/**
  * Rotate the contents of an array by a specified offset.
  *
  * Creates a new array with elements shifted to the left by the specified number of positions.

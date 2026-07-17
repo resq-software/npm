@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Combobox component family (searchable, filterable
+ * select) — re-exports `./combobox` as the `@resq-systems/ui/combobox` entry.
+ *
+ * @module @resq-systems/ui/components/combobox
+ */
+
 export * from "./combobox.js";

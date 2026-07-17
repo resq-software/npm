@@ -17,6 +17,8 @@
 /**
  * @fileoverview Deep and structural object utility types.
  *
+ * @module @resq-systems/types/object
+ *
  * The built-in `Readonly` / `Partial` / `Required` are one level deep. For
  * frozen configuration, crypto parameter bags, immutable snapshots, and
  * discriminated config unions you usually want the recursive variants — and a

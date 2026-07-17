@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Password-reset email component with a single call-to-action link.
+ *
+ * @module @resq-systems/email-templates/emails/password-reset
+ */
+
 import type { PasswordResetData } from "../schemas.js";
 import { Email } from "./primitives.js";
 
+/** Props for {@link PasswordResetEmail} — the password-reset template's validated `data`. */
 export type PasswordResetEmailProps = PasswordResetData;
 
 /** Password reset email with a single call-to-action link. */

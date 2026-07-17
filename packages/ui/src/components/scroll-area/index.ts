@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Scroll Area component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/scroll-area`.
+ *
+ * @module @resq-systems/ui/components/scroll-area
+ */
+
 export * from "./scroll-area.js";

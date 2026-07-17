@@ -23,6 +23,8 @@
  *
  * Exports `toggleVariants` (CVA) so `ToggleGroupItem` can reuse
  * the same variant matrix.
+ *
+ * @module @resq-systems/ui/components/toggle/toggle
  */
 
 "use client";

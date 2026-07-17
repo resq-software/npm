@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `FileHelpers` — fetch-and-convert utilities for URLs and blobs
+ * (ArrayBuffer, Blob, data URL, text) plus MIME-type rewriting, built on the web
+ * File APIs.
+ *
+ * @module @resq-systems/helpers/utils/file
+ */
+
 import { fetch } from "../browser/network.js";
 
 /**

@@ -13,6 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @fileoverview HTML-entity encoding and contact-link obfuscation: encodes text
+ * as decimal character references to deter naive DOM scrapers of `mailto:` /
+ * `tel:` links.
+ *
+ * @module @resq-systems/helpers/browser/html-entities
+ */
+
 import { type Brand, unsafeBrand } from "@resq-systems/types";
 
 /**
@@ -23,13 +32,14 @@ import { type Brand, unsafeBrand } from "@resq-systems/types";
 export type HtmlEntityEncoded = Brand<string, "HtmlEntityEncoded">;
 
 /**
- * Encodes every character in a string as a decimal HTML character reference.
+ * Encode every character in a string as a decimal HTML character reference.
  *
- * @param {string} str The string to encode.
- * @returns {HtmlEntityEncoded} The string with every character replaced by its HTML decimal entity.
+ * @param str - The string to encode.
+ * @returns The string with every character replaced by its HTML decimal entity.
  * @throws {TypeError} If the provided value is not a string.
  * @see https://developer.mozilla.org/en-US/docs/Glossary/Entity
  * @see https://dev.w3.org/html5/html-author/charref
+ * @internal
  */
 const toEntities = (str: string): HtmlEntityEncoded =>
 	unsafeBrand<"HtmlEntityEncoded", string>(
@@ -60,12 +70,12 @@ export interface ObfuscatedLink {
  * `tel:` value in the attribute); only the visible `encodedText` is
  * entity-encoded to deter naive DOM scrapers.
  *
- * @param {Object} opts Configuration options for link obfuscation.
- * @param {'mailto'|'tel'} opts.scheme The URI scheme (`'mailto'` or `'tel'`).
- * @param {string} opts.address The contact address (email or phone number).
- * @param {Record<string, string>} [opts.params] Optional query parameters (used for mailto links).
- * @param {string} [opts.text] Optional visible link text. Defaults to address.
- * @returns {ObfuscatedLink} Object containing the RAW `href` and entity-encoded `encodedText`.
+ * @param opts - Configuration options for link obfuscation.
+ * @param opts.scheme - The URI scheme (`"mailto"` or `"tel"`).
+ * @param opts.address - The contact address (email or phone number).
+ * @param opts.params - Optional query parameters (used for `mailto` links).
+ * @param opts.text - Optional visible link text; defaults to the address.
+ * @returns An object containing the RAW `href` and entity-encoded `encodedText`.
  * @throws {TypeError} If required fields are missing or invalid.
  * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#security_and_privacy
  * @see https://github.com/resq-software/resQ

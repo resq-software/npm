@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Detects GIF buffers and animated GIFs by walking the GIF block
+ * structure and counting image descriptors (more than one implies animation).
+ *
+ * @module @resq-systems/helpers/browser/media/gif
+ */
+
 /** Returns total length of data blocks sequence */
 function getDataBlocksLength(buffer: Uint8Array, offset: number): number {
 	let length = 0;

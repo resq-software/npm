@@ -21,6 +21,8 @@
  * animation stays compositor-friendly.
  *
  * For indeterminate / spinning loaders, use `Spinner` instead.
+ *
+ * @module @resq-systems/ui/components/progress/progress
  */
 
 "use client";

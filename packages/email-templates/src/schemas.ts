@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Effect Schema building blocks for email payloads — validated URL and
+ * recipient primitives, the send-category literal, and each built-in template's
+ * `data` struct with its inferred type.
+ *
+ * @module @resq-systems/email-templates/schemas
+ */
+
 import { Schema as S } from "effect";
+
+//#region Validation primitives
 
 /**
  * A non-empty, absolute http(s) URL. Validated with a pattern check (blocks
@@ -53,23 +63,31 @@ export type EmailAddress = typeof EmailAddress.Type;
 export const emailCategory = S.Literals(["transactional", "marketing"]);
 export type EmailCategory = typeof emailCategory.Type;
 
+//#endregion
+
+//#region Schemas
+
+/** `data` schema for the one-time-code (OTP) email. */
 export const otpData = S.Struct({
 	code: S.NonEmptyString,
 	firstName: S.optional(S.String),
 	expiresInMinutes: S.optional(S.Number),
 });
 
+/** `data` schema for the account welcome / onboarding email. */
 export const welcomeData = S.Struct({
 	firstName: S.NonEmptyString,
 	verifyUrl: S.optional(HttpUrl),
 });
 
+/** `data` schema for the password-reset email. */
 export const passwordResetData = S.Struct({
 	firstName: S.optional(S.String),
 	resetUrl: HttpUrl,
 	expiresInMinutes: S.optional(S.Number),
 });
 
+/** `data` schema for the generic notification / alert email. */
 export const notificationData = S.Struct({
 	title: S.NonEmptyString,
 	body: S.NonEmptyString,
@@ -78,6 +96,7 @@ export const notificationData = S.Struct({
 	actionLabel: S.optional(S.String),
 });
 
+/** `data` schema for the incident / dispatch alert email. */
 export const incidentAlertData = S.Struct({
 	incidentId: S.NonEmptyString,
 	title: S.NonEmptyString,
@@ -90,6 +109,7 @@ export const incidentAlertData = S.Struct({
 	dashboardUrl: HttpUrl,
 });
 
+/** `data` schema for the password-changed security notice. */
 export const passwordChangedData = S.Struct({
 	firstName: S.optional(S.String),
 	// Preformatted timestamp string (caller formats/localizes).
@@ -98,6 +118,7 @@ export const passwordChangedData = S.Struct({
 	secureAccountUrl: S.optional(HttpUrl),
 });
 
+/** `data` schema for the new-device sign-in security alert. */
 export const newDeviceLoginData = S.Struct({
 	firstName: S.optional(S.String),
 	// Human-readable client, e.g. "Chrome on macOS".
@@ -111,6 +132,7 @@ export const newDeviceLoginData = S.Struct({
 	secureAccountUrl: S.optional(HttpUrl),
 });
 
+/** `data` schema for the mission-approval sign-off request. */
 export const missionApprovalData = S.Struct({
 	missionId: S.NonEmptyString,
 	title: S.NonEmptyString,
@@ -122,6 +144,7 @@ export const missionApprovalData = S.Struct({
 	expiresInMinutes: S.optional(S.Number),
 });
 
+/** `data` schema for the organization / team invitation email. */
 export const orgInvitationData = S.Struct({
 	orgName: S.NonEmptyString,
 	inviterName: S.optional(S.String),
@@ -129,6 +152,10 @@ export const orgInvitationData = S.Struct({
 	acceptUrl: HttpUrl,
 	expiresInDays: S.optional(S.Number),
 });
+
+//#endregion
+
+//#region Types
 
 /** Inferred `data` types for the built-in templates (used for component props). */
 export type OtpData = typeof otpData.Type;
@@ -140,3 +167,5 @@ export type PasswordChangedData = typeof passwordChangedData.Type;
 export type NewDeviceLoginData = typeof newDeviceLoginData.Type;
 export type MissionApprovalData = typeof missionApprovalData.Type;
 export type OrgInvitationData = typeof orgInvitationData.Type;
+
+//#endregion

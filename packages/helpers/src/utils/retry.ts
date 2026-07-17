@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `retry` — re-invokes an async function until it succeeds or a max
+ * attempt count is reached, with configurable wait, abort signal, and error
+ * filtering.
+ *
+ * @module @resq-systems/helpers/utils/retry
+ */
+
 import { sleep } from "./control";
 
 /**

@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Field component family (form-row orchestration) —
+ * re-exports `./field` as the `@resq-systems/ui/field` entry.
+ *
+ * @module @resq-systems/ui/components/field
+ */
+
 export * from "./field.js";

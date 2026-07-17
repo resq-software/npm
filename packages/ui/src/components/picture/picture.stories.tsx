@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Storybook stories for the Picture component — showcases its
+ * variants and composition for visual review and Chromatic regression.
+ *
+ * @module @resq-systems/ui/components/picture/picture.stories
+ */
+
 import type { Meta, StoryObj } from "@storybook/react";
 import { Picture } from "./index.js";
 

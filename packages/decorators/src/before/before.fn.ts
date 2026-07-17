@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Function form of `@before` — `beforeFn(method, config)` wraps a
+ * plain method so a pre-hook runs before each call, optionally awaited when
+ * `config.wait` is set.
+ *
+ * @module @resq-systems/decorators/before/before.fn
+ */
+
 import { isFunction } from "../_utils.js";
 import type { Method } from "../types.js";
 import type { BeforeConfig } from "./before.types.js";
 
 /**
- * Wraps a method to execute a before hook function before the method runs.
+ * Wraps a method to execute a before-hook function before the method runs.
  *
- * @template D - The return type of the original method
- * @template A - The argument types of the original method
- * @param {Method<D, A>} originalMethod - The method to wrap
- * @param {BeforeConfig<any>} config - Configuration for the before hook
- * @returns {Method<Promise<D>, A>} The wrapped method
- *
+ * @template T - The type owning the named hook when `config.func` is a method name.
+ * @template D - The return type of the original method.
+ * @template A - The argument types of the original method.
+ * @param originalMethod - The method to wrap.
+ * @param config - Configuration for the before hook.
+ * @returns The wrapped method.
  * @example
  * ```typescript
  * class Service {

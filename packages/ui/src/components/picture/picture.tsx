@@ -29,6 +29,8 @@
  * `width` × `height` (or `aspectRatio`) to reserve layout space —
  * matches the perf checklist in
  * `~/.claude/rules/web/performance.md`.
+ *
+ * @module @resq-systems/ui/components/picture/picture
  */
 
 import { cva, type VariantProps } from "class-variance-authority";
@@ -46,6 +48,7 @@ import {
 import { cn } from "../../lib/utils.js";
 import type { DistributiveOmit, LqipValue, Overwrite } from "./types.js";
 
+//#region Helpers
 /** Resolve an LqipValue to a raw base64 data-URL string. */
 function resolveLqip(value: LqipValue | undefined): string | undefined {
 	if (value == null) return undefined;
@@ -64,7 +67,9 @@ function useEventCallback<Args extends unknown[], R>(fn: (...args: Args) => R) {
 
 	return useCallback((...args: Args) => ref.current(...args), []);
 }
+//#endregion
 
+//#region Constants
 const defaultRootElement = "img" as const;
 
 const pictureVariants = cva("border border-border bg-surface", {
@@ -113,7 +118,9 @@ const pictureVariants = cva("border border-border bg-surface", {
 		transition: "none",
 	},
 });
+//#endregion
 
+//#region Types
 namespace Picture {
 	export interface BaseRootElementProps {
 		className?: string;
@@ -191,7 +198,9 @@ namespace Picture {
 		(props: DistributiveOmit<Props, "component">): ReactNode;
 	}
 }
+//#endregion
 
+//#region Public API
 export const PictureInternal = <
 	TRootElement extends Picture.BaseRootElementType = typeof defaultRootElement,
 >({
@@ -292,3 +301,4 @@ export const PictureInternal = <
 };
 
 export const Picture = PictureInternal as Picture.Type;
+//#endregion

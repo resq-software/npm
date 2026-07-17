@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Navigation Menu component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/navigation-menu`.
+ *
+ * @module @resq-systems/ui/components/navigation-menu
+ */
+
 export * from "./navigation-menu.js";

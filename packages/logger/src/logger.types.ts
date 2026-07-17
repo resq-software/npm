@@ -14,49 +14,44 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Shared type definitions for `@resq-systems/logger` — log levels,
+ * logger options, the structured {@link LogEntry}/{@link LogTransport} contract,
+ * and the option shapes consumed by the logging decorators.
+ *
+ * @module @resq-systems/logger/logger.types
+ */
+
 import type { LogLevel, Logger } from "./logger.js";
 
+//#region Types
+
 /**
- * Interface for structured data that can be attached to log messages
- * @interface
+ * Structured data attached to a log message — an open bag of key-value pairs.
  */
 export interface LogData {
-	/**
-	 * Any key-value pairs to include in the log
-	 */
+	/** Arbitrary key-value pairs to include in the log. */
 	[key: string]: unknown;
 }
 
 /**
- * Configuration options for the Logger
- * @interface
+ * Configuration options for a {@link Logger} instance.
  */
 export interface LoggerOptions {
-	/**
-	 * The minimum level of messages to log
-	 */
+	/** The minimum level of messages to log. */
 	minLevel?: LogLevel;
-	/**
-	 * Whether to include timestamps in log messages
-	 */
+	/** Whether to include timestamps in log messages. */
 	includeTimestamp?: boolean;
-	/**
-	 * Whether to colorize log output
-	 */
+	/** Whether to colorize log output. */
 	colorize?: boolean;
-	/**
-	 * Whether to write logs to a file (server-side only)
-	 */
+	/** Whether to write logs to a file (server-side only). */
 	logToFile?: boolean;
-	/**
-	 * Path to the log file if logToFile is enabled
-	 */
+	/** Path to the log file when {@link LoggerOptions.logToFile} is enabled. */
 	filePath?: string;
 }
 
 /**
- * Available color keys for log formatting
- * @typedef ColorKey
+ * Available color keys for log formatting.
  */
 export type ColorKey =
 	| "reset"
@@ -71,7 +66,7 @@ export type ColorKey =
 	| "white";
 
 /**
- * Log level strings for type safety
+ * Log level strings used across the transport and decorator surfaces.
  */
 export type LogLevelString = "error" | "warn" | "info" | "debug" | "trace" | "action" | "success";
 
@@ -90,85 +85,82 @@ export type SimpleLogLevel = {
 }[LogLevelString];
 
 /**
- * Structured log entry for transport/storage
- * @interface
+ * A structured log entry as delivered to every registered {@link LogTransport}.
  */
 export interface LogEntry {
-	/** ISO timestamp of the log */
+	/** ISO-8601 timestamp of the log. */
 	timestamp: string;
-	/** Log level */
+	/** Severity level of the entry. */
 	level: LogLevelString;
-	/** Logger context/category */
+	/** Logger context/category that emitted the entry. */
 	context: string;
-	/** Log message */
+	/** Human-readable log message. */
 	message: string;
-	/** Optional structured data */
+	/** Optional structured data payload. */
 	data?: LogData;
-	/** Environment (client/server) */
+	/** Environment the entry originated in. */
 	environment: "client" | "server";
 }
 
 /**
- * Interface for custom log transports
- * @interface
+ * Contract for a custom log transport that receives structured {@link LogEntry}
+ * values (see {@link Logger.addTransport}).
  */
 export interface LogTransport {
-	/** Transport name for identification */
+	/** Transport name, used for identification and removal by name. */
 	name: string;
-	/** Method to write a log entry */
+	/** Write a single entry; may be synchronous or return a promise. */
 	write(entry: LogEntry): void | Promise<void>;
 }
 
 /**
- * Options for the @Log decorator
- * @interface
+ * Options for the `@Log` decorator.
  */
 export interface LogMethodOptions {
-	/** Whether to log method arguments (default: true) */
+	/** Whether to log method arguments (default: `true`). */
 	logArgs?: boolean;
-	/** Whether to log return value (default: false) */
+	/** Whether to log the return value (default: `false`). */
 	logResult?: boolean;
-	/** Custom message prefix */
+	/** Custom message prefix. */
 	message?: string;
-	/** Log level to use (default: 'debug'); `"error"` is excluded — see {@link SimpleLogLevel} */
+	/** Log level to use (default: `"debug"`); `"error"` is excluded — see {@link SimpleLogLevel}. */
 	level?: SimpleLogLevel;
 }
 
 /**
- * Options for the @LogTiming decorator
- * @interface
+ * Options for the `@LogTiming` decorator.
  */
 export interface LogTimingOptions {
-	/** Custom label for timing logs */
+	/** Custom label for timing logs. */
 	label?: string;
-	/** Threshold in ms - only log if execution exceeds this (default: 0) */
+	/** Threshold in ms — only log when execution exceeds this (default: `0`). */
 	threshold?: number;
-	/** Log level to use (default: 'info') */
+	/** Log level to use (default: `"info"`). */
 	level?: LogLevelString;
 }
 
 /**
- * Options for the @LogError decorator
- * @interface
+ * Options for the `@LogError` decorator.
  */
 export interface LogErrorOptions {
-	/** Whether to rethrow the error after logging (default: true) */
+	/** Whether to rethrow the error after logging (default: `true`). */
 	rethrow?: boolean;
-	/** Custom error message prefix */
+	/** Custom error message prefix. */
 	message?: string;
-	/** Whether to log the stack trace (default: true) */
+	/** Whether to log the stack trace (default: `true`). */
 	includeStack?: boolean;
 }
 
 /**
- * Options for the @LogClass decorator
- * @interface
+ * Options for the `@LogClass` decorator.
  */
 export interface LogClassOptions {
-	/** Methods to exclude from logging */
+	/** Methods to exclude from logging. */
 	exclude?: string[];
-	/** Whether to log all method calls (default: true) */
+	/** Whether to log all method calls (default: `true`). */
 	logCalls?: boolean;
-	/** Whether to time all method calls (default: false) */
+	/** Whether to time all method calls (default: `false`). */
 	timing?: boolean;
 }
+
+//#endregion

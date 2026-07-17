@@ -25,6 +25,8 @@
  * Wrapped in a relative `<div>` with a chevron overlay so the
  * styled trigger matches the design system without losing native
  * picker UX.
+ *
+ * @module @resq-systems/ui/components/native-select/native-select
  */
 
 import { CaretDownIcon } from "@phosphor-icons/react";

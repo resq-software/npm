@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Shared utilities for component performance regression tests.
+ * @fileoverview Shared utilities for component performance regression tests,
+ * covering all six Storybook Performance plugin categories plus Element Timing
+ * instrumentation checks.
  *
- * Covers all six Storybook Performance plugin categories:
+ * Categories:
  *   1. Frame Timing        — transition-all, heavy animations, will-change abuse
  *   2. Layout & Stability  — CLS contributors, forced reflows, style writes
  *   3. React Performance   — re-render guards, memo boundaries, key hygiene
@@ -12,12 +14,10 @@
  *   5. Style Writes        — inline styles, dynamic className churn
  *   6. Input Responsiveness — passive listeners, debounce patterns
  *
- * Plus Element Timing instrumentation checks.
+ * @module @resq-systems/ui/lib/perf-test-utils
  */
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+//#region Types
 
 /** Minimal shape of a React element for tree-walking assertions. */
 export interface ReactLikeElement {
@@ -79,9 +79,9 @@ const DEFAULT_BUDGET: PerfBudget = {
 	maxWillChange: 3,
 };
 
-// ---------------------------------------------------------------------------
-// Type guards
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region Type guards
 
 function isReactElement(value: unknown): value is ReactLikeElement {
 	return (
@@ -92,9 +92,9 @@ function isReactElement(value: unknown): value is ReactLikeElement {
 	);
 }
 
-// ---------------------------------------------------------------------------
-// Regex patterns (no `g` flag on any used with .test())
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region Regex patterns (no `g` flag on any used with .test())
 
 // --- Frame Timing ---
 const TRANSITION_ALL_RE = /\btransition-all\b/;
@@ -136,9 +136,9 @@ const INLINE_HANDLER_RE = /\bon[A-Z]\w+=\{(?:\([^)]*\)|[a-zA-Z_$]\w*)\s*=>/;
 const BLOCKING_LISTENER_RE =
 	/addEventListener\(\s*['"](?:wheel|touchstart|touchmove)['"]\s*,\s*[^,]+(?:,\s*\{[^}]*passive\s*:\s*false)?/;
 
-// ---------------------------------------------------------------------------
-// Source-level (static) assertions — throwing API (backwards-compatible)
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region Source-level (static) assertions — throwing API (backwards-compatible)
 
 /**
  * Throw when `source` contains the `transition-all` Tailwind utility.
@@ -213,9 +213,9 @@ export function assertNoForcedReflowTriggers(source: string, file: string): void
 	}
 }
 
-// ---------------------------------------------------------------------------
-// Source-level — non-throwing batch API (collects all violations)
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region Source-level — non-throwing batch API (collects all violations)
 
 /**
  * Collects **all** static performance violations from a source string.
@@ -351,9 +351,9 @@ export function collectSourceViolations(source: string, file: string): PerfViola
 	return v;
 }
 
-// ---------------------------------------------------------------------------
-// Runtime (render-level) tree utilities
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region Runtime (render-level) tree utilities
 
 /**
  * Counts the total number of React elements in a tree (recursively).
@@ -503,9 +503,9 @@ function collectClassNamesInto(element: unknown, acc: string[]): void {
 	}
 }
 
-// ---------------------------------------------------------------------------
-// Runtime throwing API (backwards-compatible)
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region Runtime throwing API (backwards-compatible)
 
 /**
  * Throw when the rendered React element is missing a `data-slot`
@@ -550,9 +550,9 @@ export function assertRenderedNoGenericRadius(classes: string, componentName: st
 	}
 }
 
-// ---------------------------------------------------------------------------
-// Batched runtime violation collector (covers the full panel)
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region Batched runtime violation collector (covers the full panel)
 
 /**
  * Runs all rendered-output checks against a React element tree and returns
@@ -664,9 +664,9 @@ export function collectRenderedViolations(
 	return v;
 }
 
-// ---------------------------------------------------------------------------
-// Aggregate helpers (for CI integration)
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region Aggregate helpers (for CI integration)
 
 /**
  * Returns true if any violation in the list is severity: "error".
@@ -739,9 +739,9 @@ export function formatViolationReport(violations: PerfViolation[]): string {
 	return lines.join("\n");
 }
 
-// ---------------------------------------------------------------------------
-// A11y static guards
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region A11y static guards
 
 /**
  * Icon-only buttons (size="icon*") that lack sr-only text or aria-label
@@ -779,9 +779,9 @@ export function assertInteractiveHasFocusVisible(source: string, file: string): 
 	);
 }
 
-// ---------------------------------------------------------------------------
-// Style guide font compliance
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region Style guide font compliance
 
 /**
  * Per STYLE_GUIDE.md:
@@ -847,9 +847,9 @@ export function assertFontCompliance(source: string, file: string): void {
 	}
 }
 
-// ---------------------------------------------------------------------------
-// Semantic color token guards
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region Semantic color token guards
 
 /**
  * Raw hex colours in className strings bypass the design token system.
@@ -877,9 +877,9 @@ export function assertNoRawHexInClassNames(source: string, file: string): void {
 	}
 }
 
-// ---------------------------------------------------------------------------
-// SSR safety guards
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region SSR safety guards
 
 /**
  * Bare `window.` or `document.` access outside hooks/callbacks crashes SSR.
@@ -918,9 +918,9 @@ export function assertSSRSafe(source: string, file: string): void {
 	);
 }
 
-// ---------------------------------------------------------------------------
-// Reduced motion guards
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region Reduced motion guards
 
 /**
  * Components with CSS animations (animate-*) should respect
@@ -960,9 +960,9 @@ export function assertReducedMotion(source: string, file: string): void {
 	);
 }
 
-// ---------------------------------------------------------------------------
-// Prop forwarding contract checks
-// ---------------------------------------------------------------------------
+//#endregion
+
+//#region Prop forwarding contract checks
 
 /**
  * Verifies that a component function accepts and forwards className via
@@ -998,3 +998,4 @@ export function assertClassNameMerging(source: string, file: string): void {
 			"Use cn(baseClasses, className) to allow consumer overrides.",
 	);
 }
+//#endregion

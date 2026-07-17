@@ -29,12 +29,18 @@
  *
  * Per `STYLE_GUIDE.md`, `CardTitle` renders `font-display` for
  * editorial weight against the rest of the dashboard.
+ *
+ * @module @resq-systems/ui/components/card/card
  */
 
 import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
+/**
+ * Surface container for grouped content; `size="sm"` tightens padding and gaps.
+ * Composes with the `Card*` slots below.
+ */
 function Card({
 	className,
 	size = "default",
@@ -53,6 +59,7 @@ function Card({
 	);
 }
 
+/** Top-right action slot within `CardHeader` (e.g. a menu or button). */
 function CardAction({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -63,6 +70,7 @@ function CardAction({ className, ...props }: Readonly<React.ComponentProps<"div"
 	);
 }
 
+/** Primary body region of the card. */
 function CardContent({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -73,6 +81,7 @@ function CardContent({ className, ...props }: Readonly<React.ComponentProps<"div
 	);
 }
 
+/** Muted supporting text beneath the `CardTitle`. */
 function CardDescription({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -83,6 +92,7 @@ function CardDescription({ className, ...props }: Readonly<React.ComponentProps<
 	);
 }
 
+/** Bottom bar of the card, visually separated for actions or metadata. */
 function CardFooter({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -96,6 +106,7 @@ function CardFooter({ className, ...props }: Readonly<React.ComponentProps<"div"
 	);
 }
 
+/** Header region hosting `CardTitle`, `CardDescription`, and `CardAction`. */
 function CardHeader({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -109,6 +120,7 @@ function CardHeader({ className, ...props }: Readonly<React.ComponentProps<"div"
 	);
 }
 
+/** Card heading; renders `font-display` for editorial emphasis per the style guide. */
 function CardTitle({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div

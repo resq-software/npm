@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@debounce(delayMs)` decorator — collapse rapid calls into a
+ * single deferred invocation that fires only after `delayMs` of inactivity.
+ * State is kept per-instance via a `WeakMap`.
+ *
+ * @module @resq-systems/decorators/debounce/debounce
+ */
+
 import type { Decorator, Method } from "../types.js";
 import { debounceFn } from "./debounce.fn.js";
 
@@ -21,12 +29,10 @@ import { debounceFn } from "./debounce.fn.js";
  * Decorator that debounces method calls, ensuring the method only executes
  * after the specified delay has passed since the last call.
  *
- * @template T - The type of the class containing the decorated method
- * @param {number} delayMs - The debounce delay in milliseconds
- * @returns {Decorator<T>} The decorator function
- *
- * @throws {Error} When applied to a non-method property
- *
+ * @template T - The type of the class containing the decorated method.
+ * @param delayMs - The debounce delay in milliseconds.
+ * @returns The decorator function.
+ * @throws {Error} When applied to a non-method property.
  * @example
  * ```typescript
  * class AutoSave {

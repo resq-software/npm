@@ -15,32 +15,30 @@
  */
 
 /**
- * @fileoverview Before decorator - executes a function before the decorated method.
- * Useful for validation, authentication, or preprocessing before method execution.
+ * @fileoverview `@before` decorator — run a callback before the decorated method
+ * executes. Useful for validation, authentication, or preprocessing; the hook
+ * can be awaited via `wait: true` for guard patterns.
  *
- * @module @resq/typescript/decorators/before
+ * @module @resq-systems/decorators/before/before
  *
  * @example
  * ```typescript
  * class MyService {
  *   @before({
- *     func: 'validateInput',
- *     wait: true // Wait for before function to complete
+ *     func: "validateInput",
+ *     wait: true, // Wait for the before function to complete.
  *   })
- *   saveData(data: any) {
+ *   saveData(data: unknown) {
  *     database.save(data);
  *   }
  *
  *   validateInput() {
  *     if (!this.isValid) {
- *       throw new Error('Invalid state');
+ *       throw new Error("Invalid state");
  *     }
  *   }
  * }
  * ```
- *
- * @copyright Copyright (c) 2026 ResQ
- * @license MIT
  */
 
 import type { Decorator } from "../types.js";
@@ -51,20 +49,18 @@ import type { BeforeConfig } from "./before.types.js";
  * Decorator that executes a function before the decorated method.
  * The before function is called before the method body executes.
  *
- * @template T - The type of the class containing the decorated method
- * @param {BeforeConfig<T>} config - Configuration for the before hook
- * @returns {Decorator<T>} The decorator function
- *
- * @throws {Error} When applied to a non-method property
- *
+ * @template T - The type of the class containing the decorated method.
+ * @param config - Configuration for the before hook.
+ * @returns The decorator function.
+ * @throws {Error} When applied to a non-method property.
  * @example
  * ```typescript
  * class DataProcessor {
  *   @before({
- *     func: function() {
- *       console.log('About to process...');
+ *     func: function () {
+ *       console.log("About to process...");
  *     },
- *     wait: false
+ *     wait: false,
  *   })
  *   processItems(items: string[]): number {
  *     return items.length;

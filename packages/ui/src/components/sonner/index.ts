@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Sonner component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/sonner`.
+ *
+ * @module @resq-systems/ui/components/sonner
+ */
+
 export * from "./sonner.js";

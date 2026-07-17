@@ -21,6 +21,8 @@
  * `orientation="vertical"` for inline dividers and
  * `decorative={false}` when the separator carries semantic weight
  * (e.g. between sections of a navigation menu).
+ *
+ * @module @resq-systems/ui/components/separator/separator
  */
 
 "use client";

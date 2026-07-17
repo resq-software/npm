@@ -15,6 +15,14 @@
  */
 
 /**
+ * @fileoverview Value guards and cloning — `isDefined`/`isNonNull`/`isNonNullish`
+ * narrowing type guards and a `structuredClone` with a JSON fallback for older
+ * runtimes.
+ *
+ * @module @resq-systems/helpers/utils/value
+ */
+
+/**
  * Get whether a value is not undefined.
  *
  * @param value - The value to check.

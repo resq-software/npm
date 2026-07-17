@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Order-key (`IndexKey`) helpers for list reordering: generate,
+ * validate, and compare fractional index keys built on the vendored
+ * fractional-indexing primitives. Uses non-jittered keys under `NODE_ENV=test`
+ * for deterministic output and jittered keys otherwise.
+ *
+ * @module @resq-systems/dsa/reordering
+ */
+
 import {
 	generateNJitteredKeysBetween,
 	generateNKeysBetween,

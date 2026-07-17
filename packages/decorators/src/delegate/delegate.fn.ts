@@ -14,45 +14,26 @@
  * limitations under the License.
  */
 
-import type { AsyncMethod } from "../types.js";
-
-/*
- * Copyright 2026 ResQ Systems, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /**
- * @fileoverview Delegate function implementation - wraps an async method to
- * deduplicate concurrent calls with the same arguments.
+ * @fileoverview Function form of `@delegate` — `delegateFn(method, keyResolver?)`
+ * wraps an async method so concurrent calls that map to the same key share a
+ * single in-flight promise instead of issuing duplicate requests.
  *
- * @module @resq/typescript/decorators/delegate.fn
- *
- * @copyright Copyright (c) 2026 ResQ
- * @license MIT
+ * @module @resq-systems/decorators/delegate/delegate.fn
  */
+
+import type { AsyncMethod } from "../types.js";
 
 /**
  * Wraps an async method to deduplicate concurrent calls.
  * Multiple calls with the same key will share the same promise
  * until the first one completes.
  *
- * @template D - The resolved type of the promise
- * @template A - The argument types of the original method
- * @param {AsyncMethod<D, A>} originalMethod - The async method to wrap
- * @param {(...args: A) => string} [keyResolver] - Optional function to generate cache keys
- * @returns {AsyncMethod<D, A>} The delegated method
- *
+ * @template D - The resolved type of the promise.
+ * @template A - The argument types of the original method.
+ * @param originalMethod - The async method to wrap.
+ * @param keyResolver - Optional function to generate cache keys from arguments.
+ * @returns The delegated method that shares in-flight promises by key.
  * @example
  * ```typescript
  * class Service {

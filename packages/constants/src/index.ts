@@ -14,5 +14,12 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Package barrel that re-exports the design tokens and brand
+ * identity constants, so consumers can import everything from the package root.
+ *
+ * @module @resq-systems/constants
+ */
+
 export * from "./tokens.js";
 export * from "./brand.js";

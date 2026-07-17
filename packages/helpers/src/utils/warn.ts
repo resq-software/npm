@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Deduplicated warnings — `warnOnce` logs a message a single time via
+ * the structured logger, and `warnDeprecatedGetter` builds a standard
+ * getter-deprecation message.
+ *
+ * @module @resq-systems/helpers/utils/warn
+ */
+
 import { Logger } from "@resq-systems/logger";
 
 const logger = Logger.getLogger("helpers");

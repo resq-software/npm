@@ -26,6 +26,8 @@
  * All exports rely on `navigator`, `window`, or DOM globals — do not
  * import this subpath into server-side bundles. Use the universal
  * `@resq-systems/helpers` entry for SSR-safe utilities.
+ *
+ * @module @resq-systems/helpers/browser
  */
 
 export * from "./dom-utils.js";

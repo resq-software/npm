@@ -15,13 +15,12 @@
  */
 
 /**
- * @file Throttle and Debounce Utilities
- * @module utils/throttle
- * @author ResQ
- * @description Provides functions to limit the rate at which functions can be called.
- *              Useful for preventing excessive API calls and managing request frequency.
- *              Includes throttle, debounce, rate limiter, and queue utilities.
- * @compliance NIST 800-53 SC-5 (Denial of Service Protection)
+ * @fileoverview Client- and server-side rate-shaping primitives — `throttle` and
+ * `debounce`, their per-key managers, and the token-bucket, leaky-bucket, and
+ * sliding-window limiter strategies used to bound request frequency (supporting
+ * NIST 800-53 SC-5 denial-of-service protection).
+ *
+ * @module @resq-systems/rate-limiting/throttle
  */
 
 import { Schema as S } from "effect";
@@ -29,36 +28,38 @@ import { LRUCache, Queue } from "@resq-systems/dsa";
 import type { PositiveInt, PositiveMillis, PositiveNumber } from "@resq-systems/types";
 import type { RateLimitDecision } from "./decision.js";
 
-// ============================================
-// Effect Schema Definitions
-// ============================================
+//#region Schemas
 
 /**
- * Throttle Options Schema
+ * Effect Schema for {@link throttle} edge-behaviour options, exported so callers
+ * can runtime-validate options that arrive as untyped JSON.
  */
 const ThrottleOptionsSchema = S.Struct({
-	/** Whether to call the function on the leading edge */
+	/** Whether to invoke on the leading edge of the throttle window. */
 	leading: S.optional(S.Boolean),
-	/** Whether to call the function on the trailing edge */
+	/** Whether to invoke on the trailing edge of the throttle window. */
 	trailing: S.optional(S.Boolean),
 });
 
+/** Options accepted by {@link throttle}, inferred from {@link ThrottleOptionsSchema}. */
 export type ThrottleOptions = typeof ThrottleOptionsSchema.Type;
 
 /**
- * Debounce Options Schema
+ * Effect Schema for {@link debounce} options, exported so callers can
+ * runtime-validate options that arrive as untyped JSON.
  */
 const DebounceOptionsSchema = S.Struct({
-	/** Whether to call the function on the leading edge */
+	/** Whether to invoke on the leading edge of the debounce window. */
 	leading: S.optional(S.Boolean),
-	/** Maximum time to wait before forcing execution */
+	/** Upper bound, in milliseconds, on how long invocation may be deferred. */
 	maxWait: S.optional(S.Number),
 });
 
+/** Options accepted by {@link debounce}, inferred from {@link DebounceOptionsSchema}. */
 export type DebounceOptions = typeof DebounceOptionsSchema.Type;
 
 /**
- * Rate Limiter Stats Schema
+ * Effect Schema for the capacity snapshot returned by {@link RateLimiter.getStats}.
  */
 const RateLimiterStatsSchema = S.Struct({
 	availableTokens: S.Number,
@@ -66,36 +67,40 @@ const RateLimiterStatsSchema = S.Struct({
 	capacity: S.Number,
 });
 
+/** Capacity snapshot for a keyless limiter, inferred from {@link RateLimiterStatsSchema}. */
 export type RateLimiterStats = typeof RateLimiterStatsSchema.Type;
 
 /**
- * Keyed Stats Schema
+ * Effect Schema for the key snapshot returned by the keyed managers'
+ * `getStats` methods.
  */
 const KeyedStatsSchema = S.Struct({
 	activeKeys: S.Number,
 	keys: S.Array(S.String),
 });
 
+/** Key snapshot for a keyed limiter/manager, inferred from {@link KeyedStatsSchema}. */
 export type KeyedStats = typeof KeyedStatsSchema.Type;
 
-// ============================================
-// Generic Function Type
-// ============================================
+//#endregion
 
-/** Generic callable function type */
+//#region Types
+
+/** A callable of arbitrary arity used as the upper bound for wrapped functions. */
 type AnyFunction = (...args: never[]) => unknown;
 
-// ============================================
-// Throttle Function
-// ============================================
+//#endregion
+
+//#region Throttle Function
 
 /**
- * Throttle a function to only execute once per specified interval
+ * Throttle a function so it executes at most once per `wait` interval.
  *
- * @param func Function to throttle
- * @param wait Wait time in milliseconds
- * @param options Throttle options
- * @returns Throttled function
+ * @param func - Function to throttle.
+ * @param wait - Minimum interval between invocations, in milliseconds.
+ * @param options - Leading/trailing edge behaviour.
+ * @returns The throttled wrapper, with a `cancel()` to clear any pending
+ *   trailing call.
  *
  * @example
  * ```ts
@@ -157,17 +162,18 @@ export function throttle<T extends AnyFunction>(
 	return throttled;
 }
 
-// ============================================
-// Debounce Function
-// ============================================
+//#endregion
+
+//#region Debounce Function
 
 /**
- * Debounce a function to only execute after it stops being called for specified time
+ * Debounce a function so it executes only after `wait` ms have elapsed with no
+ * further calls.
  *
- * @param func Function to debounce
- * @param wait Wait time in milliseconds
- * @param options Debounce options
- * @returns Debounced function
+ * @param func - Function to debounce.
+ * @param wait - Quiet interval, in milliseconds, that must pass before firing.
+ * @param options - Leading-edge behaviour and optional `maxWait` ceiling.
+ * @returns The debounced wrapper, with `cancel()` and `flush()` controls.
  *
  * @example
  * ```ts
@@ -248,9 +254,9 @@ export function debounce<T extends AnyFunction>(
 	return debounced;
 }
 
-// ============================================
-// Keyed Throttle Manager
-// ============================================
+//#endregion
+
+//#region Keyed Throttle Manager
 
 /**
  * Per-key throttle manager — wraps {@link throttle} with a `Map` keyed
@@ -260,7 +266,7 @@ export function debounce<T extends AnyFunction>(
  * per-document save buffers. Memory grows with the number of distinct
  * keys; call {@link cancel} or {@link cancelAll} to free resources.
  *
- * @typeParam T - Function being throttled.
+ * @template T - Function being throttled.
  *
  * @example
  * ```ts
@@ -351,9 +357,9 @@ export class KeyedThrottle<T extends AnyFunction> {
 	}
 }
 
-// ============================================
-// Keyed Debounce Manager
-// ============================================
+//#endregion
+
+//#region Keyed Debounce Manager
 
 /**
  * Per-key debounce manager — wraps {@link debounce} with a `Map` keyed
@@ -365,7 +371,7 @@ export class KeyedThrottle<T extends AnyFunction> {
  * keys; call {@link cancel}, {@link flush}, or {@link cancelAll} to
  * release resources.
  *
- * @typeParam T - Function being debounced.
+ * @template T - Function being debounced.
  *
  * @example
  * ```ts
@@ -467,9 +473,9 @@ export class KeyedDebounce<T extends AnyFunction> {
 	}
 }
 
-// ============================================
-// Rate limiter strategies
-// ============================================
+//#endregion
+
+//#region Rate Limiter Strategies
 
 /**
  * A **keyless** rate limiter: one bucket per instance, guarding a single stream
@@ -531,9 +537,9 @@ export interface KeyedRateLimiter {
 	getStats(): KeyedStats;
 }
 
-// ============================================
-// Token Bucket Rate Limiter
-// ============================================
+//#endregion
+
+//#region Token Bucket Limiter
 
 /**
  * Token-bucket rate limiter.
@@ -692,9 +698,9 @@ export class TokenBucketLimiter implements RateLimiter {
 	}
 }
 
-// ============================================
-// Leaky Bucket Rate Limiter
-// ============================================
+//#endregion
+
+//#region Leaky Bucket Limiter
 
 /**
  * Leaky-bucket rate limiter.
@@ -832,9 +838,9 @@ export class LeakyBucketLimiter implements RateLimiter {
 	}
 }
 
-// ============================================
-// Sliding Window Counter
-// ============================================
+//#endregion
+
+//#region Sliding Window Counter
 
 /**
  * Sliding-window counter for per-key rate limiting.
@@ -916,7 +922,8 @@ export class SlidingWindowCounter implements KeyedRateLimiter {
 			counter.windowStart = windowStart;
 		}
 
-		// Calculate weighted count
+		// Interpolate between the previous and current window so the count decays
+		// smoothly across the boundary instead of resetting in one step.
 		const windowPosition = (now - windowStart) / this.windowMs;
 		const weightedCount = counter.previous * (1 - windowPosition) + counter.current;
 
@@ -975,8 +982,10 @@ export class SlidingWindowCounter implements KeyedRateLimiter {
 	}
 }
 
-// ============================================
-// Exports
-// ============================================
+//#endregion
+
+//#region Exports
 
 export { DebounceOptionsSchema, KeyedStatsSchema, RateLimiterStatsSchema, ThrottleOptionsSchema };
+
+//#endregion

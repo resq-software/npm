@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Space-efficient probabilistic set-membership filter (Bloom
+ * filter) with no false negatives and a configurable false-positive rate.
+ *
+ * @module @resq-systems/dsa/bloom
+ */
+
 import type { Probability } from "./schemas.js";
 
 /** Default target false-positive rate (1%) used when none is supplied. */

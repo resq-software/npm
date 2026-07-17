@@ -15,13 +15,16 @@
  */
 
 /**
- * Configuration options for the @before decorator.
+ * @fileoverview Type for the `@before` decorator — `BeforeConfig` describes the
+ * pre-hook to run and whether the decorated method waits for it.
  *
- * @interface BeforeConfig
- * @template T - The type of the class containing the decorated method
- * @property {((...args: any[]) => any) | keyof T} func - The before function to execute, or a method name on the class
- * @property {boolean} [wait=false] - Whether to wait for the before function to complete before executing the method
+ * @module @resq-systems/decorators/before/before.types
+ */
+
+/**
+ * Configuration options for the `@before` decorator.
  *
+ * @template T - The type of the class containing the decorated method.
  * @example
  * ```typescript
  * // Using a function reference

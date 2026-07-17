@@ -23,6 +23,8 @@
  * Composition: `HoverCard > HoverCardTrigger + HoverCardContent`.
  * Configurable open/close delays via `openDelay` / `closeDelay`
  * props on the root.
+ *
+ * @module @resq-systems/ui/components/hover-card/hover-card
  */
 
 "use client";
@@ -32,10 +34,12 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
+/** Root of the hover-triggered preview popover; tune `openDelay` / `closeDelay` here. */
 function HoverCard({ ...props }: Readonly<React.ComponentProps<typeof HoverCardPrimitive.Root>>) {
 	return <HoverCardPrimitive.Root data-slot="hover-card" {...props} />;
 }
 
+/** Floating preview surface, portalled and positioned relative to the trigger. */
 function HoverCardContent({
 	align = "center",
 	className,
@@ -58,6 +62,7 @@ function HoverCardContent({
 	);
 }
 
+/** Element that reveals the card on hover or keyboard focus. */
 function HoverCardTrigger({
 	...props
 }: Readonly<React.ComponentProps<typeof HoverCardPrimitive.Trigger>>) {

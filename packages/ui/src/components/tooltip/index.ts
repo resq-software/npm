@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Tooltip component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/tooltip`.
+ *
+ * @module @resq-systems/ui/components/tooltip
+ */
+
 export * from "./tooltip.js";

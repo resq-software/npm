@@ -15,6 +15,15 @@
  */
 
 /**
+ * @fileoverview Least-recently-used cache with O(1) get/set/has/delete, optional
+ * lazy TTL expiry, an eviction callback, and read-through compute helpers.
+ *
+ * @module @resq-systems/dsa/lru-cache
+ */
+
+//#region Types
+
+/**
  * Node in the doubly-linked list
  * @internal
  */
@@ -51,6 +60,10 @@ export interface LRUCacheOptions<K = unknown, V = unknown> {
 	onEvict?: (key: K, value: V) => void;
 }
 
+//#endregion
+
+//#region Public API
+
 /**
  * Least-recently-used cache with constant-time `get`, `set`, `has`, and
  * `delete`.
@@ -63,8 +76,8 @@ export interface LRUCacheOptions<K = unknown, V = unknown> {
  * the next access touches them, at which point they're removed and treated
  * as a miss. There is no background sweeper.
  *
- * @typeParam K - Key type. Compared by `Map` semantics (SameValueZero).
- * @typeParam V - Value type. The cache stores references — it does not
+ * @template K - Key type. Compared by `Map` semantics (SameValueZero).
+ * @template V - Value type. The cache stores references — it does not
  *   copy or freeze values.
  *
  * @example Basic use
@@ -378,3 +391,4 @@ export class LRUCache<K, V> {
 		return this.entries();
 	}
 }
+//#endregion

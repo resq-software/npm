@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Render-and-send convenience wiring — validates and renders a payload,
+ * then hands it to an `EmailSender`, preserving the never-throws `SendResult`
+ * contract.
+ *
+ * @module @resq-systems/email-templates/send/send-email
+ */
+
 import { EmailValidationError } from "../mailer.js";
 import { renderEmail } from "../render.js";
 import type { EmailSender, SendResult } from "./sender.js";

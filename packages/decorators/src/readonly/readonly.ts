@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@readonly` method decorator — marks the decorated method's
+ * property descriptor non-writable so it cannot be reassigned on instances.
+ *
+ * @module @resq-systems/decorators/readonly/readonly
+ */
+
 import type { Readonlyable } from "./index.js";
 
 /**
- * Decorator that makes a method read-only (non-writable).
- * Prevents the method from being reassigned after class instantiation.
+ * Mark a method read-only by setting its property descriptor's `writable` flag to
+ * `false`, so it cannot be reassigned after the class is instantiated.
  *
- * @template T - The type of the class containing the decorated method
- * @returns {Readonlyable<T>} The decorator function
- *
+ * @template T - The class type that owns the decorated method.
+ * @returns The method decorator.
  * @example
- * ```typescript
+ * ```ts
  * class SecureApi {
  *   @readonly()
  *   authenticate(): Promise<AuthToken> {

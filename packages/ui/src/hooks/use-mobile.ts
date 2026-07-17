@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `useIsMobile` — an SSR-safe hook that tracks whether the viewport
+ * is below the mobile breakpoint via `matchMedia`, so components can switch
+ * between mobile and desktop affordances.
+ *
+ * @module @resq-systems/ui/hooks/use-mobile
+ */
+
 import * as React from "react";
 
 /** Mobile breakpoint in CSS pixels. Matches Tailwind v4's default `md` breakpoint. */

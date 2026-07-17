@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Media type tables and `MediaHelpers`: supported image/video MIME
+ * lists plus browser helpers for loading images and videos, measuring
+ * dimensions (honoring PNG pHYs DPI), extracting video frames, and detecting
+ * animation.
+ *
+ * @module @resq-systems/helpers/browser/media/media
+ */
+
 import { promiseWithResolve } from "../../utils/control.js";
 import { Image } from "../network.js";
 import { isApngAnimated } from "./apng.js";
@@ -22,12 +31,14 @@ import { isGifAnimated } from "./gif.js";
 import { PngHelpers } from "./png.js";
 import { isWebpAnimated } from "./webp.js";
 
+//#region Constants
+
 /**
  * Array of supported vector image MIME types.
  *
  * @example
  * ```ts
- * import { DEFAULT_SUPPORTED_VECTOR_IMAGE_TYPES } from '@tldraw/utils'
+ * import { DEFAULT_SUPPORTED_VECTOR_IMAGE_TYPES } from '@resq-systems/helpers/browser'
  *
  * const isSvg = DEFAULT_SUPPORTED_VECTOR_IMAGE_TYPES.includes('image/svg+xml')
  * console.log(isSvg) // true
@@ -40,7 +51,7 @@ export const DEFAULT_SUPPORTED_VECTOR_IMAGE_TYPES = Object.freeze(["image/svg+xm
  *
  * @example
  * ```ts
- * import { DEFAULT_SUPPORTED_STATIC_IMAGE_TYPES } from '@tldraw/utils'
+ * import { DEFAULT_SUPPORTED_STATIC_IMAGE_TYPES } from '@resq-systems/helpers/browser'
  *
  * const isStatic = DEFAULT_SUPPORTED_STATIC_IMAGE_TYPES.includes('image/jpeg')
  * console.log(isStatic) // true
@@ -57,7 +68,7 @@ export const DEFAULT_SUPPORTED_STATIC_IMAGE_TYPES = Object.freeze([
  *
  * @example
  * ```ts
- * import { DEFAULT_SUPPORTED_ANIMATED_IMAGE_TYPES } from '@tldraw/utils'
+ * import { DEFAULT_SUPPORTED_ANIMATED_IMAGE_TYPES } from '@resq-systems/helpers/browser'
  *
  * const isAnimated = DEFAULT_SUPPORTED_ANIMATED_IMAGE_TYPES.includes('image/gif')
  * console.log(isAnimated) // true
@@ -74,7 +85,7 @@ export const DEFAULT_SUPPORTED_ANIMATED_IMAGE_TYPES = Object.freeze([
  *
  * @example
  * ```ts
- * import { DEFAULT_SUPPORTED_IMAGE_TYPES } from '@tldraw/utils'
+ * import { DEFAULT_SUPPORTED_IMAGE_TYPES } from '@resq-systems/helpers/browser'
  *
  * const isSupported = DEFAULT_SUPPORTED_IMAGE_TYPES.includes('image/png')
  * console.log(isSupported) // true
@@ -91,7 +102,7 @@ export const DEFAULT_SUPPORTED_IMAGE_TYPES = Object.freeze([
  *
  * @example
  * ```ts
- * import { DEFAULT_SUPPORT_VIDEO_TYPES } from '@tldraw/utils'
+ * import { DEFAULT_SUPPORT_VIDEO_TYPES } from '@resq-systems/helpers/browser'
  *
  * const isVideo = DEFAULT_SUPPORT_VIDEO_TYPES.includes('video/mp4')
  * console.log(isVideo) // true
@@ -108,7 +119,7 @@ export const DEFAULT_SUPPORT_VIDEO_TYPES = Object.freeze([
  *
  * @example
  * ```ts
- * import { DEFAULT_SUPPORTED_MEDIA_TYPES } from '@tldraw/utils'
+ * import { DEFAULT_SUPPORTED_MEDIA_TYPES } from '@resq-systems/helpers/browser'
  *
  * const isMediaFile = DEFAULT_SUPPORTED_MEDIA_TYPES.includes('video/mp4')
  * console.log(isMediaFile) // true
@@ -124,7 +135,7 @@ export const DEFAULT_SUPPORTED_MEDIA_TYPES = Object.freeze([
  *
  * @example
  * ```ts
- * import { DEFAULT_SUPPORTED_MEDIA_TYPE_LIST } from '@tldraw/utils'
+ * import { DEFAULT_SUPPORTED_MEDIA_TYPE_LIST } from '@resq-systems/helpers/browser'
  *
  * // Use in HTML file input for media uploads
  * const input = document.createElement('input')
@@ -138,6 +149,10 @@ export const DEFAULT_SUPPORTED_MEDIA_TYPES = Object.freeze([
  * @public
  */
 export const DEFAULT_SUPPORTED_MEDIA_TYPE_LIST = DEFAULT_SUPPORTED_MEDIA_TYPES.join(",");
+
+//#endregion
+
+//#region Public API
 
 /**
  * Helpers for media
@@ -514,3 +529,5 @@ export class MediaHelpers {
 		}
 	}
 }
+
+//#endregion

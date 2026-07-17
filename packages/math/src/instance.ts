@@ -31,7 +31,7 @@ import { DomainError, MathError } from "./error.js";
 import type { Sort, Value } from "./value.js";
 import { asBool, asNum, asSet, bool, mkSet, num, setEq } from "./value.js";
 
-// ────────────────────────── Sort and Operator ID Maps ──────────────────────────
+//#region Constants
 
 const sortIds: Readonly<Record<Sort, number>> = Object.assign(Object.create(null), {
 	num: 1,
@@ -92,9 +92,17 @@ const isBinaryOp = (s: string | undefined): s is BinaryOp => s !== undefined && 
 const isRelOp = (s: string | undefined): s is RelOp => s !== undefined && s in relIds;
 const isLogicOp = (s: string | undefined): s is LogicOp => s !== undefined && s in logicIds;
 
-// ────────────────────────── Bitmask Encoding ──────────────────────────
+//#endregion
 
-/** Encode unary operator and argument sort into a single integer key. */
+//#region Encoding
+
+/**
+ * Encode unary operator and argument sort into a single integer key.
+ *
+ * @param op - The unary operator.
+ * @param sort - The argument sort.
+ * @returns The packed dispatch key, or `0` if either id is unknown.
+ */
 export const encodeUnary = (op: UnaryOp, sort: Sort): number => {
 	const opId = unaryIds[op];
 	const sortId = sortIds[sort];
@@ -102,7 +110,14 @@ export const encodeUnary = (op: UnaryOp, sort: Sort): number => {
 	return (opId << 8) | sortId;
 };
 
-/** Encode binary operator and left/right sorts into a single integer key. */
+/**
+ * Encode binary operator and left/right sorts into a single integer key.
+ *
+ * @param op - The binary operator.
+ * @param sortL - The left operand sort.
+ * @param sortR - The right operand sort.
+ * @returns The packed dispatch key, or `0` if any id is unknown.
+ */
 export const encodeBinary = (op: BinaryOp, sortL: Sort, sortR: Sort): number => {
 	const opId = binaryIds[op];
 	const lId = sortIds[sortL];
@@ -111,7 +126,14 @@ export const encodeBinary = (op: BinaryOp, sortL: Sort, sortR: Sort): number => 
 	return (opId << 16) | (lId << 8) | rId;
 };
 
-/** Encode relational operator and left/right sorts into a single integer key. */
+/**
+ * Encode relational operator and left/right sorts into a single integer key.
+ *
+ * @param op - The relational operator.
+ * @param sortL - The left operand sort.
+ * @param sortR - The right operand sort.
+ * @returns The packed dispatch key, or `0` if any id is unknown.
+ */
 export const encodeRel = (op: RelOp, sortL: Sort, sortR: Sort): number => {
 	const opId = relIds[op];
 	const lId = sortIds[sortL];
@@ -120,7 +142,14 @@ export const encodeRel = (op: RelOp, sortL: Sort, sortR: Sort): number => {
 	return (opId << 16) | (lId << 8) | rId;
 };
 
-/** Encode logical operator and left/right sorts into a single integer key. */
+/**
+ * Encode logical operator and left/right sorts into a single integer key.
+ *
+ * @param op - The logical operator.
+ * @param sortL - The left operand sort.
+ * @param sortR - The right operand sort.
+ * @returns The packed dispatch key, or `0` if any id is unknown.
+ */
 export const encodeLogic = (op: LogicOp, sortL: Sort, sortR: Sort): number => {
 	const opId = logicIds[op];
 	const lId = sortIds[sortL];
@@ -129,14 +158,18 @@ export const encodeLogic = (op: LogicOp, sortL: Sort, sortR: Sort): number => {
 	return (opId << 16) | (lId << 8) | rId;
 };
 
-// ────────────────────────── Instance types ──────────────────────────
+//#endregion
+
+//#region Types
 
 type UnaryImpl = (a: Value) => Value;
 type BinaryImpl = (a: Value, b: Value) => Value;
 type RelImpl = (a: Value, b: Value) => boolean;
 type LogicImpl = (a: Value, b: Value) => boolean;
 
-// ────────────────────────── Factorial helper ──────────────────────────
+//#endregion
+
+//#region Internal
 
 const factorialOf = (n: number): number => {
 	if (n < 0) throw new DomainError("factorial", "argument must be non-negative");
@@ -147,8 +180,7 @@ const factorialOf = (n: number): number => {
 	return result;
 };
 
-// ────────────────────────── Tables ──────────────────────────
-
+// Built-in operator instance tables, keyed by encoded operator+sort.
 const unaryTable = new Map<number, UnaryImpl>([
 	[encodeUnary("neg", "num"), (a) => num(-asNum(a))],
 	[
@@ -305,23 +337,51 @@ const logicTable = new Map<number, LogicImpl>([
 	[encodeLogic("⇔", "bool", "bool"), (a, b) => asBool(a) === asBool(b)],
 ]);
 
-// ────────────────────────── Lookup API ──────────────────────────
+//#endregion
 
-/** Look up a unary operator implementation. */
+//#region Public API
+
+/**
+ * Look up a unary operator implementation.
+ *
+ * @param key - A key from {@link encodeUnary}.
+ * @returns The implementation, or `undefined` when no instance is registered.
+ */
 export const lookupUnary = (key: number): UnaryImpl | undefined => unaryTable.get(key);
 
-/** Look up a binary operator implementation. */
+/**
+ * Look up a binary operator implementation.
+ *
+ * @param key - A key from {@link encodeBinary}.
+ * @returns The implementation, or `undefined` when no instance is registered.
+ */
 export const lookupBinary = (key: number): BinaryImpl | undefined => binaryTable.get(key);
 
-/** Look up a relational operator implementation. */
+/**
+ * Look up a relational operator implementation.
+ *
+ * @param key - A key from {@link encodeRel}.
+ * @returns The implementation, or `undefined` when no instance is registered.
+ */
 export const lookupRel = (key: number): RelImpl | undefined => relTable.get(key);
 
-/** Look up a logic operator implementation. */
+/**
+ * Look up a logic operator implementation.
+ *
+ * @param key - A key from {@link encodeLogic}.
+ * @returns The implementation, or `undefined` when no instance is registered.
+ */
 export const lookupLogic = (key: number): LogicImpl | undefined => logicTable.get(key);
 
-// ────────────────────────── Extensibility API ──────────────────────────
+// Extensibility: register custom operator instances via string keys.
 
-/** Register a custom unary operator instance. */
+/**
+ * Register a custom unary operator instance.
+ *
+ * @param key - A `"op:sort"` string (e.g. `"neg:num"`).
+ * @param impl - The implementation to invoke for that operator and sort.
+ * @throws {MathError} If the key is malformed or names an unknown operator or sort.
+ */
 export const registerUnary = (key: string, impl: UnaryImpl): void => {
 	const parts = key.split(":");
 	if (parts.length !== 2) throw new MathError("INVALID_KEY", `Invalid unary key: ${key}`);
@@ -331,7 +391,13 @@ export const registerUnary = (key: string, impl: UnaryImpl): void => {
 	unaryTable.set(encodeUnary(op, sort), impl);
 };
 
-/** Register a custom binary operator instance. */
+/**
+ * Register a custom binary operator instance.
+ *
+ * @param key - An `"op:leftSort:rightSort"` string (e.g. `"+:num:num"`).
+ * @param impl - The implementation to invoke for that operator and sort pair.
+ * @throws {MathError} If the key is malformed or names an unknown operator or sort.
+ */
 export const registerBinary = (key: string, impl: BinaryImpl): void => {
 	const parts = key.split(":");
 	if (parts.length !== 3) throw new MathError("INVALID_KEY", `Invalid binary key: ${key}`);
@@ -343,7 +409,13 @@ export const registerBinary = (key: string, impl: BinaryImpl): void => {
 	binaryTable.set(encodeBinary(op, sortL, sortR), impl);
 };
 
-/** Register a custom relational operator instance. */
+/**
+ * Register a custom relational operator instance.
+ *
+ * @param key - An `"op:leftSort:rightSort"` string (e.g. `"=:num:num"`).
+ * @param impl - The implementation to invoke for that operator and sort pair.
+ * @throws {MathError} If the key is malformed or names an unknown operator or sort.
+ */
 export const registerRelation = (key: string, impl: RelImpl): void => {
 	const parts = key.split(":");
 	if (parts.length !== 3) throw new MathError("INVALID_KEY", `Invalid relation key: ${key}`);
@@ -355,7 +427,13 @@ export const registerRelation = (key: string, impl: RelImpl): void => {
 	relTable.set(encodeRel(op, sortL, sortR), impl);
 };
 
-/** Register a custom logic operator instance. */
+/**
+ * Register a custom logic operator instance.
+ *
+ * @param key - An `"op:leftSort:rightSort"` string (e.g. `"∧:bool:bool"`).
+ * @param impl - The implementation to invoke for that operator and sort pair.
+ * @throws {MathError} If the key is malformed or names an unknown operator or sort.
+ */
 export const registerLogic = (key: string, impl: LogicImpl): void => {
 	const parts = key.split(":");
 	if (parts.length !== 3) throw new MathError("INVALID_KEY", `Invalid logic key: ${key}`);
@@ -366,3 +444,5 @@ export const registerLogic = (key: string, impl: LogicImpl): void => {
 	}
 	logicTable.set(encodeLogic(op, sortL, sortR), impl);
 };
+
+//#endregion

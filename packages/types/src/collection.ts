@@ -17,6 +17,8 @@
 /**
  * @fileoverview Tuple and union type utilities.
  *
+ * @module @resq-systems/types/collection
+ *
  * The building blocks behind "derive a literal union from a `readonly` config
  * tuple", "does this union have more than one member", and variadic-tuple
  * manipulation. These are the type-challenges classics, curated to the handful

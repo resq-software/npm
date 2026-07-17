@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Color types shared by the contrasting-color utilities — an 8-bit
+ * channel brand and the `Rgb`/`RGB` triplet shapes its luminance math consumes.
+ *
+ * @module @resq-systems/ui/lib/get-contrasting-color.types
+ */
+
 import type { NumberRange } from "@resq-systems/types";
 
 /**

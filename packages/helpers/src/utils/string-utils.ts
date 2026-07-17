@@ -23,8 +23,11 @@
  */
 
 /**
- * @file General string escaping, casing, normalization, and truncation helpers.
- * @module @resq-systems/helpers/string-utils
+ * @fileoverview String escaping, casing, normalization, and truncation helpers
+ * (quote/template/regex/HTML escaping, snake/title case, whitespace collapsing, and
+ * data-URL trimming).
+ *
+ * @module @resq-systems/helpers/utils/string-utils
  */
 
 /**

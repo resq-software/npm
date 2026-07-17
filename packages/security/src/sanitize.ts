@@ -15,12 +15,12 @@
  */
 
 /**
- * @file Input sanitization utilities for XSS prevention and data validation
- * @module utils/sanitize
- * @author ResQ
- * @description Provides type-safe input sanitization using Effect Schema for validation.
- *              Includes utilities for HTML escaping, URL validation, PII redaction, and more.
- * @compliance NIST 800-53 SI-10 (Information Input Validation)
+ * @fileoverview Type-safe input sanitization built on Effect Schema — HTML escaping
+ * and DOMPurify-backed HTML sanitization, safe-URL validation, prototype-pollution-
+ * hardened JSON parsing, PII redaction, and branded validators for email, phone, SSN,
+ * and more. Supports NIST 800-53 SI-10 (input validation) and AU-3 (audit content).
+ *
+ * @module @resq-systems/security/sanitize
  */
 
 import type { Brand } from "@resq-systems/types";
@@ -28,24 +28,27 @@ import { Exit, Option, Schema as S } from "effect";
 import DOMPurify from "dompurify";
 import type { Config, WindowLike } from "dompurify";
 
+//#region Types
+
 /**
- * A Schema with DecodingServices constrained to `never`, allowing synchronous decoding.
+ * A Schema whose decoding services are constrained to `never`, allowing synchronous
+ * decoding without an Effect runtime.
  */
 type SyncSchema<T> = S.Codec<T, unknown, never>;
+//#endregion
 
-// ============================================
-// Effect Schema Definitions
-// ============================================
+//#region Schemas
 
 /**
- * Schema for URL protocol validation
+ * Schema constraining a URL protocol to the recognized safe set.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const UrlProtocolSchema = S.Literals(["http:", "https:", "mailto:", "tel:", "ftp:"]);
+/** One of the protocols accepted by {@link UrlProtocolSchema}. */
 export type UrlProtocol = typeof UrlProtocolSchema.Type;
 
 /**
- * Schema for PII redaction options
+ * Schema for the per-category toggles that drive {@link redactPII}.
  * @compliance NIST 800-53 AU-3 (Content of Audit Records)
  */
 export const PIIRedactionOptionsSchema = S.Struct({
@@ -56,10 +59,11 @@ export const PIIRedactionOptionsSchema = S.Struct({
 	redactIPs: S.optional(S.Boolean),
 	redactDates: S.optional(S.Boolean),
 });
+/** Decoded options accepted by {@link redactPIIEffect} / {@link redactPII}. */
 export type PIIRedactionOptions = typeof PIIRedactionOptionsSchema.Type;
 
 /**
- * Schema for user input validation options
+ * Schema for the options controlling {@link validateUserInputEffect}.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const UserInputOptionsSchema = S.Struct({
@@ -68,10 +72,11 @@ export const UserInputOptionsSchema = S.Struct({
 	allowNewlines: S.optional(S.Boolean),
 	trimWhitespace: S.optional(S.Boolean),
 });
+/** Decoded options accepted by {@link validateUserInputEffect}. */
 export type UserInputOptions = typeof UserInputOptionsSchema.Type;
 
 /**
- * Schema for safe URL - validates URL format and protocol
+ * Schema for a safe URL — validates URL format and restricts to safe protocols.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const SafeUrlSchema = S.String.check(
@@ -94,10 +99,12 @@ export const SafeUrlSchema = S.String.check(
 export type SafeUrl = Brand<string, "SafeUrl">;
 
 /**
- * Schema for sanitized HTML-safe string (validates as string; escaping done at runtime)
+ * Schema for a sanitized HTML-safe string — validates the value is a string; the
+ * actual escaping is applied at runtime by the sanitization helpers.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const SanitizedStringSchema = S.String;
+/** A string that carries the {@link SanitizedStringSchema} contract. */
 export type SanitizedString = typeof SanitizedStringSchema.Type;
 
 /**
@@ -115,7 +122,7 @@ export const EmailSchema = S.String.check(
 export type Email = Brand<string, "Email">;
 
 /**
- * Schema for phone number validation (US format)
+ * Schema for phone number validation (US format).
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const PhoneNumberSchema = S.String.check(
@@ -125,7 +132,7 @@ export const PhoneNumberSchema = S.String.check(
 export type PhoneNumber = Brand<string, "PhoneNumber">;
 
 /**
- * Schema for SSN validation (US format)
+ * Schema for SSN validation (US format).
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const SSNSchema = S.String.check(S.isPattern(/^\d{3}[-\s]?\d{2}[-\s]?\d{4}$/));
@@ -133,7 +140,7 @@ export const SSNSchema = S.String.check(S.isPattern(/^\d{3}[-\s]?\d{2}[-\s]?\d{4
 export type SSN = Brand<string, "SSN">;
 
 /**
- * Schema for credit card number validation
+ * Schema for credit card number validation.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
 export const CreditCardSchema = S.String.check(
@@ -143,15 +150,14 @@ export const CreditCardSchema = S.String.check(
 export type CreditCard = Brand<string, "CreditCard">;
 
 /**
- * Schema for IPv4 address validation
+ * Schema for IPv4 address validation.
  */
 export const IPv4Schema = S.String.check(S.isPattern(/^(?:\d{1,3}\.){3}\d{1,3}$/));
 /** A string matching the {@link IPv4Schema} dotted-quad pattern. */
 export type IPv4 = Brand<string, "IPv4">;
+//#endregion
 
-// ============================================
-// Sanitization Functions
-// ============================================
+//#region Sanitization
 
 /**
  * Escapes special HTML characters in a string to their corresponding HTML entities,
@@ -531,12 +537,13 @@ export const stripAnsi = (text: string): string => {
 	return text.replaceAll(/\x1b\[[0-9;]*m/g, "");
 };
 
-// ============================================
-// PII Redaction Functions
-// ============================================
+//#endregion
+
+//#region PII Redaction
 
 /**
- * PII pattern definitions with Effect Schema validation
+ * PII pattern catalog: each entry pairs a global-match regex with the marker that
+ * replaces every hit during redaction.
  * @compliance NIST 800-53 AU-3 (Content of Audit Records)
  */
 const PII_PATTERNS = {
@@ -722,9 +729,9 @@ export const safeStringify = (
 	}
 };
 
-// ============================================
-// Validation Helpers
-// ============================================
+//#endregion
+
+//#region Validation Helpers
 
 /**
  * Validates if a string is a valid email address using Effect Schema.
@@ -774,3 +781,4 @@ export const isValidSSN = (ssn: string): ssn is SSN => {
 export const isValidUrl = (url: string): url is SafeUrl => {
 	return Exit.isSuccess(S.decodeUnknownExit(SafeUrlSchema)(url));
 };
+//#endregion

@@ -24,6 +24,8 @@
  * group's `direction` prop (`horizontal` | `vertical`); handles
  * support keyboard resize via arrow keys and `aria-valuenow`
  * announcements.
+ *
+ * @module @resq-systems/ui/components/resizable/resizable
  */
 
 "use client";

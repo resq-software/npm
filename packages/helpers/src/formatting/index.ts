@@ -27,6 +27,8 @@
  *
  * Pure functions; no DOM or Node-only globals. Safe in SSR and worker
  * contexts.
+ *
+ * @module @resq-systems/helpers/formatting
  */
 
 export * from "./date.js";

@@ -15,23 +15,34 @@
  */
 
 /**
- * A type representing JSON primitive values: boolean, null, string, or number.
+ * @fileoverview Structural JSON value types.
+ *
+ * @module @resq-systems/types/json
+ *
+ * The recursive {@link JsonValue} shape and its constituents, for typing
+ * anything that must round-trip through `JSON.parse` / `JSON.stringify` without
+ * falling back to `any`.
+ */
+
+/**
+ * A JSON primitive value: `boolean`, `null`, `string`, or `number`.
  */
 export type JsonPrimitive = boolean | null | string | number;
 
 /**
- * A type representing a JSON array containing any valid JSON values.
+ * A JSON array holding any valid JSON values.
  */
 export type JsonArray = JsonValue[];
 
 /**
- * A type representing a JSON object with string keys and JSON values.
+ * A JSON object keyed by strings, with JSON values. Optional (`undefined`)
+ * members model keys omitted from the serialized form.
  */
 export interface JsonObject {
 	[key: string]: JsonValue | undefined;
 }
 
 /**
- * A type that represents any valid JSON value.
+ * Any valid JSON value: a primitive, an array, or an object.
  */
 export type JsonValue = JsonPrimitive | JsonArray | JsonObject;

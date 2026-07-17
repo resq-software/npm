@@ -15,18 +15,17 @@
  */
 
 /**
- * @file Effect Schema Definitions for DSA Module
- * @module dsa/schemas
- * @description Effect Schema validation schemas for data structure configurations
- *              and inputs. Provides type-safe validation at runtime.
+ * @fileoverview Effect Schema validation schemas for data structure
+ * configurations and inputs, plus branded numeric domains. Provides type-safe
+ * validation at runtime for the optional `./schemas` entry point.
+ *
+ * @module @resq-systems/dsa/schemas
  */
 
 import { Effect } from "effect";
 import { Schema as S } from "effect";
 
-// ============================================
-// Trie Schemas
-// ============================================
+//#region Trie Schemas
 
 /**
  * Construction options for {@link Trie}.
@@ -56,9 +55,9 @@ export const TrieSearchSchema = S.Struct({
 /** Inferred TS type for {@link TrieSearchSchema}. */
 export type TrieSearch = S.Schema.Type<typeof TrieSearchSchema>;
 
-// ============================================
-// Priority Queue Schemas
-// ============================================
+//#endregion
+
+//#region Priority Queue Schemas
 
 /** Construction options for {@link PriorityQueue}. */
 export const PriorityQueueOptionsSchema = S.Struct({
@@ -85,9 +84,9 @@ export const PriorityItemSchema = S.Struct({
 /** Inferred TS type for {@link PriorityItemSchema}. */
 export type PriorityItemInput = S.Schema.Type<typeof PriorityItemSchema>;
 
-// ============================================
-// Rabin-Karp Schemas
-// ============================================
+//#endregion
+
+//#region Rabin-Karp Schemas
 
 /** Construction options for {@link RabinKarp}. */
 export const RabinKarpOptionsSchema = S.Struct({
@@ -114,9 +113,9 @@ export const RabinKarpMultiSearchSchema = S.Struct({
 /** Inferred TS type for {@link RabinKarpMultiSearchSchema}. */
 export type RabinKarpMultiSearch = S.Schema.Type<typeof RabinKarpMultiSearchSchema>;
 
-// ============================================
-// Graph Schemas
-// ============================================
+//#endregion
+
+//#region Graph Schemas
 
 /** Construction options for {@link Graph} — `directed` defaults to false. */
 export const GraphOptionsSchema = S.Struct({
@@ -147,9 +146,9 @@ export const VertexIdSchema = S.String.check(S.isMinLength(1)).pipe(S.brand("Ver
 /** Inferred TS type for {@link VertexIdSchema} — `string & Brand<"VertexId">`. */
 export type VertexId = S.Schema.Type<typeof VertexIdSchema>;
 
-// ============================================
-// Validation Helpers
-// ============================================
+//#endregion
+
+//#region Validation Helpers
 
 /**
  * Marker constraint for "any schema decoding with no service context".
@@ -220,9 +219,9 @@ export function createValidator<T extends AnySchema>(schema: T): (input: unknown
 	return (input: unknown) => S.decodeUnknownSync(schema)(input);
 }
 
-// ============================================
-// Branded Numeric Domains
-// ============================================
+//#endregion
+
+//#region Branded Numeric Domains
 
 /**
  * A probability / unit-interval value in the OPEN interval `(0, 1)`.
@@ -303,3 +302,4 @@ export function isLatitude(value: unknown): value is Latitude {
 export function isLongitude(value: unknown): value is Longitude {
 	return validateSafe(LongitudeSchema, value).success;
 }
+//#endregion

@@ -20,6 +20,8 @@
  * `wait: true` for state-validation or guard patterns. Companion
  * `beforeFn(method, config)` wraps a plain function with the same
  * semantics.
+ *
+ * @module @resq-systems/decorators/before
  */
 
 export * from "./before.js";

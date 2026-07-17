@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Picks a readable foreground color (`#000` or `#fff`) for any CSS
+ * color by computing perceived luminance, so overlaid text stays legible against
+ * arbitrary backgrounds.
+ *
+ * @module @resq-systems/ui/lib/get-contrasting-color
+ */
+
 import type { Channel, Rgb } from "./get-contrasting-color.types.js";
 
 /**

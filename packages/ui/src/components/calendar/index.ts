@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Calendar component family (date-picker UI) —
+ * re-exports `./calendar` as the `@resq-systems/ui/calendar` entry.
+ *
+ * @module @resq-systems/ui/components/calendar
+ */
+
 export * from "./calendar.js";

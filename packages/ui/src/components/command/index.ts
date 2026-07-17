@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Command component family (keyboard-first command
+ * palette) — re-exports `./command` as the `@resq-systems/ui/command` entry.
+ *
+ * @module @resq-systems/ui/components/command
+ */
+
 export * from "./command.js";

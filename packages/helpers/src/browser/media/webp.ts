@@ -20,6 +20,13 @@
  */
 
 /**
+ * @fileoverview Detects WebP buffers and animated WebP by reading the extended
+ * `VP8X` chunk's animation flag; simple VP8/VP8L files report static.
+ *
+ * @module @resq-systems/helpers/browser/media/webp
+ */
+
+/**
  * Determines whether a byte array represents a WebP image by checking the WebP file signature.
  *
  * @param view - The Uint8Array containing the potential WebP image data

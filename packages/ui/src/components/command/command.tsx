@@ -24,6 +24,8 @@
  * `CommandShortcut` (right-aligned ⌘ hint) and `CommandSeparator`.
  * `CommandDialog` wraps `Command` in a `Dialog` for the overlay
  * pattern.
+ *
+ * @module @resq-systems/ui/components/command/command
  */
 
 "use client";
@@ -42,6 +44,7 @@ import {
 } from "../dialog/dialog.js";
 import { InputGroup, InputGroupAddon } from "../input-group/input-group.js";
 
+/** Command-palette root (cmdk) with design-system styling. */
 function Command({ className, ...props }: Readonly<React.ComponentProps<typeof CommandPrimitive>>) {
 	return (
 		<CommandPrimitive
@@ -55,6 +58,7 @@ function Command({ className, ...props }: Readonly<React.ComponentProps<typeof C
 	);
 }
 
+/** Command palette hosted inside a modal `Dialog`. */
 function CommandDialog({
 	children,
 	className,
@@ -86,6 +90,7 @@ function CommandDialog({
 	);
 }
 
+/** Placeholder shown when no command matches the current query. */
 function CommandEmpty({
 	className,
 	...props
@@ -99,6 +104,7 @@ function CommandEmpty({
 	);
 }
 
+/** Titled group of related command items. */
 function CommandGroup({
 	className,
 	...props
@@ -115,6 +121,7 @@ function CommandGroup({
 	);
 }
 
+/** Search field that filters the command list as the user types. */
 function CommandInput({
 	className,
 	...props
@@ -138,6 +145,7 @@ function CommandInput({
 	);
 }
 
+/** A single selectable command row. */
 function CommandItem({
 	children,
 	className,
@@ -161,6 +169,7 @@ function CommandItem({
 	);
 }
 
+/** Scrollable container for the filtered command results. */
 function CommandList({
 	className,
 	...props
@@ -177,6 +186,7 @@ function CommandList({
 	);
 }
 
+/** Divider between command groups. */
 function CommandSeparator({
 	className,
 	...props
@@ -190,6 +200,7 @@ function CommandSeparator({
 	);
 }
 
+/** Right-aligned keyboard-shortcut hint for a command item. */
 function CommandShortcut({ className, ...props }: Readonly<React.ComponentProps<"span">>) {
 	return (
 		<span

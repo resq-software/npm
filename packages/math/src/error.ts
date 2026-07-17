@@ -26,8 +26,13 @@
 
 /** Base class for all math engine errors. */
 export class MathError extends Error {
+	/** Stable machine-readable error code (e.g. `"SORT_ERROR"`). */
 	readonly code: string;
 
+	/**
+	 * @param code - Stable machine-readable error code.
+	 * @param message - Human-readable description.
+	 */
 	constructor(code: string, message: string) {
 		super(message);
 		this.name = "MathError";
@@ -44,9 +49,16 @@ export class MathError extends Error {
  * ```
  */
 export class SortError extends MathError {
+	/** The sort the operator required. */
 	readonly expectedSort: string;
+	/** The sort actually supplied. */
 	readonly actualSort: string;
 
+	/**
+	 * @param expected - The sort the operator required.
+	 * @param actual - The sort actually supplied.
+	 * @param context - Optional location hint (e.g. operator name) for the message.
+	 */
 	constructor(expected: string, actual: string, context?: string) {
 		const msg = context
 			? `Expected ${expected}, got ${actual} in ${context}`
@@ -60,8 +72,12 @@ export class SortError extends MathError {
 
 /** Thrown when a variable is referenced but not present in the environment. */
 export class UnboundVariableError extends MathError {
+	/** Name of the variable that was not found in the environment. */
 	readonly variableName: string;
 
+	/**
+	 * @param name - Name of the unbound variable.
+	 */
 	constructor(name: string) {
 		super("UNBOUND_VARIABLE", `Unbound variable: ${name}`);
 		this.name = "UnboundVariableError";
@@ -79,9 +95,15 @@ export class UnboundVariableError extends MathError {
  * ```
  */
 export class UndefinedOpError extends MathError {
+	/** The operator symbol with no matching instance. */
 	readonly operator: string;
+	/** The operand sorts that had no registered instance. */
 	readonly sorts: readonly string[];
 
+	/**
+	 * @param operator - The operator symbol with no matching instance.
+	 * @param sorts - The operand sorts that had no registered instance.
+	 */
 	constructor(operator: string, sorts: readonly string[]) {
 		const sortStr = sorts.length === 1 ? sorts[0] : sorts.join(" × ");
 		super("UNDEFINED_OP", `${operator} is not defined on ${sortStr}`);
@@ -97,9 +119,15 @@ export class UndefinedOpError extends MathError {
  * Division by zero, square root of a negative, factorial of a non-integer, etc.
  */
 export class DomainError extends MathError {
+	/** The operator whose domain constraint was violated. */
 	readonly operator: string;
+	/** Why the operation is mathematically invalid. */
 	readonly reason: string;
 
+	/**
+	 * @param operator - The operator whose domain constraint was violated.
+	 * @param reason - Why the operation is mathematically invalid.
+	 */
 	constructor(operator: string, reason: string) {
 		super("DOMAIN_ERROR", `${operator}: ${reason}`);
 		this.name = "DomainError";
@@ -110,9 +138,16 @@ export class DomainError extends MathError {
 
 /** Thrown by the Pratt parser for invalid or unexpected input. */
 export class ParseError extends MathError {
+	/** Zero-based character offset in the source where parsing failed. */
 	readonly position: number;
+	/** The token or character actually encountered. */
 	readonly found: string;
 
+	/**
+	 * @param message - Human-readable description of the parse failure.
+	 * @param position - Zero-based character offset where parsing failed.
+	 * @param found - The token or character actually encountered.
+	 */
 	constructor(message: string, position: number, found?: string) {
 		super("PARSE_ERROR", message);
 		this.name = "ParseError";
@@ -123,9 +158,15 @@ export class ParseError extends MathError {
 
 /** Thrown when a lexical stack lookup is out of bounds. */
 export class StackError extends MathError {
+	/** The De Bruijn index that was requested. */
 	readonly index: number;
+	/** The stack depth available at the time of access. */
 	readonly depth: number;
 
+	/**
+	 * @param index - The De Bruijn index that was requested.
+	 * @param depth - The stack depth available at the time of access.
+	 */
 	constructor(index: number, depth: number) {
 		super("STACK_ERROR", `Stack access out of bounds: index ${index} at depth ${depth}`);
 		this.name = "StackError";
@@ -136,8 +177,12 @@ export class StackError extends MathError {
 
 /** Thrown when evaluator execution steps exceed the configured limit. */
 export class ExecutionLimitError extends MathError {
+	/** The configured maximum number of execution steps. */
 	readonly limit: number;
 
+	/**
+	 * @param limit - The configured maximum number of execution steps.
+	 */
 	constructor(limit: number) {
 		super("EXECUTION_LIMIT", `Execution step limit exceeded: ${limit}`);
 		this.name = "ExecutionLimitError";
@@ -147,8 +192,12 @@ export class ExecutionLimitError extends MathError {
 
 /** Thrown when recursion depth exceeds the configured limit during parsing or evaluation. */
 export class RecursionLimitError extends MathError {
+	/** The configured maximum recursion depth. */
 	readonly limit: number;
 
+	/**
+	 * @param limit - The configured maximum recursion depth.
+	 */
 	constructor(limit: number) {
 		super("RECURSION_LIMIT", `Maximum recursion depth exceeded: ${limit}`);
 		this.name = "RecursionLimitError";

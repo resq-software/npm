@@ -15,9 +15,10 @@
  */
 
 /**
- * @file Priority Queue (Binary Heap) Data Structure
- * @module dsa/priority-queue
- * @description Min/Max heap implementation for deadline-based, numeric, or custom priority ordering.
+ * @fileoverview Binary-heap priority queue with min/max/custom ordering for
+ * deadline-based, numeric, or bespoke priority dispatch, plus factory helpers.
+ *
+ * @module @resq-systems/dsa/priority-queue
  */
 
 import {
@@ -27,18 +28,17 @@ import {
 	validateSafe,
 } from "./schemas.js";
 
-// ============================================
-// Types & Interfaces
-// ============================================
+//#region Types
 
 /**
- * Comparison function for priority queue ordering
- * Returns negative if a has higher priority, positive if b has higher priority, 0 if equal
+ * Comparison function for priority-queue ordering. Returns a negative number
+ * when `a` outranks `b`, a positive number when `b` outranks `a`, and `0` when
+ * they are equal.
  */
 export type CompareFn<T> = (a: T, b: T) => number;
 
 /**
- * Options for priority queue configuration
+ * Options for priority-queue configuration.
  */
 export interface PriorityQueueOptions<T> {
 	/** Custom comparison function (default: min-heap with numeric comparison) */
@@ -76,7 +76,7 @@ export type PQArgs<T> = [T] extends [Comparable]
 	: [options: PQOptions<T>];
 
 /**
- * Priority queue statistics
+ * Priority-queue statistics snapshot.
  */
 export interface PriorityQueueStats {
 	/** Current number of elements */
@@ -87,15 +87,15 @@ export interface PriorityQueueStats {
 	isEmpty: boolean;
 }
 
-// ============================================
-// Priority Queue Implementation
-// ============================================
+//#endregion
+
+//#region Public API
 
 /**
- * Priority Queue implemented as a Binary Heap
+ * Priority queue implemented as a binary heap.
  *
- * By default, this is a min-heap where the smallest element has highest priority.
- * Use a custom compareFn for max-heap or custom ordering.
+ * By default this is a min-heap where the smallest element has highest
+ * priority. Supply a custom `compareFn` for a max-heap or bespoke ordering.
  *
  * Time Complexity:
  * - enqueue (insert): O(log n)
@@ -109,7 +109,7 @@ export interface PriorityQueueStats {
  * @template T - Type of elements in the queue
  *
  * @example
- * ```typescript
+ * ```ts
  * // Min-heap by deadline
  * const requestQueue = new PriorityQueue<Request>({
  *   compareFn: (a, b) => a.deadline.getTime() - b.deadline.getTime()
@@ -127,9 +127,11 @@ export class PriorityQueue<T> {
 	private readonly compare: CompareFn<T>;
 
 	/**
-	 * Creates a new Priority Queue
-	 * @param options - Configuration options
-	 * @throws Error if options validation fails
+	 * Creates a new priority queue.
+	 *
+	 * @param options - Configuration options. A `compareFn` is required for
+	 *   non-{@link Comparable} element types (see {@link PQArgs}).
+	 * @throws {Error} If options validation fails.
 	 */
 	constructor(...args: PQArgs<T>) {
 		const options: PriorityQueueOptions<T> = args[0] ?? {};
@@ -160,24 +162,24 @@ export class PriorityQueue<T> {
 	}
 
 	/**
-	 * Returns the number of elements in the queue
+	 * Returns the number of elements in the queue.
 	 */
 	get size(): number {
 		return this.heap.length;
 	}
 
 	/**
-	 * Checks if the queue is empty
+	 * Whether the queue currently holds no elements.
 	 */
 	get isEmpty(): boolean {
 		return this.heap.length === 0;
 	}
 
 	/**
-	 * Adds an element to the queue
+	 * Adds an element to the queue, restoring the heap invariant.
 	 *
-	 * @param element - Element to add
-	 * @returns This queue for chaining
+	 * @param element - Element to add.
+	 * @returns This queue, for chaining.
 	 */
 	enqueue(element: T): this {
 		this.heap.push(element);
@@ -186,10 +188,10 @@ export class PriorityQueue<T> {
 	}
 
 	/**
-	 * Adds multiple elements to the queue
+	 * Adds multiple elements to the queue.
 	 *
-	 * @param elements - Elements to add
-	 * @returns This queue for chaining
+	 * @param elements - Elements to add.
+	 * @returns This queue, for chaining.
 	 */
 	enqueueAll(elements: T[]): this {
 		for (const element of elements) {
@@ -199,9 +201,10 @@ export class PriorityQueue<T> {
 	}
 
 	/**
-	 * Removes and returns the highest priority element
+	 * Removes and returns the highest-priority element.
 	 *
-	 * @returns The highest priority element or undefined if empty
+	 * @returns The highest-priority element, or `undefined` if the queue is
+	 *   empty.
 	 */
 	dequeue(): T | undefined {
 		if (this.isEmpty) {
@@ -220,20 +223,21 @@ export class PriorityQueue<T> {
 	}
 
 	/**
-	 * Returns the highest priority element without removing it
+	 * Returns the highest-priority element without removing it.
 	 *
-	 * @returns The highest priority element or undefined if empty
+	 * @returns The highest-priority element, or `undefined` if the queue is
+	 *   empty.
 	 */
 	peek(): T | undefined {
 		return this.heap[0];
 	}
 
 	/**
-	 * Removes a specific element from the queue
+	 * Removes a specific element from the queue, wherever it sits in the heap.
 	 *
-	 * @param element - Element to remove
-	 * @param equalsFn - Optional equality function (default: strict equality)
-	 * @returns True if the element was found and removed
+	 * @param element - Element to remove.
+	 * @param equalsFn - Equality predicate. Defaults to strict `===`.
+	 * @returns `true` if the element was found and removed.
 	 */
 	remove(element: T, equalsFn?: (a: T, b: T) => boolean): boolean {
 		const equals = equalsFn ?? ((a: T, b: T) => a === b);
@@ -248,12 +252,13 @@ export class PriorityQueue<T> {
 	}
 
 	/**
-	 * Updates an element's priority by removing and re-adding it
+	 * Updates an element's priority by removing it and re-inserting its
+	 * replacement.
 	 *
-	 * @param oldElement - Element to update
-	 * @param newElement - New element with updated priority
-	 * @param equalsFn - Optional equality function
-	 * @returns True if the element was found and updated
+	 * @param oldElement - Element to replace.
+	 * @param newElement - New element carrying the updated priority.
+	 * @param equalsFn - Equality predicate used to locate `oldElement`.
+	 * @returns `true` if the old element was found and updated.
 	 */
 	updatePriority(oldElement: T, newElement: T, equalsFn?: (a: T, b: T) => boolean): boolean {
 		if (this.remove(oldElement, equalsFn)) {
@@ -264,11 +269,11 @@ export class PriorityQueue<T> {
 	}
 
 	/**
-	 * Checks if an element exists in the queue
+	 * Checks whether an element exists in the queue. Linear scan, `O(n)`.
 	 *
-	 * @param element - Element to find
-	 * @param equalsFn - Optional equality function
-	 * @returns True if the element exists
+	 * @param element - Element to find.
+	 * @param equalsFn - Equality predicate. Defaults to strict `===`.
+	 * @returns `true` if a matching element exists.
 	 */
 	contains(element: T, equalsFn?: (a: T, b: T) => boolean): boolean {
 		const equals = equalsFn ?? ((a: T, b: T) => a === b);
@@ -276,9 +281,9 @@ export class PriorityQueue<T> {
 	}
 
 	/**
-	 * Returns all elements in priority order (drains the queue)
+	 * Removes and returns all elements in priority order, emptying the queue.
 	 *
-	 * @returns Array of elements in priority order
+	 * @returns The elements in priority order.
 	 */
 	drain(): T[] {
 		const result: T[] = [];
@@ -292,19 +297,21 @@ export class PriorityQueue<T> {
 	}
 
 	/**
-	 * Returns all elements as an array (does not drain)
-	 * Note: Order is not guaranteed to be in priority order
+	 * Returns a shallow copy of the elements without draining the queue.
 	 *
-	 * @returns Copy of internal array
+	 * The order reflects internal heap layout and is **not** priority order —
+	 * use {@link PriorityQueue.toSortedArray} when order matters.
+	 *
+	 * @returns A copy of the internal array.
 	 */
 	toArray(): T[] {
 		return [...this.heap];
 	}
 
 	/**
-	 * Returns elements in priority order without modifying the queue
+	 * Returns the elements in priority order without modifying the queue.
 	 *
-	 * @returns Array of elements in priority order
+	 * @returns The elements in priority order.
 	 */
 	toSortedArray(): T[] {
 		const copy = [...this.heap];
@@ -312,16 +319,16 @@ export class PriorityQueue<T> {
 	}
 
 	/**
-	 * Clears all elements from the queue
+	 * Removes all elements from the queue.
 	 */
 	clear(): void {
 		this.heap.length = 0;
 	}
 
 	/**
-	 * Gets queue statistics
+	 * Snapshot of queue statistics (size, capacity, emptiness).
 	 *
-	 * @returns Queue statistics
+	 * @returns The current {@link PriorityQueueStats}.
 	 */
 	getStats(): PriorityQueueStats {
 		return {
@@ -332,11 +339,12 @@ export class PriorityQueue<T> {
 	}
 
 	/**
-	 * Creates a new priority queue from an array
+	 * Creates a new priority queue pre-loaded with the given elements.
 	 *
-	 * @param elements - Elements to add
-	 * @param options - Queue options
-	 * @returns New priority queue with elements
+	 * @param elements - Initial elements.
+	 * @param args - Queue options (a `compareFn` is required for non-comparable
+	 *   element types; see {@link PQArgs}).
+	 * @returns A new priority queue containing `elements`.
 	 */
 	static from<T>(elements: T[], ...args: PQArgs<T>): PriorityQueue<T> {
 		const queue = new PriorityQueue<T>(...args);
@@ -344,9 +352,7 @@ export class PriorityQueue<T> {
 		return queue;
 	}
 
-	// ============================================
-	// Private Helper Methods
-	// ============================================
+	// Private heap helpers.
 
 	private getParentIndex(index: number): number {
 		return Math.floor((index - 1) / 2);
@@ -443,12 +449,13 @@ export class PriorityQueue<T> {
 	}
 }
 
-// ============================================
-// Factory Functions
-// ============================================
+//#endregion
+
+//#region Factory Functions
 
 /**
- * Priority request item
+ * A schedulable request with a deadline and priority level, used by the
+ * queue factory helpers below.
  */
 export interface PriorityRequestItem {
 	/** Request ID */
@@ -463,6 +470,12 @@ export interface PriorityRequestItem {
 	metadata?: Record<string, unknown>;
 }
 
+/**
+ * Creates a priority queue of {@link PriorityRequestItem}s ordered purely by
+ * `deadline`, so the soonest deadline is dequeued first.
+ *
+ * @returns A deadline-ordered priority queue.
+ */
 export function createDeadlineQueue(): PriorityQueue<PriorityRequestItem> {
 	return new PriorityQueue<PriorityRequestItem>({
 		compareFn: (a, b) => a.deadline.getTime() - b.deadline.getTime(),
@@ -470,10 +483,11 @@ export function createDeadlineQueue(): PriorityQueue<PriorityRequestItem> {
 }
 
 /**
- * Creates a priority queue ordered by priority level
- * Lower priority number = higher priority
+ * Creates a priority queue of {@link PriorityRequestItem}s ordered by
+ * `priority` level (lower number = higher priority), breaking ties by earliest
+ * `deadline`.
  *
- * @returns Priority queue that prioritizes by priority level, then deadline
+ * @returns A priority-then-deadline ordered priority queue.
  */
 export function createPriorityLevelQueue(): PriorityQueue<PriorityRequestItem> {
 	return new PriorityQueue<PriorityRequestItem>({
@@ -524,10 +538,14 @@ export function createMinHeap<T>(...args: PQArgs<T>): PriorityQueue<T> {
 }
 
 /**
- * Validates a priority item input object
- * @returns Validated item with defaults applied, or null if invalid
+ * Validates and decodes a priority-item input object against its schema.
+ *
+ * @param input - Untrusted input to validate.
+ * @returns The validated item with schema defaults applied, or `null` if the
+ *   input is invalid.
  */
 export function validatePriorityItem(input: unknown): PriorityItemInput | null {
 	const result = validateSafe(PriorityItemSchema, input);
 	return result.success ? result.data : null;
 }
+//#endregion

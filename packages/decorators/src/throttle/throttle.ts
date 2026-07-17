@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@throttle` decorator — caps a method to at most one call per
+ * `delayMs`, dropping calls made during the cooldown.
+ *
+ * @module @resq-systems/decorators/throttle/throttle
+ */
+
 import type { Decorator } from "../types.js";
 import { throttleFn } from "./throttle.fn.js";
 
 /**
- * Decorator that throttles method calls to once per specified time period.
+ * Throttle a method to at most one call per `delayMs`; calls made during the
+ * cooldown are dropped.
  *
- * @template T - The type of the class containing the decorated method
- * @param {number} delayMs - The throttle interval in milliseconds
- * @returns {Decorator<T>} The decorator function
- *
- * @throws {Error} When applied to a non-method property
- *
+ * @template T - The class type that owns the decorated method.
+ * @param delayMs - The minimum interval between executions, in milliseconds.
+ * @returns The method decorator.
+ * @throws {Error} If applied to anything other than a method.
  * @example
- * ```typescript
+ * ```ts
  * class ResizeHandler {
  *   private width = window.innerWidth;
  *   private height = window.innerHeight;
@@ -41,9 +47,10 @@ import { throttleFn } from "./throttle.fn.js";
  * }
  *
  * const handler = new ResizeHandler();
- * window.addEventListener('resize', () => handler.handleResize());
- * // handleResize executes at most once every 200ms during resize
+ * window.addEventListener("resize", () => handler.handleResize());
+ * // handleResize executes at most once every 200ms during a resize.
  * ```
+ * @see {@link throttleFn} for the function form.
  */
 export function throttle<T = unknown>(delayMs: number): Decorator<T> {
 	return <F extends (...args: never[]) => unknown>(

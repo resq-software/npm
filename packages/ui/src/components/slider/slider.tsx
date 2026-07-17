@@ -23,6 +23,8 @@
  * Keyboard: arrow keys adjust by `step`, Home / End jump to bounds.
  * Each thumb rolls up `aria-valuenow` for screen-reader
  * announcements.
+ *
+ * @module @resq-systems/ui/components/slider/slider
  */
 
 "use client";

@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the InputOTP component family (segmented one-time-pin
+ * input) — re-exports `./input-otp` as the `@resq-systems/ui/input-otp` entry.
+ *
+ * @module @resq-systems/ui/components/input-otp
+ */
+
 export * from "./input-otp.js";

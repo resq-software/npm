@@ -15,13 +15,20 @@
  */
 
 /**
+ * @fileoverview Options type for the date formatters, mirroring the subset of
+ * `Intl.DateTimeFormat` fields the helpers expose.
+ *
+ * @module @resq-systems/helpers/formatting/date.types
+ */
+
+/**
  * Format options for date display.
  *
- * @property {'short' | 'long' | 'numeric'} [month] - Month display format.
- * @property {'numeric' | '2-digit'} [year] - Year display format.
- * @property {'numeric' | '2-digit'} [day] - Day display format.
- * @property {'numeric' | '2-digit'} [hour] - Hour display format.
- * @property {'numeric' | '2-digit'} [minute] - Minute display format.
+ * @property month - Month display format.
+ * @property year - Year display format.
+ * @property day - Day display format.
+ * @property hour - Hour display format.
+ * @property minute - Minute display format.
  */
 export interface DateFormatOptions {
 	month?: "short" | "long" | "numeric";

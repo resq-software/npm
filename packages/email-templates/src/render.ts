@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Headless render entry — validates a payload and renders it to
+ * `{ to, subject, html, text }` without a browser, so it is safe from queue workers
+ * and cron jobs.
+ *
+ * @module @resq-systems/email-templates/render
+ */
+
 import { resqMailer } from "./suite.js";
 
 export type { RenderEmailOptions, RenderedEmail } from "./mailer.js";

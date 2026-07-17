@@ -15,10 +15,11 @@
  */
 
 /**
- * @file Trie (Prefix Tree) Data Structure
- * @module dsa/trie
- * @description Efficient prefix-based search with generic data storage.
- *              Provides O(k) lookup where k is the prefix length.
+ * @fileoverview Trie (prefix tree) for efficient prefix-based search with
+ * generic data storage, plus a standalone Rabin-Karp substring matcher.
+ * Provides O(k) lookup where k is the prefix length.
+ *
+ * @module @resq-systems/dsa/trie
  */
 
 import {
@@ -29,9 +30,7 @@ import {
 	validateSafe,
 } from "./schemas.js";
 
-// ============================================
-// Types & Interfaces
-// ============================================
+//#region Types
 
 /**
  * Represents a node in the Trie
@@ -64,9 +63,9 @@ export interface TrieSearchResult<T> {
 // Re-export TrieOptions from schemas for consumers
 export type { TrieOptions };
 
-// ============================================
-// Trie Implementation
-// ============================================
+//#endregion
+
+//#region Public API
 
 /**
  * Trie (Prefix Tree) for efficient prefix-based autocomplete
@@ -82,7 +81,7 @@ export type { TrieOptions };
  * @template T - Type of data stored with each word
  *
  * @example
- * ```typescript
+ * ```ts
  * const trie = new Trie<{ id: string }>();
  * trie.insert('hello', { id: '1' });
  * const results = trie.searchByPrefix('hel');
@@ -95,9 +94,10 @@ export class Trie<T> {
 	private size: number;
 
 	/**
-	 * Creates a new Trie instance
-	 * @param options - Configuration options
-	 * @throws Error if options validation fails
+	 * Creates a new Trie instance.
+	 *
+	 * @param options - Configuration options.
+	 * @throws {Error} If options validation fails.
 	 */
 	constructor(options: TrieOptions = {}) {
 		const validation = validateSafe(TrieOptionsSchema, options);
@@ -121,8 +121,10 @@ export class Trie<T> {
 	}
 
 	/**
-	 * Inserts a word with associated data into the Trie
-	 * @returns This Trie instance for chaining
+	 * Inserts a word with associated data into the Trie. Invalid (empty) words
+	 * are silently ignored rather than throwing.
+	 *
+	 * @returns This Trie instance, for chaining.
 	 */
 	insert(word: string, data: T): this {
 		const validation = validateSafe(TrieInsertSchema, { word: word?.trim() || "" });
@@ -150,8 +152,9 @@ export class Trie<T> {
 	}
 
 	/**
-	 * Bulk insert multiple words with data
-	 * @returns This Trie instance for chaining
+	 * Bulk-inserts multiple `[word, data]` entries.
+	 *
+	 * @returns This Trie instance, for chaining.
 	 */
 	insertMany(entries: Array<[string, T]>): this {
 		for (const [word, data] of entries) {
@@ -161,8 +164,9 @@ export class Trie<T> {
 	}
 
 	/**
-	 * Searches for an exact word match
-	 * @returns The associated data or null if not found
+	 * Searches for an exact word match.
+	 *
+	 * @returns The associated data, or `null` if the word is not present.
 	 */
 	search(word: string): T | null {
 		const node = this.findNode(word);
@@ -170,7 +174,7 @@ export class Trie<T> {
 	}
 
 	/**
-	 * Checks if a word exists in the Trie
+	 * Checks whether an exact word exists in the Trie.
 	 */
 	has(word: string): boolean {
 		const node = this.findNode(word);
@@ -178,18 +182,19 @@ export class Trie<T> {
 	}
 
 	/**
-	 * Checks if any word starts with the given prefix
+	 * Checks whether any stored word starts with the given prefix.
 	 */
 	startsWith(prefix: string): boolean {
 		return this.findNode(prefix) !== null;
 	}
 
 	/**
-	 * Finds all words starting with the given prefix
+	 * Finds all words starting with the given prefix, ranked by frequency.
 	 *
-	 * @param prefix - The prefix to search for
-	 * @param limit - Maximum number of results (defaults to maxResults option)
-	 * @returns Array of search results sorted by relevance
+	 * @param prefix - The prefix to search for.
+	 * @param limit - Maximum number of results. Defaults to the `maxResults`
+	 *   constructor option.
+	 * @returns Search results sorted by descending relevance score.
 	 */
 	searchByPrefix(prefix: string, limit?: number): TrieSearchResult<T>[] {
 		const validation = validateSafe(TrieSearchSchema, {
@@ -213,8 +218,9 @@ export class Trie<T> {
 	}
 
 	/**
-	 * Deletes a word from the Trie
-	 * @returns True if the word was deleted
+	 * Deletes a word from the Trie, pruning now-empty nodes.
+	 *
+	 * @returns `true` if the word existed and was deleted.
 	 */
 	delete(word: string): boolean {
 		const normalizedWord = this.normalizeKey(word.trim());
@@ -223,14 +229,14 @@ export class Trie<T> {
 	}
 
 	/**
-	 * Returns the number of words in the Trie
+	 * Returns the number of words in the Trie.
 	 */
 	get length(): number {
 		return this.size;
 	}
 
 	/**
-	 * Clears all words from the Trie
+	 * Clears all words from the Trie.
 	 */
 	clear(): void {
 		this.root = this.createNode();
@@ -238,7 +244,7 @@ export class Trie<T> {
 	}
 
 	/**
-	 * Gets all words in the Trie
+	 * Gets every word in the Trie with its associated data, unordered.
 	 */
 	getAllWords(): Array<{ word: string; data: T }> {
 		const results: TrieSearchResult<T>[] = [];
@@ -246,9 +252,7 @@ export class Trie<T> {
 		return results.map(({ word, data }) => ({ word, data }));
 	}
 
-	// ============================================
-	// Private Helpers
-	// ============================================
+	// Private helpers.
 
 	private findNode(word: string): TrieNode<T> | null {
 		const normalizedWord = this.normalizeKey(word.trim());
@@ -307,9 +311,9 @@ export class Trie<T> {
 	}
 }
 
-// ============================================
-// Rabin-Karp string search
-// ============================================
+//#endregion
+
+//#region Rabin-Karp String Search
 
 /**
  * Finds all occurrences of a pattern in text using the Rabin-Karp rolling hash algorithm.
@@ -347,3 +351,4 @@ export function rabinKarp(text: string, pattern: string): number[] {
 	}
 	return matches;
 }
+//#endregion

@@ -20,6 +20,16 @@
  * Code: crc32, https://github.com/alexgorbatchev/crc/blob/master/src/calculators/crc32.ts
  */
 
+/**
+ * @fileoverview PNG parsing and metadata utilities: signature validation, chunk
+ * reading, pHYs (pixel-density) parsing, and rewriting the pHYs chunk to encode
+ * a device pixel ratio for high-DPI exports. Includes a CRC-32 implementation.
+ *
+ * @module @resq-systems/helpers/browser/media/png
+ */
+
+//#region CRC32
+
 type BufferInput = string | ArrayBuffer | Buffer;
 
 type CRCCalculator<T = BufferInput | Uint8Array> = (value: T, previous?: number) => number;
@@ -73,8 +83,16 @@ const crc: CRCCalculator<Uint8Array> = (current, previous) => {
 	return crc ^ -1;
 };
 
+//#endregion
+
+//#region Constants
+
 const LEN_SIZE = 4;
 const CRC_SIZE = 4;
+
+//#endregion
+
+//#region Public API
 
 /**
  * Utility class for reading and manipulating PNG image files.
@@ -350,3 +368,5 @@ export class PngHelpers {
 		return new Blob([startBuf as ArrayBuffer, pHYsData, endBuf as ArrayBuffer], options);
 	}
 }
+
+//#endregion

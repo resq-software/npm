@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Effect-based HTTP client: builds and executes requests with
+ * exponential-backoff retry, timeouts, optional Schema validation, SSRF host
+ * allow/block filtering, and structured {@link FetcherError} /
+ * {@link FetcherValidationError} failures. Exposes verb helpers (`get`, `post`,
+ * `put`, `patch`, `del`, `options`, `head`) over the core {@link fetcher}.
+ *
+ * @module @resq-systems/http/fetcher
+ */
+
 import { assertNever } from "@resq-systems/types";
 import { Cause, Duration, Effect, Exit, pipe, Schedule, Schema } from "effect";
 import {
@@ -22,6 +32,8 @@ import {
 	HttpClientRequest,
 	type HttpClientResponse,
 } from "effect/unstable/http";
+
+//#region Types
 
 /**
  * A Schema with DecodingServices constrained to `never`, allowing synchronous decoding.
@@ -123,6 +135,10 @@ export type RequestBody = JsonValue | FormData;
  */
 export type Headers = Schema.Schema.Type<typeof Headers>;
 
+//#endregion
+
+//#region Constants & Helpers
+
 const EMPTY = "";
 
 const safeStringify = (error: unknown): string => {
@@ -169,6 +185,10 @@ const QueryParams = Schema.Record(
 // Headers type definition
 const Headers = Schema.Record(Schema.String, Schema.String);
 
+//#endregion
+
+//#region Errors
+
 /**
  * Thrown when a response payload fails Effect Schema validation.
  *
@@ -198,11 +218,21 @@ export class FetcherValidationError extends Error {
 
 	[Symbol.toStringTag] = "FetcherValidationError";
 
+	/**
+	 * Render a single-line diagnostic including the URL and, when known, the retry
+	 * attempt — suited for log lines where a full stack trace is noise.
+	 */
 	override toString(): string {
 		const attemptStr = this.attempt ? `, Attempt: ${this.attempt}` : "";
 		return `FetcherValidationError: ${this.message} (URL: ${this.url}${attemptStr})`;
 	}
 
+	/**
+	 * Return the schema's raw problem description, for callers that want the parse
+	 * errors without the surrounding {@link toString} formatting.
+	 *
+	 * @returns The schema parse-error messages captured at construction.
+	 */
 	getProblemsString(): string {
 		return this.problems;
 	}
@@ -239,12 +269,21 @@ export class FetcherError extends Error {
 
 	[Symbol.toStringTag] = "FetcherError";
 
+	/**
+	 * Render a single-line diagnostic including the URL and, when known, the HTTP
+	 * status and retry attempt — suited for log lines where a full stack trace is
+	 * noise.
+	 */
 	override toString(): string {
 		const statusStr = this.status ? `, Status: ${this.status}` : "";
 		const attemptStr = this.attempt ? `, Attempt: ${this.attempt}` : "";
 		return `FetcherError: ${this.message} (URL: ${this.url}${statusStr}${attemptStr})`;
 	}
 }
+
+//#endregion
+
+//#region Internal
 
 /**
  * Builds a query string from the provided query parameters.
@@ -437,6 +476,10 @@ const parseResponse = (
 		),
 	);
 };
+
+//#endregion
+
+//#region Public API
 
 // --- Overloaded function signatures for type safety with effect/Schema ---
 
@@ -992,3 +1035,5 @@ export const createApiResponseSchema = <T>(dataSchema: Schema.Schema<T>) => {
 		errors: Schema.optional(Schema.Array(Schema.String)),
 	});
 };
+
+//#endregion

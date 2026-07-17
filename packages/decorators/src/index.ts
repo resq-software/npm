@@ -15,14 +15,15 @@
  */
 
 /**
- * @fileoverview Main decorators module exports.
- * Re-exports all decorator modules for convenient importing.
+ * @fileoverview Package barrel — re-exports every decorator (memoize, throttle,
+ * bind, debounce, and friends) plus the shared `Method`/`Decorator` types so
+ * consumers import from a single entry point.
  *
- * @module @resq/typescript/decorators
+ * @module @resq-systems/decorators
  *
  * @example
  * ```typescript
- * import { memoize, throttle, bind } from '@resq/typescript/decorators';
+ * import { memoize, throttle, bind } from "@resq-systems/decorators";
  *
  * class MyClass {
  *   @memoize()
@@ -31,19 +32,12 @@
  *   }
  *
  *   @throttle(100)
- *   handleScroll(): void {
- *     // Handle scroll event
- *   }
+ *   handleScroll(): void {}
  *
  *   @bind
- *   handleClick(): void {
- *     // Handle click event
- *   }
+ *   handleClick(): void {}
  * }
  * ```
- *
- * @copyright Copyright (c) 2026 ResQ
- * @license MIT
  */
 
 export * from "./after/index.js";

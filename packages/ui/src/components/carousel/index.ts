@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Carousel component family (scrollable item sets)
+ * — re-exports `./carousel` as the `@resq-systems/ui/carousel` entry.
+ *
+ * @module @resq-systems/ui/components/carousel
+ */
+
 export * from "./carousel.js";

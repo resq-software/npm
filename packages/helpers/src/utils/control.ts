@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Control-flow primitives — a `Result` discriminated union with
+ * factories, exhaustiveness and truthiness assertions, and small promise helpers
+ * (`promiseWithResolve`, `sleep`).
+ *
+ * @module @resq-systems/helpers/utils/control
+ */
+
 import { assertNever } from "@resq-systems/types";
 import { omitFromStackTrace } from "./function";
 
+//#region Types
 /**
  * Represents a successful result containing a value.
  *
@@ -84,7 +93,9 @@ export interface ErrorResult<E> {
  * @public
  */
 export type Result<T, E> = OkResult<T> | ErrorResult<E>;
+//#endregion
 
+//#region Public API
 /**
  * Utility object for creating Result instances.
  *
@@ -302,3 +313,4 @@ export function sleep(ms: number): Promise<void> {
 	// eslint-disable-next-line no-restricted-globals
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
+//#endregion

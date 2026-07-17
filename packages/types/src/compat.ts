@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Backwards-compatibility aliases for the deep-object utilities.
+ *
+ * @module @resq-systems/types/compat
+ *
+ * Thin re-namings ({@link RecursivePartial}, {@link Expand}, …) that map legacy
+ * or third-party utility-type names onto the canonical helpers in the object
+ * module, so packages migrating onto this toolkit keep compiling without a
+ * rename sweep.
+ */
+
 import type { DeepPartial, Simplify } from "./object.js";
 
 /**

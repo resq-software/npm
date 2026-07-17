@@ -24,6 +24,8 @@
  * Composition: `Menubar > MenubarMenu > MenubarTrigger +
  * MenubarContent > (MenubarItem | MenubarCheckboxItem |
  * MenubarRadioGroup > MenubarRadioItem | MenubarSub …)`.
+ *
+ * @module @resq-systems/ui/components/menubar/menubar
  */
 
 "use client";
@@ -34,6 +36,7 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
+/** Horizontal application menu bar containing `MenubarMenu`s. */
 function Menubar({
 	className,
 	...props
@@ -50,6 +53,7 @@ function Menubar({
 	);
 }
 
+/** Menu row with a toggle checkmark bound to its `checked` state. */
 function MenubarCheckboxItem({
 	checked,
 	children,
@@ -76,6 +80,7 @@ function MenubarCheckboxItem({
 	);
 }
 
+/** Floating menu surface for a `MenubarMenu`, portalled and positioned. */
 function MenubarContent({
 	align = "start",
 	alignOffset = -4,
@@ -100,10 +105,12 @@ function MenubarContent({
 	);
 }
 
+/** Semantic grouping of related menu items. */
 function MenubarGroup({ ...props }: Readonly<React.ComponentProps<typeof MenubarPrimitive.Group>>) {
 	return <MenubarPrimitive.Group data-slot="menubar-group" {...props} />;
 }
 
+/** A selectable menu row; `variant` and `inset` adjust its styling. */
 function MenubarItem({
 	className,
 	inset,
@@ -129,6 +136,7 @@ function MenubarItem({
 	);
 }
 
+/** Non-interactive section label within a menu. */
 function MenubarLabel({
 	className,
 	inset,
@@ -148,22 +156,26 @@ function MenubarLabel({
 	);
 }
 
+/** A single top-level menu within the `Menubar`. */
 function MenubarMenu({ ...props }: Readonly<React.ComponentProps<typeof MenubarPrimitive.Menu>>) {
 	return <MenubarPrimitive.Menu data-slot="menubar-menu" {...props} />;
 }
 
+/** Portals the menu subtree to the document body. */
 function MenubarPortal({
 	...props
 }: Readonly<React.ComponentProps<typeof MenubarPrimitive.Portal>>) {
 	return <MenubarPrimitive.Portal data-slot="menubar-portal" {...props} />;
 }
 
+/** Groups mutually-exclusive `MenubarRadioItem`s. */
 function MenubarRadioGroup({
 	...props
 }: Readonly<React.ComponentProps<typeof MenubarPrimitive.RadioGroup>>) {
 	return <MenubarPrimitive.RadioGroup data-slot="menubar-radio-group" {...props} />;
 }
 
+/** Single-select menu row rendering a radio indicator. */
 function MenubarRadioItem({
 	children,
 	className,
@@ -188,6 +200,7 @@ function MenubarRadioItem({
 	);
 }
 
+/** Divider between menu sections. */
 function MenubarSeparator({
 	className,
 	...props
@@ -201,6 +214,7 @@ function MenubarSeparator({
 	);
 }
 
+/** Right-aligned keyboard-shortcut hint for a menu item. */
 function MenubarShortcut({ className, ...props }: Readonly<React.ComponentProps<"span">>) {
 	return (
 		<span
@@ -214,10 +228,12 @@ function MenubarShortcut({ className, ...props }: Readonly<React.ComponentProps<
 	);
 }
 
+/** Root of a nested submenu. */
 function MenubarSub({ ...props }: Readonly<React.ComponentProps<typeof MenubarPrimitive.Sub>>) {
 	return <MenubarPrimitive.Sub data-slot="menubar-sub" {...props} />;
 }
 
+/** Floating panel for a submenu's items. */
 function MenubarSubContent({
 	className,
 	...props
@@ -234,6 +250,7 @@ function MenubarSubContent({
 	);
 }
 
+/** Menu row that opens its submenu on hover or focus. */
 function MenubarSubTrigger({
 	children,
 	className,
@@ -260,6 +277,7 @@ function MenubarSubTrigger({
 	);
 }
 
+/** Top-bar button that opens its `MenubarMenu`. */
 function MenubarTrigger({
 	className,
 	...props

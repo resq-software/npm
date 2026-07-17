@@ -15,6 +15,13 @@
  */
 
 /**
+ * @fileoverview Comparator helpers — `sortById` orders objects ascending by their
+ * `id` for use with `Array.prototype.sort`.
+ *
+ * @module @resq-systems/helpers/utils/sort
+ */
+
+/**
  * Compares two objects by their id property for use with Array.sort().
  * Sorts objects in ascending order based on their id values.
  *

@@ -28,6 +28,8 @@
  * `TabsList` ships in multiple visual variants via the
  * `tabsListVariants` CVA (default, underline, …); pick the one
  * that matches the surface containing the tabs.
+ *
+ * @module @resq-systems/ui/components/tabs/tabs
  */
 
 "use client";

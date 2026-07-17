@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Compound email primitives — theme-driven, client-safe building blocks
+ * (shell, header, CTA, legal footer, and more) that every template composes from,
+ * exposed as a single `Email` namespace object.
+ *
+ * @module @resq-systems/email-templates/emails/primitives
+ */
+
 import {
 	Body,
 	Button,
@@ -38,6 +46,8 @@ import {
 	buildTailwindConfig,
 	resolveEmailTheme,
 } from "./theme.js";
+
+//#region Internal
 
 interface ShellProps {
 	preview: string;
@@ -240,6 +250,10 @@ function LegalFooter({ reason, category }: { reason?: ReactNode; category?: Emai
 	);
 }
 
+//#endregion
+
+//#region Public API
+
 /**
  * Compound email primitives. Templates compose only from these so styling stays
  * consistent, theme-driven, and email-client safe. The raw react-email
@@ -279,3 +293,5 @@ export const Email: {
 	Link,
 	Hr,
 };
+
+//#endregion

@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Provider-agnostic email transport port — the `EmailSender` interface
+ * plus its normalized input and result shapes.
+ *
+ * @module @resq-systems/email-templates/send/sender
+ */
+
 /** Provider-agnostic input for sending a single email. */
 export interface SendEmailInput {
 	from: string;

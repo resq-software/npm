@@ -14,40 +14,44 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Function form of the `@throttleAsync` decorator — wraps an async
+ * method so at most `parallelCalls` executions run at once, queuing the rest.
+ *
+ * @module @resq-systems/decorators/throttle-async/throttle-async.fn
+ */
+
 import type { AsyncMethod } from "../types.js";
 import { ThrottleAsyncExecutor } from "./throttle-async-executor.js";
 
 /**
- * Wraps an async method to limit concurrent executions.
+ * Wrap an async method to limit concurrent executions (function form of
+ * {@link throttleAsync}). Calls beyond the limit queue and run in FIFO order.
  *
- * @template D - The resolved type of the async method
- * @template A - The argument types of the original method
- * @param {AsyncMethod<D, A>} originalMethod - The async method to throttle
- * @param {number} [parallelCalls=1] - Maximum number of concurrent calls
- * @returns {AsyncMethod<D, A>} The throttled async method
- *
+ * @template D - The resolved type of the async method.
+ * @template A - The argument tuple of the original method.
+ * @param originalMethod - The async method to throttle.
+ * @param parallelCalls - Maximum number of concurrent calls; defaults to `1`.
+ * @returns The throttled async method.
  * @example
- * ```typescript
+ * ```ts
  * class ApiClient {
  *   async fetchUser(userId: string): Promise<User> {
- *     return fetch(`/api/users/${userId}`).then(r => r.json());
+ *     return fetch(`/api/users/${userId}`).then((r) => r.json());
  *   }
  * }
  *
  * const client = new ApiClient();
  *
- * // Limit to 2 concurrent requests
- * const throttledFetch = throttleAsyncFn(
- *   client.fetchUser.bind(client),
- *   2
- * );
+ * // Limit to two concurrent requests.
+ * const throttledFetch = throttleAsyncFn(client.fetchUser.bind(client), 2);
  *
- * // Execute multiple calls, only 2 run concurrently
+ * // Execute multiple calls; only two run concurrently.
  * const users = await Promise.all([
- *   throttledFetch('1'), // Starts immediately
- *   throttledFetch('2'), // Starts immediately
- *   throttledFetch('3'), // Queued, starts when 1 or 2 completes
- *   throttledFetch('4'), // Queued, starts when slot available
+ *   throttledFetch("1"), // Starts immediately.
+ *   throttledFetch("2"), // Starts immediately.
+ *   throttledFetch("3"), // Queued; starts when 1 or 2 completes.
+ *   throttledFetch("4"), // Queued; starts when a slot frees up.
  * ]);
  * ```
  */

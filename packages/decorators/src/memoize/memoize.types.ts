@@ -14,104 +14,75 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Types for the `@memoize` decorator and its function form: the
+ * cache-key resolver, the cache contract, the configuration object, and the
+ * legacy decorator signature.
+ *
+ * @module @resq-systems/decorators/memoize/memoize.types
+ */
+
 import type { Method } from "../types.js";
-/*
- * Copyright 2026 ResQ Systems, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 /**
- * @fileoverview Type definitions for the Memoize decorator.
- * Provides types for caching method results.
+ * Resolves a cache key from a method's arguments.
  *
- * @module @resq/typescript/decorators/memoize/types
- *
- * @copyright Copyright (c) 2026 ResQ
- * @license MIT
- */
-
-/**
- * Function type for resolving cache keys from method arguments.
- *
- * @param {...any[]} args - The method arguments
- * @returns {string} The cache key string
- *
+ * @param args - The method arguments.
+ * @returns The cache key.
  * @example
- * ```typescript
- * const keyResolver: KeyResolver = (userId, includeDetails) => {
- *   return `${userId}-${includeDetails}`;
- * };
+ * ```ts
+ * const keyResolver: KeyResolver = (userId, includeDetails) =>
+ *   `${userId}-${includeDetails}`;
  * ```
  */
 export type KeyResolver = (...args: unknown[]) => string;
 
 /**
- * Interface for cache implementations used by the memoize decorator.
+ * Cache contract used by the `@memoize` decorator. Any store with these four
+ * synchronous operations (a plain `Map`, an LRU, etc.) can back the cache.
  *
- * @interface Cache
- * @template D - The type of values stored in the cache
- * @property {(key: string, value: D) => void} set - Store a value in the cache
- * @property {(key: string) => D | null | undefined} get - Retrieve a value from the cache
- * @property {(key: string) => void} delete - Remove a value from the cache
- * @property {(key: string) => boolean} has - Check if a key exists in the cache
- *
+ * @template D - The type of values stored in the cache.
  * @example
- * ```typescript
+ * ```ts
  * const cache: Cache<User> = {
  *   set: (key, value) => storage.set(key, value),
  *   get: (key) => storage.get(key),
  *   delete: (key) => storage.delete(key),
- *   has: (key) => storage.has(key)
+ *   has: (key) => storage.has(key),
  * };
  * ```
  */
 export interface Cache<D> {
-	/** Store a value in the cache */
+	/** Store a value in the cache. */
 	set: (key: string, value: D) => void;
-	/** Retrieve a value from the cache */
+	/** Retrieve a value from the cache. */
 	get: (key: string) => D | null | undefined;
-	/** Remove a value from the cache */
+	/** Remove a value from the cache. */
 	delete: (key: string) => void;
-	/** Check if a key exists in the cache */
+	/** Check whether a key exists in the cache. */
 	has: (key: string) => boolean;
 }
 
 /**
- * Configuration options for the @memoize decorator.
+ * Configuration for the `@memoize` decorator and {@link memoizeFn}.
  *
- * @interface MemoizeConfig
- * @template T - The type of the class containing the decorated method
- * @template D - The return type of the decorated method
- * @property {Cache<D>} [cache] - Custom cache implementation (defaults to Map)
- * @property {KeyResolver | keyof T} [keyResolver] - Function or method name for generating cache keys
- * @property {number} [expirationTimeMs] - Time in milliseconds after which cached values expire
- *
+ * @template T - The class type a `keyof T` key resolver resolves against.
+ * @template D - The return type of the decorated method.
  * @example
- * ```typescript
+ * ```ts
  * const config: MemoizeConfig<MyService, User> = {
  *   cache: new LRUCache<string, User>(100),
  *   keyResolver: (id) => `user-${id}`,
- *   expirationTimeMs: 300000 // 5 minutes
+ *   expirationTimeMs: 300000, // Five minutes.
  * };
  * ```
  */
 export interface MemoizeConfig<T, D> {
-	/** Custom cache implementation (defaults to Map) */
+	/** Custom cache implementation; defaults to a `Map`. */
 	cache?: Cache<D>;
-	/** Function or method name for generating cache keys */
+	/** Function or method name that generates cache keys. */
 	keyResolver?: KeyResolver | keyof T;
-	/** Time in milliseconds after which cached values expire */
+	/** Time in milliseconds after which cached values expire. */
 	expirationTimeMs?: number;
 }
 
@@ -124,13 +95,12 @@ export interface MemoizeConfig<T, D> {
  * TS1270 at the decoration site). `memoize` now returns `Decorator<T>`, which
  * preserves the method signature end-to-end. Retained only for back-compat.
  *
- * @template T - The type of the class containing the decorated method
- * @template D - The return type of the decorated method
- *
- * @param {T} target - The class prototype
- * @param {keyof T} propertyName - The name of the method being decorated
- * @param {TypedPropertyDescriptor<Method<D>>} descriptor - The property descriptor
- * @returns {TypedPropertyDescriptor<Method<D>>} The modified descriptor
+ * @template T - The class type that owns the decorated method.
+ * @template D - The return type of the decorated method.
+ * @param target - The class prototype.
+ * @param propertyName - The name of the method being decorated.
+ * @param descriptor - The property descriptor.
+ * @returns The modified descriptor.
  */
 export type Memoizable<T, D> = (
 	target: T,

@@ -1,6 +1,13 @@
 // Copyright 2026 ResQ Systems, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * @fileoverview Storybook stories for the Toggle Group component — showcases its
+ * variants and composition for visual review and Chromatic regression.
+ *
+ * @module @resq-systems/ui/components/toggle-group/toggle-group.stories
+ */
+
 import { TextBolderIcon, TextItalicIcon, TextUnderlineIcon } from "@phosphor-icons/react";
 import type { Meta, StoryObj } from "@storybook/react";
 

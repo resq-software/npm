@@ -17,6 +17,8 @@
 /**
  * @fileoverview Nominal (branded / opaque) types.
  *
+ * @module @resq-systems/types/brand
+ *
  * TypeScript is structural: any two `string`s are interchangeable. That is a
  * problem for a security library, where "a string that has been sanitized",
  * "a validated email", and "a raw header the attacker controls" are all

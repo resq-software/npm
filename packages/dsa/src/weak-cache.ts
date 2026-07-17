@@ -15,6 +15,13 @@
  */
 
 /**
+ * @fileoverview Lazy, memoizing micro-cache keyed by objects and backed by a
+ * `WeakMap`, so entries are garbage-collected once their keys are unreachable.
+ *
+ * @module @resq-systems/dsa/weak-cache
+ */
+
+/**
  * A lightweight cache implementation using WeakMap for storing key-value pairs.
  *
  * A micro cache that stores computed values associated with object keys.
@@ -36,9 +43,9 @@ export class WeakCache<K extends object, V> {
 	 * in the cache, and returns it. Subsequent calls with the same key will return the
 	 * cached value without recomputation.
 	 *
-	 * @param item - The object key to retrieve the cached value for
-	 * @param cb - Callback function that computes the value when not already cached
-	 * @returns The cached value if it exists, otherwise the newly computed value from the callback
+	 * @param item - The object key to retrieve the cached value for.
+	 * @param cb - Callback that computes the value when it is not already cached.
+	 * @returns The cached value, or the newly computed value from the callback.
 	 */
 	get<P extends K>(item: P, cb: (item: P) => V): V {
 		if (!this.items.has(item)) {

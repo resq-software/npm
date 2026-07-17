@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Promise-returning `debounce` — coalesces rapid calls into a single
+ * trailing invocation and exposes a `cancel` that rejects any pending call.
+ *
+ * @module @resq-systems/helpers/utils/debounce
+ */
+
 import { noop } from "./function.js";
 import type { Awaitable } from "@resq-systems/types";
 

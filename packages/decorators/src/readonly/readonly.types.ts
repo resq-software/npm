@@ -15,21 +15,26 @@
  */
 
 /**
- * Type for decorators that make methods read-only.
+ * @fileoverview Types for the `@readonly` method decorator: the decorator
+ * signature that preserves the decorated method's type end-to-end.
  *
- * @template T - The type of the class containing the decorated method
+ * @module @resq-systems/decorators/readonly/readonly.types
+ */
+
+/**
+ * Signature for decorators that make a method read-only.
  *
- * @param {T} target - The class prototype
- * @param {keyof T} propertyName - The name of the method being decorated
- * @param {PropertyDescriptor} descriptor - The property descriptor
- * @returns {PropertyDescriptor} The modified descriptor with writable set to false
+ * Generic over the decorated method `F`, so the descriptor's type is preserved
+ * end-to-end rather than erased to `Method<any>` — the shape of the built-in
+ * (itself generic) `MethodDecorator`.
  *
- * The decorator is generic over the decorated method `F`, so the descriptor's
- * type is **preserved** end-to-end rather than erased to `Method<any>` — this is
- * exactly the shape of the built-in `MethodDecorator` (itself generic).
- *
+ * @template T - The class type that owns the decorated method.
+ * @param target - The class prototype.
+ * @param propertyName - The name of the method being decorated.
+ * @param descriptor - The property descriptor.
+ * @returns The modified descriptor with `writable` set to `false`.
  * @example
- * ```typescript
+ * ```ts
  * type ReadonlyMethod = Readonlyable<MyClass>;
  *
  * const decorator: ReadonlyMethod = (_target, _key, descriptor) => ({

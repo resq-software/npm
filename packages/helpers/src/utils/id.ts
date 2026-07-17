@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
-// all environments that tldraw runs in (browser, workers, recent node versions) have global
-// `crypto`
+/**
+ * @fileoverview Unique-ID generation — a pooled, URL-safe nanoid-style generator,
+ * with test hooks to mock and restore the underlying implementation.
+ *
+ * @module @resq-systems/helpers/utils/id
+ */
+
+// Every environment this package targets (browser, workers, recent Node) exposes
+// a global `crypto`.
 const crypto = globalThis.crypto;
 
 // This alphabet uses `A-Za-z0-9_-` symbols.

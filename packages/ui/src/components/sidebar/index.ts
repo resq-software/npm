@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Sidebar component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/sidebar`.
+ *
+ * @module @resq-systems/ui/components/sidebar
+ */
+
 export * from "./sidebar.js";

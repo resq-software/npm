@@ -20,6 +20,8 @@
  * `"indeterminate"` (the latter for parent rows with mixed child
  * state). Radix handles keyboard activation (Space) and ARIA
  * roles automatically.
+ *
+ * @module @resq-systems/ui/components/checkbox/checkbox
  */
 
 "use client";
@@ -30,6 +32,10 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
+/**
+ * Tri-state checkbox — accepts `true`, `false`, or `"indeterminate"` (for a
+ * parent row with mixed children); Radix supplies keyboard and ARIA behavior.
+ */
 function Checkbox({
 	className,
 	...props

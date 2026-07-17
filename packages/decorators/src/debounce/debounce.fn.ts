@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Function form of `@debounce` — `debounceFn(method, delayMs)`
+ * returns a debounced wrapper that fires `method` only after `delayMs` of
+ * quiet, resetting the timer on each call.
+ *
+ * @module @resq-systems/decorators/debounce/debounce.fn
+ */
+
 import type { Method } from "../types.js";
 
 /**
@@ -21,12 +29,11 @@ import type { Method } from "../types.js";
  * The method will only execute after the specified delay has passed
  * since the last time it was called.
  *
- * @template D - The return type of the original method
- * @template A - The argument types of the original method
- * @param {Method<D, A>} originalMethod - The method to debounce
- * @param {number} delayMs - The debounce delay in milliseconds
- * @returns {Method<void, A>} The debounced method
- *
+ * @template D - The return type of the original method.
+ * @template A - The argument types of the original method.
+ * @param originalMethod - The method to debounce.
+ * @param delayMs - The debounce delay in milliseconds.
+ * @returns The debounced method.
  * @example
  * ```typescript
  * class SearchService {

@@ -15,6 +15,16 @@
  */
 
 /**
+ * @fileoverview User-agent-based platform and browser detection: platform/OS
+ * predicates, a resolved browser/platform name, touch-screen detection, and
+ * composed browser-on-platform predicates. Browser-only.
+ *
+ * @module @resq-systems/helpers/browser/platform
+ */
+
+//#region Types
+
+/**
  * Closed set of browser names returned by {@link getBrowser}.
  */
 export type BrowserName =
@@ -32,78 +42,86 @@ export type BrowserName =
  */
 export type Platform = "ios" | "android" | "macos" | "chromeos" | "windows" | "unknown";
 
+//#endregion
+
+//#region Platform Detection
+
 /**
- * Detects if the current user agent is an iOS device (iPad, iPhone, iPod).
+ * Detect whether the current user agent is an iOS device (iPad, iPhone, iPod).
  *
- * @returns {boolean} True if the platform is iOS, otherwise false.
+ * @returns `true` if the platform is iOS, otherwise `false`.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Navigator/userAgent
  * @example
  * ```ts
- * if (isIOS()) { console.log('Running on iOS'); }
+ * if (isIOS()) console.log("Running on iOS");
  * ```
  */
 export const isIOS = (): boolean =>
 	/iPad|iPhone|iPod/.test(navigator.userAgent) && !(globalThis as { MSStream?: unknown }).MSStream;
 
 /**
- * Detects if the current user agent is an Android device.
+ * Detect whether the current user agent is an Android device.
  *
- * @returns {boolean} True if the platform is Android, otherwise false.
+ * @returns `true` if the platform is Android, otherwise `false`.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Navigator/userAgent
  * @example
  * ```ts
- * if (isAndroid()) { console.log('Running on Android'); }
+ * if (isAndroid()) console.log("Running on Android");
  * ```
  */
 export const isAndroid = (): boolean => /android/i.test(navigator.userAgent);
 
 /**
- * Detects if the current user agent is a macOS device.
+ * Detect whether the current user agent is a macOS device.
  *
- * @returns {boolean} True if the platform is macOS, otherwise false.
+ * @returns `true` if the platform is macOS, otherwise `false`.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Navigator/userAgent
  * @example
  * ```ts
- * if (isMacOS()) { console.log('Running on macOS'); }
+ * if (isMacOS()) console.log("Running on macOS");
  * ```
  */
 export const isMacOS = (): boolean =>
 	/Macintosh|Mac|Mac OS|MacIntel|MacPPC|Mac68K/gi.test(navigator.userAgent);
 
 /**
- * Detects if the current user agent is a Windows device.
+ * Detect whether the current user agent is a Windows device.
  *
- * @returns {boolean} True if the platform is Windows, otherwise false.
+ * @returns `true` if the platform is Windows, otherwise `false`.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Navigator/userAgent
  * @example
  * ```ts
- * if (isWindows()) { console.log('Running on Windows'); }
+ * if (isWindows()) console.log("Running on Windows");
  * ```
  */
 export const isWindows = (): boolean =>
 	/Win32|Win64|Windows|Windows NT|WinCE/gi.test(navigator.userAgent);
 
 /**
- * Detects if the current user agent is Chrome OS.
+ * Detect whether the current user agent is Chrome OS.
  *
- * @returns {boolean} True if the platform is Chrome OS, otherwise false.
+ * @returns `true` if the platform is Chrome OS, otherwise `false`.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Navigator/userAgent
  * @example
  * ```ts
- * if (isChromeOS()) { console.log('Running on Chrome OS'); }
+ * if (isChromeOS()) console.log("Running on Chrome OS");
  * ```
  */
 export const isChromeOS = (): boolean => /CrOS/gi.test(navigator.userAgent);
 
+//#endregion
+
+//#region Browser & Platform Resolution
+
 /**
- * Retrieves the browser name based on the user agent string.
+ * Resolve the browser name from the user-agent string.
  *
- * @returns {string} The browser name: 'edge', 'chrome', 'firefox', 'safari', 'opera', 'android', 'iphone', or 'unknown'.
+ * @returns The browser name: `"edge"`, `"chrome"`, `"firefox"`, `"safari"`, `"opera"`, `"android"`, `"iphone"`, or `"unknown"`.
+ * @throws {TypeError} If `navigator.userAgent` is not accessible.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Navigator/userAgent
- * @throws {TypeError} Throws if navigator.userAgent is not accessible.
  * @example
  * ```ts
- * const browser = getBrowser(); // 'chrome', 'firefox', etc.
+ * const browser = getBrowser(); // → "chrome", "firefox", etc.
  * ```
  */
 export const getBrowser = (): BrowserName => {
@@ -134,17 +152,18 @@ export const getBrowser = (): BrowserName => {
 };
 
 /**
- * Determines the device platform as a string: 'ios', 'android', 'macos', 'chromeos', 'windows', or 'unknown'.
+ * Resolve the device platform: `"ios"`, `"android"`, `"macos"`, `"chromeos"`,
+ * `"windows"`, or `"unknown"`.
  *
- * @returns {string} The detected platform.
- * @see isIOS
- * @see isAndroid
- * @see isMacOS
- * @see isChromeOS
- * @see isWindows
+ * @returns The detected platform.
+ * @see {@link isIOS}
+ * @see {@link isAndroid}
+ * @see {@link isMacOS}
+ * @see {@link isChromeOS}
+ * @see {@link isWindows}
  * @example
  * ```ts
- * const platform = getPlatform(); // 'android', 'ios', etc.
+ * const platform = getPlatform(); // → "android", "ios", etc.
  * ```
  */
 export const getPlatform = (): Platform => {
@@ -167,14 +186,14 @@ export const getPlatform = (): Platform => {
 };
 
 /**
- * Checks if the current device has a touchscreen capability.
+ * Detect whether the current device has touchscreen capability.
  *
- * @returns {boolean} True if touch screen is supported, otherwise false.
+ * @returns `true` if a touch screen is supported, otherwise `false`.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Navigator/maxTouchPoints
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia
  * @example
  * ```ts
- * if (isTouchScreen()) { console.log('Device supports touch.'); }
+ * if (isTouchScreen()) console.log("Device supports touch.");
  * ```
  */
 export const isTouchScreen = (): boolean => {
@@ -184,159 +203,169 @@ export const isTouchScreen = (): boolean => {
 	);
 };
 
+//#endregion
+
+//#region Browser Predicates
+
 /**
- * Determines if the current browser is Google Chrome.
+ * Determine whether the current browser is Google Chrome.
  *
- * @returns {boolean} True if Chrome, otherwise false.
- * @see getBrowser
+ * @returns `true` if Chrome, otherwise `false`.
+ * @see {@link getBrowser}
  */
 export const isChrome = (): boolean => getBrowser() === "chrome";
 
 /**
- * Determines if the current browser is Mozilla Firefox.
+ * Determine whether the current browser is Mozilla Firefox.
  *
- * @returns {boolean} True if Firefox, otherwise false.
- * @see getBrowser
+ * @returns `true` if Firefox, otherwise `false`.
+ * @see {@link getBrowser}
  */
 export const isFirefox = (): boolean => getBrowser() === "firefox";
 
 /**
- * Determines if the current browser is Safari.
+ * Determine whether the current browser is Safari.
  *
- * @returns {boolean} True if Safari, otherwise false.
- * @see getBrowser
+ * @returns `true` if Safari, otherwise `false`.
+ * @see {@link getBrowser}
  */
 export const isSafari = (): boolean => getBrowser() === "safari";
 
 /**
- * Determines if the current browser is Opera.
+ * Determine whether the current browser is Opera.
  *
- * @returns {boolean} True if Opera, otherwise false.
- * @see getBrowser
+ * @returns `true` if Opera, otherwise `false`.
+ * @see {@link getBrowser}
  */
 export const isOpera = (): boolean => getBrowser() === "opera";
 
 /**
- * Determines if the current browser is Microsoft Edge.
+ * Determine whether the current browser is Microsoft Edge.
  *
- * @returns {boolean} True if Edge, otherwise false.
- * @see getBrowser
+ * @returns `true` if Edge, otherwise `false`.
+ * @see {@link getBrowser}
  */
 export const isEdge = (): boolean => getBrowser() === "edge";
 
+//#endregion
+
+//#region Browser + Platform Predicates
+
 /**
- * Detects Safari running on iOS devices.
+ * Detect Safari running on iOS devices.
  *
- * @returns {boolean} True if iOS Safari, otherwise false.
- * @see isIOS
- * @see isSafari
+ * @returns `true` if iOS Safari, otherwise `false`.
+ * @see {@link isIOS}
+ * @see {@link isSafari}
  */
 export const isIOSSafari = (): boolean => getBrowser() === "safari" && isIOS();
 
 /**
- * Detects Chrome running on iOS devices.
+ * Detect Chrome running on iOS devices.
  *
- * @returns {boolean} True if iOS Chrome, otherwise false.
- * @see isIOS
- * @see isChrome
+ * @returns `true` if iOS Chrome, otherwise `false`.
+ * @see {@link isIOS}
+ * @see {@link isChrome}
  */
 export const isIOSChrome = (): boolean => getBrowser() === "chrome" && isIOS();
 
 /**
- * Detects Chrome running on Android devices.
+ * Detect Chrome running on Android devices.
  *
- * @returns {boolean} True if Android Chrome, otherwise false.
- * @see isAndroid
- * @see isChrome
+ * @returns `true` if Android Chrome, otherwise `false`.
+ * @see {@link isAndroid}
+ * @see {@link isChrome}
  */
 export const isAndroidChrome = (): boolean => getBrowser() === "chrome" && isAndroid();
 
 /**
- * Detects Chrome running on macOS devices.
+ * Detect Chrome running on macOS devices.
  *
- * @returns {boolean} True if macOS Chrome, otherwise false.
- * @see isMacOS
- * @see isChrome
+ * @returns `true` if macOS Chrome, otherwise `false`.
+ * @see {@link isMacOS}
+ * @see {@link isChrome}
  */
 export const isMacOSChrome = (): boolean => getBrowser() === "chrome" && isMacOS();
 
 /**
- * Detects Chrome running on Windows devices.
+ * Detect Chrome running on Windows devices.
  *
- * @returns {boolean} True if Windows Chrome, otherwise false.
- * @see isWindows
- * @see isChrome
+ * @returns `true` if Windows Chrome, otherwise `false`.
+ * @see {@link isWindows}
+ * @see {@link isChrome}
  */
 export const isWindowsChrome = (): boolean => getBrowser() === "chrome" && isWindows();
 
 /**
- * Detects Firefox running on iOS devices.
+ * Detect Firefox running on iOS devices.
  *
- * @returns {boolean} True if iOS Firefox, otherwise false.
- * @see isIOS
- * @see isFirefox
+ * @returns `true` if iOS Firefox, otherwise `false`.
+ * @see {@link isIOS}
+ * @see {@link isFirefox}
  */
 export const isIOSFirefox = (): boolean => getBrowser() === "firefox" && isIOS();
 
 /**
- * Detects Firefox running on Android devices.
+ * Detect Firefox running on Android devices.
  *
- * @returns {boolean} True if Android Firefox, otherwise false.
- * @see isAndroid
- * @see isFirefox
+ * @returns `true` if Android Firefox, otherwise `false`.
+ * @see {@link isAndroid}
+ * @see {@link isFirefox}
  */
 export const isAndroidFirefox = (): boolean => getBrowser() === "firefox" && isAndroid();
 
 /**
- * Detects Edge running on iOS devices.
+ * Detect Edge running on iOS devices.
  *
- * @returns {boolean} True if iOS Edge, otherwise false.
- * @see isIOS
- * @see isEdge
+ * @returns `true` if iOS Edge, otherwise `false`.
+ * @see {@link isIOS}
+ * @see {@link isEdge}
  */
 export const isIOSEdge = (): boolean => getBrowser() === "edge" && isIOS();
 
 /**
- * Detects Edge running on Android devices.
+ * Detect Edge running on Android devices.
  *
- * @returns {boolean} True if Android Edge, otherwise false.
- * @see isAndroid
- * @see isEdge
+ * @returns `true` if Android Edge, otherwise `false`.
+ * @see {@link isAndroid}
+ * @see {@link isEdge}
  */
 export const isAndroidEdge = (): boolean => getBrowser() === "edge" && isAndroid();
 
 /**
- * Detects Edge running on macOS devices.
+ * Detect Edge running on macOS devices.
  *
- * @returns {boolean} True if macOS Edge, otherwise false.
- * @see isMacOS
- * @see isEdge
+ * @returns `true` if macOS Edge, otherwise `false`.
+ * @see {@link isMacOS}
+ * @see {@link isEdge}
  */
 export const isMacOSEdge = (): boolean => getBrowser() === "edge" && isMacOS();
 
 /**
- * Detects Edge running on Windows devices.
+ * Detect Edge running on Windows devices.
  *
- * @returns {boolean} True if Windows Edge, otherwise false.
- * @see isWindows
- * @see isEdge
+ * @returns `true` if Windows Edge, otherwise `false`.
+ * @see {@link isWindows}
+ * @see {@link isEdge}
  */
 export const isWindowsEdge = (): boolean => getBrowser() === "edge" && isWindows();
 
 /**
- * Detects Opera running on iOS devices.
+ * Detect Opera running on iOS devices.
  *
- * @returns {boolean} True if iOS Opera, otherwise false.
- * @see isIOS
- * @see isOpera
+ * @returns `true` if iOS Opera, otherwise `false`.
+ * @see {@link isIOS}
+ * @see {@link isOpera}
  */
 export const isIOSOpera = (): boolean => getBrowser() === "opera" && isIOS();
 
 /**
- * Detects Opera running on Android devices.
+ * Detect Opera running on Android devices.
  *
- * @returns {boolean} True if Android Opera, otherwise false.
- * @see isAndroid
- * @see isOpera
+ * @returns `true` if Android Opera, otherwise `false`.
+ * @see {@link isAndroid}
+ * @see {@link isOpera}
  */
 export const isAndroidOpera = (): boolean => getBrowser() === "opera" && isAndroid();
+
+//#endregion

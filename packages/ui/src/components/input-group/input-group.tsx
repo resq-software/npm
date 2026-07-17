@@ -23,6 +23,8 @@
  * InputGroupAddon (end)`. `InputGroupInput`, `InputGroupTextarea`,
  * `InputGroupText`, and `InputGroupButton` are pre-styled inner
  * controls that drop seamlessly into the group's border collapse.
+ *
+ * @module @resq-systems/ui/components/input-group/input-group
  */
 
 "use client";
@@ -35,6 +37,7 @@ import { Button } from "../button/button.js";
 import { Input } from "../input/input.js";
 import { Textarea } from "../textarea/textarea.js";
 
+/** Wraps an input with affixed addons (icons, buttons, text) as one control. */
 function InputGroup({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -68,6 +71,7 @@ const inputGroupAddonVariants = cva(
 	},
 );
 
+/** Leading/trailing addon slot; its `align` variant positions it inside the group. */
 function InputGroupAddon({
 	align = "inline-start",
 	className,
@@ -104,6 +108,7 @@ const inputGroupButtonVariants = cva("gap-2 text-sm shadow-none flex items-cente
 	},
 });
 
+/** Button sized to sit flush within an `InputGroupAddon`. */
 function InputGroupButton({
 	className,
 	size = "xs",
@@ -123,6 +128,7 @@ function InputGroupButton({
 	);
 }
 
+/** Borderless `<input>` that hands its focus ring to the surrounding group. */
 function InputGroupInput({ className, ...props }: Readonly<React.ComponentProps<"input">>) {
 	return (
 		<Input
@@ -136,6 +142,7 @@ function InputGroupInput({ className, ...props }: Readonly<React.ComponentProps<
 	);
 }
 
+/** Static text addon (e.g. a unit or prefix) within the group. */
 function InputGroupText({ className, ...props }: Readonly<React.ComponentProps<"span">>) {
 	return (
 		<span
@@ -148,6 +155,7 @@ function InputGroupText({ className, ...props }: Readonly<React.ComponentProps<"
 	);
 }
 
+/** Borderless `<textarea>` variant for multi-line grouped input. */
 function InputGroupTextarea({ className, ...props }: Readonly<React.ComponentProps<"textarea">>) {
 	return (
 		<Textarea

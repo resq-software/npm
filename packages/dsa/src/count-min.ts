@@ -15,6 +15,16 @@
  */
 
 /**
+ * @fileoverview Sub-linear-memory frequency estimator (count-min sketch) for
+ * heavy-hitter detection, request-rate estimation, and log-rollup counts where
+ * exact per-key counters are not affordable.
+ *
+ * @module @resq-systems/dsa/count-min
+ */
+
+import type { Probability } from "./schemas.js";
+
+/**
  * Sub-linear-memory frequency estimator.
  *
  * Estimates the number of times a string has been observed using
@@ -26,9 +36,6 @@
  * - `width = ⌈ e / epsilon ⌉` (columns per row)
  * - `depth = ⌈ ln(1 / delta) ⌉`  (independent hash rows)
  *
- * Use cases: heavy-hitter detection, request-rate estimation, log-rollup
- * counts where exact counts are not affordable.
- *
  * @example
  * ```ts
  * const sketch = new CountMinSketch(0.001, 0.01); // ~2718 × 5
@@ -36,9 +43,6 @@
  * sketch.estimate("203.0.113.7"); // approximate count
  * ```
  */
-
-import type { Probability } from "./schemas.js";
-
 export class CountMinSketch {
 	readonly #table: Uint32Array[];
 	readonly #width: number;

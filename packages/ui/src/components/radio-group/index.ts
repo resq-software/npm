@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Radio Group component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/radio-group`.
+ *
+ * @module @resq-systems/ui/components/radio-group
+ */
+
 export * from "./radio-group.js";

@@ -15,6 +15,15 @@
  */
 
 /**
+ * @fileoverview Performance-timing utilities — console-styled duration logging plus
+ * method decorators that report execution time and running averages, over shared
+ * color tokens.
+ *
+ * @module @resq-systems/helpers/utils/perf
+ */
+
+//#region Constants
+/**
  * Color scheme for performance indicators.
  * Provides consistent colors for performance measurement displays.
  *
@@ -33,7 +42,9 @@ export const PERFORMANCE_COLORS = {
  * @public
  */
 export const PERFORMANCE_PREFIX_COLOR = PERFORMANCE_COLORS.Good;
+//#endregion
 
+//#region Public API
 /**
  * Measures and logs the execution time of a callback function.
  * Executes the provided callback and logs the duration to the console with styled output.
@@ -155,3 +166,4 @@ export function measureAverageDuration(
 	averages.set(descriptor.value, { total: 0, count: 0 });
 	return descriptor;
 }
+//#endregion

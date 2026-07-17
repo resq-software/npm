@@ -18,10 +18,10 @@
  * @fileoverview Distance calculation utility supporting multiple formulas
  * for geospatial and mathematical distance computations.
  *
- * @module dsa/distance
+ * @module @resq-systems/dsa/distance
  *
  * @example
- * ```typescript
+ * ```ts
  * import { Distance } from '@resq-systems/dsa';
  *
  * // Geographic distance between two points
@@ -38,16 +38,12 @@
  * const pointB = { lat: 51.5074, lng: -0.1278, alt: 200 };
  * const dist3d = Distance.threed(pointA, pointB);
  * ```
- *
- * @license Apache-2.0
  */
 
 import { assertNever } from "./_assert.js";
 import type { Latitude, Longitude } from "./schemas.js";
 
-// ============================================================================
-// Types
-// ============================================================================
+//#region Types
 
 /**
  * Available distance calculation formulas.
@@ -138,9 +134,9 @@ export interface DistanceResult {
 	error?: string;
 }
 
-// ============================================================================
-// Validation
-// ============================================================================
+//#endregion
+
+//#region Validation
 
 /**
  * Error thrown when coordinate validation fails.
@@ -192,9 +188,9 @@ function isCoordinates3D(point: Coordinates2D | Coordinates3D): point is Coordin
 	return "alt" in point && typeof point.alt === "number";
 }
 
-// ============================================================================
-// Constants
-// ============================================================================
+//#endregion
+
+//#region Constants
 
 /** Earth's mean radius in kilometers */
 const EARTH_RADIUS_KM = 6371;
@@ -215,9 +211,9 @@ const VINCENTY_ITERATION_LIMIT = 100;
 /** Convergence threshold for Vincenty formula */
 const VINCENTY_CONVERGENCE_THRESHOLD = 1e-12;
 
-// ============================================================================
-// Distance Class
-// ============================================================================
+//#endregion
+
+//#region Public API
 
 /**
  * Distance calculation utility class.
@@ -231,6 +227,15 @@ const VINCENTY_CONVERGENCE_THRESHOLD = 1e-12;
  * @category Geometry
  */
 export class Distance {
+	/**
+	 * Straight-line (L2) distance between two points, treating `lat`/`lng` as
+	 * plain planar coordinates rather than geographic ones.
+	 *
+	 * @param point1 - First point.
+	 * @param point2 - Second point.
+	 * @returns The Euclidean distance in coordinate units.
+	 * @throws {ValidationError} If either point has non-finite coordinates.
+	 */
 	static euclidean(point1: Coordinates2D, point2: Coordinates2D): number {
 		validateCoordinates2D(point1, "point1");
 		validateCoordinates2D(point2, "point2");
@@ -240,6 +245,16 @@ export class Distance {
 		return Math.hypot(dLat, dLng);
 	}
 
+	/**
+	 * Great-circle distance between two geographic points on a spherical Earth.
+	 * Fast and accurate to ~0.5% — prefer {@link Distance.vincenty} when
+	 * ellipsoidal precision matters.
+	 *
+	 * @param point1 - First geographic point.
+	 * @param point2 - Second geographic point.
+	 * @returns The distance in kilometres.
+	 * @throws {ValidationError} If either point is outside valid lat/lng ranges.
+	 */
 	static haversine(point1: Coordinates2D, point2: Coordinates2D): number {
 		validateGeographicCoordinates(point1, "point1");
 		validateGeographicCoordinates(point2, "point2");
@@ -257,10 +272,30 @@ export class Distance {
 		return EARTH_RADIUS_KM * c;
 	}
 
+	/**
+	 * Convenience wrapper around {@link Distance.haversine} returning metres
+	 * instead of kilometres.
+	 *
+	 * @param point1 - First geographic point.
+	 * @param point2 - Second geographic point.
+	 * @returns The great-circle distance in metres.
+	 * @throws {ValidationError} If either point is outside valid lat/lng ranges.
+	 */
 	static haversineMeters(point1: Coordinates2D, point2: Coordinates2D): number {
 		return Distance.haversine(point1, point2) * 1000;
 	}
 
+	/**
+	 * Ellipsoidal geodesic distance on the WGS-84 spheroid via Vincenty's
+	 * inverse formula. More accurate than {@link Distance.haversine} but
+	 * iterative, and it may fail to converge for near-antipodal points.
+	 *
+	 * @param point1 - First geographic point.
+	 * @param point2 - Second geographic point.
+	 * @returns The geodesic distance in kilometres.
+	 * @throws {ValidationError} If either point is out of range, or if the
+	 *   iteration fails to converge (near-antipodal points).
+	 */
 	static vincenty(point1: Coordinates2D, point2: Coordinates2D): number {
 		validateGeographicCoordinates(point1, "point1");
 		validateGeographicCoordinates(point2, "point2");
@@ -341,6 +376,14 @@ export class Distance {
 		return distanceMeters / 1000;
 	}
 
+	/**
+	 * Taxicab (L1) distance: the sum of the absolute coordinate differences.
+	 *
+	 * @param point1 - First point.
+	 * @param point2 - Second point.
+	 * @returns The Manhattan distance in coordinate units.
+	 * @throws {ValidationError} If either point has non-finite coordinates.
+	 */
 	static manhattan(point1: Coordinates2D, point2: Coordinates2D): number {
 		validateCoordinates2D(point1, "point1");
 		validateCoordinates2D(point2, "point2");
@@ -348,6 +391,14 @@ export class Distance {
 		return Math.abs(point1.lat - point2.lat) + Math.abs(point1.lng - point2.lng);
 	}
 
+	/**
+	 * Chessboard (L∞) distance: the largest single-axis coordinate difference.
+	 *
+	 * @param point1 - First point.
+	 * @param point2 - Second point.
+	 * @returns The Chebyshev distance in coordinate units.
+	 * @throws {ValidationError} If either point has non-finite coordinates.
+	 */
 	static chebyshev(point1: Coordinates2D, point2: Coordinates2D): number {
 		validateCoordinates2D(point1, "point1");
 		validateCoordinates2D(point2, "point2");
@@ -355,6 +406,17 @@ export class Distance {
 		return Math.max(Math.abs(point1.lat - point2.lat), Math.abs(point1.lng - point2.lng));
 	}
 
+	/**
+	 * Generalised Lp distance. Reduces to Manhattan at `p = 1`, Euclidean at
+	 * `p = 2`, and Chebyshev at `p = Infinity`.
+	 *
+	 * @param point1 - First point.
+	 * @param point2 - Second point.
+	 * @param p - Order of the norm; must be a positive finite number (or
+	 *   `Infinity`). Defaults to `2` (Euclidean).
+	 * @returns The Minkowski distance in coordinate units.
+	 * @throws {ValidationError} If a point is non-finite or `p <= 0`.
+	 */
 	static minkowski(point1: Coordinates2D, point2: Coordinates2D, p: number = 2): number {
 		validateCoordinates2D(point1, "point1");
 		validateCoordinates2D(point2, "point2");
@@ -373,6 +435,16 @@ export class Distance {
 		return (dLat ** p + dLng ** p) ** (1 / p);
 	}
 
+	/**
+	 * Euclidean distance in 3D, treating `alt` as the third axis alongside
+	 * `lat`/`lng`.
+	 *
+	 * @param point1 - First 3D point.
+	 * @param point2 - Second 3D point.
+	 * @returns The 3D Euclidean distance in coordinate units.
+	 * @throws {ValidationError} If either point lacks a finite `alt` or has
+	 *   non-finite coordinates.
+	 */
 	static threed(point1: Coordinates3D, point2: Coordinates3D): number {
 		validateCoordinates3D(point1, "point1");
 		validateCoordinates3D(point2, "point2");
@@ -380,6 +452,16 @@ export class Distance {
 		return Math.hypot(point1.lat - point2.lat, point1.lng - point2.lng, point1.alt - point2.alt);
 	}
 
+	/**
+	 * Cosine distance (`1 - cosine similarity`) between the two coordinates read
+	 * as 2D vectors from the origin. Ranges from `0` (identical direction) to
+	 * `2` (opposite direction).
+	 *
+	 * @param point1 - First vector.
+	 * @param point2 - Second vector.
+	 * @returns The cosine distance in `[0, 2]`.
+	 * @throws {ValidationError} If a point is non-finite or is the zero vector.
+	 */
 	static cosine(point1: Coordinates2D, point2: Coordinates2D): number {
 		validateCoordinates2D(point1, "point1");
 		validateCoordinates2D(point2, "point2");
@@ -398,6 +480,15 @@ export class Distance {
 		return 1 - clampedSimilarity;
 	}
 
+	/**
+	 * Hamming distance: the count of coordinate positions whose values differ.
+	 * Intended for discrete/binary vectors encoded as `lat`/`lng`.
+	 *
+	 * @param point1 - First vector.
+	 * @param point2 - Second vector.
+	 * @returns The number of differing positions (`0`, `1`, or `2`).
+	 * @throws {ValidationError} If either point has non-finite coordinates.
+	 */
 	static hamming(point1: Coordinates2D, point2: Coordinates2D): number {
 		validateCoordinates2D(point1, "point1");
 		validateCoordinates2D(point2, "point2");
@@ -410,6 +501,15 @@ export class Distance {
 		}, 0);
 	}
 
+	/**
+	 * Jaccard distance (`1 - |A ∩ B| / |A ∪ B|`) between the two coordinates
+	 * read as sets of their `lat`/`lng` values.
+	 *
+	 * @param point1 - First set of values.
+	 * @param point2 - Second set of values.
+	 * @returns The Jaccard distance in `[0, 1]`.
+	 * @throws {ValidationError} If either point has non-finite coordinates.
+	 */
 	static jaccard(point1: Coordinates2D, point2: Coordinates2D): number {
 		validateCoordinates2D(point1, "point1");
 		validateCoordinates2D(point2, "point2");
@@ -425,6 +525,15 @@ export class Distance {
 		return 1 - intersection.size / union.size;
 	}
 
+	/**
+	 * Sørensen–Dice distance (`1 - 2|A ∩ B| / (|A| + |B|)`) between the two
+	 * coordinates read as sets of their `lat`/`lng` values.
+	 *
+	 * @param point1 - First set of values.
+	 * @param point2 - Second set of values.
+	 * @returns The Sørensen–Dice distance in `[0, 1]`.
+	 * @throws {ValidationError} If either point has non-finite coordinates.
+	 */
 	static sorensenDice(point1: Coordinates2D, point2: Coordinates2D): number {
 		validateCoordinates2D(point1, "point1");
 		validateCoordinates2D(point2, "point2");
@@ -440,6 +549,20 @@ export class Distance {
 		return 1 - (2 * intersection.size) / denominator;
 	}
 
+	/**
+	 * Dispatch to the named distance formula. {@link PointFor} constrains the
+	 * point shape at the type level, so `"threed"` requires 3D points and every
+	 * other formula requires 2D points.
+	 *
+	 * @template F - The selected {@link DistanceFormula}.
+	 * @param formula - Which distance formula to apply.
+	 * @param point1 - First point, of the shape the formula requires.
+	 * @param point2 - Second point, of the shape the formula requires.
+	 * @param options - Formula options; only `p` (Minkowski order) is consulted.
+	 * @returns The computed distance in the formula's native units.
+	 * @throws {ValidationError} If the points are invalid for the formula.
+	 * @see {@link Distance.calculateSafe} for a non-throwing variant.
+	 */
 	static calculate<F extends DistanceFormula>(
 		formula: F,
 		point1: PointFor<F>,
@@ -478,6 +601,19 @@ export class Distance {
 		}
 	}
 
+	/**
+	 * Non-throwing wrapper around {@link Distance.calculate}: catches validation
+	 * failures and reports them in the returned {@link DistanceResult} instead
+	 * of throwing, so callers can branch on `valid`.
+	 *
+	 * @template F - The selected {@link DistanceFormula}.
+	 * @param formula - Which distance formula to apply.
+	 * @param point1 - First point, of the shape the formula requires.
+	 * @param point2 - Second point, of the shape the formula requires.
+	 * @param options - Formula options; only `p` (Minkowski order) is consulted.
+	 * @returns A result with the distance (or `NaN`), the formula, a `valid`
+	 *   flag, and an `error` message on failure.
+	 */
 	static calculateSafe<F extends DistanceFormula>(
 		formula: F,
 		point1: PointFor<F>,
@@ -501,6 +637,15 @@ export class Distance {
 		}
 	}
 
+	/**
+	 * Recommend a geographic formula for an expected distance range, trading
+	 * speed for accuracy: `"haversine"` for short hops, `"vincenty"` once
+	 * ellipsoidal error starts to matter.
+	 *
+	 * @param maxDistanceKm - Expected upper bound of the distances to compute,
+	 *   in kilometres. Omit to assume a short range.
+	 * @returns `"haversine"` below 1000 km, otherwise `"vincenty"`.
+	 */
 	static recommendGeoFormula(maxDistanceKm?: number): DistanceFormula {
 		if (!maxDistanceKm || maxDistanceKm < 1000) {
 			return "haversine";
@@ -508,3 +653,4 @@ export class Distance {
 		return "vincenty";
 	}
 }
+//#endregion

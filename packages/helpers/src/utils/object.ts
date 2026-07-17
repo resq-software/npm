@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Typed object helpers — own-property access, key/value/entry maps
+ * that preserve literal types, shallow and float-tolerant deep equality, grouping,
+ * and omit.
+ *
+ * @module @resq-systems/helpers/utils/object
+ */
+
 import isEqualWith from "lodash.isequalwith";
 
 /**

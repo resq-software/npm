@@ -14,62 +14,55 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Core universal utilities for `@resq-systems/helpers`: JSON/URL
+ * helpers, a frozen `Result` discriminated union with combinators, and runtime
+ * type guards. Safe in Node, Bun, and the browser.
+ *
+ * @module @resq-systems/helpers/helpers
+ */
+
 import { Logger } from "@resq-systems/logger";
 
 const logger = Logger.getLogger("[helpers]");
 
+//#region General Helpers
+
 /**
- * Converts an object to a formatted JSON string with proper indentation.
+ * Serialize a value to a JSON string with two-space indentation.
  *
- * @param {object} obj - The object to convert to a JSON string
- * @returns {string} A properly formatted JSON string representation of the input object with 2-space indentation
+ * Thin wrapper over `JSON.stringify(obj, null, 2)` for readable debug and log
+ * output; throws on circular references exactly as `JSON.stringify` does.
  *
+ * @param obj - The value to serialize.
+ * @returns The indented JSON representation.
+ * @throws {TypeError} If `obj` contains a circular reference.
  * @example
  * ```ts
- * const obj = { name: "John", age: 30 };
- * const jsonString = Stringify(obj);
- * // Returns:
- * // {
- * //   "name": "John",
- * //   "age": 30
- * // }
+ * Stringify({ name: "John", age: 30 });
+ * // → '{\n  "name": "John",\n  "age": 30\n}'
  * ```
- *
- * @remarks
- * - Uses JSON.stringify() internally with null replacer and 2-space indent
- * - Handles circular references by throwing an error
- * - Preserves object structure and nesting
- * - Useful for debugging, logging, and data serialization
- * - Safe with primitives, arrays, objects, null and undefined
  */
 export const Stringify = (obj: object): string => {
 	return JSON.stringify(obj, null, 2);
 };
 
 /**
- * Constructs a fully qualified URL based on the current globalThis's location,
- * with an optional path.
+ * Build an absolute URL from the current origin plus an optional path.
  *
- * @param {string} [path=''] - Optional path to append to the base URL
- * @returns {string} Complete URL with proper formatting and protocol
+ * Uses `globalThis.location.origin` in the browser, falling back to the
+ * `VITE_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `BASE_URL` env vars on the server,
+ * and returns `""` when no origin can be resolved. Intended for same-origin
+ * client-side use, not as a fixed cross-environment API base.
  *
+ * @param path - Path to append to the origin; leading slashes are trimmed.
+ * @returns The combined URL, or `""` when no origin is available.
  * @example
  * ```ts
- * // Assuming current page is "http://localhost:5173/dashboard"
- * getURL("api/users") // Returns "http://localhost:5173/api/users"
- * getURL() // Returns "http://localhost:5173"
- *
- * // Assuming current page is "[https://example.com/products](https://example.com/products)"
- * getURL("test") // Returns "[https://example.com/test](https://example.com/test)"
+ * // On "http://localhost:5173/dashboard":
+ * getURL("api/users"); // → "http://localhost:5173/api/users"
+ * getURL();            // → "http://localhost:5173"
  * ```
- *
- * @remarks
- * - Uses globalThis.location.origin as the base URL.
- * - Removes trailing slashes from base URL.
- * - Removes leading slashes from path.
- * - Handles empty/undefined path gracefully.
- * - Suitable for client-side contexts where the API/resource is on the same origin.
- * - NOT recommended for defining a fixed API base URL across environments or for server-side use.
  */
 export const getURL = (path = ""): string => {
 	let url = "";
@@ -104,10 +97,14 @@ export const getURL = (path = ""): string => {
 	return sanitizedPath ? `${url}/${sanitizedPath}` : url;
 };
 
+//#endregion
+
+//#region Result
+
 /**
  * The success branch of a {@link Result}.
  *
- * @typeParam T - Type of the wrapped value.
+ * @template T - Type of the wrapped value.
  */
 type Success<T> = {
 	readonly success: true;
@@ -117,7 +114,7 @@ type Success<T> = {
 /**
  * The failure branch of a {@link Result}.
  *
- * @typeParam E - Type of the wrapped error.
+ * @template E - Type of the wrapped error.
  */
 type Failure<E> = {
 	readonly success: false;
@@ -128,8 +125,8 @@ type Failure<E> = {
  * Discriminated union representing either a successful value or an error.
  * Discriminate with the `success` boolean field.
  *
- * @typeParam T - Type of the value on success.
- * @typeParam E - Type of the error on failure.
+ * @template T - Type of the value on success.
+ * @template E - Type of the error on failure.
  *
  * @example
  * ```ts
@@ -359,12 +356,17 @@ export const tap =
 		return result;
 	};
 
+//#endregion
+
+//#region Type Guards
+
 /**
  * Type guard: narrow `unknown` to `number`.
  *
  * Note: returns `true` for `NaN` (which is a `number`). Use
  * `Number.isFinite` afterward if you need to exclude it.
  *
+ * @param value - The value to test.
  * @example
  * ```ts
  * if (isNumber(input)) input.toFixed(2);
@@ -376,6 +378,7 @@ export const isNumber = (value: unknown): value is number => typeof value === "n
  * Type guard: narrow `unknown` to `string`. Does not match `String`
  * object wrappers (`new String("x")`), only string primitives.
  *
+ * @param value - The value to test.
  * @example
  * ```ts
  * if (isString(input)) input.toUpperCase();
@@ -390,6 +393,7 @@ export const isString = (value: unknown): value is string => typeof value === "s
  * built-in callables. Use `isFunction` before invoking values pulled
  * from untrusted sources (e.g. dynamic imports, JSON-config).
  *
+ * @param value - The value to test.
  * @example
  * ```ts
  * if (isFunction(handler)) handler(payload);
@@ -405,6 +409,7 @@ export const isFunction = (value: unknown): value is (...args: unknown[]) => unk
  * than `instanceof Promise` so it works across realm boundaries
  * (iframes, workers) and with custom thenables.
  *
+ * @param value - The value to test.
  * @example
  * ```ts
  * const v = maybeAsync();
@@ -415,3 +420,5 @@ export const isPromise = (value: unknown): value is Promise<unknown> =>
 	!!value &&
 	(typeof value === "object" || typeof value === "function") &&
 	typeof (value as Promise<unknown>).then === "function";
+
+//#endregion

@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Function form of `@execTime` — `execTimeFn(method, arg?)` wraps a
+ * method to measure its wall-clock duration and hand it to a reporter, preserving
+ * synchronous-versus-async behavior so callers still receive the original value.
+ *
+ * @module @resq-systems/decorators/exec-time/exec-time.fn
+ */
+
 import { isFunction, isPromise, logger } from "../_utils.js";
 import type { AsyncMethod, Method } from "../types.js";
 import type { ExactTimeReportData, ReportFunction } from "./exec-time.types.js";
@@ -21,8 +29,7 @@ import type { ExactTimeReportData, ReportFunction } from "./exec-time.types.js";
 /**
  * Default reporter function that logs execution time using the logger.
  *
- * @param {ExactTimeReportData} data - The execution data
- * @returns {void}
+ * @param data - The execution data.
  */
 const reporter: ReportFunction = (data: ExactTimeReportData): void => {
 	logger.info(`Execution time: ${data.execTime}ms`);
@@ -32,14 +39,13 @@ const reporter: ReportFunction = (data: ExactTimeReportData): void => {
  * Wraps a method to measure and report its execution time.
  * Handles both synchronous and asynchronous methods.
  *
- * @template D - The return type of the original method
- * @template A - The argument types of the original method
- * @param {Method<D, A> | AsyncMethod<D, A>} originalMethod - The method to wrap
- * @param {ReportFunction | string} [arg] - Optional reporter function or label
- * @returns {Method<D | Promise<D>, A>} The wrapped method. Preserves the
- *   original return value and stays synchronous for synchronous methods —
- *   it only awaits when the wrapped method itself returns a promise.
- *
+ * @template D - The return type of the original method.
+ * @template A - The argument types of the original method.
+ * @param originalMethod - The method to wrap.
+ * @param arg - Optional reporter function or label.
+ * @returns The wrapped method. Preserves the original return value and stays
+ *   synchronous for synchronous methods — it only awaits when the wrapped method
+ *   itself returns a promise.
  * @example
  * ```typescript
  * class Calculator {

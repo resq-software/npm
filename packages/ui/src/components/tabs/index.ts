@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Tabs component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/tabs`.
+ *
+ * @module @resq-systems/ui/components/tabs
+ */
+
 export * from "./tabs.js";

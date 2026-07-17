@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Resend adapter implementing the `EmailSender` port — server-only,
+ * normalizes API and transport failures into a `SendResult` instead of throwing.
+ *
+ * @module @resq-systems/email-templates/send/resend-sender
+ */
+
 import { Resend } from "resend";
 import type { EmailSender, SendEmailInput, SendResult } from "./sender.js";
 

@@ -17,6 +17,8 @@
 /**
  * @fileoverview Type-level test kit.
  *
+ * @module @resq-systems/types/testing
+ *
  * The same primitives the type-challenges project uses to assert that a type
  * resolves to what you expect. Exported so consumers can lock their own
  * branded types and inference against regressions in a `*.test-d.ts` file:

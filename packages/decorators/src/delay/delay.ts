@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `@delay(delayMs)` decorator — defer the decorated method by
+ * `delayMs` milliseconds before it runs. Useful for sequencing, animation
+ * timing, and back-off helpers.
+ *
+ * @module @resq-systems/decorators/delay/delay
+ */
+
 import type { Decorator } from "../types.js";
 import { delayFn } from "./delay.fn.js";
 
 /**
  * Decorator that delays the execution of a method by the specified time.
  *
- * @template T - The type of the class containing the decorated method
- * @param {number} delayMs - The delay time in milliseconds
- * @returns {Decorator<T>} The decorator function
- *
- * @throws {Error} When applied to a non-method property
- *
+ * @template T - The type of the class containing the decorated method.
+ * @param delayMs - The delay time in milliseconds.
+ * @returns The decorator function.
+ * @throws {Error} When applied to a non-method property.
  * @example
  * ```typescript
  * class AnimationController {

@@ -30,6 +30,8 @@
  * Children can be `Button`, `Select`, or any `data-slot`-tagged
  * element from the design system; the wrapper's CSS hooks resolve
  * adjacency-based border collapse for any combination.
+ *
+ * @module @resq-systems/ui/components/button-group/button-group
  */
 
 import { cva, type VariantProps } from "class-variance-authority";
@@ -38,6 +40,12 @@ import { Slot } from "radix-ui";
 import { cn } from "../../lib/utils.js";
 import { Separator } from "../separator/separator.js";
 
+/**
+ * Class-variance-authority definition for button-group layout; drives the
+ * horizontal/vertical seam styling that fuses adjacent controls.
+ *
+ * @see {@link ButtonGroup}
+ */
 const buttonGroupVariants = cva(
 	"has-[>[data-slot=button-group]]:gap-2 has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-r-[6px] flex w-fit items-stretch [&>*]:focus-visible:z-10 [&>*]:focus-visible:relative [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1",
 	{
@@ -55,6 +63,10 @@ const buttonGroupVariants = cva(
 	},
 );
 
+/**
+ * Clusters buttons (and compatible controls) into one seamless unit, collapsing
+ * the shared borders and radii along the chosen `orientation`.
+ */
 function ButtonGroup({
 	className,
 	orientation,
@@ -71,6 +83,7 @@ function ButtonGroup({
 	);
 }
 
+/** Divider drawn between members of a `ButtonGroup`. */
 function ButtonGroupSeparator({
 	className,
 	orientation = "vertical",
@@ -89,6 +102,10 @@ function ButtonGroupSeparator({
 	);
 }
 
+/**
+ * Non-interactive labeled segment (e.g. a prefix/addon) styled to sit flush
+ * within a `ButtonGroup`; pass `asChild` to delegate the element.
+ */
 function ButtonGroupText({
 	asChild = false,
 	className,

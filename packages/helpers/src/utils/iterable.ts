@@ -15,6 +15,13 @@
  */
 
 /**
+ * @fileoverview Iterable helpers — read the first value out of a `Set` or `Map`
+ * without materializing an intermediate array.
+ *
+ * @module @resq-systems/helpers/utils/iterable
+ */
+
+/**
  * Get the first item from an iterable Set or Map.
  *
  * @param value - The iterable Set or Map to get the first item from

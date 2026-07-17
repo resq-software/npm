@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `PerformanceTracker` — measures frame rate across an operation and
+ * logs a color-coded FPS summary to the console.
+ *
+ * @module @resq-systems/helpers/utils/performance-tracker
+ */
+
 import { PERFORMANCE_COLORS, PERFORMANCE_PREFIX_COLOR } from "./perf";
 
 /**

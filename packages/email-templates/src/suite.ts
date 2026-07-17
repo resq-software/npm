@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview The default mailer over the built-in ResQ Systems templates — the
+ * single source of truth behind the package's payload, decoder, registry, and render
+ * exports.
+ *
+ * @module @resq-systems/email-templates/suite
+ */
+
 import { createMailer } from "./mailer.js";
 import { resqEmailTemplates } from "./templates.js";
 

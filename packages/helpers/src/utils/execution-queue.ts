@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `ExecutionQueue` — runs async tasks one at a time in FIFO order,
+ * with an optional delay between tasks for rate limiting or flow control.
+ *
+ * @module @resq-systems/helpers/utils/execution-queue
+ */
+
 import { sleep } from "./control";
 
 /**
@@ -57,7 +64,7 @@ export class ExecutionQueue {
 	 * If a timeout is provided, there will be a delay between each task execution,
 	 * which is useful for rate limiting or controlling execution flow.
 	 *
-	 * timeout - Optional delay in milliseconds between task executions
+	 * @param timeout - Optional delay in milliseconds between task executions.
 	 * @example
 	 * ```ts
 	 * // Create queue without delay
@@ -102,9 +109,8 @@ export class ExecutionQueue {
 				}
 			}
 		} finally {
-			// this try/finally should not be needed because the tasks don't throw
-			// but better safe than sorry
-			// console.log('\n\n\nrunning false\n\n\n')
+			// Tasks are wrapped so they never throw here, but the finally guard
+			// still resets `running` even if that assumption ever breaks.
 			this.running = false;
 		}
 	}
@@ -156,7 +162,6 @@ export class ExecutionQueue {
 	 * running task will complete normally, but no additional tasks will be executed.
 	 * This method does not wait for the current task to finish.
 	 *
-	 * @returns void
 	 * @example
 	 * ```ts
 	 * const queue = new ExecutionQueue()

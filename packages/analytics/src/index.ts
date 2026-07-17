@@ -16,6 +16,14 @@
  *
  */
 
+/**
+ * @fileoverview Framework-agnostic core of the unified PostHog + GA4 analytics
+ * client: the typed event registry, the lazy-loading {@link Analytics}
+ * singleton, and the standalone `track`/`identify`/`reset`/`pageview` helpers.
+ *
+ * @module @resq-systems/analytics
+ */
+
 import type { LiteralUnion } from "@resq-systems/types";
 import type { PostHog, PostHogConfig } from "posthog-js";
 import {
@@ -24,6 +32,8 @@ import {
 	type ResqSubdomain,
 	toCookieDomain,
 } from "./resq";
+
+//#region Types
 
 /**
  * Augmentable typed event registry. Consumers extend this via module
@@ -45,6 +55,12 @@ import {
 // biome-ignore lint/suspicious/noEmptyInterface: augmentation-only registry — a body would add an index signature and collapse EventName to string
 export interface AnalyticsEvents {}
 
+/**
+ * PostHog provider credentials and init overrides. The `key` is the only
+ * required field; `host`/`uiHost` target non-default (EU or self-hosted)
+ * regions and `options` is merged over the package defaults set in
+ * {@link Analytics.init}.
+ */
 export interface PostHogProviderConfig {
 	key: string;
 	host?: string;
@@ -52,11 +68,22 @@ export interface PostHogProviderConfig {
 	options?: Partial<PostHogConfig>;
 }
 
+/**
+ * GA4 provider config. `measurementId` is the branded {@link Ga4MeasurementId}
+ * so only a sanitized ID reaches gtag; `domains` seeds the cross-subdomain
+ * linker allow-list. Build one ergonomically with `ga4Stream` from
+ * `@resq-systems/analytics/next`.
+ */
 export interface GA4ProviderConfig {
 	measurementId: Ga4MeasurementId;
 	domains?: LiteralUnion<ResqSubdomain>[];
 }
 
+/**
+ * Top-level analytics configuration passed to {@link Analytics.init}. Both
+ * providers are optional so a consumer can run PostHog only, GA4 only, or
+ * neither (e.g. `disabled` in preview environments).
+ */
 export interface AnalyticsConfig {
 	posthog?: PostHogProviderConfig;
 	ga4?: GA4ProviderConfig;
@@ -147,6 +174,10 @@ interface GtagWindow {
 	dataLayer?: GtagCommand[];
 }
 
+//#endregion
+
+//#region Internal
+
 const isBrowser = (): boolean => typeof window !== "undefined";
 
 const gtag = (...args: GtagCommand): void => {
@@ -193,19 +224,53 @@ const primitivesOnly = (
 	return out;
 };
 
+//#endregion
+
+//#region Public API
+
+/**
+ * Unified analytics facade over PostHog and GA4. A single shared instance
+ * ({@link analytics}) is initialised once via {@link Analytics.init}; every
+ * method is a no-op until then and while `disabled`, so call sites never need
+ * their own guards.
+ *
+ * PostHog is imported lazily on init so non-analytics page loads pay nothing,
+ * and every event fans out to whichever providers are configured.
+ *
+ * @example
+ * ```ts
+ * const a = new Analytics();
+ * await a.init({ posthog: { key: "phc_…" } });
+ * a.track("cta_clicked", { id: "hero" });
+ * ```
+ */
 export class Analytics {
 	#config: AnalyticsConfig | null = null;
 	#posthog: PostHog | null = null;
 	#initPromise: Promise<void> | null = null;
 
+	/** The active configuration, or `null` before init / after {@link reset}. */
 	get config(): Readonly<AnalyticsConfig> | null {
 		return this.#config;
 	}
 
+	/**
+	 * The lazily-loaded PostHog client, or `null` until PostHog init resolves.
+	 * Exposed for advanced features (feature flags, group identify) not on this
+	 * facade.
+	 */
 	get posthog(): PostHog | null {
 		return this.#posthog;
 	}
 
+	/**
+	 * Initialise the client and lazily boot the configured providers.
+	 * Idempotent: the first call wins and later calls return the same promise,
+	 * so a double-mount never re-inits PostHog / GA4.
+	 *
+	 * @param config - PostHog/GA4 credentials plus cross-subdomain and debug flags.
+	 * @returns A promise that resolves once provider bootstrapping has settled.
+	 */
 	init(config: AnalyticsConfig): Promise<void> {
 		if (this.#initPromise) return this.#initPromise;
 		this.#config = config;
@@ -247,6 +312,20 @@ export class Analytics {
 		gtag("config", provider.measurementId, params);
 	}
 
+	/**
+	 * Emit an event to every configured provider. Registered events (via
+	 * {@link AnalyticsEvents} augmentation) get a typed, sometimes-required
+	 * payload; ad-hoc names accept an optional free-form bag. GA4 params are
+	 * flattened to primitives by {@link primitivesOnly} before dispatch.
+	 *
+	 * @template E - The event name, narrowed to a registered key when one exists.
+	 * @param event - The event name.
+	 * @param args - The event payload, shaped by {@link TrackArgs}.
+	 * @example
+	 * ```ts
+	 * analytics.track("cta_clicked", { id: "hero" });
+	 * ```
+	 */
 	track<E extends EventName>(event: E, ...args: TrackArgs<E>): void {
 		if (!this.#config) return;
 		const [properties] = args as [Record<string, unknown> | undefined];
@@ -260,6 +339,14 @@ export class Analytics {
 		}
 	}
 
+	/**
+	 * Bind a stable identity to the current session across both providers. Call
+	 * on sign-in; GA4 traits are flattened to primitives and the `user_id` is set
+	 * on the measurement config.
+	 *
+	 * @param userId - The stable user identifier.
+	 * @param traits - Optional user properties / person profile fields.
+	 */
 	identify(userId: string, traits?: Record<string, unknown>): void {
 		if (!this.#config) return;
 		if (this.#config.debug) {
@@ -273,6 +360,11 @@ export class Analytics {
 		}
 	}
 
+	/**
+	 * Clear the bound identity and tear down local state. Call on sign-out: it
+	 * clears GA4's `user_id`, resets PostHog, and drops the cached config so a
+	 * later {@link init} can boot cleanly.
+	 */
 	reset(): void {
 		if (this.#config?.ga4) {
 			gtag("config", this.#config.ga4.measurementId, { user_id: null });
@@ -289,6 +381,8 @@ export class Analytics {
 	 * SPA navigation, and GA4's Enhanced Measurement (UI default) does the same
 	 * for gtag.js. Only call manually if you've disabled both auto-captures, or
 	 * for first-paint pageviews before init has resolved.
+	 *
+	 * @param url - Explicit page URL; defaults to the current location.
 	 */
 	pageview(url?: string): void {
 		if (!this.#config || this.#config.disabled) return;
@@ -299,24 +393,57 @@ export class Analytics {
 	}
 }
 
+/** The process-wide analytics singleton bound by the standalone helpers below. */
 export const analytics = new Analytics();
 
+/**
+ * Initialise the shared {@link analytics} singleton. Convenience wrapper over
+ * {@link Analytics.init}.
+ *
+ * @param config - PostHog/GA4 credentials plus cross-subdomain and debug flags.
+ * @returns A promise that resolves once provider bootstrapping has settled.
+ */
 export const initAnalytics = (config: AnalyticsConfig): Promise<void> => analytics.init(config);
 
+/**
+ * Emit an event through the shared {@link analytics} singleton. Convenience
+ * wrapper over {@link Analytics.track}.
+ *
+ * @template E - The event name, narrowed to a registered key when one exists.
+ * @param event - The event name.
+ * @param args - The event payload, shaped by {@link TrackArgs}.
+ */
 export function track<E extends EventName>(event: E, ...args: TrackArgs<E>): void {
 	analytics.track(event, ...args);
 }
 
+/**
+ * Bind an identity on the shared {@link analytics} singleton. Convenience
+ * wrapper over {@link Analytics.identify}.
+ *
+ * @param userId - The stable user identifier.
+ * @param traits - Optional user properties / person profile fields.
+ */
 export const identify = (userId: string, traits?: Record<string, unknown>): void =>
 	analytics.identify(userId, traits);
 
+/**
+ * Clear identity and state on the shared {@link analytics} singleton.
+ * Convenience wrapper over {@link Analytics.reset}.
+ */
 export const reset = (): void => analytics.reset();
 
+/**
+ * Emit a manual pageview through the shared {@link analytics} singleton.
+ * Convenience wrapper over {@link Analytics.pageview}.
+ *
+ * @param url - Explicit page URL; defaults to the current location.
+ */
 export const pageview = (url?: string): void => analytics.pageview(url);
 
-// ResQ-specific helpers shared across the three TS surfaces. Centralised
-// here so adding a fourth subdomain or tightening the GA4-ID regex is one
-// version bump instead of three coordinated edits in the consumer repos.
+// ResQ-specific helpers are re-exported here so consumers get one import
+// surface: adding a fourth subdomain or tightening the GA4-ID regex is one
+// version bump instead of three coordinated edits across the consumer repos.
 export {
 	GA4_ID_PATTERN,
 	isCookieDomain,
@@ -332,6 +459,9 @@ export type { CookieDomain, Ga4MeasurementId, ResqSubdomain } from "./resq";
  * the longest common dot-suffix in normalized leading-dot {@link CookieDomain}
  * form (e.g. `["research.resq.software", "viz.resq.software"]` →
  * `".resq.software"`), or `undefined` when the hosts share no multi-label root.
+ *
+ * @param domains - The hosts to reduce to their shared registrable root.
+ * @returns The branded shared cookie domain, or `undefined` when there is none.
  */
 export const inferCookieDomain = (domains: string[]): CookieDomain | undefined => {
 	if (domains.length === 0) return undefined;
@@ -349,3 +479,5 @@ export const inferCookieDomain = (domains: string[]): CookieDomain | undefined =
 	if (!shared?.includes(".")) return undefined;
 	return toCookieDomain(shared) ?? undefined;
 };
+
+//#endregion

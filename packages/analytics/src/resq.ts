@@ -17,14 +17,18 @@
  */
 
 /**
- * ResQ-specific helpers shared by the three analytics consumers
- * (`resq-software/landing`, `resq-software/research`, `resq-software/viz`).
- * Keeping these in the package means adding a fourth subdomain or
- * tightening the GA4 ID format becomes a single version bump instead of
- * three coordinated edits.
+ * @fileoverview ResQ-specific analytics primitives — branded {@link CookieDomain}
+ * and {@link Ga4MeasurementId} types with their validating smart constructors,
+ * plus the cross-subdomain allow-list. Centralised so the three consumers
+ * (`resq-software/landing`, `resq-software/research`, `resq-software/viz`) share
+ * one source of truth for subdomains and the GA4 ID format.
+ *
+ * @module @resq-systems/analytics/resq
  */
 
 import { type Brand, brandRefiner, unsafeBrand } from "@resq-systems/types";
+
+//#region Subdomains
 
 /**
  * Cross-subdomain allow-list for GA4 cross-domain linking.
@@ -51,6 +55,10 @@ export const RESQ_SUBDOMAIN_ALLOWLIST = [
  * lockstep with the runtime value.
  */
 export type ResqSubdomain = (typeof RESQ_SUBDOMAIN_ALLOWLIST)[number];
+
+//#endregion
+
+//#region GA4 Measurement ID
 
 /**
  * A GA4 Measurement ID that has been validated against {@link GA4_ID_PATTERN}.
@@ -88,6 +96,10 @@ export function sanitizeGa4Id(id: string | null | undefined): Ga4MeasurementId |
 	if (!id) return null;
 	return GA4_ID_PATTERN.test(id) ? unsafeBrand<"Ga4MeasurementId", string>(id) : null;
 }
+
+//#endregion
+
+//#region Cookie Domain
 
 /**
  * A normalized cross-subdomain cookie domain in leading-dot form
@@ -190,3 +202,5 @@ export function resolveResqCookieDomain(
 	}
 	return undefined;
 }
+
+//#endregion

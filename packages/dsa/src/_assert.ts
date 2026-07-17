@@ -15,10 +15,10 @@
  */
 
 /**
- * @file Exhaustiveness assertion helper
- * @module dsa/_assert
- * @description Local, zero-dependency exhaustiveness guard for `switch` default
- *              arms and other spots that must never be reached at the type level.
+ * @fileoverview Local, zero-dependency exhaustiveness guard for `switch` default
+ * arms and other spots that must never be reached at the type level.
+ *
+ * @module @resq-systems/dsa/_assert
  */
 
 /**

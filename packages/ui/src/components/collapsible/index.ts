@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Collapsible component family (single-panel
+ * disclosure) — re-exports `./collapsible` as the `@resq-systems/ui/collapsible` entry.
+ *
+ * @module @resq-systems/ui/components/collapsible
+ */
+
 export * from "./collapsible.js";

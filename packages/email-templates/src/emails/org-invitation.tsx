@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Organization / team invitation email component.
+ *
+ * @module @resq-systems/email-templates/emails/org-invitation
+ */
+
 import type { OrgInvitationData } from "../schemas.js";
 import { Email } from "./primitives.js";
 
+/** Props for {@link OrgInvitationEmail} — the org-invitation template's validated `data`. */
 export type OrgInvitationEmailProps = OrgInvitationData;
 
 /** Invitation to join a ResQ Systems organization / team. */

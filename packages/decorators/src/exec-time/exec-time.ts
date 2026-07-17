@@ -15,10 +15,11 @@
  */
 
 /**
- * @fileoverview ExecTime decorator - measures and reports the execution time of methods.
- * Useful for performance monitoring and debugging slow operations.
+ * @fileoverview `@execTime` decorator — measures and reports the wall-clock
+ * execution time of a method. Useful for performance monitoring and debugging
+ * slow operations; supports both legacy and Stage-3 decorator forms.
  *
- * @module @resq/typescript/decorators/exec-time
+ * @module @resq-systems/decorators/exec-time/exec-time
  *
  * @example
  * ```typescript
@@ -34,9 +35,6 @@
  *   }
  * }
  * ```
- *
- * @copyright Copyright (c) 2026 ResQ
- * @license MIT
  */
 
 import type { AsyncMethod, Method } from "../types.js";
@@ -47,11 +45,10 @@ import type { ExactTimeReportable, ReportFunction } from "./exec-time.types.js";
  * Decorator that measures and reports the execution time of methods.
  * Supports both legacy (TypeScript) and standard (Stage 3) decorator formats.
  *
- * @param {ReportFunction | string} [arg] - Optional reporter function or label string
- * @returns {any} The decorator function
- *
- * @throws {Error} When applied to a non-method property
- *
+ * @template T - The type of the class containing the decorated method.
+ * @param arg - Optional reporter function or label string.
+ * @returns The decorator function.
+ * @throws {Error} When applied to a non-method property.
  * @example
  * ```typescript
  * class PerformanceMonitor {

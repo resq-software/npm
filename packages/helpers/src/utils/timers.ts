@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview `Timers` — tracks timeouts, intervals, and animation frames by
+ * named context so they can be disposed together, preventing leaks.
+ *
+ * @module @resq-systems/helpers/utils/timers
+ */
+
 /* eslint-disable tldraw/no-restricted-properties */
 
 /**
@@ -126,7 +133,6 @@ export class Timers {
 	 * Disposes of all timers associated with the specified context.
 	 * Clears all timeouts, intervals, and animation frames for the given context ID.
 	 * @param contextId - The context identifier whose timers should be cleared.
-	 * @returns void
 	 * @example
 	 * ```ts
 	 * const timers = new Timers()
@@ -151,7 +157,6 @@ export class Timers {
 	/**
 	 * Disposes of all timers across all contexts.
 	 * Clears every timeout, interval, and animation frame managed by this instance.
-	 * @returns void
 	 * @example
 	 * ```ts
 	 * const timers = new Timers()

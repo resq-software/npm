@@ -23,12 +23,15 @@
  * EmptyDescription)` followed by `EmptyContent` (typically a CTA
  * button cluster). `EmptyMedia` accepts a `variant` prop for the
  * leading icon container styling.
+ *
+ * @module @resq-systems/ui/components/empty/empty
  */
 
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "../../lib/utils.js";
 
+/** Centered empty-state container for "no results" / "nothing here yet" surfaces. */
 function Empty({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -42,6 +45,7 @@ function Empty({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	);
 }
 
+/** Groups the `EmptyMedia`, `EmptyTitle`, and `EmptyDescription`. */
 function EmptyHeader({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -67,6 +71,7 @@ const emptyMediaVariants = cva(
 	},
 );
 
+/** Slot below the header for actions such as a primary CTA. */
 function EmptyContent({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div
@@ -80,6 +85,7 @@ function EmptyContent({ className, ...props }: Readonly<React.ComponentProps<"di
 	);
 }
 
+/** Muted explanatory copy under the `EmptyTitle`. */
 function EmptyDescription({ className, ...props }: Readonly<React.ComponentProps<"p">>) {
 	return (
 		<div
@@ -93,6 +99,7 @@ function EmptyDescription({ className, ...props }: Readonly<React.ComponentProps
 	);
 }
 
+/** Illustration/icon slot; the `variant` selects its emphasis treatment. */
 function EmptyMedia({
 	className,
 	variant = "default",
@@ -108,6 +115,7 @@ function EmptyMedia({
 	);
 }
 
+/** Primary heading of the empty state. */
 function EmptyTitle({ className, ...props }: Readonly<React.ComponentProps<"div">>) {
 	return (
 		<div

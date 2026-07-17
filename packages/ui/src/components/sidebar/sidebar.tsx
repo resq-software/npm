@@ -40,6 +40,8 @@
  *   descendant.
  *
  * Layout shell pairs with `Drawer`/`Sheet` for mobile breakpoints.
+ *
+ * @module @resq-systems/ui/components/sidebar/sidebar
  */
 
 "use client";
@@ -58,13 +60,16 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { Skeleton } from "../skeleton/skeleton.js";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../tooltip/tooltip.js";
 
+//#region Constants
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "16rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
+//#endregion
 
+//#region Types
 interface SidebarContextProps {
 	isMobile: boolean;
 	open: boolean;
@@ -76,7 +81,9 @@ interface SidebarContextProps {
 }
 
 const SidebarContext = React.createContext<null | SidebarContextProps>(null);
+//#endregion
 
+//#region Public API
 function Sidebar({
 	children,
 	className,
@@ -702,6 +709,7 @@ function SidebarMenuSubItem({ className, ...props }: Readonly<React.ComponentPro
 		/>
 	);
 }
+//#endregion
 
 export {
 	Sidebar,

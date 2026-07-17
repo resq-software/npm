@@ -15,12 +15,18 @@
  */
 
 /**
+ * @fileoverview Types for the `@after` decorator — the hook signature
+ * (`AfterFunc`), its configuration (`AfterConfig`), and the payload the hook
+ * receives (`AfterParams`).
+ *
+ * @module @resq-systems/decorators/after/after.types
+ */
+
+/**
  * Function signature for after hooks.
  *
- * @template D - The return type of the decorated method
- * @param {AfterParams<D>} [x] - Parameters containing args and response
- * @returns {void}
- *
+ * @template D - The return type of the decorated method.
+ * @param x - Parameters containing the call arguments and the response.
  * @example
  * ```typescript
  * const afterHook: AfterFunc<string> = ({ args, response }) => {
@@ -31,14 +37,10 @@
 export type AfterFunc<D> = (x?: AfterParams<D>) => void;
 
 /**
- * Configuration options for the @after decorator.
+ * Configuration options for the `@after` decorator.
  *
- * @interface AfterConfig
- * @template T - The type of the class containing the decorated method
- * @template D - The return type of the decorated method
- * @property {AfterFunc<D> | keyof T} func - The after function to execute, or a method name on the class
- * @property {boolean} [wait=false] - Whether to wait for the after function to complete before returning
- *
+ * @template T - The type of the class containing the decorated method.
+ * @template D - The return type of the decorated method.
  * @example
  * ```typescript
  * // Using a function reference
@@ -64,11 +66,7 @@ export interface AfterConfig<T = unknown, D = unknown> {
 /**
  * Parameters passed to the after hook function.
  *
- * @interface AfterParams
- * @template D - The return type of the decorated method
- * @property {any[]} args - The arguments passed to the decorated method
- * @property {D} response - The return value of the decorated method
- *
+ * @template D - The return type of the decorated method.
  * @example
  * ```typescript
  * const params: AfterParams<number> = {

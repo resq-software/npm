@@ -21,6 +21,8 @@
  * is in flight, additional calls with the same key share the same
  * pending promise, and the resolved value is cached for subsequent
  * lookups (subject to the optional TTL).
+ *
+ * @module @resq-systems/decorators/memoize-async
  */
 
 export * from "./memoize-async.fn.js";

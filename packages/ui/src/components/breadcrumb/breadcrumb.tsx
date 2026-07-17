@@ -26,6 +26,8 @@
  *
  * `asChild` on `BreadcrumbLink` delegates to a routing library's
  * `<Link>` via Radix Slot.
+ *
+ * @module @resq-systems/ui/components/breadcrumb/breadcrumb
  */
 
 import { CaretRightIcon, DotsThreeIcon } from "@phosphor-icons/react";
@@ -34,12 +36,14 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
+/** Navigation landmark (`aria-label="breadcrumb"`) wrapping a `BreadcrumbList`. */
 function Breadcrumb({ className, ...props }: Readonly<React.ComponentProps<"nav">>) {
 	return (
 		<nav aria-label="breadcrumb" className={cn(className)} data-slot="breadcrumb" {...props} />
 	);
 }
 
+/** Collapsed-crumbs indicator rendering a "more" ellipsis glyph. */
 function BreadcrumbEllipsis({ className, ...props }: Readonly<React.ComponentProps<"span">>) {
 	return (
 		<span
@@ -55,6 +59,7 @@ function BreadcrumbEllipsis({ className, ...props }: Readonly<React.ComponentPro
 	);
 }
 
+/** A single crumb `<li>` holding a `BreadcrumbLink` or `BreadcrumbPage`. */
 function BreadcrumbItem({ className, ...props }: Readonly<React.ComponentProps<"li">>) {
 	return (
 		<li
@@ -65,6 +70,7 @@ function BreadcrumbItem({ className, ...props }: Readonly<React.ComponentProps<"
 	);
 }
 
+/** Navigable crumb link; pass `asChild` to delegate to a router link. */
 function BreadcrumbLink({
 	asChild,
 	className,
@@ -85,6 +91,7 @@ function BreadcrumbLink({
 	);
 }
 
+/** Ordered list that arranges the crumbs and separators. */
 function BreadcrumbList({ className, ...props }: Readonly<React.ComponentProps<"ol">>) {
 	return (
 		<ol
@@ -98,6 +105,7 @@ function BreadcrumbList({ className, ...props }: Readonly<React.ComponentProps<"
 	);
 }
 
+/** The current page crumb — non-interactive, marked `aria-current="page"`. */
 function BreadcrumbPage({ className, ...props }: Readonly<React.ComponentProps<"span">>) {
 	return (
 		<span
@@ -111,6 +119,7 @@ function BreadcrumbPage({ className, ...props }: Readonly<React.ComponentProps<"
 	);
 }
 
+/** Visual divider between crumbs; defaults to a caret when no child is given. */
 function BreadcrumbSeparator({
 	children,
 	className,

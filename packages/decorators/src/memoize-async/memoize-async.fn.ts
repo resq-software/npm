@@ -14,36 +14,37 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Function form of the `@memoizeAsync` decorator — wraps a
+ * promise-returning method so concurrent calls with the same key share one
+ * in-flight promise and resolved values are cached, subject to an optional TTL.
+ *
+ * @module @resq-systems/decorators/memoize-async/memoize-async.fn
+ */
+
 import { isFunction, isNumber, TaskExec } from "../_utils.js";
 import type { AsyncMethod } from "../types.js";
 import type { KeyResolver } from "../memoize/memoize.types.js";
 import type { AsyncMemoizeConfig } from "./memoize-async.types.js";
 
 /**
- * Wraps an async method to cache its results and deduplicate concurrent calls.
+ * Wrap a promise-returning method so results are cached and concurrent calls are
+ * deduplicated (function form of {@link memoizeAsync}).
  *
- * @overload
- * @template D - The resolved type of the async method
- * @template A - The argument types of the original method
- * @param {AsyncMethod<D, A>} originalMethod - The async method to memoize
- * @returns {AsyncMethod<D, A>} The memoized method
+ * While a call is in flight, further calls with the same key share its promise;
+ * the resolved value is then cached for later lookups. The second argument omits
+ * to cache forever, is a number for a TTL in milliseconds, or an
+ * {@link AsyncMemoizeConfig} for a custom cache, key resolver, and/or expiry.
  *
- * @overload
- * @template D - The resolved type of the async method
- * @template A - The argument types of the original method
- * @param {AsyncMethod<D, A>} originalMethod - The async method to memoize
- * @param {AsyncMemoizeConfig<Record<PropertyKey, unknown>, D>} config - Configuration for memoization
- * @returns {AsyncMethod<D, A>} The memoized method
- *
- * @overload
- * @template D - The resolved type of the async method
- * @template A - The argument types of the original method
- * @param {AsyncMethod<D, A>} originalMethod - The async method to memoize
- * @param {number} expirationTimeMs - Cache expiration time in milliseconds
- * @returns {AsyncMethod<D, A>} The memoized method
- *
+ * @template T - The class type a `keyof T` key resolver resolves against.
+ * @template D - The resolved type of the async method.
+ * @template A - The argument tuple of the original method.
+ * @param originalMethod - The async method whose results are cached.
+ * @param input - A TTL in milliseconds, an {@link AsyncMemoizeConfig}, or omitted
+ * to cache indefinitely.
+ * @returns The memoized async method.
  * @example
- * ```typescript
+ * ```ts
  * class ApiClient {
  *   async fetchData(endpoint: string): Promise<Data> {
  *     const response = await fetch(endpoint);
@@ -53,29 +54,23 @@ import type { AsyncMemoizeConfig } from "./memoize-async.types.js";
  *
  * const client = new ApiClient();
  *
- * // Basic memoization
+ * // Basic memoization.
  * const memoized = memoizeAsyncFn(client.fetchData.bind(client));
  *
- * // Concurrent calls share the same promise
- * const promise1 = memoized('/api/data');
- * const promise2 = memoized('/api/data'); // Same promise as above
+ * // Concurrent calls share the same promise.
+ * const promise1 = memoized("/api/data");
+ * const promise2 = memoized("/api/data");
  * const [data1, data2] = await Promise.all([promise1, promise2]);
  *
- * // With TTL
- * const withTTL = memoizeAsyncFn(
- *   client.fetchData.bind(client),
- *   60000 // Cache for 60 seconds
- * );
+ * // With a TTL of 60 seconds.
+ * const withTTL = memoizeAsyncFn(client.fetchData.bind(client), 60000);
  *
- * // With custom config
- * const withConfig = memoizeAsyncFn(
- *   client.fetchData.bind(client),
- *   {
- *     cache: new Map(),
- *     keyResolver: (endpoint) => endpoint,
- *     expirationTimeMs: 300000
- *   }
- * );
+ * // With a custom config.
+ * const withConfig = memoizeAsyncFn(client.fetchData.bind(client), {
+ *   cache: new Map(),
+ *   keyResolver: (endpoint) => endpoint,
+ *   expirationTimeMs: 300000,
+ * });
  * ```
  */
 export function memoizeAsyncFn<D = unknown, A extends unknown[] = unknown[]>(

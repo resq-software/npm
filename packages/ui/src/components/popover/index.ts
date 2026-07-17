@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Public barrel for the Popover component — re-exports its
+ * component surface so consumers can import from `@resq-systems/ui/popover`.
+ *
+ * @module @resq-systems/ui/components/popover
+ */
+
 export * from "./popover.js";

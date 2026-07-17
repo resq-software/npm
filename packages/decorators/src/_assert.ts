@@ -15,6 +15,14 @@
  */
 
 /**
+ * @fileoverview Compile-time exhaustiveness guard (`assertNever`) for switch
+ * statements over discriminated unions, so an unhandled variant becomes a type
+ * error instead of a silent fall-through.
+ *
+ * @module @resq-systems/decorators/_assert
+ */
+
+/**
  * Exhaustiveness guard for discriminated unions.
  *
  * Call this in the `default` branch of a `switch` over a union's discriminant.

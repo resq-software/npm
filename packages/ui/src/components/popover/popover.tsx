@@ -25,6 +25,8 @@
  *
  * Use `Tooltip` for hover-triggered hints, `HoverCard` for richer
  * hover previews, and `Dialog` when content needs to be modal.
+ *
+ * @module @resq-systems/ui/components/popover/popover
  */
 
 "use client";
