@@ -1,0 +1,34 @@
+{
+	"$schema": "../../node_modules/wrangler/config-schema.json",
+	"name": "resq-design",
+	"compatibility_date": "2026-07-01",
+
+	// Lives in packages/ui rather than the repo root: wrangler refuses to
+	// deploy from a workspace root ("application detection logic has been
+	// run in the root of a workspace"), so the config must sit beside the
+	// package it deploys. The Workers Builds deploy command must cd here:
+	//
+	//   cd packages/ui && npx wrangler deploy
+	//
+	// Assets-only Worker: no "main" entrypoint. The Storybook build is
+	// fully static, so Cloudflare serves the directory directly with no JS
+	// on the request path.
+	//
+	// Path is package-relative — `storybook build` writes to
+	// packages/ui/storybook-static (gitignored, ~11MB, rebuilt per deploy).
+	"assets": {
+		"directory": "./storybook-static",
+
+		// Storybook is a client-routed SPA. Without single-page-application,
+		// a deep link like /?path=/docs/button--docs 404s on hard refresh
+		// instead of falling back to index.html.
+		"not_found_handling": "single-page-application"
+	},
+
+	"observability": {
+		"enabled": true,
+		"logs": {
+			"enabled": true
+		}
+	}
+}
