@@ -58,11 +58,22 @@ export const brand = {
 		 * RFC 5322 display-name form (`Name <addr>`) for use as a message `From`
 		 * header verbatim. Sends from the `send.resq.software` subdomain — the
 		 * DKIM/SPF-authenticated envelope domain — which differs from the apex
-		 * reply domain used by {@link support}/{@link contact}.
+		 * reply mailboxes such as {@link contact} and {@link security}.
 		 */
 		from: "ResQ Systems <updates@send.resq.software>",
-		support: "support@resq.software",
+		/**
+		 * General support address. Currently an alias of {@link contact} — there
+		 * is no dedicated `support@` mailbox — so replies land in the same inbox.
+		 */
+		support: "contact@resq.software",
+		/** General contact / inbound inquiries. */
 		contact: "contact@resq.software",
+		/** Security & vulnerability reports; the address to publish in `security.txt`. */
+		security: "security@resq.software",
+		/** Research, press, and partnership inquiries. */
+		research: "research@resq.software",
+		/** Engineering / automation address — matches the CI commit author. */
+		engineer: "engineer@resq.software",
 	},
 	legal: {
 		termsUrl: "https://resq.software/legal/terms",
