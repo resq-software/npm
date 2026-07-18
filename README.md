@@ -17,7 +17,7 @@
 # ResQ Systems npm Packages
 
 [![CI](https://img.shields.io/github/actions/workflow/status/resq-software/npm/ci.yml?branch=master&label=ci&style=flat-square)](https://github.com/resq-software/npm/actions)
-[![Storybook](https://img.shields.io/badge/storybook-chromatic-FF4785?style=flat-square)](https://master--69b2711843dac80a70e4ca83.chromatic.com)
+[![Storybook](https://img.shields.io/badge/storybook-design.resq.software-FF4785?style=flat-square)](https://design.resq.software)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](LICENSE)
 
 [![@resq-systems/ui](https://img.shields.io/npm/v/%40resq-systems%2Fui?style=flat-square&label=%40resq-systems%2Fui)](https://www.npmjs.com/package/@resq-systems/ui)
@@ -92,7 +92,7 @@ graph TB
 | :--- | :--- | :--- | :--- |
 | [`@resq-systems/constants`](packages/constants/) | Shared design tokens (oklch + email-safe hex), brand identity, and cross-app values — one source of truth | **zero deps** | [README](packages/constants/README.md) |
 | [`@resq-systems/types`](packages/types/) | Nominal/branded type toolkit — `Brand`, `Opaque`, `NumberRange`, numeric brands, `assertNever`, and type-level test helpers | **zero deps** | [README](packages/types/README.md) |
-| [`@resq-systems/ui`](packages/ui/) | React component library — dark-first oklch color system, WCAG AA, subpath exports | radix-ui, tailwindcss | [README](packages/ui/README.md) · [Storybook](https://master--69b2711843dac80a70e4ca83.chromatic.com) |
+| [`@resq-systems/ui`](packages/ui/) | React component library — dark-first oklch color system, WCAG AA, subpath exports | radix-ui, tailwindcss | [README](packages/ui/README.md) · [Storybook](https://design.resq.software) |
 | [`@resq-systems/dsa`](packages/dsa/) | Data structures & algorithms — graph, heap, trie, bloom filter, distance, LRU cache, queue | **zero deps** | [README](packages/dsa/README.md) |
 | [`@resq-systems/http`](packages/http/) | Effect-based HTTP client with retry, timeout, and schema validation | effect | [README](packages/http/README.md) |
 | [`@resq-systems/logger`](packages/logger/) | Structured logging with 7 levels, context, timing, and logging decorators | **zero deps** | [README](packages/logger/README.md) |

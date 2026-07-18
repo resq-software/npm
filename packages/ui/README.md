@@ -18,7 +18,7 @@
 
 [![npm](https://img.shields.io/npm/v/%40resq-systems%2Fui?style=flat-square)](https://www.npmjs.com/package/@resq-systems/ui)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
-[![Storybook](https://img.shields.io/badge/storybook-chromatic-FF4785?style=flat-square)](https://master--69b2711843dac80a70e4ca83.chromatic.com)
+[![Storybook](https://img.shields.io/badge/storybook-design.resq.software-FF4785?style=flat-square)](https://design.resq.software)
 
 ResQ Systems's shared React component library — **57 components** built on Radix UI primitives and Tailwind CSS v4 with a dark-first oklch color system. Tree-shakeable subpath exports, WCAG AA contrast, full keyboard support.
 
@@ -73,7 +73,7 @@ The default export (`@resq-systems/ui`) re-exports everything for convenience bu
 | Data | `calendar`, `carousel`, `chart`, `table` |
 | Misc | `avatar`, `direction`, `icons`, `item`, `kbd`, `picture` |
 
-Browse all components and variants in [Storybook on Chromatic](https://master--69b2711843dac80a70e4ca83.chromatic.com).
+Browse all components and variants at [design.resq.software](https://design.resq.software).
 
 ## Utilities
 
