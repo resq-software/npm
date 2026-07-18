@@ -319,7 +319,7 @@
 	],
 	"scripts": {
 		"build": "tsdown",
-		"build-storybook": "storybook build",
+		"build-storybook": "storybook build --disable-telemetry",
 		"chromatic": "bunx chromatic --build-script-name=build-storybook",
 		"dev": "tsdown --watch",
 		"docs": "bunx typedoc --entryPointStrategy Expand src",
@@ -328,7 +328,7 @@
 		"lint:knip": "knip",
 		"lint:md": "markdownlint \"**/*.md\" \".github/**/*.md\"",
 		"lint:spelling": "cspell \"**\" \".github/**/*\"",
-		"storybook": "storybook dev -p 6006",
+		"storybook": "storybook dev -p 6006 --disable-telemetry",
 		"test": "vitest",
 		"tsc": "tsc"
 	},
