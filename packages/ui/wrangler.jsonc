@@ -6,10 +6,24 @@
 	// Lives in packages/ui rather than the repo root: wrangler refuses to
 	// deploy from a workspace root ("application detection logic has been
 	// run in the root of a workspace"), so the config must sit beside the
-	// package it deploys. Set the Workers Builds project's root directory to
-	// `packages/ui` so the build already starts here, then deploy with:
+	// package it deploys.
 	//
-	//   bunx wrangler deploy
+	// The Workers Builds project keeps its root directory at the repo root
+	// (`/`) so `bun install` resolves the bun workspace, and both commands
+	// cd in explicitly:
+	//
+	//   build:            bun install && cd packages/ui && bun run build-storybook
+	//   deploy (prod):    cd packages/ui && npx wrangler deploy
+	//   deploy (preview): cd packages/ui && npx wrangler versions upload
+	//
+	// Both deploy commands need the cd. Without it wrangler runs at the repo
+	// root, finds no config, and fails with "Missing entry-point to Worker
+	// script or to assets directory".
+	//
+	// Do NOT set the project root to `packages/ui` without first deleting the
+	// stale packages/ui/yarn.lock — Cloudflare picks a package manager by
+	// sniffing lockfiles, and from that directory it would find yarn.lock
+	// before the root bun.lock.
 	//
 	// Assets-only Worker: no "main" entrypoint. The Storybook build is
 	// fully static, so Cloudflare serves the directory directly with no JS
