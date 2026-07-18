@@ -7,6 +7,6 @@
 		"src/components/icons/index.ts"
 	],
 	"ignoreExportsUsedInFile": { "interface": true, "type": true },
-	"ignoreDependencies": ["lint-staged"],
+	"ignoreDependencies": ["lint-staged", "wrangler"],
 	"project": ["src/**/*.ts", "src/**/*.tsx"]
 }
