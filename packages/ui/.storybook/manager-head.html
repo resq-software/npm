@@ -1,0 +1,55 @@
+<!--
+  Copyright 2026 ResQ Systems, Inc.
+  SPDX-License-Identifier: Apache-2.0
+
+  Injected into the Storybook manager's <head> at build time. This is the
+  document link crawlers (Slack, X, LinkedIn, Discord, iMessage) fetch for
+  design.resq.software, so social card metadata belongs here — Storybook has
+  no metadata.json equivalent.
+
+  Values mirror `brand` in @resq-systems/constants (brand.name, brand.tagline,
+  brand.description, brand.domains, brand.socials.xHandle, brand.logo). They
+  are duplicated as literals because this is static HTML and cannot import
+  TypeScript; keep them in sync with packages/constants/src/brand.ts.
+
+  og:image reuses the marketing site's card image, matching the landing repo
+  (src/lib/seo/meta.ts). It is verified live at 1200x630 — the dimensions
+  crawlers render best — which is why the width/height hints below are safe
+  to declare.
+
+  Do NOT use brand.logo (https://resq.software/logo.png): that URL currently
+  404s.
+-->
+
+<meta
+	name="description"
+	content="The ResQ Systems design system — the component library behind ResQ Tactical OS, the autonomous drone disaster response platform."
+/>
+<link rel="canonical" href="https://design.resq.software/" />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="ResQ Systems" />
+<meta property="og:title" content="ResQ UI — Design System" />
+<meta
+	property="og:description"
+	content="The ResQ Systems design system — the component library behind ResQ Tactical OS, the autonomous drone disaster response platform."
+/>
+<meta property="og:url" content="https://design.resq.software/" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:image" content="https://resq.software/og-banner.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="ResQ UI — the ResQ Systems design system" />
+
+<!-- X / Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@resqsystems_inc" />
+<meta name="twitter:creator" content="@resqsystems_inc" />
+<meta name="twitter:title" content="ResQ UI — Design System" />
+<meta
+	name="twitter:description"
+	content="The ResQ Systems design system — the component library behind ResQ Tactical OS, the autonomous drone disaster response platform."
+/>
+<meta name="twitter:image" content="https://resq.software/og-banner.png" />
+<meta name="twitter:image:alt" content="ResQ UI — the ResQ Systems design system" />
