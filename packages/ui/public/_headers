@@ -14,6 +14,13 @@
 #      server rendering; this is a fully static export, so Storybook's
 #      inline bootstrap cannot carry a nonce. This is a real weakening — treat
 #      access control (Cloudflare Access) as the primary control, not CSP.
+#
+# connect-src is intentionally 'self': the @chromatic-com/storybook addon's
+# Visual Tests panel calls Chromatic's API, and that call is blocked here on
+# purpose. The panel needs a project token and auth, so a visitor to the
+# published site cannot use it anyway, and blocking keeps the design site from
+# making third-party requests. If you do want the panel live, add
+# https://*.chromatic.com to connect-src and img-src.
 
 /*
   X-Content-Type-Options: nosniff
