@@ -31,7 +31,7 @@ bun --filter @resq-systems/ui chromatic       # visual regression
 - `console-fail-test` is active: any `console.log/warn/error` inside a test **fails** it.
 - Every component is individually exported (tree-shakeable subpaths).
 - Radix / base-ui own interaction logic; Tailwind v4 owns styling.
-- Visual review runs through Storybook + Chromatic. Lint with Biome (`lint`), dead-code with `lint:knip`. Run `copyright` to apply license headers.
+- Visual review runs through Storybook + Chromatic. Lint with Biome (`lint`), dead-code with `lint:knip`. License headers are applied by the `resq` pre-commit hook — there is no per-package script to run.
 
 ## Changesets
 
