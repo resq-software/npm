@@ -6,9 +6,10 @@
 	// Lives in packages/ui rather than the repo root: wrangler refuses to
 	// deploy from a workspace root ("application detection logic has been
 	// run in the root of a workspace"), so the config must sit beside the
-	// package it deploys. The Workers Builds deploy command must cd here:
+	// package it deploys. Set the Workers Builds project's root directory to
+	// `packages/ui` so the build already starts here, then deploy with:
 	//
-	//   cd packages/ui && npx wrangler deploy
+	//   bunx wrangler deploy
 	//
 	// Assets-only Worker: no "main" entrypoint. The Storybook build is
 	// fully static, so Cloudflare serves the directory directly with no JS
