@@ -20,5 +20,3 @@
 ---
 
 Add security, research, and engineer addresses to brand.email and repoint support to the real contact@ mailbox
-
-`brand.email` gains `security@`, `research@`, and `engineer@resq.software` entries, and `support` now aliases the real `contact@resq.software` mailbox (there is no dedicated `support@` inbox, so the previous value bounced). Email templates that surface the support address (password-changed, new-device-login) now link to `contact@`.
