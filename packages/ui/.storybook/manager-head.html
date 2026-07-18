@@ -12,10 +12,13 @@
   are duplicated as literals because this is static HTML and cannot import
   TypeScript; keep them in sync with packages/constants/src/brand.ts.
 
-  og:image points at the existing hosted brand logo. Crawlers render cards
-  best at 1200x630, so once a dedicated asset exists, drop it in
-  packages/ui/public/ and point og:image at
-  https://design.resq.software/og-image.png instead.
+  og:image reuses the marketing site's card image, matching the landing repo
+  (src/lib/seo/meta.ts). It is verified live at 1200x630 — the dimensions
+  crawlers render best — which is why the width/height hints below are safe
+  to declare.
+
+  Do NOT use brand.logo (https://resq.software/logo.png): that URL currently
+  404s.
 -->
 
 <meta
@@ -33,8 +36,11 @@
 	content="The ResQ Systems design system — the component library behind ResQ Tactical OS, autonomous drone disaster response."
 />
 <meta property="og:url" content="https://design.resq.software/" />
-<meta property="og:image" content="https://resq.software/logo.png" />
-<meta property="og:image:alt" content="ResQ Systems logo" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:image" content="https://resq.software/og-banner.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="ResQ UI — the ResQ Systems design system" />
 
 <!-- X / Twitter -->
 <meta name="twitter:card" content="summary_large_image" />
@@ -45,4 +51,5 @@
 	name="twitter:description"
 	content="The ResQ Systems design system — the component library behind ResQ Tactical OS, autonomous drone disaster response."
 />
-<meta name="twitter:image" content="https://resq.software/logo.png" />
+<meta name="twitter:image" content="https://resq.software/og-banner.png" />
+<meta name="twitter:image:alt" content="ResQ UI — the ResQ Systems design system" />
