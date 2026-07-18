@@ -1,0 +1,48 @@
+<!--
+  Copyright 2026 ResQ Systems, Inc.
+  SPDX-License-Identifier: Apache-2.0
+
+  Injected into the Storybook manager's <head> at build time. This is the
+  document link crawlers (Slack, X, LinkedIn, Discord, iMessage) fetch for
+  design.resq.software, so social card metadata belongs here — Storybook has
+  no metadata.json equivalent.
+
+  Values mirror `brand` in @resq-systems/constants (brand.name, brand.tagline,
+  brand.description, brand.domains, brand.socials.xHandle, brand.logo). They
+  are duplicated as literals because this is static HTML and cannot import
+  TypeScript; keep them in sync with packages/constants/src/brand.ts.
+
+  og:image points at the existing hosted brand logo. Crawlers render cards
+  best at 1200x630, so once a dedicated asset exists, drop it in
+  packages/ui/public/ and point og:image at
+  https://design.resq.software/og-image.png instead.
+-->
+
+<meta
+	name="description"
+	content="The ResQ Systems design system — the component library behind ResQ Tactical OS, autonomous drone disaster response."
+/>
+<link rel="canonical" href="https://design.resq.software/" />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="ResQ Systems" />
+<meta property="og:title" content="ResQ UI — Design System" />
+<meta
+	property="og:description"
+	content="The ResQ Systems design system — the component library behind ResQ Tactical OS, autonomous drone disaster response."
+/>
+<meta property="og:url" content="https://design.resq.software/" />
+<meta property="og:image" content="https://resq.software/logo.png" />
+<meta property="og:image:alt" content="ResQ Systems logo" />
+
+<!-- X / Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@resqsystems_inc" />
+<meta name="twitter:creator" content="@resqsystems_inc" />
+<meta name="twitter:title" content="ResQ UI — Design System" />
+<meta
+	name="twitter:description"
+	content="The ResQ Systems design system — the component library behind ResQ Tactical OS, autonomous drone disaster response."
+/>
+<meta name="twitter:image" content="https://resq.software/logo.png" />
