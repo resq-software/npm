@@ -11,6 +11,10 @@ const config: StorybookConfig = {
 		"@storybook/addon-links",
 		"@chromatic-com/storybook",
 	],
+	core: {
+		// Storybook reports anonymous usage data by default; opt out.
+		disableTelemetry: true,
+	},
 	docs: {
 		defaultName: "Docs",
 	},
@@ -18,6 +22,10 @@ const config: StorybookConfig = {
 		name: "@storybook/nextjs-vite",
 		options: {},
 	},
+	// Copied verbatim into storybook-static/. Carries `_headers`, which
+	// Cloudflare Workers reads from the assets root to serve the deployed
+	// Storybook's security headers.
+	staticDirs: ["../public"],
 	stories: ["../src/**/*.mdx", "../src/**/*.stories.@(ts|tsx)"],
 	async viteFinal(config) {
 		const { mergeConfig } = await import("vite");
