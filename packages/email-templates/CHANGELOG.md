@@ -1,5 +1,15 @@
 <!--
 
+## 0.6.2
+### Patch Changes
+
+
+
+- [#212](https://github.com/resq-software/npm/pull/212) [`80ae136`](https://github.com/resq-software/npm/commit/80ae136c449c8fa0e5f24f5116e282bf30a09f71) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add security, research, and engineer addresses to brand.email and repoint support to the real contact@ mailbox
+
+- Updated dependencies [[`80ae136`](https://github.com/resq-software/npm/commit/80ae136c449c8fa0e5f24f5116e282bf30a09f71)]:
+  - @resq-systems/constants@0.5.0
+
 ## 0.6.1
 ### Patch Changes
 
