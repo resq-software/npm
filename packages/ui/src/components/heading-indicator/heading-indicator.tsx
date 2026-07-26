@@ -21,7 +21,7 @@
  * lubber line, with a fixed aircraft symbol at the centre.
  *
  * Stateless and hook-free (server-renderable). All motion is expressed through
- * SVG `transform` attributes (zero inline styles) and every colour is a design
+ * SVG `transform` attributes (zero inline styles) and every color is a design
  * token, so it tracks the light / dark theme.
  *
  * Original clean-room implementation: the geometry follows standard compass-card
@@ -57,7 +57,7 @@ const LABEL_RADIUS = 72;
 /** Cardinal letters shown in place of the numeric heading. */
 const CARDINALS: Record<number, string> = { 0: "N", 90: "E", 180: "S", 270: "W" };
 
-/** Colour tokens (raw theme vars so they resolve in both light and dark). */
+/** Color tokens (raw theme vars so they resolve in both light and dark). */
 const MARK = "var(--foreground)";
 const ACCENT = "var(--warning)";
 

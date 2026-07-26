@@ -21,7 +21,7 @@
  * up-and-over the top for climb and down-and-under the bottom for descent.
  *
  * Stateless and hook-free (server-renderable). All motion is expressed through
- * SVG attributes (zero inline styles) and every colour is a design token, so it
+ * SVG attributes (zero inline styles) and every color is a design token, so it
  * tracks the light / dark theme. Geometry comes from the shared
  * {@link module:@resq-systems/ui/lib/instrument-dial} helpers.
  *
@@ -68,7 +68,7 @@ const NEEDLE_TIP = 86;
 const NEEDLE_TAIL = 16;
 const HUB_RADIUS = 4.5;
 
-/** Colour tokens (raw theme vars so they resolve in both light and dark). */
+/** Color tokens (raw theme vars so they resolve in both light and dark). */
 const MARK = "var(--foreground)";
 const HUB = "var(--warning)";
 

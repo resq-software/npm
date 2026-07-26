@@ -18,13 +18,13 @@
  * @fileoverview AirspeedIndicator — a round pointer gauge rendered as pure SVG.
  * Drive it with `speed` against a `maxSpeed` range; a needle sweeps a 300° arc
  * (zero at the lower-left, maximum at the lower-right) over an optional set of
- * coloured operating `bands` and a `redline`, with a digital readout below.
+ * colored operating `bands` and a `redline`, with a digital readout below.
  *
  * Although modelled on an airspeed indicator, the `bands` / `unit` / `maxSpeed`
  * props make it a general-purpose telemetry dial (speed, RPM, pressure, …).
  *
  * Stateless and hook-free (server-renderable). All motion is expressed through
- * SVG `transform` / path attributes (zero inline styles) and every colour is a
+ * SVG `transform` / path attributes (zero inline styles) and every color is a
  * design token, so it tracks the light / dark theme.
  *
  * Original clean-room implementation: the geometry follows standard round-dial
@@ -60,7 +60,7 @@ const TICK_OUTER = 96;
 const TICK_MAJOR_INNER = 84;
 const TICK_MINOR_INNER = 89;
 const LABEL_RADIUS = 71;
-/** Radius of the coloured operating-range arcs. */
+/** Radius of the colored operating-range arcs. */
 const BAND_RADIUS = 90;
 
 /** Needle geometry. */
@@ -73,7 +73,7 @@ const MINOR_DIVISIONS = 20;
 /** Fallback range when `maxSpeed` is missing or invalid. */
 const DEFAULT_MAX = 200;
 
-/** Colour tokens (raw theme vars so they resolve in both light and dark). */
+/** Color tokens (raw theme vars so they resolve in both light and dark). */
 const MARK = "var(--foreground)";
 const HUB = "var(--warning)";
 const TONE: Record<SpeedBandTone, string> = {
@@ -175,7 +175,7 @@ export interface AirspeedIndicatorProps extends React.ComponentProps<"div"> {
 	maxSpeed?: number;
 	/** Unit shown under the digital readout. Defaults to `"kt"`. */
 	unit?: string;
-	/** Coloured operating-range arcs. */
+	/** Colored operating-range arcs. */
 	bands?: SpeedBand[];
 	/** Never-exceed marker, in scale units. */
 	redline?: number;
@@ -233,7 +233,7 @@ function AirspeedIndicator({
 					viewBox={`0 0 ${VIEW} ${VIEW}`}
 					width="100%"
 				>
-					{/* Coloured operating-range arcs. */}
+					{/* Colored operating-range arcs. */}
 					{validBands.map((band) => (
 						<path
 							key={`band-${band.tone}-${band.from}-${band.to}`}

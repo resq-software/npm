@@ -21,7 +21,7 @@
  * 0–9 dial, with a digital counter below.
  *
  * Stateless and hook-free (server-renderable). All motion is expressed through
- * SVG attributes (zero inline styles) and every colour is a design token, so it
+ * SVG attributes (zero inline styles) and every color is a design token, so it
  * tracks the light / dark theme. Geometry comes from the shared
  * {@link module:@resq-systems/ui/lib/instrument-dial} helpers.
  *
@@ -66,7 +66,7 @@ const HUB_RADIUS = 5;
 const NUMBERS = Array.from({ length: 10 }, (_unused, index) => index);
 const MINOR_TICKS = 50;
 
-/** Colour tokens (raw theme vars so they resolve in both light and dark). */
+/** Color tokens (raw theme vars so they resolve in both light and dark). */
 const MARK = "var(--foreground)";
 const HUB = "var(--warning)";
 

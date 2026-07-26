@@ -22,7 +22,7 @@
  * the ball slides in a tube at the bottom.
  *
  * Stateless and hook-free (server-renderable). All motion is expressed through
- * SVG attributes (zero inline styles) and every colour is a design token, so it
+ * SVG attributes (zero inline styles) and every color is a design token, so it
  * tracks the light / dark theme.
  *
  * Original clean-room implementation: the geometry follows standard turn-
@@ -68,7 +68,7 @@ const CAGE_HALF = 6;
 /** When |slip| is below this the ball reads as centred. */
 const CENTRED_EPSILON = 0.03;
 
-/** Colour tokens (raw theme vars so they resolve in both light and dark). */
+/** Color tokens (raw theme vars so they resolve in both light and dark). */
 const MARK = "var(--foreground)";
 const ACCENT = "var(--warning)";
 

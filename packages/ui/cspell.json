@@ -71,6 +71,8 @@
 		"tsdown",
 		"worktrees",
 		"vaul",
-		"WCAG"
+		"WCAG",
+		"renderable",
+		"domcontentloaded"
 	]
 }

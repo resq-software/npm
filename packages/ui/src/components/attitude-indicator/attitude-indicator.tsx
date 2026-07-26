@@ -23,7 +23,7 @@
  * The instrument is presentational and stateless — it has no hooks and no
  * browser-global access, so it renders on the server. All motion is expressed
  * through SVG `transform` **attributes** (not CSS `style`) so it adds zero
- * inline-style writes, and every colour is a design token so it tracks the
+ * inline-style writes, and every color is a design token so it tracks the
  * light / dark theme.
  *
  * Original clean-room implementation: the geometry follows standard primary
@@ -47,7 +47,7 @@ const CENTER = VIEW / 2;
 const PIXELS_PER_DEGREE = 2.5;
 /** Pitch is clamped to ±90° for display; beyond that the ladder is meaningless. */
 const PITCH_DISPLAY_LIMIT = 90;
-/** Degrees in a half / full turn — used to normalise roll into (−180, 180]. */
+/** Degrees in a half / full turn — used to normalize roll into (−180, 180]. */
 const HALF_TURN = 180;
 const FULL_TURN = 360;
 
@@ -74,7 +74,7 @@ const FIELD_X = -CENTER * 3;
 const FIELD_W = VIEW * 4;
 const FIELD_H = 700;
 
-/** Colour tokens (raw theme vars so they resolve in both light and dark). */
+/** Color tokens (raw theme vars so they resolve in both light and dark). */
 const MARK = "var(--primary-foreground)"; // always-white instrument markings
 const SKY = "var(--info)";
 const GROUND = "var(--warning)";
