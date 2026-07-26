@@ -36,7 +36,8 @@
  * stack / `__filename` but has no side effects.
  *
  * @param context - A description, situation, or custom value relevant to this code path.
- * @param entity - The entity whose name is included: a function, class, or instance, a string, or a symbol.
+ * @param entity - The entity whose name is included: a function, class, or instance, a string, or a
+ *   symbol. `null` and `undefined` are accepted and yield `"UnknownEntity"`.
  * @returns A formatted string of the form `"location: <path> @<entity>: <context>"`.
  *   When the location cannot be determined, `<path>` degrades to
  *   `"unknown-location"` rather than the call failing.
@@ -57,7 +58,7 @@
  */
 export const parseCodePath = (
 	context: string | number,
-	entity: object | string | symbol,
+	entity: object | string | symbol | null | undefined,
 ): string => {
 	const entityName = extractEntityName(entity);
 	const filePath = getFilePath();
@@ -160,7 +161,8 @@ function getFilePath(): string {
  * the call site.
  *
  * @param context - Context description of the operation or location.
- * @param entity - The entity whose name is included: a function, class, or instance, a string, or a symbol.
+ * @param entity - The entity whose name is included: a function, class, or instance, a string, or a
+ *   symbol. `null` and `undefined` are accepted and yield `"UnknownEntity"`.
  * @param options - Optional configuration for the output string.
  * @param options.includeLineNumber - When true, appends the call-site line number; silently omitted if the stack cannot be parsed.
  * @param options.includeTimestamp - When true, appends a live ISO 8601 timestamp (makes output time-dependent).
@@ -175,7 +177,7 @@ function getFilePath(): string {
  */
 export const parseCodePathDetailed = (
 	context: string | number,
-	entity: object | string | symbol,
+	entity: object | string | symbol | null | undefined,
 	options: {
 		includeLineNumber?: boolean;
 		includeTimestamp?: boolean;

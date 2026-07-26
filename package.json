@@ -23,21 +23,23 @@
 	},
 	"devDependencies": {
 		"@changesets/changelog-github": "^0.7.0",
-		"@changesets/cli": "^2.31.1"
+		"@changesets/cli": "^2.31.1",
+		"puppeteer-core": "^25.3.0"
 	},
 	"overrides": {
 		"effect": "4.0.0-beta.93",
 		"get-tsconfig": "5.0.0-beta.5",
 		"vite": "^8.1.4",
 		"defu": ">=6.1.5",
-		"next": "^16.2.10",
-		"postcss": ">=8.5.10",
+		"next": "^16.2.11",
+		"postcss": ">=8.5.18",
 		"uuid": ">=14.0.0",
-		"dompurify": ">=3.4.11",
+		"dompurify": ">=3.4.12",
 		"undici": "^7.28.0",
 		"ws": "^8.21.0",
-		"brace-expansion": "^5.0.7",
+		"brace-expansion": "^5.0.8",
 		"@babel/core": "^7.29.7",
-		"esbuild": "0.28.0"
+		"esbuild": "0.28.1",
+		"sharp": "^0.35.3"
 	}
 }

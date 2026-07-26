@@ -158,7 +158,7 @@ describe("areObjectsShallowEqual", () => {
 		expect(areObjectsShallowEqual(a, a)).toBe(true); // Same reference
 		expect(areObjectsShallowEqual(a, b)).toBe(true); // Same values
 		expect(areObjectsShallowEqual(a, c)).toBe(false); // Different values
-		expect(areObjectsShallowEqual(a, d as any)).toBe(false); // Different keys
+		expect(areObjectsShallowEqual<Record<string, number>>(a, d)).toBe(false); // Different keys
 	});
 
 	it("should use Object.is for value comparison", () => {

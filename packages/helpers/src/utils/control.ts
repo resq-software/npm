@@ -299,10 +299,10 @@ export const assertExists = omitFromStackTrace(<T>(value: T, message?: string): 
  */
 export function promiseWithResolve<T>(): Promise<T> & {
 	resolve(value: T): void;
-	reject(reason?: any): void;
+	reject(reason?: unknown): void;
 } {
 	let resolve: (value: T) => void;
-	let reject: (reason?: any) => void;
+	let reject: (reason?: unknown) => void;
 	const promise = new Promise<T>((res, rej) => {
 		resolve = res;
 		reject = rej;

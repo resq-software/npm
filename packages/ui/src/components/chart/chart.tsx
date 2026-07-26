@@ -328,7 +328,7 @@ function ChartTooltipContent({
 											!hideIndicator && (
 												<div
 													className={cn(
-														"shrink-0 rounded-[2px] border-(--color-border) bg-(--color-bg)",
+														"shrink-0 rounded-xs border-(--color-border) bg-(--color-bg)",
 														{
 															"h-2.5 w-2.5": indicator === "dot",
 															"my-0.5": nestLabel && indicator === "dashed",
@@ -431,7 +431,7 @@ Partial<Pick<RechartsPrimitive.DefaultLegendContentProps, "payload" | "verticalA
 								<itemConfig.icon />
 							) : (
 								<div
-									className="h-2 w-2 shrink-0 rounded-[2px]"
+									className="h-2 w-2 shrink-0 rounded-xs"
 									style={{
 										backgroundColor: item.color,
 									}}

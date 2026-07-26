@@ -105,6 +105,7 @@ describe("escapeWithQuotes / escapeTemplateString", () => {
 		expect(() => escapeWithQuotes("x", "|")).toThrow("Invalid escape char");
 	});
 	it("escapes backtick and ${ for template literals", () => {
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: the literal "${" is exactly what this function escapes, so it must appear in both the input and the expectation.
 		expect(escapeTemplateString("a`b${c}")).toBe("a\\`b\\${c}");
 	});
 });

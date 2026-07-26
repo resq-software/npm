@@ -45,6 +45,6 @@
  * ```
  * @public
  */
-export function getFirstFromIterable<T = unknown>(set: Set<T> | Map<any, T>): T | undefined {
+export function getFirstFromIterable<T = unknown>(set: Set<T> | Map<unknown, T>): T | undefined {
 	return set.values().next().value;
 }

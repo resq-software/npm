@@ -50,7 +50,6 @@ export class TaskExec {
 		compareFn: (a, b) => a.execTime - b.execTime,
 	});
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private handler: ReturnType<typeof setTimeout> | undefined;
 
 	/**

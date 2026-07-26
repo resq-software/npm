@@ -115,6 +115,8 @@ const CRC_SIZE = 4;
  *
  * @public
  */
+
+// biome-ignore lint/complexity/noStaticOnlyClass: the static methods are the public API, and this class is not meant to be instantiated.
 export class PngHelpers {
 	/**
 	 * Checks if binary data at the specified offset contains a valid PNG file signature.

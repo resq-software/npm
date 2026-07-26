@@ -35,6 +35,27 @@ import {
 	isWindowsChrome,
 } from "../src/browser/platform.js";
 
+/**
+ * Build a full `MediaQueryList` stand-in reporting the given `matches` value.
+ *
+ * `platform.ts` only reads `.matches`, but returning a complete `MediaQueryList`
+ * lets this be assigned to `window.matchMedia` without a cast.
+ */
+function mockMatchMedia(matches: boolean): typeof window.matchMedia {
+	return vi.fn(
+		(query: string): MediaQueryList => ({
+			matches,
+			media: query,
+			onchange: null,
+			addListener: vi.fn(),
+			removeListener: vi.fn(),
+			addEventListener: vi.fn(),
+			removeEventListener: vi.fn(),
+			dispatchEvent: vi.fn(() => false),
+		}),
+	);
+}
+
 /** Helper to mock navigator.userAgent and window globals. */
 function mockUserAgent(ua: string) {
 	Object.defineProperty(navigator, "userAgent", {
@@ -64,7 +85,7 @@ describe("platform detection", () => {
 			configurable: true,
 		});
 		if (globalThis.window) {
-			globalThis.window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as any;
+			globalThis.window.matchMedia = mockMatchMedia(false);
 		}
 	});
 
@@ -219,7 +240,7 @@ describe("platform detection", () => {
 				writable: true,
 				configurable: true,
 			});
-			globalThis.window.matchMedia = vi.fn().mockReturnValue({ matches: true }) as any;
+			globalThis.window.matchMedia = mockMatchMedia(true);
 			expect(isTouchScreen()).toBe(true);
 		});
 
@@ -229,7 +250,7 @@ describe("platform detection", () => {
 				writable: true,
 				configurable: true,
 			});
-			globalThis.window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as any;
+			globalThis.window.matchMedia = mockMatchMedia(false);
 			expect(isTouchScreen()).toBe(false);
 		});
 	});

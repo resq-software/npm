@@ -48,7 +48,7 @@
  *
  * @public
  */
-export function sortById<T extends { id: any }>(a: T, b: T) {
+export function sortById<T extends { id: string | number }>(a: T, b: T) {
 	if (a.id > b.id) return 1;
 	if (a.id < b.id) return -1;
 	return 0;

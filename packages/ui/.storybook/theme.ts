@@ -5,7 +5,7 @@ import { create } from "storybook/theming";
 
 const shared = {
 	brandTitle: "ResQ UI",
-	brandUrl: "https://github.com/resq-software/ui",
+	brandUrl: "https://github.com/resq-software/npm/tree/master/packages/ui",
 	appBorderRadius: 6,
 	inputBorderRadius: 6,
 	gridCellSize: 12,

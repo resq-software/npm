@@ -152,6 +152,76 @@ export const DEFAULT_SUPPORTED_MEDIA_TYPE_LIST = DEFAULT_SUPPORTED_MEDIA_TYPES.j
 
 //#endregion
 
+//#region Types
+
+/**
+ * A MIME type listed in {@link DEFAULT_SUPPORTED_VECTOR_IMAGE_TYPES}.
+ *
+ * @public
+ */
+export type SupportedVectorImageType = (typeof DEFAULT_SUPPORTED_VECTOR_IMAGE_TYPES)[number];
+/**
+ * A MIME type listed in {@link DEFAULT_SUPPORTED_STATIC_IMAGE_TYPES}.
+ *
+ * @public
+ */
+export type SupportedStaticImageType = (typeof DEFAULT_SUPPORTED_STATIC_IMAGE_TYPES)[number];
+/**
+ * A MIME type listed in {@link DEFAULT_SUPPORTED_ANIMATED_IMAGE_TYPES}.
+ *
+ * @public
+ */
+export type SupportedAnimatedImageType = (typeof DEFAULT_SUPPORTED_ANIMATED_IMAGE_TYPES)[number];
+/**
+ * A MIME type listed in {@link DEFAULT_SUPPORTED_IMAGE_TYPES} — the union of the
+ * static, vector, and animated image types.
+ *
+ * @public
+ */
+export type SupportedImageType = (typeof DEFAULT_SUPPORTED_IMAGE_TYPES)[number];
+/**
+ * A MIME type listed in {@link DEFAULT_SUPPORT_VIDEO_TYPES}.
+ *
+ * @public
+ */
+export type SupportedVideoType = (typeof DEFAULT_SUPPORT_VIDEO_TYPES)[number];
+/**
+ * A MIME type listed in {@link DEFAULT_SUPPORTED_MEDIA_TYPES} — every supported
+ * image and video type.
+ *
+ * @public
+ */
+export type SupportedMediaType = (typeof DEFAULT_SUPPORTED_MEDIA_TYPES)[number];
+
+//#endregion
+
+//#region Internal
+
+/**
+ * Membership test that narrows an arbitrary MIME string to the literal union of
+ * a supported-type table.
+ *
+ * `Array.includes` on a `readonly ("image/png" | ...)[]` rejects a plain
+ * `string` argument, which is what forced the old `as any` casts. Widening the
+ * table to `readonly string[]` for the lookup keeps the call type-safe while the
+ * type predicate hands the literal union back to the caller.
+ *
+ * @param supported - Table of supported MIME literals to test against
+ * @param mimeType - Candidate MIME type; `null`/`undefined` are never members
+ * @returns True when `mimeType` is one of `supported`
+ *
+ * @internal
+ */
+function isSupportedMimeType<T extends string>(
+	supported: readonly T[],
+	mimeType: string | null | undefined,
+): mimeType is T {
+	const widened: readonly string[] = supported;
+	return mimeType != null && widened.includes(mimeType);
+}
+
+//#endregion
+
 //#region Public API
 
 /**
@@ -159,6 +229,8 @@ export const DEFAULT_SUPPORTED_MEDIA_TYPE_LIST = DEFAULT_SUPPORTED_MEDIA_TYPES.j
  *
  * @public
  */
+
+// biome-ignore lint/complexity/noStaticOnlyClass: the static methods are the public API, and this class is not meant to be instantiated.
 export class MediaHelpers {
 	/**
 	 * Load a video element from a URL with cross-origin support.
@@ -485,8 +557,8 @@ export class MediaHelpers {
 	 * ```
 	 * @public
 	 */
-	static isAnimatedImageType(mimeType: string | null): boolean {
-		return DEFAULT_SUPPORTED_ANIMATED_IMAGE_TYPES.includes((mimeType as any) || "");
+	static isAnimatedImageType(mimeType: string | null): mimeType is SupportedAnimatedImageType {
+		return isSupportedMimeType(DEFAULT_SUPPORTED_ANIMATED_IMAGE_TYPES, mimeType);
 	}
 
 	/**
@@ -501,8 +573,8 @@ export class MediaHelpers {
 	 * ```
 	 * @public
 	 */
-	static isStaticImageType(mimeType: string | null): boolean {
-		return DEFAULT_SUPPORTED_STATIC_IMAGE_TYPES.includes((mimeType as any) || "");
+	static isStaticImageType(mimeType: string | null): mimeType is SupportedStaticImageType {
+		return isSupportedMimeType(DEFAULT_SUPPORTED_STATIC_IMAGE_TYPES, mimeType);
 	}
 
 	/**
@@ -517,8 +589,8 @@ export class MediaHelpers {
 	 * ```
 	 * @public
 	 */
-	static isVectorImageType(mimeType: string | null): boolean {
-		return DEFAULT_SUPPORTED_VECTOR_IMAGE_TYPES.includes((mimeType as any) || "");
+	static isVectorImageType(mimeType: string | null): mimeType is SupportedVectorImageType {
+		return isSupportedMimeType(DEFAULT_SUPPORTED_VECTOR_IMAGE_TYPES, mimeType);
 	}
 
 	/**
@@ -533,8 +605,8 @@ export class MediaHelpers {
 	 * ```
 	 * @public
 	 */
-	static isImageType(mimeType: string): boolean {
-		return DEFAULT_SUPPORTED_IMAGE_TYPES.includes((mimeType as any) || "");
+	static isImageType(mimeType: string): mimeType is SupportedImageType {
+		return isSupportedMimeType(DEFAULT_SUPPORTED_IMAGE_TYPES, mimeType);
 	}
 
 	/**

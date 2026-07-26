@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+		"jsx": "react-jsx",
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"outDir": "lib",
+		"rootDir": "src",
+		"strict": true,
+		"strictFunctionTypes": false,
+		"esModuleInterop": true,
+		"skipLibCheck": true
+	},
+	"include": ["reset.d.ts", "src"],
+	"exclude": ["node_modules", "lib", "src/**/*.test.ts", "src/**/*.test.tsx"]
+}
