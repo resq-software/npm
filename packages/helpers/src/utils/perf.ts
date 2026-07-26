@@ -68,7 +68,7 @@ export const PERFORMANCE_PREFIX_COLOR = PERFORMANCE_COLORS.Good;
  *
  * @internal
  */
-export function measureCbDuration(name: string, cb: () => any) {
+export function measureCbDuration<T>(name: string, cb: () => T): T {
 	const start = performance.now();
 	const result = cb();
 	// eslint-disable-next-line no-console
@@ -79,6 +79,18 @@ export function measureCbDuration(name: string, cb: () => any) {
 	);
 	return result;
 }
+
+/**
+ * Shape of a method wrapped by the timing decorators — an arbitrary argument
+ * list and return value, invoked with the decorated instance as `this`.
+ *
+ * `PropertyDescriptor.value` is typed `any` by the standard library, so the
+ * decorators assert to this alias once and get real call/`apply` typing from
+ * there instead of propagating `any` through the wrapper.
+ *
+ * @internal
+ */
+type DecoratedMethod = (this: unknown, ...args: unknown[]) => unknown;
 
 /**
  * Decorator that measures and logs the execution time of class methods.
@@ -107,9 +119,13 @@ export function measureCbDuration(name: string, cb: () => any) {
  *
  * @internal
  */
-export function measureDuration(_target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-	const originalMethod = descriptor.value;
-	descriptor.value = function (...args: any[]) {
+export function measureDuration(
+	_target: unknown,
+	propertyKey: string,
+	descriptor: PropertyDescriptor,
+) {
+	const originalMethod = descriptor.value as DecoratedMethod;
+	descriptor.value = function (this: unknown, ...args: unknown[]) {
 		const start = performance.now();
 		const result = originalMethod.apply(this, args);
 		// eslint-disable-next-line no-console
@@ -123,7 +139,7 @@ export function measureDuration(_target: any, propertyKey: string, descriptor: P
 	return descriptor;
 }
 
-const averages = new Map<any, { total: number; count: number }>();
+const averages = new Map<DecoratedMethod, { total: number; count: number }>();
 
 /**
  * Decorator that measures method execution time and tracks running averages.
@@ -155,21 +171,21 @@ const averages = new Map<any, { total: number; count: number }>();
  * @internal
  */
 export function measureAverageDuration(
-	_target: any,
+	_target: unknown,
 	propertyKey: string,
 	descriptor: PropertyDescriptor,
 ) {
-	const originalMethod = descriptor.value;
-	descriptor.value = function (...args: any[]) {
+	const originalMethod = descriptor.value as DecoratedMethod;
+	const wrapped: DecoratedMethod = function (this: unknown, ...args: unknown[]) {
 		const start = performance.now();
 		const result = originalMethod.apply(this, args);
 		const end = performance.now();
 		const length = end - start;
 		if (length !== 0) {
-			const value = averages.get(descriptor.value)!;
+			const value = averages.get(wrapped)!;
 			const total = value.total + length;
 			const count = value.count + 1;
-			averages.set(descriptor.value, { total, count });
+			averages.set(wrapped, { total, count });
 			// eslint-disable-next-line no-console
 			console.debug(
 				`%cPerf%c ${propertyKey} took ${(end - start).toFixed(2)}ms | average ${(total / count).toFixed(2)}ms`,
@@ -179,7 +195,8 @@ export function measureAverageDuration(
 		}
 		return result;
 	};
-	averages.set(descriptor.value, { total: 0, count: 0 });
+	descriptor.value = wrapped;
+	averages.set(wrapped, { total: 0, count: 0 });
 	return descriptor;
 }
 //#endregion

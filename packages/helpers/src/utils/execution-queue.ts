@@ -54,7 +54,7 @@ import { sleep } from "./control";
  * @internal
  */
 export class ExecutionQueue {
-	private queue: (() => Promise<any>)[] = [];
+	private queue: (() => Promise<unknown>)[] = [];
 	private running = false;
 
 	/**

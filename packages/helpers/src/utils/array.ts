@@ -76,7 +76,7 @@ export function rotateArray<T>(arr: T[], offset: number): T[] {
  * ```
  * @public
  */
-export function dedupe<T>(input: T[], equals?: (a: any, b: any) => boolean): T[] {
+export function dedupe<T>(input: T[], equals?: (a: T, b: T) => boolean): T[] {
 	const result: T[] = [];
 	mainLoop: for (const item of input) {
 		for (const existing of result) {
@@ -106,7 +106,7 @@ export function dedupe<T>(input: T[], equals?: (a: any, b: any) => boolean): T[]
  * @internal
  */
 export function compact<T>(arr: T[]): NonNullable<T>[] {
-	return arr.filter((i) => i !== undefined && i !== null) as any;
+	return arr.filter((i): i is NonNullable<T> => i !== undefined && i !== null);
 }
 
 /**

@@ -32,6 +32,12 @@ export {
 	AccordionItem,
 	AccordionTrigger,
 } from "./components/accordion/index.js";
+export { AirspeedIndicator } from "./components/airspeed-indicator/index.js";
+export type {
+	AirspeedIndicatorProps,
+	SpeedBand,
+	SpeedBandTone,
+} from "./components/airspeed-indicator/index.js";
 export { Alert, AlertAction, AlertDescription, AlertTitle } from "./components/alert/index.js";
 export {
 	AlertDialog,
@@ -47,7 +53,11 @@ export {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "./components/alert-dialog/index.js";
+export { Altimeter } from "./components/altimeter/index.js";
+export type { AltimeterProps } from "./components/altimeter/index.js";
 export { AspectRatio } from "./components/aspect-ratio/index.js";
+export { AttitudeIndicator } from "./components/attitude-indicator/index.js";
+export type { AttitudeIndicatorProps } from "./components/attitude-indicator/index.js";
 export {
 	Avatar,
 	AvatarBadge,
@@ -215,6 +225,8 @@ export {
 	FieldSet,
 	FieldTitle,
 } from "./components/field/index.js";
+export { HeadingIndicator } from "./components/heading-indicator/index.js";
+export type { HeadingIndicatorProps } from "./components/heading-indicator/index.js";
 export { HoverCard, HoverCardContent, HoverCardTrigger } from "./components/hover-card/index.js";
 export { Input } from "./components/input/index.js";
 export {
@@ -392,6 +404,10 @@ export {
 	TooltipProvider,
 	TooltipTrigger,
 } from "./components/tooltip/index.js";
+export { TurnCoordinator } from "./components/turn-coordinator/index.js";
+export type { TurnCoordinatorProps } from "./components/turn-coordinator/index.js";
+export { VerticalSpeedIndicator } from "./components/vertical-speed-indicator/index.js";
+export type { VerticalSpeedIndicatorProps } from "./components/vertical-speed-indicator/index.js";
 export { useIsMobile } from "./hooks/use-mobile.js";
 export { cn } from "./lib/utils.js";
 export { getContrastingColor } from "./lib/get-contrasting-color.js";

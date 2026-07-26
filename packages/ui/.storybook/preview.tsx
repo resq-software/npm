@@ -59,6 +59,12 @@ const preview: Preview = {
 			return React.createElement(Story);
 		},
 	],
+	initialGlobals: {
+		// Run accessibility checks manually (via the a11y panel's "Run" button)
+		// rather than automatically on every render, so dragging numeric instrument
+		// controls in the Storybook dev server stays smooth. Re-run on demand.
+		a11y: { manual: true },
+	},
 	globalTypes: {
 		theme: {
 			description: "Global theme for components",

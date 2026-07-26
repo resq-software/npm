@@ -56,10 +56,10 @@ describe("value utilities", () => {
 
 			// Modifying copy should not affect original
 			(copy[1] as number[]).push(5);
-			(copy[2] as any).a = 99;
+			(copy[2] as { a: number }).a = 99;
 
 			expect(original[1]).toEqual([2, 3]);
-			expect((original[2] as any).a).toBe(4);
+			expect((original[2] as { a: number }).a).toBe(4);
 		});
 
 		it("should handle nested structures", () => {
@@ -95,7 +95,7 @@ describe("value utilities", () => {
 
 		it("should handle circular references if native structuredClone is available", () => {
 			if (isNativeStructuredClone) {
-				const obj: any = { a: 1 };
+				const obj: { a: number; self?: unknown } = { a: 1 };
 				obj.self = obj;
 
 				const copy = structuredClone(obj);

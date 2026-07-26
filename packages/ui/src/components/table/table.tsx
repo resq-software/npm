@@ -70,7 +70,7 @@ function TableCaption({ className, ...props }: Readonly<React.ComponentProps<"ca
 function TableCell({ className, ...props }: Readonly<React.ComponentProps<"td">>) {
 	return (
 		<td
-			className={cn("p-3 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0", className)}
+			className={cn("p-3 align-middle whitespace-nowrap has-[[role=checkbox]]:pr-0", className)}
 			data-slot="table-cell"
 			{...props}
 		/>
@@ -94,7 +94,7 @@ function TableHead({ className, ...props }: Readonly<React.ComponentProps<"th">>
 	return (
 		<th
 			className={cn(
-				"text-hint h-10 px-3 text-left align-middle font-mono text-[10px] font-medium uppercase tracking-[0.18em] whitespace-nowrap [&:has([role=checkbox])]:pr-0",
+				"text-hint h-10 px-3 text-left align-middle font-mono text-[10px] font-medium uppercase tracking-[0.18em] whitespace-nowrap has-[[role=checkbox]]:pr-0",
 				className,
 			)}
 			data-slot="table-head"

@@ -35,7 +35,10 @@ const config: StorybookConfig = {
 			build: {
 				chunkSizeWarningLimit: 2000,
 				rollupOptions: {
-					onwarn(warning, warn) {
+					onwarn(
+						warning: { code: string; message: string | string[] },
+						warn: (arg0: unknown) => void,
+					) {
 						if (
 							warning.code === "MODULE_LEVEL_DIRECTIVE" &&
 							warning.message.includes("use client")

@@ -22,6 +22,11 @@
 			"import": "./lib/components/accordion/index.js",
 			"default": "./lib/components/accordion/index.js"
 		},
+		"./airspeed-indicator": {
+			"types": "./lib/components/airspeed-indicator/index.d.ts",
+			"import": "./lib/components/airspeed-indicator/index.js",
+			"default": "./lib/components/airspeed-indicator/index.js"
+		},
 		"./alert": {
 			"types": "./lib/components/alert/index.d.ts",
 			"import": "./lib/components/alert/index.js",
@@ -32,10 +37,20 @@
 			"import": "./lib/components/alert-dialog/index.js",
 			"default": "./lib/components/alert-dialog/index.js"
 		},
+		"./altimeter": {
+			"types": "./lib/components/altimeter/index.d.ts",
+			"import": "./lib/components/altimeter/index.js",
+			"default": "./lib/components/altimeter/index.js"
+		},
 		"./aspect-ratio": {
 			"types": "./lib/components/aspect-ratio/index.d.ts",
 			"import": "./lib/components/aspect-ratio/index.js",
 			"default": "./lib/components/aspect-ratio/index.js"
+		},
+		"./attitude-indicator": {
+			"types": "./lib/components/attitude-indicator/index.d.ts",
+			"import": "./lib/components/attitude-indicator/index.js",
+			"default": "./lib/components/attitude-indicator/index.js"
 		},
 		"./avatar": {
 			"types": "./lib/components/avatar/index.d.ts",
@@ -136,6 +151,11 @@
 			"types": "./lib/components/field/index.d.ts",
 			"import": "./lib/components/field/index.js",
 			"default": "./lib/components/field/index.js"
+		},
+		"./heading-indicator": {
+			"types": "./lib/components/heading-indicator/index.d.ts",
+			"import": "./lib/components/heading-indicator/index.js",
+			"default": "./lib/components/heading-indicator/index.js"
 		},
 		"./hover-card": {
 			"types": "./lib/components/hover-card/index.d.ts",
@@ -291,6 +311,16 @@
 			"types": "./lib/components/tooltip/index.d.ts",
 			"import": "./lib/components/tooltip/index.js",
 			"default": "./lib/components/tooltip/index.js"
+		},
+		"./turn-coordinator": {
+			"types": "./lib/components/turn-coordinator/index.d.ts",
+			"import": "./lib/components/turn-coordinator/index.js",
+			"default": "./lib/components/turn-coordinator/index.js"
+		},
+		"./vertical-speed-indicator": {
+			"types": "./lib/components/vertical-speed-indicator/index.d.ts",
+			"import": "./lib/components/vertical-speed-indicator/index.js",
+			"default": "./lib/components/vertical-speed-indicator/index.js"
 		},
 		"./styles/globals.css": "./src/styles/globals.css",
 		"./lib/utils": {

@@ -15,8 +15,6 @@
  */
 
 // @vitest-environment jsdom
-/* eslint-disable tldraw/no-direct-storage */
-
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	clearLocalStorage,
@@ -29,29 +27,36 @@ import {
 	setInSessionStorage,
 } from "../../src/browser/storage.js";
 
+/**
+ * Build a `Storage` stand-in whose methods are Vitest mocks. Returning the mock
+ * object (rather than reaching for `localStorage.getItem` after the fact) is what
+ * keeps the per-test `mockImplementation` calls fully typed.
+ */
+function createStorageMock() {
+	return {
+		getItem: vi.fn<(key: string) => string | null>(),
+		setItem: vi.fn<(key: string, value: string) => void>(),
+		removeItem: vi.fn<(key: string) => void>(),
+		clear: vi.fn<() => void>(),
+		key: vi.fn<(index: number) => string | null>(),
+		length: 0,
+	} satisfies Storage;
+}
+
 describe("storage", () => {
 	// Store original implementations
 	const originalLocalStorage = global.localStorage;
 	const originalSessionStorage = global.sessionStorage;
 
-	beforeEach(() => {
-		// Mock localStorage
-		const localStorageMock = {
-			getItem: vi.fn(),
-			setItem: vi.fn(),
-			removeItem: vi.fn(),
-			clear: vi.fn(),
-		};
-		global.localStorage = localStorageMock as any;
+	let localStorageMock: ReturnType<typeof createStorageMock>;
+	let sessionStorageMock: ReturnType<typeof createStorageMock>;
 
-		// Mock sessionStorage
-		const sessionStorageMock = {
-			getItem: vi.fn(),
-			setItem: vi.fn(),
-			removeItem: vi.fn(),
-			clear: vi.fn(),
-		};
-		global.sessionStorage = sessionStorageMock as any;
+	beforeEach(() => {
+		localStorageMock = createStorageMock();
+		global.localStorage = localStorageMock;
+
+		sessionStorageMock = createStorageMock();
+		global.sessionStorage = sessionStorageMock;
 	});
 
 	afterEach(() => {
@@ -63,7 +68,7 @@ describe("storage", () => {
 
 	describe("getFromLocalStorage", () => {
 		it("should return null when localStorage.getItem throws an error", () => {
-			(localStorage.getItem as any).mockImplementation(() => {
+			localStorageMock.getItem.mockImplementation(() => {
 				throw new Error("Storage not available");
 			});
 
@@ -75,7 +80,7 @@ describe("storage", () => {
 
 	describe("setInLocalStorage", () => {
 		it("should not throw when localStorage.setItem throws an error", () => {
-			(localStorage.setItem as any).mockImplementation(() => {
+			localStorageMock.setItem.mockImplementation(() => {
 				throw new Error("Quota exceeded");
 			});
 
@@ -85,7 +90,7 @@ describe("storage", () => {
 
 	describe("deleteFromLocalStorage", () => {
 		it("should not throw when localStorage.removeItem throws an error", () => {
-			(localStorage.removeItem as any).mockImplementation(() => {
+			localStorageMock.removeItem.mockImplementation(() => {
 				throw new Error("Storage not available");
 			});
 
@@ -95,7 +100,7 @@ describe("storage", () => {
 
 	describe("clearLocalStorage", () => {
 		it("should not throw when localStorage.clear throws an error", () => {
-			(localStorage.clear as any).mockImplementation(() => {
+			localStorageMock.clear.mockImplementation(() => {
 				throw new Error("Storage not available");
 			});
 
@@ -105,7 +110,7 @@ describe("storage", () => {
 
 	describe("getFromSessionStorage", () => {
 		it("should return null when sessionStorage.getItem throws an error", () => {
-			(sessionStorage.getItem as any).mockImplementation(() => {
+			sessionStorageMock.getItem.mockImplementation(() => {
 				throw new Error("Storage not available");
 			});
 
@@ -117,7 +122,7 @@ describe("storage", () => {
 
 	describe("setInSessionStorage", () => {
 		it("should not throw when sessionStorage.setItem throws an error", () => {
-			(sessionStorage.setItem as any).mockImplementation(() => {
+			sessionStorageMock.setItem.mockImplementation(() => {
 				throw new Error("Quota exceeded");
 			});
 
@@ -127,7 +132,7 @@ describe("storage", () => {
 
 	describe("deleteFromSessionStorage", () => {
 		it("should not throw when sessionStorage.removeItem throws an error", () => {
-			(sessionStorage.removeItem as any).mockImplementation(() => {
+			sessionStorageMock.removeItem.mockImplementation(() => {
 				throw new Error("Storage not available");
 			});
 
@@ -137,7 +142,7 @@ describe("storage", () => {
 
 	describe("clearSessionStorage", () => {
 		it("should not throw when sessionStorage.clear throws an error", () => {
-			(sessionStorage.clear as any).mockImplementation(() => {
+			sessionStorageMock.clear.mockImplementation(() => {
 				throw new Error("Storage not available");
 			});
 

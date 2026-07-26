@@ -85,7 +85,12 @@ export class Timers {
 	 * ```
 	 * @public
 	 */
-	setTimeout(contextId: string, handler: TimerHandler, timeout?: number, ...args: any[]): number {
+	setTimeout(
+		contextId: string,
+		handler: TimerHandler,
+		timeout?: number,
+		...args: unknown[]
+	): number {
 		const id = window.setTimeout(handler, timeout, ...args);
 		const current = this.timeouts.get(contextId) ?? [];
 		this.timeouts.set(contextId, [...current, id]);
@@ -107,7 +112,12 @@ export class Timers {
 	 * ```
 	 * @public
 	 */
-	setInterval(contextId: string, handler: TimerHandler, timeout?: number, ...args: any[]): number {
+	setInterval(
+		contextId: string,
+		handler: TimerHandler,
+		timeout?: number,
+		...args: unknown[]
+	): number {
 		const id = window.setInterval(handler, timeout, ...args);
 		const current = this.intervals.get(contextId) ?? [];
 		this.intervals.set(contextId, [...current, id]);
@@ -207,9 +217,9 @@ export class Timers {
 	 */
 	forContext(contextId: string) {
 		return {
-			setTimeout: (handler: TimerHandler, timeout?: number, ...args: any[]) =>
+			setTimeout: (handler: TimerHandler, timeout?: number, ...args: unknown[]) =>
 				this.setTimeout(contextId, handler, timeout, ...args),
-			setInterval: (handler: TimerHandler, timeout?: number, ...args: any[]) =>
+			setInterval: (handler: TimerHandler, timeout?: number, ...args: unknown[]) =>
 				this.setInterval(contextId, handler, timeout, ...args),
 			requestAnimationFrame: (callback: FrameRequestCallback) =>
 				this.requestAnimationFrame(contextId, callback),

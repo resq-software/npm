@@ -45,6 +45,7 @@ import { fetch } from "../browser/network.js";
  *
  * @public
  */
+// biome-ignore lint/complexity/noStaticOnlyClass: the static methods are the public API, and this class is not meant to be instantiated.
 export class FileHelpers {
 	/**
 	 * Converts a URL to an ArrayBuffer by fetching the resource.
