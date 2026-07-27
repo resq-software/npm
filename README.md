@@ -32,6 +32,8 @@
 [![@resq-systems/constants](https://img.shields.io/npm/v/%40resq-systems%2Fconstants?style=flat-square&label=%40resq-systems%2Fconstants)](https://www.npmjs.com/package/@resq-systems/constants)
 [![@resq-systems/types](https://img.shields.io/npm/v/%40resq-systems%2Ftypes?style=flat-square&label=%40resq-systems%2Ftypes)](https://www.npmjs.com/package/@resq-systems/types)
 [![@resq-systems/email-templates](https://img.shields.io/npm/v/%40resq-systems%2Femail-templates?style=flat-square&label=%40resq-systems%2Femail-templates)](https://www.npmjs.com/package/@resq-systems/email-templates)
+[![@resq-systems/telemetry](https://img.shields.io/npm/v/%40resq-systems%2Ftelemetry?style=flat-square&label=%40resq-systems%2Ftelemetry)](https://www.npmjs.com/package/@resq-systems/telemetry)
+[![@resq-systems/map](https://img.shields.io/npm/v/%40resq-systems%2Fmap?style=flat-square&label=%40resq-systems%2Fmap)](https://www.npmjs.com/package/@resq-systems/map)
 
 Registry workspace for all ResQ Systems npm packages published under the `@resq-systems` scope. Provides the shared UI component library, zero-dependency data structures, and standalone server/client utilities for the ResQ Systems autonomous disaster response platform.
 
@@ -46,7 +48,7 @@ graph TB
             types["@resq-systems/types<br/><small>nominal/branded types · zero deps</small>"]
         end
         subgraph frontend["Frontend"]
-            ui["@resq-systems/ui<br/><small>57 components · Radix + Tailwind v4</small>"]
+            ui["@resq-systems/ui<br/><small>63 components + flight instruments · Radix + Tailwind v4</small>"]
         end
         subgraph algorithms["Algorithms"]
             dsa["@resq-systems/dsa<br/><small>11 modules · zero deps</small>"]
@@ -64,11 +66,14 @@ graph TB
         end
         subgraph telemetry["Telemetry"]
             analytics["@resq-systems/analytics<br/><small>PostHog + GA4 · cross-subdomain</small>"]
+            wsclient["@resq-systems/telemetry<br/><small>reconnecting WebSocket · fan-out</small>"]
+            geomap["@resq-systems/map<br/><small>MapLibre + react-map-gl</small>"]
         end
     end
 
     constants --> ui
     constants --> email
+    wsclient --> geomap
     foundation --> apps["Consumer Apps"]
     frontend --> apps
     algorithms --> apps
@@ -92,7 +97,7 @@ graph TB
 | :--- | :--- | :--- | :--- |
 | [`@resq-systems/constants`](packages/constants/) | Shared design tokens (oklch + email-safe hex), brand identity, and cross-app values — one source of truth | **zero deps** | [README](packages/constants/README.md) |
 | [`@resq-systems/types`](packages/types/) | Nominal/branded type toolkit — `Brand`, `Opaque`, `NumberRange`, numeric brands, `assertNever`, and type-level test helpers | **zero deps** | [README](packages/types/README.md) |
-| [`@resq-systems/ui`](packages/ui/) | React component library — dark-first oklch color system, WCAG AA, subpath exports | radix-ui, tailwindcss | [README](packages/ui/README.md) · [Storybook](https://design.resq.software) |
+| [`@resq-systems/ui`](packages/ui/) | React component library — dark-first oklch color system, WCAG AA, subpath exports; 63 components incl. the basic-six flight instruments | radix-ui, tailwindcss | [README](packages/ui/README.md) · [Storybook](https://design.resq.software) |
 | [`@resq-systems/dsa`](packages/dsa/) | Data structures & algorithms — graph, heap, trie, bloom filter, distance, LRU cache, queue | **zero deps** | [README](packages/dsa/README.md) |
 | [`@resq-systems/http`](packages/http/) | Effect-based HTTP client with retry, timeout, and schema validation | effect | [README](packages/http/README.md) |
 | [`@resq-systems/logger`](packages/logger/) | Structured logging with 7 levels, context, timing, and logging decorators | **zero deps** | [README](packages/logger/README.md) |
@@ -101,6 +106,8 @@ graph TB
 | [`@resq-systems/decorators`](packages/decorators/) | 15 TypeScript decorators — memoize, throttle, debounce, bind, execTime, rateLimit | **zero deps** | [README](packages/decorators/README.md) |
 | [`@resq-systems/helpers`](packages/helpers/) | Result monad, type guards, date/number/string formatting, platform detection | @resq-systems/logger | [README](packages/helpers/README.md) |
 | [`@resq-systems/analytics`](packages/analytics/) | Unified PostHog + GA4 client — cross-subdomain identity, lazy-loaded, typed events, Next.js + React adapters | posthog-js (peer) | [README](packages/analytics/README.md) |
+| [`@resq-systems/telemetry`](packages/telemetry/) | Framework-agnostic reconnecting WebSocket client — single-owner socket, exponential backoff, many-consumer fan-out, open-replay; optional React bindings | **zero deps** · react (peer) | [README](packages/telemetry/README.md) |
+| [`@resq-systems/map`](packages/map/) | MapLibre + react-map-gl telemetry primitives — themeable map shell, asset markers, GeoJSON tracks, live position binding to `@resq-systems/telemetry` | maplibre-gl, react-map-gl (peers) | [README](packages/map/README.md) |
 | [`@resq-systems/email-templates`](packages/email-templates/) | Type-safe transactional emails — Effect Schema contract, React Email components, headless render, optional Resend sender | react, effect, @react-email | [README](packages/email-templates/README.md) |
 
 ## Examples
