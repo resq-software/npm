@@ -1,5 +1,20 @@
 <!--
 
+## 0.38.0
+### Minor Changes
+
+
+
+- [#225](https://github.com/resq-software/npm/pull/225) [`13e2e2f`](https://github.com/resq-software/npm/commit/13e2e2fceb6547529d428d1656f01cb618a972f9) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add Altimeter, VerticalSpeedIndicator, and TurnCoordinator instruments, completing the basic-six flight instrument set on a shared dial-geometry helper
+
+
+
+- [#225](https://github.com/resq-software/npm/pull/225) [`13e2e2f`](https://github.com/resq-software/npm/commit/13e2e2fceb6547529d428d1656f01cb618a972f9) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add AttitudeIndicator instrument — an SVG artificial horizon with a pitch ladder, rotating bank scale, and an accessible attitude label
+
+
+
+- [#225](https://github.com/resq-software/npm/pull/225) [`13e2e2f`](https://github.com/resq-software/npm/commit/13e2e2fceb6547529d428d1656f01cb618a972f9) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add HeadingIndicator (compass card) and AirspeedIndicator (pointer dial with operating bands and redline) instruments
+
 ## 0.37.2
 ### Patch Changes
 

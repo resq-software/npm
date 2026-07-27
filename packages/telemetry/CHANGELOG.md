@@ -1,4 +1,11 @@
 <!--
+
+## 0.2.0
+### Minor Changes
+
+
+
+- [#225](https://github.com/resq-software/npm/pull/225) [`13e2e2f`](https://github.com/resq-software/npm/commit/13e2e2fceb6547529d428d1656f01cb618a972f9) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add @resq-systems/telemetry — a framework-agnostic reconnecting WebSocket client (single-owner socket, exponential backoff, many-consumer fan-out, open-replay) with optional React bindings (TelemetryProvider, useTelemetry, useTelemetryChannel)
   Copyright 2026 ResQ
 
   Licensed under the Apache License, Version 2.0 (the "License");

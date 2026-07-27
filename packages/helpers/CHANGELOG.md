@@ -1,4 +1,23 @@
 <!--
+
+## 0.5.0
+### Minor Changes
+
+
+
+- [#225](https://github.com/resq-software/npm/pull/225) [`13e2e2f`](https://github.com/resq-software/npm/commit/13e2e2fceb6547529d428d1656f01cb618a972f9) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add supported-media MIME literal unions and replace `any` with precise types across helpers
+
+  `MediaHelpers.isImageType`, `isAnimatedImageType`, `isStaticImageType`, and `isVectorImageType` now
+  return type predicates over the new `SupportedImageType` / `SupportedAnimatedImageType` /
+  `SupportedStaticImageType` / `SupportedVectorImageType` unions (`SupportedVideoType` and
+  `SupportedMediaType` are exported too). `measureCbDuration` is now generic and returns the
+  callback's own type instead of `any`. Tightened types on `dedupe`, `compact`, `sortById`,
+  `getFirstFromIterable`, `promiseWithResolve`, and `Timers`. `parseCodePath` and
+  `parseCodePathDetailed` now accept `null`/`undefined` for `entity`, matching the
+  `"UnknownEntity"` fallback they already implemented.
+
+  Type-only breaking changes: `sortById` now requires `id` to be a `string` or `number`, and
+  `dedupe`'s `equals` callback is typed `(a: T, b: T)`. Runtime behavior is unchanged.
   Copyright 2026 ResQ
 
   Licensed under the Apache License, Version 2.0 (the "License");
