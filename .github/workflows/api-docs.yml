@@ -142,6 +142,7 @@ jobs:
             "$schema": "https://typedoc-plugin-markdown.org/schema.json",
             "plugin": ["typedoc-plugin-markdown"],
             "tsconfig": "tsconfig.json",
+            "skipErrorChecking": true,
             "entryPointStrategy": "Expand",
             "entryPoints": ["src"],
             "exclude": [
