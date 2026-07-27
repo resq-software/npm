@@ -20,7 +20,7 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
 [![Storybook](https://img.shields.io/badge/storybook-design.resq.software-FF4785?style=flat-square)](https://design.resq.software)
 
-ResQ Systems's shared React component library — **57 components** built on Radix UI primitives and Tailwind CSS v4 with a dark-first oklch color system. Tree-shakeable subpath exports, WCAG AA contrast, full keyboard support.
+ResQ Systems's shared React component library — **63 components** built on Radix UI primitives and Tailwind CSS v4 with a dark-first oklch color system, including a set of clean-room SVG **flight instruments** for fleet telemetry. Tree-shakeable subpath exports, WCAG AA contrast, full keyboard support.
 
 ## Install
 
@@ -61,7 +61,7 @@ The default export (`@resq-systems/ui`) re-exports everything for convenience bu
 
 ## Component catalog
 
-57 components grouped by intent:
+63 components grouped by intent:
 
 | Group | Components |
 | :--- | :--- |
@@ -72,6 +72,7 @@ The default export (`@resq-systems/ui`) re-exports everything for convenience bu
 | Feedback | `badge`, `progress`, `skeleton`, `sonner` (toasts), `spinner` |
 | Data | `calendar`, `carousel`, `chart`, `table` |
 | Misc | `avatar`, `direction`, `icons`, `item`, `kbd`, `picture` |
+| Instruments | `attitude-indicator`, `heading-indicator`, `airspeed-indicator`, `altimeter`, `vertical-speed-indicator`, `turn-coordinator` — clean-room SVG flight instruments (server-renderable, theme-aware, `aria-label`led) |
 
 Browse all components and variants at [design.resq.software](https://design.resq.software).
 
