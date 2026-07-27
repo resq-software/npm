@@ -52,13 +52,19 @@ jobs:
       # this list when the monorepo gains new public packages.
       PUBLIC_PACKAGES: >-
         analytics
+        constants
         decorators
         dsa
+        email-templates
         helpers
         http
         logger
+        map
+        math
         rate-limiting
         security
+        telemetry
+        types
         ui
 
     steps:
