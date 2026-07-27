@@ -179,7 +179,7 @@
     },
     "packages/helpers": {
       "name": "@resq-systems/helpers",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "dependencies": {
         "@resq-systems/dsa": "^2.1.0",
         "@resq-systems/logger": "^0.3.0",
@@ -238,9 +238,9 @@
     },
     "packages/map": {
       "name": "@resq-systems/map",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "devDependencies": {
-        "@resq-systems/telemetry": "^0.1.0",
+        "@resq-systems/telemetry": "^0.2.0",
         "@total-typescript/ts-reset": "^0.6.1",
         "@types/geojson": "^7946.0.14",
         "@types/node": "^26.1.1",
@@ -255,7 +255,7 @@
         "vitest": "4.1.10",
       },
       "peerDependencies": {
-        "@resq-systems/telemetry": ">=0.1.0",
+        "@resq-systems/telemetry": ">=0.2.0",
         "maplibre-gl": ">=5",
         "react": ">=19",
         "react-dom": ">=19",
@@ -329,7 +329,7 @@
     },
     "packages/telemetry": {
       "name": "@resq-systems/telemetry",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "devDependencies": {
         "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "^26.1.1",
@@ -358,7 +358,7 @@
     },
     "packages/ui": {
       "name": "@resq-systems/ui",
-      "version": "0.37.2",
+      "version": "0.38.0",
       "dependencies": {
         "@base-ui/react": "^1.6.0",
         "@phosphor-icons/react": "^2.1.10",
@@ -428,7 +428,6 @@
     "dompurify": ">=3.4.12",
     "effect": "4.0.0-beta.93",
     "esbuild": "0.28.1",
-    "get-tsconfig": "5.0.0-beta.5",
     "next": "^16.2.11",
     "postcss": ">=8.5.18",
     "sharp": "^0.35.3",
@@ -1875,7 +1874,7 @@
 
     "get-nonce": ["get-nonce@1.0.1", "", {}, "sha512-FJhYRoDaiatfEkUK8HKlicmu/3SGFD51q3itKDGoSTysQJBnfOcxU5GxnhE1E6soB76MbT0MBtnKJuXyAx+96Q=="],
 
-    "get-tsconfig": ["get-tsconfig@5.0.0-beta.5", "", { "dependencies": { "resolve-pkg-maps": "^1.0.0" } }, "sha512-/6gFNr0N04nob252sTQxyFLi3eKFRqIg1I87YcqAMT1i6SQrSF6KujUEQrtrjMV0H/eejTCltLdDSTEMzHbnsQ=="],
+    "get-tsconfig": ["get-tsconfig@4.14.0", "", { "dependencies": { "resolve-pkg-maps": "^1.0.0" } }, "sha512-yTb+8DXzDREzgvYmh6s9vHsSVCHeC0G3PI5bEXNBHtmshPnO+S5O7qgLEOn0I5QvMy6kpZN8K1NKGyilLb93wA=="],
 
     "get-value": ["get-value@2.0.6", "", {}, "sha512-Ln0UQDlxH1BapMu3GPtf7CuYNwRZf2gwCuPqbyG6pB8WfmFpzqcy4xtAaAMUhnNqjMKTiCPZG2oMT3YSx8U2NA=="],
 
@@ -2996,6 +2995,8 @@
     "read-yaml-file/js-yaml": ["js-yaml@3.14.2", "", { "dependencies": { "argparse": "^1.0.7", "esprima": "^4.0.0" }, "bin": { "js-yaml": "bin/js-yaml.js" } }, "sha512-PMSmkqxr106Xa156c2M265Z+FTrPl+oxd/rgOQy2tijQeK5TxQ43psO1ZCwhVOSdnn+RzkzlRz/eY4BgJBYVpg=="],
 
     "redent/strip-indent": ["strip-indent@3.0.0", "", { "dependencies": { "min-indent": "^1.0.0" } }, "sha512-laJTa3Jb+VQpaC6DseHhF7dXVqHTfJPCRDaEbid/drOhgitgYku/letMUqOXFoWV0zIIUbjpdH2t+tYj4bQMRQ=="],
+
+    "rolldown-plugin-dts/get-tsconfig": ["get-tsconfig@5.0.0-beta.5", "", { "dependencies": { "resolve-pkg-maps": "^1.0.0" } }, "sha512-/6gFNr0N04nob252sTQxyFLi3eKFRqIg1I87YcqAMT1i6SQrSF6KujUEQrtrjMV0H/eejTCltLdDSTEMzHbnsQ=="],
 
     "run-con/strip-json-comments": ["strip-json-comments@3.1.1", "", {}, "sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig=="],
 
