@@ -415,7 +415,7 @@
 		"tailwindcss": "^4.1.18",
 		"tinyglobby": "^0.2.17",
 		"tsdown": "0.22.14",
-		"typescript": "6.0.3",
+		"typescript": "7.0.2",
 		"vite": "^8.1.5",
 		"vitest": "4.1.10",
 		"wrangler": "4.114.0"
