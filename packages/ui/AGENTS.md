@@ -41,3 +41,4 @@ Behavior changes need a `.changeset/*.md` bumping `@resq-systems/ui`. See the [r
 
 - [Package README](README.md)
 - [Workspace guide](../../AGENTS.md)
+- [Vehicle Telemetry Instruments](../../design/VEHICLE_TELEMETRY_INSTRUMENTS.md) — instrument inventory and the props each one accepts

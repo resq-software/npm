@@ -67,6 +67,8 @@ export {
 	AvatarImage,
 } from "./components/avatar/index.js";
 export { Badge, badgeVariants } from "./components/badge/index.js";
+export { BatteryGauge } from "./components/battery-gauge/index.js";
+export type { BatteryGaugeProps } from "./components/battery-gauge/index.js";
 export {
 	Breadcrumb,
 	BreadcrumbEllipsis,
@@ -146,6 +148,10 @@ export {
 	CommandSeparator,
 	CommandShortcut,
 } from "./components/command/index.js";
+export { CompassRose } from "./components/compass-rose/index.js";
+export type { CompassRoseProps } from "./components/compass-rose/index.js";
+export { ContactScope } from "./components/contact-scope/index.js";
+export type { ContactScopeProps, ScopeContact } from "./components/contact-scope/index.js";
 export {
 	ContextMenu,
 	ContextMenuCheckboxItem,
@@ -163,6 +169,8 @@ export {
 	ContextMenuSubTrigger,
 	ContextMenuTrigger,
 } from "./components/context-menu/index.js";
+export { DepthGauge } from "./components/depth-gauge/index.js";
+export type { DepthGaugeProps } from "./components/depth-gauge/index.js";
 export {
 	Dialog,
 	DialogClose,
@@ -257,6 +265,8 @@ export {
 } from "./components/item/index.js";
 export { Kbd, KbdGroup } from "./components/kbd/index.js";
 export { Label } from "./components/label/index.js";
+export { LidarScan } from "./components/lidar-scan/index.js";
+export type { LidarScanProps } from "./components/lidar-scan/index.js";
 export {
 	Menubar,
 	MenubarCheckboxItem,
@@ -291,6 +301,12 @@ export {
 	navigationMenuTriggerStyle,
 	NavigationMenuViewport,
 } from "./components/navigation-menu/index.js";
+export { OccupancyGrid } from "./components/occupancy-grid/index.js";
+export type {
+	GridPoint,
+	GridPose,
+	OccupancyGridProps,
+} from "./components/occupancy-grid/index.js";
 export {
 	Pagination,
 	PaginationContent,
@@ -395,7 +411,13 @@ export {
 	tabsListVariants,
 	TabsTrigger,
 } from "./components/tabs/index.js";
+export { TeleopPad } from "./components/teleop-pad/index.js";
+export type { TeleopPadProps, TeleopVector } from "./components/teleop-pad/index.js";
 export { Textarea } from "./components/textarea/index.js";
+export { ThrusterRing } from "./components/thruster-ring/index.js";
+export type { ThrusterReading, ThrusterRingProps } from "./components/thruster-ring/index.js";
+export { TiltIndicator } from "./components/tilt-indicator/index.js";
+export type { TiltIndicatorProps } from "./components/tilt-indicator/index.js";
 export { Toggle, toggleVariants } from "./components/toggle/index.js";
 export { ToggleGroup, ToggleGroupItem } from "./components/toggle-group/index.js";
 export {
@@ -408,6 +430,8 @@ export { TurnCoordinator } from "./components/turn-coordinator/index.js";
 export type { TurnCoordinatorProps } from "./components/turn-coordinator/index.js";
 export { VerticalSpeedIndicator } from "./components/vertical-speed-indicator/index.js";
 export type { VerticalSpeedIndicatorProps } from "./components/vertical-speed-indicator/index.js";
+export { WheelOdometer } from "./components/wheel-odometer/index.js";
+export type { WheelOdometerProps, WheelReading } from "./components/wheel-odometer/index.js";
 export { useIsMobile } from "./hooks/use-mobile.js";
 export { cn } from "./lib/utils.js";
 export { getContrastingColor } from "./lib/get-contrasting-color.js";
