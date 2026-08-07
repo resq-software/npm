@@ -45,8 +45,9 @@ The rule is **transport → normalize → present**, and nothing skips a layer.
 
 | Layer | Package | Owns | Never contains |
 |-------|---------|------|----------------|
-| Transport | `@resq-systems/telemetry` | `TelemetrySocket`, backoff, channel fan-out, React bindings | Any vehicle-domain schema; any rendering |
+| Transport | `@resq-systems/telemetry` | `TelemetrySocket` (WebSocket), `MqttTelemetrySource` (MQTT topics), backoff, channel fan-out, React bindings | Any vehicle-domain schema; any rendering |
 | Geospatial | `@resq-systems/map` | MapLibre shell, `AssetMarker`, `TrackLayer`, `useAssetPositions` | Non-geographic plots; instrument chrome |
+| Decoding | `@resq-systems/ui/adapters` | Pure message → prop mappers for ROS 2, MAVLink, AIS, Signal K, VDA5050 | React, DOM, transport, protocol libraries |
 | Presentation | `@resq-systems/ui` | Stateless SVG instruments driven by plain numeric props | WebSockets, ROS/MAVLink/AIS decoding, `maplibre-gl` |
 
 Three consequences worth stating explicitly, because each one has an obvious-looking
@@ -54,8 +55,9 @@ wrong answer:
 
 1. **No instrument decodes a wire format.** `LidarScan` takes `ranges: number[]` plus
    `angleMin` / `angleIncrement` — the same three fields as `sensor_msgs/LaserScan`, but
-   as numbers, not as a ROS message type. The package never imports `roslibjs`. Adapters
-   live in the consuming app (or, later, an opt-in `@resq-systems/ui/adapters` subpath).
+   as numbers, not as a ROS message type. The package never imports `roslibjs`. Decoding
+   lives in the opt-in `@resq-systems/ui/adapters` subpath: pure functions, no React, no
+   protocol libraries, so importing an instrument never drags a transport in behind it.
 2. **Anything with a latitude belongs to `map`.** An AIS overlay on a basemap is a `map`
    concern. But a **relative-bearing scope** — contacts plotted by range and bearing from
    own-vehicle, with no projection and no basemap — is a plot, not a map, so `ContactScope`
@@ -111,6 +113,40 @@ it is the contract this design is accountable to.
 | `ThrusterRing` | `ACTUATOR_OUTPUT_STATUS` / ArduSub motor mix | `thrusters: { label, output, angle }[]` with `output` in ±1 |
 | `ContactScope` | AIS position reports (AISStream / AIS-catcher) | `contacts: { id, bearing, range, course?, speed?, cpa?, tcpa? }[]`, `rangeMax`, `heading` |
 
+### Ground fleets (VDA5050 over MQTT)
+
+VDA5050 is the open standard for AGV fleet ↔ master-control messaging, and it is where
+the "no wire formats in `ui`" rule earns its keep twice over: one `State` message feeds
+three different instruments.
+
+| Component | VDA5050 `State` field | Prop mapping |
+|-----------|-----------------------|--------------|
+| `OccupancyGrid` (pose) | `agvPosition.{x,y,theta}` | `pose` — `theta` is already radians |
+| `BatteryGauge` | `batteryState.{batteryCharge,batteryVoltage,charging}` | `percentage` (already 0–100), `voltage`; VDA5050 reports **no current**, so the amps readout stays blank |
+| `TeleopPad` (readback) | `velocity.{vx,vy,omega}` | normalized against caller-supplied full-scale |
+
+The fleet dimension lives in the **topic**, not the payload —
+`<interface>/v<major>/<manufacturer>/<serial>/<topic>` — which is why the MQTT transport
+exposes topic filters rather than one undifferentiated frame stream.
+
+### Marine data (Signal K)
+
+Signal K deltas are SI throughout — radians, m/s, metres — so every adapter here is path
+lookup plus unit conversion. Deltas carry an ISO-8601 `timestamp`; the adapters ignore it
+and leave staleness policy to the caller.
+
+| Component | Signal K path | Prop mapping |
+|-----------|---------------|--------------|
+| `CompassRose` | `navigation.headingTrue`, `navigation.courseOverGroundTrue` | radians → degrees |
+| `CompassRose` | `navigation.speedOverGround` | m/s → knots (÷ 0.514444) |
+| `DepthGauge` | `environment.depth.belowSurface` | `seabed` |
+| `DepthGauge` | `environment.depth.{surfaceToTransducer,transducerToKeel}` | `depth` — keel below surface |
+| `DepthGauge` | `environment.depth.belowKeel` | cross-check for the derived altitude |
+
+That last group is why `DepthGauge` earns its place on a surface vessel and not only on an
+ROV: feed it keel depth as `depth` and sounded depth as `seabed`, and its altitude readout
+*is* under-keel clearance — the number a skipper actually watches.
+
 Bearing convention across the whole set: **degrees clockwise from north (or from
 vehicle nose for relative bearings)**, matching the existing `polar()` helper, which
 measures clockwise from 12 o'clock.
@@ -162,21 +198,46 @@ copied from any of them:
 - **SIST**, **Maritime Vessel Tracking** — AIS anomaly/congestion dashboards
 - **AIS-catcher**, **AISdb**, `ros_ais` — AIS ingest, storage, and ROS bridging
 
+A second sweep turned up more operator consoles but confirmed the shape of the gap:
+almost every result is a *whole application* — a console, a fleet dashboard, a protocol
+bridge — and almost none is a reusable component library. That is the space this package
+occupies, so these are mined for behaviour and field vocabulary, never for code:
+
+- **Open-RMF** (`rmf-web`, `free_fleet`, `rmf_visualization`) — multi-fleet indoor robot
+  dashboards; the reference for what fleet state actually needs to be shown
+- **Waverley `robo-perception`**, **`ROS2-ReactJS-App`**, **FKIE `field_test_tool`** —
+  React + `roslibjs` + rosbridge teleop consoles
+- **Transitive Robotics `transact`**, **NVIDIA Isaac Mission Control / Cloud Control** —
+  cloud fleet management and VDA5050 dispatch
+- **VDA5050** and the **VDA5050 Visualizer** — the AGV fleet standard itself, and an
+  MQTT-over-WebSocket visualiser for it
+- **Signal K Server**, **KIP**, **Freeboard-SK**, **OpenPlotter** — the marine data
+  standard and the mature dashboards built on it
+- **Serial Studio** — a cross-protocol telemetry dashboard (MAVLink, NMEA 0183/2000, UBX)
+- **VRX** — Gazebo/ROS 2 USV autonomy simulation, useful for generating test fixtures
+
+Two of those are **standards, not applications**, and they are the reason §4 grew: VDA5050
+fixes the ground-fleet contract, Signal K fixes the marine one. Both are now first-class
+adapter targets.
+
 The Thalweg finding drives one rule here: `OccupancyGrid` and `ContactScope` accept
 `ArrayLike<number>` and plain arrays respectively, and never lift per-cell or per-contact
 data into React state.
 
 ## 8. Non-goals
 
-- No ROS/MAVLink/AIS **decoding** in `ui`. Adapters are a later, opt-in subpath.
+- No ROS/MAVLink/AIS **decoding** in the instrument components. It lives one layer out, in
+  the opt-in `./adapters` subpath, which imports no React and no protocol library.
 - No video. Camera feeds (`web_video_server`, WebRTC) are an app concern.
 - No 3D. Point clouds and mesh SLAM output are out of scope for an SVG instrument set.
 - No basemap in `ui`. Geographic rendering stays in `@resq-systems/map`.
 
 ## 9. Follow-on work
 
-1. `@resq-systems/ui/adapters` — pure `ros2` / `mavlink` / `ais` message → prop mappers,
-   unit-tested against recorded frames.
-2. `AisLayer` in `@resq-systems/map` — the geographic half of `ContactScope`.
-3. A `<VehicleConsole>` composite (telemetry provider + instrument grid) once the ground
+1. `AisLayer` in `@resq-systems/map` — the geographic half of `ContactScope`.
+2. A `<VehicleConsole>` composite (telemetry provider + instrument grid) once the ground
    and sea sets have been exercised by a real consumer.
+3. VDA5050 `Order` / `InstantActions` **publishing** helpers. The adapters currently read
+   `State` only; commanding a fleet is a bigger safety surface and wants its own design.
+4. Recorded-frame fixtures (rosbag, VRX, AIS-catcher captures) to replace the synthetic
+   messages the adapter tests use today.

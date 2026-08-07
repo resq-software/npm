@@ -22,6 +22,11 @@
 			"import": "./lib/components/accordion/index.js",
 			"default": "./lib/components/accordion/index.js"
 		},
+		"./adapters": {
+			"types": "./lib/adapters/index.d.ts",
+			"import": "./lib/adapters/index.js",
+			"default": "./lib/adapters/index.js"
+		},
 		"./airspeed-indicator": {
 			"types": "./lib/components/airspeed-indicator/index.d.ts",
 			"import": "./lib/components/airspeed-indicator/index.js",
