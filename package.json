@@ -24,7 +24,7 @@
 	"devDependencies": {
 		"@changesets/changelog-github": "^0.7.0",
 		"@changesets/cli": "^2.31.1",
-		"puppeteer-core": "^25.4.0"
+		"puppeteer-core": "^25.5.0"
 	},
 	"overrides": {
 		"effect": "4.0.0-beta.93",
