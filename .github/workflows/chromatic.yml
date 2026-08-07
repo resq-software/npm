@@ -20,7 +20,7 @@ jobs:
     name: Chromatic
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Required: Chromatic uses git history to determine which stories changed.
           fetch-depth: 0
@@ -31,7 +31,7 @@ jobs:
         working-directory: packages/ui
       - name: Run Chromatic
         if: github.actor != 'dependabot[bot]'
-        uses: chromaui/action@94713c544284a14195de3b50ef24301579f1877e # v15
+        uses: chromaui/action@14cfaef73576e69f95f47f60058063f46ca38719 # v15
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           storybookBuildDir: packages/ui/storybook-static
