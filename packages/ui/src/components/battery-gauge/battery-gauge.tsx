@@ -62,6 +62,7 @@ const CELLS_BOTTOM = 164;
 const CELLS_MEAN_Y = (CELLS_TOP + CELLS_BOTTOM) / 2;
 const CELLS_HALF_HEIGHT = (CELLS_BOTTOM - CELLS_TOP) / 2;
 const CELL_MIN_HEIGHT = 1.5;
+const CELL_MIN_WIDTH = 1.5;
 const CELL_GAP = 1;
 
 /** Cells beyond this are dropped; the count is surfaced in the label. */
@@ -257,7 +258,7 @@ function BatteryGauge({
 			? deltaWarn
 			: Math.max(deltaWarn, ...cells.shown.map((volts) => Math.abs(volts - cells.mean)));
 	const cellPitch = cells === null ? 0 : BAR_W / cells.shown.length;
-	const cellWidth = Math.max(CELL_MIN_HEIGHT, cellPitch - CELL_GAP);
+	const cellWidth = Math.max(CELL_MIN_WIDTH, cellPitch - CELL_GAP);
 
 	return (
 		<div

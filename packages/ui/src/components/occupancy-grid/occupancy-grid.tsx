@@ -76,12 +76,6 @@ const CLASS_OCCUPIED = 2;
 const RAD_TO_DEG = 180 / Math.PI;
 const PERCENT = 100;
 
-/**
- * Shared clip id. The clip geometry is the fixed plot box, identical for every
- * instance, so a constant id stays correct even with several grids on a page.
- */
-const CLIP_ID = "resq-occupancy-grid-clip";
-
 /** Color tokens (raw theme vars so they resolve in both light and dark). */
 const MARK = "var(--foreground)";
 const HINT = "var(--hint)";
@@ -385,12 +379,6 @@ function OccupancyGrid({
 					viewBox={`0 0 ${VIEW} ${VIEW}`}
 					width="100%"
 				>
-					<defs>
-						<clipPath id={CLIP_ID}>
-							<rect height={PLOT_H} width={PLOT_W} x={PLOT_X} y={PLOT_Y} />
-						</clipPath>
-					</defs>
-
 					<text className="font-mono" fill={HINT} fontSize={8} textAnchor="start" x={6} y={16}>
 						MAP
 					</text>
@@ -425,7 +413,16 @@ function OccupancyGrid({
 							<path d={classPath(raster, fit, CLASS_UNKNOWN)} fill={UNKNOWN} stroke="none" />
 							<path d={classPath(raster, fit, CLASS_OCCUPIED)} fill={OCCUPIED} stroke="none" />
 
-							<g clipPath={`url(#${CLIP_ID})`}>
+							{/* A nested viewport clips to its own bounds, so no clip-path id
+							    is needed — and two grids on one page cannot collide on it. */}
+							<svg
+								aria-hidden="true"
+								height={PLOT_H}
+								viewBox={`${PLOT_X} ${PLOT_Y} ${PLOT_W} ${PLOT_H}`}
+								width={PLOT_W}
+								x={PLOT_X}
+								y={PLOT_Y}
+							>
 								{polyline === "" ? null : (
 									<polyline
 										fill="none"
@@ -443,7 +440,7 @@ function OccupancyGrid({
 										transform={`rotate(${poseRotation.toFixed(2)} ${poseScreen.x.toFixed(2)} ${poseScreen.y.toFixed(2)})`}
 									/>
 								)}
-							</g>
+							</svg>
 						</g>
 					)}
 
