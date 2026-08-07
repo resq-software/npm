@@ -174,14 +174,22 @@ function downsample(
 		const end = Math.min(count, start + stride);
 		let best = Number.POSITIVE_INFINITY;
 
+		let bestIndex = -1;
 		for (let index = start; index < end; index += 1) {
 			const range = ranges[index];
-			if (isReturn(range, rangeMin, rangeMax) && range < best) best = range;
+			if (isReturn(range, rangeMin, rangeMax) && range < best) {
+				best = range;
+				bestIndex = index;
+			}
 		}
 
-		const hit = best !== Number.POSITIVE_INFINITY;
+		const hit = bestIndex !== -1;
+		// A hit is drawn at the bearing of the beam that actually saw it. Using the
+		// bucket midpoint would misplace a close obstacle by up to half a stride —
+		// an error that grows with scan density, exactly when it matters most.
+		const beamIndex = hit ? bestIndex : start + (end - start - 1) / 2;
 		beams.push({
-			angle: angleMin + (start + (end - start - 1) / 2) * increment,
+			angle: angleMin + beamIndex * increment,
 			hit,
 			range: hit ? best : rangeMax,
 		});

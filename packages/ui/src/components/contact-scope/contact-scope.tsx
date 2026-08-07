@@ -138,9 +138,18 @@ function isPlottable(contact: ScopeContact, rangeMax: number): boolean {
 	);
 }
 
+/**
+ * Whether a CPA is usable. A negative closest-approach distance is not a
+ * shorter one — it is nonsense, and treating it as such would paint the nearest
+ * possible risk and hijack the summary line.
+ */
+function isUsableCpa(cpa: number | undefined): cpa is number {
+	return isReading(cpa) && cpa >= 0;
+}
+
 /** Token for a contact's closest-point-of-approach risk. */
 function riskColor(cpa: number | undefined, warning: number, alert: number): string {
-	if (!isReading(cpa)) return NOMINAL;
+	if (!isUsableCpa(cpa)) return NOMINAL;
 	if (cpa <= alert) return DANGER;
 	if (cpa <= warning) return CAUTION;
 	return NOMINAL;
@@ -150,7 +159,7 @@ function riskColor(cpa: number | undefined, warning: number, alert: number): str
 function worstApproach(contacts: readonly ScopeContact[]): ScopeContact | null {
 	let worst: ScopeContact | null = null;
 	for (const contact of contacts) {
-		if (!isReading(contact.cpa)) continue;
+		if (!isUsableCpa(contact.cpa)) continue;
 		if (worst === null || contact.cpa < (worst.cpa as number)) worst = contact;
 	}
 	return worst;

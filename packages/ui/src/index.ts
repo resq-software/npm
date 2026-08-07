@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * @fileoverview Public API for `@resq-systems/ui` — 57-component React
+ * @fileoverview Public API for `@resq-systems/ui` — a React component
  * library built on Radix UI primitives and Tailwind CSS v4 with a
  * dark-first oklch color system.
  *

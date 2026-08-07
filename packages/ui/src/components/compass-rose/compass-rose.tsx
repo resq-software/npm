@@ -82,7 +82,9 @@ function normalizeBearing(value: number): number {
 
 /** Wrap a bearing difference into (−180, 180]. */
 function normalizeDelta(value: number): number {
-	return ((((value + HALF_TURN) % FULL_TURN) + FULL_TURN) % FULL_TURN) - HALF_TURN;
+	const wrapped = ((((value + HALF_TURN) % FULL_TURN) + FULL_TURN) % FULL_TURN) - HALF_TURN;
+	// The range is (−180, 180], so an exact half turn is starboard, not port.
+	return wrapped === -HALF_TURN ? HALF_TURN : wrapped;
 }
 
 /** Three-digit marine bearing, so 7° reads as `007`. */

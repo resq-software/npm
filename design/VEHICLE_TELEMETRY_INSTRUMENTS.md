@@ -101,7 +101,7 @@ it is the contract this design is accountable to.
 | `WheelOdometer` | `sensor_msgs/JointState` / custom drive status | `wheels: { label, velocity, commanded?, slip? }[]`, `maxVelocity` (m/s) |
 | `LidarScan` | `sensor_msgs/LaserScan` | `ranges: number[]`, `angleMin`, `angleIncrement` (rad), `rangeMax` (m), `warnRange` |
 | `OccupancyGrid` | `nav_msgs/OccupancyGrid` + `nav_msgs/Path` | `cells: ArrayLike<number>` (−1 unknown, 0–100 occupancy), `width`, `height`, `resolution`, `pose`, `path` |
-| `BatteryGauge` | `sensor_msgs/BatteryState` | `percentage` (0–1 → shown 0–100), `voltage`, `current`, `cellVoltages[]`, `temperature` |
+| `BatteryGauge` | `sensor_msgs/BatteryState` | `percentage` is **0–100**; ROS sends a 0–1 fraction, so the adapter multiplies by 100. Plus `voltage`, `current`, `cellVoltages[]`, `temperature` |
 | `TeleopPad` | publishes `geometry_msgs/Twist` | emits `{ linear, angular }` normalized to ±1; caller scales to `cmd_vel` |
 
 ### Sea (MAVLink / NMEA / AIS)

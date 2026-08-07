@@ -83,6 +83,13 @@ describe("CompassRose", () => {
 		expect(element.props["aria-label"]).toBe("USV 1 compass");
 	});
 
+	it("reports an exact half-turn divergence as starboard, not port", () => {
+		// normalizeDelta's range is (−180, 180], so 180 must not read as −180.
+		const element = CompassRose({ course: 180, heading: 0 });
+
+		expect(element.props["aria-label"]).toContain("180 degrees starboard drift");
+	});
+
 	it("merges a consumer className over the base size", () => {
 		const element = CompassRose({ className: "size-64", heading: 42 });
 

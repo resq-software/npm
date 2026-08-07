@@ -326,15 +326,26 @@ function TeleopPad({
 		[command.linear, commit],
 	);
 
+	const { onKeyDown: consumerKeyDown, ...rest } = props;
+
 	const handleKeyDown = React.useCallback(
 		(event: React.KeyboardEvent<HTMLDivElement>) => {
-			if (disabled || (event.key !== "Escape" && event.key !== " ")) return;
-			event.preventDefault();
-			commit(zeroVector());
+			// The stop key is handled first so the zero command stays enforced, then
+			// the consumer's handler still runs — spreading `props` onto the root
+			// would otherwise silently drop a declared `div` prop.
+			if (!disabled && (event.key === "Escape" || event.key === " ")) {
+				event.preventDefault();
+				commit(zeroVector());
+			}
+			consumerKeyDown?.(event);
 		},
-		[commit, disabled],
+		[commit, consumerKeyDown, disabled],
 	);
 
+	// The hidden range inputs are the keyboard surface, so their native step *is*
+	// the documented arrow-key increment. Anything non-finite or non-positive
+	// would disable stepping entirely, so fall back rather than forward it.
+	const step = Number.isFinite(keyboardStep) && keyboardStep > 0 ? keyboardStep : INPUT_STEP;
 	const ariaLabel = label ?? formatTeleopLabel(command);
 	const knobX = CENTER + command.angular * PAD_HALF;
 	const knobY = CENTER - command.linear * PAD_HALF;
@@ -342,7 +353,7 @@ function TeleopPad({
 
 	return (
 		<div
-			{...props}
+			{...rest}
 			aria-disabled={disabled || undefined}
 			aria-label={ariaLabel}
 			className={cn(
@@ -459,7 +470,7 @@ function TeleopPad({
 				max={1}
 				min={-1}
 				onChange={handleLinearInput}
-				step={INPUT_STEP}
+				step={step}
 				type="range"
 				value={command.linear}
 			/>
@@ -470,7 +481,7 @@ function TeleopPad({
 				max={1}
 				min={-1}
 				onChange={handleAngularInput}
-				step={INPUT_STEP}
+				step={step}
 				type="range"
 				value={command.angular}
 			/>

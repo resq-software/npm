@@ -270,6 +270,47 @@ describe("TeleopPad", () => {
 		expect(pad.getAttribute("aria-label")).toBe("Rover 3 drive command");
 	});
 
+	it("uses keyboardStep as the native step on both axis inputs", () => {
+		const pad = render(<TeleopPad keyboardStep={0.25} />);
+		const [linear, angular] = rangeInputs(pad);
+
+		expect(linear.getAttribute("step")).toBe("0.25");
+		expect(angular.getAttribute("step")).toBe("0.25");
+	});
+
+	it("falls back to the default step for a non-positive keyboardStep", () => {
+		const pad = render(<TeleopPad keyboardStep={0} />);
+
+		expect(rangeInputs(pad)[0].getAttribute("step")).toBe("0.01");
+	});
+
+	it("forwards a consumer onKeyDown alongside the stop key", () => {
+		const onKeyDown = vi.fn();
+		const onChange = vi.fn();
+		const pad = render(
+			<TeleopPad onChange={onChange} onKeyDown={onKeyDown} value={{ angular: 1, linear: 1 }} />,
+		);
+
+		React.act(() => {
+			pad.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Escape" }));
+		});
+
+		// Both must run: the pad still commands zero, and the consumer still hears it.
+		expect(onChange).toHaveBeenLastCalledWith<[TeleopVector]>({ angular: 0, linear: 0 });
+		expect(onKeyDown).toHaveBeenCalledTimes(1);
+	});
+
+	it("forwards a consumer onKeyDown for keys the pad ignores", () => {
+		const onKeyDown = vi.fn();
+		const pad = render(<TeleopPad onKeyDown={onKeyDown} />);
+
+		React.act(() => {
+			pad.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "a" }));
+		});
+
+		expect(onKeyDown).toHaveBeenCalledTimes(1);
+	});
+
 	it("merges a consumer className over the base size", () => {
 		const pad = render(<TeleopPad className="size-64" />);
 

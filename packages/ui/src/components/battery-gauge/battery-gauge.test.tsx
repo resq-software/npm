@@ -97,6 +97,13 @@ describe("BatteryGauge", () => {
 		expect(element.props["aria-label"]).toBe("Rover 3 pack");
 	});
 
+	it("orders reversed charge thresholds instead of inverting severity", () => {
+		const element = BatteryGauge({ alertPercentage: 40, percentage: 30, warnPercentage: 15 });
+
+		// 30% sits between the two, so it is a warning however they were supplied.
+		expect(element.props["aria-label"]).toBe("Battery, 30 percent");
+	});
+
 	it("merges a consumer className over the base size", () => {
 		const element = BatteryGauge({ ...PACK, className: "size-64" });
 

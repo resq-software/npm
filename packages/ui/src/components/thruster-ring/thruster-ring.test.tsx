@@ -106,6 +106,13 @@ describe("ThrusterRing", () => {
 		expect(element.props["aria-label"]).toBe("ROV 2 thrust");
 	});
 
+	it("clamps an out-of-range saturation threshold to full output", () => {
+		// A threshold above 1 is unreachable and would disable the callout.
+		const element = ThrusterRing({ saturation: 1.1, thrusters: [{ label: "T1", output: 1 }] });
+
+		expect(element.props["aria-label"]).toContain("1 saturated: T1");
+	});
+
 	it("merges a consumer className over the base size", () => {
 		const element = ThrusterRing({ className: "size-64", thrusters: VECTORED_SIX });
 

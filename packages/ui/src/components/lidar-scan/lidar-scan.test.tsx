@@ -115,6 +115,22 @@ describe("LidarScan", () => {
 		expect(element.props["aria-label"]).toBe("Rover 3 lidar");
 	});
 
+	it("plots a downsampled hit at its own bearing, not the bucket midpoint", () => {
+		// 1080 beams reduce to 360 buckets (stride 3). Beam 4 is 1.333° off the
+		// start; the midpoint of its bucket (beams 3-5) sits a full beam away, so
+		// a midpoint angle would misreport the bearing.
+		const dense = Array.from({ length: 1080 }, () => 8);
+		dense[4] = 0.4;
+		const element = LidarScan({
+			angleIncrement: (2 * Math.PI) / 1080,
+			angleMin: 0,
+			ranges: dense,
+		});
+
+		// Beam 4 → 4 × (360/1080)° = 1.33° counter-clockwise → 359° clockwise.
+		expect(element.props["aria-label"]).toContain("nearest obstacle 0.4 meters at 359 degrees");
+	});
+
 	it("merges a consumer className over the base size", () => {
 		const element = LidarScan({ className: "size-64", ranges: EIGHT_BEAM });
 

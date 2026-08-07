@@ -101,6 +101,11 @@ interface CellSummary {
 
 //#region Helpers
 
+/** Whether a current reading rounds to no measurable flow. */
+function isNoFlow(current: number | undefined): boolean {
+	return isReading(current) && Math.round(current * 10) === 0;
+}
+
 /** Token for the current state of charge. */
 function chargeColor(percentage: number, warn: number, alert: number): string {
 	if (percentage <= alert) return DANGER;
@@ -150,7 +155,7 @@ function formatBatteryLabel(
 	}
 	if (isReading(current)) {
 		const magnitude = Math.abs(current).toFixed(1);
-		if (Math.round(current * 10) === 0) {
+		if (isNoFlow(current)) {
 			parts.push("no current flow");
 		} else {
 			parts.push(`${current > 0 ? "charging" : "discharging"} ${magnitude} amps`);
@@ -230,8 +235,12 @@ function BatteryGauge({
 	className,
 	...props
 }: Readonly<BatteryGaugeProps>) {
-	const warn = safePositive(warnPercentage, DEFAULT_WARN_PERCENTAGE);
-	const alert = safePositive(alertPercentage, DEFAULT_ALERT_PERCENTAGE);
+	const warnInput = safePositive(warnPercentage, DEFAULT_WARN_PERCENTAGE);
+	const alertInput = safePositive(alertPercentage, DEFAULT_ALERT_PERCENTAGE);
+	// Alert is the more severe threshold, so it must sit at or below warn. Reversed
+	// inputs would otherwise paint a mid charge red while the label called it fine.
+	const warn = Math.max(warnInput, alertInput);
+	const alert = Math.min(warnInput, alertInput);
 	const deltaWarn = safePositive(cellDeltaWarning, DEFAULT_CELL_DELTA_WARNING);
 	const deltaAlert = safePositive(cellDeltaAlert, DEFAULT_CELL_DELTA_ALERT);
 
@@ -306,7 +315,11 @@ function BatteryGauge({
 						{readout(voltage, 1, "")}
 					</text>
 					<text className="font-mono" fill={HINT} fontSize={8} textAnchor="end" x={188} y={70}>
-						{isReading(current) && current > 0 ? "AMPS IN" : "AMPS OUT"}
+						{isNoFlow(current)
+							? "NO FLOW"
+							: isReading(current) && current > 0
+								? "AMPS IN"
+								: "AMPS OUT"}
 					</text>
 					<text className="font-mono" fill={MARK} fontSize={15} textAnchor="end" x={188} y={88}>
 						{isReading(current) ? Math.abs(current).toFixed(1) : "—"}

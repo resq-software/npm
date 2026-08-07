@@ -192,8 +192,11 @@ function WheelOdometer({
 	...props
 }: Readonly<WheelOdometerProps>) {
 	const max = safePositive(maxVelocity, DEFAULT_MAX_VELOCITY);
-	const warning = safePositive(slipWarning, DEFAULT_SLIP_WARNING);
-	const alert = safePositive(slipAlert, DEFAULT_SLIP_ALERT);
+	const warningInput = safePositive(slipWarning, DEFAULT_SLIP_WARNING);
+	const alertInput = safePositive(slipAlert, DEFAULT_SLIP_ALERT);
+	// Alert is the more severe threshold, so it must sit at or above warning.
+	const warning = Math.min(warningInput, alertInput);
+	const alert = Math.max(warningInput, alertInput);
 
 	const all = wheels ?? [];
 	const shown = all.slice(0, MAX_WHEELS);

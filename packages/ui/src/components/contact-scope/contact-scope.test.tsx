@@ -124,6 +124,20 @@ describe("ContactScope", () => {
 		expect(element.props["aria-label"]).toBe("USV 1 traffic");
 	});
 
+	it("ignores a negative CPA rather than treating it as the closest approach", () => {
+		// A negative closest-approach distance is nonsense, not an urgent one.
+		const element = ContactScope({
+			contacts: [
+				{ bearing: 45, cpa: -3, id: "GHOST", range: 1 },
+				{ bearing: 90, cpa: 2.4, id: "REAL", range: 2 },
+			],
+		});
+
+		expect(element.props["aria-label"]).toContain("closest point of approach 2.4 NM for REAL");
+		expect(element.props["aria-label"]).not.toContain("collision risk");
+		expect(element.props["aria-label"]).not.toContain("-3");
+	});
+
 	it("merges a consumer className over the base size", () => {
 		const element = ContactScope({ className: "size-64", contacts: TRAFFIC });
 

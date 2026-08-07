@@ -130,6 +130,18 @@ describe("WheelOdometer", () => {
 		expect(element.props["aria-label"]).toBe("Rover 3 drive");
 	});
 
+	it("orders reversed slip thresholds instead of inverting severity", () => {
+		// slipWarning above slipAlert would otherwise report no slip while
+		// painting the bar red.
+		const element = WheelOdometer({
+			slipAlert: 0.2,
+			slipWarning: 0.6,
+			wheels: [{ commanded: 1.2, label: "RL", velocity: 0.3 }],
+		});
+
+		expect(element.props["aria-label"]).toContain("1 slipping: RL");
+	});
+
 	it("merges a consumer className over the base size", () => {
 		const element = WheelOdometer({ className: "size-64", wheels: TRACKING });
 

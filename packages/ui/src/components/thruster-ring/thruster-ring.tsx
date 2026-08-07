@@ -206,7 +206,9 @@ function ThrusterRing({
 	className,
 	...props
 }: Readonly<ThrusterRingProps>) {
-	const limit = safePositive(saturation, DEFAULT_SATURATION);
+	// Outputs are normalized to ±1, so a threshold above 1 could never be reached
+	// and would silently disable the saturation callout.
+	const limit = Math.min(1, safePositive(saturation, DEFAULT_SATURATION));
 	const all = thrusters ?? [];
 	const shown = all.slice(0, MAX_THRUSTERS);
 
