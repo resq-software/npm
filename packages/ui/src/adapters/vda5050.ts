@@ -40,6 +40,7 @@
 import type { BatteryGaugeProps } from "../components/battery-gauge/index.js";
 import type { GridPose } from "../components/occupancy-grid/index.js";
 import type { TeleopVector } from "../components/teleop-pad/index.js";
+import { clamp, optional } from "./numeric.js";
 
 //#region Constants
 
@@ -111,16 +112,6 @@ export interface Vda5050ErrorSummary {
 //#endregion
 
 //#region Helpers
-
-/** Finite number or `undefined`. */
-function optional(value: number | undefined): number | undefined {
-	return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
-
-/** Clamp into the inclusive range. */
-function clamp(value: number, min: number, max: number): number {
-	return Math.min(max, Math.max(min, value));
-}
 
 /** Normalize a velocity component against its full scale, guarding zero. */
 function normalizeAxis(value: number | undefined, scale: number): number {

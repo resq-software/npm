@@ -35,6 +35,7 @@
 import type { BatteryGaugeProps } from "../components/battery-gauge/index.js";
 import type { CompassRoseProps } from "../components/compass-rose/index.js";
 import type { TiltIndicatorProps } from "../components/tilt-indicator/index.js";
+import { optional } from "./numeric.js";
 
 //#region Constants
 
@@ -110,11 +111,6 @@ export interface DepthFromPressureOptions {
 //#endregion
 
 //#region Helpers
-
-/** Finite number or `undefined`. */
-function optional(value: number | undefined): number | undefined {
-	return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
 
 /** Finite, non-sentinel number or `undefined`. */
 function withoutSentinel(value: number | undefined, sentinel: number): number | undefined {
@@ -192,9 +188,13 @@ export function pressureToDepth(
 export function batteryStatusToProps(
 	status: Readonly<MavlinkBatteryStatus>,
 ): Pick<BatteryGaugeProps, "percentage" | "voltage" | "current" | "temperature" | "cellVoltages"> {
-	const cells = (status.voltages ?? [])
-		.filter((millivolts) => Number.isFinite(millivolts) && millivolts !== UINT16_MAX)
-		.map((millivolts) => millivolts / MILLI);
+	// One pass rather than filter-then-map: no intermediate array, and the
+	// sentinel check stays next to the conversion it guards.
+	const cells: number[] = [];
+	for (const millivolts of status.voltages ?? []) {
+		if (!Number.isFinite(millivolts) || millivolts === UINT16_MAX) continue;
+		cells.push(millivolts / MILLI);
+	}
 
 	const centiamps = withoutSentinel(status.current_battery, UNKNOWN);
 	const centidegrees = withoutSentinel(status.temperature, INT16_MAX);

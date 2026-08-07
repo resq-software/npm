@@ -46,6 +46,7 @@ import {
 	INSTRUMENT_CENTER,
 	INSTRUMENT_VIEW,
 	polar,
+	safePositive,
 	toFinite,
 } from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
@@ -104,12 +105,6 @@ export interface ThrusterReading {
 
 //#region Helpers
 
-/** Positive, finite value or the supplied fallback. */
-function safePositive(value: number | undefined, fallback: number): number {
-	const resolved = toFinite(value, fallback);
-	return resolved > 0 ? resolved : fallback;
-}
-
 /** Mounting bearing, falling back to an even distribution around the hull. */
 function bearingOf(thruster: ThrusterReading, index: number, count: number): number {
 	if (typeof thruster.angle === "number" && Number.isFinite(thruster.angle)) {
@@ -140,9 +135,10 @@ function formatThrusterLabel(
 
 	const magnitudes = shown.map((thruster) => Math.abs(clamp(toFinite(thruster.output), -1, 1)));
 	const peak = Math.max(...magnitudes);
-	const saturated = shown
-		.filter((_thruster, index) => magnitudes[index] >= saturation)
-		.map((thruster) => thruster.label);
+	const saturated: string[] = [];
+	for (let index = 0; index < shown.length; index += 1) {
+		if (magnitudes[index] >= saturation) saturated.push(shown[index].label);
+	}
 
 	const saturationPart =
 		saturated.length === 0

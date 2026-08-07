@@ -29,9 +29,10 @@
  *    latching is opt-in.
  * 2. **No layout reads.** Pointer position comes from the event's `offsetX` /
  *    `offsetY` (computed at dispatch, so nothing is measured on demand) divided
- *    by a size kept in state by a `ResizeObserver`. The measuring DOM APIs that
+ *    by a size a `ResizeObserver` keeps in a ref. The measuring DOM APIs that
  *    force synchronous layout are never called; the package's perf guards block
- *    them outright.
+ *    them outright. The size lives in a ref rather than state because only the
+ *    pointer handler reads it, so a resize must not cost a render.
  * 3. **Real controls underneath.** Two visually-hidden `<input type="range">`
  *    elements carry the axes, so keyboard and assistive-technology users get
  *    native slider semantics, announcements and stepping instead of a `div`
@@ -225,7 +226,10 @@ function TeleopPad({
 	...props
 }: Readonly<TeleopPadProps>) {
 	const padRef = React.useRef<HTMLDivElement>(null);
-	const [size, setSize] = React.useState({ height: 0, width: 0 });
+	// A ref, not state: the measured size is read only inside the pointer handler
+	// and never during render, so keeping it in state would re-render the whole
+	// instrument on every resize for no visual change.
+	const sizeRef = React.useRef({ height: 0, width: 0 });
 	const [dragging, setDragging] = React.useState(false);
 	const [internal, setInternal] = React.useState(() => normalizeVector(defaultValue));
 
@@ -241,7 +245,7 @@ function TeleopPad({
 		const observer = new ResizeObserver((entries) => {
 			const entry = entries[0];
 			if (entry === undefined) return;
-			setSize({ height: entry.contentRect.height, width: entry.contentRect.width });
+			sizeRef.current = { height: entry.contentRect.height, width: entry.contentRect.width };
 		});
 		observer.observe(node);
 		return () => observer.disconnect();
@@ -257,16 +261,17 @@ function TeleopPad({
 
 	const updateFromPointer = React.useCallback(
 		(event: React.PointerEvent<HTMLDivElement>) => {
-			if (size.width <= 0 || size.height <= 0) return;
+			const { height, width } = sizeRef.current;
+			if (width <= 0 || height <= 0) return;
 			const native = event.nativeEvent;
 			commit(
 				normalizeVector({
-					angular: (native.offsetX / size.width) * 2 - 1,
-					linear: 1 - (native.offsetY / size.height) * 2,
+					angular: (native.offsetX / width) * 2 - 1,
+					linear: 1 - (native.offsetY / height) * 2,
 				}),
 			);
 		},
-		[commit, size.height, size.width],
+		[commit],
 	);
 
 	const handlePointerDown = React.useCallback(

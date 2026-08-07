@@ -45,6 +45,7 @@ import {
 	INSTRUMENT_CENTER,
 	INSTRUMENT_VIEW,
 	polar,
+	safePositive,
 	toFinite,
 } from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
@@ -107,12 +108,6 @@ interface ScanSummary {
 //#endregion
 
 //#region Helpers
-
-/** Positive, finite value or the supplied fallback. */
-function safePositive(value: number | undefined, fallback: number): number {
-	const resolved = toFinite(value, fallback);
-	return resolved > 0 ? resolved : fallback;
-}
 
 /** Whether a raw range counts as a real return for this scan configuration. */
 function isReturn(range: number, rangeMin: number, rangeMax: number): boolean {

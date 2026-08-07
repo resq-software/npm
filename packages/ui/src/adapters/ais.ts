@@ -34,6 +34,7 @@
  */
 
 import type { ScopeContact } from "../components/contact-scope/index.js";
+import { optional } from "./numeric.js";
 import {
 	bearingDeg,
 	courseToVelocity,
@@ -83,11 +84,6 @@ export interface Approach {
 //#endregion
 
 //#region Helpers
-
-/** Finite number or `undefined`. */
-function optional(value: number | undefined): number | undefined {
-	return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
 
 /** Prefer a real name over the MMSI, but never an empty string. */
 function contactId(report: Readonly<AisPositionReport>): string {

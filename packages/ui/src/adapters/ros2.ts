@@ -33,6 +33,7 @@ import type { LidarScanProps } from "../components/lidar-scan/index.js";
 import type { GridPose, OccupancyGridProps } from "../components/occupancy-grid/index.js";
 import type { TeleopVector } from "../components/teleop-pad/index.js";
 import type { TiltIndicatorProps } from "../components/tilt-indicator/index.js";
+import { clamp, optional } from "./numeric.js";
 
 //#region Constants
 
@@ -108,20 +109,6 @@ export interface EulerAngles {
 	roll: number;
 	pitch: number;
 	yaw: number;
-}
-
-//#endregion
-
-//#region Helpers
-
-/** Finite number or `undefined`, so absent readings stay absent. */
-function optional(value: number | undefined): number | undefined {
-	return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
-
-/** Clamp into the inclusive range. */
-function clamp(value: number, min: number, max: number): number {
-	return Math.min(max, Math.max(min, value));
 }
 
 //#endregion

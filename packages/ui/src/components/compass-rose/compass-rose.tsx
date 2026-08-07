@@ -35,7 +35,7 @@
 
 import type * as React from "react";
 
-import { INSTRUMENT_CENTER, INSTRUMENT_VIEW, polar } from "../../lib/instrument-dial.js";
+import { INSTRUMENT_CENTER, INSTRUMENT_VIEW, isReading, polar } from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
 //#region Geometry constants
@@ -74,11 +74,6 @@ const DRIFT = "var(--warning)";
 //#endregion
 
 //#region Helpers
-
-/** Whether a prop carries a usable reading. */
-function isReading(value: number | undefined): value is number {
-	return typeof value === "number" && Number.isFinite(value);
-}
 
 /** Wrap a bearing into [0, 360). */
 function normalizeBearing(value: number): number {

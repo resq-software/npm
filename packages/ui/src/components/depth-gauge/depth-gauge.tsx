@@ -35,7 +35,13 @@
 
 import type * as React from "react";
 
-import { clamp, INSTRUMENT_VIEW, linearTicks, toFinite } from "../../lib/instrument-dial.js";
+import {
+	clamp,
+	INSTRUMENT_VIEW,
+	isReading,
+	linearTicks,
+	safePositive,
+} from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
 //#region Geometry constants
@@ -74,17 +80,6 @@ const DANGER = "var(--destructive)";
 //#endregion
 
 //#region Helpers
-
-/** Positive, finite value or the supplied fallback. */
-function safePositive(value: number | undefined, fallback: number): number {
-	const resolved = toFinite(value, fallback);
-	return resolved > 0 ? resolved : fallback;
-}
-
-/** Whether a prop carries a usable reading. */
-function isReading(value: number | undefined): value is number {
-	return typeof value === "number" && Number.isFinite(value);
-}
 
 /** Resolve the full-scale depth: explicit, else derived from the seabed. */
 function resolveMaxDepth(maxDepth: number | undefined, seabed: number | undefined): number {

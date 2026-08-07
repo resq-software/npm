@@ -46,8 +46,9 @@ import {
 	clamp,
 	INSTRUMENT_CENTER,
 	INSTRUMENT_VIEW,
+	isReading,
 	polar,
-	toFinite,
+	safePositive,
 } from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
@@ -116,17 +117,6 @@ export interface ScopeContact {
 //#endregion
 
 //#region Helpers
-
-/** Positive, finite value or the supplied fallback. */
-function safePositive(value: number | undefined, fallback: number): number {
-	const resolved = toFinite(value, fallback);
-	return resolved > 0 ? resolved : fallback;
-}
-
-/** Whether a prop carries a usable reading. */
-function isReading(value: number | undefined): value is number {
-	return typeof value === "number" && Number.isFinite(value);
-}
 
 /** Wrap a bearing into [0, 360). */
 function normalizeBearing(value: number): number {
@@ -293,10 +283,13 @@ function ContactScope({
 	const scale = safePositive(speedScale, DEFAULT_SPEED_SCALE);
 	const ownHeading = isReading(heading) ? normalizeBearing(heading) : 0;
 
-	// Nearest-first, so the cap keeps the contacts that actually matter.
+	// Nearest-first, so the cap keeps the contacts that actually matter. `filter`
+	// has already produced a fresh array, so sorting it in place cannot reach the
+	// caller's prop — which keeps the non-mutating guarantee without `toSorted`,
+	// unavailable at this package's compilation target.
 	const plottable = (contacts ?? [])
 		.filter((contact) => isPlottable(contact, max))
-		.toSorted((left, right) => left.range - right.range);
+		.sort((left, right) => left.range - right.range);
 	const shown = plottable.slice(0, MAX_CONTACTS);
 
 	const ariaLabel = label ?? formatScopeLabel(shown, plottable.length, max, rangeUnit, alert);

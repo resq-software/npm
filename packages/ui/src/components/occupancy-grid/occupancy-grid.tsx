@@ -42,7 +42,7 @@
 
 import type * as React from "react";
 
-import { INSTRUMENT_VIEW, toFinite } from "../../lib/instrument-dial.js";
+import { INSTRUMENT_VIEW, safePositive, toFinite } from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
 //#region Geometry constants
@@ -130,12 +130,6 @@ interface Fit {
 //#endregion
 
 //#region Helpers
-
-/** Positive, finite value or the supplied fallback. */
-function safePositive(value: number | undefined, fallback: number): number {
-	const resolved = toFinite(value, fallback);
-	return resolved > 0 ? resolved : fallback;
-}
 
 /** Whole, positive dimension or 0 when the input cannot describe a grid. */
 function safeExtent(value: number | undefined): number {

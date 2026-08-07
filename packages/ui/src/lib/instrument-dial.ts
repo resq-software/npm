@@ -30,6 +30,25 @@ export function clamp(value: number, min: number, max: number): number {
 	return Math.min(max, Math.max(min, value));
 }
 
+/**
+ * Whether a prop carries a usable reading. Narrows `number | undefined` to
+ * `number`, so an instrument can tell "absent" apart from zero and leave a
+ * readout blank rather than displaying a fabricated 0.
+ */
+export function isReading(value: number | undefined): value is number {
+	return typeof value === "number" && Number.isFinite(value);
+}
+
+/**
+ * A strictly positive, finite value, or `fallback` when the input is neither.
+ * Full-scale ranges and thresholds use this: a zero or negative scale would
+ * divide by zero or invert the display, so it is treated as absent.
+ */
+export function safePositive(value: number | undefined, fallback: number): number {
+	const resolved = toFinite(value, fallback);
+	return resolved > 0 ? resolved : fallback;
+}
+
 /** Point on a circle centred on the instrument, at `angleDeg` clockwise from top. */
 export function polar(angleDeg: number, radius: number): Point {
 	const rad = (angleDeg * Math.PI) / 180;

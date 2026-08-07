@@ -37,7 +37,13 @@
 
 import type * as React from "react";
 
-import { clamp, INSTRUMENT_CENTER, INSTRUMENT_VIEW, toFinite } from "../../lib/instrument-dial.js";
+import {
+	clamp,
+	INSTRUMENT_CENTER,
+	INSTRUMENT_VIEW,
+	safePositive,
+	toFinite,
+} from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
 //#region Geometry constants
@@ -77,12 +83,6 @@ const DANGER = "var(--destructive)";
 //#endregion
 
 //#region Helpers
-
-/** Positive, finite limit or the supplied fallback. */
-function safeLimit(value: number | undefined, fallback: number): number {
-	const resolved = toFinite(value, fallback);
-	return resolved > 0 ? resolved : fallback;
-}
 
 /** Token for the current envelope usage. */
 function statusColor(fraction: number): string {
@@ -185,8 +185,8 @@ function TiltIndicator({
 	className,
 	...props
 }: Readonly<TiltIndicatorProps>) {
-	const rollMax = safeLimit(rollLimit, DEFAULT_ROLL_LIMIT);
-	const pitchMax = safeLimit(pitchLimit, DEFAULT_PITCH_LIMIT);
+	const rollMax = safePositive(rollLimit, DEFAULT_ROLL_LIMIT);
+	const pitchMax = safePositive(pitchLimit, DEFAULT_PITCH_LIMIT);
 	const rollDeg = clamp(toFinite(roll), -TILT_DISPLAY_LIMIT, TILT_DISPLAY_LIMIT);
 	const pitchDeg = clamp(toFinite(pitch), -TILT_DISPLAY_LIMIT, TILT_DISPLAY_LIMIT);
 

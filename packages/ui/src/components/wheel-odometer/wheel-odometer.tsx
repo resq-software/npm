@@ -36,7 +36,7 @@
 
 import type * as React from "react";
 
-import { clamp, INSTRUMENT_VIEW, toFinite } from "../../lib/instrument-dial.js";
+import { clamp, INSTRUMENT_VIEW, safePositive, toFinite } from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
 //#region Geometry constants
@@ -96,12 +96,6 @@ export interface WheelReading {
 
 //#region Helpers
 
-/** Positive, finite full-scale velocity or the supplied fallback. */
-function safeScale(value: number | undefined, fallback: number): number {
-	const resolved = toFinite(value, fallback);
-	return resolved > 0 ? resolved : fallback;
-}
-
 /** Map a velocity onto the bipolar bar's x axis. */
 function velocityToX(velocity: number, max: number): number {
 	return BAR_CENTER + (clamp(velocity, -max, max) / max) * BAR_HALF;
@@ -145,7 +139,10 @@ function formatWheelLabel(
 	const mean =
 		shown.reduce((sum, wheel) => sum + Math.abs(toFinite(wheel.velocity)), 0) / shown.length;
 
-	const slipping = shown.filter((_wheel, index) => slips[index] >= warning).map((w) => w.label);
+	const slipping: string[] = [];
+	for (let index = 0; index < shown.length; index += 1) {
+		if (slips[index] >= warning) slipping.push(shown[index].label);
+	}
 	const slipPart =
 		slipping.length === 0
 			? "no slip detected"
@@ -194,9 +191,9 @@ function WheelOdometer({
 	className,
 	...props
 }: Readonly<WheelOdometerProps>) {
-	const max = safeScale(maxVelocity, DEFAULT_MAX_VELOCITY);
-	const warning = safeScale(slipWarning, DEFAULT_SLIP_WARNING);
-	const alert = safeScale(slipAlert, DEFAULT_SLIP_ALERT);
+	const max = safePositive(maxVelocity, DEFAULT_MAX_VELOCITY);
+	const warning = safePositive(slipWarning, DEFAULT_SLIP_WARNING);
+	const alert = safePositive(slipAlert, DEFAULT_SLIP_ALERT);
 
 	const all = wheels ?? [];
 	const shown = all.slice(0, MAX_WHEELS);
