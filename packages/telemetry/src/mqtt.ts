@@ -231,17 +231,26 @@ export class MqttTelemetrySource {
 		const client = this.#factory(this.#url);
 		this.#client = client;
 
+		// Every handler is scoped to the client that registered it. `close()` drops
+		// the reference but cannot unregister these, so a delayed event from a
+		// superseded client would otherwise revive the state or deliver stale
+		// telemetry onto a newer connection.
+		const isCurrent = () => this.#client === client;
+
 		client.on("connect", () => {
+			if (!isCurrent()) return;
 			this.#setState("open");
 			this.#resubscribe();
 			for (const sub of this.#subscribers) sub.onOpen?.();
 		});
 
 		client.on("reconnect", () => {
+			if (!isCurrent()) return;
 			if (!this.#closedByUser) this.#setState("reconnecting");
 		});
 
 		client.on("close", () => {
+			if (!isCurrent()) return;
 			for (const sub of this.#subscribers) sub.onClose?.();
 			this.#setState(this.#closedByUser ? "closed" : "reconnecting");
 		});
@@ -251,6 +260,7 @@ export class MqttTelemetrySource {
 		client.on("error", () => {});
 
 		client.on("message", (topic: string, payload: MqttPayload) => {
+			if (!isCurrent()) return;
 			const data = decodePayload(payload);
 			for (const sub of this.#subscribers) {
 				if (sub.topic === undefined || topicMatches(sub.topic, topic)) {

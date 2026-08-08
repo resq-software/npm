@@ -168,7 +168,12 @@ export function stateToPose(state: Readonly<Vda5050State>): GridPose | null {
 	const y = optional(position.y);
 	if (x === undefined || y === undefined) return null;
 
-	return { theta: optional(position.theta) ?? 0, x, y };
+	// An unreported orientation is not a heading of zero — that would draw the
+	// AGV confidently facing +x. `GridPose.theta` is optional, so leave it out.
+	const theta = optional(position.theta);
+	const pose: GridPose = { x, y };
+	if (theta !== undefined) pose.theta = theta;
+	return pose;
 }
 
 /**

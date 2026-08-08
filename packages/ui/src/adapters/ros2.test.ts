@@ -210,3 +210,36 @@ describe("teleopToTwist", () => {
 		expect(twist.angular.y).toBe(0);
 	});
 });
+
+describe("teleopToTwist input validation", () => {
+	it("clamps a command beyond the normalized range to the speed limit", () => {
+		const twist = teleopToTwist({ angular: -9, linear: 9 }, { angular: 2, linear: 1.5 });
+
+		expect(twist.linear.x).toBeCloseTo(1.5, 6);
+		expect(twist.angular.z).toBeCloseTo(-2, 6);
+	});
+
+	it("treats a non-finite command axis as stopped", () => {
+		const twist = teleopToTwist(
+			{ angular: Number.NaN, linear: Number.POSITIVE_INFINITY },
+			{ angular: 2, linear: 1.5 },
+		);
+
+		expect(twist.linear.x).toBe(0);
+		expect(twist.angular.z).toBe(0);
+	});
+
+	it("refuses to invert the command on a negative scale", () => {
+		const twist = teleopToTwist({ angular: 1, linear: 1 }, { angular: -2, linear: -1.5 });
+
+		expect(twist.linear.x).toBe(0);
+		expect(twist.angular.z).toBe(0);
+	});
+
+	it("treats a non-finite scale as zero rather than emitting NaN", () => {
+		const twist = teleopToTwist({ angular: 1, linear: 1 }, { angular: Number.NaN, linear: 0 });
+
+		expect(twist.linear.x).toBe(0);
+		expect(twist.angular.z).toBe(0);
+	});
+});

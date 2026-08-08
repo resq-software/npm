@@ -230,9 +230,18 @@ export function teleopToTwist(
 	command: Readonly<TeleopVector>,
 	scale: Readonly<{ linear: number; angular: number }>,
 ): Ros2Twist {
+	// This is the one function here that drives a vehicle rather than describing
+	// one, so it distrusts its inputs: axes are clamped to the ±1 the pad
+	// promises, and a non-finite or non-positive scale becomes zero rather than
+	// reversing or invalidating the command.
+	const linearScale = optional(scale.linear);
+	const angularScale = optional(scale.angular);
+	const safeLinear = linearScale !== undefined && linearScale > 0 ? linearScale : 0;
+	const safeAngular = angularScale !== undefined && angularScale > 0 ? angularScale : 0;
+
 	return {
-		angular: { x: 0, y: 0, z: command.angular * scale.angular },
-		linear: { x: command.linear * scale.linear, y: 0, z: 0 },
+		angular: { x: 0, y: 0, z: clamp(optional(command.angular) ?? 0, -1, 1) * safeAngular },
+		linear: { x: clamp(optional(command.linear) ?? 0, -1, 1) * safeLinear, y: 0, z: 0 },
 	};
 }
 

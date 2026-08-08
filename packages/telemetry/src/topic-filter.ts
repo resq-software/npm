@@ -32,6 +32,21 @@ const MULTI_LEVEL = "#";
 const RESERVED_PREFIX = "$";
 
 /**
+ * Whether every wildcard occupies a whole level, and `#` is the last of them.
+ * MQTT 3.1.1 §4.7.1 makes anything else a malformed filter, which a broker
+ * would reject outright.
+ */
+function isWellFormed(levels: readonly string[]): boolean {
+	for (let index = 0; index < levels.length; index += 1) {
+		const level = levels[index];
+		if (level.includes(MULTI_LEVEL) && level !== MULTI_LEVEL) return false;
+		if (level.includes(SINGLE_LEVEL) && level !== SINGLE_LEVEL) return false;
+		if (level === MULTI_LEVEL && index !== levels.length - 1) return false;
+	}
+	return true;
+}
+
+/**
  * Whether an MQTT topic name matches a topic filter.
  *
  * Implements the wildcard rules from MQTT 3.1.1 §4.7:
@@ -51,9 +66,13 @@ const RESERVED_PREFIX = "$";
  * ```
  */
 export function topicMatches(filter: string, topic: string): boolean {
+	const filterLevels = filter.split(SEPARATOR);
+
+	// Validate before the exact-match fast path, or a malformed filter would
+	// match itself and contradict the rule that it matches nothing.
+	if (!isWellFormed(filterLevels)) return false;
 	if (filter === topic) return true;
 
-	const filterLevels = filter.split(SEPARATOR);
 	const topicLevels = topic.split(SEPARATOR);
 
 	const leading = filterLevels[0];

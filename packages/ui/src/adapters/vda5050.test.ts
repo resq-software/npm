@@ -66,8 +66,12 @@ describe("stateToPose", () => {
 		expect(stateToPose({ agvPosition: { theta: 0, x: Number.NaN, y: 2 } })).toBeNull();
 	});
 
-	it("defaults a non-finite theta to zero rather than dropping the pose", () => {
-		expect(stateToPose({ agvPosition: { theta: Number.NaN, x: 1, y: 2 } })?.theta).toBe(0);
+	it("keeps the pose but omits an unknown theta rather than inventing zero", () => {
+		// Reporting 0 would draw the AGV confidently facing +x; absent is honest.
+		const pose = stateToPose({ agvPosition: { theta: Number.NaN, x: 1, y: 2 } });
+
+		expect(pose).toEqual({ x: 1, y: 2 });
+		expect(pose?.theta).toBeUndefined();
 	});
 });
 

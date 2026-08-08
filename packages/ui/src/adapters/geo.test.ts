@@ -133,3 +133,32 @@ describe("isPosition", () => {
 		expect(isPosition({ latitude: 1, longitude: Number.POSITIVE_INFINITY })).toBe(false);
 	});
 });
+
+describe("antimeridian and coordinate bounds", () => {
+	it("wraps a longitude delta across the antimeridian", () => {
+		// 179.9°E to 179.9°W is 0.2° apart, not 359.8°.
+		const offset = toLocalNm({ latitude: 0, longitude: 179.9 }, { latitude: 0, longitude: -179.9 });
+
+		expect(offset.east).toBeCloseTo(12, 1);
+	});
+
+	it("keeps the sign of a wrapped delta", () => {
+		const east = toLocalNm({ latitude: 0, longitude: 179.9 }, { latitude: 0, longitude: -179.9 });
+		const west = toLocalNm({ latitude: 0, longitude: -179.9 }, { latitude: 0, longitude: 179.9 });
+
+		expect(east.east).toBeGreaterThan(0);
+		expect(west.east).toBeLessThan(0);
+	});
+
+	it("rejects coordinates outside the valid geographic range", () => {
+		expect(isPosition({ latitude: 91, longitude: 0 })).toBe(false);
+		expect(isPosition({ latitude: -91, longitude: 0 })).toBe(false);
+		expect(isPosition({ latitude: 0, longitude: 181 })).toBe(false);
+		expect(isPosition({ latitude: 0, longitude: -181 })).toBe(false);
+	});
+
+	it("accepts the poles and the antimeridian themselves", () => {
+		expect(isPosition({ latitude: 90, longitude: 180 })).toBe(true);
+		expect(isPosition({ latitude: -90, longitude: -180 })).toBe(true);
+	});
+});

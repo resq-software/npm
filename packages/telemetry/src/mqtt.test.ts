@@ -282,3 +282,63 @@ describe("MqttTelemetrySource", () => {
 		expect(source.state).toBe("closed");
 	});
 });
+
+describe("MqttTelemetrySource superseded clients", () => {
+	it("ignores a delayed connect from a client that was closed", () => {
+		const { client, source } = makeSource();
+		source.connect();
+		client.emit("connect");
+		source.close();
+
+		// The old client still holds our handlers; a late event must not revive it.
+		client.emit("connect");
+
+		expect(source.state).toBe("closed");
+	});
+
+	it("ignores a delayed message from a superseded client", () => {
+		const first = new FakeClient();
+		const second = new FakeClient();
+		const clients = [first, second];
+		let index = 0;
+		const source = new MqttTelemetrySource({
+			connect: () => clients[index++],
+			url: "wss://broker.invalid/mqtt",
+		});
+		const onMessage = vi.fn();
+		source.subscribe({ onMessage });
+
+		source.connect();
+		first.emit("connect");
+		source.close();
+		source.connect();
+		second.emit("connect");
+
+		first.deliver(STATE_TOPIC, '{"stale":true}');
+
+		expect(onMessage).not.toHaveBeenCalled();
+	});
+
+	it("still delivers from the live client after a reconnect cycle", () => {
+		const first = new FakeClient();
+		const second = new FakeClient();
+		const clients = [first, second];
+		let index = 0;
+		const source = new MqttTelemetrySource({
+			connect: () => clients[index++],
+			url: "wss://broker.invalid/mqtt",
+		});
+		const onMessage = vi.fn();
+		source.subscribe({ onMessage });
+
+		source.connect();
+		first.emit("connect");
+		source.close();
+		source.connect();
+		second.emit("connect");
+
+		second.deliver(STATE_TOPIC, '{"live":true}');
+
+		expect(onMessage).toHaveBeenCalledWith(STATE_TOPIC, '{"live":true}');
+	});
+});

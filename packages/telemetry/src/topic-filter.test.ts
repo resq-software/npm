@@ -66,3 +66,22 @@ describe("topicMatches", () => {
 		expect(topicMatches("a/+/b", "a//b")).toBe(true);
 	});
 });
+
+describe("malformed filters", () => {
+	it("matches nothing even against an identical string", () => {
+		// The exact-match fast path must not resurrect an invalid filter.
+		expect(topicMatches("sport/#/player1", "sport/#/player1")).toBe(false);
+	});
+
+	it("rejects a wildcard sharing a level with other characters", () => {
+		expect(topicMatches("sport#", "sport#")).toBe(false);
+		expect(topicMatches("sport+", "sport+")).toBe(false);
+		expect(topicMatches("sp+rt/x", "sp+rt/x")).toBe(false);
+	});
+
+	it("still accepts the well-formed wildcard placements", () => {
+		expect(topicMatches("#", "a/b")).toBe(true);
+		expect(topicMatches("sport/#", "sport/tennis")).toBe(true);
+		expect(topicMatches("sport/+/x", "sport/tennis/x")).toBe(true);
+	});
+});

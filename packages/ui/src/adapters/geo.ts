@@ -37,6 +37,10 @@ const NM_PER_DEGREE = 60;
 const DEG_TO_RAD = Math.PI / 180;
 const RAD_TO_DEG = 180 / Math.PI;
 const FULL_TURN = 360;
+const HALF_TURN = 180;
+/** Valid coordinate bounds in degrees. */
+const MAX_LATITUDE = 90;
+const MAX_LONGITUDE = 180;
 
 //#endregion
 
@@ -67,7 +71,25 @@ export function normalizeBearing(value: number): number {
 
 /** Whether a position is usable. */
 export function isPosition(value: LatLon | undefined): value is LatLon {
-	return value !== undefined && Number.isFinite(value.latitude) && Number.isFinite(value.longitude);
+	return (
+		value !== undefined &&
+		Number.isFinite(value.latitude) &&
+		Number.isFinite(value.longitude) &&
+		Math.abs(value.latitude) <= MAX_LATITUDE &&
+		Math.abs(value.longitude) <= MAX_LONGITUDE
+	);
+}
+
+/**
+ * Shortest signed longitude difference, wrapped into (−180, 180].
+ *
+ * Without this, an origin at 179.9° and a point at −179.9° differ by −359.8°
+ * rather than 0.2°, which the flat projection below turns into a ~21,000 NM
+ * offset — and a nonsense CPA with it.
+ */
+function longitudeDelta(from: number, to: number): number {
+	const raw = to - from;
+	return ((((raw + HALF_TURN) % FULL_TURN) + FULL_TURN) % FULL_TURN) - HALF_TURN;
 }
 
 //#endregion
@@ -122,7 +144,7 @@ export function bearingDeg(from: LatLon, to: LatLon): number {
 export function toLocalNm(origin: LatLon, point: LatLon): LocalOffset {
 	const meanLat = ((origin.latitude + point.latitude) / 2) * DEG_TO_RAD;
 	return {
-		east: (point.longitude - origin.longitude) * NM_PER_DEGREE * Math.cos(meanLat),
+		east: longitudeDelta(origin.longitude, point.longitude) * NM_PER_DEGREE * Math.cos(meanLat),
 		north: (point.latitude - origin.latitude) * NM_PER_DEGREE,
 	};
 }
