@@ -1,5 +1,12 @@
 <!--
 
+## 0.3.0
+### Minor Changes
+
+
+
+- [#241](https://github.com/resq-software/npm/pull/241) [`e20c6ba`](https://github.com/resq-software/npm/commit/e20c6bab1904bb8bf22dc988de8f2a836c58094c) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add MqttTelemetrySource, a topic-addressed transport for MQTT fleets, plus the topicMatches filter matcher
+
 ## 0.2.0
 ### Minor Changes
 
