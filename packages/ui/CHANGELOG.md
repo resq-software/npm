@@ -1,5 +1,16 @@
 <!--
 
+## 0.39.0
+### Minor Changes
+
+
+
+- [#241](https://github.com/resq-software/npm/pull/241) [`e20c6ba`](https://github.com/resq-software/npm/commit/e20c6bab1904bb8bf22dc988de8f2a836c58094c) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add the `./adapters` subpath with pure ROS 2, MAVLink, AIS, Signal K and VDA5050 message-to-prop mappers, including CPA/TCPA solving for AIS contacts
+
+
+
+- [#241](https://github.com/resq-software/npm/pull/241) [`e20c6ba`](https://github.com/resq-software/npm/commit/e20c6bab1904bb8bf22dc988de8f2a836c58094c) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add ground and sea vehicle telemetry instruments: TiltIndicator, WheelOdometer, LidarScan, OccupancyGrid, BatteryGauge, TeleopPad, DepthGauge, CompassRose, ThrusterRing and ContactScope
+
 ## 0.38.0
 ### Minor Changes
 
