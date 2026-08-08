@@ -22,6 +22,11 @@
 			"import": "./lib/components/accordion/index.js",
 			"default": "./lib/components/accordion/index.js"
 		},
+		"./adapters": {
+			"types": "./lib/adapters/index.d.ts",
+			"import": "./lib/adapters/index.js",
+			"default": "./lib/adapters/index.js"
+		},
 		"./airspeed-indicator": {
 			"types": "./lib/components/airspeed-indicator/index.d.ts",
 			"import": "./lib/components/airspeed-indicator/index.js",
@@ -61,6 +66,11 @@
 			"types": "./lib/components/badge/index.d.ts",
 			"import": "./lib/components/badge/index.js",
 			"default": "./lib/components/badge/index.js"
+		},
+		"./battery-gauge": {
+			"types": "./lib/components/battery-gauge/index.d.ts",
+			"import": "./lib/components/battery-gauge/index.js",
+			"default": "./lib/components/battery-gauge/index.js"
 		},
 		"./breadcrumb": {
 			"types": "./lib/components/breadcrumb/index.d.ts",
@@ -117,10 +127,25 @@
 			"import": "./lib/components/command/index.js",
 			"default": "./lib/components/command/index.js"
 		},
+		"./compass-rose": {
+			"types": "./lib/components/compass-rose/index.d.ts",
+			"import": "./lib/components/compass-rose/index.js",
+			"default": "./lib/components/compass-rose/index.js"
+		},
+		"./contact-scope": {
+			"types": "./lib/components/contact-scope/index.d.ts",
+			"import": "./lib/components/contact-scope/index.js",
+			"default": "./lib/components/contact-scope/index.js"
+		},
 		"./context-menu": {
 			"types": "./lib/components/context-menu/index.d.ts",
 			"import": "./lib/components/context-menu/index.js",
 			"default": "./lib/components/context-menu/index.js"
+		},
+		"./depth-gauge": {
+			"types": "./lib/components/depth-gauge/index.d.ts",
+			"import": "./lib/components/depth-gauge/index.js",
+			"default": "./lib/components/depth-gauge/index.js"
 		},
 		"./dialog": {
 			"types": "./lib/components/dialog/index.d.ts",
@@ -192,6 +217,11 @@
 			"import": "./lib/components/label/index.js",
 			"default": "./lib/components/label/index.js"
 		},
+		"./lidar-scan": {
+			"types": "./lib/components/lidar-scan/index.d.ts",
+			"import": "./lib/components/lidar-scan/index.js",
+			"default": "./lib/components/lidar-scan/index.js"
+		},
 		"./menubar": {
 			"types": "./lib/components/menubar/index.d.ts",
 			"import": "./lib/components/menubar/index.js",
@@ -206,6 +236,11 @@
 			"types": "./lib/components/navigation-menu/index.d.ts",
 			"import": "./lib/components/navigation-menu/index.js",
 			"default": "./lib/components/navigation-menu/index.js"
+		},
+		"./occupancy-grid": {
+			"types": "./lib/components/occupancy-grid/index.d.ts",
+			"import": "./lib/components/occupancy-grid/index.js",
+			"default": "./lib/components/occupancy-grid/index.js"
 		},
 		"./pagination": {
 			"types": "./lib/components/pagination/index.d.ts",
@@ -292,10 +327,25 @@
 			"import": "./lib/components/tabs/index.js",
 			"default": "./lib/components/tabs/index.js"
 		},
+		"./teleop-pad": {
+			"types": "./lib/components/teleop-pad/index.d.ts",
+			"import": "./lib/components/teleop-pad/index.js",
+			"default": "./lib/components/teleop-pad/index.js"
+		},
 		"./textarea": {
 			"types": "./lib/components/textarea/index.d.ts",
 			"import": "./lib/components/textarea/index.js",
 			"default": "./lib/components/textarea/index.js"
+		},
+		"./thruster-ring": {
+			"types": "./lib/components/thruster-ring/index.d.ts",
+			"import": "./lib/components/thruster-ring/index.js",
+			"default": "./lib/components/thruster-ring/index.js"
+		},
+		"./tilt-indicator": {
+			"types": "./lib/components/tilt-indicator/index.d.ts",
+			"import": "./lib/components/tilt-indicator/index.js",
+			"default": "./lib/components/tilt-indicator/index.js"
 		},
 		"./toggle": {
 			"types": "./lib/components/toggle/index.d.ts",
@@ -321,6 +371,11 @@
 			"types": "./lib/components/vertical-speed-indicator/index.d.ts",
 			"import": "./lib/components/vertical-speed-indicator/index.js",
 			"default": "./lib/components/vertical-speed-indicator/index.js"
+		},
+		"./wheel-odometer": {
+			"types": "./lib/components/wheel-odometer/index.d.ts",
+			"import": "./lib/components/wheel-odometer/index.js",
+			"default": "./lib/components/wheel-odometer/index.js"
 		},
 		"./styles/globals.css": "./src/styles/globals.css",
 		"./lib/utils": {
