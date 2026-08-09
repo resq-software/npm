@@ -1,5 +1,12 @@
 <!--
 
+## 0.40.0
+### Minor Changes
+
+
+
+- [#247](https://github.com/resq-software/npm/pull/247) [`0257d51`](https://github.com/resq-software/npm/commit/0257d51a64b2b3ce4ec7a409564a2c1302dbb341) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add a `stale` prop to every reading instrument plus `isStale`/`readingAge`/`latestTimestamp` adapters, and rank the ContactScope render cap by CPA risk instead of range
+
 ## 0.39.0
 ### Minor Changes
 
