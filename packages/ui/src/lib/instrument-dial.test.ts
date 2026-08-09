@@ -13,6 +13,7 @@ import {
 	safePositive,
 	toFinite,
 	valueToAngle,
+	withStaleness,
 } from "./instrument-dial";
 
 describe("instrument-dial geometry", () => {
@@ -122,6 +123,20 @@ describe("instrument-dial geometry", () => {
 			expect(safePositive(undefined, 10)).toBe(10);
 			expect(safePositive(Number.NaN, 10)).toBe(10);
 			expect(safePositive(Number.POSITIVE_INFINITY, 10)).toBe(10);
+		});
+	});
+	describe("withStaleness", () => {
+		it("leads with the staleness so it is heard before the numbers", () => {
+			expect(withStaleness("Depth gauge, 12.4 meters", true)).toBe(
+				"Stale, Depth gauge, 12.4 meters",
+			);
+		});
+
+		it("leaves a fresh label untouched", () => {
+			expect(withStaleness("Depth gauge, 12.4 meters", false)).toBe("Depth gauge, 12.4 meters");
+			expect(withStaleness("Depth gauge, 12.4 meters", undefined)).toBe(
+				"Depth gauge, 12.4 meters",
+			);
 		});
 	});
 });

@@ -72,3 +72,11 @@ export const ForwardFacingSector: Story = {
 export const NoReturns: Story = {
 	args: { ranges: Array.from({ length: 360 }, () => Number.POSITIVE_INFINITY) },
 };
+
+/**
+ * A frozen reading is more dangerous than a missing one, because it still
+ * invites a decision. Dimmed, badged, and announced as stale before its numbers.
+ */
+export const Stale: Story = {
+	args: { ...OpenGround.args, stale: true },
+};

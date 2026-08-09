@@ -41,6 +41,7 @@ import {
 	isReading,
 	linearTicks,
 	safePositive,
+	withStaleness,
 } from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
@@ -136,6 +137,15 @@ export interface DepthGaugeProps extends React.ComponentProps<"div"> {
 	maxDepth?: number;
 	/** Altitude at or below which the seabed alarm fires. Defaults to 2. */
 	altitudeWarning?: number;
+	/**
+	 * Marks the reading as no longer trustworthy: dims the figure, shows a STALE
+	 * badge, sets `data-stale`, and leads the accessible label with "Stale".
+	 *
+	 * A boolean rather than a timestamp — this component holds no timer and
+	 * could not notice itself going stale. Compute it with `isStale` from
+	 * `@resq-systems/ui/adapters`, driven by your own render loop.
+	 */
+	stale?: boolean;
 	/** Overrides the auto-generated `aria-label`. */
 	label?: string;
 }
@@ -154,6 +164,7 @@ function DepthGauge({
 	target,
 	maxDepth,
 	altitudeWarning,
+	stale,
 	label,
 	className,
 	...props
@@ -168,7 +179,7 @@ function DepthGauge({
 
 	const waterBottom = hasSeabed ? depthToY(seabed, max) : TAPE_BOTTOM;
 	const vehicleY = hasDepth ? depthToY(depth, max) : TAPE_TOP;
-	const ariaLabel = label ?? formatDepthLabel(depth, seabed, target, warning);
+	const ariaLabel = withStaleness(label ?? formatDepthLabel(depth, seabed, target, warning), stale);
 
 	return (
 		<div
@@ -176,9 +187,15 @@ function DepthGauge({
 			aria-label={ariaLabel}
 			className={cn("relative inline-block size-48 select-none", className)}
 			data-slot="depth-gauge"
+			data-stale={stale === true ? "" : undefined}
 			role="img"
 		>
-			<div className="absolute inset-0 overflow-hidden rounded-[6px] border border-border bg-card">
+			<div
+				className={cn(
+					"absolute inset-0 overflow-hidden rounded-[6px] border border-border bg-card",
+					stale === true && "opacity-45",
+				)}
+			>
 				<svg
 					aria-hidden="true"
 					className="block"
@@ -308,6 +325,11 @@ function DepthGauge({
 					</text>
 				</svg>
 			</div>
+			{stale === true ? (
+				<span className="absolute top-1 right-1 rounded-[3px] bg-destructive px-1 py-px font-mono text-[9px] uppercase leading-none text-destructive-foreground">
+					Stale
+				</span>
+			) : null}
 		</div>
 	);
 }

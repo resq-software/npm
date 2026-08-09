@@ -48,6 +48,7 @@ import {
 	polar,
 	safePositive,
 	toFinite,
+	withStaleness,
 } from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
@@ -181,6 +182,15 @@ export interface ThrusterRingProps extends React.ComponentProps<"div"> {
 	thrusters?: readonly ThrusterReading[];
 	/** Absolute output at which a thruster counts as saturated. Defaults to 0.95. */
 	saturation?: number;
+	/**
+	 * Marks the reading as no longer trustworthy: dims the figure, shows a STALE
+	 * badge, sets `data-stale`, and leads the accessible label with "Stale".
+	 *
+	 * A boolean rather than a timestamp — this component holds no timer and
+	 * could not notice itself going stale. Compute it with `isStale` from
+	 * `@resq-systems/ui/adapters`, driven by your own render loop.
+	 */
+	stale?: boolean;
 	/** Overrides the auto-generated `aria-label`. */
 	label?: string;
 }
@@ -202,6 +212,7 @@ export interface ThrusterRingProps extends React.ComponentProps<"div"> {
 function ThrusterRing({
 	thrusters,
 	saturation,
+	stale,
 	label,
 	className,
 	...props
@@ -215,7 +226,7 @@ function ThrusterRing({
 	const magnitudes = shown.map((thruster) => Math.abs(clamp(toFinite(thruster.output), -1, 1)));
 	const peak = magnitudes.length === 0 ? 0 : Math.max(...magnitudes);
 	const saturatedCount = magnitudes.filter((magnitude) => magnitude >= limit).length;
-	const ariaLabel = label ?? formatThrusterLabel(shown, all.length, limit);
+	const ariaLabel = withStaleness(label ?? formatThrusterLabel(shown, all.length, limit), stale);
 
 	return (
 		<div
@@ -223,9 +234,15 @@ function ThrusterRing({
 			aria-label={ariaLabel}
 			className={cn("relative inline-block size-48 select-none", className)}
 			data-slot="thruster-ring"
+			data-stale={stale === true ? "" : undefined}
 			role="img"
 		>
-			<div className="absolute inset-0 overflow-hidden rounded-full border border-border bg-card">
+			<div
+				className={cn(
+					"absolute inset-0 overflow-hidden rounded-full border border-border bg-card",
+					stale === true && "opacity-45",
+				)}
+			>
 				<svg
 					aria-hidden="true"
 					className="block"
@@ -301,6 +318,11 @@ function ThrusterRing({
 					</text>
 				</svg>
 			</div>
+			{stale === true ? (
+				<span className="absolute top-1 right-1 rounded-[3px] bg-destructive px-1 py-px font-mono text-[9px] uppercase leading-none text-destructive-foreground">
+					Stale
+				</span>
+			) : null}
 		</div>
 	);
 }

@@ -65,6 +65,8 @@ export interface SignalKValue {
 /** One update block inside a delta. */
 export interface SignalKUpdate {
 	values?: readonly SignalKValue[];
+	/** ISO-8601 instant the values were observed. */
+	timestamp?: string;
 }
 
 /** A Signal K delta message. */
@@ -110,6 +112,25 @@ export function applyDelta(
 	const next = new Map(previous);
 	for (const [path, value] of flattenDelta(delta)) next.set(path, value);
 	return next;
+}
+
+/**
+ * Newest update timestamp in a delta, as epoch milliseconds.
+ *
+ * Earlier revisions of this module ignored `timestamp` outright and left
+ * staleness entirely to the caller. That was half an answer: the caller had no
+ * supported way to *get* the observation time out of a delta. Pair this with
+ * `isStale` to drive an instrument's `stale` prop.
+ */
+export function latestTimestamp(delta: Readonly<SignalKDelta>): number | undefined {
+	let newest: number | undefined;
+	for (const update of delta.updates ?? []) {
+		if (typeof update?.timestamp !== "string") continue;
+		const parsed = Date.parse(update.timestamp);
+		if (!Number.isFinite(parsed)) continue;
+		if (newest === undefined || parsed > newest) newest = parsed;
+	}
+	return newest;
 }
 
 /** Read a path as a finite number, or `undefined` when absent or non-numeric. */

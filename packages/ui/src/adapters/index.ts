@@ -89,6 +89,7 @@ export {
 export {
 	applyDelta,
 	flattenDelta,
+	latestTimestamp,
 	readNumber,
 	SIGNALK_PATHS,
 	signalKToCompass,
@@ -98,6 +99,7 @@ export {
 	type SignalKUpdate,
 	type SignalKValue,
 } from "./signalk.js";
+export { DEFAULT_MAX_AGE_MS, isStale, readingAge } from "./staleness.js";
 export {
 	parseTopic,
 	stateToBattery,

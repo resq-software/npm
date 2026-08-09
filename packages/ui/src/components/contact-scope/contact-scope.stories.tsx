@@ -83,3 +83,11 @@ export const MetreScale: Story = {
 export const NoContacts: Story = {
 	args: { contacts: [] },
 };
+
+/**
+ * A frozen reading is more dangerous than a missing one, because it still
+ * invites a decision. Dimmed, badged, and announced as stale before its numbers.
+ */
+export const Stale: Story = {
+	args: { ...OpenWater.args, stale: true },
+};
