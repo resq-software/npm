@@ -177,10 +177,12 @@ exposes topic filters rather than one undifferentiated frame stream.
 ### Marine data (Signal K)
 
 Signal K deltas are SI throughout — radians, m/s, metres — so every adapter here is path
-lookup plus unit conversion. Deltas carry an ISO-8601 `timestamp`. It is never folded
+lookup plus unit conversion. Delta updates *may* carry an ISO-8601 `timestamp`. It is
+never folded
 into a prop — unit conversion stays the adapters' job and staleness policy stays the
 caller's — but `latestTimestamp` exposes it, so the caller can drive `stale` (§3a)
-rather than having no supported way to read it at all.
+rather than having no supported way to read it at all. It returns `undefined` when no
+update carries a usable one, which §3a treats as stale rather than as fresh.
 
 | Component | Signal K path | Prop mapping |
 |-----------|---------------|--------------|

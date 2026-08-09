@@ -81,16 +81,20 @@ export function isStale(
 	const current = optional(now);
 	if (current === undefined) return true;
 
+	// Every bound is validated before any decision, not lazily inside the branch
+	// that happens to use it. A caller passing a nonsense limit has a bug, and
+	// this module's whole posture is that an unanswerable question resolves to
+	// "stale" — so that must not depend on which side of `now` the reading fell.
 	const limit = optional(maxAgeMs);
 	if (limit === undefined || limit < 0) return true;
 
-	const age = current - taken;
-	if (age >= 0) return age > limit;
-
-	// The reading claims to be from the future. Tolerate a little, disbelieve a lot.
 	const skew = optional(maxSkewMs);
 	if (skew === undefined || skew < 0) return true;
-	return -age > skew;
+
+	const age = current - taken;
+
+	// Past: too old to trust. Future: tolerate a little skew, disbelieve a lot.
+	return age >= 0 ? age > limit : -age > skew;
 }
 
 /** Age of a reading in milliseconds, or `undefined` when it cannot be known. */

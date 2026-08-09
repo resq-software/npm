@@ -61,6 +61,17 @@ describe("isStale", () => {
 		expect(isStale(NOW + 1, NOW, 5000, Number.NaN)).toBe(true);
 	});
 
+	it("rejects an invalid skew allowance for past readings too", () => {
+		// The bound is nonsense either way; which side of `now` the reading fell
+		// on must not decide whether the caller's bug is noticed.
+		expect(isStale(NOW - 1000, NOW, 5000, Number.NaN)).toBe(true);
+		expect(isStale(NOW - 1000, NOW, 5000, -1)).toBe(true);
+	});
+
+	it("still accepts a fresh past reading when every bound is valid", () => {
+		expect(isStale(NOW - 1000, NOW, 5000, 60_000)).toBe(false);
+	});
+
 	it("defaults the window when none is given", () => {
 		expect(isStale(NOW - (DEFAULT_MAX_AGE_MS - 1), NOW)).toBe(false);
 		expect(isStale(NOW - (DEFAULT_MAX_AGE_MS + 1), NOW)).toBe(true);
