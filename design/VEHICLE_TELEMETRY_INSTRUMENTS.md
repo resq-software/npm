@@ -91,8 +91,8 @@ preferences — they fail CI:
 ## 3a. Freshness
 
 Every reading instrument — all fifteen, air as well as ground and sea — takes
-`stale?: boolean`. When set it dims the figure,
-shows a STALE badge, sets `data-stale` for consumer styling, and **leads** the
+`stale?: boolean`. When set it dims the figure, shows a STALE badge, sets
+`data-stale` for consumer styling, and **leads** the
 accessible label with `Stale,` — before the numbers, so an operator knows to
 distrust them rather than learning so afterwards. It applies even to a
 caller-supplied `label`, because a custom name does not make a frozen reading
@@ -120,8 +120,9 @@ age is not a young one. Future timestamps are bounded in the same spirit:
 modest skew is tolerated, but beyond `DEFAULT_MAX_SKEW_MS` the timestamp is
 disbelieved, because an unbounded allowance would let a badly-set vehicle clock
 keep frozen data looking fresh indefinitely.
-`latestTimestamp` extracts the observation time from a Signal K delta, closing
-a gap this document previously left open by saying the adapters ignore it.
+`latestTimestamp` extracts the observation time from a Signal K delta, so §4's
+rule that the adapters never fold a timestamp into a prop no longer leaves the
+caller without a supported way to read one.
 
 `TeleopPad` has no `stale` prop: it produces commands rather than displaying a
 reading, so it has nothing that can go stale.
@@ -176,8 +177,10 @@ exposes topic filters rather than one undifferentiated frame stream.
 ### Marine data (Signal K)
 
 Signal K deltas are SI throughout — radians, m/s, metres — so every adapter here is path
-lookup plus unit conversion. Deltas carry an ISO-8601 `timestamp`; the adapters ignore it
-and leave staleness policy to the caller.
+lookup plus unit conversion. Deltas carry an ISO-8601 `timestamp`. It is never folded
+into a prop — unit conversion stays the adapters' job and staleness policy stays the
+caller's — but `latestTimestamp` exposes it, so the caller can drive `stale` (§3a)
+rather than having no supported way to read it at all.
 
 | Component | Signal K path | Prop mapping |
 |-----------|---------------|--------------|
