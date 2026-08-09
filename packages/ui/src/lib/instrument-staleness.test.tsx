@@ -11,19 +11,26 @@
  * that forgets `stale` now fails here rather than shipping quietly.
  *
  * TeleopPad is absent on purpose: it produces commands rather than displaying a
- * reading, so it has nothing that can go stale.
+ * reading, so it has nothing that can go stale. Every other instrument in the
+ * package is here, including the six aviation ones that predate this work.
  */
 
 import { describe, expect, it } from "vitest";
 
+import { AirspeedIndicator } from "../components/airspeed-indicator/index.js";
+import { Altimeter } from "../components/altimeter/index.js";
+import { AttitudeIndicator } from "../components/attitude-indicator/index.js";
 import { BatteryGauge } from "../components/battery-gauge/index.js";
 import { CompassRose } from "../components/compass-rose/index.js";
 import { ContactScope } from "../components/contact-scope/index.js";
 import { DepthGauge } from "../components/depth-gauge/index.js";
+import { HeadingIndicator } from "../components/heading-indicator/index.js";
 import { LidarScan } from "../components/lidar-scan/index.js";
 import { OccupancyGrid } from "../components/occupancy-grid/index.js";
 import { ThrusterRing } from "../components/thruster-ring/index.js";
 import { TiltIndicator } from "../components/tilt-indicator/index.js";
+import { TurnCoordinator } from "../components/turn-coordinator/index.js";
+import { VerticalSpeedIndicator } from "../components/vertical-speed-indicator/index.js";
 import { WheelOdometer } from "../components/wheel-odometer/index.js";
 import { collectClassNames, countElementNodes } from "./perf-test-utils";
 
@@ -32,6 +39,15 @@ type Instrument = (props: Record<string, unknown>) => {
 };
 
 const INSTRUMENTS: readonly (readonly [string, Instrument])[] = [
+	// Air — shipped before the ground and sea sets, and just as capable of
+	// freezing. A stuck artificial horizon is if anything the worse case.
+	["AirspeedIndicator", AirspeedIndicator as unknown as Instrument],
+	["Altimeter", Altimeter as unknown as Instrument],
+	["AttitudeIndicator", AttitudeIndicator as unknown as Instrument],
+	["HeadingIndicator", HeadingIndicator as unknown as Instrument],
+	["TurnCoordinator", TurnCoordinator as unknown as Instrument],
+	["VerticalSpeedIndicator", VerticalSpeedIndicator as unknown as Instrument],
+	// Ground and sea
 	["BatteryGauge", BatteryGauge as unknown as Instrument],
 	["CompassRose", CompassRose as unknown as Instrument],
 	["ContactScope", ContactScope as unknown as Instrument],
@@ -45,7 +61,10 @@ const INSTRUMENTS: readonly (readonly [string, Instrument])[] = [
 
 describe("instrument staleness contract", () => {
 	it("covers every reading instrument", () => {
-		expect(INSTRUMENTS).toHaveLength(9);
+		// Fifteen: six air, plus the nine ground and sea. This count is the point
+		// of the suite — the first revision asserted nine and silently excluded
+		// the six that already existed.
+		expect(INSTRUMENTS).toHaveLength(15);
 	});
 
 	for (const [name, Instrument] of INSTRUMENTS) {

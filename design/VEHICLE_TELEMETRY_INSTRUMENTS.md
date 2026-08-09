@@ -90,7 +90,8 @@ preferences — they fail CI:
 
 ## 3a. Freshness
 
-Every reading instrument takes `stale?: boolean`. When set it dims the figure,
+Every reading instrument — all fifteen, air as well as ground and sea — takes
+`stale?: boolean`. When set it dims the figure,
 shows a STALE badge, sets `data-stale` for consumer styling, and **leads** the
 accessible label with `Stale,` — before the numbers, so an operator knows to
 distrust them rather than learning so afterwards. It applies even to a
@@ -115,17 +116,21 @@ and `readingAge` so there is one obvious way to compute it:
 ```
 
 `isStale` treats an unknown timestamp as stale rather than fresh — an unknown
-age is not a young one — and tolerates modest clock skew, since a vehicle clock
-slightly ahead of the console is normal and should not raise a false alarm.
+age is not a young one. Future timestamps are bounded in the same spirit:
+modest skew is tolerated, but beyond `DEFAULT_MAX_SKEW_MS` the timestamp is
+disbelieved, because an unbounded allowance would let a badly-set vehicle clock
+keep frozen data looking fresh indefinitely.
 `latestTimestamp` extracts the observation time from a Signal K delta, closing
 a gap this document previously left open by saying the adapters ignore it.
 
 `TeleopPad` has no `stale` prop: it produces commands rather than displaying a
 reading, so it has nothing that can go stale.
 
-The contract is asserted for all nine instruments at once in
-`src/lib/instrument-staleness.test.tsx`, rather than nine times separately, so a
-tenth instrument that forgets it fails rather than shipping quietly.
+The contract is asserted for all fifteen instruments at once in
+`src/lib/instrument-staleness.test.tsx`, rather than once per component, so the
+next instrument that forgets it fails rather than shipping quietly. The first
+revision of that suite asserted nine and quietly omitted the six aviation
+instruments — which is precisely the failure mode the suite exists to catch.
 
 ## 4. Data-shape contracts
 

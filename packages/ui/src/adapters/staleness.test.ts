@@ -3,7 +3,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_MAX_AGE_MS, isStale, readingAge } from "./staleness";
+import { DEFAULT_MAX_AGE_MS, DEFAULT_MAX_SKEW_MS, isStale, readingAge } from "./staleness";
 
 const NOW = 1_800_000_000_000;
 
@@ -39,6 +39,26 @@ describe("isStale", () => {
 	it("tolerates modest clock skew rather than raising a false alarm", () => {
 		// A vehicle clock slightly ahead of the console is normal.
 		expect(isStale(NOW + 250, NOW, 5000)).toBe(false);
+	});
+
+	it("disbelieves a timestamp far in the future rather than trusting it forever", () => {
+		// Unbounded, a badly-set clock would keep frozen data fresh indefinitely.
+		expect(isStale(NOW + DEFAULT_MAX_SKEW_MS + 1, NOW, 5000)).toBe(true);
+		expect(isStale(NOW + 86_400_000, NOW, 5000)).toBe(true);
+	});
+
+	it("treats the skew boundary as still tolerated", () => {
+		expect(isStale(NOW + DEFAULT_MAX_SKEW_MS, NOW, 5000)).toBe(false);
+	});
+
+	it("honours a custom skew allowance", () => {
+		expect(isStale(NOW + 2000, NOW, 5000, 1000)).toBe(true);
+		expect(isStale(NOW + 500, NOW, 5000, 1000)).toBe(false);
+	});
+
+	it("treats a negative or non-finite skew allowance as stale", () => {
+		expect(isStale(NOW + 1, NOW, 5000, -1)).toBe(true);
+		expect(isStale(NOW + 1, NOW, 5000, Number.NaN)).toBe(true);
 	});
 
 	it("defaults the window when none is given", () => {

@@ -37,17 +37,32 @@ import { optional } from "./numeric.js";
 export const DEFAULT_MAX_AGE_MS = 5000;
 
 /**
+ * How far ahead of the local clock a timestamp may sit before it is disbelieved.
+ *
+ * Some skew between a vehicle and a console is ordinary and should not raise a
+ * false alarm. A reading claiming to be from next week is not early, it is
+ * wrong — and left unbounded it would keep frozen data looking fresh forever,
+ * which is the exact failure this module exists to prevent.
+ */
+export const DEFAULT_MAX_SKEW_MS = 60_000;
+
+/**
  * Whether a reading is too old to trust.
  *
  * A missing or non-finite timestamp counts as stale: an unknown age is not a
  * young one, and silently treating it as fresh is the exact failure this guards
- * against. A timestamp in the future is treated as fresh, since modest clock
- * skew between a vehicle and a console is normal and should not raise a false
- * alarm.
+ * against.
+ *
+ * Future timestamps are bounded in the same spirit. Modest skew is tolerated,
+ * because a vehicle clock a little ahead of the console is normal; but beyond
+ * {@link DEFAULT_MAX_SKEW_MS} the timestamp is disbelieved rather than trusted,
+ * since an unbounded allowance would let a badly-set clock keep frozen data
+ * fresh indefinitely.
  *
  * @param timestamp - When the reading was taken, in epoch milliseconds.
  * @param now - Current time in epoch milliseconds, from the caller's clock.
  * @param maxAgeMs - Maximum trusted age. Defaults to {@link DEFAULT_MAX_AGE_MS}.
+ * @param maxSkewMs - Maximum tolerated future skew. Defaults to {@link DEFAULT_MAX_SKEW_MS}.
  *
  * @example
  * ```tsx
@@ -58,6 +73,7 @@ export function isStale(
 	timestamp: number | undefined,
 	now: number,
 	maxAgeMs: number = DEFAULT_MAX_AGE_MS,
+	maxSkewMs: number = DEFAULT_MAX_SKEW_MS,
 ): boolean {
 	const taken = optional(timestamp);
 	if (taken === undefined) return true;
@@ -68,7 +84,13 @@ export function isStale(
 	const limit = optional(maxAgeMs);
 	if (limit === undefined || limit < 0) return true;
 
-	return current - taken > limit;
+	const age = current - taken;
+	if (age >= 0) return age > limit;
+
+	// The reading claims to be from the future. Tolerate a little, disbelieve a lot.
+	const skew = optional(maxSkewMs);
+	if (skew === undefined || skew < 0) return true;
+	return -age > skew;
 }
 
 /** Age of a reading in milliseconds, or `undefined` when it cannot be known. */

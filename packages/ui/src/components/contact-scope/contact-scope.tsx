@@ -264,7 +264,7 @@ const SCOPE_GRID = (
 //#region Component
 
 export interface ContactScopeProps extends React.ComponentProps<"div"> {
-	/** Tracked contacts. Sorted nearest-first; beyond 48 are dropped. */
+	/** Tracked contacts. A usable CPA ranks ahead of range; at most 48 are drawn. */
 	contacts?: readonly ScopeContact[];
 	/** Full-scale range of the outer ring. Defaults to 6. */
 	rangeMax?: number;
