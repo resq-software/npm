@@ -54,3 +54,11 @@ export const HeadingOnly: Story = {
 export const NoData: Story = {
 	args: {},
 };
+
+/**
+ * A frozen reading is more dangerous than a missing one, because it still
+ * invites a decision. Dimmed, badged, and announced as stale before its numbers.
+ */
+export const Stale: Story = {
+	args: { ...OnCourse.args, stale: true },
+};

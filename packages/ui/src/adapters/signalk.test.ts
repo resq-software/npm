@@ -3,7 +3,14 @@
 
 import { describe, expect, it } from "vitest";
 
-import { applyDelta, flattenDelta, readNumber, signalKToCompass, signalKToDepth } from "./signalk";
+import {
+	applyDelta,
+	flattenDelta,
+	latestTimestamp,
+	readNumber,
+	signalKToCompass,
+	signalKToDepth,
+} from "./signalk";
 
 const HEADING_DELTA = {
 	context: "vessels.self",
@@ -174,5 +181,29 @@ describe("signalKToDepth", () => {
 
 	it("leaves an empty path set undefined", () => {
 		expect(signalKToDepth(new Map())).toEqual({ depth: undefined, seabed: undefined });
+	});
+});
+
+describe("latestTimestamp", () => {
+	it("reads the observation time as epoch milliseconds", () => {
+		expect(latestTimestamp(HEADING_DELTA)).toBe(Date.parse("2026-01-01T00:00:00.000Z"));
+	});
+
+	it("takes the newest across several updates", () => {
+		const newest = latestTimestamp({
+			updates: [
+				{ timestamp: "2026-01-01T00:00:00.000Z", values: [] },
+				{ timestamp: "2026-01-01T00:00:05.000Z", values: [] },
+				{ timestamp: "2026-01-01T00:00:02.000Z", values: [] },
+			],
+		});
+
+		expect(newest).toBe(Date.parse("2026-01-01T00:00:05.000Z"));
+	});
+
+	it("returns undefined when no update carries a usable timestamp", () => {
+		expect(latestTimestamp({})).toBeUndefined();
+		expect(latestTimestamp({ updates: [{ values: [] }] })).toBeUndefined();
+		expect(latestTimestamp({ updates: [{ timestamp: "not-a-date", values: [] }] })).toBeUndefined();
 	});
 });

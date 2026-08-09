@@ -51,3 +51,11 @@ export const BeyondLimit: Story = {
 export const NarrowTrackVehicle: Story = {
 	args: { pitch: 6, pitchLimit: 25, roll: 14, rollLimit: 18 },
 };
+
+/**
+ * A frozen reading is more dangerous than a missing one, because it still
+ * invites a decision. Dimmed, badged, and announced as stale before its numbers.
+ */
+export const Stale: Story = {
+	args: { ...Level.args, stale: true },
+};

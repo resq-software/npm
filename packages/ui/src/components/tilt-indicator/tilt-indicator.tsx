@@ -43,6 +43,7 @@ import {
 	INSTRUMENT_VIEW,
 	safePositive,
 	toFinite,
+	withStaleness,
 } from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
@@ -164,6 +165,15 @@ export interface TiltIndicatorProps extends React.ComponentProps<"div"> {
 	rollLimit?: number;
 	/** Pitch angle treated as the pitchover limit. Defaults to 30. */
 	pitchLimit?: number;
+	/**
+	 * Marks the reading as no longer trustworthy: dims the figure, shows a STALE
+	 * badge, sets `data-stale`, and leads the accessible label with "Stale".
+	 *
+	 * A boolean rather than a timestamp — this component holds no timer and
+	 * could not notice itself going stale. Compute it with `isStale` from
+	 * `@resq-systems/ui/adapters`, driven by your own render loop.
+	 */
+	stale?: boolean;
 	/** Overrides the auto-generated `aria-label`. */
 	label?: string;
 }
@@ -181,6 +191,7 @@ function TiltIndicator({
 	pitch,
 	rollLimit,
 	pitchLimit,
+	stale,
 	label,
 	className,
 	...props
@@ -200,7 +211,7 @@ function TiltIndicator({
 	const dotX = CENTER + rollFraction * scale * LIMIT_RADIUS;
 	const dotY = PLOT_CENTER_Y - pitchFraction * scale * LIMIT_RADIUS;
 
-	const ariaLabel = label ?? formatTiltLabel(rollDeg, pitchDeg, fraction);
+	const ariaLabel = withStaleness(label ?? formatTiltLabel(rollDeg, pitchDeg, fraction), stale);
 
 	return (
 		<div
@@ -208,9 +219,15 @@ function TiltIndicator({
 			aria-label={ariaLabel}
 			className={cn("relative inline-block size-48 select-none", className)}
 			data-slot="tilt-indicator"
+			data-stale={stale === true ? "" : undefined}
 			role="img"
 		>
-			<div className="absolute inset-0 overflow-hidden rounded-[6px] border border-border bg-card">
+			<div
+				className={cn(
+					"absolute inset-0 overflow-hidden rounded-[6px] border border-border bg-card",
+					stale === true && "opacity-45",
+				)}
+			>
 				<svg
 					aria-hidden="true"
 					className="block"
@@ -286,6 +303,11 @@ function TiltIndicator({
 					<circle cx={CENTER} cy={PLOT_CENTER_Y} fill={GRID} r={2} />
 				</svg>
 			</div>
+			{stale === true ? (
+				<span className="absolute top-1 right-1 rounded-[3px] bg-destructive px-1 py-px font-mono text-[9px] uppercase leading-none text-destructive-foreground">
+					Stale
+				</span>
+			) : null}
 		</div>
 	);
 }

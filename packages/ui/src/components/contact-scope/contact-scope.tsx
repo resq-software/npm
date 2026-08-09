@@ -49,6 +49,7 @@ import {
 	isReading,
 	polar,
 	safePositive,
+	withStaleness,
 } from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
@@ -155,6 +156,28 @@ function riskColor(cpa: number | undefined, warning: number, alert: number): str
 	return NOMINAL;
 }
 
+/**
+ * Order contacts by how much they matter: a usable CPA first and smallest
+ * first, then by range. Contacts with no CPA are not assumed safe — they are
+ * simply unranked on that axis, and fall back to proximity.
+ */
+function compareByRisk(left: ScopeContact, right: ScopeContact): number {
+	const leftCpa = isUsableCpa(left.cpa) ? left.cpa : Number.POSITIVE_INFINITY;
+	const rightCpa = isUsableCpa(right.cpa) ? right.cpa : Number.POSITIVE_INFINITY;
+	if (leftCpa !== rightCpa) return leftCpa - rightCpa;
+	return left.range - right.range;
+}
+
+/** The closest contact by range. The label reports what is drawn, so this
+ * searches the shown set rather than assuming a range-sorted array. */
+function nearestByRange(contacts: readonly ScopeContact[]): ScopeContact | null {
+	let nearest: ScopeContact | null = null;
+	for (const contact of contacts) {
+		if (nearest === null || contact.range < nearest.range) nearest = contact;
+	}
+	return nearest;
+}
+
 /** The contact with the smallest reported CPA, if any reports one. */
 function worstApproach(contacts: readonly ScopeContact[]): ScopeContact | null {
 	let worst: ScopeContact | null = null;
@@ -180,7 +203,7 @@ function formatScopeLabel(
 			? `showing ${shown.length} of ${total} contacts`
 			: `${shown.length} contact${shown.length === 1 ? "" : "s"}`;
 
-	const nearest = shown[0];
+	const nearest = nearestByRange(shown) ?? shown[0];
 	const parts = [
 		`${countPart} within ${rangeMax} ${unit}`,
 		`nearest ${nearest.id} at ${nearest.range.toFixed(1)} ${unit} bearing ${formatBearing(nearest.bearing)} degrees`,
@@ -257,6 +280,15 @@ export interface ContactScopeProps extends React.ComponentProps<"div"> {
 	cpaAlert?: number;
 	/** Speed at which a contact's course vector reaches full length. Defaults to 15. */
 	speedScale?: number;
+	/**
+	 * Marks the reading as no longer trustworthy: dims the figure, shows a STALE
+	 * badge, sets `data-stale`, and leads the accessible label with "Stale".
+	 *
+	 * A boolean rather than a timestamp — this component holds no timer and
+	 * could not notice itself going stale. Compute it with `isStale` from
+	 * `@resq-systems/ui/adapters`, driven by your own render loop.
+	 */
+	stale?: boolean;
 	/** Overrides the auto-generated `aria-label`. */
 	label?: string;
 }
@@ -282,6 +314,7 @@ function ContactScope({
 	cpaWarning,
 	cpaAlert,
 	speedScale,
+	stale,
 	label,
 	className,
 	...props
@@ -292,16 +325,24 @@ function ContactScope({
 	const scale = safePositive(speedScale, DEFAULT_SPEED_SCALE);
 	const ownHeading = isReading(heading) ? normalizeBearing(heading) : 0;
 
-	// Nearest-first, so the cap keeps the contacts that actually matter. `filter`
-	// has already produced a fresh array, so sorting it in place cannot reach the
-	// caller's prop — which keeps the non-mutating guarantee without `toSorted`,
-	// unavailable at this package's compilation target.
+	// Risk-first, so the cap keeps the contacts that actually matter. Ranking by
+	// range alone was wrong: a five-mile contact closing to a 0.2 NM CPA outranks
+	// a stationary buoy one mile off, and dropping it because forty-eight nearer
+	// hulls exist is exactly the contact an operator needed to see. Contacts
+	// reporting a usable CPA sort ahead of those that do not, then by range.
+	//
+	// `filter` has already produced a fresh array, so sorting it in place cannot
+	// reach the caller's prop — which keeps the non-mutating guarantee without
+	// `toSorted`, unavailable at this package's compilation target.
 	const plottable = (contacts ?? [])
 		.filter((contact) => isPlottable(contact, max))
-		.sort((left, right) => left.range - right.range);
+		.sort(compareByRisk);
 	const shown = plottable.slice(0, MAX_CONTACTS);
 
-	const ariaLabel = label ?? formatScopeLabel(shown, plottable.length, max, rangeUnit, alert);
+	const ariaLabel = withStaleness(
+		label ?? formatScopeLabel(shown, plottable.length, max, rangeUnit, alert),
+		stale,
+	);
 	const worst = worstApproach(shown);
 	const worstCpa = worst === null ? null : (worst.cpa as number);
 
@@ -315,9 +356,15 @@ function ContactScope({
 			aria-label={ariaLabel}
 			className={cn("relative inline-block size-48 select-none", className)}
 			data-slot="contact-scope"
+			data-stale={stale === true ? "" : undefined}
 			role="img"
 		>
-			<div className="absolute inset-0 overflow-hidden rounded-full border border-border bg-card">
+			<div
+				className={cn(
+					"absolute inset-0 overflow-hidden rounded-full border border-border bg-card",
+					stale === true && "opacity-45",
+				)}
+			>
 				<svg
 					aria-hidden="true"
 					className="block"
@@ -386,6 +433,11 @@ function ContactScope({
 					</text>
 				</svg>
 			</div>
+			{stale === true ? (
+				<span className="absolute top-1 right-1 rounded-[3px] bg-destructive px-1 py-px font-mono text-[9px] uppercase leading-none text-destructive-foreground">
+					Stale
+				</span>
+			) : null}
 		</div>
 	);
 }
