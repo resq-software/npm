@@ -136,16 +136,31 @@ interface Point extends Reading {
 	broken: boolean;
 }
 
-/** Keep only plottable samples, in time order. */
+/**
+ * Keep only plottable samples, in time order.
+ *
+ * The sort is not optional: telemetry genuinely arrives out of order — UDP
+ * reordering, a merge of two sources, a replayed backlog — and plotting that
+ * unsorted would draw the series backwards through itself. But a feed that is
+ * already in order is the common case, so ordering is checked during the filter
+ * pass the function already performs and the sort is skipped when there is
+ * nothing to reorder.
+ */
 function readingsOf(samples: readonly ChartSample[]): Reading[] {
 	const kept: Reading[] = [];
+	let ordered = true;
+	let last = Number.NEGATIVE_INFINITY;
+
 	for (const sample of samples) {
 		if (!Number.isFinite(sample.t)) continue;
 		if (sample.value === undefined || !Number.isFinite(sample.value)) continue;
+		if (sample.t < last) ordered = false;
+		last = sample.t;
 		kept.push({ t: sample.t, value: sample.value });
 	}
-	// Sorting the array `filter` already produced, so the caller's stays untouched.
-	return kept.sort((left, right) => left.t - right.t);
+
+	// Sorting the array this loop produced, so the caller's stays untouched.
+	return ordered ? kept : kept.sort((left, right) => left.t - right.t);
 }
 
 /** Estimate the feed's healthy period from a low quantile of its intervals. */
@@ -256,7 +271,12 @@ interface Scale {
  * the whole panel — a chart that kills the console when the window gets long is
  * worse than no chart.
  */
-function extremesOf(readings: readonly Reading[]): { low: number; high: number } {
+interface Extremes {
+	low: number;
+	high: number;
+}
+
+function extremesOf(readings: readonly Reading[]): Extremes {
 	if (readings.length === 0) return { high: 1, low: 0 };
 
 	let low = Number.POSITIVE_INFINITY;
@@ -269,8 +289,13 @@ function extremesOf(readings: readonly Reading[]): { low: number; high: number }
 }
 
 /** Work out the axis ranges, honouring caller-fixed bounds. */
-function scaleOf(readings: readonly Reading[], min?: number, max?: number): Scale {
-	const { low: dataLow, high: dataHigh } = extremesOf(readings);
+function scaleOf(
+	readings: readonly Reading[],
+	extremes: Extremes,
+	min?: number,
+	max?: number,
+): Scale {
+	const { low: dataLow, high: dataHigh } = extremes;
 
 	let low = Number.isFinite(min) ? (min as number) : dataLow;
 	let high = Number.isFinite(max) ? (max as number) : dataHigh;
@@ -325,6 +350,7 @@ function buildPath(points: readonly Point[], scale: Scale): string {
 function formatChartLabel(
 	readings: readonly Reading[],
 	scale: Scale,
+	extremes: Extremes,
 	gaps: number,
 	name?: string,
 	unit?: string,
@@ -334,7 +360,7 @@ function formatChartLabel(
 
 	const suffix = unit === undefined ? "" : ` ${unit}`;
 	const latest = readings[readings.length - 1]?.value ?? 0;
-	const { low: lowest, high: highest } = extremesOf(readings);
+	const { low: lowest, high: highest } = extremes;
 	const parts = [
 		`latest ${latest}${suffix}`,
 		`range ${lowest} to ${highest}${suffix}`,
@@ -382,14 +408,17 @@ function TelemetryChart({
 	...props
 }: Readonly<TelemetryChartProps>) {
 	const readings = readingsOf(samples ?? []);
-	const scale = scaleOf(readings, min, max);
+	// Scanned once and shared: the axis and the spoken summary both need the
+	// extremes, and the series can be long enough for a second pass to matter.
+	const extremes = extremesOf(readings);
+	const scale = scaleOf(readings, extremes, min, max);
 	const threshold = Number.isFinite(gapMs)
 		? (gapMs as number)
 		: nominalInterval(readings) * GAP_INTERVALS;
 
 	const { points, gaps } = toPoints(readings, threshold);
 	const path = buildPath(points, scale);
-	const summary = label ?? formatChartLabel(readings, scale, gaps, name, unit);
+	const summary = label ?? formatChartLabel(readings, scale, extremes, gaps, name, unit);
 
 	return (
 		<svg
