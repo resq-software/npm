@@ -18,6 +18,7 @@
  */
 
 import { writeFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 import axe from "axe-core";
 import { createElement } from "react";
@@ -32,8 +33,19 @@ import { describe, expect, it, vi } from "vitest";
  */
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-const REPORT_PATH =
-	"/tmp/claude-1000/-home-wombocombo-github-wrk-npm/2953833a-408a-4f0b-b10d-8c6bec93b890/scratchpad/a11y-report.json";
+/**
+ * Where the report lands.
+ *
+ * Repo-relative, not the OS temp directory. A fixed name under `/tmp` is a
+ * symlink-attack surface — anyone on the box can pre-create the path and choose
+ * what the run overwrites — and it is also unreproducible: the first version of
+ * this file hard-coded one machine's scratchpad, so on any other machine the
+ * write threw `ENOENT` *after* the full ten-minute audit had run, losing all of
+ * it at the last step.
+ *
+ * `A11Y_REPORT_PATH` overrides it for CI, which may want the artefact elsewhere.
+ */
+const REPORT_PATH = process.env.A11Y_REPORT_PATH ?? resolve(process.cwd(), "a11y-report.json");
 
 /** Rules that cannot produce a trustworthy result without layout or CSS. */
 const DISABLED_RULES = {

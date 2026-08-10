@@ -7,10 +7,18 @@ import { LinkQuality, type LinkQualityProps } from "./link-quality";
 
 /** The five rows, keyed by their name, as the component hands them to `Row`. */
 function rows(props: Readonly<LinkQualityProps>) {
-	const children = LinkQuality(props).props.children as {
-		props: { name: string; value: string; grade: string; note: string };
-	}[];
-	return Object.fromEntries(children.map((child) => [child.props.name, child.props]));
+	// The stale badge and the `null` that stands in for it when current are also
+	// children, so select the Rows by shape rather than assuming position.
+	const children = LinkQuality(props).props.children as ({
+		props?: { name?: string; value?: string; grade?: string; note?: string };
+	} | null)[];
+	const rowProps = children
+		.map((child) => child?.props)
+		.filter(
+			(p): p is { name: string; value: string; grade: string; note: string } =>
+				p?.name !== undefined,
+		);
+	return Object.fromEntries(rowProps.map((p) => [p.name, p]));
 }
 
 const HEALTHY: LinkQualityProps = {
@@ -125,6 +133,27 @@ describe("LinkQuality staleness", () => {
 
 		expect(element.props["data-stale"]).toBe("");
 		expect(String(element.props["aria-label"]).startsWith("Stale, ")).toBe(true);
+	});
+
+	it("badges staleness rather than only dimming", () => {
+		// A dropout dims several panels at once, so dimming alone does not say
+		// which reading is old. Every instrument and PanelFrame badge it.
+		const children = LinkQuality({ ...HEALTHY, stale: true }).props.children as {
+			props?: Record<string, unknown>;
+		}[];
+		const badge = children.find(
+			(child) => child?.props?.["data-slot"] === "link-quality-stale-badge",
+		);
+
+		expect(badge).toBeDefined();
+	});
+
+	it("shows no badge when the readings are current", () => {
+		const children = LinkQuality(HEALTHY).props.children as { props?: Record<string, unknown> }[];
+
+		expect(
+			children.find((child) => child?.props?.["data-slot"] === "link-quality-stale-badge"),
+		).toBeUndefined();
 	});
 
 	it("dims the panel when stale", () => {

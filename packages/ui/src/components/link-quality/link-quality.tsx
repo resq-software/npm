@@ -224,6 +224,20 @@ function LinkQuality({
 			data-stale={stale === true ? "" : undefined}
 			role="group"
 		>
+			{stale === true ? (
+				// Every instrument and PanelFrame badges staleness; this panel only
+				// dimmed, so on a console where a dropout dims several panels at once
+				// there was nothing to say which reading was actually old. Its own
+				// story prose already claimed "dimmed, badged, and announced" — the
+				// badge was the part that did not exist.
+				<span
+					className="w-fit rounded-[3px] bg-destructive px-1 py-px font-mono text-[9px] text-destructive-foreground uppercase leading-none"
+					data-slot="link-quality-stale-badge"
+				>
+					Stale
+				</span>
+			) : null}
+
 			<Row grade={signalGrade} name="Signal" note={signalGrade} value={show(rssi, " dBm")} />
 			<Row grade={lossGrade} name="Loss" note={lossGrade} value={show(lossPercent, "%", 1)} />
 			<Row grade={latencyGrade} name="Latency" note={latencyGrade} value={show(latencyMs, " ms")} />
