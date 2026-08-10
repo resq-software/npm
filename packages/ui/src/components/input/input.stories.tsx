@@ -64,8 +64,18 @@ export const Invalid: Story = {
 	},
 };
 
+/**
+ * A file input renders no placeholder and its button text is fixed by the browser,
+ * so without an associated label there is nothing to tell anyone — sighted or using
+ * a screen reader — which file is being asked for.
+ */
 export const WithFile: Story = {
-	args: { type: "file" },
+	render: () => (
+		<div className="grid gap-1.5 w-72">
+			<Label htmlFor="flight-log">Flight log</Label>
+			<Input id="flight-log" type="file" />
+		</div>
+	),
 };
 
 export const WithLabel: Story = {

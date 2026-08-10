@@ -109,10 +109,16 @@ function ComboboxChipsInput({ className, ...props }: Readonly<ComboboxPrimitive.
 	);
 }
 
-/** Button that clears the current selection. */
+/**
+ * Button that clears the current selection.
+ *
+ * Icon-only, so it names itself: without a default `aria-label` it reaches
+ * assistive technology as an anonymous button. Pass `aria-label` to override.
+ */
 function ComboboxClear({ className, ...props }: Readonly<ComboboxPrimitive.Clear.Props>) {
 	return (
 		<ComboboxPrimitive.Clear
+			aria-label="Clear selection"
 			className={className}
 			data-slot="combobox-clear"
 			render={<InputGroupButton size="icon-xs" variant="ghost" />}
@@ -279,7 +285,14 @@ function ComboboxSeparator({ className, ...props }: Readonly<ComboboxPrimitive.S
 	);
 }
 
-/** Button that toggles the combobox popup open or closed. */
+/**
+ * Button that toggles the combobox popup open or closed.
+ *
+ * `ComboboxInput` renders this with no children, leaving only a caret glyph —
+ * so an unnamed button is the default case, not the exception. The fallback
+ * label applies only when nothing else can name the button: pass children (a
+ * `ComboboxValue`, say) or an explicit `aria-label` and that wins instead.
+ */
 function ComboboxTrigger({
 	children,
 	className,
@@ -287,6 +300,7 @@ function ComboboxTrigger({
 }: Readonly<ComboboxPrimitive.Trigger.Props>) {
 	return (
 		<ComboboxPrimitive.Trigger
+			aria-label={children === undefined ? "Show options" : undefined}
 			className={cn("[&_svg:not([class*='size-'])]:size-4", className)}
 			data-slot="combobox-trigger"
 			{...props}
