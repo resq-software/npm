@@ -450,7 +450,8 @@
 		"lint:spelling": "cspell \"**\" \".github/**/*\"",
 		"storybook": "storybook dev -p 6006 --disable-telemetry",
 		"test": "vitest",
-		"tsc": "tsc"
+		"tsc": "tsc",
+		"a11y": "A11Y_AUDIT=1 vitest run src/lib/a11y-audit.test.ts"
 	},
 	"lint-staged": {
 		"*.{ts,tsx,js,jsx,json}": "biome check --write --no-errors-on-unmatched",

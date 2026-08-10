@@ -75,6 +75,14 @@ slot, and a consistent focus ring. Instruments already carry their own `stale`;
 lists) so the treatment is uniform across the console rather than only inside
 gauges.
 
+**Staleness has exactly one owner per subtree.** Both a frame and its child can
+be told they are stale — an instrument is still correct on its own, outside any
+frame — but only the outermost one renders the dim. `[data-stale] [data-stale]`
+resets opacity in `globals.css`, because two 45% dims multiply to 0.2025, which
+measures 1.84:1 and arrives precisely during the dropout when the last known
+value most needs reading. Pass `stale` at both levels when both know it; do not
+try to decide which level "should" carry the treatment.
+
 ### 4.2 `ConsoleShell` + `PanelGrid` (console)
 
 Build on the existing `resizable` component rather than adding a grid library.

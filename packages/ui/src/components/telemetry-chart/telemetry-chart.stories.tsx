@@ -25,17 +25,25 @@ const STEP_MS = 1_000;
 const OUTAGE_MS = 90_000;
 
 /**
- * The shape the chart actually ships in. It fills its container over a 300x100
- * viewBox that does not preserve aspect ratio, so an unconstrained story would
- * have Chromatic capturing a silhouette no console will ever render.
+ * The shape the chart actually ships in. Sizing goes on the root, which now
+ * holds the readout and the axis bounds as well as the trace — hung on the plot
+ * instead, the figures above and beside it would be unconstrained and Chromatic
+ * would capture a silhouette no console will ever render. A little taller than
+ * the trace alone needs, so the strip keeps its proportions under the readout.
  */
-const STRIP = "h-24 w-[420px]";
+const STRIP = "h-28 w-[420px]";
 
 /** Samples in the long window — far past the component's point budget. */
 const LONG_WINDOW = 2_000;
 
 /** Where the one-sample overcurrent lands: mid-window, well inside a bucket. */
 const SPIKE_INDEX = 1_237;
+
+/** Span of the pinned-window story: two minutes, as a console strip carries. */
+const PINNED_WINDOW_MS = 120_000;
+
+/** How much of that window the feed in `PinnedWindow` never got to fill. */
+const PINNED_SILENCE_MS = 40_000;
 
 /**
  * A deterministic swell. `Math.sin` gives the shape of a real feed without a
@@ -65,6 +73,7 @@ const meta: Meta<typeof TelemetryChart> = {
 		gapMs: { control: { max: 30_000, min: 500, step: 500, type: "range" } },
 		max: { control: { max: 120, min: 0, step: 1, type: "range" } },
 		min: { control: { max: 120, min: 0, step: 1, type: "range" } },
+		windowMs: { control: { max: 300_000, min: 10_000, step: 10_000, type: "range" } },
 	},
 	component: TelemetryChart,
 	tags: ["autodocs"],
@@ -107,6 +116,32 @@ export const Dropout: Story = {
 			(index) => index * STEP_MS + (index > 74 ? OUTAGE_MS : 0),
 		),
 		unit: "volts",
+	},
+};
+
+/**
+ * The empty third at the right-hand edge is the story. This feed stopped forty
+ * seconds into a two-minute window, and every other chart here would have drawn
+ * it flush against the right edge — because an axis fitted to its own data puts
+ * the newest sample there whether it landed this second or last minute. The
+ * shape would be identical to `SteadyFeed`, and an operator reading a dead pack
+ * would see a live one.
+ *
+ * Given `windowMs` and `now`, the axis stops being a description of the data and
+ * becomes a description of time, so the silence takes up exactly as much of the
+ * strip as it took of the last two minutes. Nothing is drawn in that third,
+ * because nothing was received in it.
+ */
+export const PinnedWindow: Story = {
+	args: {
+		className: STRIP,
+		name: "Pack voltage",
+		now: START_MS + PINNED_WINDOW_MS,
+		samples: series((PINNED_WINDOW_MS - PINNED_SILENCE_MS) / STEP_MS, (index) =>
+			wave(index, 24.6, 0.4, 12),
+		),
+		unit: "volts",
+		windowMs: PINNED_WINDOW_MS,
 	},
 };
 

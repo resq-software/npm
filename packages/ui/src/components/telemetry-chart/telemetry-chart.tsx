@@ -15,9 +15,10 @@
  */
 
 /**
- * @fileoverview TelemetryChart — a time series that refuses to invent data.
+ * @fileoverview TelemetryChart — a time series that refuses to invent data, with
+ * the number an operator actually reads printed beside it.
  *
- * Three things separate this from a general-purpose charting component:
+ * Four things separate this from a general-purpose charting component:
  *
  * 1. **Gaps are gaps.** When the link drops for thirty seconds, a chart library
  *    joins the sample before to the sample after with a straight line. That
@@ -30,9 +31,16 @@
  * 3. **Element count is bounded.** The whole series is one `<path>` whatever
  *    the sample count, because a console runs a dozen of these at once and
  *    per-sample DOM nodes are how a dashboard stops answering the keyboard.
+ * 4. **The trace carries digits.** The plot stretches to its container and does
+ *    not preserve aspect ratio, so any glyph placed inside it would be squashed
+ *    or drawn out by whatever width the panel happens to have. The latest value,
+ *    its unit and the axis bounds are therefore HTML *beside* the trace. Before
+ *    that, everything this component knew was in its `aria-label` alone: a
+ *    sighted operator could see the shape of the pack voltage and could not read
+ *    what it was.
  *
  * The caller owns the ring buffer; this renders whatever window it is handed.
- * Stateless, hook-free, pure SVG — no charting dependency reaches the console.
+ * Stateless, hook-free — no charting dependency reaches the console.
  *
  * @module @resq-systems/ui/components/telemetry-chart/telemetry-chart
  */
@@ -64,6 +72,17 @@ const FLAT_RANGE_PAD = 0.5;
 
 /** Nominal intervals of silence that constitute a dropout, not a slow feed. */
 const GAP_INTERVALS = 4;
+
+/**
+ * Magnitudes at or above which a printed figure sheds a decimal place. A 480
+ * amp bus current does not want hundredths; a 0.42 volt cell delta cannot spare
+ * them.
+ */
+const COARSE_MAGNITUDE = 100;
+const MEDIUM_MAGNITUDE = 10;
+
+/** Stands in for a figure the feed has not supplied. */
+const NO_READING = "—";
 
 /**
  * Quantile used to estimate the feed's nominal period.
@@ -101,7 +120,7 @@ export interface ThresholdBand {
 	severity: "warning" | "critical";
 }
 
-export interface TelemetryChartProps extends React.ComponentProps<"svg"> {
+export interface TelemetryChartProps extends React.ComponentProps<"div"> {
 	samples?: readonly ChartSample[];
 	/** Fixed axis minimum. Defaults to the data's own minimum. */
 	min?: number;
@@ -113,8 +132,27 @@ export interface TelemetryChartProps extends React.ComponentProps<"svg"> {
 	 * threshold without the caller having to state one.
 	 */
 	gapMs?: number;
+	/**
+	 * Width of the time axis, measured back from `now`. Ignored unless `now` is
+	 * given too, since a window with no anchor cannot be placed.
+	 *
+	 * Without it the axis fits itself to the data, which means the newest reading
+	 * always lands on the right-hand edge — so a feed that stopped forty seconds
+	 * ago draws a confident trace right up to the present and looks identical to
+	 * one still reporting. Pin the window and that same feed visibly stops short,
+	 * leaving the silence on screen at the width it actually occupied.
+	 */
+	windowMs?: number;
+	/**
+	 * The instant the right-hand edge stands for. Pair with `windowMs`.
+	 *
+	 * A prop rather than a clock read here: this component holds no timer and
+	 * could not re-render itself as the window slid, so the time belongs to
+	 * whatever render loop already drives the panel.
+	 */
+	now?: number;
 	bands?: readonly ThresholdBand[];
-	/** Unit for the accessible summary, e.g. `"volts"`. */
+	/** Unit for the readout and the accessible summary, e.g. `"volts"`. */
 	unit?: string;
 	/** What the series measures, e.g. `"Pack voltage"`. */
 	name?: string;
@@ -258,11 +296,29 @@ function toPoints(readings: readonly Reading[], gapMs: number): { points: Point[
 
 //#region Geometry
 
-interface Scale {
-	low: number;
-	high: number;
+/** The horizontal domain: which instants the left and right edges stand for. */
+interface TimeSpan {
 	first: number;
 	last: number;
+}
+
+interface Scale extends TimeSpan {
+	low: number;
+	high: number;
+}
+
+/**
+ * Choose the time axis: the caller's window when it is anchored, else the data.
+ *
+ * Fitting to the data is what makes a dead feed look alive — the newest sample
+ * lands flush against the right edge whether it arrived this second or last
+ * minute. A pinned window puts the silence on screen instead.
+ */
+function timeSpanOf(readings: readonly Reading[], windowMs?: number, now?: number): TimeSpan {
+	if (Number.isFinite(windowMs) && Number.isFinite(now) && (windowMs as number) > 0) {
+		return { first: (now as number) - (windowMs as number), last: now as number };
+	}
+	return { first: readings[0]?.t ?? 0, last: readings[readings.length - 1]?.t ?? 1 };
 }
 
 /**
@@ -293,7 +349,7 @@ function extremesOf(readings: readonly Reading[]): Extremes {
 
 /** Work out the axis ranges, honouring caller-fixed bounds. */
 function scaleOf(
-	readings: readonly Reading[],
+	span: TimeSpan,
 	extremes: Extremes,
 	bands: readonly ThresholdBand[],
 	min?: number,
@@ -340,12 +396,7 @@ function scaleOf(
 		high += FLAT_RANGE_PAD;
 	}
 
-	return {
-		first: readings[0]?.t ?? 0,
-		high,
-		last: readings[readings.length - 1]?.t ?? 1,
-		low,
-	};
+	return { ...span, high, low };
 }
 
 /** Map a value onto the vertical axis, clamped into the plot area. */
@@ -355,7 +406,17 @@ function toY(value: number, scale: Scale): number {
 	return VIEW_HEIGHT - clamped * VIEW_HEIGHT;
 }
 
-/** Map a timestamp onto the horizontal axis. */
+/**
+ * Map a timestamp onto the horizontal axis.
+ *
+ * Deliberately unclamped, unlike `toY`. Under a pinned window a reading older
+ * than the window maps outside the frame and the plot `<svg>` clips it away —
+ * the root is a `<div>` now, so it is the nested viewport doing the clipping,
+ * not the root. That is the honest outcome: the reading is not in this window.
+ * Clamping would stack
+ * every expired sample against the left edge as a vertical smear that no
+ * instrument ever recorded.
+ */
 function toX(t: number, scale: Scale): number {
 	const span = scale.last - scale.first;
 	// A window holding one instant has no axis to place it along, so it goes in
@@ -393,7 +454,20 @@ function buildPath(points: readonly Point[], scale: Scale): string {
 
 //#endregion
 
-//#region Label
+//#region Readout
+
+/**
+ * Decimal places a figure of this size deserves.
+ *
+ * A reading off a vehicle is a float, and printed unrounded it gives a headline
+ * like 24.600000000000001 — fourteen digits an operator has to walk past before
+ * reaching the one that changed.
+ */
+function digitsFor(magnitude: number): number {
+	if (magnitude >= COARSE_MAGNITUDE) return 0;
+	if (magnitude >= MEDIUM_MAGNITUDE) return 1;
+	return 2;
+}
 
 /** Summarise the window: a screen reader cannot read a polyline. */
 function formatChartLabel(
@@ -431,7 +505,7 @@ function formatChartLabel(
 //#region Component
 
 /**
- * A dropout-aware time series.
+ * A dropout-aware time series with a readable figure.
  *
  * @example
  * ```tsx
@@ -443,12 +517,19 @@ function formatChartLabel(
  *   unit="volts"
  * />
  * ```
+ *
+ * @example A window that shows its own silence
+ * ```tsx
+ * <TelemetryChart name="Pack voltage" now={clock} samples={window} windowMs={120_000} />
+ * ```
  */
 function TelemetryChart({
 	samples,
 	min,
 	max,
 	gapMs,
+	windowMs,
+	now,
 	bands,
 	unit,
 	name,
@@ -461,7 +542,7 @@ function TelemetryChart({
 	// Scanned once and shared: the axis and the spoken summary both need the
 	// extremes, and the series can be long enough for a second pass to matter.
 	const extremes = extremesOf(readings);
-	const scale = scaleOf(readings, extremes, bands ?? [], min, max);
+	const scale = scaleOf(timeSpanOf(readings, windowMs, now), extremes, bands ?? [], min, max);
 	const threshold = Number.isFinite(gapMs)
 		? (gapMs as number)
 		: nominalInterval(readings) * GAP_INTERVALS;
@@ -470,51 +551,135 @@ function TelemetryChart({
 	const path = buildPath(points, scale);
 	const summary = label ?? formatChartLabel(readings, scale, extremes, gaps, name, unit);
 
+	const empty = readings.length === 0;
+	const latest = readings[readings.length - 1];
+	// Both bounds take their precision from the span rather than from themselves,
+	// so the pair reads as one scale: "0" over "100", never "100" over "0.00".
+	const boundDigits = digitsFor(scale.high - scale.low);
+
 	return (
-		<svg
+		<div
 			{...props}
 			aria-label={stale === true ? `Stale, ${summary}` : summary}
-			className={cn("h-full w-full", stale === true && "opacity-45", className)}
+			// A height rather than an aspect ratio: a console stacks these in rows of
+			// a fixed size, and the trace stays a strip whatever the panel's width.
+			// Without a height here the plot's `absolute inset-0` resolves to nothing
+			// and the component collapses to its two text rows. A caller sizing the
+			// strip itself overrides this through `className`.
+			className={cn("flex h-24 w-full flex-col gap-1", stale === true && "opacity-45", className)}
 			data-slot="telemetry-chart"
 			data-stale={stale === true ? "" : undefined}
-			preserveAspectRatio="none"
 			role="img"
-			viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
 		>
-			{/* Bands need a real axis. Over an empty feed the domain falls back to 0..1,
-			    and a downward-open critical band — under-voltage, under-keel, the
-			    commonest kind — filled the whole panel solid red while the label said
-			    "no data". Absence of data must not raise an alarm. */}
-			{(readings.length === 0 ? [] : (bands ?? []).slice(0, MAX_BANDS)).map((band) => {
-				const top = toY(Number.isFinite(band.to) ? (band.to as number) : scale.high, scale);
-				const bottom = toY(Number.isFinite(band.from) ? (band.from as number) : scale.low, scale);
-				return (
-					<rect
-						className={BAND_TONE[band.severity]}
-						data-slot="telemetry-chart-band"
-						height={Math.max(0, bottom - top)}
-						key={`${band.severity}-${band.from ?? "min"}-${band.to ?? "max"}`}
-						width={VIEW_WIDTH}
-						x={0}
-						y={top}
-					/>
-				);
-			})}
+			<div className="flex items-baseline gap-2">
+				{name === undefined ? null : (
+					<span
+						className="min-w-0 flex-1 truncate font-mono text-[10px] text-muted-foreground uppercase"
+						data-slot="telemetry-chart-name"
+					>
+						{name}
+					</span>
+				)}
+				{/* The headline, and the largest thing here because it is the one fact
+				    someone crosses the room to collect. `tabular-nums` so the digits
+				    hold their columns instead of shuffling on every frame. */}
+				<span
+					className="ml-auto font-mono text-xl leading-none tabular-nums"
+					data-slot="telemetry-chart-value"
+				>
+					{latest === undefined
+						? NO_READING
+						: latest.value.toFixed(digitsFor(Math.abs(latest.value)))}
+				</span>
+				{unit === undefined ? null : (
+					<span
+						className="font-mono text-[10px] text-muted-foreground uppercase"
+						data-slot="telemetry-chart-unit"
+					>
+						{unit}
+					</span>
+				)}
+			</div>
 
-			{path === "" ? null : (
-				<path
-					className="fill-none stroke-foreground"
-					d={path}
-					data-slot="telemetry-chart-line"
-					strokeLinecap="round"
-					strokeLinejoin="round"
-					strokeWidth={1.5}
-					// The viewBox stretches to the panel, so without this the stroke
-					// would stretch with it and read thicker on a wide panel.
-					vectorEffect="non-scaling-stroke"
-				/>
-			)}
-		</svg>
+			<div className="flex min-h-0 flex-1 gap-1.5">
+				<div className="relative min-w-0 flex-1">
+					<svg
+						aria-hidden="true"
+						className="absolute inset-0 h-full w-full"
+						data-slot="telemetry-chart-plot"
+						preserveAspectRatio="none"
+						viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
+					>
+						{/* Bands need a real axis. Over an empty feed the domain falls back to 0..1,
+						    and a downward-open critical band — under-voltage, under-keel, the
+						    commonest kind — filled the whole panel solid red while the label said
+						    "no data". Absence of data must not raise an alarm. */}
+						{(empty ? [] : (bands ?? []).slice(0, MAX_BANDS)).map((band) => {
+							const top = toY(Number.isFinite(band.to) ? (band.to as number) : scale.high, scale);
+							const bottom = toY(
+								Number.isFinite(band.from) ? (band.from as number) : scale.low,
+								scale,
+							);
+							return (
+								<rect
+									className={BAND_TONE[band.severity]}
+									data-slot="telemetry-chart-band"
+									height={Math.max(0, bottom - top)}
+									key={`${band.severity}-${band.from ?? "min"}-${band.to ?? "max"}`}
+									width={VIEW_WIDTH}
+									x={0}
+									y={top}
+								/>
+							);
+						})}
+
+						{path === "" ? null : (
+							<path
+								className="fill-none stroke-foreground"
+								d={path}
+								data-slot="telemetry-chart-line"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth={1.5}
+								// The viewBox stretches to the panel, so without this the stroke
+								// would stretch with it and read thicker on a wide panel.
+								vectorEffect="non-scaling-stroke"
+							/>
+						)}
+					</svg>
+
+					{/* A blank rectangle is indistinguishable from a panel that failed to
+					    render, and an operator who reads it that way goes hunting a console
+					    fault instead of a silent vehicle. Say which one it is. */}
+					{empty ? (
+						<span
+							className="absolute inset-0 flex items-center justify-center font-mono text-[10px] text-muted-foreground"
+							data-slot="telemetry-chart-empty"
+						>
+							NO DATA
+						</span>
+					) : null}
+				</div>
+
+				{/* High above, low below, so each bound sits where the value it names
+				    would sit. Worth the room here because the domain auto-fits and now
+				    absorbs band edges too, so the trace's vertical extent is not
+				    something a reader could work out from the props they passed in. */}
+				<div
+					className="flex shrink-0 flex-col justify-between text-right font-mono text-[9px] text-muted-foreground tabular-nums"
+					data-slot="telemetry-chart-axis"
+				>
+					{/* Over an empty feed the domain is a 0..1 fallback rather than a
+					    measurement, and printing it would state a scale nothing earned. */}
+					<span data-slot="telemetry-chart-axis-high">
+						{empty ? NO_READING : scale.high.toFixed(boundDigits)}
+					</span>
+					<span data-slot="telemetry-chart-axis-low">
+						{empty ? NO_READING : scale.low.toFixed(boundDigits)}
+					</span>
+				</div>
+			</div>
+		</div>
 	);
 }
 

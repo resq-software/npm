@@ -233,8 +233,49 @@ export function assertNoForcedReflowTriggers(source: string, file: string): void
  * Collects **all** static performance violations from a source string.
  * Maps each violation to the Storybook Performance panel category it affects.
  */
+/** Matches a JSX inline style prop in source text. */
+const INLINE_STYLE_RE = /style=\{/;
+
+/**
+ * Components that already carried inline styles when the rule was introduced,
+ * each for a value no utility class expresses: a computed transform, a CSS
+ * custom property. Grandfathered so the rule could land without a refactor of
+ * five unrelated components — this set is a debt list, not a permission slip.
+ */
+const INLINE_STYLE_GRANDFATHERED = new Set([
+	"components/chart/chart.tsx",
+	"components/progress/progress.tsx",
+	"components/sidebar/sidebar.tsx",
+	"components/sonner/sonner.tsx",
+	"components/toggle-group/toggle-group.tsx",
+]);
+
 export function collectSourceViolations(source: string, file: string): PerfViolation[] {
 	const v: PerfViolation[] = [];
+
+	// ── Inline styles ─────────────────────────────────────────────────
+	// The rendered budget further down is only reachable through
+	// `collectViolations`, which takes a React element — but the suite that runs
+	// over every component file, `perf-guards.test.ts`, calls THIS function on
+	// source text. So the zero budget was enforced by nobody, and a `style={`
+	// added to any component would have landed silently.
+	//
+	// It is a ratchet rather than a flat ban because five components already use
+	// inline styles for values a utility class cannot express — a computed
+	// transform, a custom property. Those are grandfathered by name; the list
+	// must not grow. Anything else has an SVG geometry attribute available, which
+	// is dynamic without being a style.
+	if (!INLINE_STYLE_GRANDFATHERED.has(file) && INLINE_STYLE_RE.test(source)) {
+		v.push({
+			category: "style-writes",
+			match: source.match(INLINE_STYLE_RE)?.[0] ?? "style={",
+			message:
+				`${file}: inline "style={" — the budget is zero for new code. ` +
+				"Use a utility class, or an SVG geometry attribute where the value must be dynamic.",
+			rule: "inline-style-budget",
+			severity: "error",
+		});
+	}
 
 	// ── Frame Timing ──────────────────────────────────────────────────
 	if (TRANSITION_ALL_RE.test(source)) {

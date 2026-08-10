@@ -28,6 +28,22 @@ function pathOf(samples: readonly ChartSample[], extra: Record<string, unknown> 
 	return String(line?.d ?? "");
 }
 
+/** The inner plot's props — geometry now lives one level below the root. */
+function plotOf(props: Record<string, unknown>): Record<string, unknown> {
+	return slots(TelemetryChart(props), "telemetry-chart-plot")[0] ?? {};
+}
+
+/** The text a visible slot renders, or an empty string when it is absent. */
+function textOf(props: Record<string, unknown>, slot: string): string {
+	return String(slots(TelemetryChart(props), slot)[0]?.children ?? "");
+}
+
+/** The x coordinate of the path's last point, in viewBox units (0 to 300). */
+function finalX(path: string): number {
+	const pairs = path.split(/[ML]/).filter((part) => part.trim() !== "");
+	return Number((pairs[pairs.length - 1] ?? "").trim().split(" ")[0]);
+}
+
 /** The accessible summary. */
 function labelOf(props: Record<string, unknown>): string {
 	return String(TelemetryChart(props).props["aria-label"]);
@@ -62,6 +78,168 @@ describe("TelemetryChart", () => {
 
 	it("accepts a caller override for the label", () => {
 		expect(labelOf({ label: "Voltage trend", samples: steady([1]) })).toBe("Voltage trend");
+	});
+
+	it("keeps the trace in a plot of its own, silent to a screen reader", () => {
+		// The root carries the role and the name; a second described node inside it
+		// would have the whole window announced twice.
+		const plot = plotOf({ samples: steady([1, 2, 3]) });
+
+		expect(plot["data-slot"]).toBe("telemetry-chart-plot");
+		expect(plot["aria-hidden"]).toBe("true");
+	});
+
+	it("stretches that plot to the panel rather than sitting it in a letterbox", () => {
+		const plot = plotOf({ samples: steady([1, 2, 3]) });
+
+		expect(plot.preserveAspectRatio).toBe("none");
+		expect(plot.viewBox).toBe("0 0 300 100");
+	});
+
+	it("gives the root a height so the plot has something to fill", () => {
+		// The plot is absolutely positioned inside the root, so a root with no
+		// height of its own would render the component as two lines of text.
+		expect(String(TelemetryChart({ samples: steady([1]) }).props.className)).toContain("h-24");
+	});
+
+	it("lets a caller size the strip themselves", () => {
+		const element = TelemetryChart({ className: "h-40", samples: steady([1]) });
+
+		expect(String(element.props.className)).toContain("h-40");
+		expect(String(element.props.className)).not.toContain("h-24");
+	});
+});
+
+describe("TelemetryChart readout", () => {
+	it("prints the latest value where an operator can read it", () => {
+		// Everything this component knew used to live in its aria-label alone: the
+		// shape of the pack voltage was on screen and the number was not.
+		expect(
+			textOf(
+				{ name: "Pack voltage", samples: steady([24.1, 25.5]), unit: "volts" },
+				"telemetry-chart-value",
+			),
+		).toBe("25.5");
+	});
+
+	it("shows the unit beside the figure", () => {
+		expect(textOf({ samples: steady([25.5]), unit: "volts" }, "telemetry-chart-unit")).toBe(
+			"volts",
+		);
+	});
+
+	it("names what the series measures", () => {
+		expect(textOf({ name: "Pack voltage", samples: steady([25.5]) }, "telemetry-chart-name")).toBe(
+			"Pack voltage",
+		);
+	});
+
+	it("rounds a float rather than printing its noise", () => {
+		// A reading arrives off the vehicle as 0.30000000000000004, and fourteen
+		// decimal places is fourteen digits before the one that changed.
+		expect(textOf({ samples: [{ t: 0, value: 0.1 + 0.2 }] }, "telemetry-chart-value")).toBe("0.30");
+	});
+
+	it("sheds decimals as the figure grows", () => {
+		expect(textOf({ samples: [{ t: 0, value: 481.27 }] }, "telemetry-chart-value")).toBe("481");
+	});
+
+	it("holds the digits in their columns as they change", () => {
+		// Proportional figures make the headline shuffle sideways on every frame.
+		const value = slots(TelemetryChart({ samples: steady([1]) }), "telemetry-chart-value")[0];
+
+		expect(String(value?.className)).toContain("tabular-nums");
+	});
+
+	it("shows an em dash rather than a number it does not have", () => {
+		expect(textOf({ unit: "volts" }, "telemetry-chart-value")).toBe("—");
+	});
+});
+
+describe("TelemetryChart axis bounds", () => {
+	it("prints the domain a caller fixed", () => {
+		const args = { max: 100, min: 0, samples: steady([10, 90]) };
+
+		expect(textOf(args, "telemetry-chart-axis-high")).toBe("100");
+		expect(textOf(args, "telemetry-chart-axis-low")).toBe("0");
+	});
+
+	it("shows where a band pushed the domain, since the props never say", () => {
+		// The axis absorbs band edges, so a chart drawn from 24 volt readings can
+		// have a 48 volt scale and nothing else on screen would admit it.
+		const args = {
+			bands: [{ from: 46, severity: "critical" as const }],
+			samples: [
+				{ t: 0, value: 24 },
+				{ t: 1000, value: 26 },
+			],
+		};
+
+		expect(textOf(args, "telemetry-chart-axis-high")).toBe("48.2");
+		expect(textOf(args, "telemetry-chart-axis-low")).toBe("24.0");
+	});
+
+	it("gives both bounds one precision so they read as a single scale", () => {
+		const args = { samples: steady([0.25, 0.75]) };
+
+		expect(textOf(args, "telemetry-chart-axis-high")).toBe("0.75");
+		expect(textOf(args, "telemetry-chart-axis-low")).toBe("0.25");
+	});
+
+	it("claims no scale over a feed that sent nothing", () => {
+		// The empty domain is a 0 to 1 fallback, not a measurement.
+		expect(textOf({}, "telemetry-chart-axis-high")).toBe("—");
+		expect(textOf({}, "telemetry-chart-axis-low")).toBe("—");
+	});
+});
+
+describe("TelemetryChart empty state", () => {
+	it("says NO DATA rather than rendering a blank rectangle", () => {
+		// An empty box reads as a panel that failed to render, and sends an
+		// operator hunting a console fault instead of a silent vehicle.
+		expect(textOf({ name: "Pack voltage", unit: "volts" }, "telemetry-chart-empty")).toBe(
+			"NO DATA",
+		);
+	});
+
+	it("keeps the spoken summary it has always given", () => {
+		expect(labelOf({})).toBe("Telemetry, no data");
+	});
+
+	it("drops the notice the moment a reading arrives", () => {
+		expect(slots(TelemetryChart({ samples: steady([1]) }), "telemetry-chart-empty")).toHaveLength(
+			0,
+		);
+	});
+});
+
+describe("TelemetryChart pinned window", () => {
+	/** Twenty-one seconds of a 1 Hz feed, then silence. */
+	const stopped = steady(Array.from({ length: 21 }, (_unused, index) => index));
+
+	it("stops the trace short when the feed stopped short", () => {
+		// Twenty of the window's sixty seconds carry data, so the stroke ends a
+		// third of the way across and the silence occupies the width it really did.
+		expect(finalX(pathOf(stopped, { now: 60_000, windowMs: 60_000 }))).toBeCloseTo(100, 2);
+	});
+
+	it("draws that same dead feed to the right edge without a window", () => {
+		// The failure the prop exists for: an axis fitted to its own data puts the
+		// newest sample flush right however old it is, so a feed that stopped forty
+		// seconds ago is indistinguishable from one still reporting.
+		expect(finalX(pathOf(stopped))).toBeCloseTo(300, 2);
+	});
+
+	it("starts the pinned window at its own left edge", () => {
+		expect(pathOf(stopped, { now: 60_000, windowMs: 60_000 }).startsWith("M0.00")).toBe(true);
+	});
+
+	it("ignores a window with no instant to anchor it", () => {
+		expect(finalX(pathOf(stopped, { windowMs: 60_000 }))).toBeCloseTo(300, 2);
+	});
+
+	it("ignores an anchor with no window to measure back from", () => {
+		expect(finalX(pathOf(stopped, { now: 60_000 }))).toBeCloseTo(300, 2);
 	});
 });
 

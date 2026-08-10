@@ -3,7 +3,7 @@
 
 /**
  * @fileoverview Storybook stories for the CommandButton component —
- * every state the vehicle can report, plus confirmation and unavailability,
+ * every state the vehicle can report, plus hold-to-confirm and unavailability,
  * for visual review and Chromatic regression.
  *
  * @module @resq-systems/ui/components/command-button/command-button.stories
@@ -60,19 +60,36 @@ export const TimedOut: Story = {
 };
 
 /**
- * A destructive command costs a second deliberate press. Disarming in flight is
- * not something an operator should be able to do with one stray click.
+ * A destructive command costs a sustained hold. Press and keep holding: the bar
+ * fills, and the command leaves only when it is full. Let go early and nothing
+ * is sent at all — which the control says aloud, because silence reads exactly
+ * like a command that went and is still waiting.
+ *
+ * The bar is the point of the pattern. A dialog would ask the same question in
+ * a different place, and a dialog in the way of a routine action trains people
+ * to click through it; a hold cannot be cleared by reflex, and it cannot be
+ * reached by a double-click or by leaning on the Enter key.
  */
-export const AwaitingConfirmation: Story = {
+export const HoldToConfirm: Story = {
 	args: { command: "Disarm", confirm: true },
 };
 
 /**
- * The same command with its confirming press pending. The shell owns `armed`,
- * so every armed command can be cleared at once the moment the link drops.
+ * A longer dwell for a command with no undo. Two seconds is a long time to hold
+ * a button, which is the entire argument for spending it here and nowhere else.
  */
-export const Armed: Story = {
-	args: { ...AwaitingConfirmation.args, armed: true },
+export const LongHold: Story = {
+	args: { command: "Release payload", confirm: true, holdMs: 2000 },
+};
+
+/**
+ * A destructive command whose request is already in flight. The dwell is inert
+ * while `sending`, and a hold already under way is thrown away rather than
+ * resumed the moment the command goes inert — an operator who began holding
+ * under one reading of the link should not release under another.
+ */
+export const HoldWhileSending: Story = {
+	args: { ...HoldToConfirm.args, state: "sending" },
 };
 
 /**
