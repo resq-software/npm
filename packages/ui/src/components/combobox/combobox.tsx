@@ -300,7 +300,15 @@ function ComboboxTrigger({
 }: Readonly<ComboboxPrimitive.Trigger.Props>) {
 	return (
 		<ComboboxPrimitive.Trigger
-			aria-label={children === undefined ? "Show options" : undefined}
+			// `undefined`, `null` and `false` all render nothing. `false` matters most:
+			// `{isReady && <ComboboxValue />}` is the ordinary way to write this, and
+			// it hands down `false`, which would have left the trigger both empty and
+			// unnamed — the case the fallback exists for.
+			aria-label={
+				children === undefined || children === null || children === false
+					? "Show options"
+					: undefined
+			}
 			className={cn("[&_svg:not([class*='size-'])]:size-4", className)}
 			data-slot="combobox-trigger"
 			{...props}

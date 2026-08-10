@@ -131,7 +131,15 @@ function collectCases(): { cases: StoryCase[]; skipped: string[] } {
 			// A story may legitimately be `export const Default: Story = {}` — no args
 			// and no render. Skipping those silently excluded the plainest variant of
 			// many components, which is exactly the one most likely to be unlabelled.
-			if (typeof story.render !== "function" && typeof component !== "function") continue;
+			if (typeof story.render !== "function" && typeof component !== "function") {
+				// Record it. This array was declared and returned but never written to,
+				// so the report claimed `"skipped": []` while quietly dropping stories —
+				// the exact silent-exclusion failure the comment above warns about, and
+				// the third time in this file that a check reported clean by measuring
+				// less than it appeared to.
+				skipped.push(`${title} / ${name}`);
+				continue;
+			}
 
 			const args = { ...(meta?.args ?? {}), ...(story.args ?? {}) };
 
