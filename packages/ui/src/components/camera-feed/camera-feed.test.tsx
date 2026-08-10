@@ -78,9 +78,13 @@ describe("CameraFeed", () => {
 	});
 
 	it("merges a caller className rather than dropping it", () => {
-		expect(CameraFeed({ ...BOW, className: "aspect-video" }).props.className).toContain(
-			"aspect-video",
-		);
+		expect(CameraFeed({ ...BOW, className: "col-span-2" }).props.className).toContain("col-span-2");
+	});
+
+	it("carries a box of its own so a dropped feed cannot collapse the panel", () => {
+		// The placeholder is `h-full`, which resolves to nothing unless the root has
+		// a height. Without this the panel would shrink the moment a feed dropped.
+		expect(CameraFeed(BOW).props.className).toContain("aspect-video");
 	});
 });
 

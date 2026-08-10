@@ -163,7 +163,12 @@ function CameraFeed({
 		<div
 			{...props}
 			aria-label={label ?? formatCameraLabel({ latencyMs, name, stale, status })}
-			className={cn("relative overflow-hidden bg-black", className)}
+			// `aspect-video` gives the frame a box of its own, matching the 640x360
+			// defaults. Without it the root has no height, the placeholder's `h-full`
+			// resolves to nothing, and a feed that drops collapses the panel — the
+			// exact reflow the placeholder below exists to prevent. A caller sizing
+			// the frame itself overrides this through `className`.
+			className={cn("relative aspect-video overflow-hidden bg-black", className)}
 			data-slot="camera-feed"
 			data-stale={stale === true ? "" : undefined}
 			data-status={status}
