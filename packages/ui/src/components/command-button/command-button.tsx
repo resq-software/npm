@@ -132,6 +132,7 @@ function CommandButton({
 	label,
 	className,
 	disabled,
+	onClick,
 	...props
 }: Readonly<CommandButtonProps>) {
 	const unavailable = unavailableReason !== undefined;
@@ -141,6 +142,12 @@ function CommandButton({
 	return (
 		<button
 			{...props}
+			// `aria-disabled`, not the native attribute: a natively disabled button
+			// leaves the tab order and is skipped by sequential screen-reader
+			// navigation, so the reason it carries would never actually be read out —
+			// the exact failure this prop exists to prevent. The native attribute is
+			// reserved for the caller's own `disabled`, which makes no such promise.
+			aria-disabled={unavailable ? true : undefined}
 			aria-label={
 				label ?? formatCommandLabel({ armed, command, confirm, state, unavailableReason })
 			}
@@ -156,7 +163,16 @@ function CommandButton({
 			data-confirm={confirm === true ? "" : undefined}
 			data-slot="command-button"
 			data-state={state}
-			disabled={disabled === true || unavailable}
+			disabled={disabled === true}
+			onClick={(event) => {
+				// Reachable and readable, but inert: `aria-disabled` alone does not
+				// stop activation.
+				if (unavailable) {
+					event.preventDefault();
+					return;
+				}
+				onClick?.(event);
+			}}
 			type="button"
 		>
 			<span className="min-w-0 flex-1 truncate">{command}</span>

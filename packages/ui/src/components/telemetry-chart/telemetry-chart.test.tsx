@@ -144,7 +144,7 @@ describe("TelemetryChart dropouts", () => {
 		expect(pathOf(dense).match(/M/g)).toHaveLength(1);
 	});
 
-	it("keeps the spoken dropout count and the broken stroke in agreement", () => {
+	it("keeps the spoken count and the broken stroke in agreement when nothing is dropped", () => {
 		const ragged = [
 			{ t: 0, value: 1 },
 			{ t: 1000, value: 2 },
@@ -153,9 +153,27 @@ describe("TelemetryChart dropouts", () => {
 			{ t: 120_000, value: 5 },
 		];
 
-		// Two outages means three strokes, and the summary must say two.
+		// Below the point budget every reading is drawn, so two outages means three
+		// strokes and the summary must say two.
 		expect(pathOf(ragged).match(/M/g)).toHaveLength(3);
 		expect(labelOf({ samples: ragged })).toContain("2 dropouts");
+	});
+
+	it("counts every outage even when downsampling merges them into one break", () => {
+		// Two outages inside a single bucket, far from its extremes, so neither
+		// endpoint survives downsampling and they collapse to one stroke break.
+		// Counting breaks would report one dropout for two — understating exactly
+		// what the operator needs.
+		// Buckets here span 41 readings, so 2510 and 2520 sit well inside bucket 60
+		// while its drawn extremes are the readings at each end.
+		let offset = 0;
+		const merged = Array.from({ length: 5000 }, (_unused, index) => {
+			if (index === 2510 || index === 2520) offset += 60_000;
+			return { t: index * 100 + offset, value: index };
+		});
+
+		expect(pathOf(merged).match(/M/g)).toHaveLength(2);
+		expect(labelOf({ samples: merged })).toContain("2 dropouts");
 	});
 
 	it("honours an explicit gap threshold over the inferred one", () => {
@@ -177,7 +195,11 @@ describe("TelemetryChart dropouts", () => {
 					{ t: 1000, value: Number.NaN },
 				],
 			}),
-		).toContain("1 samples");
+		).toMatch(/1 sample$/);
+	});
+
+	it("says one sample rather than 1 samples", () => {
+		expect(labelOf({ samples: steady([7]) })).toMatch(/1 sample$/);
 	});
 });
 
@@ -302,6 +324,19 @@ describe("TelemetryChart element budget", () => {
 
 	it("bounds the point count so a long window costs no more than a short one", () => {
 		expect(pathOf(many).split(/[ML]/).length - 1).toBeLessThanOrEqual(240);
+	});
+
+	it("survives a window larger than the engine's argument limit", () => {
+		// The caller owns the ring buffer, so this length is not hypothetical.
+		// `Math.min(...values)` would throw RangeError here and take the whole
+		// panel's render down with it.
+		const huge = Array.from({ length: 200_000 }, (_unused, index) => ({
+			t: index * 100,
+			value: index % 97,
+		}));
+
+		expect(() => TelemetryChart({ samples: huge })).not.toThrow();
+		expect(labelOf({ samples: huge })).toContain("range 0 to 96");
 	});
 
 	it("keeps a one-sample spike rather than averaging it away", () => {

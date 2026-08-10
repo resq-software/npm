@@ -91,10 +91,11 @@ export interface Coalescer {
 /**
  * One animation frame where there is a compositor, otherwise a macrotask.
  *
- * The macrotask fallback matters for tests and server rendering, but it is also
- * the honest choice in a background tab: `requestAnimationFrame` stops firing
- * there, and a console that silently stopped publishing would look frozen
- * rather than idle.
+ * The branch is chosen by capability, not by visibility. The macrotask fallback
+ * covers hosts with no compositor — Node, and tests. A background browser tab
+ * still defines `requestAnimationFrame`, so it takes the first branch and its
+ * flushes pause until the tab is shown again; frames keep folding in memory
+ * meanwhile and the newest one publishes on the first tick after that.
  */
 export function defaultScheduler(flush: () => void): () => void {
 	if (typeof globalThis.requestAnimationFrame === "function") {
@@ -179,8 +180,11 @@ export function createCoalescer<T>(options: Readonly<CoalescerOptions<T>>): Coal
 			// render of its own — that is exactly the work being saved.
 			if (cancel !== undefined) coalesced += 1;
 
-			const seed = pending?.value ?? published?.value;
-			pending = { value: reduce === undefined ? next : reduce(seed, next) };
+			// Pick the box, then read it. `pending?.value ?? published?.value` would
+			// fall through to the published value whenever the pending one is `null`,
+			// handing the reducer a stale `previous` for any `T` that admits null.
+			const seed = pending ?? published;
+			pending = { value: reduce === undefined ? next : reduce(seed?.value, next) };
 
 			if (cancel === undefined) cancel = schedule(publish);
 		},

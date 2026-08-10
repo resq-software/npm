@@ -207,8 +207,17 @@ function chooseIndices(readings: readonly Reading[]): number[] {
 	return chosen;
 }
 
-/** Reduce the series to drawable points, each knowing whether it starts anew. */
-function toPoints(readings: readonly Reading[], gapMs: number): Point[] {
+/**
+ * Reduce the series to drawable points, each knowing whether it starts anew,
+ * plus the exact number of dropouts in the window.
+ *
+ * The count comes from the prefix over the *whole* series, not from the number
+ * of stroke breaks. Two outages falling between the same pair of drawn points
+ * produce one break, and reporting one dropout for two would understate exactly
+ * what the operator needs to know. So in a downsampled window the spoken count
+ * can legitimately exceed the number of visible breaks.
+ */
+function toPoints(readings: readonly Reading[], gapMs: number): { points: Point[]; gaps: number } {
 	const prefix = gapPrefix(readings, gapMs);
 	const points: Point[] = [];
 	let previous: number | undefined;
@@ -224,7 +233,7 @@ function toPoints(readings: readonly Reading[], gapMs: number): Point[] {
 		previous = index;
 	}
 
-	return points;
+	return { gaps: prefix[prefix.length - 1] ?? 0, points };
 }
 
 //#endregion
@@ -238,11 +247,30 @@ interface Scale {
 	last: number;
 }
 
+/**
+ * Lowest and highest reading, in one pass.
+ *
+ * Not `Math.min(...values)`: the caller owns the ring buffer, so its length is
+ * unbounded here, and a spread passes one argument per element. Past the
+ * engine's argument limit that throws `RangeError` and takes down the render of
+ * the whole panel — a chart that kills the console when the window gets long is
+ * worse than no chart.
+ */
+function extremesOf(readings: readonly Reading[]): { low: number; high: number } {
+	if (readings.length === 0) return { high: 1, low: 0 };
+
+	let low = Number.POSITIVE_INFINITY;
+	let high = Number.NEGATIVE_INFINITY;
+	for (const reading of readings) {
+		if (reading.value < low) low = reading.value;
+		if (reading.value > high) high = reading.value;
+	}
+	return { high, low };
+}
+
 /** Work out the axis ranges, honouring caller-fixed bounds. */
 function scaleOf(readings: readonly Reading[], min?: number, max?: number): Scale {
-	const values = readings.map((reading) => reading.value);
-	const dataLow = values.length === 0 ? 0 : Math.min(...values);
-	const dataHigh = values.length === 0 ? 1 : Math.max(...values);
+	const { low: dataLow, high: dataHigh } = extremesOf(readings);
 
 	let low = Number.isFinite(min) ? (min as number) : dataLow;
 	let high = Number.isFinite(max) ? (max as number) : dataHigh;
@@ -306,13 +334,11 @@ function formatChartLabel(
 
 	const suffix = unit === undefined ? "" : ` ${unit}`;
 	const latest = readings[readings.length - 1]?.value ?? 0;
-	const values = readings.map((reading) => reading.value);
-	const lowest = Math.min(...values);
-	const highest = Math.max(...values);
+	const { low: lowest, high: highest } = extremesOf(readings);
 	const parts = [
 		`latest ${latest}${suffix}`,
 		`range ${lowest} to ${highest}${suffix}`,
-		`${readings.length} samples`,
+		readings.length === 1 ? "1 sample" : `${readings.length} samples`,
 	];
 
 	if (gaps > 0) parts.push(gaps === 1 ? "1 dropout" : `${gaps} dropouts`);
@@ -361,10 +387,7 @@ function TelemetryChart({
 		? (gapMs as number)
 		: nominalInterval(readings) * GAP_INTERVALS;
 
-	const points = toPoints(readings, threshold);
-	// Every point but the first that starts a new stroke does so because of a
-	// dropout, so the stroke breaks and the spoken count can never disagree.
-	const gaps = Math.max(0, points.filter((point) => point.broken).length - 1);
+	const { points, gaps } = toPoints(readings, threshold);
 	const path = buildPath(points, scale);
 	const summary = label ?? formatChartLabel(readings, scale, gaps, name, unit);
 

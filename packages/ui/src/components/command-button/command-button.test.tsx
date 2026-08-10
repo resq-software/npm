@@ -147,7 +147,31 @@ describe("CommandButton availability", () => {
 		const element = CommandButton({ ...RTL, unavailableReason: "no GPS fix" });
 
 		expect(element.props["aria-label"]).toBe("Return to launch, unavailable, no GPS fix");
-		expect(element.props.disabled).toBe(true);
+		expect(element.props["aria-disabled"]).toBe(true);
+	});
+
+	it("stays reachable by keyboard so the reason is actually announced", () => {
+		// A natively disabled button leaves the tab order, and a screen reader
+		// skipping it would never read the reason at all.
+		expect(CommandButton({ ...RTL, unavailableReason: "no GPS fix" }).props.disabled).toBe(false);
+	});
+
+	it("refuses to activate while unavailable", () => {
+		const onClick = vi.fn();
+		const element = CommandButton({ ...RTL, onClick, unavailableReason: "no GPS fix" });
+
+		element.props.onClick?.({ preventDefault: vi.fn() });
+
+		expect(onClick).not.toHaveBeenCalled();
+	});
+
+	it("activates normally when it is available", () => {
+		const onClick = vi.fn();
+		const element = CommandButton({ ...RTL, onClick });
+
+		element.props.onClick?.({ preventDefault: vi.fn() });
+
+		expect(onClick).toHaveBeenCalledTimes(1);
 	});
 
 	it("dims an unavailable command", () => {

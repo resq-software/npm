@@ -80,7 +80,7 @@ export interface ConsoleAlert {
 	firstSeen?: number;
 }
 
-export interface AlertListProps extends Omit<React.ComponentProps<"div">, "onSelect"> {
+export interface AlertListProps extends Omit<React.ComponentProps<"div">, "children" | "onSelect"> {
 	alerts?: readonly ConsoleAlert[];
 	/** Called with an alert id when the operator acknowledges it. */
 	onAcknowledge?: (id: string) => void;

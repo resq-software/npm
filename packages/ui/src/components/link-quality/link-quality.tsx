@@ -70,7 +70,7 @@ export type GnssFix = "none" | "2d" | "3d" | "dgps" | "rtk";
 /** How good a single measurement is. */
 export type LinkGrade = "good" | "marginal" | "poor" | "unknown";
 
-export interface LinkQualityProps extends React.ComponentProps<"div"> {
+export interface LinkQualityProps extends Omit<React.ComponentProps<"div">, "children"> {
 	/** Received signal strength in dBm (negative). */
 	rssi?: number;
 	/** Packet loss as a percentage, 0–100. */

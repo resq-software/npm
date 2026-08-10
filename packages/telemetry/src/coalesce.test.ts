@@ -184,6 +184,29 @@ describe("createCoalescer accumulation", () => {
 
 		expect(reduce).toHaveBeenCalledWith(undefined, 5);
 	});
+
+	it("seeds from a pending null rather than falling back to the published value", () => {
+		// `T` here admits null, which is where reading through `??` would skip the
+		// pending value and hand the reducer a stale `previous`.
+		const scheduler = manualScheduler();
+		const seeds: (number | null | undefined)[] = [];
+		const coalescer = createCoalescer<number | null>({
+			onFlush: () => undefined,
+			reduce: (previous, next) => {
+				seeds.push(previous);
+				return next;
+			},
+			schedule: scheduler.schedule,
+			select: (raw) => (raw === "null" ? null : Number(raw)),
+		});
+
+		coalescer.push("7");
+		scheduler.tick();
+		coalescer.push("null");
+		coalescer.push("9");
+
+		expect(seeds).toEqual([undefined, 7, null]);
+	});
 });
 
 describe("createCoalescer explicit flush", () => {
