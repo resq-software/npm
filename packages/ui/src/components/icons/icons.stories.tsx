@@ -1,6 +1,7 @@
 // Copyright 2026 ResQ Systems, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
+import { Fragment } from "react";
 import type { Icon, IconWeight } from "@phosphor-icons/react";
 import {
 	AcornIcon,
@@ -3327,8 +3328,10 @@ export const Weights: Story = {
 				))}
 
 				{/* Icon rows */}
+				{/* A shorthand fragment cannot take a key, so React warned on every row
+				    even though the children inside it were keyed. `Fragment` can. */}
 				{weightShowcase.map((IconComponent, i) => (
-					<>
+					<Fragment key={weightShowcaseNames[i]}>
 						<div
 							key={`label-${weightShowcaseNames[i]}`}
 							style={{ ...labelStyle, textAlign: "left" }}
@@ -3350,7 +3353,7 @@ export const Weights: Story = {
 								<IconComponent className="size-6" weight={w} />
 							</div>
 						))}
-					</>
+					</Fragment>
 				))}
 			</div>
 			<span style={sectionLabel}>* library default</span>
