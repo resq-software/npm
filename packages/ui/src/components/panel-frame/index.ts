@@ -15,21 +15,9 @@
  */
 
 /**
- * @fileoverview React bindings for `@resq-systems/telemetry` (the `./react`
- * entry): a provider that owns one shared socket and hooks to consume it.
+ * @fileoverview Public barrel for the PanelFrame component.
  *
- * @module @resq-systems/telemetry/react
+ * @module @resq-systems/ui/components/panel-frame
  */
 
-export {
-	TelemetryContext,
-	type TelemetryContextValue,
-	TelemetryProvider,
-	type TelemetryProviderProps,
-} from "./telemetry-provider.js";
-export {
-	type CoalescedChannel,
-	type CoalescedChannelOptions,
-	useCoalescedChannel,
-} from "./use-coalesced-channel.js";
-export { type TelemetryChannel, useTelemetry, useTelemetryChannel } from "./use-telemetry.js";
+export { PanelFrame, type PanelFrameProps, type PanelPriority } from "./panel-frame.js";

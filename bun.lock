@@ -359,7 +359,7 @@
     },
     "packages/ui": {
       "name": "@resq-systems/ui",
-      "version": "0.39.0",
+      "version": "0.40.0",
       "dependencies": {
         "@base-ui/react": "^1.7.0",
         "@phosphor-icons/react": "^2.1.10",

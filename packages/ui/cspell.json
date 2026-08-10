@@ -108,6 +108,20 @@
 		"uninitialised",
 		"unplottable",
 		"antimeridian",
-		"unranked"
+		"unranked",
+		"colour",
+		"dgps",
+		"hdop",
+		"mjpeg",
+		"mjpg",
+		"normalise",
+		"optimiser",
+		"overcurrent",
+		"pluralises",
+		"rssi",
+		"sparkline",
+		"summarise",
+		"summarised",
+		"summarises"
 	]
 }

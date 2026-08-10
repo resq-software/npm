@@ -42,6 +42,11 @@
 			"import": "./lib/components/alert-dialog/index.js",
 			"default": "./lib/components/alert-dialog/index.js"
 		},
+		"./alert-list": {
+			"types": "./lib/components/alert-list/index.d.ts",
+			"import": "./lib/components/alert-list/index.js",
+			"default": "./lib/components/alert-list/index.js"
+		},
 		"./altimeter": {
 			"types": "./lib/components/altimeter/index.d.ts",
 			"import": "./lib/components/altimeter/index.js",
@@ -92,6 +97,11 @@
 			"import": "./lib/components/calendar/index.js",
 			"default": "./lib/components/calendar/index.js"
 		},
+		"./camera-feed": {
+			"types": "./lib/components/camera-feed/index.d.ts",
+			"import": "./lib/components/camera-feed/index.js",
+			"default": "./lib/components/camera-feed/index.js"
+		},
 		"./card": {
 			"types": "./lib/components/card/index.d.ts",
 			"import": "./lib/components/card/index.js",
@@ -126,6 +136,11 @@
 			"types": "./lib/components/command/index.d.ts",
 			"import": "./lib/components/command/index.js",
 			"default": "./lib/components/command/index.js"
+		},
+		"./command-button": {
+			"types": "./lib/components/command-button/index.d.ts",
+			"import": "./lib/components/command-button/index.js",
+			"default": "./lib/components/command-button/index.js"
 		},
 		"./compass-rose": {
 			"types": "./lib/components/compass-rose/index.d.ts",
@@ -222,6 +237,11 @@
 			"import": "./lib/components/lidar-scan/index.js",
 			"default": "./lib/components/lidar-scan/index.js"
 		},
+		"./link-quality": {
+			"types": "./lib/components/link-quality/index.d.ts",
+			"import": "./lib/components/link-quality/index.js",
+			"default": "./lib/components/link-quality/index.js"
+		},
 		"./menubar": {
 			"types": "./lib/components/menubar/index.d.ts",
 			"import": "./lib/components/menubar/index.js",
@@ -246,6 +266,11 @@
 			"types": "./lib/components/pagination/index.d.ts",
 			"import": "./lib/components/pagination/index.js",
 			"default": "./lib/components/pagination/index.js"
+		},
+		"./panel-frame": {
+			"types": "./lib/components/panel-frame/index.d.ts",
+			"import": "./lib/components/panel-frame/index.js",
+			"default": "./lib/components/panel-frame/index.js"
 		},
 		"./popover": {
 			"types": "./lib/components/popover/index.d.ts",
@@ -312,6 +337,11 @@
 			"import": "./lib/components/spinner/index.js",
 			"default": "./lib/components/spinner/index.js"
 		},
+		"./status-announcer": {
+			"types": "./lib/components/status-announcer/index.d.ts",
+			"import": "./lib/components/status-announcer/index.js",
+			"default": "./lib/components/status-announcer/index.js"
+		},
 		"./switch": {
 			"types": "./lib/components/switch/index.d.ts",
 			"import": "./lib/components/switch/index.js",
@@ -331,6 +361,11 @@
 			"types": "./lib/components/teleop-pad/index.d.ts",
 			"import": "./lib/components/teleop-pad/index.js",
 			"default": "./lib/components/teleop-pad/index.js"
+		},
+		"./telemetry-chart": {
+			"types": "./lib/components/telemetry-chart/index.d.ts",
+			"import": "./lib/components/telemetry-chart/index.js",
+			"default": "./lib/components/telemetry-chart/index.js"
 		},
 		"./textarea": {
 			"types": "./lib/components/textarea/index.d.ts",
