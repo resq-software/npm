@@ -13,8 +13,8 @@
  * report noise. Contrast is covered analytically by `contrast-audit.test.ts`
  * against the oklch tokens.
  *
- * Writes findings to a JSON report rather than asserting, so the whole picture
- * can be read at once.
+ * Writes the full picture to a JSON report AND asserts zero, so a regression
+ * fails rather than quietly changing a number nobody reads.
  */
 
 import { writeFileSync } from "node:fs";
@@ -23,7 +23,7 @@ import axe from "axe-core";
 import { createElement } from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 /**
  * Without this React logs an error on every `act()`, and `console-fail-test`
@@ -33,7 +33,7 @@ import { describe, expect, it } from "vitest";
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const REPORT_PATH =
-	"/tmp/claude-1000/-home-wombocombo-github-wrk-npm/2953833a-408a-4f0b-b10d-8c6bec93b890/scratchpad/a11y-report-verify.json";
+	"/tmp/claude-1000/-home-wombocombo-github-wrk-npm/2953833a-408a-4f0b-b10d-8c6bec93b890/scratchpad/a11y-report.json";
 
 /** Rules that cannot produce a trustworthy result without layout or CSS. */
 const DISABLED_RULES = {
@@ -146,6 +146,19 @@ function collectCases(): { cases: StoryCase[]; skipped: string[] } {
 describe.runIf(process.env.A11Y_AUDIT === "1")("Accessibility audit", () => {
 	it("runs axe over every story and writes a report", async () => {
 		polyfillJsdom();
+
+		// Rendering 374 stories makes React and recharts talk: act() warnings from
+		// async state, layout complaints from a chart in a DOM with no layout. That
+		// noise trips `console-fail-test` and would red the gate for reasons that
+		// have nothing to do with accessibility. Capture it into the report instead
+		// of muting it — a "unique key" warning in there is a real defect, and
+		// silently swallowing it would trade one blind spot for another.
+		const noise: string[] = [];
+		const record = (...args: unknown[]) => {
+			noise.push(args.map((a) => String(a)).join(" ").slice(0, 200));
+		};
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(record);
+		const warnSpy = vi.spyOn(console, "warn").mockImplementation(record);
 		const { cases, skipped } = collectCases();
 		const audited: string[] = [];
 		const findings: Finding[] = [];
@@ -191,11 +204,29 @@ describe.runIf(process.env.A11Y_AUDIT === "1")("Accessibility audit", () => {
 			}
 		}
 
+		errorSpy.mockRestore();
+		warnSpy.mockRestore();
+
 		writeFileSync(
 			REPORT_PATH,
-			JSON.stringify({ audited, findings, renderErrors, skipped, total: cases.length }, null, 2),
+			JSON.stringify(
+				{ audited, findings, noise: [...new Set(noise)], renderErrors, skipped, total: cases.length },
+				null,
+				2,
+			),
 		);
 
-		expect(cases.length).toBeGreaterThan(0);
+		// Coverage first: a harness that silently stops collecting stories reports
+		// zero violations and looks like success. Two earlier versions of this file
+		// did exactly that — one skipped every no-args story, one let twenty stories
+		// throw before axe saw them — and between them hid 11 of 38 real findings.
+		expect(cases.length).toBeGreaterThan(300);
+		expect(audited.length).toBeGreaterThan(360);
+
+		// Then the gate itself.
+		const summary = findings
+			.map((f) => `${f.component} / ${f.story}: ${f.rule} — ${f.help}`)
+			.join("\n");
+		expect(summary, `axe found ${findings.length} violations:\n${summary}`).toBe("");
 	}, 900_000);
 });

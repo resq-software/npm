@@ -492,6 +492,7 @@
 		"@types/react": "^19.2.18",
 		"@types/react-dom": "^19.2.4",
 		"@vitest/coverage-v8": "4.1.10",
+		"axe-core": "^4.11.3",
 		"chromatic": "^18.1.0",
 		"console-fail-test": "0.6.1",
 		"cspell": "10.0.1",
