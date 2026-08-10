@@ -46,9 +46,13 @@ import { join } from "node:path";
 import process from "node:process";
 
 const PACKAGES_DIR = "packages";
-const COMMENT = /<!--([\s\S]*?)-->/g;
+// Deliberately tolerates a missing `-->`: an unclosed comment swallows the rest
+// of the file, which is exactly the shape this whole issue took — a bare `<!--`
+// on line 1. Matching only closed pairs would let the worst case through.
+const COMMENT = /<!--([\s\S]*?)(?:-->|$)/g;
 const VERSION_HEADING = /^## .*$/gm;
 const LICENCE_LINE = /Copyright\s+\d{4}\s+ResQ/g;
+const TITLE = "# Changelog";
 
 /** Every changelog in the workspace, as `[package, path, contents]`. */
 function changelogs() {
@@ -58,8 +62,11 @@ function changelogs() {
 		const path = join(PACKAGES_DIR, entry.name, "CHANGELOG.md");
 		try {
 			found.push([entry.name, path, readFileSync(path, "utf8")]);
-		} catch {
-			// A package without a changelog has simply never been released.
+		} catch (error) {
+			// Only a missing file means "never released". Treating a permission or
+			// I/O error the same way would quietly shrink the set being checked and
+			// still report success.
+			if (error?.code !== "ENOENT") throw error;
 		}
 	}
 	return found;
@@ -69,9 +76,15 @@ const all = changelogs();
 const problems = [];
 
 for (const [name, path, contents] of all) {
-	const hidden = [...contents.matchAll(COMMENT)].flatMap((match) => [
-		...match[1].matchAll(VERSION_HEADING),
-	]);
+	const comments = [...contents.matchAll(COMMENT)];
+	const hidden = comments.flatMap((match) => [...match[1].matchAll(VERSION_HEADING)]);
+
+	if (comments.some((match) => !match[0].endsWith("-->"))) {
+		problems.push(
+			`${path}: unclosed HTML comment — everything after it is invisible, however ` +
+				"correct the rest of the file looks.",
+		);
+	}
 	if (hidden.length > 0) {
 		problems.push(
 			`${path}: ${hidden.length} release section(s) inside an HTML comment — ` +
@@ -80,19 +93,21 @@ for (const [name, path, contents] of all) {
 	}
 
 	const licences = [...contents.matchAll(LICENCE_LINE)].length;
-	if (licences > 1) {
+	if (licences !== 1) {
 		problems.push(
-			`${path}: ${licences} licence headers — the header is being prepended again ` +
-				"each release instead of being recognised.",
+			licences === 0
+				? `${path}: no licence header.`
+				: `${path}: ${licences} licence headers — the header is being prepended again ` +
+					"each release instead of being recognised.",
 		);
 	}
 
-	const firstLine = contents.split("\n", 1)[0] ?? "";
-	if (!firstLine.startsWith("# ")) {
+	const firstLine = (contents.split("\n", 1)[0] ?? "").replace(/\r$/, "");
+	if (firstLine !== TITLE) {
 		problems.push(
 			`${path} (${name}): starts with ${JSON.stringify(firstLine.slice(0, 40))} rather ` +
-				"than a `# ` heading. `changeset version` inserts after the first line, so " +
-				"anything else there swallows the next release notes.",
+				`than ${JSON.stringify(TITLE)}. \`changeset version\` inserts after the first ` +
+				"line, so anything else there swallows the next release notes.",
 		);
 	}
 }
@@ -101,7 +116,7 @@ if (problems.length > 0) {
 	console.error("Changelog guard failed:\n");
 	for (const problem of problems) console.error(`  - ${problem}`);
 	console.error(
-		"\nA changelog must begin with `# Changelog`, carry exactly one licence header " +
+		`\nA changelog must begin with ${JSON.stringify(TITLE)}, carry exactly one licence header ` +
 			"below it, and keep every release section outside HTML comments.\n" +
 			"See https://github.com/resq-software/npm/issues/248 for how this breaks.",
 	);
