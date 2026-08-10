@@ -22,7 +22,18 @@ const meta: Meta<typeof Switch> = {
 export default meta;
 type Story = StoryObj<typeof Switch>;
 
-export const Default: Story = {};
+/**
+ * The baseline for the other states. A switch with no label announces only as
+ * "switch, off", which says nothing about what would change if it were on.
+ */
+export const Default: Story = {
+	render: (args) => (
+		<div className="flex items-center gap-2">
+			<Switch {...args} id="default-telemetry-uplink" />
+			<Label htmlFor="default-telemetry-uplink">Telemetry uplink</Label>
+		</div>
+	),
+};
 
 /**
  * The on state is the only cue that the setting behind a switch is live, so it

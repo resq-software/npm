@@ -33,7 +33,7 @@ import { describe, expect, it } from "vitest";
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const REPORT_PATH =
-	"/tmp/claude-1000/-home-wombocombo-github-wrk-npm/2953833a-408a-4f0b-b10d-8c6bec93b890/scratchpad/a11y-report-final.json";
+	"/tmp/claude-1000/-home-wombocombo-github-wrk-npm/2953833a-408a-4f0b-b10d-8c6bec93b890/scratchpad/a11y-report-verify.json";
 
 /** Rules that cannot produce a trustworthy result without layout or CSS. */
 const DISABLED_RULES = {

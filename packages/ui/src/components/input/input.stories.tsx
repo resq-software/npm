@@ -87,7 +87,17 @@ export const WithLabel: Story = {
 	),
 };
 
+/**
+ * The interaction story typed into a field with no name, which is precisely the
+ * case a screen-reader user cannot complete.
+ */
 export const Typing: Story = {
+	render: (args) => (
+		<div className="flex flex-col gap-2">
+			<Label htmlFor="typing-callsign">Vehicle callsign</Label>
+			<Input {...args} id="typing-callsign" />
+		</div>
+	),
 	play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
 		const canvas = within(canvasElement);
 		const input = canvas.getByRole("textbox");

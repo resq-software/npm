@@ -17,7 +17,19 @@ const meta: Meta<typeof Checkbox> = {
 export default meta;
 type Story = StoryObj<typeof Checkbox>;
 
-export const Default: Story = {};
+/**
+ * The baseline every other state is read against. It carries a label because an
+ * unlabelled checkbox is not a simpler demo, it is a broken one — the tick is
+ * silent to a screen reader, and a story is the thing consumers copy.
+ */
+export const Default: Story = {
+	render: (args) => (
+		<div className="flex items-center gap-2">
+			<Checkbox {...args} id="default-notify-dispatch" />
+			<Label htmlFor="default-notify-dispatch">Notify dispatch on arrival</Label>
+		</div>
+	),
+};
 
 /**
  * A pre-ticked box is how a form proposes a default on the user's behalf, so it
@@ -79,7 +91,17 @@ export const WithLabel: Story = {
 	),
 };
 
+/**
+ * The interaction story drove an unlabelled control, which is the one thing a
+ * keyboard or screen-reader user cannot do with it.
+ */
 export const Toggle: Story = {
+	render: (args) => (
+		<div className="flex items-center gap-2">
+			<Checkbox {...args} id="toggle-confirm-waypoint" />
+			<Label htmlFor="toggle-confirm-waypoint">Confirm waypoint before executing</Label>
+		</div>
+	),
 	play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
 		const canvas = within(canvasElement);
 		const checkbox = canvas.getByRole("checkbox");
