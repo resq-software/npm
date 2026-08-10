@@ -1,6 +1,6 @@
 {
 	"name": "@resq-systems/telemetry",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"description": "Framework-agnostic real-time telemetry client — single-owner WebSocket with exponential backoff, channel multiplexing, and open-replay, plus React bindings",
 	"license": "Apache-2.0",
 	"type": "module",

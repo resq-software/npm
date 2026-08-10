@@ -1,5 +1,12 @@
 <!--
 
+## 0.4.0
+### Minor Changes
+
+
+
+- [#251](https://github.com/resq-software/npm/pull/251) [`dea7787`](https://github.com/resq-software/npm/commit/dea7787279a9725ebb53fa2a9c15cee6e0cabc5c) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add operator-console panels — PanelFrame, LinkQuality, AlertList, CameraFeed, TelemetryChart, CommandButton, StatusAnnouncer — and frame coalescing
+
 ## 0.3.0
 ### Minor Changes
 

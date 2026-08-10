@@ -1,5 +1,11 @@
 <!--
 
+## 3.0.0
+### Patch Changes
+
+- Updated dependencies [[`dea7787`](https://github.com/resq-software/npm/commit/dea7787279a9725ebb53fa2a9c15cee6e0cabc5c)]:
+  - @resq-systems/telemetry@0.4.0
+
 ## 2.0.0
 ### Patch Changes
 

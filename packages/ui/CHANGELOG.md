@@ -1,5 +1,16 @@
 <!--
 
+## 0.41.0
+### Minor Changes
+
+
+
+- [#251](https://github.com/resq-software/npm/pull/251) [`dea7787`](https://github.com/resq-software/npm/commit/dea7787279a9725ebb53fa2a9c15cee6e0cabc5c) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add operator-console panels — PanelFrame, LinkQuality, AlertList, CameraFeed, TelemetryChart, CommandButton, StatusAnnouncer — and frame coalescing
+
+
+
+- [#251](https://github.com/resq-software/npm/pull/251) [`dea7787`](https://github.com/resq-software/npm/commit/dea7787279a9725ebb53fa2a9c15cee6e0cabc5c) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Name every control axe found unnamed: add `thumbAriaLabels`/`thumbAriaLabelledBy` to Slider, default labels to Combobox's icon-only clear and caret buttons, and a `bun run a11y` audit that runs axe over every story
+
 ## 0.40.0
 ### Minor Changes
 
