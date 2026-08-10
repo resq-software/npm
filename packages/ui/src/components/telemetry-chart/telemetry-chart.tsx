@@ -324,20 +324,35 @@ function toY(value: number, scale: Scale): number {
 /** Map a timestamp onto the horizontal axis. */
 function toX(t: number, scale: Scale): number {
 	const span = scale.last - scale.first;
-	if (span <= 0) return VIEW_WIDTH;
+	// A window holding one instant has no axis to place it along, so it goes in
+	// the middle. Pinning it to an edge would imply a position it does not have.
+	if (span <= 0) return VIEW_WIDTH / 2;
 	return ((t - scale.first) / span) * VIEW_WIDTH;
 }
 
 /**
  * Build one path for the whole series. A dropout emits a fresh `M`, which
  * breaks the stroke instead of drawing a line across data that never arrived.
+ *
+ * A reading with a dropout on both sides gets a zero-length segment rather than
+ * a bare `M`. SVG draws nothing for a moveto that is never followed by a line,
+ * so such a reading would vanish silently — and a reading that survived an
+ * outage is usually the most diagnostically valuable one in the window. With
+ * `stroke-linecap="round"` the zero-length segment renders as a dot, which is
+ * what an isolated sample honestly is: a point, not a line.
  */
 function buildPath(points: readonly Point[], scale: Scale): string {
 	return points
-		.map((point) => {
+		.map((point, index) => {
 			const x = toX(point.t, scale).toFixed(2);
 			const y = toY(point.value, scale).toFixed(2);
-			return `${point.broken ? "M" : "L"}${x} ${y}`;
+			if (!point.broken) return `L${x} ${y}`;
+
+			// Isolated when nothing follows, or when what follows starts its own
+			// stroke — either way this point would be alone in its subpath.
+			const next = points[index + 1];
+			const isolated = next === undefined || next.broken;
+			return isolated ? `M${x} ${y} L${x} ${y}` : `M${x} ${y}`;
 		})
 		.join(" ");
 }

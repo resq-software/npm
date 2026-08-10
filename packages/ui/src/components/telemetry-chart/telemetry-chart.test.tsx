@@ -3,6 +3,7 @@
 
 import { describe, expect, it } from "vitest";
 
+import * as stories from "./telemetry-chart.stories";
 import { type ChartSample, TelemetryChart } from "./telemetry-chart";
 
 /** Props of every node carrying `data-slot`, depth-first. */
@@ -112,6 +113,46 @@ describe("TelemetryChart dropouts", () => {
 
 	it("mentions no dropouts when the feed never lapsed", () => {
 		expect(labelOf({ samples: steady([1, 2, 3]) })).not.toContain("dropout");
+	});
+
+	it("draws a reading that is isolated between two dropouts", () => {
+		// SVG renders nothing for a moveto never followed by a line, so a reading
+		// stranded between two outages would silently vanish — and it is usually
+		// the most diagnostically valuable one in the window. A zero-length segment
+		// renders as a dot under stroke-linecap="round".
+		const path = pathOf([
+			{ t: 0, value: 1 },
+			{ t: 1000, value: 2 },
+			{ t: 60_000, value: 9 },
+			{ t: 120_000, value: 4 },
+			{ t: 121_000, value: 5 },
+		]);
+
+		// The stranded reading is the series maximum, so it sits at the top edge.
+		expect(path).toContain("M148.76 0.00 L148.76 0.00");
+	});
+
+	it("leaves no bare moveto anywhere in the path", () => {
+		const path = pathOf([
+			{ t: 0, value: 1 },
+			{ t: 60_000, value: 9 },
+			{ t: 120_000, value: 4 },
+		]);
+
+		// Every subpath must carry at least one drawing command, or it renders
+		// nothing at all.
+		for (const subpath of path.split("M").slice(1)) {
+			expect(subpath).toContain("L");
+		}
+	});
+
+	it("draws a single-sample window rather than rendering blank", () => {
+		expect(pathOf([{ t: 0, value: 7 }])).toBe("M150.00 50.00 L150.00 50.00");
+	});
+
+	it("centres a lone reading instead of pinning it to an edge", () => {
+		// One instant has no position along a time axis; an edge would imply one.
+		expect(pathOf([{ t: 5000, value: 7 }])).toContain("150.00");
 	});
 
 	it("still detects dropouts when most of the window is dropout", () => {
@@ -347,6 +388,37 @@ describe("TelemetryChart element budget", () => {
 
 		// The spike must survive downsampling into the window's maximum.
 		expect(labelOf({ samples: spiky })).toContain("to 999");
+	});
+});
+
+describe("TelemetryChart documented states", () => {
+	/** Every exported story except the default meta, as name/args pairs. */
+	const cases = Object.entries(stories as Record<string, unknown>)
+		.filter(([name]) => name !== "default")
+		.map(
+			([name, story]) => [name, (story as { args?: Record<string, unknown> }).args ?? {}] as const,
+		);
+
+	it("exports the stories under test", () => {
+		expect(cases.length).toBeGreaterThan(5);
+	});
+
+	it.each(cases)("renders something visible for %s", (name, args) => {
+		const line = slots(TelemetryChart(args), "telemetry-chart-line")[0];
+		const bands = slots(TelemetryChart(args), "telemetry-chart-band");
+		const drawn = String(line?.d ?? "");
+
+		// `NoData` is the one state with genuinely nothing to draw.
+		if (name === "NoData") {
+			expect(drawn).toBe("");
+			return;
+		}
+
+		// A path made only of movetos renders as an empty box, which reads to an
+		// operator as a broken panel rather than as data.
+		expect(drawn, `${name} drew no path`).not.toBe("");
+		expect(drawn, `${name} drew only movetos`).toContain("L");
+		expect(bands.length + (drawn === "" ? 0 : 1)).toBeGreaterThan(0);
 	});
 });
 

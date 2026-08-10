@@ -125,6 +125,8 @@
 		"summarises",
 		"manoeuvre",
 		"neighbouring",
-		"recognise"
+		"recognise",
+		"moveto",
+		"movetos"
 	]
 }
