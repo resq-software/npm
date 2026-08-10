@@ -127,6 +127,10 @@
 		"neighbouring",
 		"recognise",
 		"moveto",
-		"movetos"
+		"movetos",
+		"colours",
+		"unwired",
+		"letterbox",
+		"scrim"
 	]
 }

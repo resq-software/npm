@@ -55,10 +55,16 @@ const SEVERITY_RANK: Record<AlertSeverity, number> = {
 	warning: 1,
 };
 
+/**
+ * Fill tokens on the rule, `-text` variants on the word. The raw tokens are
+ * 3:1 UI-component colours — correct for the 2px rule, but only 2.81:1 as text
+ * on `bg-card` in the light theme, which would make the severity word the least
+ * legible thing in the row it exists to disambiguate.
+ */
 const SEVERITY_TONE: Record<AlertSeverity, string> = {
-	critical: "border-l-destructive text-destructive",
-	info: "border-l-info text-info",
-	warning: "border-l-warning text-warning",
+	critical: "border-l-destructive text-destructive-text",
+	info: "border-l-info text-info-text",
+	warning: "border-l-warning text-warning-text",
 };
 
 /** A single console alert, already deduplicated by the caller's store. */
@@ -200,7 +206,10 @@ function AlertList({
 
 					{onAcknowledge === undefined || alert.acknowledged === true ? null : (
 						<button
-							className="shrink-0 rounded-[3px] border border-border px-1 font-mono text-[9px] text-muted-foreground uppercase leading-4 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+							// Acknowledgement is the operator's only action in this panel, and it was
+							// a ~26x18px target sitting 4px from the next row's. Gloved or on a
+							// tablet, that is a mis-acknowledged alert.
+							className="min-h-6 min-w-6 shrink-0 rounded-[3px] border border-border px-1.5 font-mono text-[10px] text-muted-foreground uppercase leading-5 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
 							onClick={() => onAcknowledge(alert.id)}
 							type="button"
 						>

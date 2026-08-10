@@ -56,6 +56,9 @@ const MAX_POINTS = 240;
 /** Bands rendered; anything beyond is dropped rather than silently stacking. */
 const MAX_BANDS = 4;
 
+/** Room left past a band edge that defines an axis bound, as a fraction of span. */
+const BAND_HEADROOM = 0.1;
+
 /** A y-range of zero cannot be scaled, so it is padded by this much. */
 const FLAT_RANGE_PAD = 0.5;
 
@@ -292,6 +295,7 @@ function extremesOf(readings: readonly Reading[]): Extremes {
 function scaleOf(
 	readings: readonly Reading[],
 	extremes: Extremes,
+	bands: readonly ThresholdBand[],
 	min?: number,
 	max?: number,
 ): Scale {
@@ -299,6 +303,36 @@ function scaleOf(
 
 	let low = Number.isFinite(min) ? (min as number) : dataLow;
 	let high = Number.isFinite(max) ? (max as number) : dataHigh;
+
+	// Threshold edges participate in an auto-fitted domain. Without this a band
+	// is by definition outside the data range — that is what a threshold IS — so
+	// it computed zero height and never drew. A caller who fixes a bound keeps it
+	// exactly; only the automatic side moves.
+	let bandSetLow = false;
+	let bandSetHigh = false;
+	for (const band of bands) {
+		for (const edge of [band.from, band.to]) {
+			if (!Number.isFinite(edge)) continue;
+			const value = edge as number;
+			if (!Number.isFinite(min) && value < low) {
+				low = value;
+				bandSetLow = true;
+			}
+			if (!Number.isFinite(max) && value > high) {
+				high = value;
+				bandSetHigh = true;
+			}
+		}
+	}
+
+	// An open-ended band runs from its edge to the bound, so if its edge IS the
+	// bound it has no area and stays invisible — which is what happened before.
+	// Give the side a band defined a little room past it.
+	if (bandSetLow || bandSetHigh) {
+		const headroom = Math.max((high - low) * BAND_HEADROOM, FLAT_RANGE_PAD);
+		if (bandSetLow) low -= headroom;
+		if (bandSetHigh) high += headroom;
+	}
 	if (high <= low) {
 		// A flat series still has to be drawable, and it belongs mid-frame rather
 		// than pinned to an edge where it would read as an extreme.
@@ -403,6 +437,7 @@ function formatChartLabel(
  * ```tsx
  * <TelemetryChart
  *   bands={[{ from: 46, severity: "critical" }]}
+ *   max={52}
  *   name="Pack voltage"
  *   samples={window}
  *   unit="volts"
@@ -426,7 +461,7 @@ function TelemetryChart({
 	// Scanned once and shared: the axis and the spoken summary both need the
 	// extremes, and the series can be long enough for a second pass to matter.
 	const extremes = extremesOf(readings);
-	const scale = scaleOf(readings, extremes, min, max);
+	const scale = scaleOf(readings, extremes, bands ?? [], min, max);
 	const threshold = Number.isFinite(gapMs)
 		? (gapMs as number)
 		: nominalInterval(readings) * GAP_INTERVALS;
@@ -446,7 +481,11 @@ function TelemetryChart({
 			role="img"
 			viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
 		>
-			{(bands ?? []).slice(0, MAX_BANDS).map((band) => {
+			{/* Bands need a real axis. Over an empty feed the domain falls back to 0..1,
+			    and a downward-open critical band — under-voltage, under-keel, the
+			    commonest kind — filled the whole panel solid red while the label said
+			    "no data". Absence of data must not raise an alarm. */}
+			{(readings.length === 0 ? [] : (bands ?? []).slice(0, MAX_BANDS)).map((band) => {
 				const top = toY(Number.isFinite(band.to) ? (band.to as number) : scale.high, scale);
 				const bottom = toY(Number.isFinite(band.from) ? (band.from as number) : scale.low, scale);
 				return (

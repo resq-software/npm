@@ -340,6 +340,52 @@ describe("TelemetryChart bands", () => {
 		expect(String(bands[1]?.className)).toContain("warning");
 	});
 
+	it("raises no alarm over an empty feed", () => {
+		// Over no data the domain falls back to 0..1, so a downward-open critical
+		// band — under-voltage, under-keel, the commonest kind — used to fill the
+		// whole panel solid red while the label said "no data". Absence of data is
+		// not an alarm condition.
+		expect(
+			slots(
+				TelemetryChart({ bands: [{ severity: "critical", to: 46 }], samples: [] }),
+				"telemetry-chart-band",
+			),
+		).toHaveLength(0);
+	});
+
+	it("fits the axis around a band so a threshold is actually visible", () => {
+		// A threshold is by definition outside the data range; without folding its
+		// edges into an auto-fitted domain every band computed zero height and drew
+		// nothing at all — including in the component's own documented example.
+		const band = slots(
+			TelemetryChart({
+				bands: [{ from: 46, severity: "critical" }],
+				samples: [
+					{ t: 0, value: 24 },
+					{ t: 1000, value: 26 },
+				],
+			}),
+			"telemetry-chart-band",
+		)[0];
+
+		expect(Number(band?.height)).toBeGreaterThan(0);
+	});
+
+	it("keeps a caller-fixed bound exactly, moving only the automatic side", () => {
+		const band = slots(
+			TelemetryChart({
+				bands: [{ from: 46, severity: "critical" }],
+				min: 0,
+				samples: [{ t: 0, value: 24 }],
+			}),
+			"telemetry-chart-band",
+		)[0];
+
+		// min stays 0, so the band's lower edge maps below the top of the frame.
+		expect(Number(band?.height)).toBeGreaterThan(0);
+		expect(Number(band?.y)).toBe(0);
+	});
+
 	it("caps the number of bands rather than stacking them without limit", () => {
 		const bands = Array.from({ length: 12 }, (_unused, index) => ({
 			from: index * 5,

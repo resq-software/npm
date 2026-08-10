@@ -38,6 +38,7 @@
 
 import type * as React from "react";
 
+import { withStaleness } from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
 //#region Types
@@ -59,12 +60,24 @@ const STATUS_WORD: Record<CameraStatus, string> = {
 	offline: "Offline",
 };
 
-const STATUS_TONE: Record<CameraStatus, string> = {
-	connecting: "text-warning",
-	live: "text-success",
-	"no-signal": "text-warning",
-	offline: "text-destructive",
-};
+/**
+ * Chrome text is white rather than a severity token, and that is a deliberate
+ * loss rather than an oversight.
+ *
+ * The picture area is a letterbox matte: theme-independent, because video is
+ * arbitrary content and `object-cover` needs something behind it. The severity
+ * tokens are not theme-independent — `--warning` *darkens* in the light theme,
+ * so `text-warning` on this scrim measures 1.62:1 and `text-destructive` 1.19:1.
+ * Picking the light theme would actively degrade the most-watched panel on the
+ * console.
+ *
+ * The dark variant resolves from a class on `html`, so a subtree cannot opt into
+ * dark tokens; hue is simply unavailable on this surface. The status word
+ * carries severity alone here — the encoding every panel is meant to be able to
+ * fall back to. Restoring hue needs theme-independent video-surface tokens in
+ * the theme itself.
+ */
+const CHROME_TEXT = "text-white";
 
 export interface CameraFeedProps extends Omit<React.ComponentProps<"div">, "children"> {
 	/** Camera name, e.g. `"Bow"` or `"Payload"`. Part of the accessible name. */
@@ -97,17 +110,21 @@ export interface CameraFeedProps extends Omit<React.ComponentProps<"div">, "chil
 
 //#region Helpers
 
-/** Build the accessible name: which camera, doing what, how fresh. */
+/**
+ * Build the accessible name: which camera, doing what.
+ *
+ * Deliberately says nothing about staleness. That is applied to the *resolved*
+ * name at the call site, so it survives a caller-supplied `label`.
+ */
 function formatCameraLabel(props: Readonly<CameraFeedProps>): string {
-	const status = props.status ?? "live";
+	const status = props.status ?? "connecting";
 	const parts = [props.name ?? "Camera", STATUS_WORD[status].toLowerCase()];
 
 	if (typeof props.latencyMs === "number" && Number.isFinite(props.latencyMs)) {
 		parts.push(`${Math.round(props.latencyMs)} millisecond latency`);
 	}
 
-	const body = parts.join(", ");
-	return props.stale === true ? `Stale, ${body}, picture may be frozen` : body;
+	return parts.join(", ");
 }
 
 //#endregion
@@ -132,7 +149,10 @@ function CameraFeed({
 	src,
 	kind = "stream",
 	poster,
-	status = "live",
+	// Not "live". A shell that forgets to wire `status` would otherwise paint a
+	// confident LIVE over a black rectangle, and the repo's own rule is that an
+	// unknown age is not a young one. The optimistic value must be asked for.
+	status = "connecting",
 	stale,
 	latencyMs,
 	width = 640,
@@ -145,6 +165,15 @@ function CameraFeed({
 	const showPicture = status === "live" || status === "connecting";
 	const hasLatency = typeof latencyMs === "number" && Number.isFinite(latencyMs);
 	const pictureClass = cn("block h-full w-full object-cover", stale === true && "opacity-60");
+
+	// Staleness wraps the *resolved* name. Reading `label ?? format(...)` put the
+	// "Stale," prefix inside the fallback only, so a shell naming its cameras —
+	// "Rover 3 bow camera" — silently switched off the frozen-picture
+	// announcement on every one of them, while the visible banner kept rendering
+	// and hid the loss from Chromatic and from sighted review.
+	const summary = label ?? formatCameraLabel({ latencyMs, name, status });
+	const spokenName =
+		stale === true ? withStaleness(`${summary}, picture may be frozen`, true) : summary;
 
 	// An MJPEG endpoint is a never-ending multipart response, so the browser paints
 	// it as an ordinary image and no player is involved.
@@ -162,7 +191,7 @@ function CameraFeed({
 	return (
 		<div
 			{...props}
-			aria-label={label ?? formatCameraLabel({ latencyMs, name, stale, status })}
+			aria-label={spokenName}
 			// `aspect-video` gives the frame a box of its own, matching the 640x360
 			// defaults. Without it the root has no height, the placeholder's `h-full`
 			// resolves to nothing, and a feed that drops collapses the panel — the
@@ -194,10 +223,14 @@ function CameraFeed({
 				// Fills the same box the picture would, so a dropped feed does not
 				// collapse the panel and shove every other panel sideways.
 				<div
-					className="flex h-full w-full items-center justify-center bg-muted"
+					// No background of its own: it sits on the root's matte. `bg-muted`
+					// here meant that in the light theme a dropped feed flipped a black
+					// rectangle to a near-white one — a flash across the console at the
+					// moment a camera dies, in a room that is usually darkened.
+					className="flex h-full w-full items-center justify-center"
 					data-slot="camera-feed-placeholder"
 				>
-					<span className={cn("font-mono text-[11px] uppercase", STATUS_TONE[status])}>
+					<span className={cn("font-mono text-[11px] uppercase", CHROME_TEXT)}>
 						{STATUS_WORD[status]}
 					</span>
 				</div>
@@ -212,7 +245,7 @@ function CameraFeed({
 						{`${Math.round(latencyMs)} ms`}
 					</span>
 				) : null}
-				<span className={cn("font-mono text-[10px] uppercase", STATUS_TONE[status])}>
+				<span className={cn("font-mono text-[10px] uppercase", CHROME_TEXT)}>
 					{STATUS_WORD[status]}
 				</span>
 			</div>

@@ -60,21 +60,38 @@ describe("CameraFeed", () => {
 	});
 
 	it("names the camera and what it is doing", () => {
-		expect(CameraFeed({ ...BOW, latencyMs: 120 }).props["aria-label"]).toBe(
+		expect(CameraFeed({ ...BOW, latencyMs: 120, status: "live" }).props["aria-label"]).toBe(
 			"Bow, live, 120 millisecond latency",
 		);
 	});
 
 	it("falls back to a generic name when the camera is unnamed", () => {
-		expect(CameraFeed({}).props["aria-label"]).toBe("Camera, live");
+		expect(CameraFeed({}).props["aria-label"]).toBe("Camera, connecting");
 	});
 
 	it("omits latency it cannot measure rather than reporting zero", () => {
-		expect(CameraFeed({ ...BOW, latencyMs: Number.NaN }).props["aria-label"]).toBe("Bow, live");
+		expect(CameraFeed({ ...BOW, latencyMs: Number.NaN, status: "live" }).props["aria-label"]).toBe(
+			"Bow, live",
+		);
 	});
 
 	it("accepts a caller override for the label", () => {
 		expect(CameraFeed({ ...BOW, label: "Forward view" }).props["aria-label"]).toBe("Forward view");
+	});
+
+	it("does not claim the picture is live until a shell says so", () => {
+		// An unwired `status` must not paint a confident LIVE over a black frame.
+		// An unknown age is not a young one.
+		expect(CameraFeed(BOW).props["data-status"]).toBe("connecting");
+		expect(String(CameraFeed(BOW).props["aria-label"])).not.toContain("live");
+	});
+
+	it("still announces staleness when the caller supplies its own label", () => {
+		// The prefix used to live inside the fallback, so naming a camera silently
+		// switched off the frozen-picture warning while the banner kept rendering.
+		expect(
+			CameraFeed({ ...BOW, label: "Rover 3 bow camera", stale: true }).props["aria-label"],
+		).toBe("Stale, Rover 3 bow camera, picture may be frozen");
 	});
 
 	it("merges a caller className rather than dropping it", () => {
@@ -152,7 +169,7 @@ describe("CameraFeed status", () => {
 		expect(textOf(CameraFeed({ ...BOW, status: "no-signal" }))).toContain("No signal");
 		expect(textOf(CameraFeed({ ...BOW, status: "offline" }))).toContain("Offline");
 		expect(textOf(CameraFeed({ ...BOW, status: "connecting" }))).toContain("Connecting");
-		expect(textOf(CameraFeed(BOW))).toContain("Live");
+		expect(textOf(CameraFeed({ ...BOW, status: "live" }))).toContain("Live");
 	});
 
 	it("says the status in the accessible name too", () => {
@@ -170,7 +187,7 @@ describe("CameraFeed staleness", () => {
 	});
 
 	it("says so in the accessible name, not only in the banner", () => {
-		expect(CameraFeed({ ...BOW, stale: true }).props["aria-label"]).toBe(
+		expect(CameraFeed({ ...BOW, stale: true, status: "live" }).props["aria-label"]).toBe(
 			"Stale, Bow, live, picture may be frozen",
 		);
 	});

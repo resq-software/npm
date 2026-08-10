@@ -53,10 +53,17 @@ const LATENCY_POOR = 600;
 const HDOP_MARGINAL = 2;
 const HDOP_POOR = 5;
 
+/**
+ * The `-text` variants, not the raw fill tokens. `--warning` and friends are
+ * 3:1 UI-component colours; as text on `bg-card` they measure 2.81:1 in the
+ * light theme. The word is this panel's second severity channel — the one that
+ * survives colour-blindness and sunlight — so it cannot be the least legible
+ * thing on the panel.
+ */
 const TONE = {
-	good: "text-success",
-	marginal: "text-warning",
-	poor: "text-destructive",
+	good: "text-success-text",
+	marginal: "text-warning-text",
+	poor: "text-destructive-text",
 	unknown: "text-muted-foreground",
 } as const;
 

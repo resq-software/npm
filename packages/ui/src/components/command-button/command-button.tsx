@@ -55,12 +55,18 @@ const STATE_WORD: Record<CommandState, string> = {
 	"timed-out": "No response",
 };
 
+/**
+ * Fill tokens on the border, `-text` variants on the word. The raw tokens are
+ * 3:1 UI-component colours and fall to 2.81:1 as text on `bg-card` in the light
+ * theme — and the word carries the whole distinction here, since "Rejected" and
+ * "No response" are not separable by hue.
+ */
 const STATE_TONE: Record<CommandState, string> = {
-	acknowledged: "border-success text-success",
+	acknowledged: "border-success text-success-text",
 	idle: "border-border text-foreground",
-	rejected: "border-destructive text-destructive",
-	sending: "border-warning text-warning",
-	"timed-out": "border-destructive text-destructive",
+	rejected: "border-destructive text-destructive-text",
+	sending: "border-warning text-warning-text",
+	"timed-out": "border-destructive text-destructive-text",
 };
 
 export interface CommandButtonProps extends Omit<React.ComponentProps<"button">, "children"> {
@@ -167,7 +173,14 @@ function CommandButton({
 			onClick={(event) => {
 				// Reachable and readable, but inert: `aria-disabled` alone does not
 				// stop activation.
-				if (unavailable) {
+				//
+				// `sending` is inert for a different and sharper reason. This control
+				// exists for links where an acknowledgement takes seconds, so the
+				// interval where nothing appears to have happened is exactly the
+				// interval an operator presses again — and a second press would put a
+				// second RETURN_TO_LAUNCH on the vehicle. A request in flight is not a
+				// request you may repeat.
+				if (unavailable || state === "sending") {
 					event.preventDefault();
 					return;
 				}

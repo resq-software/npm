@@ -165,6 +165,18 @@ describe("CommandButton availability", () => {
 		expect(onClick).not.toHaveBeenCalled();
 	});
 
+	it("refuses to activate while a request is already in flight", () => {
+		// The seconds where nothing appears to have happened are exactly when an
+		// operator presses again — and a second press is a second command on the
+		// vehicle, not a retry.
+		const onClick = vi.fn();
+		const element = CommandButton({ ...RTL, onClick, state: "sending" });
+
+		element.props.onClick?.({ preventDefault: vi.fn() });
+
+		expect(onClick).not.toHaveBeenCalled();
+	});
+
 	it("activates normally when it is available", () => {
 		const onClick = vi.fn();
 		const element = CommandButton({ ...RTL, onClick });
