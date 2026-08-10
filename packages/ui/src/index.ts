@@ -53,6 +53,12 @@ export {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "./components/alert-dialog/index.js";
+export { AlertList } from "./components/alert-list/index.js";
+export type {
+	AlertListProps,
+	AlertSeverity,
+	ConsoleAlert,
+} from "./components/alert-list/index.js";
 export { Altimeter } from "./components/altimeter/index.js";
 export type { AltimeterProps } from "./components/altimeter/index.js";
 export { AspectRatio } from "./components/aspect-ratio/index.js";
@@ -86,6 +92,12 @@ export {
 	buttonGroupVariants,
 } from "./components/button-group/index.js";
 export { Calendar, CalendarDayButton } from "./components/calendar/index.js";
+export { CameraFeed } from "./components/camera-feed/index.js";
+export type {
+	CameraFeedProps,
+	CameraKind,
+	CameraStatus,
+} from "./components/camera-feed/index.js";
 export {
 	Card,
 	CardAction,
@@ -148,6 +160,11 @@ export {
 	CommandSeparator,
 	CommandShortcut,
 } from "./components/command/index.js";
+export { CommandButton } from "./components/command-button/index.js";
+export type {
+	CommandButtonProps,
+	CommandState,
+} from "./components/command-button/index.js";
 export { CompassRose } from "./components/compass-rose/index.js";
 export type { CompassRoseProps } from "./components/compass-rose/index.js";
 export { ContactScope } from "./components/contact-scope/index.js";
@@ -267,6 +284,12 @@ export { Kbd, KbdGroup } from "./components/kbd/index.js";
 export { Label } from "./components/label/index.js";
 export { LidarScan } from "./components/lidar-scan/index.js";
 export type { LidarScanProps } from "./components/lidar-scan/index.js";
+export { LinkQuality } from "./components/link-quality/index.js";
+export type {
+	GnssFix,
+	LinkGrade,
+	LinkQualityProps,
+} from "./components/link-quality/index.js";
 export {
 	Menubar,
 	MenubarCheckboxItem,
@@ -307,6 +330,8 @@ export type {
 	GridPose,
 	OccupancyGridProps,
 } from "./components/occupancy-grid/index.js";
+export { PanelFrame } from "./components/panel-frame/index.js";
+export type { PanelFrameProps, PanelPriority } from "./components/panel-frame/index.js";
 export {
 	Pagination,
 	PaginationContent,
@@ -393,6 +418,11 @@ export { Skeleton } from "./components/skeleton/index.js";
 export { Slider } from "./components/slider/index.js";
 export { Toaster } from "./components/sonner/index.js";
 export { Spinner } from "./components/spinner/index.js";
+export { StatusAnnouncer } from "./components/status-announcer/index.js";
+export type {
+	AnnouncementUrgency,
+	StatusAnnouncerProps,
+} from "./components/status-announcer/index.js";
 export { Switch } from "./components/switch/index.js";
 export {
 	Table,
@@ -411,6 +441,12 @@ export {
 	tabsListVariants,
 	TabsTrigger,
 } from "./components/tabs/index.js";
+export { TelemetryChart } from "./components/telemetry-chart/index.js";
+export type {
+	ChartSample,
+	TelemetryChartProps,
+	ThresholdBand,
+} from "./components/telemetry-chart/index.js";
 export { TeleopPad } from "./components/teleop-pad/index.js";
 export type { TeleopPadProps, TeleopVector } from "./components/teleop-pad/index.js";
 export { Textarea } from "./components/textarea/index.js";
