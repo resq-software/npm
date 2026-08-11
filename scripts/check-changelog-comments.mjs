@@ -98,7 +98,7 @@ for (const [name, path, contents] of all) {
 			licences === 0
 				? `${path}: no licence header.`
 				: `${path}: ${licences} licence headers — the header is being prepended again ` +
-					"each release instead of being recognised.",
+						"each release instead of being recognised.",
 		);
 	}
 
