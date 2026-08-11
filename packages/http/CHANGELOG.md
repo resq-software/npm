@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- Updated dependencies [[`b43014e`](https://github.com/resq-software/npm/commit/b43014e16296172959680150ad1a31d6cf346b04)]:
+  - @resq-systems/types@0.2.0
+
 <!--
   Copyright 2026 ResQ
 
@@ -17,11 +24,13 @@
 -->
 
 ## 2.0.1
+
 ### Patch Changes
 
 - [#179](https://github.com/resq-software/npm/pull/179) [`4a8cf9a`](https://github.com/resq-software/npm/commit/4a8cf9a1d0b8d76e9c380067c446a209117032a2) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Replace `workspace:*` internal dependency ranges with concrete semver so published packages install cleanly outside the monorepo
 
 ## 2.0.0
+
 ### Major Changes
 
 - [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Type SSRF allowedHosts/blockedHosts as a template-literal HostPattern union so malformed host entries fail to compile, and make fetcher body-type handling exhaustive
@@ -41,6 +50,7 @@
   backward compatibility for consumers written before the rename.
 
 ## 1.0.0
+
 ### Major Changes
 
 - [#168](https://github.com/resq-software/npm/pull/168) [`1d0f73c`](https://github.com/resq-software/npm/commit/1d0f73c6b8dbb5a09e3260ad78ab1fd7ac5c4636) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Replace RequestBody `any` with a JSON/FormData union and brand request IDs as sanitized RequestId
@@ -63,6 +73,7 @@
   - @resq-systems/types@0.1.0
 
 ## 0.2.0
+
 ### Minor Changes
 
 - [#152](https://github.com/resq-software/npm/pull/152) [`23ce8e3`](https://github.com/resq-software/npm/commit/23ce8e3f59c54a010bff42b3b2a76b6df0b2dc99) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Resolve security, algorithmic consistency, and memory leak issues:
@@ -101,6 +112,7 @@
   No runtime or API change in any package: exports, behavior, and types are untouched.
 
 ## 0.1.2
+
 ### Patch Changes
 
 - [#141](https://github.com/resq-software/npm/pull/141) [`2a3c926`](https://github.com/resq-software/npm/commit/2a3c926fc6fb88cae74984f637f99cf37de5da71) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Adopt effect 4.0.0-beta.93: bump the pinned dev version and the root effect override from beta.50, validated against the full build and test suite
