@@ -14,7 +14,7 @@
 		"release": "bun run build && changeset publish",
 		"build": "bun --filter '*' build",
 		"test": "bun --filter '*' test",
-		"lint": "bun --filter @resq-systems/ui lint && node scripts/check-no-workspace-protocol.mjs"
+		"lint": "bun --filter @resq-systems/ui lint && node scripts/check-no-workspace-protocol.mjs && node scripts/check-changelog-comments.mjs"
 	},
 	"packageManager": "bun@1.3.10",
 	"dependencies": {

@@ -1,3 +1,5 @@
+# Changelog
+
 <!--
 
 ## 3.0.0
@@ -23,8 +25,7 @@
 ### Patch Changes
 
 - Updated dependencies [[`13e2e2f`](https://github.com/resq-software/npm/commit/13e2e2fceb6547529d428d1656f01cb618a972f9)]:
-  - @resq-systems/telemetry@0.2.0
-  Copyright 2026 ResQ
+  - @resq-systems/telemetry@0.2.0  Copyright 2026 ResQ
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -38,5 +39,21 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+
+## 2.0.0
+### Patch Changes
+
+- Updated dependencies [[`e20c6ba`](https://github.com/resq-software/npm/commit/e20c6bab1904bb8bf22dc988de8f2a836c58094c)]:
+  - @resq-systems/telemetry@0.3.0
+
+## 1.0.0
+### Minor Changes
+
+- [#225](https://github.com/resq-software/npm/pull/225) [`13e2e2f`](https://github.com/resq-software/npm/commit/13e2e2fceb6547529d428d1656f01cb618a972f9) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add @resq-systems/map — MapLibre + react-map-gl telemetry primitives: TelemetryMap (token-free themeable shell), AssetMarker (heading arrow or custom children), TrackLayer (GeoJSON breadcrumb), and useAssetPositions binding @resq-systems/telemetry frames to live positions
+
+### Patch Changes
+
+- Updated dependencies [[`13e2e2f`](https://github.com/resq-software/npm/commit/13e2e2fceb6547529d428d1656f01cb618a972f9)]:
+  - @resq-systems/telemetry@0.2.0
 
 # @resq-systems/map
