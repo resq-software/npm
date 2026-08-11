@@ -232,6 +232,12 @@ describe("sanitizeJson prototype-pollution depth", () => {
 	// The key surviving is only interesting because of what an application then does
 	// with it: an ordinary recursive merge reaches the prototype.
 	it("leaves a leaf that cannot pollute a prototype through a deep merge", () => {
+		// Deliberately unguarded, and CodeQL is right that it is: this models the
+		// vulnerable consumer. A merge that checked for __proto__ itself would pass
+		// whether or not sanitizeJson stripped the key, so the test would prove nothing.
+		// The assertion below is what makes it safe — if the key survived sanitization,
+		// this merge sets Object.prototype.isAdmin and the test fails.
+		// codeql[js/prototype-polluting-function]
 		const merge = (target: Record<string, unknown>, source: Record<string, unknown>) => {
 			for (const key of Object.keys(source)) {
 				const value = source[key];
