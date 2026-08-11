@@ -41,6 +41,7 @@ import {
 	polar,
 	toFinite,
 	valueToAngle,
+	withStaleness,
 } from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
@@ -155,6 +156,15 @@ export interface VerticalSpeedIndicatorProps extends React.ComponentProps<"div">
 	verticalSpeed?: number;
 	/** Symmetric full-scale rate. Defaults to 2000. */
 	maxRate?: number;
+	/**
+	 * Marks the reading as no longer trustworthy: dims the figure, shows a STALE
+	 * badge, sets `data-stale`, and leads the accessible label with "Stale".
+	 *
+	 * A boolean rather than a timestamp — this component holds no timer and
+	 * could not notice itself going stale. Compute it with `isStale` from
+	 * `@resq-systems/ui/adapters`, driven by your own render loop.
+	 */
+	stale?: boolean;
 	/** Overrides the auto-generated `aria-label`. */
 	label?: string;
 }
@@ -170,6 +180,7 @@ export interface VerticalSpeedIndicatorProps extends React.ComponentProps<"div">
 function VerticalSpeedIndicator({
 	verticalSpeed,
 	maxRate,
+	stale,
 	label,
 	className,
 	...props
@@ -180,11 +191,13 @@ function VerticalSpeedIndicator({
 			: DEFAULT_MAX_RATE;
 	const rate = clamp(toFinite(verticalSpeed), -max, max);
 	const rounded = Math.round(rate);
-	const ariaLabel =
+	const ariaLabel = withStaleness(
 		label ??
-		(rounded === 0
-			? "Vertical speed indicator, level"
-			: `Vertical speed indicator, ${Math.abs(rounded)} feet per minute ${rounded > 0 ? "climb" : "descent"}`);
+			(rounded === 0
+				? "Vertical speed indicator, level"
+				: `Vertical speed indicator, ${Math.abs(rounded)} feet per minute ${rounded > 0 ? "climb" : "descent"}`),
+		stale,
+	);
 
 	const needleAngle = rateToAngle(rate, max);
 	const tip = polar(needleAngle, NEEDLE_TIP);
@@ -196,9 +209,15 @@ function VerticalSpeedIndicator({
 			aria-label={ariaLabel}
 			className={cn("relative inline-block size-48 select-none", className)}
 			data-slot="vertical-speed-indicator"
+			data-stale={stale === true ? "" : undefined}
 			role="img"
 		>
-			<div className="absolute inset-0 overflow-hidden rounded-full border border-border bg-card">
+			<div
+				className={cn(
+					"absolute inset-0 overflow-hidden rounded-full border border-border bg-card",
+					stale === true && "opacity-45",
+				)}
+			>
 				<svg
 					aria-hidden="true"
 					className="block"
@@ -259,6 +278,11 @@ function VerticalSpeedIndicator({
 					<circle cx={CENTER} cy={CENTER} fill={HUB} r={HUB_RADIUS} />
 				</svg>
 			</div>
+			{stale === true ? (
+				<span className="absolute top-1 right-1 rounded-[3px] bg-destructive px-1 py-px font-mono text-[9px] uppercase leading-none text-destructive-foreground">
+					Stale
+				</span>
+			) : null}
 		</div>
 	);
 }

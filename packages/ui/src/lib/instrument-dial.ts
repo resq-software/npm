@@ -30,6 +30,44 @@ export function clamp(value: number, min: number, max: number): number {
 	return Math.min(max, Math.max(min, value));
 }
 
+/**
+ * Whether a prop carries a usable reading. Narrows `number | undefined` to
+ * `number`, so an instrument can tell "absent" apart from zero and leave a
+ * readout blank rather than displaying a fabricated 0.
+ */
+export function isReading(value: number | undefined): value is number {
+	return typeof value === "number" && Number.isFinite(value);
+}
+
+/**
+ * Mark an instrument's accessible label as stale.
+ *
+ * Staleness leads rather than trails: an operator hearing "Stale" first knows
+ * to distrust the numbers that follow, where a suffix arrives too late. It is
+ * applied even to a caller-supplied `label`, because a custom name does not
+ * make a frozen reading fresh.
+ *
+ * Instruments take `stale` as a boolean rather than a timestamp on purpose.
+ * They are pure and hold no timer, so a component given `timestamp` + `maxAge`
+ * could not notice itself going stale — it would only re-evaluate when some
+ * *other* prop changed, which is exactly when the reading is still moving. The
+ * app already has the render loop, so it owns the clock; see `isStale` in
+ * `@resq-systems/ui/adapters`.
+ */
+export function withStaleness(label: string, stale: boolean | undefined): string {
+	return stale === true ? `Stale, ${label}` : label;
+}
+
+/**
+ * A strictly positive, finite value, or `fallback` when the input is neither.
+ * Full-scale ranges and thresholds use this: a zero or negative scale would
+ * divide by zero or invert the display, so it is treated as absent.
+ */
+export function safePositive(value: number | undefined, fallback: number): number {
+	const resolved = toFinite(value, fallback);
+	return resolved > 0 ? resolved : fallback;
+}
+
 /** Point on a circle centred on the instrument, at `angleDeg` clockwise from top. */
 export function polar(angleDeg: number, radius: number): Point {
 	const rad = (angleDeg * Math.PI) / 180;

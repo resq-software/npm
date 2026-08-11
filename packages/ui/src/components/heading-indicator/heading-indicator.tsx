@@ -32,6 +32,7 @@
 
 import type * as React from "react";
 
+import { withStaleness } from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
 //#region Geometry constants
@@ -156,6 +157,15 @@ const COMPASS_NUMBERS = NUMBERS.map(({ deg, size, text }) => {
 export interface HeadingIndicatorProps extends React.ComponentProps<"div"> {
 	/** Heading in degrees, clockwise from north. Wrapped into [0, 360). */
 	heading?: number;
+	/**
+	 * Marks the reading as no longer trustworthy: dims the figure, shows a STALE
+	 * badge, sets `data-stale`, and leads the accessible label with "Stale".
+	 *
+	 * A boolean rather than a timestamp — this component holds no timer and
+	 * could not notice itself going stale. Compute it with `isStale` from
+	 * `@resq-systems/ui/adapters`, driven by your own render loop.
+	 */
+	stale?: boolean;
 	/** Overrides the auto-generated `aria-label`. */
 	label?: string;
 }
@@ -170,12 +180,16 @@ export interface HeadingIndicatorProps extends React.ComponentProps<"div"> {
  */
 function HeadingIndicator({
 	heading,
+	stale,
 	label,
 	className,
 	...props
 }: Readonly<HeadingIndicatorProps>) {
 	const headingDeg = normalizeHeading(toFiniteDegrees(heading));
-	const ariaLabel = label ?? `Heading indicator, ${Math.round(headingDeg) % FULL_TURN} degrees`;
+	const ariaLabel = withStaleness(
+		label ?? `Heading indicator, ${Math.round(headingDeg) % FULL_TURN} degrees`,
+		stale,
+	);
 
 	return (
 		<div
@@ -183,9 +197,15 @@ function HeadingIndicator({
 			aria-label={ariaLabel}
 			className={cn("relative inline-block size-48 select-none", className)}
 			data-slot="heading-indicator"
+			data-stale={stale === true ? "" : undefined}
 			role="img"
 		>
-			<div className="absolute inset-0 overflow-hidden rounded-full border border-border bg-card">
+			<div
+				className={cn(
+					"absolute inset-0 overflow-hidden rounded-full border border-border bg-card",
+					stale === true && "opacity-45",
+				)}
+			>
 				<svg
 					aria-hidden="true"
 					className="block"
@@ -236,6 +256,11 @@ function HeadingIndicator({
 					</g>
 				</svg>
 			</div>
+			{stale === true ? (
+				<span className="absolute top-1 right-1 rounded-[3px] bg-destructive px-1 py-px font-mono text-[9px] uppercase leading-none text-destructive-foreground">
+					Stale
+				</span>
+			) : null}
 		</div>
 	);
 }

@@ -21,7 +21,8 @@
  * and any vertically-stacked, line-per-record UI.
  *
  * Composition:
- * - `ItemGroup` — wraps a vertical list of items.
+ * - `ItemGroup` — wraps a vertical list of items and supplies the
+ *   `role="list"` that makes its rows' `role="listitem"` valid.
  * - `Item` — single row; supports `variant` (default / outline /
  *   muted) and `size` (default / sm).
  * - `ItemMedia` — leading slot for an avatar, icon, or thumbnail
@@ -34,6 +35,16 @@
  *
  * `Item` supports `asChild` so it can render as a routing link via
  * Radix Slot.
+ *
+ * Semantics: `Item` is this family's `<li>` — it always carries
+ * `role="listitem"`, so it must render inside an `ItemGroup` (or
+ * another `role="list"` container), including when there is only one
+ * row; a group of one is correct, as a one-item `<ul>` is. The two
+ * roles are a matched pair and neither survives alone: an ungrouped
+ * `Item` fails `aria-required-parent` and may be dropped from the
+ * accessibility tree, while a group whose children drop the role
+ * fails `aria-required-children`. For a standalone surface that is
+ * not a record in a collection, reach for `Card` instead.
  *
  * @module @resq-systems/ui/components/item/item
  */

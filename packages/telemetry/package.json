@@ -1,6 +1,6 @@
 {
 	"name": "@resq-systems/telemetry",
-	"version": "0.2.0",
+	"version": "0.4.0",
 	"description": "Framework-agnostic real-time telemetry client — single-owner WebSocket with exponential backoff, channel multiplexing, and open-replay, plus React bindings",
 	"license": "Apache-2.0",
 	"type": "module",
@@ -37,8 +37,8 @@
 	},
 	"devDependencies": {
 		"@total-typescript/ts-reset": "^0.6.1",
-		"@types/node": "^26.1.1",
-		"@types/react": "^19.2.17",
+		"@types/node": "^26.1.2",
+		"@types/react": "^19.2.18",
 		"react": "^19.2.8",
 		"tsdown": "^0.22.14",
 		"typescript": "7.0.2",

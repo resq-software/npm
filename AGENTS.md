@@ -64,6 +64,8 @@ Bump types: `patch` (bug fix), `minor` (new feature), `major` (breaking change).
 - [Development Guide](.github/DEVELOPMENT.md)
 - [Code Style](CODE_STYLE.md) — JSDoc, comments, `#region`, file headers
 - [Style Guide](design/STYLE_GUIDE.md) — visual design system
+- [Vehicle Telemetry Instruments](design/VEHICLE_TELEMETRY_INSTRUMENTS.md) — air/ground/sea instrument inventory, data-shape contracts, package placement
+- [Vehicle Dashboards](design/VEHICLE_DASHBOARDS.md) — console shell architecture, per-vehicle panel layouts, data plumbing and build order
 
 ## Git hooks
 

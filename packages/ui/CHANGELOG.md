@@ -1,4 +1,35 @@
+# Changelog
+
 <!--
+
+## 0.41.0
+### Minor Changes
+
+
+
+- [#251](https://github.com/resq-software/npm/pull/251) [`dea7787`](https://github.com/resq-software/npm/commit/dea7787279a9725ebb53fa2a9c15cee6e0cabc5c) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add operator-console panels — PanelFrame, LinkQuality, AlertList, CameraFeed, TelemetryChart, CommandButton, StatusAnnouncer — and frame coalescing
+
+
+
+- [#251](https://github.com/resq-software/npm/pull/251) [`dea7787`](https://github.com/resq-software/npm/commit/dea7787279a9725ebb53fa2a9c15cee6e0cabc5c) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Name every control axe found unnamed: add `thumbAriaLabels`/`thumbAriaLabelledBy` to Slider, default labels to Combobox's icon-only clear and caret buttons, and a `bun run a11y` audit that runs axe over every story
+
+## 0.40.0
+### Minor Changes
+
+
+
+- [#247](https://github.com/resq-software/npm/pull/247) [`0257d51`](https://github.com/resq-software/npm/commit/0257d51a64b2b3ce4ec7a409564a2c1302dbb341) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add a `stale` prop to every reading instrument plus `isStale`/`readingAge`/`latestTimestamp` adapters, and rank the ContactScope render cap by CPA risk instead of range
+
+## 0.39.0
+### Minor Changes
+
+
+
+- [#241](https://github.com/resq-software/npm/pull/241) [`e20c6ba`](https://github.com/resq-software/npm/commit/e20c6bab1904bb8bf22dc988de8f2a836c58094c) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add the `./adapters` subpath with pure ROS 2, MAVLink, AIS, Signal K and VDA5050 message-to-prop mappers, including CPA/TCPA solving for AIS contacts
+
+
+
+- [#241](https://github.com/resq-software/npm/pull/241) [`e20c6ba`](https://github.com/resq-software/npm/commit/e20c6bab1904bb8bf22dc988de8f2a836c58094c) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add ground and sea vehicle telemetry instruments: TiltIndicator, WheelOdometer, LidarScan, OccupancyGrid, BatteryGauge, TeleopPad, DepthGauge, CompassRose, ThrusterRing and ContactScope
 
 ## 0.38.0
 ### Minor Changes
@@ -24,8 +55,7 @@
 
 
 
-- [#197](https://github.com/resq-software/npm/pull/197) [`7269bda`](https://github.com/resq-software/npm/commit/7269bdad52363247477163490a8d8af9b1672316) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Remove file-wide @ts-nocheck from chart.tsx and type recharts 3.x usage properly (scoped @ts-expect-error only where unavoidable)
-  Copyright 2026 ResQ
+- [#197](https://github.com/resq-software/npm/pull/197) [`7269bda`](https://github.com/resq-software/npm/commit/7269bdad52363247477163490a8d8af9b1672316) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Remove file-wide @ts-nocheck from chart.tsx and type recharts 3.x usage properly (scoped @ts-expect-error only where unavoidable)  Copyright 2026 ResQ
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -40,26 +70,46 @@
   limitations under the License.
 -->
 
-<!--
+## 0.40.0
+### Minor Changes
+
+- [#247](https://github.com/resq-software/npm/pull/247) [`0257d51`](https://github.com/resq-software/npm/commit/0257d51a64b2b3ce4ec7a409564a2c1302dbb341) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add a `stale` prop to every reading instrument plus `isStale`/`readingAge`/`latestTimestamp` adapters, and rank the ContactScope render cap by CPA risk instead of range
+
+## 0.39.0
+### Minor Changes
+
+- [#241](https://github.com/resq-software/npm/pull/241) [`e20c6ba`](https://github.com/resq-software/npm/commit/e20c6bab1904bb8bf22dc988de8f2a836c58094c) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add the `./adapters` subpath with pure ROS 2, MAVLink, AIS, Signal K and VDA5050 message-to-prop mappers, including CPA/TCPA solving for AIS contacts
+
+- [#241](https://github.com/resq-software/npm/pull/241) [`e20c6ba`](https://github.com/resq-software/npm/commit/e20c6bab1904bb8bf22dc988de8f2a836c58094c) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add ground and sea vehicle telemetry instruments: TiltIndicator, WheelOdometer, LidarScan, OccupancyGrid, BatteryGauge, TeleopPad, DepthGauge, CompassRose, ThrusterRing and ContactScope
+
+## 0.38.0
+### Minor Changes
+
+- [#225](https://github.com/resq-software/npm/pull/225) [`13e2e2f`](https://github.com/resq-software/npm/commit/13e2e2fceb6547529d428d1656f01cb618a972f9) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add Altimeter, VerticalSpeedIndicator, and TurnCoordinator instruments, completing the basic-six flight instrument set on a shared dial-geometry helper
+
+- [#225](https://github.com/resq-software/npm/pull/225) [`13e2e2f`](https://github.com/resq-software/npm/commit/13e2e2fceb6547529d428d1656f01cb618a972f9) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add AttitudeIndicator instrument — an SVG artificial horizon with a pitch ladder, rotating bank scale, and an accessible attitude label
+
+- [#225](https://github.com/resq-software/npm/pull/225) [`13e2e2f`](https://github.com/resq-software/npm/commit/13e2e2fceb6547529d428d1656f01cb618a972f9) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add HeadingIndicator (compass card) and AirspeedIndicator (pointer dial with operating bands and redline) instruments
+
+## 0.37.2
+### Patch Changes
+
+- [#195](https://github.com/resq-software/npm/pull/195) [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Extend design-token drift guard to radii, fonts, chart, and surface
+
+- [#197](https://github.com/resq-software/npm/pull/197) [`7269bda`](https://github.com/resq-software/npm/commit/7269bdad52363247477163490a8d8af9b1672316) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Remove file-wide @ts-nocheck from chart.tsx and type recharts 3.x usage properly (scoped @ts-expect-error only where unavoidable)
 
 ## 0.37.1
 ### Patch Changes
-
-
 
 - [#179](https://github.com/resq-software/npm/pull/179) [`4a8cf9a`](https://github.com/resq-software/npm/commit/4a8cf9a1d0b8d76e9c380067c446a209117032a2) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Replace `workspace:*` internal dependency ranges with concrete semver so published packages install cleanly outside the monorepo
 
 ## 0.37.0
 ### Minor Changes
 
-
-
 - [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Type RGB channels with NumberRange<0,255>, split Rgb from its null failure state, and fix getContrastingColor treating a zero channel as absent
 
 ## 0.36.0
 ### Minor Changes
-
-
 
 - [#167](https://github.com/resq-software/npm/pull/167) [`c80c8b8`](https://github.com/resq-software/npm/commit/c80c8b8f0eecd3e12af3e74cdd26aac98337675b) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Rebrand to ResQ Systems: rename npm scope `@resq-sw/*` → `@resq-systems/*`
 
@@ -74,29 +124,9 @@
 ## 0.35.7
 ### Patch Changes
 
-
-
 - [#145](https://github.com/resq-software/npm/pull/145) [`c6982a6`](https://github.com/resq-software/npm/commit/c6982a6474860ddc400c622c7b9d3e2dfafe58d8) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add @total-typescript/ts-reset devDependency and reset.d.ts to improve global typing defaults during development, keeping it out of the published library output.
 
-
-
 - [#145](https://github.com/resq-software/npm/pull/145) [`c6982a6`](https://github.com/resq-software/npm/commit/c6982a6474860ddc400c622c7b9d3e2dfafe58d8) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Update TypeScript to 7.0.2 across all packages
-  Copyright 2026 ResQ Systems, Inc.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
-
-# Changelog
 
 ## [0.35.4](https://github.com/resq-software/npm/compare/0.35.3...0.35.4) (2026-04-10)
 

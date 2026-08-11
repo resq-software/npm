@@ -34,7 +34,13 @@
 
 import type * as React from "react";
 
-import { clamp, INSTRUMENT_CENTER, INSTRUMENT_VIEW, toFinite } from "../../lib/instrument-dial.js";
+import {
+	clamp,
+	INSTRUMENT_CENTER,
+	INSTRUMENT_VIEW,
+	toFinite,
+	withStaleness,
+} from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
 //#region Geometry constants
@@ -158,6 +164,15 @@ export interface TurnCoordinatorProps extends React.ComponentProps<"div"> {
 	turn?: number;
 	/** Inclinometer ball position, −1 (full left) … 1 (full right). 0 is coordinated. */
 	slip?: number;
+	/**
+	 * Marks the reading as no longer trustworthy: dims the figure, shows a STALE
+	 * badge, sets `data-stale`, and leads the accessible label with "Stale".
+	 *
+	 * A boolean rather than a timestamp — this component holds no timer and
+	 * could not notice itself going stale. Compute it with `isStale` from
+	 * `@resq-systems/ui/adapters`, driven by your own render loop.
+	 */
+	stale?: boolean;
 	/** Overrides the auto-generated `aria-label`. */
 	label?: string;
 }
@@ -173,6 +188,7 @@ export interface TurnCoordinatorProps extends React.ComponentProps<"div"> {
 function TurnCoordinator({
 	turn,
 	slip,
+	stale,
 	label,
 	className,
 	...props
@@ -190,7 +206,7 @@ function TurnCoordinator({
 		Math.abs(slipValue) < CENTRED_EPSILON
 			? "ball centred"
 			: `ball ${slipValue > 0 ? "right" : "left"}`;
-	const ariaLabel = label ?? `Turn coordinator, ${turnPart}, ${slipPart}`;
+	const ariaLabel = withStaleness(label ?? `Turn coordinator, ${turnPart}, ${slipPart}`, stale);
 
 	return (
 		<div
@@ -198,9 +214,15 @@ function TurnCoordinator({
 			aria-label={ariaLabel}
 			className={cn("relative inline-block size-48 select-none", className)}
 			data-slot="turn-coordinator"
+			data-stale={stale === true ? "" : undefined}
 			role="img"
 		>
-			<div className="absolute inset-0 overflow-hidden rounded-full border border-border bg-card">
+			<div
+				className={cn(
+					"absolute inset-0 overflow-hidden rounded-full border border-border bg-card",
+					stale === true && "opacity-45",
+				)}
+			>
 				<svg
 					aria-hidden="true"
 					className="block"
@@ -257,6 +279,11 @@ function TurnCoordinator({
 					<circle cx={ballX} cy={BALL_Y} fill={ACCENT} r={BALL_RADIUS} />
 				</svg>
 			</div>
+			{stale === true ? (
+				<span className="absolute top-1 right-1 rounded-[3px] bg-destructive px-1 py-px font-mono text-[9px] uppercase leading-none text-destructive-foreground">
+					Stale
+				</span>
+			) : null}
 		</div>
 	);
 }

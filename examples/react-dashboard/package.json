@@ -15,17 +15,17 @@
 		"@resq-systems/rate-limiting": "workspace:*",
 		"@resq-systems/security": "workspace:*",
 		"@resq-systems/ui": "workspace:*",
-		"effect": "4.0.0-beta.102",
+		"effect": "4.0.0-beta.103",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
 		"tailwindcss": "^4.1.0"
 	},
 	"devDependencies": {
 		"@tailwindcss/vite": "^4.3.3",
-		"@types/react": "^19.2.17",
-		"@types/react-dom": "^19.0.0",
-		"@vitejs/plugin-react-swc": "^4.3.2",
+		"@types/react": "^19.2.18",
+		"@types/react-dom": "^19.2.4",
+		"@vitejs/plugin-react-swc": "^4.3.3",
 		"typescript": "7.0.2",
-		"vite": "^8.1.5"
+		"vite": "^8.2.0"
 	}
 }

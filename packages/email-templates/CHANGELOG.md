@@ -1,20 +1,6 @@
+# Changelog
+
 <!--
-
-## 0.6.2
-### Patch Changes
-
-
-
-- [#212](https://github.com/resq-software/npm/pull/212) [`80ae136`](https://github.com/resq-software/npm/commit/80ae136c449c8fa0e5f24f5116e282bf30a09f71) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add security, research, and engineer addresses to brand.email and repoint support to the real contact@ mailbox
-
-- Updated dependencies [[`80ae136`](https://github.com/resq-software/npm/commit/80ae136c449c8fa0e5f24f5116e282bf30a09f71)]:
-  - @resq-systems/constants@0.5.0
-
-## 0.6.1
-### Patch Changes
-
-- Updated dependencies [[`848e667`](https://github.com/resq-software/npm/commit/848e667e0467e4663a6684fad00244070b11b01c), [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998)]:
-  - @resq-systems/constants@0.4.0
   Copyright 2026 ResQ
 
   Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,12 +16,22 @@
   limitations under the License.
 -->
 
-<!--
+## 0.6.2
+### Patch Changes
+
+- [#212](https://github.com/resq-software/npm/pull/212) [`80ae136`](https://github.com/resq-software/npm/commit/80ae136c449c8fa0e5f24f5116e282bf30a09f71) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add security, research, and engineer addresses to brand.email and repoint support to the real contact@ mailbox
+
+- Updated dependencies [[`80ae136`](https://github.com/resq-software/npm/commit/80ae136c449c8fa0e5f24f5116e282bf30a09f71)]:
+  - @resq-systems/constants@0.5.0
+
+## 0.6.1
+### Patch Changes
+
+- Updated dependencies [[`848e667`](https://github.com/resq-software/npm/commit/848e667e0467e4663a6684fad00244070b11b01c), [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998)]:
+  - @resq-systems/constants@0.4.0
 
 ## 0.6.0
 ### Minor Changes
-
-
 
 - [#187](https://github.com/resq-software/npm/pull/187) [`e6c5ac8`](https://github.com/resq-software/npm/commit/e6c5ac81648a5d681961d13e7faa01982b08d478) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Validate and brand the recipient address at the mailer boundary
 
@@ -46,14 +42,10 @@
 ## 0.5.1
 ### Patch Changes
 
-
-
 - [#179](https://github.com/resq-software/npm/pull/179) [`4a8cf9a`](https://github.com/resq-software/npm/commit/4a8cf9a1d0b8d76e9c380067c446a209117032a2) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Replace `workspace:*` internal dependency ranges with concrete semver so published packages install cleanly outside the monorepo
 
 ## 0.5.0
 ### Minor Changes
-
-
 
 - [#175](https://github.com/resq-software/npm/pull/175) [`abc88da`](https://github.com/resq-software/npm/commit/abc88da66987f0cce47303d09108d4f1fc3b4520) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Validate and brand the recipient address at the mailer boundary
 
@@ -64,8 +56,6 @@
 ## 0.4.0
 ### Minor Changes
 
-
-
 - [#174](https://github.com/resq-software/npm/pull/174) [`59d6d6d`](https://github.com/resq-software/npm/commit/59d6d6d053e755acb28bd655a9faa44362bb680d) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Validate and brand the recipient address at the mailer boundary
 
   `createMailer`, `decodeEmailPayload`, `renderEmail`, and `sendEmail` now decode each payload's `to` through a branded `EmailAddress` schema (exported from the package root) instead of a bare `Schema.String`. A malformed address — or one carrying the CR/LF that underpins SMTP header injection (e.g. `"ok@example.com\r\nBcc: attacker@evil"`) — is rejected with `EmailValidationError` at the decode boundary, and the validated recipient carries the `EmailAddress` brand through to `RenderedEmail["to"]`. Also replaces the opaque `decodeUnknownExit` cast with the shared `Schema.Codec<Payload, unknown, never>` idiom used across the workspace.
@@ -73,8 +63,6 @@
   BREAKING: a `to` that is not a syntactically valid email now fails validation instead of passing through; `RenderedEmail["to"]` and the decoded payload `to` narrow from `string` to the branded `EmailAddress`.
 
 ### Patch Changes
-
-
 
 - [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Republish with corrected manifests. Earlier releases via the tag-triggered
   `release-package.yml` workflow used `bunx npm publish`, which does not rewrite
@@ -93,8 +81,6 @@
 ## 0.3.0
 ### Minor Changes
 
-
-
 - [#167](https://github.com/resq-software/npm/pull/167) [`c80c8b8`](https://github.com/resq-software/npm/commit/c80c8b8f0eecd3e12af3e74cdd26aac98337675b) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Rebrand to ResQ Systems: rename npm scope `@resq-sw/*` → `@resq-systems/*`
 
   **BREAKING (npm scope rename):** every package is republished under the new
@@ -109,34 +95,15 @@
 
 - Updated dependencies [[`1d0f73c`](https://github.com/resq-software/npm/commit/1d0f73c6b8dbb5a09e3260ad78ab1fd7ac5c4636), [`c80c8b8`](https://github.com/resq-software/npm/commit/c80c8b8f0eecd3e12af3e74cdd26aac98337675b)]:
   - @resq-systems/constants@0.3.0
-  Copyright 2026 ResQ
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
-
-<!--
 
 ## 0.2.0
 ### Minor Changes
-
-
 
 - [#164](https://github.com/resq-software/npm/pull/164) [`d324afe`](https://github.com/resq-software/npm/commit/d324afe582374c9573142edf2b03ce5fa890fdaf) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add password-changed, new-device-login, mission-approval, and org-invitation templates plus Email.SupportLine
 
   - New transactional templates: `password-changed` and `new-device-login` (security notices), `mission-approval` (approver sign-off, maps to the HCE mission-approval routes), and `org-invitation` (team/org invite).
   - New `Email.SupportLine` primitive that renders a support-contact line sourced from `theme.org.supportEmail`, so security notices always surface an actionable path.
   - Documents the full template coverage roadmap in `EMAIL_CONTENT_AND_LEGAL_GUIDE.md`.
-
 
 - [#158](https://github.com/resq-software/npm/pull/158) [`4cdfb89`](https://github.com/resq-software/npm/commit/4cdfb89871ca5fa0b74314813083eed0e8cfda1a) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add brand-sourced org identity, legal footer, and compliance category to email templates
 
@@ -150,8 +117,6 @@
 
 ## 0.1.1
 ### Patch Changes
-
-
 
 - [#156](https://github.com/resq-software/npm/pull/156) [`52a18eb`](https://github.com/resq-software/npm/commit/52a18eba2e89d17aa6056c802b16fff53bdbfde1) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Correct the `effect` peer ranges to the versions these packages are actually built and tested against.
 
@@ -179,20 +144,6 @@
   old range resolved to `0.90.0` — the v3 line — steering Bun consumers into the same broken pairing.
 
   No runtime or API change in any package: exports, behavior, and types are untouched.
-  Copyright 2026 ResQ
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
 
 # @resq-sw/email-templates
 

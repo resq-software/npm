@@ -7,10 +7,13 @@ import {
 	clamp,
 	describeArc,
 	INSTRUMENT_CENTER,
+	isReading,
 	linearTicks,
 	polar,
+	safePositive,
 	toFinite,
 	valueToAngle,
+	withStaleness,
 } from "./instrument-dial";
 
 describe("instrument-dial geometry", () => {
@@ -84,6 +87,56 @@ describe("instrument-dial geometry", () => {
 
 			const counter = describeArc(90, 90, 0);
 			expect(counter).toContain(" A 90 90 0 0 0 ");
+		});
+	});
+
+	describe("isReading", () => {
+		it("accepts any finite number, including zero and negatives", () => {
+			expect(isReading(0)).toBe(true);
+			expect(isReading(-12.4)).toBe(true);
+		});
+
+		it("rejects absent and non-finite values", () => {
+			expect(isReading(undefined)).toBe(false);
+			expect(isReading(Number.NaN)).toBe(false);
+			expect(isReading(Number.POSITIVE_INFINITY)).toBe(false);
+			expect(isReading(Number.NEGATIVE_INFINITY)).toBe(false);
+		});
+
+		it("distinguishes a zero reading from an absent one", () => {
+			// The whole point: a gauge must show 0 but blank out "unknown".
+			expect(isReading(0)).not.toBe(isReading(undefined));
+		});
+	});
+
+	describe("safePositive", () => {
+		it("keeps a positive finite value", () => {
+			expect(safePositive(2.5, 10)).toBe(2.5);
+		});
+
+		it("falls back for zero and negative scales", () => {
+			expect(safePositive(0, 10)).toBe(10);
+			expect(safePositive(-3, 10)).toBe(10);
+		});
+
+		it("falls back for absent and non-finite input", () => {
+			expect(safePositive(undefined, 10)).toBe(10);
+			expect(safePositive(Number.NaN, 10)).toBe(10);
+			expect(safePositive(Number.POSITIVE_INFINITY, 10)).toBe(10);
+		});
+	});
+	describe("withStaleness", () => {
+		it("leads with the staleness so it is heard before the numbers", () => {
+			expect(withStaleness("Depth gauge, 12.4 meters", true)).toBe(
+				"Stale, Depth gauge, 12.4 meters",
+			);
+		});
+
+		it("leaves a fresh label untouched", () => {
+			expect(withStaleness("Depth gauge, 12.4 meters", false)).toBe("Depth gauge, 12.4 meters");
+			expect(withStaleness("Depth gauge, 12.4 meters", undefined)).toBe(
+				"Depth gauge, 12.4 meters",
+			);
 		});
 	});
 });

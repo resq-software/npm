@@ -59,7 +59,13 @@ export const Disabled: Story = {
 	args: { children: "Unavailable", disabled: true },
 };
 
+/**
+ * The interaction story rendered a button with no content, so it had no
+ * accessible name — an empty button is exactly what a screen-reader user cannot
+ * act on, and an interaction demo is the last place to model that.
+ */
 export const Clickable: Story = {
+	args: { children: "Save changes" },
 	play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
 		const canvas = within(canvasElement);
 		const button = canvas.getByRole("button");

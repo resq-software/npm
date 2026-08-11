@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * @fileoverview Public API for `@resq-systems/ui` — 57-component React
+ * @fileoverview Public API for `@resq-systems/ui` — a React component
  * library built on Radix UI primitives and Tailwind CSS v4 with a
  * dark-first oklch color system.
  *
@@ -53,6 +53,12 @@ export {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "./components/alert-dialog/index.js";
+export { AlertList } from "./components/alert-list/index.js";
+export type {
+	AlertListProps,
+	AlertSeverity,
+	ConsoleAlert,
+} from "./components/alert-list/index.js";
 export { Altimeter } from "./components/altimeter/index.js";
 export type { AltimeterProps } from "./components/altimeter/index.js";
 export { AspectRatio } from "./components/aspect-ratio/index.js";
@@ -67,6 +73,8 @@ export {
 	AvatarImage,
 } from "./components/avatar/index.js";
 export { Badge, badgeVariants } from "./components/badge/index.js";
+export { BatteryGauge } from "./components/battery-gauge/index.js";
+export type { BatteryGaugeProps } from "./components/battery-gauge/index.js";
 export {
 	Breadcrumb,
 	BreadcrumbEllipsis,
@@ -84,6 +92,12 @@ export {
 	buttonGroupVariants,
 } from "./components/button-group/index.js";
 export { Calendar, CalendarDayButton } from "./components/calendar/index.js";
+export { CameraFeed } from "./components/camera-feed/index.js";
+export type {
+	CameraFeedProps,
+	CameraKind,
+	CameraStatus,
+} from "./components/camera-feed/index.js";
 export {
 	Card,
 	CardAction,
@@ -146,6 +160,15 @@ export {
 	CommandSeparator,
 	CommandShortcut,
 } from "./components/command/index.js";
+export { CommandButton } from "./components/command-button/index.js";
+export type {
+	CommandButtonProps,
+	CommandState,
+} from "./components/command-button/index.js";
+export { CompassRose } from "./components/compass-rose/index.js";
+export type { CompassRoseProps } from "./components/compass-rose/index.js";
+export { ContactScope } from "./components/contact-scope/index.js";
+export type { ContactScopeProps, ScopeContact } from "./components/contact-scope/index.js";
 export {
 	ContextMenu,
 	ContextMenuCheckboxItem,
@@ -163,6 +186,8 @@ export {
 	ContextMenuSubTrigger,
 	ContextMenuTrigger,
 } from "./components/context-menu/index.js";
+export { DepthGauge } from "./components/depth-gauge/index.js";
+export type { DepthGaugeProps } from "./components/depth-gauge/index.js";
 export {
 	Dialog,
 	DialogClose,
@@ -257,6 +282,14 @@ export {
 } from "./components/item/index.js";
 export { Kbd, KbdGroup } from "./components/kbd/index.js";
 export { Label } from "./components/label/index.js";
+export { LidarScan } from "./components/lidar-scan/index.js";
+export type { LidarScanProps } from "./components/lidar-scan/index.js";
+export { LinkQuality } from "./components/link-quality/index.js";
+export type {
+	GnssFix,
+	LinkGrade,
+	LinkQualityProps,
+} from "./components/link-quality/index.js";
 export {
 	Menubar,
 	MenubarCheckboxItem,
@@ -291,6 +324,14 @@ export {
 	navigationMenuTriggerStyle,
 	NavigationMenuViewport,
 } from "./components/navigation-menu/index.js";
+export { OccupancyGrid } from "./components/occupancy-grid/index.js";
+export type {
+	GridPoint,
+	GridPose,
+	OccupancyGridProps,
+} from "./components/occupancy-grid/index.js";
+export { PanelFrame } from "./components/panel-frame/index.js";
+export type { PanelFrameProps, PanelPriority } from "./components/panel-frame/index.js";
 export {
 	Pagination,
 	PaginationContent,
@@ -377,6 +418,11 @@ export { Skeleton } from "./components/skeleton/index.js";
 export { Slider } from "./components/slider/index.js";
 export { Toaster } from "./components/sonner/index.js";
 export { Spinner } from "./components/spinner/index.js";
+export { StatusAnnouncer } from "./components/status-announcer/index.js";
+export type {
+	AnnouncementUrgency,
+	StatusAnnouncerProps,
+} from "./components/status-announcer/index.js";
 export { Switch } from "./components/switch/index.js";
 export {
 	Table,
@@ -395,7 +441,19 @@ export {
 	tabsListVariants,
 	TabsTrigger,
 } from "./components/tabs/index.js";
+export { TelemetryChart } from "./components/telemetry-chart/index.js";
+export type {
+	ChartSample,
+	TelemetryChartProps,
+	ThresholdBand,
+} from "./components/telemetry-chart/index.js";
+export { TeleopPad } from "./components/teleop-pad/index.js";
+export type { TeleopPadProps, TeleopVector } from "./components/teleop-pad/index.js";
 export { Textarea } from "./components/textarea/index.js";
+export { ThrusterRing } from "./components/thruster-ring/index.js";
+export type { ThrusterReading, ThrusterRingProps } from "./components/thruster-ring/index.js";
+export { TiltIndicator } from "./components/tilt-indicator/index.js";
+export type { TiltIndicatorProps } from "./components/tilt-indicator/index.js";
 export { Toggle, toggleVariants } from "./components/toggle/index.js";
 export { ToggleGroup, ToggleGroupItem } from "./components/toggle-group/index.js";
 export {
@@ -408,6 +466,8 @@ export { TurnCoordinator } from "./components/turn-coordinator/index.js";
 export type { TurnCoordinatorProps } from "./components/turn-coordinator/index.js";
 export { VerticalSpeedIndicator } from "./components/vertical-speed-indicator/index.js";
 export type { VerticalSpeedIndicatorProps } from "./components/vertical-speed-indicator/index.js";
+export { WheelOdometer } from "./components/wheel-odometer/index.js";
+export type { WheelOdometerProps, WheelReading } from "./components/wheel-odometer/index.js";
 export { useIsMobile } from "./hooks/use-mobile.js";
 export { cn } from "./lib/utils.js";
 export { getContrastingColor } from "./lib/get-contrasting-color.js";
