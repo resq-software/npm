@@ -1,5 +1,3 @@
-# Changelog
-
 <!--
   Copyright 2026 ResQ
 
