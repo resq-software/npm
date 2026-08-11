@@ -53,7 +53,7 @@ and behaves. Satisfying the requirement remains the application's job.
 
 | Requirement | Level | What it asks | Exports | Proving test |
 |---|---|---|---|---|
-| 1.2.1 | 1 | Context-relevant output encoding for HTML elements, attributes and header fields | `escapeHtmlText`, `escapeHtmlAttribute`, `escapeHtml` | `tests/encoder-conformance.test.ts` |
+| 1.2.1 | 1 | Context-relevant output encoding for HTML element and attribute contexts | `escapeHtmlText`, `escapeHtmlAttribute`, `escapeHtml` | `tests/encoder-conformance.test.ts` |
 | 1.2.2 | 1 | Encode untrusted data in URLs; permit only safe protocols | `sanitizeUrl`, `resolveRedirectTarget` | `tests/controls.test.ts` |
 | 1.2.3 | 1 | Encode when dynamically building JavaScript or JSON content | `encodeJsonForScript` | `tests/validators.test.ts` |
 | 1.2.10 | 3 | RFC 4180 escaping, and a leading quote on formula-trigger characters | `escapeCsvField`, `toCsvRow` | `tests/validators.test.ts` |
@@ -71,6 +71,17 @@ and behaves. Satisfying the requirement remains the application's job.
 
 `generateSecureToken` defaults to 32 bytes — 256 bits, comfortably above 11.5.1's
 128-bit floor.
+
+**1.2.1 covers the element and attribute contexts only.** The requirement also names HTTP
+header fields, and nothing here satisfies that half. `escapeHtml` and `escapeHtmlText`
+pass CR and LF through unchanged, so neither prevents header splitting.
+`escapeHtmlAttribute` does neutralize them, but into `&#x0D;&#x0A;` — right inside a
+quoted attribute, and a corrupted value in a header, whose grammar has never heard of an
+HTML entity. The `HEADER-*` rules report a line break in a value, which is detection, not
+a control. The control is the HTTP layer refusing the value — undici's `Headers` and
+Node's `ServerResponse.setHeader` both reject CR/LF — and this package deliberately does
+not add a fourth encoder to duplicate it. `tests/encoder-conformance.test.ts` pins all of
+this, so the paragraph fails a test rather than merely aging.
 
 ## 2. Detected but not controlled
 

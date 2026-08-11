@@ -142,7 +142,16 @@ import { scanForThreats } from "@resq-systems/security/threats";
 const result = scanForThreats(req.query.file ?? "", { contexts: ["filesystem"] });
 
 if (result.verdict === "block") {
-  logger.warn("traversal attempt", { findings: result.findings });
+  // Log an allowlist, never the findings themselves: `matchedPattern` carries an
+  // excerpt of the input, which for a `credential_exposure` hit is the credential.
+  logger.warn("traversal attempt", {
+    rules: result.findings.map(({ ruleId, type, severity, cwe }) => ({
+      ruleId,
+      type,
+      severity,
+      cwe,
+    })),
+  });
   return new Response("Bad request", { status: 400 });
 }
 ```
@@ -353,7 +362,10 @@ host is the IDN homograph attack.
 #### `getThreatErrorMessage(result): string`
 
 User-facing message for the first finding only — enumerating every category that fired
-leaks the rule set to whoever is probing it. Log `result.findings` server-side instead.
+leaks the rule set to whoever is probing it. Server-side, log an allowlist of each
+finding's `ruleId`, `type`, `severity` and `cwe` — enough to investigate with. Do not log
+the `ThreatFinding` itself: `matchedPattern` is an excerpt of the input, so for a
+`credential_exposure` or `pii_exposure` hit the log line becomes the leak.
 
 #### Deprecated
 

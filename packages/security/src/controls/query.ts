@@ -356,17 +356,34 @@ function countOperations(document: string): number {
 }
 
 /**
+ * Deepest body nesting traversed. A real batch is one array of operation objects, so
+ * anything past this is a client sending nesting for its own sake.
+ *
+ * The bound is what keeps {@link analyzeGraphQLRequest}'s "never throws" contract honest:
+ * a caller handing over `req.body` straight from a JSON body parser can pass `[[[[…]]]]`
+ * nested tens of thousands deep, and an unbounded descent raises `RangeError: Maximum
+ * call stack size exceeded` inside a function documented not to throw. The raw-text path
+ * never had this exposure — its `JSON.parse` failure is caught below — so only the
+ * already-parsed path was affected. Same unbounded-cost shape `payload.ts` caps with
+ * `MAX_COUNTER_STACK`.
+ */
+const MAX_BODY_DEPTH = 8;
+
+/**
  * Extract the GraphQL documents from a request body of any accepted shape.
  *
  * @param body - Parsed body, or the raw JSON text.
+ * @param depth - Current nesting level; callers use the default.
  * @returns Every `query` string found, in order.
  */
-function documentsFrom(body: unknown): string[] {
+function documentsFrom(body: unknown, depth = 0): string[] {
+	if (depth > MAX_BODY_DEPTH) return [];
+
 	if (typeof body === "string") {
 		const trimmed = body.trim();
 		if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
 			try {
-				return documentsFrom(JSON.parse(trimmed) as unknown);
+				return documentsFrom(JSON.parse(trimmed) as unknown, depth + 1);
 			} catch {
 				// Not JSON after all — fall through and treat it as a bare document.
 			}
@@ -374,7 +391,7 @@ function documentsFrom(body: unknown): string[] {
 		return [body];
 	}
 
-	if (Array.isArray(body)) return body.flatMap((entry) => documentsFrom(entry));
+	if (Array.isArray(body)) return body.flatMap((entry) => documentsFrom(entry, depth + 1));
 
 	if (typeof body === "object" && body !== null) {
 		const query = (body as { query?: unknown }).query;

@@ -211,7 +211,7 @@ function isAsciiOnly(input: string): boolean {
 export function getRestrictionLevel(input: string): IdentifierRestrictionLevel {
 	if (!input || typeof input !== "string") return "ascii_only";
 
-	if (containsBidiControls(input) || containsInvisibleCharacters(input)) {
+	if (containsBidiControls(input) || HOSTILE_INVISIBLES.test(input)) {
 		return "unrestricted";
 	}
 
@@ -254,6 +254,20 @@ const BIDI_CONTROLS = /[\u202a-\u202e\u2066-\u2069]/;
 
 /** Zero-width, soft-hyphen, and word-joiner code points. */
 const INVISIBLE_CHARACTERS = /[\u00ad\u200b-\u200f\u2060-\u2064\ufeff]/;
+
+/**
+ * The subset of {@link INVISIBLE_CHARACTERS} with no legitimate use in an identifier.
+ *
+ * U+200C (ZWNJ) and U+200D (ZWJ) are deliberately absent. They are not decoration:
+ * Persian, Hindi, and other scripts need them to write ordinary words and names
+ * correctly \u2014 `\u0645\u06cc\u200c\u0631\u0648\u0645` is spelled with a ZWNJ \u2014 and they appear in everyday emoji
+ * sequences. Demoting on their presence rejects a correctly spelled Persian identifier
+ * at the default level, which is a worse outcome than the spoofing risk they carry,
+ * and that risk is already covered: {@link getSkeleton} strips them before comparison,
+ * so a joiner cannot hide a confusable. {@link containsInvisibleCharacters} still
+ * reports them, because a caller may reasonably want to know they are there.
+ */
+const HOSTILE_INVISIBLES = /[\u00ad\u200b\u200e\u200f\u2060-\u2064\ufeff]/;
 
 /** Global variant used for stripping both families at once. */
 const REMOVABLE_FORMATTING = /[\u00ad\u200b-\u200f\u2060-\u2064\ufeff\u202a-\u202e\u2066-\u2069]/g;

@@ -92,9 +92,68 @@ describe("getSkeleton", () => {
 	});
 });
 
+// A capital lookalike filed under a lowercase prototype folds to the lowercase letter
+// while its Latin twin folds to the uppercase one, so the pair compares as *not*
+// confusable — the precise case an identifier check exists to catch.
+describe("uppercase lookalikes fold to uppercase prototypes", () => {
+	it.each([
+		["Cyrillic ER", "Р", "P"],
+		["Greek RHO", "Ρ", "P"],
+		["Coptic RO", "Ⲣ", "P"],
+		["Cyrillic DZE", "Ѕ", "S"],
+		["Cherokee DU", "Ꮪ", "S"],
+		["Cyrillic IZHITSA", "Ѵ", "V"],
+		["Roman numeral five", "Ⅴ", "V"],
+		["Cherokee DO", "Ꮩ", "V"],
+		["Cyrillic WE", "Ԝ", "W"],
+		["Cyrillic HA", "Х", "X"],
+		["Greek CHI", "Χ", "X"],
+		["Roman numeral ten", "Ⅹ", "X"],
+		["Coptic KHI", "Ⲭ", "X"],
+		["Cyrillic U", "У", "Y"],
+		["Greek UPSILON", "Υ", "Y"],
+		["Coptic UA", "Ⲩ", "Y"],
+		["Greek ZETA", "Ζ", "Z"],
+		["Cherokee NO", "Ꮓ", "Z"],
+		["Latin Z with swash tail", "Ɀ", "Z"],
+		["Roman numeral one thousand", "Ⅿ", "M"],
+		["Coptic SIMA", "Ⲥ", "C"],
+		["Coptic DEI", "Ϯ", "T"],
+	])("%s folds onto %s", (_label, lookalike, latin) => {
+		expect(getSkeleton(lookalike)).toBe(getSkeleton(latin));
+		expect(getSkeleton(lookalike)).not.toBe(getSkeleton(latin.toLowerCase()));
+	});
+
+	it("keeps the two Roman numeral fives on their own case", () => {
+		// U+2174 was listed under both `v` and `V`; later-row-wins folded it to `V`
+		// while U+2164 folded to `v`, swapping the pair.
+		expect(getSkeleton("ⅴ")).toBe(getSkeleton("v"));
+		expect(getSkeleton("Ⅴ")).toBe(getSkeleton("V"));
+		expect(areConfusable("ⅴ", "v")).toBe(true);
+		expect(areConfusable("Ⅴ", "V")).toBe(true);
+	});
+
+	it("still folds the lowercase-shaped Lu letters onto lowercase", () => {
+		// General category `Lu`, lowercase glyph — these belong where they are.
+		for (const [lookalike, latin] of [
+			["Ƅ", "b"],
+			["Ь", "b"],
+			["Ꮟ", "b"],
+			["Ꮒ", "h"],
+			["Ꭹ", "y"],
+		] as const) {
+			expect(getSkeleton(lookalike)).toBe(getSkeleton(latin));
+		}
+	});
+});
+
 describe("areConfusable", () => {
 	it("reports confusable pairs", () => {
 		expect(areConfusable(CYRILLIC_PAYPAL, "paypal")).toBe(true);
+	});
+
+	it("catches an uppercase spoof of a real name", () => {
+		expect(areConfusable("РayPal", "PayPal")).toBe(true);
 	});
 
 	it("does not report a string as confusable with itself", () => {

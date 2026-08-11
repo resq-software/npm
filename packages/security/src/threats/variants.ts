@@ -114,7 +114,14 @@ export function decodeHtmlEntities(input: string): string {
 			return code <= MAX_CODE_POINT ? String.fromCodePoint(code) : match;
 		}
 		if (name !== undefined) {
-			return NAMED_ENTITIES[name] ?? match;
+			// Own-property check, not `?? match`: the name group matches `constructor`,
+			// `toString`, `valueOf` and friends, which resolve up the prototype chain to a
+			// function. `??` never fires for those, and `replace` then coerces the function
+			// to its source text — `&constructor;` decoded to
+			// `function Object() { [native code] }`, injecting braces and parens that trip
+			// unrelated rules and corrupting the `html_decoded` variant for any input
+			// carrying such a reference.
+			return Object.hasOwn(NAMED_ENTITIES, name) ? NAMED_ENTITIES[name] : match;
 		}
 		return match;
 	});

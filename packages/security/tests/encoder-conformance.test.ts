@@ -223,3 +223,38 @@ describe("HTML encoder parser conformance", () => {
 		});
 	});
 });
+
+// ASVS 1.2.1 names three contexts: HTML elements, HTML attributes, and HTTP header
+// fields. The conformance map claims the first two and explicitly disclaims the third.
+// That map's own test only checks the named exports resolve, so without these the scope
+// of the claim is prose nothing enforces.
+describe("ASVS 1.2.1 scope", () => {
+	it("encodes the metacharacters of the element context it claims", () => {
+		const encoded = escapeHtmlText(`<img src=x onerror="alert(1)">`);
+		expect(encoded).not.toContain("<");
+		expect(encoded).not.toContain(">");
+	});
+
+	it("encodes the metacharacters of the attribute context it claims", () => {
+		const encoded = escapeHtmlAttribute(`" onmouseover="alert(1)`);
+		expect(encoded).not.toContain('"');
+	});
+
+	it("passes CR and LF through the element encoder, so it cannot gate a header value", () => {
+		// Not a defect — CR and LF are ordinary text in an HTML element, and encoding
+		// them there would be wrong. It is why `escapeHtmlText` cannot stand in for a
+		// header-value control: the CRLF reaches the HTTP layer intact, so that layer
+		// has to be the one to reject it.
+		expect(escapeHtmlText("value\r\nX-Injected: yes")).toContain("\r\n");
+	});
+
+	it("entity-encodes CR and LF in the attribute encoder, which is not header encoding", () => {
+		// `escapeHtmlAttribute` does neutralize the bytes, but into `&#x0D;&#x0A;` —
+		// correct inside a quoted attribute, and a corrupted value in an HTTP header,
+		// where the header grammar has never heard of an HTML entity. Neutralizing a
+		// byte is not the same as encoding for the context, which is what 1.2.1 asks.
+		expect(escapeHtmlAttribute("value\r\nX-Injected: yes")).toBe(
+			"value&#x0D;&#x0A;X-Injected:&#x20;yes",
+		);
+	});
+});

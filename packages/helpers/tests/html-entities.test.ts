@@ -151,8 +151,7 @@ describe("obfuscateLink", () => {
 	// the returned `href` straight into an anchor.
 	describe("input validation", () => {
 		const call = (opts: unknown) => () =>
-			// biome-ignore lint/suspicious/noExplicitAny: reproduces what an untyped caller reaches this with.
-			obfuscateLink(opts as any);
+			obfuscateLink(opts as Parameters<typeof obfuscateLink>[0]);
 
 		test.each(["javascript", "data", "vbscript", "file", "http", "JAVASCRIPT", ""])(
 			"rejects the %o scheme",
@@ -198,6 +197,49 @@ describe("obfuscateLink", () => {
 			["a bare extension", "tel", "4477"],
 		])("still accepts %s", (_label, scheme, address) => {
 			expect(call({ scheme, address })).not.toThrow();
+		});
+	});
+
+	// `?`, `#`, `%` and `&` are atext, so RFC 5322 makes them legal in a local part and
+	// the address allowlist admits them. They are also the delimiters RFC 6068 uses to
+	// separate a `mailto:` address from its header fields, so an address carrying one
+	// reaches the compose window as caller-controlled `bcc`/`subject` unless it is
+	// percent-encoded on the way into the URI.
+	describe("URI delimiters in the address", () => {
+		test("does not emit caller-controlled header fields from a '?' in the address", () => {
+			const result = obfuscateLink({
+				scheme: "mailto",
+				address: "victim@example.com?bcc=attacker@example.com",
+			});
+			expect(result.href).toBe("mailto:victim@example.com%3Fbcc=attacker@example.com");
+			expect(result.href).not.toContain("?");
+		});
+
+		test.each([
+			["a question mark", "a?b@example.com", "mailto:a%3Fb@example.com"],
+			["an ampersand", "a&b@example.com", "mailto:a%26b@example.com"],
+			["a hash", "a#b@example.com", "mailto:a%23b@example.com"],
+			["a percent sign", "a%b@example.com", "mailto:a%25b@example.com"],
+			// Encoded in one pass, so an address that already looks encoded is escaped
+			// rather than left to decode into a delimiter downstream.
+			["a literal percent-escape", "a%3Fb@example.com", "mailto:a%253Fb@example.com"],
+		])("percent-encodes %s", (_label, address, expected) => {
+			expect(obfuscateLink({ scheme: "mailto", address }).href).toBe(expected);
+		});
+
+		test("leaves an address without delimiters untouched", () => {
+			expect(obfuscateLink({ scheme: "tel", address: "+1 (555) 010-4477" }).href).toBe(
+				"tel:+1 (555) 010-4477",
+			);
+		});
+
+		test("keeps the params separator distinguishable from an encoded address", () => {
+			const result = obfuscateLink({
+				scheme: "mailto",
+				address: "a?b@example.com",
+				params: { subject: "hi" },
+			});
+			expect(result.href).toBe("mailto:a%3Fb@example.com?subject=hi");
 		});
 	});
 });

@@ -253,19 +253,34 @@ export function elementSafeTagName(element: Element): string {
 let styleCaches: Map<string, WeakMap<Element, CSSStyleDeclaration | undefined>> | undefined;
 let cachesCounter = 0;
 
-/** Cache bucket for one pseudo selector, created on demand while a scope is open. */
+/**
+ * Bucket ceiling. `pseudo` is an arbitrary caller string, so an unbounded map grows
+ * once per distinct value for as long as the scope stays open — including values
+ * `getComputedStyle` goes on to reject, which leave behind a bucket that never sees a
+ * second lookup. CSS defines fewer than a dozen pseudo-elements, so real call sites stay
+ * well under this; a scope that exceeds it is generating selectors rather than reusing
+ * them, and gains nothing from memoization anyway.
+ */
+const MAX_STYLE_CACHE_BUCKETS = 16;
+
+/**
+ * Cache bucket for one pseudo selector, created on demand while a scope is open.
+ * Returns `undefined` for a new selector once the ceiling is reached, which costs the
+ * caller memoization for that selector but never correctness.
+ */
 function styleCacheFor(
 	pseudo: string | undefined,
 ): WeakMap<Element, CSSStyleDeclaration | undefined> | undefined {
 	if (!styleCaches) return undefined;
 
 	const key = pseudo ?? "";
-	let cache = styleCaches.get(key);
-	if (!cache) {
-		cache = new WeakMap();
-		styleCaches.set(key, cache);
-	}
-	return cache;
+	const cache = styleCaches.get(key);
+	if (cache) return cache;
+	if (styleCaches.size >= MAX_STYLE_CACHE_BUCKETS) return undefined;
+
+	const created = new WeakMap<Element, CSSStyleDeclaration | undefined>();
+	styleCaches.set(key, created);
+	return created;
 }
 
 /**

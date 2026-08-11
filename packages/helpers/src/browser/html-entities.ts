@@ -69,8 +69,35 @@ const toEntities = (str: string): HtmlEntityEncoded =>
  * past what produces a dangerous href would be a breaking change unrelated to the
  * one being fixed. The 320-character ceiling is RFC 3696's 64-character local part,
  * a separator, and a 255-character domain.
+ *
+ * The set still admits `%`, `?`, `#` and `&`, which are atext and so legal in a local
+ * part; {@link encodeAddress} percent-encodes them rather than this pattern rejecting
+ * them, because they are only dangerous once they reach the URI.
  */
 const ADDRESS_PATTERN = /^[\p{L}\p{M}\p{N}!#$%&*+\-/=?^_`{|}~.@() ]{0,320}$/u;
+
+/**
+ * Percent-encodings for the delimiters that separate a `mailto:` address from the
+ * header fields after it (RFC 6068 §2). A null-prototype map, so an address containing
+ * `constructor` or any other inherited key cannot resolve to something off the chain.
+ */
+const URI_DELIMITER_ESCAPES: Readonly<Record<string, string>> = Object.assign(
+	Object.create(null) as Record<string, string>,
+	{ "%": "%25", "?": "%3F", "#": "%23", "&": "%26" },
+);
+
+/**
+ * Percent-encode the delimiters in an address so it stays a single opaque address.
+ *
+ * Without this, `victim@example.com?bcc=attacker@example.com` passes
+ * {@link ADDRESS_PATTERN} — `?` is atext — and reaches the caller as a `mailto:` href
+ * carrying attacker-chosen header fields, which the compose window honours. `%` is
+ * encoded for the same reason and in the same pass: one pass means the `%25` this
+ * produces is not itself rescanned, so a literal `%3F` in an address survives as
+ * `%253F` rather than decoding into a delimiter one hop later.
+ */
+const encodeAddress = (address: string): string =>
+	address.replace(/[%?#&]/g, (char) => URI_DELIMITER_ESCAPES[char] ?? char);
 
 /**
  * Result of {@link obfuscateLink}: a RAW (un-encoded) `href` suitable for
@@ -137,7 +164,7 @@ export const obfuscateLink = (opts: {
 		throw new TypeError("obfuscateLink: address contains characters that are not allowed");
 	}
 
-	let uri = `${scheme}:${address}`;
+	let uri = `${scheme}:${encodeAddress(address)}`;
 
 	if (params && Object.keys(params).length) {
 		const qs = Object.entries(params)

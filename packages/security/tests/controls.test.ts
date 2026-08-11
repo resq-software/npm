@@ -898,6 +898,21 @@ describe("analyzeGraphQLRequest", () => {
 				withinLimits: true,
 			});
 		});
+
+		it("never throws on a deeply nested parsed body", () => {
+			// What a JSON body parser hands over for `[[[[…]]]]`. An unbounded descent
+			// raises RangeError inside a function documented never to throw.
+			let body: unknown = [];
+			for (let level = 0; level < 50_000; level++) body = [body];
+
+			expect(() => analyzeGraphQLRequest(body)).not.toThrow();
+			expect(analyzeGraphQLRequest(body)).toMatchObject({ documents: 0, withinLimits: true });
+		});
+
+		it("still reads a document through ordinary batch nesting", () => {
+			const analysis = analyzeGraphQLRequest([{ query: "query { user { id } }" }]);
+			expect(analysis.documents).toBe(1);
+		});
 	});
 });
 

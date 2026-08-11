@@ -583,6 +583,15 @@ describe("input variants", () => {
 		expect(decodeHtmlEntities("&notarealentity;")).toBe("&notarealentity;");
 	});
 
+	it.each(["constructor", "toString", "valueOf", "isPrototypeOf", "propertyIsEnumerable"])(
+		"leaves the inherited property name %s alone",
+		(name) => {
+			// The named-entity group matches these, and a plain object resolves them up the
+			// prototype chain to a function, which `replace` stringifies into its source text.
+			expect(decodeHtmlEntities(`&${name};`)).toBe(`&${name};`);
+		},
+	);
+
 	it("does not recursively decode", () => {
 		// `&amp;#60;` decodes once to `&#60;`, not twice to `<`. Recursive decoding
 		// makes the scanner disagree with the sink about what the value actually is.

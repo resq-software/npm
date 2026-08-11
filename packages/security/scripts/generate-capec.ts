@@ -74,7 +74,13 @@ function extractPatterns(xml: string, catalog: ReadonlySet<number>): Pattern[] {
 		const name = /Name="([^"]*)"/.exec(head)?.[1] ?? "";
 		const abstraction = /Abstraction="([^"]*)"/.exec(head)?.[1] ?? "";
 
-		const body = block.slice(0, block.indexOf("</Attack_Pattern>"));
+		// A block with no closing tag is truncated input, not a pattern. Slicing to a -1
+		// index would keep the rest of the document, attributing every later `CWE_ID` to
+		// this one pattern and inventing links MITRE never published.
+		const end = block.indexOf("</Attack_Pattern>");
+		if (end === -1) continue;
+
+		const body = block.slice(0, end);
 		const severity = /<Typical_Severity>([^<]*)<\/Typical_Severity>/.exec(body)?.[1] ?? "";
 
 		const cwes = [...body.matchAll(/CWE_ID="(\d+)"/g)]

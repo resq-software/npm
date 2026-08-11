@@ -721,8 +721,18 @@ export function validateSafeText(input: string): boolean {
 	return isSafeInput(input);
 }
 
-/** Letters, marks, apostrophes, hyphens, periods, and spaces — nothing else. */
-const PERSON_NAME_PATTERN = /^[\p{L}\p{M}'’.\-\s]+$/u;
+/**
+ * Letters, marks, apostrophes, hyphens, periods, spaces, and the two joiners — nothing
+ * else.
+ *
+ * U+200C (ZWNJ) and U+200D (ZWJ) are part of the spelling, not decoration. Persian and
+ * Hindi names need them to be written correctly — a ZWNJ is what keeps the two halves
+ * of `می‌روم` from joining — so a pattern without them rejects the name its owner
+ * actually has. They carry no injection risk here: everything a payload needs (`<`,
+ * `(`, `;`, `$`, `=`, digits) stays excluded. Written as escapes, not literals — an
+ * invisible character pasted into a character class is unreviewable in a diff.
+ */
+const PERSON_NAME_PATTERN = /^[\p{L}\p{M}'’.\-\s\u{200C}\u{200D}]+$/u;
 
 /** Shortest accepted name. Mononyms and single-letter names exist. */
 const MIN_NAME_LENGTH = 1;
