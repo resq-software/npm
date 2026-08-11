@@ -320,6 +320,7 @@ jobs:
         run: |
           set -eu
           for attempt in $(seq 1 60); do
+            printf "attempt %s/60\n" "$attempt"
             conclusion=$(gh api "repos/$REPO/actions/runs?head_sha=$SHA" \
               --jq '[.workflow_runs[] | select(.name == "security")] | first | .conclusion // "pending"' || echo pending)
             case "$conclusion" in
