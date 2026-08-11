@@ -1,3 +1,5 @@
+# Changelog
+
 <!--
   Copyright 2026 ResQ Systems, Inc.
 
@@ -13,8 +15,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-
-# Changelog
 
 <!--
 
