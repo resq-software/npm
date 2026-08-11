@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.3
+
+### Patch Changes
+
+- Updated dependencies [[`b43014e`](https://github.com/resq-software/npm/commit/b43014e16296172959680150ad1a31d6cf346b04)]:
+  - @resq-systems/types@0.2.0
+
 <!--
   Copyright 2026 ResQ
 
@@ -17,6 +24,7 @@
 -->
 
 ## 0.4.2
+
 ### Patch Changes
 
 - [#195](https://github.com/resq-software/npm/pull/195) [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Reuse @resq-systems/dsa Queue for the FIFO waiter queues in TokenBucketLimiter and LeakyBucketLimiter instead of hand-rolled Array push/shift
@@ -25,11 +33,13 @@
   - @resq-systems/dsa@2.1.0
 
 ## 0.4.1
+
 ### Patch Changes
 
 - [#179](https://github.com/resq-software/npm/pull/179) [`4a8cf9a`](https://github.com/resq-software/npm/commit/4a8cf9a1d0b8d76e9c380067c446a209117032a2) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Replace `workspace:*` internal dependency ranges with concrete semver so published packages install cleanly outside the monorepo
 
 ## 0.4.0
+
 ### Minor Changes
 
 - [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add RateLimiter (keyless) and KeyedRateLimiter (per-key) Strategy interfaces so TokenBucketLimiter/LeakyBucketLimiter and SlidingWindowCounter are interchangeable behind a shared type
@@ -47,10 +57,12 @@
   `@resq-systems/rate-limiting` additionally re-adds a `@deprecated`
   `RateLimitCheckResult` type alias for the renamed `RateLimitDecision`, restoring
   backward compatibility for consumers written before the rename.
+
 - Updated dependencies [[`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca)]:
   - @resq-systems/dsa@2.0.0
 
 ## 0.3.0
+
 ### Minor Changes
 
 - [#167](https://github.com/resq-software/npm/pull/167) [`c80c8b8`](https://github.com/resq-software/npm/commit/c80c8b8f0eecd3e12af3e74cdd26aac98337675b) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Rebrand to ResQ Systems: rename npm scope `@resq-sw/*` → `@resq-systems/*`
@@ -72,6 +84,7 @@
   - @resq-systems/types@0.1.0
 
 ## 0.2.0
+
 ### Minor Changes
 
 - [#152](https://github.com/resq-software/npm/pull/152) [`23ce8e3`](https://github.com/resq-software/npm/commit/23ce8e3f59c54a010bff42b3b2a76b6df0b2dc99) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Resolve security, algorithmic consistency, and memory leak issues:
@@ -108,10 +121,12 @@
   old range resolved to `0.90.0` — the v3 line — steering Bun consumers into the same broken pairing.
 
   No runtime or API change in any package: exports, behavior, and types are untouched.
+
 - Updated dependencies [[`52a18eb`](https://github.com/resq-software/npm/commit/52a18eba2e89d17aa6056c802b16fff53bdbfde1), [`23ce8e3`](https://github.com/resq-software/npm/commit/23ce8e3f59c54a010bff42b3b2a76b6df0b2dc99)]:
   - @resq-sw/dsa@0.2.0
 
 ## 0.1.2
+
 ### Patch Changes
 
 - [#141](https://github.com/resq-software/npm/pull/141) [`2a3c926`](https://github.com/resq-software/npm/commit/2a3c926fc6fb88cae74984f637f99cf37de5da71) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Adopt effect 4.0.0-beta.93: bump the pinned dev version and the root effect override from beta.50, validated against the full build and test suite
