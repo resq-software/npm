@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import {
 	escapeHtml,
 	isValidEmail,
@@ -83,11 +83,33 @@ describe("sanitizeUrl", () => {
 		expect(sanitizeUrl("/path/to/page")).toBe("/path/to/page");
 	});
 
-	it("should handle protocol-relative URLs", () => {
-		// Note: sanitizeUrl allows protocol-relative URLs as they resolve to same protocol
-		// This tests the current behavior - if security requires blocking, update implementation
-		const result = sanitizeUrl("//evil.com");
-		expect(typeof result).toBe("string");
+	// Regression: this assertion previously checked only `typeof result === "string"`,
+	// which is vacuously true whether the URL is rejected or passed straight through.
+	// It passed while `sanitizeUrl("//evil.com")` returned the value unchanged — and
+	// `//evil.com` resolved against a trusted base yields host `evil.com`.
+	it("should reject protocol-relative URLs, which name a different host", () => {
+		expect(sanitizeUrl("//evil.example")).toBe("");
+		expect(sanitizeUrl("///evil.example")).toBe("");
+		expect(sanitizeUrl("//evil.example/path?a=1")).toBe("");
+	});
+
+	it("should reject backslash forms, which the URL parser treats as slashes", () => {
+		expect(sanitizeUrl("/\\evil.example")).toBe("");
+		expect(sanitizeUrl("\\\\evil.example")).toBe("");
+	});
+
+	it("should not let an authority-opening reference bypass the protocol allowlist", () => {
+		// The allowlist rejects a legitimate https URL here, so accepting `//evil` would
+		// be strictly worse than the explicit case it exists to gate.
+		expect(sanitizeUrl("//evil.example", ["mailto:"])).toBe("");
+		expect(sanitizeUrl("https://ok.example", ["mailto:"])).toBe("");
+	});
+
+	it("should still accept ordinary root-relative and absolute URLs", () => {
+		expect(sanitizeUrl("/foo")).toBe("/foo");
+		expect(sanitizeUrl("/a/b?c=1")).toBe("/a/b?c=1");
+		expect(sanitizeUrl("https://ok.example")).toBe("https://ok.example");
+		expect(sanitizeUrl("mailto:a@b.example")).toBe("mailto:a@b.example");
 	});
 });
 
@@ -176,6 +198,99 @@ describe("stripAnsi", () => {
 	it("should return empty string for null/undefined", () => {
 		expect(stripAnsi(null as unknown as string)).toBe("");
 		expect(stripAnsi(undefined as unknown as string)).toBe("");
+	});
+});
+
+describe("sanitizeJson prototype-pollution depth", () => {
+	/** `{"a":{"a":...{"__proto__":{"isAdmin":true}}...}}` nested `depth` levels. */
+	const nested = (depth: number): string => {
+		let json = `{"__proto__":{"isAdmin":true}}`;
+		for (let i = 0; i < depth; i++) json = `{"a":${json}}`;
+		return json;
+	};
+
+	const deepestLeaf = (value: unknown): Record<string, unknown> => {
+		let current = value;
+		while (current !== null && typeof current === "object" && "a" in current) {
+			current = (current as Record<string, unknown>).a;
+		}
+		return current as Record<string, unknown>;
+	};
+
+	afterEach(() => {
+		delete (Object.prototype as Record<string, unknown>).isAdmin;
+	});
+
+	// The walk used to recurse with a depth cap of 50 and return early past it, so
+	// 51 wrapper levels carried the payload through the function whose whole purpose
+	// is to remove it. 50 and 51 bracket that former cutover exactly.
+	it.each([0, 10, 49, 50, 51, 60, 500])("strips __proto__ nested %i levels deep", (depth) => {
+		const leaf = deepestLeaf(sanitizeJson(nested(depth)));
+		expect(Object.hasOwn(leaf, "__proto__")).toBe(false);
+	});
+
+	// The key surviving is only interesting because of what an application then does
+	// with it: an ordinary recursive merge reaches the prototype.
+	it("leaves a leaf that cannot pollute a prototype through a deep merge", () => {
+		// Deliberately unguarded, and CodeQL is right that it is: this models the
+		// vulnerable consumer. A merge that checked for __proto__ itself would pass
+		// whether or not sanitizeJson stripped the key, so the test would prove nothing.
+		// The assertion below is what makes it safe — if the key survived sanitization,
+		// this merge sets Object.prototype.isAdmin and the test fails.
+		// codeql[js/prototype-polluting-function]
+		const merge = (target: Record<string, unknown>, source: Record<string, unknown>) => {
+			for (const key of Object.keys(source)) {
+				const value = source[key];
+				if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+					if (typeof target[key] !== "object" || target[key] === null) target[key] = {};
+					merge(target[key] as Record<string, unknown>, value as Record<string, unknown>);
+				} else {
+					target[key] = value;
+				}
+			}
+		};
+
+		merge({}, deepestLeaf(sanitizeJson(nested(60))));
+
+		expect(({} as Record<string, unknown>).isAdmin).toBeUndefined();
+	});
+
+	// The cap existed to keep the recursion off the call stack. An explicit stack
+	// removes the need for it, so depth that would once have overflowed now completes.
+	it("handles nesting far beyond any call-stack limit", () => {
+		expect(Object.hasOwn(deepestLeaf(sanitizeJson(nested(100_000))), "__proto__")).toBe(false);
+	});
+});
+
+describe("stripAnsi beyond colour codes", () => {
+	const ESC = String.fromCharCode(27);
+	const BEL = String.fromCharCode(7);
+
+	// The pattern used to be /\x1b\[[0-9;]*m/ — SGR only. Everything below survived
+	// the function that LOG-ANSI-ESCAPE-001 names as its control, and cursor movement
+	// and screen erasure are the sequences that actually rewrite an audit trail.
+	it.each([
+		["erase display", `${ESC}[2Jcleared`, "cleared"],
+		["cursor up", `${ESC}[5Aoverwritten`, "overwritten"],
+		["alternate screen buffer", `${ESC}[?1049h`, ""],
+		["OSC window title, BEL-terminated", `${ESC}]0;pwned${BEL}tail`, "tail"],
+		["OSC window title, ST-terminated", `${ESC}]0;pwned${ESC}\\tail`, "tail"],
+		["Fs escape (RIS)", `${ESC}creset`, "reset"],
+		["trailing bare ESC", `a${ESC}`, "a"],
+		["SGR colour, the one case already handled", `${ESC}[31mred${ESC}[0m`, "red"],
+	])("removes %s", (_label, input, expected) => {
+		expect(stripAnsi(input)).toBe(expected);
+	});
+
+	it("leaves text with no escape sequences untouched", () => {
+		expect(stripAnsi("héllo 世界 — no escapes")).toBe("héllo 世界 — no escapes");
+	});
+
+	// A bounded, non-nested pattern has nothing to backtrack over.
+	it("stays linear on input built to force backtracking", () => {
+		const started = performance.now();
+		stripAnsi(ESC + "[".repeat(1_000_000));
+		expect(performance.now() - started).toBeLessThan(1_000);
 	});
 });
 

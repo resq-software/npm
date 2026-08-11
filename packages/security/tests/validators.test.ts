@@ -15,18 +15,26 @@
  */
 
 import { describe, expect, it } from "vitest";
+import { scanForThreats } from "../src/threats/engine.js";
 import {
 	containsCommandInjection,
 	containsHomoglyphs,
 	containsNoSQLInjection,
 	containsPathTraversal,
+	containsPrototypePollution,
 	containsSQLInjection,
 	containsXSSPatterns,
 	detectThreatPatterns,
+	encodeJsonForScript,
+	encodeLogValue,
+	escapeCsvField,
+	escapeHtmlAttribute,
+	escapeHtmlText,
 	getThreatErrorMessage,
 	isSafeInput,
 	normalizeUnicode,
 	sanitizeForDisplay,
+	toCsvRow,
 	validateSafeEmail,
 	validateSafeName,
 	validateSafeText,
@@ -63,13 +71,39 @@ describe("containsXSSPatterns", () => {
 		expect(result.length).toBeGreaterThan(0);
 	});
 
-	it("should detect __proto__ pollution", () => {
-		const result = containsXSSPatterns("__proto__");
-		expect(result.length).toBeGreaterThan(0);
+	it("should NOT classify prototype pollution as XSS", () => {
+		// Prototype pollution is a distinct weakness class with distinct controls, so
+		// it reports as `prototype_pollution` — see the suite below.
+		expect(containsXSSPatterns('{"__proto__":{"isAdmin":true}}')).toEqual([]);
 	});
 
 	it("should return empty array for safe input", () => {
 		expect(containsXSSPatterns("Hello, world!")).toEqual([]);
+	});
+});
+
+// ============================================
+// Prototype Pollution Detection
+// ============================================
+
+describe("containsPrototypePollution", () => {
+	it("should detect __proto__ in a JSON body", () => {
+		const result = containsPrototypePollution('{"__proto__":{"isAdmin":true}}');
+		expect(result.length).toBeGreaterThan(0);
+		expect(result[0]!.type).toBe("prototype_pollution");
+		expect(result[0]!.cwe).toBe(1321);
+	});
+
+	it("should detect bracket notation in a query string", () => {
+		expect(containsPrototypePollution("a[__proto__][isAdmin]=1").length).toBeGreaterThan(0);
+	});
+
+	it("should detect a constructor.prototype chain", () => {
+		expect(containsPrototypePollution("obj.constructor.prototype.x = 1").length).toBeGreaterThan(0);
+	});
+
+	it("should not fire on prose that merely mentions the property", () => {
+		expect(containsPrototypePollution("the __proto__ property is legacy")).toEqual([]);
 	});
 });
 
@@ -456,5 +490,285 @@ describe("getThreatErrorMessage", () => {
 			threats: [{ type: "homoglyph", description: "Homoglyph" }],
 		});
 		expect(msg).toContain("lookalike");
+	});
+});
+
+// Every encoder below shipped with no test at all, and each is the `primaryControl` of
+// at least one rule. An encoder that does not do what its rule claims is worse than no
+// encoder: the caller's round-trip check passes while the sink stays open.
+describe("output encoders", () => {
+	const ESCAPE = String.fromCharCode(27);
+	const NUL = String.fromCharCode(0);
+
+	describe("escapeHtmlAttribute", () => {
+		it.each([
+			["tab", "\t", "&#x09;"],
+			["carriage return", "\r", "&#x0D;"],
+			["line feed", "\n", "&#x0A;"],
+		])("keeps the existing escape for %s byte-identical", (_label, char, entity) => {
+			expect(escapeHtmlAttribute(`a${char}b`)).toBe(`a${entity}b`);
+		});
+
+		// U+000C ends an unquoted attribute value; U+000D does not, because the input
+		// stream preprocessor normalises it to U+000A before the tokenizer runs. This used
+		// to escape the one that cannot matter and miss this one.
+		it("escapes the form feed that actually terminates an unquoted value", () => {
+			expect(escapeHtmlAttribute("foo\fautofocus")).toBe("foo&#x0C;autofocus");
+		});
+
+		it.each([
+			["null", "\u0000", "&#x00;"],
+			["vertical tab", "\u000b", "&#x0B;"],
+			["escape", "\u001b", "&#x1B;"],
+			["delete", "\u007f", "&#x7F;"],
+			["C1 next-line", "\u0085", "&#x85;"],
+			["line separator", "\u2028", "&#x2028;"],
+			["paragraph separator", "\u2029", "&#x2029;"],
+		])("escapes %s", (_label, char, entity) => {
+			expect(escapeHtmlAttribute(`a${char}b`)).toBe(`a${entity}b`);
+		});
+
+		it("leaves ordinary text alone apart from the documented set", () => {
+			expect(escapeHtmlAttribute("Jos\u00e9 Mu\u00f1oz")).toBe("Jos\u00e9&#x20;Mu\u00f1oz");
+		});
+
+		it.each([
+			["", ""],
+			[null, ""],
+			[undefined, ""],
+		])("returns an empty string for %o", (input, expected) => {
+			expect(escapeHtmlAttribute(input as unknown as string)).toBe(expected);
+		});
+
+		// Element text has no unquoted-attribute state, so widening that one would be
+		// churn with no threat behind it.
+		it("does not change escapeHtmlText, where a form feed terminates nothing", () => {
+			expect(escapeHtmlText("a\fb")).toBe("a\fb");
+		});
+	});
+
+	describe("encodeLogValue", () => {
+		it.each([
+			["a forged entry", "alice\nINFO  promoted", "alice\\nINFO  promoted"],
+			["a CRLF split", "alice\r\nERROR fake", "alice\\r\\nERROR fake"],
+			["a tab", "a\tb", "a\\tb"],
+		])("renders %s on one line", (_label, input, expected) => {
+			expect(encodeLogValue(input)).toBe(expected);
+		});
+
+		it.each([
+			["ANSI erase display", `x${ESCAPE}[2J`],
+			["ANSI cursor up", `x${ESCAPE}[5A`],
+			["OSC window title", `x${ESCAPE}]0;pwned`],
+			["bidi override", "x\u202eadmin"],
+			["zero-width space", "ad\u200bmin"],
+			["byte order mark", "\ufeffx"],
+			["NUL", `x${NUL}root`],
+			["line separator", "x\u2028y"],
+		])("leaves no raw control or formatting character for %s", (_label, input) => {
+			expect(encodeLogValue(input)).not.toMatch(
+				// biome-ignore lint/suspicious/noControlCharactersInRegex: asserting no control character survives
+				/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u2028-\u202e\u2060-\u2064\u2066-\u2069\ufeff]/,
+			);
+		});
+
+		// The point of a control is that the rule stops firing once it is applied.
+		it.each([
+			["forged entry", "alice\nINFO  promoted"],
+			["ANSI escape", `alice${ESCAPE}[2J`],
+			["bidi override", "alice\u202eadmin"],
+		])("closes the finding it is the control for: %s", (_label, payload) => {
+			expect(scanForThreats(payload, { contexts: ["log"] }).findings.length).toBeGreaterThan(0);
+			expect(scanForThreats(encodeLogValue(payload), { contexts: ["log"] }).findings).toEqual([]);
+		});
+
+		it.each([
+			"alice@example.com",
+			"/home/dashboard?tab=recent",
+			"Jos\u00e9 Mu\u00f1oz",
+			"\u4e16\u754c",
+		])("passes benign value %o through unchanged", (value) => {
+			expect(encodeLogValue(value)).toBe(value);
+		});
+
+		// Silent truncation in an audit record is its own problem, so it is announced.
+		it("announces truncation rather than applying it silently", () => {
+			expect(encodeLogValue("a".repeat(5000))).toContain("[truncated 2952 chars]");
+		});
+
+		it("honours an explicit maxLength", () => {
+			expect(encodeLogValue("abcdef", { maxLength: 3 })).toBe("abc[truncated 3 chars]");
+		});
+
+		it.each([
+			["", ""],
+			[null, ""],
+			[undefined, ""],
+		])("returns an empty string for %o", (input, expected) => {
+			expect(encodeLogValue(input as unknown as string)).toBe(expected);
+		});
+	});
+
+	describe("escapeCsvField", () => {
+		/** RFC 4180 reader, so these assert a round trip rather than a golden string. */
+		const parseCsvRow = (row: string, delimiter = ","): string[] => {
+			const out: string[] = [];
+			let field = "";
+			let index = 0;
+			let quoted = false;
+			while (index < row.length) {
+				const char = row[index];
+				if (quoted) {
+					if (char === '"') {
+						if (row[index + 1] === '"') {
+							field += '"';
+							index += 2;
+							continue;
+						}
+						quoted = false;
+						index++;
+						continue;
+					}
+					field += char;
+					index++;
+					continue;
+				}
+				if (char === '"' && field === "") {
+					quoted = true;
+					index++;
+					continue;
+				}
+				if (char === delimiter) {
+					out.push(field);
+					field = "";
+					index++;
+					continue;
+				}
+				field += char;
+				index++;
+			}
+			out.push(field);
+			return out;
+		};
+
+		it.each([
+			"=SUM(1)",
+			"+1+1",
+			"-1+1",
+			"@SUM(1)",
+			"\t=1",
+			"\r=1",
+			" =cmd|'/c calc'!A1",
+			'"=1+1',
+			'=WEBSERVICE("https://evil.example")',
+		])("neutralises the formula trigger in %o", (payload) => {
+			const encoded = escapeCsvField(payload);
+			const inner = encoded.startsWith('"') ? encoded.slice(1) : encoded;
+			expect(inner).not.toMatch(/^[=+\-@\t\r]/);
+		});
+
+		// A leading apostrophe and a position-independent DDE rule mean the encoded value
+		// still scans dirty. That is correct: the rules describe the value, the encoder
+		// protects the file. Asserting a clean scan would force both rules to be weakened.
+		it("still scans as a finding, because the rules describe the value not the file", () => {
+			const encoded = escapeCsvField("=SUM(1)");
+			const result = scanForThreats(encoded, { contexts: ["spreadsheet"] });
+			expect(result.findings.length).toBeGreaterThan(0);
+		});
+
+		it("round-trips one encode through one decode", () => {
+			const cells = ["Ada Lovelace", "=1+1", 42, -1234, true, null];
+			expect(parseCsvRow(toCsvRow(cells))).toEqual([
+				"Ada Lovelace",
+				"'=1+1",
+				"42",
+				"-1234",
+				"true",
+				"",
+			]);
+		});
+
+		it.each([
+			["a quote", 'He said "hi"'],
+			["the delimiter", "a,b"],
+			["a line feed", "line1\nline2"],
+			["a carriage return", "line1\rline2"],
+		])("quotes and recovers a field containing %s", (_label, value) => {
+			expect(parseCsvRow(escapeCsvField(value))[0]).toBe(value);
+		});
+
+		// Numbers come from the application's own types and cannot carry a formula, so
+		// prefixing them would turn every negative value in a sheet into text.
+		it("prefixes a numeric string but not a number", () => {
+			expect(escapeCsvField(-1234)).toBe("-1234");
+			expect(escapeCsvField("-1234")).toBe("'-1234");
+		});
+
+		it("quotes on the configured delimiter, not on a comma", () => {
+			expect(toCsvRow(["a;b"], { delimiter: ";" })).toBe('"a;b"');
+			expect(toCsvRow(["a,b"], { delimiter: ";" })).toBe("a,b");
+		});
+
+		it("removes NUL, which no CSV reader accepts", () => {
+			expect(escapeCsvField(`a${NUL}b`)).toBe("ab");
+		});
+
+		it.each([
+			[null, ""],
+			[undefined, ""],
+			["", ""],
+		])("returns an empty string for %o", (input, expected) => {
+			expect(escapeCsvField(input)).toBe(expected);
+		});
+	});
+
+	describe("encodeJsonForScript", () => {
+		const BREAKOUT = { user: "</script><script>window.PWNED=1</script>" };
+
+		it("escapes the sequence that closes a script element from inside a string", () => {
+			expect(encodeJsonForScript(BREAKOUT)).not.toContain("</script>");
+			expect(encodeJsonForScript(BREAKOUT)).toContain("\\u003c");
+		});
+
+		it.each([
+			{ a: 1 },
+			[],
+			"plain string",
+			0,
+			null,
+			true,
+			{ nested: { deep: ["x", "</script>"] } },
+			{ emoji: "\u{1f389}" },
+			{ cjk: "\u4e16\u754c" },
+			{ separators: "a\u2028b\u2029c" },
+			{ amp: "a&b", lt: "a<b", gt: "a>b" },
+			{ quote: 'he said "hi"', backslash: "C:\\x" },
+		])("round-trips %o through JSON.parse", (value) => {
+			expect(JSON.parse(encodeJsonForScript(value))).toEqual(value);
+		});
+
+		it.each([{ a: "<" }, { a: ">" }, { a: "&" }, { a: "\u2028" }, { a: "\u2029" }])(
+			"leaves no raw breakout character for %o",
+			(value) => {
+				expect(encodeJsonForScript(value)).not.toMatch(/[<>&\u2028\u2029]/);
+			},
+		);
+
+		// A sentinel string would emit a syntax error into the page, which is worse than
+		// an error the caller can see.
+		it.each([
+			["undefined", undefined],
+			["a function", () => 1],
+			["a symbol", Symbol("x")],
+			["a bigint", 10n],
+		])("throws on %s rather than returning a non-string", (_label, value) => {
+			expect(() => encodeJsonForScript(value)).toThrow(TypeError);
+		});
+
+		it("throws on a circular structure", () => {
+			const circular: Record<string, unknown> = {};
+			circular.self = circular;
+			expect(() => encodeJsonForScript(circular)).toThrow(TypeError);
+		});
 	});
 });

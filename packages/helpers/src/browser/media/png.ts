@@ -90,6 +90,19 @@ const crc: CRCCalculator<Uint8Array> = (current, previous) => {
 const LEN_SIZE = 4;
 const CRC_SIZE = 4;
 
+/** Bytes in a chunk's four-character type field (`IHDR`, `IDAT`, `IEND`, …). */
+const TYPE_SIZE = 4;
+
+/**
+ * Largest chunk length the PNG specification permits.
+ *
+ * The spec requires the high bit of the length field to be zero, so a declared length
+ * above 2^31-1 is malformed by definition. Enforcing it keeps the signed and unsigned
+ * readings of the field in agreement for every valid file, and rejects the hostile
+ * values that previously made the chunk walker run backwards.
+ */
+const MAX_CHUNK_LENGTH = 0x7fffffff;
+
 //#endregion
 
 //#region Public API
@@ -218,27 +231,44 @@ export class PngHelpers {
 		}
 		offset += 8;
 
-		while (offset <= view.buffer.byteLength) {
-			const start = offset;
-			const len = view.getInt32(offset);
-			offset += 4;
-			const chunkType = PngHelpers.getChunkType(view, offset);
+		// `view.byteLength`, not `view.buffer.byteLength`: a DataView can be a window
+		// onto a larger buffer, and reading past the window is out of bounds.
+		const end = view.byteLength;
 
-			if (chunkType === "IDAT" && chunks[chunkType]) {
-				offset += len + LEN_SIZE + CRC_SIZE;
-				continue;
-			}
+		while (offset + LEN_SIZE + TYPE_SIZE <= end) {
+			const start = offset;
+
+			// Unsigned. The PNG spec caps chunk length at 2^31-1 with the high bit zero,
+			// so signed and unsigned agree on every spec-valid file — but only the
+			// unsigned read refuses to run backwards on a hostile one. Read as a signed
+			// int, a declared length of 0xFFFFFFF4 decodes to -12, and the old
+			// `offset += len + LEN_SIZE + CRC_SIZE` then advanced by -12 + 4 + 4 = -4,
+			// exactly cancelling the +4 that preceded it. Offset 8 was a fixed point, so
+			// a 70-byte structurally-valid PNG spun forever and hung the calling thread.
+			// A `try/catch` around the caller cannot catch a hang.
+			const len = view.getUint32(offset);
+			if (len > MAX_CHUNK_LENGTH) break;
+			if (start + LEN_SIZE + TYPE_SIZE + len + CRC_SIZE > end) break;
+
+			offset += LEN_SIZE;
+			const chunkType = PngHelpers.getChunkType(view, offset);
 
 			if (chunkType === "IEND") {
 				break;
 			}
 
-			chunks[chunkType] = {
-				start,
-				dataOffset: offset + 4,
-				size: len,
-			};
-			offset += len + LEN_SIZE + CRC_SIZE;
+			// First IDAT wins; later ones are skipped but still advance the cursor.
+			if (!(chunkType === "IDAT" && chunks[chunkType])) {
+				chunks[chunkType] = {
+					start,
+					dataOffset: offset + TYPE_SIZE,
+					size: len,
+				};
+			}
+
+			// Anchored to `start`, so every iteration makes structural forward progress
+			// no matter what length the file declares.
+			offset = start + LEN_SIZE + TYPE_SIZE + len + CRC_SIZE;
 		}
 
 		return chunks;

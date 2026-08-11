@@ -55,6 +55,51 @@ const toEntities = (str: string): HtmlEntityEncoded =>
 	);
 
 /**
+ * Characters permitted in a `mailto:` or `tel:` address.
+ *
+ * An allowlist, because the value is interpolated into an attribute that callers place
+ * directly in markup. It admits the RFC 5322 local-part atext set, the characters a
+ * phone number needs (`+`, spaces, parens, hyphens), and internationalized domains and
+ * names via `\p{L}\p{M}\p{N}`. It excludes the four that matter: `"` and `'` break out
+ * of an attribute, `<` and `>` open a tag, and CR/LF inject headers into a compose
+ * window.
+ *
+ * The empty string is admitted deliberately: `mailto:` with no address is useless
+ * but not dangerous, and it is existing documented behaviour. Widening the guard
+ * past what produces a dangerous href would be a breaking change unrelated to the
+ * one being fixed. The 320-character ceiling is RFC 3696's 64-character local part,
+ * a separator, and a 255-character domain.
+ *
+ * The set still admits `%`, `?`, `#` and `&`, which are atext and so legal in a local
+ * part; {@link encodeAddress} percent-encodes them rather than this pattern rejecting
+ * them, because they are only dangerous once they reach the URI.
+ */
+const ADDRESS_PATTERN = /^[\p{L}\p{M}\p{N}!#$%&*+\-/=?^_`{|}~.@() ]{0,320}$/u;
+
+/**
+ * Percent-encodings for the delimiters that separate a `mailto:` address from the
+ * header fields after it (RFC 6068 §2). A null-prototype map, so an address containing
+ * `constructor` or any other inherited key cannot resolve to something off the chain.
+ */
+const URI_DELIMITER_ESCAPES: Readonly<Record<string, string>> = Object.assign(
+	Object.create(null) as Record<string, string>,
+	{ "%": "%25", "?": "%3F", "#": "%23", "&": "%26" },
+);
+
+/**
+ * Percent-encode the delimiters in an address so it stays a single opaque address.
+ *
+ * Without this, `victim@example.com?bcc=attacker@example.com` passes
+ * {@link ADDRESS_PATTERN} — `?` is atext — and reaches the caller as a `mailto:` href
+ * carrying attacker-chosen header fields, which the compose window honours. `%` is
+ * encoded for the same reason and in the same pass: one pass means the `%25` this
+ * produces is not itself rescanned, so a literal `%3F` in an address survives as
+ * `%253F` rather than decoding into a delimiter one hop later.
+ */
+const encodeAddress = (address: string): string =>
+	address.replace(/[%?#&]/g, (char) => URI_DELIMITER_ESCAPES[char] ?? char);
+
+/**
  * Result of {@link obfuscateLink}: a RAW (un-encoded) `href` suitable for
  * an anchor's `href` attribute, paired with entity-encoded visible text.
  *
@@ -102,7 +147,24 @@ export const obfuscateLink = (opts: {
 }): ObfuscatedLink => {
 	const { scheme, address, params, text } = opts;
 
-	let uri = `${scheme}:${address}`;
+	// The union guards the ordinary case at compile time, but not the ones that matter:
+	// `obfuscateLink({ ...JSON.parse(config) })` type-checks clean because `JSON.parse`
+	// returns `any`, and this package is published, so plain-JS consumers get no
+	// enforcement at all. Without this check the returned href was `javascript:alert(1)`
+	// — placed straight into an anchor by every documented usage.
+	if (scheme !== "mailto" && scheme !== "tel") {
+		throw new TypeError(`obfuscateLink: unsupported scheme ${String(scheme)}`);
+	}
+
+	// `params` below are percent-encoded, but `address` was interpolated raw — so
+	// `x@y.com" onmouseover="alert(1)` survived verbatim into a value the docs describe
+	// as ready for an anchor's `href`. A quote breaks out of the attribute, and CR/LF
+	// injects headers into a `mailto:` compose window.
+	if (typeof address !== "string" || !ADDRESS_PATTERN.test(address)) {
+		throw new TypeError("obfuscateLink: address contains characters that are not allowed");
+	}
+
+	let uri = `${scheme}:${encodeAddress(address)}`;
 
 	if (params && Object.keys(params).length) {
 		const qs = Object.entries(params)

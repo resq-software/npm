@@ -275,6 +275,76 @@ jobs:
       - run: bun run lint:knip
         working-directory: packages/ui
 
+  # Lockfile CVE scan. `bun audit` reads bun.lock natively, which is why this uses it
+  # rather than a third-party scanner: the repo is bun-only, and resolving an unpinned
+  # package from the network to check for supply-chain problems argues against itself.
+  #
+  # Two tiers on purpose. Critical blocks. High is advisory because the one high finding
+  # today (image-size, reached through @storybook/nextjs-vite) has no fixed release —
+  # the latest published version is the vulnerable one. A gate that cannot be made green
+  # gets disabled within a month, so it reports instead.
+  sca:
+    name: Dependency audit
+    needs: detect
+    # `== true` coerces the string output to a number and never matches, so the
+    # comparison has to be against the string `'true'`.
+    if: needs.detect.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/prepare
+      - name: Block on critical advisories
+        run: bun audit --audit-level=critical
+      - name: Report high advisories
+        continue-on-error: true
+        run: bun audit --audit-level=high
+
+  # security.yml runs CodeQL and Semgrep on every pull request but was not in the
+  # required aggregate, so neither gated a merge — the exact anti-pattern the
+  # DevSecOps guidance calls out. This job waits on that workflow's conclusion for the
+  # current SHA and fails when it did not succeed, which makes it a required check
+  # without duplicating the scan.
+  # The gate deliberately does not filter on `detect`: security.yml scans every
+  # pull request and every master push, including workflow-only diffs where no
+  # package changed, and `required` treats a skipped job as passing. Gating on
+  # changed packages would therefore let a workflow-only PR merge with the scan
+  # ungated. The only exclusion mirrors security.yml's own: Dependabot, whose
+  # restricted context startup-fails the reusable workflow.
+  security-scan:
+    name: Security scan gate
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    steps:
+      - name: Wait for the security workflow on this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -eu
+          for attempt in $(seq 1 60); do
+            printf "attempt %s/60\n" "$attempt"
+            # Ask the security workflow for its own runs rather than filtering every
+            # run for the SHA. That listing is paginated at 30 and ordered newest
+            # first, and a busy pull request blows past it — review-comment traffic
+            # alone can spawn dozens of runs — pushing the security run off page one,
+            # where the filter finds nothing, reports "pending" forever, and times
+            # out on a scan that actually succeeded.
+            conclusion=$(gh api "repos/$REPO/actions/workflows/security.yml/runs?head_sha=$SHA&per_page=1" \
+              --jq '.workflow_runs | first | .conclusion // "pending"' || echo pending)
+            case "$conclusion" in
+              success) echo "security workflow succeeded"; exit 0 ;;
+              pending|null|"") sleep 20 ;;
+              *) echo "::error::security workflow concluded: $conclusion"; exit 1 ;;
+            esac
+          done
+          echo "::error::timed out waiting for the security workflow"
+          exit 1
+
   markdown:
     name: Markdown
     needs: detect
@@ -321,6 +391,8 @@ jobs:
       - changeset
       - storybook
       - knip
+      - sca
+      - security-scan
       - markdown
       - spelling
     if: always()

@@ -79,11 +79,29 @@ export type UserInputOptions = typeof UserInputOptionsSchema.Type;
  * Schema for a safe URL — validates URL format and restricts to safe protocols.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
  */
+/**
+ * Whether a reference opens a URL *authority* component — i.e. can name a different
+ * host once resolved against a base.
+ *
+ * `//evil.example` resolved against `https://trusted.example/page` yields host
+ * `evil.example`, and so do `///evil.example` and `/\evil.example`: the WHATWG URL
+ * parser treats a backslash as a slash in the relative-slash state.
+ *
+ * This must be checked **before** the root-relative fast path. A `startsWith("//")`
+ * guard alone is insufficient twice over: it misses the backslash forms entirely, and
+ * `//evil.example` that falls through to `new URL()` throws without a base and lands in
+ * the catch branch, whose `[a-zA-Z0-9/_.-]` character class happily accepts it.
+ *
+ * @internal
+ */
+const opensAuthority = (url: string): boolean => /^[/\\]{2}/.test(url.trim());
+
 export const SafeUrlSchema = S.String.check(
 	S.makeFilter(
 		(url: string) => {
 			if (!url || url.trim() === "") return false;
-			if (url.startsWith("/") && !url.startsWith("//")) return true;
+			if (opensAuthority(url)) return false;
+			if (url.startsWith("/")) return true;
 			try {
 				const parsed = new URL(url);
 				const safeProtocols = ["http:", "https:", "mailto:"];
@@ -100,7 +118,11 @@ export const SafeUrlSchema = S.String.check(
  * narrowing through the {@link isValidUrl} type guard (backed by
  * {@link SafeUrlSchema}); the brand guarantees the value is either a
  * root-relative path or an absolute URL restricted to `http:`/`https:`/
- * `mailto:`. It does **not** guarantee the host is reachable or trusted.
+ * `mailto:`. An authority-opening reference (`//host`, `///host`, `/\host`) is
+ * rejected, since resolving one against a base yields a different host.
+ *
+ * It does **not** guarantee the host is reachable or trusted — for that, validate the
+ * resolved origin with `isAllowedOrigin` from `@resq-systems/security/controls`.
  */
 export type SafeUrl = Brand<string, "SafeUrl">;
 
@@ -232,8 +254,10 @@ export const escapeHtml = (text: string): string => {
  * (an `Exit.fail` carrying a {@link S.SchemaError}), never a thrown exception.
  *
  * @param url - The URL to be validated and sanitized.
- * @param allowedProtocols - Allowed URL protocols; a root-relative path
- *   (`/foo`, not `//foo`) is always accepted regardless of this list.
+ * @param allowedProtocols - Allowed URL protocols; a root-relative path (`/foo`) is
+ *   always accepted regardless of this list. An authority-opening reference — `//host`,
+ *   `///host`, or `/\host` — is always **rejected**, because it names a different host
+ *   once resolved and would otherwise bypass this list entirely.
  * @returns An {@link Exit.Exit}: success carries the accepted URL string,
  *   failure carries a {@link S.SchemaError}.
  * @compliance NIST 800-53 SI-10 (Information Input Validation)
@@ -256,7 +280,10 @@ export const sanitizeUrlEffect = (
 			(u: string) => {
 				if (!u || u.trim() === "") return false;
 				const trimmed = u.trim();
-				if (trimmed.startsWith("/") && !trimmed.startsWith("//")) return true;
+				// Before the root-relative fast path: an authority-opening reference can
+				// name a different host and bypasses `allowedProtocols` entirely.
+				if (opensAuthority(trimmed)) return false;
+				if (trimmed.startsWith("/")) return true;
 				try {
 					const parsed = new URL(trimmed);
 					if (!allowedProtocols.includes(parsed.protocol)) return false;
@@ -304,11 +331,51 @@ export const sanitizeUrl = (
 
 let purifyInstance: typeof DOMPurify | null | undefined;
 
+/**
+ * Add `rel="noopener noreferrer"` to any link that opens a new browsing context.
+ *
+ * Without it the opened page receives a live `window.opener` handle and can navigate
+ * the original tab to a phishing page — reverse tabnabbing, WSTG-CLNT-14. DOMPurify
+ * does not add this by default, and unlike most of CLNT-14 the fix lives inside code
+ * this package already owns, so a weakness no signature can detect becomes one that is
+ * simply prevented.
+ *
+ * Modern browsers imply `noopener` for `target="_blank"`; this covers older engines and
+ * the named-target case (`target="win1"`), which remains exploitable everywhere.
+ *
+ * Note that DOMPurify's default configuration strips `target` outright, so this hook is
+ * a no-op unless the caller opts back in with `ADD_ATTR: ["target"]` or a custom
+ * `ALLOWED_ATTR` — which is precisely the configuration that reintroduces the risk.
+ *
+ * @internal
+ */
+const addNoopenerToTargetedLinks = (node: Element): void => {
+	if (typeof node.hasAttribute !== "function" || !node.hasAttribute("target")) return;
+
+	const target = node.getAttribute("target");
+	// `_self`, `_parent`, and `_top` stay in the current context and grant no handle.
+	if (target === null || target === "_self" || target === "_parent" || target === "_top") return;
+
+	const existing = (node.getAttribute("rel") ?? "").split(/\s+/).filter(Boolean);
+	for (const required of ["noopener", "noreferrer"]) {
+		if (!existing.includes(required)) existing.push(required);
+	}
+	node.setAttribute("rel", existing.join(" "));
+};
+
+/** Register the reverse-tabnabbing hook on a DOMPurify instance. */
+const withHooks = (purify: typeof DOMPurify): typeof DOMPurify => {
+	purify.addHook("afterSanitizeAttributes", (node) => {
+		addNoopenerToTargetedLinks(node as unknown as Element);
+	});
+	return purify;
+};
+
 const getPurify = (): typeof DOMPurify | null => {
 	if (purifyInstance !== undefined) return purifyInstance;
 
 	if (typeof window !== "undefined") {
-		purifyInstance = DOMPurify;
+		purifyInstance = withHooks(DOMPurify);
 	} else {
 		try {
 			// Resolve `node:module` at runtime (server-side only) via
@@ -334,7 +401,7 @@ const getPurify = (): typeof DOMPurify | null => {
 				};
 			};
 			const dom = new JSDOM("");
-			purifyInstance = DOMPurify(dom.window);
+			purifyInstance = withHooks(DOMPurify(dom.window));
 		} catch {
 			purifyInstance = null;
 		}
@@ -465,39 +532,52 @@ export const validateUserInput = (input: string, maxLength = 500, allowHtml = fa
 	return Exit.isSuccess(result) ? result.value : "";
 };
 
+/** Own keys removed at every level, because assigning them reaches the prototype. */
+const DANGEROUS_KEYS = ["__proto__", "constructor", "prototype"] as const;
+
 /**
- * Recursively strip prototype-pollution keys (`__proto__`, `constructor`,
- * `prototype`) from an object.
+ * Strip prototype-pollution keys (`__proto__`, `constructor`, `prototype`) from
+ * every node of a parsed JSON value.
  *
  * **Mutates `val` in place** (deletes offending keys) and returns nothing;
- * callers pass a freshly `JSON.parse`d value they own. Recursion is bounded
- * at a depth of 50, so deeply nested or cyclic structures stop rather than
- * overflowing the stack — keys below that depth are left untouched.
+ * callers pass a freshly `JSON.parse`d value they own. The walk is iterative and
+ * unbounded in depth: every node is visited, however deeply nested.
  *
  * @internal
  */
-const sanitizeObject = (val: unknown, depth = 0): void => {
-	if (depth > 50) {
-		return;
-	}
-	if (typeof val !== "object" || val === null) {
-		return;
-	}
-	if (Array.isArray(val)) {
-		for (const item of val) {
-			sanitizeObject(item, depth + 1);
+const sanitizeObject = (val: unknown): void => {
+	// Walked with an explicit stack rather than by recursion. The previous version
+	// bounded itself at depth 50 to avoid overflowing the call stack and returned
+	// early past that, so wrapping the payload in 51 layers carried `__proto__`
+	// through untouched — and feeding the resulting leaf to an ordinary recursive
+	// deep-merge set `Object.prototype.isAdmin`. The cap was never cycle protection:
+	// both callers parse JSON first, and JSON cannot express a cycle. Dropping the
+	// recursion removes the reason for the cap, so every node is now visited.
+	const stack: unknown[] = [val];
+
+	while (stack.length > 0) {
+		const current = stack.pop();
+
+		if (typeof current !== "object" || current === null) {
+			continue;
 		}
-		return;
-	}
-	const dangerous = ["__proto__", "constructor", "prototype"];
-	const obj = val as Record<string, unknown>;
-	for (const key of dangerous) {
-		if (key in obj) {
-			delete obj[key];
+
+		if (Array.isArray(current)) {
+			for (const item of current) {
+				stack.push(item);
+			}
+			continue;
 		}
-	}
-	for (const key of Object.keys(obj)) {
-		sanitizeObject(obj[key], depth + 1);
+
+		const obj = current as Record<string, unknown>;
+		for (const key of DANGEROUS_KEYS) {
+			if (key in obj) {
+				delete obj[key];
+			}
+		}
+		for (const key of Object.keys(obj)) {
+			stack.push(obj[key]);
+		}
 	}
 };
 
@@ -593,8 +673,17 @@ export const sanitizeJson = (jsonString: string): unknown => {
 };
 
 /**
- * Strips ANSI escape codes from a string.
- * Useful for cleaning terminal output before logging to files.
+ * Strips ANSI escape sequences from a string.
+ *
+ * Removes CSI sequences (colour, cursor movement, screen and line erasure, mode
+ * switches), OSC sequences (window title and similar), two-character escapes, and
+ * any bare ESC left over. This is the control named by `LOG-ANSI-ESCAPE-001`: a
+ * terminal-backed log sink treats these as commands, so an attacker who lands them
+ * in a log can scroll earlier entries away or overwrite them (CWE-117).
+ *
+ * Removal is destructive by design — the sequence goes, and any text it carried
+ * goes with it. Where the record matters more than the rendering, escape the
+ * characters instead of deleting them.
  *
  * @param text - The text potentially containing ANSI codes.
  * @returns The text with ANSI codes removed.
@@ -608,8 +697,22 @@ export const stripAnsi = (text: string): string => {
 	if (!text || typeof text !== "string") {
 		return "";
 	}
-	// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI codes require control characters
-	return text.replaceAll(/\x1b\[[0-9;]*m/g, "");
+	// Every escape sequence, not just the colour ones. The previous pattern was
+	// `/\\x1b\\[[0-9;]*m/` — SGR only — so `ESC[2J` (erase display), `ESC[?1049h`
+	// (alternate screen buffer), `ESC[5A` (cursor up, which overwrites the audit
+	// lines already written) and `ESC]0;...` (set window title) all survived the
+	// function that `LOG-ANSI-ESCAPE-001` names as its control. Colour was the one
+	// case handled, and the only one that is merely cosmetic.
+	//
+	// Alternatives are ordered CSI, OSC, then the general ECMA-48 form (ESC,
+	// intermediates 0x20-0x2F, final 0x30-0x7E), which covers Fs escapes such as
+	// ESC c. Every quantifier is bounded and none is nested, so nothing backtracks.
+	// A trailing `?` also removes a bare ESC that begins no valid sequence.
+	return text.replaceAll(
+		// biome-ignore lint/suspicious/noControlCharactersInRegex: stripping ANSI requires matching control characters
+		/\u001b(?:\[[0-?]{0,32}[ -/]{0,8}[@-~]|\][^\u0007\u001b]{0,512}(?:\u0007|\u001b\\)|[ -/]{0,8}[0-~])?/g,
+		"",
+	);
 };
 
 //#endregion
