@@ -185,3 +185,192 @@ export type Without<T, U> = { [K in Exclude<keyof T, keyof U>]?: never };
 export type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
 
 //#endregion
+
+//#region Key sets & excess-property control
+
+/**
+ * The empty object type, isolated behind an alias so the one lint suppression it
+ * needs lives at exactly one site. Used as the "requires no key at all" probe by
+ * {@link RequiredKeys} and {@link OptionalKeys}.
+ *
+ * @internal
+ */
+// biome-ignore lint/complexity/noBannedTypes: `{}` is load-bearing here — it is the only shape that asks "can this property be omitted entirely?", which is exactly how an optional key is told apart from a required one.
+type EmptyShape = {};
+
+/**
+ * Forbid keys that `T` does not declare, by typing every extra key of the
+ * candidate `U` as `never`.
+ *
+ * **When to use**
+ *
+ * Use it on a generic factory, builder, or client constructor that takes an
+ * options bag. TypeScript's excess-property check fires only when a *fresh
+ * object literal* is assigned to a **known** type; the moment that bag flows
+ * through a type parameter the check evaporates and a typo'd key is silently
+ * accepted. This puts the check back.
+ *
+ * **Details**
+ *
+ * It is only meaningful in the self-referential (F-bounded) position
+ * `<const U extends NoExcessProperties<Shape, U>>`. `U` is inferred from the
+ * literal at the call site and then fed back in, so `Exclude<keyof U, keyof T>`
+ * names precisely the keys the caller invented. Declared optional keys of `T`
+ * stay optional, and when `U` has no extra keys the extra half is
+ * `Record<never, never>` — an intersection with the empty object, i.e. `T`
+ * unchanged. Writing `NoExcessProperties<A, B>` for two *fixed* types is legal
+ * but pointless: nothing infers `U`, so nothing is rejected that a plain `A`
+ * would not already reject.
+ *
+ * **Gotchas**
+ *
+ * It rejects the extra key rather than removing it, so the diagnostic lands on
+ * that property as "not assignable to type `never`" — accurate, but it reads
+ * oddly the first time. It constrains only the *key set*: use it together with
+ * the shape, never instead of it. The result is a live intersection, not a
+ * flattened object — `NoExcessProperties<{ a: number }, { a: number }>` is
+ * `{ a: number } & Readonly<Record<never, never>>`, which is *mutually
+ * assignable* with `{ a: number }` but not `Equal` to it. Wrap it in
+ * {@link Simplify} when the hover text matters.
+ *
+ * **Example** (Rejecting a typo'd option that passes through a generic factory)
+ *
+ * ```ts
+ * type Options = { readonly retries: number; readonly timeoutMs?: number };
+ *
+ * declare function configure<const U extends NoExcessProperties<Options, U>>(options: U): void;
+ *
+ * configure({ retries: 3 });                 // ✓
+ * configure({ retries: 3, timeoutMs: 50 });  // ✓
+ * configure({ retries: 3, timoutMs: 50 });   // ✗ — `timoutMs` is not an option
+ * ```
+ *
+ * @typeParam T - The permitted shape.
+ * @typeParam U - The candidate type, normally inferred from the call site.
+ *
+ * @see {@link Without} — the same "these keys must be absent" device, used to build {@link XOR}.
+ * @see {@link RequireExactlyOne} when the keys are all known and the rule is mutual exclusion.
+ * @category utility types
+ * @since 0.2.0
+ */
+export type NoExcessProperties<T, U> = T & Readonly<Record<Exclude<keyof U, keyof T>, never>>;
+
+/**
+ * The union of the keys of `T` that must be present — every key declared without
+ * a `?` modifier.
+ *
+ * **When to use**
+ *
+ * Use it when you need the *set* of required keys as a type: to build a
+ * "supply at least these" parameter, to split a config into its mandatory and
+ * optional halves, or to assert in a type test that a refactor did not quietly
+ * make a field optional. `IsOptionalKey` in `@resq-systems/types/logic` answers
+ * the same question one key at a time; this is the whole set at once.
+ *
+ * **Details**
+ *
+ * The `-?` in the mapped type strips optionality before the probe runs, so
+ * `EmptyShape extends Pick<T, K>` is decided by the *original* declaration
+ * rather than by a modifier the mapped type re-applied. Under this package's
+ * `exactOptionalPropertyTypes` the distinction is sharp: `{ a?: string }` may
+ * omit the key, `{ a: string | undefined }` must supply it explicitly, and they
+ * are not the same type.
+ *
+ * **Gotchas**
+ *
+ * Not distributive over a union — `keyof (A | B)` is the *intersection* of the
+ * two key sets, so `RequiredKeys<{ a: 1 } | { b: 2 }>` is `never`. Distribute
+ * first if that is not what you want.
+ *
+ * An index signature is reported as **optional**, never required:
+ * `RequiredKeys<{ [k: string]: number }>` is `never` and
+ * `OptionalKeys<{ [k: string]: number }>` is `string`. That follows from the
+ * probe — the empty object type satisfies an index signature through TypeScript's
+ * implicit-index-signature rule — and it is the right answer, since no *specific*
+ * key of such a type is ever mandatory.
+ *
+ * Both are meant for object types. On an array or tuple, `keyof T` also carries
+ * `length` and every `Array.prototype` member, so the answer is not the
+ * positional key set you would expect; reach for `Length` from
+ * `collection.ts` when what you actually want is tuple arity.
+ *
+ * **Example** (Splitting a config into its mandatory and optional halves)
+ *
+ * ```ts
+ * interface Config {
+ * 	readonly url: string;
+ * 	readonly retries?: number;
+ * 	readonly timeout: number | undefined;
+ * }
+ *
+ * type Mandatory = RequiredKeys<Config>; // "url" | "timeout"
+ * type Defaults = Pick<Config, OptionalKeys<Config>>; // { readonly retries?: number }
+ * ```
+ *
+ * @typeParam T - The object type to partition.
+ *
+ * @see {@link OptionalKeys} — the other half of the partition.
+ * @see {@link RequireAtLeastOne}
+ * @see {@link RequireExactlyOne}
+ * @category utility types
+ * @since 0.2.0
+ */
+export type RequiredKeys<T> = {
+	[K in keyof T]-?: EmptyShape extends Pick<T, K> ? never : K;
+}[keyof T];
+
+/**
+ * The union of the keys of `T` that may be omitted — every key declared with a
+ * `?` modifier.
+ *
+ * **When to use**
+ *
+ * Use it as the complement of {@link RequiredKeys}: to type a defaults object
+ * (`Required<Pick<T, OptionalKeys<T>>>`), to prove a key really is omissible, or
+ * to drive a "which of these did the caller actually pass" mapped type.
+ *
+ * **Details**
+ *
+ * Identical machinery to {@link RequiredKeys} with the two branches swapped, so
+ * for any ordinary object type the pair partitions `keyof T` exactly — no key is
+ * reported by both, and none by neither. The one documented exception is a
+ * *string* index signature: `keyof { [k: string]: number }` is `string | number`
+ * (TypeScript admits the numeric alias of the same slot) while the optional half
+ * reports `string` alone, so the two halves cover less than `keyof T`. They are
+ * still disjoint. Do not treat the union of the halves as a drop-in for `keyof T`
+ * on an index-signature type.
+ *
+ * **Gotchas**
+ *
+ * All of {@link RequiredKeys}' gotchas apply unchanged — no distribution over a
+ * union, index signatures land here rather than in {@link RequiredKeys}, and
+ * arrays/tuples are out of scope. One more specific to this half: a *required*
+ * key whose value type merely includes `undefined` is **not** optional under
+ * `exactOptionalPropertyTypes`, so `OptionalKeys<{ a: string | undefined }>` is
+ * `never`.
+ *
+ * **Example** (Typing a defaults bag)
+ *
+ * ```ts
+ * interface Config {
+ * 	readonly url: string;
+ * 	readonly retries?: number;
+ * 	readonly backoffMs?: number;
+ * }
+ *
+ * type Omissible = OptionalKeys<Config>; // "retries" | "backoffMs"
+ * type Defaults = Required<Pick<Config, OptionalKeys<Config>>>;
+ * ```
+ *
+ * @typeParam T - The object type to partition.
+ *
+ * @see {@link RequiredKeys} — the other half of the partition.
+ * @see {@link DeepPartial}
+ * @category utility types
+ * @since 0.2.0
+ */
+export type OptionalKeys<T> = {
+	[K in keyof T]-?: EmptyShape extends Pick<T, K> ? K : never;
+}[keyof T];
+
+//#endregion

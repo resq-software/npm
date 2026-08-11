@@ -15,10 +15,55 @@
 			"import": "./lib/brand.js",
 			"default": "./lib/brand.js"
 		},
+		"./brand-parse": {
+			"types": "./lib/brand-parse.d.ts",
+			"import": "./lib/brand-parse.js",
+			"default": "./lib/brand-parse.js"
+		},
+		"./equivalence": {
+			"types": "./lib/equivalence.d.ts",
+			"import": "./lib/equivalence.js",
+			"default": "./lib/equivalence.js"
+		},
+		"./filter": {
+			"types": "./lib/filter.d.ts",
+			"import": "./lib/filter.js",
+			"default": "./lib/filter.js"
+		},
+		"./guards": {
+			"types": "./lib/guards.d.ts",
+			"import": "./lib/guards.js",
+			"default": "./lib/guards.js"
+		},
+		"./logic": {
+			"types": "./lib/logic.d.ts",
+			"import": "./lib/logic.js",
+			"default": "./lib/logic.js"
+		},
+		"./narrow": {
+			"types": "./lib/narrow.d.ts",
+			"import": "./lib/narrow.js",
+			"default": "./lib/narrow.js"
+		},
+		"./order": {
+			"types": "./lib/order.d.ts",
+			"import": "./lib/order.js",
+			"default": "./lib/order.js"
+		},
+		"./predicate": {
+			"types": "./lib/predicate.d.ts",
+			"import": "./lib/predicate.js",
+			"default": "./lib/predicate.js"
+		},
 		"./testing": {
 			"types": "./lib/testing.d.ts",
 			"import": "./lib/testing.js",
 			"default": "./lib/testing.js"
+		},
+		"./union": {
+			"types": "./lib/union.d.ts",
+			"import": "./lib/union.js",
+			"default": "./lib/union.js"
 		}
 	},
 	"main": "lib/index.js",
@@ -29,7 +74,11 @@
 	],
 	"scripts": {
 		"build": "tsdown",
-		"test": "vitest run"
+		"doctest": "bun ../../scripts/extract-doctests.ts --package types --write --report",
+		"doctest:check": "bun ../../scripts/extract-doctests.ts --package types --check",
+		"doctest:typecheck": "bun ../../scripts/extract-doctests.ts --package types --typecheck",
+		"test": "bun run doctest:check && bun run doctest:typecheck && vitest run",
+		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
 		"@total-typescript/ts-reset": "^0.6.1",

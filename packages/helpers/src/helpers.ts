@@ -376,64 +376,21 @@ export const tap =
 //#region Type Guards
 
 /**
- * Type guard: narrow `unknown` to `number`.
+ * The four core type guards now live in `@resq-systems/types/guards`, which owns
+ * the whole leaf-guard vocabulary (`isBigInt`, `isPlainObject`, `isValidDate`, …)
+ * and feeds the combinators in `@resq-systems/types/predicate`. They are
+ * re-exported here unchanged so `@resq-systems/helpers` keeps its exact public
+ * surface — same names, same signatures, same runtime behavior, including the
+ * deliberate quirks a caller may already rely on:
  *
- * Note: returns `true` for `NaN` (which is a `number`). Use
- * `Number.isFinite` afterward if you need to exclude it.
- *
- * @param value - The value to test.
- * @example
- * ```ts
- * if (isNumber(input)) input.toFixed(2);
- * ```
+ * - `isNumber` still returns `true` for `NaN`. Reach for `isFiniteNumber` from
+ *   `@resq-systems/types` when you need it excluded.
+ * - `isFunction` still narrows to `(...args: unknown[]) => unknown`, not
+ *   `never[]`, so `if (isFunction(x)) x(a, b)` keeps compiling.
+ * - `isPromise` is still Promises/A+ duck-typing rather than
+ *   `instanceof Promise`, so it survives realm boundaries and callable
+ *   thenables.
  */
-export const isNumber = (value: unknown): value is number => typeof value === "number";
-
-/**
- * Type guard: narrow `unknown` to `string`. Does not match `String`
- * object wrappers (`new String("x")`), only string primitives.
- *
- * @param value - The value to test.
- * @example
- * ```ts
- * if (isString(input)) input.toUpperCase();
- * ```
- */
-export const isString = (value: unknown): value is string => typeof value === "string";
-
-/**
- * Type guard: narrow `unknown` to a callable.
- *
- * Matches arrow functions, `function` declarations, classes, and
- * built-in callables. Use `isFunction` before invoking values pulled
- * from untrusted sources (e.g. dynamic imports, JSON-config).
- *
- * @param value - The value to test.
- * @example
- * ```ts
- * if (isFunction(handler)) handler(payload);
- * ```
- */
-export const isFunction = (value: unknown): value is (...args: unknown[]) => unknown =>
-	typeof value === "function";
-
-/**
- * Type guard: narrow `unknown` to a `PromiseLike` / `Promise`.
- *
- * Uses Promises/A+ duck-typing (presence of a callable `.then`) rather
- * than `instanceof Promise` so it works across realm boundaries
- * (iframes, workers) and with custom thenables.
- *
- * @param value - The value to test.
- * @example
- * ```ts
- * const v = maybeAsync();
- * const value = isPromise(v) ? await v : v;
- * ```
- */
-export const isPromise = (value: unknown): value is Promise<unknown> =>
-	!!value &&
-	(typeof value === "object" || typeof value === "function") &&
-	typeof (value as Promise<unknown>).then === "function";
+export { isFunction, isNumber, isPromise, isString } from "@resq-systems/types/guards";
 
 //#endregion

@@ -20,7 +20,15 @@ import { defineConfig } from "tsdown";
 
 export default defineConfig({
 	dts: true,
-	entry: ["src/**/*.ts", "!src/**/*.test.*", "!src/**/*.test-d.ts"],
+	// Generated doctests (`src/__generated__/doctests/*.doctest.ts`) are test code that
+	// imports `src` directly; they must never reach the published `lib/`.
+	entry: [
+		"src/**/*.ts",
+		"!src/**/*.test.*",
+		"!src/**/*.test-d.ts",
+		"!src/**/*.doctest.ts",
+		"!src/__generated__/**",
+	],
 	outDir: "lib",
 	platform: "neutral",
 	unbundle: true,

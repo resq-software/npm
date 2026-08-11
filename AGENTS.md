@@ -30,7 +30,7 @@ Each package has its own `AGENTS.md` (and synced `CLAUDE.md`) with package-speci
 | `@resq-systems/rate-limiting` | Token bucket, leaky bucket, sliding window, throttle/debounce | @resq-systems/dsa, @resq-systems/types; effect, @upstash/* (peers) |
 | `@resq-systems/constants` | Design tokens (oklch + email-safe hex), brand identity, cross-app values | **zero deps** |
 | `@resq-systems/email-templates` | Type-safe transactional emails (Effect Schema + React Email + optional Resend) | @resq-systems/constants, @react-email/*; effect, react, resend (peers) |
-| `@resq-systems/types` | Advanced TypeScript type toolkit (nominal brands, deep utils, type-test kit) | **zero deps** |
+| `@resq-systems/types` | Advanced TypeScript type toolkit (nominal brands, runtime guards + guard algebra, narrowing/assertions, tagged-union dispatch, type-level logic, deep utils, type-test kit) | **zero deps** |
 
 ## Key Rules
 
