@@ -328,8 +328,14 @@ jobs:
           set -eu
           for attempt in $(seq 1 60); do
             printf "attempt %s/60\n" "$attempt"
-            conclusion=$(gh api "repos/$REPO/actions/runs?head_sha=$SHA" \
-              --jq '[.workflow_runs[] | select(.name == "security")] | first | .conclusion // "pending"' || echo pending)
+            # Ask the security workflow for its own runs rather than filtering every
+            # run for the SHA. That listing is paginated at 30 and ordered newest
+            # first, and a busy pull request blows past it — review-comment traffic
+            # alone can spawn dozens of runs — pushing the security run off page one,
+            # where the filter finds nothing, reports "pending" forever, and times
+            # out on a scan that actually succeeded.
+            conclusion=$(gh api "repos/$REPO/actions/workflows/security.yml/runs?head_sha=$SHA&per_page=1" \
+              --jq '.workflow_runs | first | .conclusion // "pending"' || echo pending)
             case "$conclusion" in
               success) echo "security workflow succeeded"; exit 0 ;;
               pending|null|"") sleep 20 ;;
