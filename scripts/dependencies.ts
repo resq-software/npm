@@ -72,6 +72,12 @@ interface DependencyRecord {
 	direct: boolean;
 	/** A local `packages/*` or `examples/*` project, not an external dependency. */
 	workspace: boolean;
+	/**
+	 * Part of the project surface — the workspace root or a workspace package.
+	 * Distinct from {@link workspace}: the root is a project but not a
+	 * workspace, and reporting it as a dependency of itself is meaningless.
+	 */
+	project: boolean;
 	/** Reachable from the project surface without traversing a `dev` edge. */
 	production: boolean;
 	/** Every edge kind by which this package is depended upon. */
@@ -160,6 +166,7 @@ function collect(tree: Node): Map<string, DependencyRecord> {
 			version: node.package?.version ?? "unknown",
 			direct: false,
 			workspace: node !== tree,
+			project: true,
 			production: true,
 			kinds: new Set<EdgeKind>(),
 			depth: 0,
@@ -212,6 +219,7 @@ function collect(tree: Node): Map<string, DependencyRecord> {
 					version: target.package?.version ?? "unknown",
 					direct: false,
 					workspace: target.isWorkspace === true,
+					project: target.isWorkspace === true,
 					production: false,
 					kinds: new Set<EdgeKind>(),
 					depth: Number.POSITIVE_INFINITY,
@@ -343,8 +351,42 @@ function parseArgs(argv: string[]): Options {
 	};
 
 	let sawPath = false;
+	let index = 0;
 
-	for (let index = 0; index < argv.length; index += 1) {
+	function fail(message: string): never {
+		console.error(`${message}\n\nRun with --help for usage.`);
+		process.exit(1);
+	}
+
+	/*
+	 * Consumes the next argv entry only when it is a value rather than another
+	 * flag. Blindly taking `argv[index + 1]` lets `--depth --direct` swallow
+	 * `--direct`, yielding NaN — and because every `depth > NaN` comparison is
+	 * false, both filters silently vanish instead of erroring.
+	 */
+	function takeValue(): string | null {
+		const next = argv[index + 1];
+		if (next === undefined || next.startsWith("-")) {
+			return null;
+		}
+		index += 1;
+		return next;
+	}
+
+	/** Reads a numeric option, rejecting missing or malformed values. */
+	function takeNumber(flag: string): number {
+		const raw = takeValue();
+		if (raw === null) {
+			return fail(`${flag} needs a number`);
+		}
+		const value = Number(raw);
+		if (!Number.isFinite(value) || value < 0) {
+			return fail(`${flag} expects a non-negative number, got "${raw}"`);
+		}
+		return value;
+	}
+
+	for (; index < argv.length; index += 1) {
 		const arg = argv[index];
 		switch (arg) {
 			case "--direct":
@@ -363,16 +405,13 @@ function parseArgs(argv: string[]): Options {
 				options.kinds.add(arg.slice(2) as EdgeKind);
 				break;
 			case "--why":
-				index += 1;
-				options.why = argv[index] ?? null;
+				options.why = takeValue() ?? fail("--why needs a package name");
 				break;
 			case "--depth":
-				index += 1;
-				options.maxDepth = Number(argv[index] ?? "Infinity");
+				options.maxDepth = takeNumber("--depth");
 				break;
 			case "--paths":
-				index += 1;
-				options.maxPaths = Number(argv[index] ?? "1");
+				options.maxPaths = takeNumber("--paths");
 				break;
 			case "--help":
 			case "-h":
@@ -385,14 +424,21 @@ function parseArgs(argv: string[]): Options {
 				options.licenses = true;
 				break;
 			case "--json":
-				index += 1;
-				options.json = argv[index] ?? "dependencies.json";
+				options.json = takeValue() ?? "dependencies.json";
 				break;
 			default:
-				if (arg && !arg.startsWith("--") && !sawPath) {
-					options.projectPath = arg;
-					sawPath = true;
+				/* A typo'd flag must not be mistaken for the project path. */
+				if (arg === undefined) {
+					break;
 				}
+				if (arg.startsWith("-")) {
+					fail(`Unknown option: ${arg}`);
+				}
+				if (sawPath) {
+					fail(`Unexpected extra argument: ${arg}`);
+				}
+				options.projectPath = arg;
+				sawPath = true;
 				break;
 		}
 	}
@@ -406,7 +452,7 @@ function parseArgs(argv: string[]): Options {
 }
 
 function matches(record: DependencyRecord, options: Options): boolean {
-	if (record.workspace) {
+	if (record.project) {
 		return false;
 	}
 	if (options.onlyDirect && !record.direct) {
@@ -478,7 +524,24 @@ function printWhy(options: Options, records: Map<string, DependencyRecord>): voi
 			console.log(`    ${path.join(" -> ")}`);
 		}
 
-		const remediation = [...new Set(paths.map((path) => path[1]).filter(Boolean))];
+		/*
+		 * The first hop on the path that is itself a direct dependency and not
+		 * part of the project surface. Naively taking `path[1]` names the
+		 * workspace package a dependency arrived through, which nobody can bump
+		 * — the actionable target is the external dependency that declares it.
+		 */
+		const remediation = [
+			...new Set(
+				paths
+					.map((path) =>
+						path.find((entry) => {
+							const hop = records.get(entry);
+							return hop?.direct === true && !hop.project;
+						}),
+					)
+					.filter((entry): entry is string => entry !== undefined),
+			),
+		];
 		if (remediation.length > 0) {
 			console.log(`\n  Direct remediation target(s): ${remediation.join(", ")}`);
 		}
@@ -488,7 +551,7 @@ function printWhy(options: Options, records: Map<string, DependencyRecord>): voi
 function printDuplicates(records: Map<string, DependencyRecord>): void {
 	const versions = new Map<string, string[]>();
 	for (const record of records.values()) {
-		if (record.workspace) {
+		if (record.project) {
 			continue;
 		}
 		const list = versions.get(record.name) ?? [];
@@ -511,7 +574,7 @@ function printDuplicates(records: Map<string, DependencyRecord>): void {
 function printLicenses(records: Map<string, DependencyRecord>): void {
 	const groups = new Map<string, number>();
 	for (const record of records.values()) {
-		if (record.workspace) {
+		if (record.project) {
 			continue;
 		}
 		groups.set(record.license, (groups.get(record.license) ?? 0) + 1);
