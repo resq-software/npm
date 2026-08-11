@@ -1,3 +1,5 @@
+# Changelog
+
 <!--
   Copyright 2026 ResQ
 
@@ -14,26 +16,17 @@
   limitations under the License.
 -->
 
-<!--
-
 ## 2.0.1
 ### Patch Changes
-
-
 
 - [#179](https://github.com/resq-software/npm/pull/179) [`4a8cf9a`](https://github.com/resq-software/npm/commit/4a8cf9a1d0b8d76e9c380067c446a209117032a2) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Replace `workspace:*` internal dependency ranges with concrete semver so published packages install cleanly outside the monorepo
 
 ## 2.0.0
 ### Major Changes
 
-
-
 - [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add branded CookieDomain and a gtag command discriminated union, tightening cookieDomain and resolver return types
 
-
 ### Patch Changes
-
-
 
 - [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Republish with corrected manifests. Earlier releases via the tag-triggered
   `release-package.yml` workflow used `bunx npm publish`, which does not rewrite
@@ -50,14 +43,9 @@
 ## 1.0.0
 ### Major Changes
 
-
-
 - [#168](https://github.com/resq-software/npm/pull/168) [`1d0f73c`](https://github.com/resq-software/npm/commit/1d0f73c6b8dbb5a09e3260ad78ab1fd7ac5c4636) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Brand GA4 measurement IDs, tighten the event registry and track() payloads, and split color-token roles into canonical ColorRole/StatusRole types
 
-
 ### Minor Changes
-
-
 
 - [#167](https://github.com/resq-software/npm/pull/167) [`c80c8b8`](https://github.com/resq-software/npm/commit/c80c8b8f0eecd3e12af3e74cdd26aac98337675b) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Rebrand to ResQ Systems: rename npm scope `@resq-sw/*` → `@resq-systems/*`
 
@@ -77,34 +65,12 @@
 ## 0.4.1
 ### Patch Changes
 
-
-
 - [#145](https://github.com/resq-software/npm/pull/145) [`c6982a6`](https://github.com/resq-software/npm/commit/c6982a6474860ddc400c622c7b9d3e2dfafe58d8) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add @total-typescript/ts-reset devDependency and reset.d.ts to improve global typing defaults during development, keeping it out of the published library output.
 
-
-
 - [#145](https://github.com/resq-software/npm/pull/145) [`c6982a6`](https://github.com/resq-software/npm/commit/c6982a6474860ddc400c622c7b9d3e2dfafe58d8) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Update TypeScript to 7.0.2 across all packages
-  Copyright 2026 ResQ
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
-
-<!--
 
 ## 0.4.0
 ### Minor Changes
-
-
 
 - [#91](https://github.com/resq-software/npm/pull/91) [`be1d05e`](https://github.com/resq-software/npm/commit/be1d05e2b64a9e57c5498691ed6498b81bd03222) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add ResQ-specific helpers shared across the three TS surfaces (`landing`,
   `research`, `viz`):
@@ -127,20 +93,6 @@
   Centralizing these means adding a fourth subdomain or tightening the
   GA4-ID format becomes a single version bump instead of three
   coordinated edits across consumer repos
-  Copyright 2026 ResQ Systems, Inc.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
 
 # @resq-sw/analytics
 

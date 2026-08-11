@@ -1,11 +1,6 @@
+# Changelog
+
 <!--
-
-## 1.0.5
-### Patch Changes
-
-
-
-- [#195](https://github.com/resq-software/npm/pull/195) [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Type getHashForObject input as unknown instead of any
   Copyright 2026 ResQ
 
   Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,12 +16,13 @@
   limitations under the License.
 -->
 
-<!--
+## 1.0.5
+### Patch Changes
+
+- [#195](https://github.com/resq-software/npm/pull/195) [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Type getHashForObject input as unknown instead of any
 
 ## 1.0.4
 ### Patch Changes
-
-
 
 - [#187](https://github.com/resq-software/npm/pull/187) [`e6c5ac8`](https://github.com/resq-software/npm/commit/e6c5ac81648a5d681961d13e7faa01982b08d478) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Accept Punycode/IDN TLDs in EmailSchema / isValidEmail
 
@@ -35,19 +31,14 @@
 ## 1.0.3
 ### Patch Changes
 
-
-
 - [#179](https://github.com/resq-software/npm/pull/179) [`4a8cf9a`](https://github.com/resq-software/npm/commit/4a8cf9a1d0b8d76e9c380067c446a209117032a2) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Replace `workspace:*` internal dependency ranges with concrete semver so published packages install cleanly outside the monorepo
 
 ## 1.0.2
 ### Patch Changes
 
-
-
 - [#176](https://github.com/resq-software/npm/pull/176) [`189eed6`](https://github.com/resq-software/npm/commit/189eed6040a1e2422cf2f3f640b23b20035be32d) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Fix redactPII leaking email addresses with Punycode/IDN TLDs
 
   `PII_PATTERNS.email` was not updated when `EmailSchema` gained Punycode/IDN TLD support, so `redactPII` silently failed to redact addresses like `user@example.xn--p1ai`. The redaction pattern now mirrors `EmailSchema`'s TLD alternation (and drops a stray `|` from the former `[A-Z|a-z]` character class).
-
 
 - [#175](https://github.com/resq-software/npm/pull/175) [`abc88da`](https://github.com/resq-software/npm/commit/abc88da66987f0cce47303d09108d4f1fc3b4520) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Accept Punycode/IDN TLDs in EmailSchema / isValidEmail
 
@@ -55,8 +46,6 @@
 
 ## 1.0.1
 ### Patch Changes
-
-
 
 - [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Republish with corrected manifests. Earlier releases via the tag-triggered
   `release-package.yml` workflow used `bunx npm publish`, which does not rewrite
@@ -70,7 +59,6 @@
   `RateLimitCheckResult` type alias for the renamed `RateLimitDecision`, restoring
   backward compatibility for consumers written before the rename.
 
-
 - [#174](https://github.com/resq-software/npm/pull/174) [`59d6d6d`](https://github.com/resq-software/npm/commit/59d6d6d053e755acb28bd655a9faa44362bb680d) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Accept Punycode/IDN TLDs in EmailSchema / isValidEmail
 
   `EmailSchema` (and `isValidEmail`) previously rejected valid internationalized domains whose TLD is Punycode-encoded (e.g. `user@example.xn--p1ai` for `.рф`). The TLD pattern now also accepts an `xn--…` label. Structural rejections (no `@`, empty domain, disallowed local-part characters) are unchanged. Kept in sync with `@resq-systems/email-templates`'s `EmailAddress` brand.
@@ -78,14 +66,9 @@
 ## 1.0.0
 ### Major Changes
 
-
-
 - [#168](https://github.com/resq-software/npm/pull/168) [`1d0f73c`](https://github.com/resq-software/npm/commit/1d0f73c6b8dbb5a09e3260ad78ab1fd7ac5c4636) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Brand crypto and validator outputs as nominal types and require branded EncryptionKey/Ciphertext/PositiveInt inputs
 
-
 ### Minor Changes
-
-
 
 - [#167](https://github.com/resq-software/npm/pull/167) [`c80c8b8`](https://github.com/resq-software/npm/commit/c80c8b8f0eecd3e12af3e74cdd26aac98337675b) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Rebrand to ResQ Systems: rename npm scope `@resq-sw/*` → `@resq-systems/*`
 
@@ -101,27 +84,9 @@
 
 - Updated dependencies [[`1d0f73c`](https://github.com/resq-software/npm/commit/1d0f73c6b8dbb5a09e3260ad78ab1fd7ac5c4636)]:
   - @resq-systems/types@0.1.0
-  Copyright 2026 ResQ
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
-
-<!--
 
 ## 0.2.0
 ### Minor Changes
-
-
 
 - [#152](https://github.com/resq-software/npm/pull/152) [`23ce8e3`](https://github.com/resq-software/npm/commit/23ce8e3f59c54a010bff42b3b2a76b6df0b2dc99) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Resolve security, algorithmic consistency, and memory leak issues:
   - @resq-sw/security: Implement recursive prototype pollution protection in `sanitizeJson` and `sanitizeObject`. Integrate DOMPurify for HTML sanitization when `allowHtml` is enabled in `validateUserInput`.
@@ -130,8 +95,6 @@
   - @resq-sw/dsa: Add an optional `onEvict` callback to `LRUCache` to support cleanup tasks like canceling active timers during eviction, and skip expired entries when calling keys(), values(), and entries() iterators.
 
 ### Patch Changes
-
-
 
 - [#156](https://github.com/resq-software/npm/pull/156) [`52a18eb`](https://github.com/resq-software/npm/commit/52a18eba2e89d17aa6056c802b16fff53bdbfde1) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Correct the `effect` peer ranges to the versions these packages are actually built and tested against.
 
@@ -163,31 +126,11 @@
 ## 0.1.2
 ### Patch Changes
 
-
-
 - [#141](https://github.com/resq-software/npm/pull/141) [`2a3c926`](https://github.com/resq-software/npm/commit/2a3c926fc6fb88cae74984f637f99cf37de5da71) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Adopt effect 4.0.0-beta.93: bump the pinned dev version and the root effect override from beta.50, validated against the full build and test suite
-
-
 
 - [#145](https://github.com/resq-software/npm/pull/145) [`c6982a6`](https://github.com/resq-software/npm/commit/c6982a6474860ddc400c622c7b9d3e2dfafe58d8) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add @total-typescript/ts-reset devDependency and reset.d.ts to improve global typing defaults during development, keeping it out of the published library output.
 
-
-
 - [#145](https://github.com/resq-software/npm/pull/145) [`c6982a6`](https://github.com/resq-software/npm/commit/c6982a6474860ddc400c622c7b9d3e2dfafe58d8) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Update TypeScript to 7.0.2 across all packages
-  Copyright 2026 ResQ Systems, Inc.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
 
 # @resq-sw/security
 
