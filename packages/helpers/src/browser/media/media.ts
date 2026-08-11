@@ -220,6 +220,124 @@ function isSupportedMimeType<T extends string>(
 	return mimeType != null && widened.includes(mimeType);
 }
 
+/** Container formats {@link MediaHelpers.isAnimated} knows how to inspect. */
+type AnimatedContainer = "gif" | "avif" | "webp" | "png";
+
+/** Longest prefix any signature below needs; shorter buffers cannot match one. */
+const SIGNATURE_PROBE_SIZE = 12;
+
+/** Whether `view` carries `ascii` at `offset`, without running past the end. */
+function hasAscii(view: Uint8Array, offset: number, ascii: string): boolean {
+	if (offset + ascii.length > view.length) return false;
+	for (let i = 0; i < ascii.length; i++) {
+		if (view[offset + i] !== ascii.charCodeAt(i)) return false;
+	}
+	return true;
+}
+
+/**
+ * Identify a buffer's container from its leading bytes.
+ *
+ * Chooses which parser {@link MediaHelpers.isAnimated} runs. It used to switch on
+ * `Blob.type`, a caller-supplied label, which was wrong in both directions:
+ *
+ * - APNG is served and stored as `image/png` — `image/apng` exists but is rarely
+ *   what a file picker reports, since browsers derive `File.type` from the `.png`
+ *   extension. So ordinary APNGs, the common case, answered `false`.
+ * - A GIF relabelled `image/webp` reached the WebP parser, which rejected the
+ *   signature and answered `false`. Any check built on this — an upload rule
+ *   refusing animation, say — was bypassed by renaming the file.
+ *
+ * Each parser re-validates its own signature, so this only needs to route; a
+ * wrong guess degrades to `false` rather than to a misparse.
+ *
+ * @param buffer - Bytes to inspect. Only the first {@link SIGNATURE_PROBE_SIZE} are read.
+ * @returns The detected container, or `undefined` when no signature matches.
+ */
+function sniffAnimatedContainer(buffer: ArrayBuffer): AnimatedContainer | undefined {
+	if (buffer.byteLength < SIGNATURE_PROBE_SIZE) return undefined;
+	const view = new Uint8Array(buffer, 0, SIGNATURE_PROBE_SIZE);
+
+	// "GIF87a" / "GIF89a" — the version follows, and `isGifAnimated` checks it.
+	if (hasAscii(view, 0, "GIF8")) return "gif";
+
+	// PNG signature; APNG shares it and is distinguished by an acTL chunk.
+	if (
+		view[0] === 0x89 &&
+		view[1] === 0x50 &&
+		view[2] === 0x4e &&
+		view[3] === 0x47 &&
+		view[4] === 0x0d &&
+		view[5] === 0x0a &&
+		view[6] === 0x1a &&
+		view[7] === 0x0a
+	) {
+		return "png";
+	}
+
+	// RIFF container with a WEBP form type at offset 8.
+	if (hasAscii(view, 0, "RIFF") && hasAscii(view, 8, "WEBP")) return "webp";
+
+	// ISOBMFF: a box size, then "ftyp". AVIF brands are checked by `isAvifAnimated`.
+	if (hasAscii(view, 4, "ftyp")) return "avif";
+
+	return undefined;
+}
+
+/**
+ * Bytes {@link MediaHelpers.isAnimated} reads before deciding whether it needs more.
+ *
+ * Generous on purpose. The headers themselves need well under 100 bytes, but APNG allows
+ * ancillary chunks — a colour profile, most often — between the signature and `acTL`,
+ * and GIF's first frame sits before the second image descriptor. 64 KB clears both in
+ * practice while staying negligible against the whole-file read it replaces.
+ */
+const ANIMATION_PROBE_SIZE = 65_536;
+
+/** Animation parser per container, keyed by what {@link sniffAnimatedContainer} returns. */
+const ANIMATION_PARSERS: Readonly<Record<AnimatedContainer, (buffer: ArrayBuffer) => boolean>> = {
+	gif: isGifAnimated,
+	avif: isAvifAnimated,
+	webp: isWebpAnimated,
+	png: isApngAnimated,
+};
+
+/** Byte holding the VP8X feature flags; `isWebpAnimated` reads nothing beyond it. */
+const WEBP_FLAGS_OFFSET = 20;
+
+/**
+ * Whether a *negative* answer from a prefix is final, or might just be truncation.
+ *
+ * Only asked after the parser has already said "not animated", and only when the prefix
+ * is shorter than the file. A positive answer never reaches here, because no later byte
+ * can withdraw an animation marker that has already been seen.
+ *
+ * @param container - Container the prefix was identified as.
+ * @param prefix - The bytes read so far.
+ * @returns `true` when the parser saw everything it could ever consult.
+ */
+function decidesFromPrefix(container: AnimatedContainer, prefix: ArrayBuffer): boolean {
+	const view = new Uint8Array(prefix);
+
+	// `isWebpAnimated` inspects the RIFF header, the VP8X tag and one flag byte, and
+	// reads nothing after it, so the rest of the file cannot change its answer.
+	if (container === "webp") return view.length > WEBP_FLAGS_OFFSET;
+
+	// `isAvifAnimated` scans compatible brands only to the end of the `ftyp` box, whose
+	// size is declared in its first four bytes. A declared size below the 8-byte header
+	// means "extends to end of file", which the prefix cannot bound.
+	if (container === "avif") {
+		if (view.length < 8) return false;
+		const boxSize = new DataView(prefix).getUint32(0);
+		return boxSize >= 8 && boxSize <= view.length;
+	}
+
+	// PNG and GIF can both require the whole file to *disprove* animation: `acTL` may
+	// sit behind an oversized ancillary chunk, and a second GIF frame behind a large
+	// first one.
+	return false;
+}
+
 //#endregion
 
 //#region Public API
@@ -526,23 +644,29 @@ export class MediaHelpers {
 	 * @public
 	 */
 	static async isAnimated(file: Blob): Promise<boolean> {
-		if (file.type === "image/gif") {
-			return isGifAnimated(await file.arrayBuffer());
-		}
+		// Read a bounded prefix rather than the whole file. Every parser here decides
+		// from a header — 12 bytes for AVIF, 21 for WebP, 26 for GIF, 53 for a typical
+		// APNG — so materializing a 32 MB upload to answer was an O(n) read and an O(n)
+		// allocation for an O(1) question, on the main thread, once per upload.
+		const prefixSize = Math.min(ANIMATION_PROBE_SIZE, file.size);
+		const prefix = await file.slice(0, prefixSize).arrayBuffer();
 
-		if (file.type === "image/avif") {
-			return isAvifAnimated(await file.arrayBuffer());
-		}
+		const container = sniffAnimatedContainer(prefix);
+		if (container === undefined) return false;
 
-		if (file.type === "image/webp") {
-			return isWebpAnimated(await file.arrayBuffer());
-		}
+		const parse = ANIMATION_PARSERS[container];
 
-		if (file.type === "image/apng") {
-			return isApngAnimated(await file.arrayBuffer());
-		}
+		// A positive answer is always conclusive: acTL, the VP8X animation bit, an
+		// `avis` brand and a second GIF image descriptor are present-or-absent markers,
+		// never retracted by later bytes.
+		if (parse(prefix)) return true;
 
-		return false;
+		// A negative can mean "not animated" or "ran out of bytes". Escalate only when
+		// that distinction is live and the parser cannot rule it out from the prefix.
+		if (prefixSize >= file.size) return false;
+		if (decidesFromPrefix(container, prefix)) return false;
+
+		return parse(await file.arrayBuffer());
 	}
 
 	/**

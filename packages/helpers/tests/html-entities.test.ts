@@ -143,4 +143,61 @@ describe("obfuscateLink", () => {
 			expect(result.encodedText).toBe("&#53;");
 		});
 	});
+
+	// The `scheme: "mailto" | "tel"` union guards the ordinary case at compile time
+	// but not the ones that matter: `obfuscateLink({ ...JSON.parse(config) })` type-
+	// checks clean because `JSON.parse` returns `any`, and this package is published,
+	// so plain-JS consumers get no enforcement at all. Every documented usage puts
+	// the returned `href` straight into an anchor.
+	describe("input validation", () => {
+		const call = (opts: unknown) => () =>
+			// biome-ignore lint/suspicious/noExplicitAny: reproduces what an untyped caller reaches this with.
+			obfuscateLink(opts as any);
+
+		test.each(["javascript", "data", "vbscript", "file", "http", "JAVASCRIPT", ""])(
+			"rejects the %o scheme",
+			(scheme) => {
+				expect(call({ scheme, address: "alert(1)" })).toThrow(TypeError);
+			},
+		);
+
+		test.each([null, undefined, 0, {}])("rejects a %o scheme", (scheme) => {
+			expect(call({ scheme, address: "a@b.c" })).toThrow(TypeError);
+		});
+
+		test.each([
+			["a double quote, which closes the href attribute", 'x@y.com" onmouseover="alert(1)'],
+			["a single quote, which closes a single-quoted href", "x@y.com' onfocus='alert(1)"],
+			["an angle bracket, which opens a tag", "x@y.com<script>"],
+			["a carriage return, which injects a mailto header", "x@y.com\r\nBcc: victim@example.com"],
+			["a bare newline", "x@y.com\nSubject: spam"],
+			["a NUL byte", "x@y.com\0evil"],
+			["a backslash", "x@y.com\\"],
+			["a semicolon", "x@y.com;evil"],
+		])("rejects an address containing %s", (_label, address) => {
+			expect(call({ scheme: "mailto", address })).toThrow(TypeError);
+		});
+
+		test.each([null, undefined, 42, {}, ["a@b.c"]])(
+			"rejects a non-string address (%o)",
+			(address) => {
+				expect(call({ scheme: "mailto", address })).toThrow(TypeError);
+			},
+		);
+
+		test("rejects an address beyond the 320-character ceiling", () => {
+			const local = "a".repeat(310);
+			expect(call({ scheme: "mailto", address: `${local}@example.com` })).toThrow(TypeError);
+		});
+
+		test.each([
+			["a plain mailbox", "mailto", "jane.doe@example.com"],
+			["a tagged mailbox", "mailto", "jane+tag@example.co.uk"],
+			["an internationalized mailbox", "mailto", "josé@münchen.example"],
+			["a formatted phone number", "tel", "+1 (555) 010-4477"],
+			["a bare extension", "tel", "4477"],
+		])("still accepts %s", (_label, scheme, address) => {
+			expect(call({ scheme, address })).not.toThrow();
+		});
+	});
 });

@@ -26,6 +26,33 @@
  * @module @resq-systems/helpers/browser/media/apng
  */
 
+/** Bytes in the PNG file signature that precedes the first chunk. */
+const PNG_SIGNATURE_SIZE = 8;
+
+/** Bytes in a chunk's big-endian length field. */
+const LENGTH_SIZE = 4;
+
+/** Bytes in a chunk's four-character type field. */
+const TYPE_SIZE = 4;
+
+/** Bytes in a chunk's trailing CRC-32. */
+const CRC_SIZE = 4;
+
+/**
+ * Largest chunk length the PNG specification permits.
+ *
+ * Clause 5.3 caps it at 2^31-1 and requires the high bit to be zero, so a longer
+ * declared length means the stream is malformed rather than merely truncated.
+ */
+const MAX_CHUNK_LENGTH = 0x7fffffff;
+
+/**
+ * Smallest byte count that can hold a signature plus one chunk header.
+ *
+ * Anything shorter cannot be walked, so it is rejected before the loop.
+ */
+const MIN_PNG_SIZE = PNG_SIGNATURE_SIZE + LENGTH_SIZE + TYPE_SIZE;
+
 /**
  * Determines whether an ArrayBuffer contains an animated PNG (APNG) image.
  *
@@ -58,11 +85,9 @@
 export function isApngAnimated(buffer: ArrayBuffer): boolean {
 	const view = new Uint8Array(buffer);
 
-	if (
-		!view ||
-		!((typeof Buffer !== "undefined" && Buffer.isBuffer(view)) || view instanceof Uint8Array) ||
-		view.length < 16
-	) {
+	// `view` is a Uint8Array constructed on the line above, so the old
+	// `Buffer.isBuffer` branch here could never be reached.
+	if (view.length < MIN_PNG_SIZE) {
 		return false;
 	}
 
@@ -80,97 +105,39 @@ export function isApngAnimated(buffer: ArrayBuffer): boolean {
 		return false;
 	}
 
-	/**
-	 * Returns the index of the first occurrence of a string pattern in a Uint8Array, or -1 if not found.
-	 *
-	 * Searches for a string pattern by decoding chunks of the byte array to UTF-8 text and using
-	 * regular expression matching. Handles cases where the pattern might be split across chunk boundaries.
-	 *
-	 * @param haystack - The Uint8Array to search in
-	 * @param needle - The string or RegExp pattern to locate
-	 * @param fromIndex - The array index at which to begin the search
-	 * @param upToIndex - The array index up to which to search (optional, defaults to array end)
-	 * @param chunksize - Size of the chunks used when searching (default 1024 bytes)
-	 * @returns The index position of the first match, or -1 if not found
-	 */
-	function indexOfSubstring(
-		haystack: Uint8Array,
-		needle: string | RegExp,
-		fromIndex: number,
-		upToIndex?: number,
-		chunksize = 1024 /* Bytes */,
-	) {
-		/**
-		 * Adopted from: https://stackoverflow.com/a/67771214/2142071
-		 */
+	// APNGs carry an animation control chunk (acTL) before the first IDAT.
+	// See https://en.wikipedia.org/wiki/APNG#File_format
+	//
+	// Walked as a chunk stream rather than scanned as text. The previous
+	// implementation decoded the bytes with a streaming TextDecoder and accumulated
+	// UTF-16 code-unit counts as if they were byte offsets, so any multi-byte
+	// sequence ahead of acTL shrank the index and the comparison silently failed —
+	// genuinely-encoded APNGs carrying a compressed ICC profile reported *not*
+	// animated. Scanning for the literal text also matched chunk *data*, so a static
+	// PNG with `acTL` inside a tEXt comment reported animated. Matching the 4-byte
+	// type field at a known offset fixes both directions.
+	const data = new DataView(view.buffer, view.byteOffset, view.byteLength);
+	let offset = PNG_SIGNATURE_SIZE;
 
-		if (!needle) {
-			return -1;
-		}
-		needle = new RegExp(needle, "g");
+	while (offset + LENGTH_SIZE + TYPE_SIZE <= view.length) {
+		const length = data.getUint32(offset);
+		// The PNG spec caps chunk length at 2^31-1 with the high bit zero; anything
+		// larger, or any chunk running past the end, means the stream is malformed.
+		if (length > MAX_CHUNK_LENGTH) return false;
+		if (offset + LENGTH_SIZE + TYPE_SIZE + length + CRC_SIZE > view.length) return false;
 
-		// The needle could get split over two chunks.
-		// So, at every chunk we prepend the last few characters
-		// of the last chunk.
-		const needle_length = needle.source.length;
-		const decoder = new TextDecoder();
+		const type = String.fromCharCode(
+			view[offset + 4] as number,
+			view[offset + 5] as number,
+			view[offset + 6] as number,
+			view[offset + 7] as number,
+		);
 
-		// Handle search offset in line with
-		// `Array.prototype.indexOf()` and `TypedArray.prototype.subarray()`.
-		const full_haystack_length = haystack.length;
-		if (typeof upToIndex === "undefined") {
-			upToIndex = full_haystack_length;
-		}
-		if (fromIndex >= full_haystack_length || upToIndex <= 0 || fromIndex >= upToIndex) {
-			return -1;
-		}
-		haystack = haystack.subarray(fromIndex, upToIndex);
+		if (type === "acTL") return true;
+		// acTL must precede the first IDAT, so either marker ends the search.
+		if (type === "IDAT" || type === "IEND") return false;
 
-		let position = -1;
-		let current_index = 0;
-		let full_length = 0;
-		let needle_buffer = "";
-
-		outer: while (current_index < haystack.length) {
-			const next_index = current_index + chunksize;
-			// subarray doesn't copy
-			const chunk = haystack.subarray(current_index, next_index);
-			const decoded = decoder.decode(chunk, { stream: true });
-
-			const text = needle_buffer + decoded;
-
-			const match = needle.exec(text);
-			let last_index = -1;
-			while (match !== null) {
-				last_index = match.index - needle_buffer.length;
-				position = full_length + last_index;
-				break outer;
-			}
-
-			current_index = next_index;
-			full_length += decoded.length;
-
-			// Check that the buffer doesn't itself include the needle
-			// this would cause duplicate finds (we could also use a Set to avoid that).
-			const needle_index =
-				last_index > -1 ? last_index + needle_length : decoded.length - needle_length;
-			needle_buffer = decoded.slice(needle_index);
-		}
-
-		// Correct for search offset.
-		if (position >= 0) {
-			position += fromIndex >= 0 ? fromIndex : full_haystack_length + fromIndex;
-		}
-
-		return position;
-	}
-
-	// APNGs have an animation control chunk ('acTL') preceding the IDATs.
-	// See: https://en.wikipedia.org/wiki/APNG#File_format
-	const idatIdx = indexOfSubstring(view, "IDAT", 12);
-	if (idatIdx >= 12) {
-		const actlIdx = indexOfSubstring(view, "acTL", 8, idatIdx);
-		return actlIdx >= 8;
+		offset += LENGTH_SIZE + TYPE_SIZE + length + CRC_SIZE;
 	}
 
 	return false;
