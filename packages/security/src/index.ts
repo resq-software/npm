@@ -16,14 +16,27 @@
 
 /**
  * @fileoverview Public API for `@resq-systems/security` — AES-256-GCM encryption,
- * Effect-Schema input validators, threat detection, and PII sanitization.
+ * Effect-Schema input validators, context-aware threat detection, UTS #39 identifier
+ * analysis, and PII sanitization.
  *
  * Subpath exports:
- * - `@resq-systems/security` — crypto, validators, sanitizer
+ * - `@resq-systems/security` — crypto, validators, sanitizer, threats, unicode
  * - `@resq-systems/security/sanitize` — PII redaction without crypto deps
+ * - `@resq-systems/security/threats` — the context-aware rule engine
+ * - `@resq-systems/security/controls` — preventive controls for weaknesses no
+ *   signature can detect: CORS origin validation, CSRF tokens, upload type agreement,
+ *   JSONP callback validation, query-complexity bounds
+ * - `@resq-systems/security/unicode` — UTS #39 skeletons, scripts, restriction levels
+ * - `@resq-systems/security/paths` — CWE-22 path containment. **Node only**, and
+ *   therefore not re-exported from this barrel: it imports `node:path` statically.
  *
- * `effect` is an optional peer dependency required only for the
- * Schema-based validators.
+ * `effect` is an optional peer dependency required only for the Schema-based
+ * validators.
+ *
+ * The detection surface reports what an untrusted value *looks like*. It is not what
+ * makes an application safe — parameterized queries, context-correct output encoding,
+ * path containment, and argv-array process spawning are. Every rule names its own
+ * control in `primaryControl`.
  *
  * @module @resq-systems/security
  *
@@ -33,6 +46,14 @@
  *
  * redactPII("Contact john@example.com from 1.2.3.4");
  * // → "Contact [EMAIL] from [IP_ADDRESS]"
+ * ```
+ *
+ * @example Scoping detection to the sink the value reaches
+ * ```ts
+ * import { scanForThreats } from "@resq-systems/security";
+ *
+ * scanForThreats(bio, { contexts: ["general_text"] }).verdict; // "allow"
+ * scanForThreats(uploadName, { contexts: ["filesystem"] });    // traversal rules run
  * ```
  */
 
@@ -59,14 +80,22 @@ export {
 	containsHomoglyphs,
 	containsNoSQLInjection,
 	containsPathTraversal,
+	containsPrototypePollution,
 	containsSQLInjection,
 	containsXSSPatterns,
 	detectThreatPatterns,
+	encodeJsonForScript,
+	encodeLogValue,
+	escapeCsvField,
+	escapeHtmlAttribute,
+	escapeHtmlText,
 	getThreatErrorMessage,
 	isSafeInput,
 	normalizeUnicode,
 	sanitizeForDisplay,
 	THREAT_DETECTED_MESSAGE,
+	toCsvRow,
+	validatePersonName,
 	validateSafeEmail,
 	validateSafeName,
 	validateSafeText,
@@ -74,9 +103,105 @@ export {
 export type {
 	ThreatDetectionConfig,
 	ThreatDetectionResult,
-	ThreatFinding,
-	ThreatType,
+	ThreatSummary,
 } from "./validators.js";
+export {
+	ALL_THREAT_CONTEXTS,
+	assertRuleCatalogIsValid,
+	ATTACK_PATTERNS,
+	attackPatternsForCwe,
+	buildInputVariants,
+	calculateThreatScore,
+	CONFIDENCE_MULTIPLIERS,
+	DEFAULT_THREAT_POLICY,
+	decodeHtmlEntities,
+	getRulesForContexts,
+	MAX_SCAN_LENGTH,
+	scanForThreats,
+	scoreForFinding,
+	SEVERITY_WEIGHTS,
+	summarizeByType,
+	THREAT_RULES,
+	tryPercentDecode,
+	verdictForScore,
+} from "./threats/index.js";
+export type {
+	AttackPattern,
+	EventContext,
+	InputSource,
+	InputVariant,
+	InputVariantKind,
+	ThreatConfidence,
+	ThreatContext,
+	ThreatFinding,
+	ThreatPolicy,
+	ThreatRule,
+	ThreatScanOptions,
+	ThreatScanResult,
+	ThreatSeverity,
+	ThreatType,
+	ThreatTypeSummary,
+	ThreatVerdict,
+} from "./threats/index.js";
+export {
+	analyzeGraphQLRequest,
+	analyzeQueryComplexity,
+	assertOutboundUrl,
+	assertUploadType,
+	checkCorsResponsePolicy,
+	checkJsonPayloadLimits,
+	createCsrfToken,
+	detectFileSignature,
+	classifyAddress,
+	isAllowedOrigin,
+	isPubliclyRoutableAddress,
+	normalizeOrigin,
+	resolveRedirectTarget,
+	validateJsonpCallback,
+	verifyCsrfToken,
+} from "./controls/index.js";
+export type {
+	AddressClassification,
+	CorsResponsePolicy,
+	CsrfFailureReason,
+	CsrfTokenOptions,
+	CsrfVerification,
+	CsrfVerifyOptions,
+	FileTypeName,
+	GraphQLRequestAnalysis,
+	GraphQLRequestLimits,
+	JsonPayloadLimits,
+	JsonPayloadReport,
+	OriginPolicyOptions,
+	OutboundRejectionReason,
+	OutboundUrlPolicy,
+	OutboundUrlVerdict,
+	QueryComplexity,
+	QueryComplexityLimits,
+	RedirectPolicyOptions,
+	RedirectRejectionReason,
+	RedirectVerdict,
+	UploadCandidate,
+	UploadRejectionReason,
+	UploadVerdict,
+} from "./controls/index.js";
+export {
+	analyzeIdentifier,
+	areConfusable,
+	containsBidiControls,
+	containsInvisibleCharacters,
+	foldConfusables,
+	getRestrictionLevel,
+	getScripts,
+	getSkeleton,
+	isSafeIdentifier,
+	stripInvisibleCharacters,
+} from "./unicode/index.js";
+export type {
+	IdentifierRestrictionLevel,
+	IdentifierSecurityResult,
+	UnicodeScript,
+} from "./unicode/index.js";
 export {
 	CreditCardSchema,
 	EmailSchema,

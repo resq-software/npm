@@ -25,6 +25,26 @@
 			"import": "./lib/crypto.mjs",
 			"default": "./lib/crypto.mjs"
 		},
+		"./controls": {
+			"types": "./lib/controls/index.d.mts",
+			"import": "./lib/controls/index.mjs",
+			"default": "./lib/controls/index.mjs"
+		},
+		"./threats": {
+			"types": "./lib/threats/index.d.mts",
+			"import": "./lib/threats/index.mjs",
+			"default": "./lib/threats/index.mjs"
+		},
+		"./unicode": {
+			"types": "./lib/unicode/index.d.mts",
+			"import": "./lib/unicode/index.mjs",
+			"default": "./lib/unicode/index.mjs"
+		},
+		"./paths": {
+			"types": "./lib/paths.d.mts",
+			"import": "./lib/paths.mjs",
+			"default": "./lib/paths.mjs"
+		},
 		"./package.json": "./package.json"
 	},
 	"main": "lib/index.mjs",
@@ -74,7 +94,14 @@
 		"validation",
 		"sanitize",
 		"xss",
-		"pii"
+		"pii",
+		"threat-detection",
+		"owasp",
+		"cwe",
+		"unicode-security",
+		"uts39",
+		"homoglyph",
+		"path-traversal"
 	],
 	"engines": {
 		"node": ">=20.19.0"

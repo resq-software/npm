@@ -120,63 +120,254 @@ The crypto surface uses nominal (branded) types so a plain `string` cannot be pa
 | `isCiphertext(value)` | type guard | `true` for a well-formed envelope |
 | `unsafeCiphertext(value)` | `Ciphertext` | Brand without checking |
 
-### Threat Detection (`validators.ts`)
+### Threat Detection (`threats/`)
 
-#### `detectThreatPatterns(input, config?): ThreatDetectionResult`
+> **Detection is not the control.** Every rule carries a `primaryControl` string naming
+> what actually prevents the weakness. Parameterized queries stop SQL injection;
+> context-correct output encoding and DOMPurify stop XSS; `resolveContainedPath` stops
+> traversal; spawning with an argv array stops command injection. Use findings for
+> telemetry, risk scoring, rate limiting, and review — never as the only barrier.
 
-Runs all configured detectors on input.
+#### `scanForThreats(input, options?): ThreatScanResult`
 
-- Returns `{ isSafe: boolean, threats: ThreatFinding[] }`.
+Evaluates only the rules that apply to the **sink the value is bound for**. Declaring
+the context is the package's primary false-positive control: a biography containing
+`C:\Windows`, a ticket containing `1=1`, and a question containing `eval(` are all
+ordinary text, and only become evidence when the value reaches a filesystem, SQL, or
+HTML sink.
 
-| Config Option | Type | Default | Description |
-|---------------|------|---------|-------------|
-| `checkXSS` | `boolean` | `true` | Detect script injection, event handlers |
-| `checkSQLInjection` | `boolean` | `true` | Detect UNION, DROP, stacked queries |
-| `checkNoSQLInjection` | `boolean` | `true` | Detect MongoDB operators |
-| `checkCommandInjection` | `boolean` | `false` | Detect shell commands (can cause false positives) |
-| `checkPathTraversal` | `boolean` | `true` | Detect `../`, `%2e%2e`, null bytes |
-| `checkHomoglyphs` | `boolean` | `true` | Detect Unicode lookalike characters |
+```ts
+import { scanForThreats } from "@resq-systems/security/threats";
 
-#### `isSafeInput(input, config?): boolean`
+const result = scanForThreats(req.query.file ?? "", { contexts: ["filesystem"] });
 
-Quick check returning `true` if no threats are detected.
+if (result.verdict === "block") {
+  logger.warn("traversal attempt", { findings: result.findings });
+  return new Response("Bad request", { status: 400 });
+}
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `contexts` | `ThreatContext[]` | `["general_text"]` | Sinks the value reaches. The default enables only universal rules (bidi, invisible, control chars) |
+| `maxLength` | `number` | `100_000` | Truncation bound |
+| `scanVariants` | `boolean` | `true` | Also scan NFC, percent-decoded, and HTML-decoded forms |
+| `minSeverity` | `ThreatSeverity` | `"low"` | Drop findings below this severity |
+| `excludeRuleIds` | `string[]` | — | Silence individual rules. Prefer this to disabling a category |
+| `policy` | `ThreatPolicy` | `{ reviewAt: 4, blockAt: 8 }` | Score thresholds |
+
+Returns `{ isSafe, score, verdict, findings, types, truncated }`. Each finding carries
+`ruleId`, `type`, `severity`, `confidence`, `cwe`, `primaryControl`, `variant`,
+`matchedPattern`, `start`, and `end`.
+
+**Contexts:** `general_text`, `html`, `sql`, `nosql`, `shell`, `filesystem`, `url`,
+`url_parameter`, `http_header`, `jwt`, `identifier`, `object_merge`, `template`, `xml`,
+`ldap`, `xpath`, `spreadsheet`, `log`, `llm_prompt`.
+
+Two draw deliberately fine distinctions. `url_parameter` is a *single value* about to be
+concatenated into a query string, where `&role=` is an injected parameter — as opposed
+to `url`, where it is ordinary grammar. `jwt` is scoped to the token itself; to check a
+`kid` or `jku` claim, extract it and declare *its* real sink (`filesystem`, `sql`,
+`url`), which the existing rules already cover.
+
+**Categories:** `xss`, `sql_injection`, `nosql_injection`, `command_injection`,
+`path_traversal`, `prototype_pollution`, `homoglyph`, `header_injection`,
+`ldap_injection`, `xpath_injection`, `xml_injection`, `template_injection`,
+`file_inclusion`, `ssrf`, `formula_injection`, `log_injection`, `prompt_injection`,
+`parameter_pollution`, `credential_exposure`, `jwt_tampering`, `resource_abuse`.
+
+`credential_exposure` runs the opposite way to every other category: it detects the
+application's own secret *leaving* — in a URL it is about to fetch, or a line it is
+about to log — so a finding usually means your code is at fault, not the submitter's.
+
+**Canonicalization.** Each scan evaluates the raw string plus whichever of `nfc`,
+`nfkc`, `percent_decoded`, and `html_decoded` differ from it, and the finding records
+which one matched. `nfkc` matters more than it sounds: NFC is a documented no-op on
+compatibility characters, so before it was added, fullwidth `．．／．．／etc／passwd` and
+`＜script＞` bypassed every signature in the catalog.
+
+#### Scoring
+
+Any individual signature produces false positives, so a single low-confidence hit
+raises a signal rather than rejecting a submission. Score is
+`severityWeight x confidenceMultiplier`, counted once per rule:
+
+| Severity | Weight | Confidence | Multiplier |
+|----------|--------|------------|------------|
+| `low` | 1 | `low` | 0.5 |
+| `medium` | 2 | `medium` | 1 |
+| `high` | 4 | `high` | 1.5 |
+| `critical` | 8 | | |
+
+`score < 4` is `allow`, `< 8` is `review`, `>= 8` is `block`.
+
+Helpers: `calculateThreatScore`, `verdictForScore`, `scoreForFinding`,
+`summarizeByType`, `THREAT_RULES`, `getRulesForContexts`, `buildInputVariants`.
 
 #### Individual Detectors
 
-Each returns `ThreatFinding[]`:
+Thin wrappers that scan one context and return at most one `ThreatFinding`:
 
-| Function | Detects |
+| Function | Context | Detects |
+|----------|---------|---------|
+| `containsXSSPatterns(input)` | `html` | Script tags, event handlers, `javascript:` URIs, `eval()` |
+| `containsPrototypePollution(input)` | `object_merge` | `__proto__`, `constructor.prototype` as property paths |
+| `containsSQLInjection(input)` | `sql` | UNION SELECT, DROP TABLE, quoted tautologies, SLEEP, stacked queries |
+| `containsNoSQLInjection(input)` | `nosql` | MongoDB operators (`$gt`, `$where`, `$function`) |
+| `containsCommandInjection(input)` | `shell` | Command substitution, piped shells, chained commands |
+| `containsPathTraversal(input)` | `filesystem` | Directory traversal, NUL bytes, sensitive paths |
+| `containsHomoglyphs(input)` | `identifier` | UTS #39 mixed-script and bidirectional spoofing |
+
+### Unicode Identifier Security (`unicode/`)
+
+Scope these to **protected identifiers** — usernames, domains, org names, package
+names. UTS #39 warns that broad confusable detection flags many legitimate strings, so
+do not run them on prose or on people's names. `containsBidiControls` is the exception
+and is safe anywhere.
+
+```ts
+import { analyzeIdentifier } from "@resq-systems/security/unicode";
+
+const candidate = analyzeIdentifier(requestedUsername);
+if (await skeletonIndex.has(candidate.skeleton)) {
+  return { error: "That name is too similar to an existing account" };
+}
+// Store `candidate.original` for display, index `candidate.skeleton`.
+```
+
+| Function | Purpose |
 |----------|---------|
-| `containsXSSPatterns(input)` | Script tags, event handlers, `javascript:` URIs, `eval()` |
-| `containsSQLInjection(input)` | UNION SELECT, DROP TABLE, `1=1`, SLEEP, stacked queries |
-| `containsNoSQLInjection(input)` | MongoDB operators (`$gt`, `$where`, `$function`) |
-| `containsCommandInjection(input)` | Command substitution, piped shells |
-| `containsPathTraversal(input)` | Directory traversal, null bytes, sensitive paths |
-| `containsHomoglyphs(input)` | Cyrillic/Greek lookalike characters |
+| `analyzeIdentifier(input)` | `{ original, normalized, skeleton, scripts, isMixedScript, restrictionLevel, hasInvisibleCharacters, hasBidiControls }` |
+| `getSkeleton(input)` | Opaque confusable comparison key. Compare it, never display it |
+| `areConfusable(a, b)` | Whether two distinct strings share a skeleton |
+| `getScripts(input)` | Scripts present, script-neutral characters excluded |
+| `getRestrictionLevel(input)` | `ascii_only`, `single_script`, `highly_restrictive`, `moderately_restrictive`, `minimally_restrictive`, `unrestricted` |
+| `isSafeIdentifier(input, max?)` | Policy check, default max `moderately_restrictive` |
+| `containsBidiControls(input)` | Trojan Source (CVE-2021-42574). Hostile in any field |
+| `stripInvisibleCharacters(input)` | Remove zero-width and bidi code points |
 
-#### `sanitizeForDisplay(input): string`
+`Ольга Иванова`, `東京タワー`, and `서울-Seoul` pass. `pаypal` (with a Cyrillic `а`) and
+a filename carrying U+202E do not.
 
-Escapes HTML entities (`<`, `>`, `&`, `"`, `'`, `/`) for safe rendering.
+### Path Containment (`paths.ts`) — Node only
 
-#### `normalizeUnicode(input): string`
+The prevention half of CWE-22. Not exported from the package root, since it imports
+`node:path`.
 
-Normalizes to NFC form and replaces known homoglyphs with ASCII equivalents.
+```ts
+import { resolveContainedPath } from "@resq-systems/security/paths";
+
+const target = resolveContainedPath("/srv/uploads", req.body.filename);
+if (target === null) return new Response("Bad request", { status: 400 });
+```
+
+| Function | Purpose |
+|----------|---------|
+| `resolveContainedPath(base, untrusted, opts?)` | Resolved absolute path, or `null` when it escapes the base |
+| `isPathContained(base, candidate, opts?)` | Boolean form |
+| `sanitizeFilename(name, fallback?)` | Reduce to one safe path segment. Hygiene, not the control |
+
+Performs **no** filesystem I/O, so it cannot see symlinks. When the target may exist and
+may be a link, `realpath` both sides and re-check.
+
+### Preventive Controls (`controls/`) — Node only
+
+Some weaknesses cannot be detected, only prevented. A forged CSRF request is
+byte-identical to a genuine one; `Origin: https://evil.example` is shaped exactly like a
+legitimate origin; an upload's danger lies in three values *disagreeing*. Each of these
+is a decision function that fails closed.
+
+```ts
+import {
+  assertUploadType,
+  isAllowedOrigin,
+  verifyCsrfToken,
+} from "@resq-systems/security/controls";
+
+if (!isAllowedOrigin(req.headers.origin ?? "", ALLOWED_ORIGINS)) return forbid();
+
+const csrf = verifyCsrfToken(req.headers["x-csrf-token"], SECRET, {
+  sessionId: session.id,
+});
+if (!csrf.valid) return forbid();
+```
+
+| Function | Prevents |
+|----------|----------|
+| `isAllowedOrigin(origin, allowlist, opts?)` | CORS misconfiguration. Exact match only — no prefix, suffix, or substring path exists through it. `null` and `*` refused; subdomain matching is opt-in and label-boundary anchored |
+| `normalizeOrigin(origin)` | Returns the canonical origin, or `null` when the value carries a path, query, or userinfo |
+| `checkCorsResponsePolicy(policy)` | The credentialed-wildcard mistake (`ACAO: *` with `ACAC: true`) |
+| `createCsrfToken(secret, opts?)` / `verifyCsrfToken(token, secret, opts?)` | CSRF. Signed double-submit: HMAC-SHA256 over length-prefixed fields, constant-time length-blind comparison, signed expiry, optional session binding |
+| `assertUploadType(candidate)` | Unrestricted upload. Requires the declared `Content-Type`, the filename extension, and the magic bytes to agree on one allowlisted type |
+| `detectFileSignature(headBytes)` | Identifies a file from its leading bytes |
+| `validateJsonpCallback(name)` | XSSI. A JSONP callback name is concatenated into executable JavaScript, so an allowlist is the only safe validation |
+| `analyzeQueryComplexity(query, limits?)` | Query-depth denial of service. Computed depth/alias/field bound, string- and comment-aware |
+| `analyzeGraphQLRequest(body, limits?)` | Batched-request denial of service (API4). `analyzeQueryComplexity` measures one document; on an array batch the documented `req.body.query` call reads `undefined` and passes 250 operations. Counts top-level operations across the batch |
+| `resolveRedirectTarget(target, opts?)` | Open redirect (CWE-601). Allowlist: a same-site path, or an absolute URL whose host you named. Tests for control characters *before* testing for an authority, because tab/LF/CR escape the origin and the authority test cannot see them |
+| `classifyAddress(host)` / `isPubliclyRoutableAddress(host)` | Classifies an IP literal against the IANA special-purpose registries, unwrapping IPv4-mapped IPv6. Returns `null` for a name — *unknown*, not safe |
+| `assertOutboundUrl(url, policy?)` | SSRF. Default-deny: with no allowlist and `allowPublicHosts` off, even a hostname is refused, because nothing here can know what DNS will answer. A pre-connection check — redirects need re-validation per hop and egress control remains the durable fix |
+| `checkJsonPayloadLimits(text, limits?)` | Unrestricted resource consumption (API4). One linear pass over the JSON *text* — depth, container sizes, string lengths — before `JSON.parse` allocates the graph. Reports rather than enforces |
+
+`sanitizeHtml` also registers a DOMPurify hook adding `rel="noopener noreferrer"` to
+links with a non-self `target`, preventing reverse tabnabbing. It is a no-op under
+DOMPurify's default config, which strips `target` — it matters when you opt back in with
+`ADD_ATTR: ["target"]`.
+
+**Each of these is one layer.** CSRF tokens need `SameSite` cookies and origin validation
+beside them; `assertUploadType` reads only the head, so store uploads outside the webroot
+and serve them from a separate origin with `Content-Disposition: attachment`. See
+[WSTG-COVERAGE.md](WSTG-COVERAGE.md) §3 for what each one does *not* cover.
+
+### Output Encoding and Field Validators (`validators.ts`)
+
+Output encoding is context-dependent — HTML text, attributes, URLs, JS strings, and CSS
+each have different rules, and no single function is correct for all of them.
+
+| Function | Use for |
+|----------|---------|
+| `escapeHtmlText(input)` | Element text and fully quoted attribute values |
+| `escapeHtmlAttribute(input)` | Attribute values, including unquoted ones |
+| `sanitizeUrl(url)` | URLs (see Sanitization below) |
+| `sanitizeHtml(html)` | Values meant to *be* markup — DOMPurify |
+
+There is deliberately no JavaScript- or CSS-context escaper: hand-rolled versions are
+reliably wrong, and the fix is to stop interpolating untrusted values into script and
+style source.
+
+#### `validatePersonName(input): boolean`
+
+Allowlist of what a name is made of — letters in any script, combining marks,
+apostrophes, hyphens, periods, spaces — plus a length bound and a bidi check. It does
+**not** run SQL, path-traversal, or confusable detectors: a name is not a query, a path,
+or a protected identifier. Encode the value at whatever sink it reaches.
 
 #### `validateSafeText(input): boolean`
 
-Validates text is safe from all attack patterns. For use as a schema refinement.
-
-#### `validateSafeName(input): boolean`
-
-Validates a name field -- allows international characters but blocks injection patterns.
+Schema-refinement helper over `isSafeInput` with default config.
 
 #### `validateSafeEmail(input): boolean`
 
-Validates email format and checks for injection patterns.
+RFC-shaped format check plus UTS #39 analysis of the **domain**, where a mixed-script
+host is the IDN homograph attack.
 
 #### `getThreatErrorMessage(result): string`
 
-Returns a human-readable error message for a threat detection result.
+User-facing message for the first finding only — enumerating every category that fired
+leaks the rule set to whoever is probing it. Log `result.findings` server-side instead.
+
+#### Deprecated
+
+| Deprecated | Replacement |
+|------------|-------------|
+| `detectThreatPatterns(input, config)` | `scanForThreats(input, { contexts })` |
+| `ThreatDetectionConfig` | `ThreatScanOptions.contexts` |
+| `sanitizeForDisplay(input)` | `escapeHtmlText(input)` |
+| `normalizeUnicode(input)` | `getSkeleton` / `analyzeIdentifier` |
+| `validateSafeName(input)` | `validatePersonName(input)` |
+
+`isSafeInput` and the legacy toggles still work; each flag maps onto a context
+(`checkXSS` to `html`, `checkSQLInjection` to `sql`, `checkNoSQLInjection` to `nosql`,
+`checkCommandInjection` to `shell`, `checkPathTraversal` to `filesystem`).
 
 ### Sanitization (`sanitize.ts`)
 
