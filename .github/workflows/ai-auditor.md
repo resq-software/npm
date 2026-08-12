@@ -11,8 +11,15 @@ permissions:
   issues: read
   pull-requests: read
 
-# AI engine - Gemini (free Google AI Studio tier; avoids Copilot utility-model rate limits)
-engine: gemini
+# AI engine - Gemini (free Google AI Studio tier; avoids Copilot utility-model rate limits).
+# The model is pinned deliberately. Left unpinned, the router resolves the proxy's
+# `gemini-3.1-flash` alias through the glob `gemini-3.1*flash*`, which also matches
+# `gemini-3.1-flash-tts-preview` — a text-to-speech model carrying no entry in the
+# AI-credits pricing table. Every call is then rejected `unknown_model_ai_credits` and
+# the audit exits 144 having read nothing.
+engine:
+  id: gemini
+  model: gemini-2.5-flash
 
 # Network access
 network: defaults
