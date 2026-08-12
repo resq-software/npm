@@ -19,7 +19,7 @@ permissions:
 # the audit exits 144 having read nothing.
 engine:
   id: gemini
-  model: gemini-2.5-flash
+  model: gemini-2.5-pro
 
 # Network access
 network: defaults
