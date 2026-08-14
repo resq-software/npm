@@ -1,4 +1,20 @@
+# @resq-systems/types
+
 <!--
+  Copyright 2026 ResQ Systems, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
 
 ## 0.2.0
 ### Minor Changes
@@ -63,22 +79,6 @@
   **A new `Equivalence` or `Order` export must ship law tests.** That rule is now recorded in `packages/types/AGENTS.md` rather than left as folklore, because the compiler enforces none of it: any `(a, b) => boolean` is assignable to `Equivalence<A>` and any `(a, b) => Ordering` to `Order<A>`, so a relation that is neither symmetric nor transitive typechecks perfectly. `equivalence.test.ts` runs `expectLawful` — reflexivity, symmetry and transitivity over every pair and triple of a sample matrix — and `order.test.ts` runs `assertOrderLaws` plus `assertSortsConsistently`. Combinators must be shown to *preserve* the laws, not merely to hold them on one example, and the matrix must include the adversarial values: `NaN`, `-0`, empty collections, and non-enumerable own properties, which is the case that `recordOf` got wrong. A deliberate violation gets a named test pinning it and a **Gotchas** block; `eqStrict`'s reflexivity break at `NaN` is the model.
 
   **Documentation conventions.** Every export carries `@category` — drawn from a closed twelve-value vocabulary, where the guards/predicates split is decided purely by whether the return type is `value is T` or plain `boolean` — and `@since 0.2.0`, the version at which these modules first become reachable from npm. Each doc block opens with a one-line summary and a mandatory **When to use**, adding **Details** only where the signature does not tell the whole story and **Gotchas** only where behavior will actively surprise.
-  Copyright 2026 ResQ
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
-
-# @resq-systems/types
 
 ## 0.1.0
 
