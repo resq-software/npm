@@ -15,7 +15,7 @@
 		"@resq-systems/rate-limiting": "workspace:*",
 		"@resq-systems/security": "workspace:*",
 		"@resq-systems/ui": "workspace:*",
-		"effect": "4.0.0-beta.103",
+		"effect": "4.0.0-beta.107",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
 		"tailwindcss": "^4.1.0"
