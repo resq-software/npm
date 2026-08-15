@@ -49,10 +49,16 @@ staged-change checks to `resq`. If the CLI is unavailable, the hook warns and
 skips these local checks.
 That scanner is local-only and reads [`.secretsignore`](../.secretsignore),
 which is *its* allowlist — not CI's, and not GitHub's. GitHub's own exclusions
-would go in `.github/secret_scanning.yml`, which this repo does not need today:
-the scanner reports no alerts, since the credential-shaped strings in
-`packages/security/tests/fixtures/corpora.ts` are the vendors' published
-placeholders and are recognised as such.
+would go in `.github/secret_scanning.yml`, which this repo does not need today —
+GitHub's scanner reports no alerts here.
+
+Note what `.secretsignore` does and does not buy. It excludes
+`packages/security/tests/fixtures/corpora.ts` **by path**, so the local scanner
+does not read that file at all. The credential-shaped strings in it are the
+vendors' published placeholders, which is what makes the exclusion safe to
+grant — but nothing inspects them, and a real credential committed to that path
+would pass the local scan unnoticed. GitHub's secret scanning and push
+protection still cover it, and they are what to rely on there.
 
 `.secretsignore` therefore holds paths, not fingerprints, and is not
 interchangeable with a `.gitleaksignore`.
