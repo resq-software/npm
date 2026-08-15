@@ -44,8 +44,9 @@ Gitleaks is deliberately **off**. It needs a `GITLEAKS_LICENSE` even for public
 org repos, and it would duplicate the native scanning already running here. The
 switch lives in the reusable workflow if that trade-off ever changes.
 
-**Before CI.** The `resq` pre-commit hook runs `resq secrets` over staged
-changes, so a credential is caught at commit time rather than after a push.
+**Before CI.** When the `resq` CLI is installed, the pre-commit hook delegates
+staged-change checks to `resq`. If the CLI is unavailable, the hook warns and
+skips these local checks.
 That scanner is local-only and reads [`.secretsignore`](../.secretsignore),
 which is *its* allowlist — not CI's, and not GitHub's. GitHub's own exclusions
 would go in `.github/secret_scanning.yml`, which this repo does not need today:
