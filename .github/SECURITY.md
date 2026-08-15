@@ -48,9 +48,10 @@ switch lives in the reusable workflow if that trade-off ever changes.
 staged-change checks to `resq`. If the CLI is unavailable, the hook warns and
 skips these local checks.
 That scanner is local-only and reads [`.secretsignore`](../.secretsignore),
-which is *its* allowlist — not CI's, and not GitHub's. GitHub's own exclusions
-would go in `.github/secret_scanning.yml`, which this repo does not need today —
-GitHub's scanner reports no alerts here.
+which is *its* allowlist — not CI's, and not GitHub's. The two exclusion
+mechanisms are separate by design: GitHub's live in
+`.github/secret_scanning.yml`, which this repo does not define, so nothing is
+excluded from GitHub's scanning or push protection.
 
 Note what `.secretsignore` does and does not buy. It excludes
 `packages/security/tests/fixtures/corpora.ts` **by path**, so the local scanner
