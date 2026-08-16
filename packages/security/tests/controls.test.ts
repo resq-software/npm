@@ -906,7 +906,63 @@ describe("analyzeGraphQLRequest", () => {
 			for (let level = 0; level < 50_000; level++) body = [body];
 
 			expect(() => analyzeGraphQLRequest(body)).not.toThrow();
-			expect(analyzeGraphQLRequest(body)).toMatchObject({ documents: 0, withinLimits: true });
+			// Not throwing is the contract; passing is not. The walk stopped early, so the
+			// zero means "nothing seen", not "nothing there".
+			expect(analyzeGraphQLRequest(body)).toMatchObject({
+				documents: 0,
+				withinLimits: false,
+				exceeded: ["bodyDepth"],
+			});
+		});
+
+		it("does not let nesting hide a batch that would otherwise be blocked", () => {
+			// Arrange: the exact batch the limiter catches head-on, wrapped past the walk
+			// bound. Extraction finds nothing, and "nothing found" must not read as "small".
+			const batch = Array.from({ length: 150 }, (_, i) => ({
+				query: `query Q${i} { user { id } }`,
+			}));
+			let wrapped: unknown = batch;
+			for (let level = 0; level < 10; level++) wrapped = [wrapped];
+
+			// Act / Assert: blocked either way, for different stated reasons.
+			const bare = analyzeGraphQLRequest(batch);
+			expect(bare).toMatchObject({ operations: 150, withinLimits: false });
+			expect(bare.exceeded).toEqual(expect.arrayContaining(["documents", "operations"]));
+
+			const hidden = analyzeGraphQLRequest(wrapped);
+			expect(hidden.withinLimits).toBe(false);
+			expect(hidden.exceeded).toContain("bodyDepth");
+
+			// And the same payload handed over as raw text rather than parsed.
+			const asText = analyzeGraphQLRequest(JSON.stringify(wrapped));
+			expect(asText.withinLimits).toBe(false);
+			expect(asText.exceeded).toContain("bodyDepth");
+		});
+
+		it("rejects a bracket run prefixed to a real batch rather than counting it as one document", () => {
+			// Arrange: `JSON.parse` fails on this, and treating the leftovers as a single bare
+			// document reported 150 operations as 1 — undercounting by whatever the attacker
+			// chose. No GraphQL document starts with `[`, so this can only be an unreadable batch.
+			const batch = JSON.stringify(
+				Array.from({ length: 150 }, (_, i) => ({ query: `query Q${i} { user { id } }` })),
+			);
+
+			// Act
+			const analysis = analyzeGraphQLRequest("[".repeat(2500) + batch);
+
+			// Assert
+			expect(analysis.withinLimits).toBe(false);
+			expect(analysis.exceeded).toContain("malformedBody");
+			expect(analysis.documents).toBe(0);
+		});
+
+		it("still treats anonymous shorthand as a document, since it starts with a brace", () => {
+			// The `{`-prefixed sibling of the case above: not JSON, but perfectly good GraphQL,
+			// so it must keep falling through as a document rather than being called malformed.
+			const analysis = analyzeGraphQLRequest("{ user { id } }");
+			expect(analysis.documents).toBe(1);
+			expect(analysis.operations).toBe(1);
+			expect(analysis.exceeded).not.toContain("malformedBody");
 		});
 
 		it("still reads a document through ordinary batch nesting", () => {
