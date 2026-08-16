@@ -32,9 +32,18 @@ network: defaults
 # `cancel-in-progress: false` costs nothing here because the trigger is
 # `pull_request: [opened]`, not `synchronize`: pushing more commits to a PR does
 # not re-fire this workflow, so there is no superseded run worth cancelling.
+#
+# `queue: max` is required, not optional, once the group is shared. The default
+# is `queue: single`, which keeps one pending run and *replaces* any older
+# pending one — so a burst of PRs would serialize down to one running plus one
+# waiting and the rest would be dropped without ever being audited. `max` keeps
+# up to 100 pending runs in FIFO order instead. Past 100 runs are still dropped,
+# which is an acceptable bound here: it would take 100 pull requests opened
+# inside a single audit's runtime to reach it.
 concurrency:
   group: "gh-aw-${{ github.workflow }}"
   cancel-in-progress: false
+  queue: max
 
 # Outputs - what APIs and tools can the AI use?
 safe-outputs:
