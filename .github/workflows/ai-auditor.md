@@ -22,6 +22,20 @@ engine:
 # Network access
 network: defaults
 
+# Concurrency - one shared group for the whole repository, so every run of this
+# workflow serializes. The compiler's default group is keyed by PR number, which
+# puts audits of different PRs in different groups: they then read the shared
+# daily AI-credit counter before any of them has written its own consumption, and
+# the budget is overshot by however many happened to start together. Opening
+# several PRs at once — a Dependabot batch, say — is enough to trigger it.
+#
+# `cancel-in-progress: false` costs nothing here because the trigger is
+# `pull_request: [opened]`, not `synchronize`: pushing more commits to a PR does
+# not re-fire this workflow, so there is no superseded run worth cancelling.
+concurrency:
+  group: "gh-aw-${{ github.workflow }}"
+  cancel-in-progress: false
+
 # Outputs - what APIs and tools can the AI use?
 safe-outputs:
   report-failure-as-issue: false
