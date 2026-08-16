@@ -15,10 +15,9 @@ permissions:
 # The model is pinned: left unpinned the proxy steers to whatever its alias globs
 # resolve to, which since 2026-08-10 has been `gemini-3.1-flash-tts-preview` — a
 # text-to-speech model with no entry in the AI-credits pricing table.
+model: gemini-2.5-pro
 engine:
   id: gemini
-  model: gemini-2.5-pro
-
 # Network access
 network: defaults
 
