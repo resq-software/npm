@@ -333,14 +333,36 @@ export function generate(options: GenerateOptions): GenerationResult {
  * @param repoRoot - Workspace root, used to render drifted paths.
  * @returns Repo-relative paths that are missing, stale, or orphaned. Empty means in sync.
  */
+/**
+ * Read a file, treating "not there" as a value rather than an error.
+ *
+ * Deliberately not `existsSync` followed by `readFileSync`. Those are two syscalls with
+ * a gap between them, and the file can be gone by the second one — `--check` runs in CI
+ * beside jobs that write into the same tree, which is exactly when a build script should
+ * not die on `ENOENT`. Asking once and handling the answer removes the window entirely.
+ *
+ * @param absolutePath - File to read.
+ * @returns The contents, or `undefined` when the file does not exist.
+ * @throws Any read error other than `ENOENT`, which stays fatal — an unreadable file is
+ *   a real problem and must not be reported as an absent one.
+ */
+function readIfPresent(absolutePath: string): string | undefined {
+	try {
+		return readFileSync(absolutePath, "utf8");
+	} catch (error) {
+		if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+			return undefined;
+		}
+		throw error;
+	}
+}
+
 export function diffAgainstDisk(result: GenerationResult, repoRoot: string): readonly string[] {
 	const drifted: string[] = [];
 	const expected = new Set(result.files.map((file) => file.absolutePath));
 
 	for (const file of result.files) {
-		const current = existsSync(file.absolutePath)
-			? readFileSync(file.absolutePath, "utf8")
-			: undefined;
+		const current = readIfPresent(file.absolutePath);
 		if (current !== file.content) {
 			drifted.push(file.relativePath);
 		}
@@ -367,9 +389,7 @@ export function writeToDisk(result: GenerationResult, repoRoot: string): readonl
 	const expected = new Set(result.files.map((file) => file.absolutePath));
 
 	for (const file of result.files) {
-		const current = existsSync(file.absolutePath)
-			? readFileSync(file.absolutePath, "utf8")
-			: undefined;
+		const current = readIfPresent(file.absolutePath);
 		if (current === file.content) {
 			continue;
 		}
