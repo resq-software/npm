@@ -263,9 +263,21 @@ export interface GraphQLRequestAnalysis {
 	readonly operations: number;
 	/** The highest per-document complexity in the batch. */
 	readonly worst: QueryComplexity;
-	/** `true` when every limit is satisfied. */
+	/** `true` when every limit is satisfied *and* the body was fully readable. */
 	readonly withinLimits: boolean;
-	/** Names of the limits exceeded; empty when `withinLimits`. */
+	/**
+	 * Names of the limits exceeded; empty when `withinLimits`.
+	 *
+	 * Per-document names come from {@link QueryComplexity}: `depth`, `aliases`, `fields`,
+	 * `length`. Batch-level names are `documents` and `operations`. Two more report that
+	 * the body could not be read rather than that a bound was passed, and both mean the
+	 * other counts are lower bounds rather than measurements:
+	 *
+	 * - `bodyDepth` — nesting exceeded the internal walk limit, so documents past it were
+	 *   never seen.
+	 * - `malformedBody` — a `[`-prefixed string was not valid JSON, so a batch could not
+	 *   be read at all.
+	 */
 	readonly exceeded: readonly string[];
 }
 
@@ -372,33 +384,73 @@ const MAX_BODY_DEPTH = 8;
 /**
  * Extract the GraphQL documents from a request body of any accepted shape.
  *
+ * Reports whether the walk completed, because both ways of stopping early —
+ * {@link MAX_BODY_DEPTH}, and batch text that will not parse — otherwise return an
+ * empty or short list that reads as an innocent request. Measured against this
+ * package before the flags existed: 150 operations wrapped ten arrays deep extracted
+ * `0` documents and satisfied every limit, and `"[".repeat(2500)` prefixed to a real
+ * 150-operation batch extracted `1`. Both now surface as `exceeded` entries.
+ *
  * @param body - Parsed body, or the raw JSON text.
- * @param depth - Current nesting level; callers use the default.
- * @returns Every `query` string found, in order.
+ * @returns The documents found, plus the two early-stop flags.
  */
-function documentsFrom(body: unknown, depth = 0): string[] {
-	if (depth > MAX_BODY_DEPTH) return [];
+interface Extraction {
+	/** Every `query` string found, in order. */
+	readonly documents: readonly string[];
+	/** Set when the walk hit {@link MAX_BODY_DEPTH} and stopped descending. */
+	readonly tooDeep: boolean;
+	/** Set when a `[`-prefixed string was not valid JSON, so a batch could not be read. */
+	readonly malformed: boolean;
+}
 
-	if (typeof body === "string") {
-		const trimmed = body.trim();
-		if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
-			try {
-				return documentsFrom(JSON.parse(trimmed) as unknown, depth + 1);
-			} catch {
-				// Not JSON after all — fall through and treat it as a bare document.
-			}
+function documentsFrom(body: unknown): Extraction {
+	const documents: string[] = [];
+	let tooDeep = false;
+	let malformed = false;
+
+	// A local walk rather than a recursive return, so accumulating a large batch stays
+	// linear instead of re-copying the array at every level.
+	const walk = (value: unknown, depth: number): void => {
+		if (depth > MAX_BODY_DEPTH) {
+			tooDeep = true;
+			return;
 		}
-		return [body];
-	}
 
-	if (Array.isArray(body)) return body.flatMap((entry) => documentsFrom(entry, depth + 1));
+		if (typeof value === "string") {
+			const trimmed = value.trim();
+			if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+				try {
+					walk(JSON.parse(trimmed) as unknown, depth + 1);
+					return;
+				} catch {
+					// A `{`-prefixed string that is not JSON is ordinary anonymous-shorthand
+					// GraphQL — `{ user { id } }` — so it falls through as a document. A
+					// `[`-prefixed one cannot be: no GraphQL document starts with `[`, so this
+					// is a batch we failed to read, and calling it "one document" undercounts
+					// it to exactly the degree an attacker chooses.
+					if (trimmed.startsWith("[")) {
+						malformed = true;
+						return;
+					}
+				}
+			}
+			documents.push(value);
+			return;
+		}
 
-	if (typeof body === "object" && body !== null) {
-		const query = (body as { query?: unknown }).query;
-		return typeof query === "string" ? [query] : [];
-	}
+		if (Array.isArray(value)) {
+			for (const entry of value) walk(entry, depth + 1);
+			return;
+		}
 
-	return [];
+		if (typeof value === "object" && value !== null) {
+			const query = (value as { query?: unknown }).query;
+			if (typeof query === "string") documents.push(query);
+		}
+	};
+
+	walk(body, 0);
+	return { documents, tooDeep, malformed };
 }
 
 /**
@@ -441,7 +493,7 @@ export function analyzeGraphQLRequest(
 ): GraphQLRequestAnalysis {
 	const { maxOperations, maxDocuments } = { ...DEFAULT_REQUEST_LIMITS, ...limits };
 
-	const documents = documentsFrom(body);
+	const { documents, tooDeep, malformed } = documentsFrom(body);
 	const measured = documents.map((document) => analyzeQueryComplexity(document, limits));
 	const operations = documents.reduce((total, document) => total + countOperations(document), 0);
 
@@ -468,6 +520,11 @@ export function analyzeGraphQLRequest(
 	const exceeded = [...worst.exceeded];
 	if (documents.length > maxDocuments) exceeded.push("documents");
 	if (operations > maxOperations) exceeded.push("operations");
+	// Fail closed. Everything above measures what was extracted, and these two say the
+	// extraction was incomplete — so the counts are lower bounds, not measurements, and
+	// reporting `withinLimits: true` off them would be asserting something never checked.
+	if (tooDeep) exceeded.push("bodyDepth");
+	if (malformed) exceeded.push("malformedBody");
 
 	return {
 		documents: documents.length,
