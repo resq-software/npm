@@ -140,9 +140,12 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/prepare
+      # Repo-wide, not packages/ui. Scoped to one package this missed every root file
+      # and every other package, which is what let a formatting violation in
+      # .github/aw/actions-lock.json reach the Release job's push and block a release.
+      # Lint is the right place for that to surface; a pre-push hook is not.
       - name: Biome
         run: bunx biome ci .
-        working-directory: packages/ui
       - name: "No workspace: protocol in published deps"
         run: node scripts/check-no-workspace-protocol.mjs
 
