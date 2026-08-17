@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.2.0
+
+### Minor Changes
+
+- [#277](https://github.com/resq-software/npm/pull/277) [`de55a4a`](https://github.com/resq-software/npm/commit/de55a4a95ac495ee8dd7f654e27869536661c456) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Export the `Coordinates2D`, `Coordinates3D` and `PointFor` type names
+
+  `Distance`'s methods take these shapes, so callers were already passing them — but the names were never re-exported from the barrel, and `distance.ts` has no subpath entry. A consumer could construct a value that satisfied `Distance`, and could not annotate the variable holding it or type a helper that forwarded one.
+
+  Found by type-checking `examples/dsa-pathfinding`, which imports `Coordinates2D` and had been failing to compile unnoticed: examples declare no build or test script, so the workspace-wide filters skipped them and nothing ever checked them. CI now type-checks the examples.
+
+  Additive and type-only. `export type` erases, so `@resq-systems/dsa` remains zero-runtime-dependency.
+
 <!--
   Copyright 2026 ResQ
 
@@ -17,6 +29,7 @@
 -->
 
 ## 2.1.0
+
 ### Minor Changes
 
 - [#202](https://github.com/resq-software/npm/pull/202) [`f2af02b`](https://github.com/resq-software/npm/commit/f2af02b534e9cf86a940fad487032d5453a789ce) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add `MultiMap` to `@resq-systems/dsa` and `ManualPromise`/`signalToPromise`/`Semaphore` async primitives to `@resq-systems/helpers`, adapted from Microsoft Playwright with attribution
@@ -26,11 +39,13 @@
 - [#195](https://github.com/resq-software/npm/pull/195) [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Replace `globalThis as any` process access in reordering with a typed narrow (zero `any`)
 
 ## 2.0.0
+
 ### Major Changes
 
 - [#171](https://github.com/resq-software/npm/pull/171) [`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add branded Probability/Latitude/Longitude domains at numeric boundaries and a typed Graph<T, M> metadata parameter
 
 ## 1.0.0
+
 ### Major Changes
 
 - [#168](https://github.com/resq-software/npm/pull/168) [`1d0f73c`](https://github.com/resq-software/npm/commit/1d0f73c6b8dbb5a09e3260ad78ab1fd7ac5c4636) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Tighten Distance.calculate to derive point shape from the formula and require compareFn for non-comparable PriorityQueue element types
@@ -48,6 +63,7 @@
   ("ResQ Tactical OS") are unchanged.
 
 ## 0.2.0
+
 ### Minor Changes
 
 - [#152](https://github.com/resq-software/npm/pull/152) [`23ce8e3`](https://github.com/resq-software/npm/commit/23ce8e3f59c54a010bff42b3b2a76b6df0b2dc99) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Resolve security, algorithmic consistency, and memory leak issues:
@@ -86,6 +102,7 @@
   No runtime or API change in any package: exports, behavior, and types are untouched.
 
 ## 0.1.1
+
 ### Patch Changes
 
 - [#141](https://github.com/resq-software/npm/pull/141) [`2a3c926`](https://github.com/resq-software/npm/commit/2a3c926fc6fb88cae74984f637f99cf37de5da71) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Adopt effect 4.0.0-beta.93: bump the pinned dev version and the root effect override from beta.50, validated against the full build and test suite
