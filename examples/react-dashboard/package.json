@@ -3,7 +3,8 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "vite"
+		"dev": "vite",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@resq-systems/analytics": "workspace:*",
@@ -14,6 +15,7 @@
 		"@resq-systems/logger": "workspace:*",
 		"@resq-systems/rate-limiting": "workspace:*",
 		"@resq-systems/security": "workspace:*",
+		"@resq-systems/types": "workspace:*",
 		"@resq-systems/ui": "workspace:*",
 		"effect": "4.0.0-beta.107",
 		"react": "^19.2.8",

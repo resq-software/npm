@@ -1,0 +1,16 @@
+{
+	"name": "@resq-systems/example-math-sketch",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"start": "bun run math-sketch.ts",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@resq-systems/types": "workspace:*"
+	},
+	"devDependencies": {
+		"typescript": "^7.0.2"
+	}
+}

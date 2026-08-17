@@ -66,6 +66,9 @@ import { initAnalytics, pageview, track } from "@resq-systems/analytics";
 // ── @resq-systems/constants — Shared oklch design tokens ────────────
 import { colors, radii } from "@resq-systems/constants";
 
+// ── @resq-systems/types — Total orderings that interop with dsa ─────
+import { mapInput, orderNumber } from "@resq-systems/types/order";
+
 import { useEffect, useMemo, useState } from "react";
 
 // @resq-systems/analytics — augment the event registry once per app so
@@ -192,8 +195,18 @@ export function App() {
 
 	// ── @resq-systems/dsa — PriorityQueue for mission priority ────────
 	const missionQueue = useMemo(() => {
+		// @resq-systems/types — `Order<A>` is `(a, b) => -1 | 0 | 1` and dsa's
+		// `CompareFn<T>` is `(a, b) => number`, so an Order drops straight into
+		// PriorityQueue with no dependency edge from dsa to types. dsa is
+		// zero-runtime-dep and has to stay that way; the two interoperate structurally.
+		//
+		// `a.urgency - b.urgency` also works, and is exactly why `fromCompare` exists:
+		// subtraction yields NaN the moment a field is missing or non-numeric, and every
+		// comparison against NaN is false, so the heap mis-orders silently.
+		// `mapInput(orderNumber, …)` cannot produce NaN.
+		const byUrgency = mapInput(orderNumber, (m: { urgency: number }) => m.urgency);
 		const pq = new PriorityQueue<{ id: string; urgency: number; label: string }>({
-			compareFn: (a, b) => a.urgency - b.urgency,
+			compareFn: byUrgency,
 		});
 		pq.enqueue({ id: "DRN-003", urgency: 0, label: "CRITICAL — RTB low battery" });
 		pq.enqueue({ id: "DRN-005", urgency: 1, label: "HIGH — Thermal anomaly detected" });

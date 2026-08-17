@@ -22,6 +22,11 @@ jobs:
       packages: ${{ steps.detect.outputs.packages }}
       any: ${{ steps.detect.outputs.any }}
       ui: ${{ steps.detect.outputs.ui }}
+      # `any` is derived purely from packages/*, so a PR touching only examples/**
+      # leaves it false and every job gated on it skips — including the one meant to
+      # keep the examples compiling. Tracked separately so example-only changes are
+      # still checked.
+      examples: ${{ steps.detect.outputs.examples }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -119,6 +124,14 @@ jobs:
 
           echo "packages=$PACKAGES" >> "$GITHUB_OUTPUT"
           echo "any=$( [ "$PACKAGES" != '[]' ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
+
+          # Independent of $PACKAGES: an example-only PR changes no package, so `any`
+          # stays false and a job gated on it never runs.
+          if git diff --name-only "$BASE" HEAD -- 'examples/' | grep -q .; then
+            echo "examples=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "examples=false" >> "$GITHUB_OUTPUT"
+          fi
 
           if echo "$PACKAGES" | node -e "process.exit(JSON.parse(require('fs').readFileSync(0,'utf8')).includes('ui') ? 0 : 1)"; then
             echo "ui=true" >> "$GITHUB_OUTPUT"
@@ -223,6 +236,29 @@ jobs:
       - name: Type check
         run: bunx tsc --noEmit
         working-directory: packages/${{ matrix.package }}
+
+  # ── Examples ──────────────────────────────────────────────────────────
+  # The examples are workspace members but declared no build or test script, so
+  # `bun --filter '*' build|test` skipped them and nothing type-checked them. They
+  # were free to rot, and wiring this up immediately proved it: `dsa-pathfinding`
+  # imported `Coordinates2D`, a type `@resq-systems/dsa` had never exported.
+  examples:
+    name: Examples
+    needs: detect
+    # Either trigger: a package change can break an example that consumes it, and an
+    # example-only change is the case this job exists for. Gating on `any` alone would
+    # have skipped exactly the second one.
+    if: needs.detect.outputs.any == 'true' || needs.detect.outputs.examples == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/prepare
+      - name: Build workspace dependencies
+        run: bun run build
+      - name: Type check examples
+        run: bun --filter './examples/*' typecheck
 
   # ── Changeset status (PR only) ────────────────────────────────────────
 
@@ -391,6 +427,7 @@ jobs:
       - build
       - test
       - typecheck
+      - examples
       - changeset
       - storybook
       - knip

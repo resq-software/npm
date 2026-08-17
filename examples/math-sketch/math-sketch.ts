@@ -32,6 +32,8 @@
  * Run:  bun run examples/math-sketch/math-sketch.ts
  */
 
+import { matchTag } from "@resq-systems/types/union";
+
 // ---------- Values: the two domains ("sorts") + booleans for relations ----------
 type Value =
 	| { readonly sort: "num"; readonly value: number }
@@ -107,50 +109,61 @@ const relInstances: Partial<Record<RelKey, (a: Value, b: Value) => boolean>> = {
 // ---------- Evaluator: walks the AST, resolves overloads by sort ----------
 type Env = ReadonlyMap<string, Value>;
 
-const evaluate = (e: Expr, env: Env = new Map()): Value => {
-	switch (e.kind) {
-		case "lit":
-			return e.value;
-		case "var": {
-			const bound = env.get(e.name);
-			if (bound === undefined) throw new Error(`unbound variable: ${e.name}`);
+// @resq-systems/types — `matchTag` is the `switch (e.kind)` this used to be, with the
+// exhaustiveness the switch never had. There was no `default` and no `assertNever`, so
+// adding a seventh node kind to `Expr` would have compiled cleanly and returned
+// `undefined` at runtime for that kind, while the signature kept promising `Value`.
+// A missing arm here is a compile error naming the arm.
+//
+// Each arm receives the member already narrowed, so `n.value`, `n.arg` and `n.bound`
+// are reachable without a cast — what `case "lit":` bought, as a value rather than syntax.
+const evaluate = (e: Expr, env: Env = new Map()): Value =>
+	matchTag(e, "kind", {
+		lit: (n) => n.value,
+
+		var: (n) => {
+			const bound = env.get(n.name);
+			if (bound === undefined) throw new Error(`unbound variable: ${n.name}`);
 			return bound;
-		}
-		case "unary": {
-			const a = evaluate(e.arg, env);
-			const impl = unInstances[`${e.op}:${a.sort}`];
-			if (!impl) throw new Error(`${e.op} is undefined on ${a.sort}`);
+		},
+
+		unary: (n) => {
+			const a = evaluate(n.arg, env);
+			const impl = unInstances[`${n.op}:${a.sort}`];
+			if (!impl) throw new Error(`${n.op} is undefined on ${a.sort}`);
 			return impl(a);
-		}
-		case "binary": {
-			const a = evaluate(e.left, env);
-			const b = evaluate(e.right, env);
-			const impl = binInstances[`${e.op}:${a.sort}:${b.sort}`];
-			if (!impl) throw new Error(`${e.op} is undefined on ${a.sort}×${b.sort}`);
+		},
+
+		binary: (n) => {
+			const a = evaluate(n.left, env);
+			const b = evaluate(n.right, env);
+			const impl = binInstances[`${n.op}:${a.sort}:${b.sort}`];
+			if (!impl) throw new Error(`${n.op} is undefined on ${a.sort}×${b.sort}`);
 			return impl(a, b);
-		}
-		case "relation": {
-			const a = evaluate(e.left, env);
-			const b = evaluate(e.right, env);
-			const impl = relInstances[`${e.op}:${a.sort}:${b.sort}`];
-			if (!impl) throw new Error(`${e.op} is undefined on ${a.sort}×${b.sort}`);
+		},
+
+		relation: (n) => {
+			const a = evaluate(n.left, env);
+			const b = evaluate(n.right, env);
+			const impl = relInstances[`${n.op}:${a.sort}:${b.sort}`];
+			if (!impl) throw new Error(`${n.op} is undefined on ${a.sort}×${b.sort}`);
 			return bool(impl(a, b));
-		}
-		case "bigSum": {
+		},
+
+		bigSum: (n) => {
 			// Binder: the body is NOT pre-evaluated; it runs once per element with the
 			// bound variable added to the environment. This is why ∑/∫/∀ can't be
 			// table entries keyed on evaluated operands.
-			const domain = evaluate(e.over, env);
+			const domain = evaluate(n.over, env);
 			if (domain.sort !== "set") throw new Error("∑ requires a set domain");
 			let acc = 0;
 			for (const x of domain.value) {
-				const r = evaluate(e.body, new Map(env).set(e.bound, num(x)));
+				const r = evaluate(n.body, new Map(env).set(n.bound, num(x)));
 				acc += asNum(r);
 			}
 			return num(acc);
-		}
-	}
-};
+		},
+	});
 
 // ---------- Tiny constructors so the demos read like math ----------
 const lit = (value: Value): Expr => ({ kind: "lit", value });
