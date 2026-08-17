@@ -84,6 +84,11 @@ export type {
 export { RabinKarp, quickSearch } from "./rabin-karp.js";
 export type { PatternMatch, RabinKarpOptions, SearchStats } from "./rabin-karp.js";
 export { Distance } from "./distance.js";
+// `Distance`'s methods take these, so callers already pass them — but without the
+// names there was no way to annotate a variable on the way in, or to type a helper
+// that forwards one. Reachable structurally before, nameable now. `export type`
+// erases, so dsa stays zero-runtime-dependency.
+export type { Coordinates2D, Coordinates3D, PointFor } from "./distance.js";
 export { Queue } from "./queue.js";
 export type { QueueNode } from "./queue.js";
 export { LRUCache } from "./lru-cache.js";

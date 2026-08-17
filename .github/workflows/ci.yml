@@ -224,6 +224,26 @@ jobs:
         run: bunx tsc --noEmit
         working-directory: packages/${{ matrix.package }}
 
+  # ── Examples ──────────────────────────────────────────────────────────
+  # The examples are workspace members but declared no build or test script, so
+  # `bun --filter '*' build|test` skipped them and nothing type-checked them. They
+  # were free to rot, and wiring this up immediately proved it: `dsa-pathfinding`
+  # imported `Coordinates2D`, a type `@resq-systems/dsa` had never exported.
+  examples:
+    name: Examples
+    needs: detect
+    if: needs.detect.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/prepare
+      - name: Build workspace dependencies
+        run: bun run build
+      - name: Type check examples
+        run: bun --filter './examples/*' typecheck
+
   # ── Changeset status (PR only) ────────────────────────────────────────
 
   changeset:
@@ -391,6 +411,7 @@ jobs:
       - build
       - test
       - typecheck
+      - examples
       - changeset
       - storybook
       - knip
