@@ -195,7 +195,12 @@ jobs:
 
       - name: Record outputs
         id: record
-        run: echo "operation=${{ inputs.operation }}" >> "$GITHUB_OUTPUT"
+        # `inputs.operation` arrives from workflow_dispatch/workflow_call, so expanding
+        # it into the shell text lets a caller close the quote and append commands.
+        # Read through `env` it is data the shell consumes, never source it parses.
+        env:
+          OPERATION: ${{ inputs.operation }}
+        run: echo "operation=$OPERATION" >> "$GITHUB_OUTPUT"
 
   update_pull_request_branches:
     if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call') && inputs.operation == 'update_pull_request_branches' && (!(github.event.repository.fork)) }}
@@ -280,7 +285,12 @@ jobs:
 
       - name: Record outputs
         id: record
-        run: echo "run_url=${{ inputs.run_url }}" >> "$GITHUB_OUTPUT"
+        # Same shape as the `operation` step above: a caller-supplied value must not be
+        # pasted into the command text. A URL is if anything easier to weaponise, since
+        # quotes and semicolons survive most callers' idea of "looks like a link".
+        env:
+          RUN_URL: ${{ inputs.run_url }}
+        run: echo "run_url=$RUN_URL" >> "$GITHUB_OUTPUT"
 
   create_labels:
     if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call') && inputs.operation == 'create_labels' && (!(github.event.repository.fork)) }}
