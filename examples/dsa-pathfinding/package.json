@@ -3,7 +3,8 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"start": "bun run src/main.ts"
+		"start": "bun run src/main.ts",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@resq-systems/dsa": "workspace:*"

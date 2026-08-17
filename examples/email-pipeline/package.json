@@ -6,7 +6,8 @@
 	"description": "Render and (optionally) send @resq-systems/email-templates from a Node/Bun pipeline",
 	"scripts": {
 		"start": "bun run index.ts",
-		"tsc": "tsc --noEmit"
+		"tsc": "tsc --noEmit",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@resq-systems/email-templates": "workspace:*",
