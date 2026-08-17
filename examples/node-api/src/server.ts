@@ -132,7 +132,10 @@ const server = Bun.serve({
 				// compile while being false for most of what a client can actually post:
 				// `[1,2,3]`, `"hello"`, `42` and `null` all satisfy the cast and none of them
 				// is a record. @resq-systems/types: `isPlainObject` proves it instead of
-				// asserting it, and rejects arrays and null-prototype objects too.
+				// asserting it — rejecting arrays, primitives and class instances, while
+				// still accepting an `Object.create(null)` dictionary, which is what a
+				// JSON body deserialises to under some parsers and is a record in every
+				// sense that matters here.
 				const body: unknown = await req.json();
 				if (!isPlainObject(body)) {
 					return Response.json(
