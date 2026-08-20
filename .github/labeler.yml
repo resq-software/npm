@@ -62,6 +62,18 @@
   - changed-files:
     - any-glob-to-any-file: packages/types/**/*
 
+"pkg:map":
+  - changed-files:
+    - any-glob-to-any-file: packages/map/**/*
+
+"pkg:math":
+  - changed-files:
+    - any-glob-to-any-file: packages/math/**/*
+
+"pkg:telemetry":
+  - changed-files:
+    - any-glob-to-any-file: packages/telemetry/**/*
+
 # ── Area labels ─────────────────────────────────────────────────────────
 
 "A-CI":
