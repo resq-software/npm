@@ -69,7 +69,7 @@ jobs:
               echo "Added '$name'."
               return 0
             fi
-            if printf '%s' "$err" | grep -qiE "not found|could not add label"; then
+            if printf '%s' "$err" | grep -qF "$name" && printf '%s' "$err" | grep -qiE "not found|could not add label"; then
               echo "::warning::label '$name' not found yet (run Label Sync); skipped."
               return 0
             fi
@@ -85,7 +85,7 @@ jobs:
               echo "Removed stale '$name'."
               return 0
             fi
-            if printf '%s' "$err" | grep -qiE "not found|not labeled|does not have"; then
+            if printf '%s' "$err" | grep -qF "$name" && printf '%s' "$err" | grep -qiE "not found|not labeled|does not have"; then
               return 0
             fi
             printf '%s\n' "$err" >&2
