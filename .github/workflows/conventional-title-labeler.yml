@@ -34,6 +34,12 @@ jobs:
         run: |
           set -euo pipefail
           type="$(printf '%s' "$TITLE" | sed -nE 's/^([a-zA-Z]+)(\([^)]*\))?!?:.*/\1/p' | tr '[:upper:]' '[:lower:]')"
+          # A `!` immediately before the colon (after an optional scope) is the
+          # Conventional Commits breaking-change marker, e.g. `feat(ui)!: ...`.
+          breaking=""
+          if printf '%s' "$TITLE" | grep -qE '^[a-zA-Z]+(\([^)]*\))?!:'; then
+            breaking="C-Breaking-Change"
+          fi
           case "$type" in
             feat|feature) label="C-Feature" ;;
             fix)          label="C-Bug" ;;
@@ -42,8 +48,67 @@ jobs:
             refactor)     label="C-Refactor" ;;
             test)         label="C-Testing" ;;
             chore|build|ci|style|revert) label="C-Chore" ;;
-            *) echo "Title has no conventional type prefix; nothing to label."; exit 0 ;;
+            *) label="" ;;
           esac
-          echo "Conventional type '$type' -> $label"
-          gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --add-label "$label" \
-            || echo "::warning::label '$label' not found yet (run Label Sync); skipped."
+          if [ -z "$label" ] && [ -z "$breaking" ]; then
+            echo "Title has no conventional type prefix; nothing to label."
+            exit 0
+          fi
+
+          # Labels currently on the PR, so we only touch what is actually present.
+          current="$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json labels --jq '.labels[].name')"
+          has_label() { printf '%s\n' "$current" | grep -qxF "$1"; }
+
+          # Adds a label, tolerating ONLY the "label not defined yet" case (before
+          # Label Sync has created it). Any other failure -- auth, API, rate limit,
+          # transient -- is propagated so the step fails loudly instead of silently
+          # skipping the label.
+          add_label() {
+            local name="$1" err
+            if err="$(gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --add-label "$name" 2>&1)"; then
+              echo "Added '$name'."
+              return 0
+            fi
+            if printf '%s' "$err" | grep -qiE "not found|could not add label"; then
+              echo "::warning::label '$name' not found yet (run Label Sync); skipped."
+              return 0
+            fi
+            printf '%s\n' "$err" >&2
+            return 1
+          }
+
+          # Removes a label, tolerating only the "not present" races; other
+          # failures propagate.
+          remove_label() {
+            local name="$1" err
+            if err="$(gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --remove-label "$name" 2>&1)"; then
+              echo "Removed stale '$name'."
+              return 0
+            fi
+            if printf '%s' "$err" | grep -qiE "not found|not labeled|does not have"; then
+              return 0
+            fi
+            printf '%s\n' "$err" >&2
+            return 1
+          }
+
+          # On a retitle (edited event) the PR keeps its old change-type label
+          # because --add-label only appends. Drop any stale change-type label
+          # this workflow *solely* owns so the changelog classification tracks the
+          # current title. C-Documentation, C-Testing, and C-Chore are shared with
+          # the path labeler (.github/labeler.yml) and are left for it to manage.
+          for stale in C-Feature C-Bug C-Performance C-Refactor C-Breaking-Change; do
+            if [ "$stale" != "$label" ] && [ "$stale" != "$breaking" ] && has_label "$stale"; then
+              remove_label "$stale"
+            fi
+          done
+
+          if [ -n "$label" ]; then
+            echo "Conventional type '$type' -> $label"
+            if ! has_label "$label"; then
+              add_label "$label"
+            fi
+          fi
+          if [ -n "$breaking" ] && ! has_label "$breaking"; then
+            add_label "$breaking"
+          fi
