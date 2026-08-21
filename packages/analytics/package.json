@@ -55,7 +55,7 @@
 		"@total-typescript/ts-reset": "^0.6.1",
 		"@types/node": "^26.2.0",
 		"@types/react": "^19.2.18",
-		"posthog-js": "^1.415.2",
+		"posthog-js": "^1.417.4",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
 		"tsdown": "^0.22.14",
