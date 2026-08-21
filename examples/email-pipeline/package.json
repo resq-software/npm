@@ -11,7 +11,7 @@
 	},
 	"dependencies": {
 		"@resq-systems/email-templates": "workspace:*",
-		"effect": "4.0.0-beta.107",
+		"effect": "4.0.0-rc.110",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
 		"resend": "6.20.0"
