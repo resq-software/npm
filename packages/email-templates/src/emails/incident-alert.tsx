@@ -55,7 +55,7 @@ export function IncidentAlertEmail({
 			</Email.Text>
 			<Email.Title>{title}</Email.Title>
 			<Email.Paragraph>{summary}</Email.Paragraph>
-			<Email.Text className="mb-2 font-mono text-xs uppercase tracking-wide text-muted">
+			<Email.Text className="resq-email-muted mb-2 font-mono text-xs uppercase tracking-wide text-muted">
 				{meta}
 			</Email.Text>
 			<Email.CTA href={dashboardUrl}>Open incident dashboard</Email.CTA>

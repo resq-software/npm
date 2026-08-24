@@ -44,7 +44,7 @@ export function NewDeviceLoginEmail({
 			{firstName ? <Email.Paragraph>Hi {firstName},</Email.Paragraph> : null}
 			<Email.Paragraph>We noticed a new sign-in to your ResQ Systems account.</Email.Paragraph>
 			{meta ? (
-				<Email.Text className="mb-4 font-mono text-xs uppercase tracking-wide text-muted">
+				<Email.Text className="resq-email-muted mb-4 font-mono text-xs uppercase tracking-wide text-muted">
 					{meta}
 				</Email.Text>
 			) : null}

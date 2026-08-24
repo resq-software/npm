@@ -59,7 +59,7 @@ export function MissionApprovalEmail({
 			<Email.Title>{title}</Email.Title>
 			<Email.Paragraph>A mission needs your sign-off before it can execute.</Email.Paragraph>
 			{summary ? <Email.Paragraph>{summary}</Email.Paragraph> : null}
-			<Email.Text className="mb-2 font-mono text-xs uppercase tracking-wide text-muted">
+			<Email.Text className="resq-email-muted mb-2 font-mono text-xs uppercase tracking-wide text-muted">
 				{meta}
 			</Email.Text>
 			<Email.CTA href={approveUrl}>Review &amp; approve</Email.CTA>

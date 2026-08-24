@@ -24,25 +24,27 @@
 
 import {
 	Body,
-	Button,
+	Column,
 	Container,
 	Head,
 	Heading,
 	Hr,
 	Html,
-	Img,
 	Link,
 	Preview,
+	Row,
 	Section,
 	Tailwind,
 	Text,
 } from "@react-email/components";
 import { type ReactNode, useContext } from "react";
+import { emailDesignContract } from "../email-design-contract.js";
 import type { EmailCategory } from "../schemas.js";
 import {
 	EmailMessageContext,
 	EmailThemeContext,
 	type EmailThemeOverride,
+	buildDarkModeCss,
 	buildTailwindConfig,
 	resolveEmailTheme,
 } from "./theme.js";
@@ -64,44 +66,59 @@ function Shell({ preview, theme, children }: ShellProps) {
 	return (
 		<Html lang="en">
 			<Head>
-				<meta name="color-scheme" content="dark" />
-				<meta name="supported-color-schemes" content="dark" />
+				<meta name="color-scheme" content="light dark" />
+				<meta name="supported-color-schemes" content="light dark" />
 				{resolved.fontsHref ? <link href={resolved.fontsHref} rel="stylesheet" /> : null}
+				<style>{`${buildDarkModeCss(resolved)}
+@media only screen and (max-width: ${emailDesignContract.layout.cardWidthPx + emailDesignContract.layout.mobilePaddingPx * 2}px) {
+  .resq-email-card { padding: ${emailDesignContract.layout.mobilePaddingPx}px !important; }
+}`}</style>
 			</Head>
 			<Tailwind config={config}>
 				<Preview>{preview}</Preview>
-				<Body className="bg-background font-sans text-foreground">
-					<Container className="mx-auto my-10 max-w-xl rounded-xl border border-solid border-border bg-surface p-10">
-						{children}
-					</Container>
+				<Body className="resq-email-body resq-email-foreground bg-background font-sans text-foreground">
+					<Row>
+						<Column className="resq-email-canvas bg-background text-foreground">
+							<Container
+								className="resq-email-card mx-auto my-10 border border-solid border-border bg-surface"
+								style={{
+									borderRadius: `${emailDesignContract.layout.radiusPx}px`,
+									maxWidth: `${emailDesignContract.layout.cardWidthPx}px`,
+									padding: `${emailDesignContract.layout.desktopPaddingPx}px`,
+								}}
+							>
+								{children}
+							</Container>
+						</Column>
+					</Row>
 				</Body>
 			</Tailwind>
 		</Html>
 	);
 }
 
-/** Brand lockup (logo + product wordmark) rendered at the top of the card. */
+/** Text-first company lockup rendered at the top of the card. */
 function Header() {
 	const { org } = useContext(EmailThemeContext);
 	return (
-		<Section className="mb-8">
-			<Img
-				src={org.logoUrl}
-				width="40"
-				height="40"
-				alt={org.productName}
-				className="inline-block align-middle"
-			/>
-			<Text className="ml-3 inline-block align-middle font-display text-lg font-bold tracking-tight text-foreground">
-				{org.productName}
+		<Section className="resq-email-header mb-8">
+			<Text className="resq-email-foreground m-0 font-display text-xl font-bold tracking-tight text-foreground">
+				{org.brandName}
 			</Text>
+			<Text className="resq-email-muted mb-0 mt-1 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted">
+				{org.descriptor.toUpperCase()}
+			</Text>
+			<Hr
+				className="resq-email-brand-rule mb-0 mt-4 border-0 bg-primary"
+				style={{ height: `${emailDesignContract.presentation.header.brandRulePx}px` }}
+			/>
 		</Section>
 	);
 }
 
 function Title({ children }: { children: ReactNode }) {
 	return (
-		<Heading className="mb-4 font-display text-2xl font-bold tracking-tight text-foreground">
+		<Heading className="resq-email-foreground mb-4 font-display text-2xl font-bold tracking-tight text-foreground">
 			{children}
 		</Heading>
 	);
@@ -109,7 +126,9 @@ function Title({ children }: { children: ReactNode }) {
 
 function Paragraph({ children }: { children: ReactNode }) {
 	return (
-		<Text className="mb-4 font-sans text-base leading-relaxed text-foreground">{children}</Text>
+		<Text className="resq-email-foreground mb-4 font-sans text-[15px] leading-[1.6] text-foreground">
+			{children}
+		</Text>
 	);
 }
 
@@ -121,7 +140,7 @@ function Paragraph({ children }: { children: ReactNode }) {
 function Signature({ children }: { children?: ReactNode }) {
 	const { org } = useContext(EmailThemeContext);
 	return (
-		<Text className="mt-6 font-sans text-sm leading-relaxed text-muted">
+		<Text className="resq-email-muted mt-6 font-sans text-sm leading-relaxed text-muted">
 			{children ?? `— The ${org.brandName} team`}
 		</Text>
 	);
@@ -135,7 +154,7 @@ function Signature({ children }: { children?: ReactNode }) {
 function SupportLine({ children }: { children?: ReactNode }) {
 	const { org } = useContext(EmailThemeContext);
 	return (
-		<Text className="mb-4 font-sans text-sm leading-relaxed text-muted">
+		<Text className="resq-email-muted mb-4 font-sans text-sm leading-relaxed text-muted">
 			{children ?? "Didn't do this?"} Contact us at{" "}
 			<Link href={`mailto:${org.supportEmail}`} className="text-primary underline">
 				{org.supportEmail}
@@ -148,8 +167,8 @@ function SupportLine({ children }: { children?: ReactNode }) {
 /** A large, letter-spaced code block for OTP / verification codes. */
 function Code({ children }: { children: ReactNode }) {
 	return (
-		<Section className="my-6 rounded-md border border-solid border-border bg-background py-4 text-center">
-			<Text className="font-mono text-3xl font-medium tracking-[8px] text-foreground">
+		<Section className="resq-email-otp-panel my-6 rounded-md border border-solid border-border bg-background py-4 text-center">
+			<Text className="resq-email-foreground font-mono text-3xl font-medium tracking-[8px] text-foreground">
 				{children}
 			</Text>
 		</Section>
@@ -162,7 +181,7 @@ function Code({ children }: { children: ReactNode }) {
  */
 function FallbackLink({ href }: { href: string }) {
 	return (
-		<Text className="mt-4 font-sans text-xs leading-relaxed text-muted">
+		<Text className="resq-email-muted mt-4 font-sans text-xs leading-relaxed text-muted">
 			Or paste this link into your browser:
 			<br />
 			<Link href={href} className="break-all text-primary">
@@ -184,13 +203,26 @@ function CTA({
 	fallback?: boolean;
 }) {
 	return (
-		<Section className="my-6">
-			<Button
-				href={href}
-				className="box-border block rounded-md bg-primary px-8 py-3.5 text-center font-mono text-sm font-medium uppercase tracking-wide text-white no-underline"
-			>
-				{children}
-			</Button>
+		<Section className="resq-email-primary-cta my-6 w-full" width="100%" style={{ width: "100%" }}>
+			<Row>
+				<Column
+					align="center"
+					height={String(emailDesignContract.presentation.cta.minimumHeightPx)}
+					className="bg-primary text-center"
+					style={{
+						borderRadius: `${emailDesignContract.presentation.cta.radiusPx}px`,
+						height: `${emailDesignContract.presentation.cta.minimumHeightPx}px`,
+					}}
+				>
+					<Link
+						href={href}
+						className="box-border block w-full px-6 text-center font-mono text-sm font-medium uppercase tracking-wide text-white no-underline"
+						style={{ lineHeight: `${emailDesignContract.presentation.cta.minimumHeightPx}px` }}
+					>
+						{children}
+					</Link>
+				</Column>
+			</Row>
 			{fallback ? <FallbackLink href={href} /> : null}
 		</Section>
 	);
@@ -198,10 +230,15 @@ function CTA({
 
 function Footer({ children }: { children: ReactNode }) {
 	return (
-		<>
-			<Hr className="my-6 border-border" />
-			<Text className="font-sans text-xs leading-relaxed text-muted">{children}</Text>
-		</>
+		<Section className="resq-email-footer">
+			<Hr className="resq-email-neutral-divider my-6 border-border" />
+			<Text
+				className="resq-email-muted font-sans text-xs text-muted"
+				style={{ lineHeight: `${emailDesignContract.presentation.footer.lineHeightPx}px` }}
+			>
+				{children}
+			</Text>
+		</Section>
 	);
 }
 
@@ -220,33 +257,48 @@ function LegalFooter({ reason, category }: { reason?: ReactNode; category?: Emai
 	// omit the affordance (and are effectively transactional).
 	const unsubscribeHref = message.unsubscribeUrl;
 	return (
-		<>
-			<Hr className="my-6 border-border" />
+		<Section className="resq-email-footer">
+			<Signature />
+			<Hr className="resq-email-neutral-divider my-6 border-border" />
 			{reason ? (
-				<Text className="mb-2 font-sans text-xs leading-relaxed text-muted">{reason}</Text>
+				<Text
+					className="resq-email-muted mb-2 font-sans text-xs text-muted"
+					style={{ lineHeight: `${emailDesignContract.presentation.footer.lineHeightPx}px` }}
+				>
+					{reason}
+				</Text>
 			) : null}
 			{/* `registeredAddress` already leads with the legal entity name, so it is a
 			    complete CAN-SPAM postal line on its own — no separate `legalName`. */}
-			<Text className="mb-2 font-sans text-xs leading-relaxed text-muted">
+			<Text
+				className="resq-email-muted mb-2 font-sans text-xs text-muted"
+				style={{ lineHeight: `${emailDesignContract.presentation.footer.lineHeightPx}px` }}
+			>
 				{org.registeredAddress}
 			</Text>
-			<Text className="mb-2 font-sans text-xs leading-relaxed text-muted">
-				<Link href={org.termsUrl} className="text-muted underline">
+			<Text
+				className="resq-email-muted mb-2 font-sans text-xs text-muted"
+				style={{ lineHeight: `${emailDesignContract.presentation.footer.lineHeightPx}px` }}
+			>
+				<Link href={org.termsUrl} className="resq-email-muted text-muted underline">
 					Terms
 				</Link>
 				{" · "}
-				<Link href={org.privacyUrl} className="text-muted underline">
+				<Link href={org.privacyUrl} className="resq-email-muted text-muted underline">
 					Privacy
 				</Link>
 			</Text>
 			{effectiveCategory === "marketing" && unsubscribeHref ? (
-				<Text className="font-sans text-xs leading-relaxed text-muted">
-					<Link href={unsubscribeHref} className="text-muted underline">
+				<Text
+					className="resq-email-muted font-sans text-xs text-muted"
+					style={{ lineHeight: `${emailDesignContract.presentation.footer.lineHeightPx}px` }}
+				>
+					<Link href={unsubscribeHref} className="resq-email-muted text-muted underline">
 						Unsubscribe or manage preferences
 					</Link>
 				</Text>
 			) : null}
-		</>
+		</Section>
 	);
 }
 

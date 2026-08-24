@@ -206,7 +206,9 @@ export function buildDarkModeCss(theme: EmailTheme): string {
 
 	return `@media (prefers-color-scheme: dark) {
   .resq-email-body { background-color: ${background} !important; }
+  .resq-email-canvas { background-color: ${background} !important; color: ${foreground} !important; }
   .resq-email-card { background-color: ${surface} !important; border-color: ${border} !important; }
+  .resq-email-otp-panel { background-color: ${background} !important; border-color: ${border} !important; }
   .resq-email-foreground { color: ${foreground} !important; }
   .resq-email-muted { color: ${muted} !important; }
   .resq-email-neutral-divider { border-color: ${border} !important; }
