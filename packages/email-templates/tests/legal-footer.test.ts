@@ -116,19 +116,23 @@ describe("legal footer", () => {
 	for (const payload of builtInPayloads) {
 		describe(`"${payload.name}" template`, () => {
 			it("renders the legal entity name and registered postal address", async () => {
-				const { html } = await renderEmail(payload);
+				const { html, text } = await renderEmail(payload);
 
 				expect(html).toContain(org.legalName);
 				expect(html).toContain(org.registeredAddress);
+				expect(text).toContain(org.legalName);
+				expect(text).toContain(org.registeredAddress);
 			});
 
 			it("renders Terms and Privacy links in the footer", async () => {
-				const { html } = await renderEmail(payload);
+				const { html, text } = await renderEmail(payload);
 
 				expect(html).toContain(org.termsUrl);
 				expect(html).toContain(org.privacyUrl);
 				expect(html).toContain(">Terms<");
 				expect(html).toContain(">Privacy<");
+				expect(text).toContain(`Terms ${org.termsUrl}`);
+				expect(text).toContain(`Privacy ${org.privacyUrl}`);
 			});
 
 			it('no longer contains the legacy hardcoded "ResQ Software." footer string', async () => {
