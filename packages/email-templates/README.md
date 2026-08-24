@@ -16,10 +16,10 @@
 
 # @resq-systems/email-templates
 
-Type-safe transactional email templates for React apps and backend pipelines.
+Type-safe transactional and marketing email templates for React apps and backend pipelines.
 
-- **One contract.** Every email is a validated `{ name, to, data }` payload, described by an [Effect Schema](https://effect.website) discriminated union — including a validated, branded recipient (`EmailAddress`). Nothing else can be enqueued or rendered.
-- **React Email components.** Templates are React components built on [React Email](https://react.email) with a `<Tailwind>` theme mapped to the dark-first ResQ Systems brand — red primary, Syne/DM Sans/DM Mono — with oklch tokens converted to email-safe hex.
+- **One payload envelope.** Every email requires `{ name, to, data }` and may include `category`, `unsubscribeUrl`, and `preferencesUrl`. An [Effect Schema](https://effect.website) discriminated union validates each template variant and its branded recipient (`EmailAddress`).
+- **React Email components.** Templates are React components built on [React Email](https://react.email) with a light-base, dark-enhanced ResQ Systems theme. The shared shell uses email-safe hex values and Syne/DM Sans/DM Mono font stacks.
 - **Headless render.** `renderEmail(payload)` returns `{ to, subject, html, text }` with no DOM — safe to call from queue workers, cron jobs, and other pipelines.
 - **Pluggable sending.** A provider-agnostic `EmailSender` port with an optional Resend adapter under `@resq-systems/email-templates/send`.
 
@@ -39,7 +39,39 @@ bun add resend
 | --- | --- | --- |
 | `@resq-systems/email-templates` | `EmailPayload` schema, types, `EmailAddress`, `decodeEmailPayload`, `registry`, `renderEmail` | browser + server |
 | `@resq-systems/email-templates/emails` | `Email` primitives, `emailColors`, and the template components | browser + server |
+| `@resq-systems/email-templates/email-contract` | Framework-neutral design contract, stable canonicalizer, and SHA-256 integrity value | browser + server |
 | `@resq-systems/email-templates/send` | `EmailSender` port, `createResendSender`, `sendEmail` | **server only** |
+
+## Email design contract
+
+Consumers that do not use React Email can import the same identity, color
+modes, font stacks, layout measurements, and presentation rules:
+
+```ts
+import {
+	canonicalizeEmailContract,
+	emailDesignContract,
+	emailDesignContractIntegrity,
+} from "@resq-systems/email-templates/email-contract";
+
+emailDesignContract.schemaVersion; // 1
+emailDesignContract.identity.descriptor; // "Autonomous Disaster Response"
+emailDesignContract.integrity.digest === emailDesignContractIntegrity; // true
+canonicalizeEmailContract(emailDesignContract); // stable JSON without the top-level integrity field
+```
+
+The `./email-contract` import graph has no React, Effect, or Resend dependency.
+Its lowercase SHA-256 digest covers the canonicalized contract values and lets
+another renderer verify that it consumes the same versioned data.
+
+`emailColors` takes all six light shell roles from
+`emailDesignContract.modes.light`. The contract defines the email-specific light
+background, surface, border, foreground, and muted values. It imports the
+primary color, all six dark shell roles, font stacks, and radii from
+[`@resq-systems/constants/tokens`](../constants). Identity comes from
+`@resq-systems/constants/brand`. The React Email theme also imports the four
+status roles (`info`, `success`, `warning`, and `danger`) from constants; those
+roles are outside the framework-neutral contract.
 
 ## Pipeline / worker usage
 
@@ -78,6 +110,33 @@ const { subject, html, text } = await renderEmail({
 
 The payload is validated at the boundary — an unknown `name`, a missing required `data` field, or a malformed recipient `to` (including one carrying a CR/LF header-injection payload) throws `EmailValidationError`. The decoded `to` is a branded `EmailAddress`, so a validated recipient can't be confused with a raw string downstream.
 
+## Marketing opt-out controls
+
+Marketing payloads must include `category: "marketing"` and an
+`unsubscribeUrl`. `preferencesUrl` is a separate optional destination:
+
+```ts
+const marketingEmail = await renderEmail({
+	name: "notification",
+	to: "user@example.com",
+	category: "marketing",
+	unsubscribeUrl: "https://app.resq.software/unsubscribe?token=abc123",
+	preferencesUrl: "https://app.resq.software/preferences?token=abc123",
+	data: { title: "Response update", body: "A new field report is available." },
+});
+```
+
+`unsubscribeUrl` renders the **Unsubscribe** control. `preferencesUrl` renders
+**Manage preferences** only when it has its own value. The package never uses
+the website URL as a substitute for either destination. Transactional messages
+hide both controls even when the payload supplies the fields.
+
+This release changes validation behavior. `decodeEmailPayload()`,
+`renderEmail()`, and mailers created with `createMailer()` reject marketing
+payloads without `unsubscribeUrl`. Both URL fields must be real absolute
+`http://` or `https://` URLs with a host. URLs containing credentials, ASCII
+whitespace, or control characters are rejected with `EmailValidationError`.
+
 ## React app usage
 
 Import a template component directly (for in-app previews or your own rendering):
@@ -104,12 +163,18 @@ import { WelcomeEmail } from "@resq-systems/email-templates/emails";
 
 ## Theming
 
-Templates render in the dark-first ResQ Systems brand by default, sourced from
-[`@resq-systems/constants`](../constants)`/tokens`. Rebrand any render without forking:
+Templates render a complete light theme in inline styles by default, sourced
+from the public email contract. A scoped `prefers-color-scheme: dark` rule
+enhances the stable shell roles in clients that support embedded media queries.
+Rebrand any render without forking:
 
 ```ts
 const { html } = await renderEmail(payload, {
-	theme: { colors: { primary: "#0ea5e9" }, fontsHref: null },
+	theme: {
+		colors: { primary: "#0EA5E9" },
+		darkColors: { primary: "#38BDF8" },
+		fontsHref: null,
+	},
 });
 ```
 
@@ -118,13 +183,25 @@ Or wrap React usage in a provider:
 ```tsx
 import { EmailThemeContext, mergeEmailTheme } from "@resq-systems/email-templates";
 
-<EmailThemeContext.Provider value={mergeEmailTheme({ colors: { primary: "#0ea5e9" } })}>
+<EmailThemeContext.Provider
+	value={mergeEmailTheme({
+		colors: { primary: "#0EA5E9" },
+		darkColors: { primary: "#38BDF8" },
+	})}
+>
 	<WelcomeEmail firstName="Ada" />
 </EmailThemeContext.Provider>;
 ```
 
-`colors` map to Tailwind `theme.extend.colors`; unset keys fall back to the ResQ Systems
-defaults. Change the brand for every app at once by editing `@resq-systems/constants`.
+`colors` map to Tailwind `theme.extend.colors`; `darkColors` overrides the six
+shell roles independently. Unset keys fall back to the ResQ Systems defaults,
+and dark-mode values must use six-digit `#RRGGBB` notation. Use theme overrides
+for render-specific changes rather than copying contract values into a consumer.
+
+Clients that ignore the media query keep the readable light inline styles.
+Clients may also block the hosted webfonts, so every font family includes system
+fallbacks. Exact dark-mode rendering still depends on each client's CSS and
+user preference support.
 
 ## Custom template suites
 
@@ -197,8 +274,10 @@ Sender config follows the ResQ Systems convention: `RESEND_API_KEY` (required) a
 
 Email clients drop `oklch()`, `color-mix()`, and CSS custom properties, and many ignore `rem` and flex/grid. Templates therefore:
 
-- use the hex `emailColors` snapshot (keep it in sync with the oklch design tokens);
+- use the email-safe hex `emailColors` palette; its light shell roles come from the public email contract;
 - pass `pixelBasedPreset` to `<Tailwind>` so utilities emit `px`;
+- use light inline colors as the fallback when dark-mode media queries are ignored;
+- keep system fonts after each preferred brand font; and
 - avoid responsive prefixes and flex/grid — use `Section` for layout.
 
 ## Prerequisites
@@ -238,4 +317,3 @@ preview during development, use `email:dev` (see [Preview](#preview)).
 ## Troubleshooting
 
 - **Rendering Failures**: Next.js Server Components might struggle with client-side React Email components. Render mailers asynchronously on the server.
-
