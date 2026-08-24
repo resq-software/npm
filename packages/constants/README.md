@@ -31,7 +31,7 @@ bun add @resq-systems/constants
 | --- | --- |
 | `@resq-systems/constants` | everything below |
 | `@resq-systems/constants/tokens` | `colors` (`oklch` source + email-safe `hex` snapshot, incl. `info`/`success`/`warning`/`danger` status roles), `fonts` (stacks + webfont href), `radii`, `themeColor` (light/dark PWA + viewport `theme-color`), plus the color-role types `ColorRole`, `StatusRole`, `OklchColorRole`, `ColorTokenName` |
-| `@resq-systems/constants/brand` | `brand` — name, product name, legal name, tagline, description, domains, email addresses, legal URLs, socials, company info, logo, postal address |
+| `@resq-systems/constants/brand` | `brand` — name, product name, email descriptor, legal name, tagline, description, domains, email addresses, legal URLs, socials, company info, logo, postal address |
 | `@resq-systems/constants/tokens.css` | Stylesheet mirroring `./tokens`: the `oklch` color roles, `--resq-chart-1..5` palette, `--resq-radius-*`, and `--resq-font-*` stacks as CSS custom properties on `:root`. `@import` it directly. |
 
 Everything is `as const`, so values are literal-typed and tree-shakeable.
@@ -44,10 +44,16 @@ import { brand } from "@resq-systems/constants/brand";
 
 element.style.background = colors.hex.background; // "#0A0E1A"
 const from = brand.email.from; // "ResQ Systems <updates@send.resq.software>"
+const emailDescriptor = brand.emailDescriptor; // "Autonomous Disaster Response"
 ```
 
-`@resq-systems/email-templates` sources its default theme colors and fonts from
-`./tokens`, so rebranding the palette in one place updates every email.
+`brand.emailDescriptor` is the short descriptor beneath the company name in the
+shared email lockup. It does not replace `brand.productName` or the longer
+`brand.tagline`.
+
+`@resq-systems/email-templates` sources email identity, fonts, primary and dark
+shell colors, and status colors from this package. Its public email contract
+owns the remaining email-specific light shell colors and presentation values.
 
 ## Adding constants
 
@@ -100,4 +106,3 @@ bun --filter @resq-systems/constants test
   Import the token objects from `@resq-systems/constants/tokens` and emit variables yourself.
 - **Colors look wrong in email or older targets**: use the email-safe `colors.hex.*`
   values, not the `oklch` source — many mail clients drop `oklch()`.
-
