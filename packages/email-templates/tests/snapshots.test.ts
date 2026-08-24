@@ -118,11 +118,24 @@ const cases: readonly EmailPayload[] = [
 	},
 ];
 
+const expectedSubjects: Readonly<Record<EmailPayload["name"], string>> = {
+	otp: "Your ResQ Systems verification code: 123456",
+	welcome: "Welcome to ResQ Systems, Ada",
+	"password-reset": "Reset your ResQ Systems password",
+	notification: "Deploy finished",
+	"incident-alert": "[CRITICAL] Wildfire perimeter breach",
+	"password-changed": "Your ResQ Systems password was changed",
+	"new-device-login": "New sign-in to your ResQ Systems account",
+	"mission-approval": "Mission approval needed: Deploy swarm to Sector 7 wildfire",
+	"org-invitation": "You're invited to join Cascade County SAR on ResQ Systems",
+};
+
 describe("email template snapshots", () => {
 	for (const payload of cases) {
 		it(`renders "${payload.name}" deterministically`, async () => {
 			const { subject, html, text } = await renderEmail(payload);
 
+			expect(subject).toBe(expectedSubjects[payload.name]);
 			expect(subject).toMatchSnapshot();
 			expect(html).toMatchSnapshot();
 			expect(text).toMatchSnapshot();

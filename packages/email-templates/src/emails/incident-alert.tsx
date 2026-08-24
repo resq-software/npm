@@ -54,6 +54,9 @@ export function IncidentAlertEmail({
 				{severity} incident
 			</Email.Text>
 			<Email.Title>{title}</Email.Title>
+			<Email.Paragraph>
+				Review this incident in ResQ Tactical OS and coordinate the next response action.
+			</Email.Paragraph>
 			<Email.Paragraph>{summary}</Email.Paragraph>
 			<Email.Text className="resq-email-muted mb-2 font-mono text-xs uppercase tracking-wide text-muted">
 				{meta}

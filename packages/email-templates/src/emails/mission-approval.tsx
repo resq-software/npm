@@ -57,7 +57,9 @@ export function MissionApprovalEmail({
 				</Email.Text>
 			) : null}
 			<Email.Title>{title}</Email.Title>
-			<Email.Paragraph>A mission needs your sign-off before it can execute.</Email.Paragraph>
+			<Email.Paragraph>
+				A ResQ Tactical OS mission needs your sign-off before it can execute.
+			</Email.Paragraph>
 			{summary ? <Email.Paragraph>{summary}</Email.Paragraph> : null}
 			<Email.Text className="resq-email-muted mb-2 font-mono text-xs uppercase tracking-wide text-muted">
 				{meta}
