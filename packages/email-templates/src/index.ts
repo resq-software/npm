@@ -25,6 +25,16 @@
 export { EmailPayload, EmailValidationError, decodeEmailPayload } from "./contract.js";
 export type { EmailName, EmailTemplateData } from "./contract.js";
 export {
+	canonicalizeEmailContract,
+	emailDesignContract,
+	emailDesignContractIntegrity,
+} from "./email-design-contract.js";
+export type {
+	EmailDesignContract,
+	EmailDesignContractCore,
+	EmailModeColors,
+} from "./email-design-contract.js";
+export {
 	buildTailwindConfig,
 	defaultEmailTheme,
 	EmailMessageContext,
