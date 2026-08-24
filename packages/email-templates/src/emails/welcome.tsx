@@ -44,7 +44,6 @@ export function WelcomeEmail({ firstName = "there", verifyUrl }: WelcomeEmailPro
 					<Email.CTA href={verifyUrl}>Verify email</Email.CTA>
 				</>
 			) : null}
-			<Email.Signature />
 			<Email.LegalFooter
 				category="transactional"
 				reason="You are receiving this email because you created a ResQ Systems account."

@@ -62,7 +62,9 @@ describe("adaptive email theme", () => {
 
 		expect(css).toBe(`@media (prefers-color-scheme: dark) {
   .resq-email-body { background-color: #0A0E1A !important; }
+  .resq-email-canvas { background-color: #0A0E1A !important; color: #F0F2FA !important; }
   .resq-email-card { background-color: #171C2B !important; border-color: #1E2438 !important; }
+  .resq-email-otp-panel { background-color: #0A0E1A !important; border-color: #1E2438 !important; }
   .resq-email-foreground { color: #F0F2FA !important; }
   .resq-email-muted { color: #7D8CAE !important; }
   .resq-email-neutral-divider { border-color: #1E2438 !important; }
