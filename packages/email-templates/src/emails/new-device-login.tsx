@@ -56,10 +56,7 @@ export function NewDeviceLoginEmail({
 			</Email.Paragraph>
 			{secureAccountUrl ? <Email.CTA href={secureAccountUrl}>Secure your account</Email.CTA> : null}
 			<Email.SupportLine>Don't recognize this sign-in?</Email.SupportLine>
-			<Email.LegalFooter
-				category="transactional"
-				reason="You are receiving this email because a new sign-in to your ResQ Systems account was detected."
-			/>
+			<Email.LegalFooter reason="You are receiving this email because a new sign-in to your ResQ Systems account was detected." />
 		</Email.Shell>
 	);
 }

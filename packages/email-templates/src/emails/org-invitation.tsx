@@ -51,7 +51,7 @@ export function OrgInvitationEmail({
 				<Email.Paragraph>This invitation expires in {expiresInDays} days.</Email.Paragraph>
 			) : null}
 			<Email.Paragraph>Weren't expecting this? You can safely ignore this email.</Email.Paragraph>
-			<Email.LegalFooter category="transactional" reason={reason} />
+			<Email.LegalFooter reason={reason} />
 		</Email.Shell>
 	);
 }

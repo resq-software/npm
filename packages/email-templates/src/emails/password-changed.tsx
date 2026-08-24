@@ -55,10 +55,7 @@ export function PasswordChangedEmail({
 				</Email.Paragraph>
 			)}
 			<Email.SupportLine>Didn't change your password?</Email.SupportLine>
-			<Email.LegalFooter
-				category="transactional"
-				reason="You are receiving this email because the password on your ResQ Systems account was changed."
-			/>
+			<Email.LegalFooter reason="You are receiving this email because the password on your ResQ Systems account was changed." />
 		</Email.Shell>
 	);
 }

@@ -149,8 +149,27 @@ describe("legal footer", () => {
 
 describe("unsubscribe affordance", () => {
 	const unsubscribeUrl = "https://app.resq.software/unsubscribe?token=abc123";
+	const preferencesUrl = "https://app.resq.software/preferences?token=abc123";
 
-	it("renders an unsubscribe link and URL for a marketing notification", async () => {
+	for (const payload of builtInPayloads) {
+		it(`renders both marketing controls for the "${payload.name}" template`, async () => {
+			const { html, text } = await renderEmail({
+				...payload,
+				category: "marketing",
+				unsubscribeUrl,
+				preferencesUrl,
+			});
+
+			expect(html).toContain(`href="${unsubscribeUrl}"`);
+			expect(html).toContain(">Unsubscribe<");
+			expect(html).toContain(`href="${preferencesUrl}"`);
+			expect(html).toContain(">Manage preferences<");
+			expect(text).toContain(`Unsubscribe ${unsubscribeUrl}`);
+			expect(text).toContain(`Manage preferences ${preferencesUrl}`);
+		});
+	}
+
+	it("renders only the unsubscribe control when marketing supplies only unsubscribeUrl", async () => {
 		const { html } = await renderEmail({
 			name: "notification",
 			to: "ops@example.com",
@@ -159,14 +178,52 @@ describe("unsubscribe affordance", () => {
 			data: { title: "Product update", body: "New features shipped this week.", severity: "info" },
 		});
 
-		expect(html).toContain("Unsubscribe or manage preferences");
-		expect(html).toContain(unsubscribeUrl);
+		expect(html).toContain(`href="${unsubscribeUrl}"`);
+		expect(html).toContain(">Unsubscribe<");
+		expect(html).not.toContain("Manage preferences");
 	});
 
-	it("omits unsubscribe UI for a transactional notification (no category)", async () => {
+	it("rejects marketing when only preferencesUrl is supplied", async () => {
+		await expect(
+			renderEmail({
+				name: "notification",
+				to: "ops@example.com",
+				category: "marketing",
+				preferencesUrl,
+				data: {
+					title: "Product update",
+					body: "New features shipped this week.",
+					severity: "info",
+				},
+			}),
+		).rejects.toMatchObject({ name: "EmailValidationError" });
+	});
+
+	it("renders distinct unsubscribe and preference controls when marketing supplies both", async () => {
 		const { html } = await renderEmail({
 			name: "notification",
 			to: "ops@example.com",
+			category: "marketing",
+			unsubscribeUrl,
+			preferencesUrl,
+			data: { title: "Product update", body: "New features shipped this week.", severity: "info" },
+		});
+
+		expect(html).toContain(`href="${unsubscribeUrl}"`);
+		expect(html).toContain(">Unsubscribe<");
+		expect(html).toContain(`href="${preferencesUrl}"`);
+		expect(html).toContain(">Manage preferences<");
+		expect(html).toContain(`href="${unsubscribeUrl}" class="resq-email-muted"`);
+		expect(html).toContain(`href="${preferencesUrl}" class="resq-email-muted"`);
+	});
+
+	it("omits both controls for a transactional notification even when both URLs are supplied", async () => {
+		const { html } = await renderEmail({
+			name: "notification",
+			to: "ops@example.com",
+			category: "transactional",
+			unsubscribeUrl,
+			preferencesUrl,
 			data: {
 				title: "Deploy finished",
 				body: "Your deployment completed successfully.",
@@ -175,22 +232,23 @@ describe("unsubscribe affordance", () => {
 		});
 
 		expect(html.toLowerCase()).not.toContain("unsubscribe");
+		expect(html).not.toContain("Manage preferences");
+		expect(html).not.toContain(unsubscribeUrl);
+		expect(html).not.toContain(preferencesUrl);
 	});
 
-	it("omits unsubscribe UI for a marketing notification when unsubscribeUrl is missing", async () => {
-		const { html } = await renderEmail({
-			name: "notification",
-			to: "ops@example.com",
-			category: "marketing",
-			data: {
-				title: "Product update",
-				body: "New features shipped this week.",
-				severity: "info",
-			},
-		});
-
-		// CAN-SPAM/GDPR: without a real opt-out URL we render no unsubscribe link
-		// (and never fall back to the homepage).
-		expect(html.toLowerCase()).not.toContain("unsubscribe");
+	it("rejects marketing when unsubscribeUrl is missing instead of substituting the homepage", async () => {
+		await expect(
+			renderEmail({
+				name: "notification",
+				to: "ops@example.com",
+				category: "marketing",
+				data: {
+					title: "Product update",
+					body: "New features shipped this week.",
+					severity: "info",
+				},
+			}),
+		).rejects.toMatchObject({ name: "EmailValidationError" });
 	});
 });
