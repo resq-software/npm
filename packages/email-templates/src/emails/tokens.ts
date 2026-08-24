@@ -24,13 +24,23 @@
 
 import { brand } from "@resq-systems/constants/brand";
 import { colors, fonts } from "@resq-systems/constants/tokens";
+import { emailDesignContract } from "../email-design-contract.js";
 
 /**
  * Email-safe hex color tokens, sourced from the shared `@resq-systems/constants`
  * design tokens so the brand palette lives in one place across apps. Email
  * clients don't support `oklch()`, so the hex snapshot is used here.
  */
-export const emailColors = colors.hex;
+export const emailColors = {
+	...emailDesignContract.modes.light,
+	info: colors.hex.info,
+	success: colors.hex.success,
+	warning: colors.hex.warning,
+	danger: colors.hex.danger,
+} as const;
+
+/** Email shell colors applied as a dark-mode enhancement. */
+export const emailDarkColors = emailDesignContract.modes.dark;
 
 /** Brand font stacks + webfont stylesheet href, from the shared design tokens. */
 export const emailFonts = fonts;
@@ -46,6 +56,7 @@ export type EmailColorToken = keyof typeof emailColors;
 export const emailOrg = {
 	brandName: brand.name,
 	productName: brand.productName,
+	descriptor: brand.emailDescriptor,
 	legalName: brand.legalName,
 	registeredAddress: brand.postalAddress,
 	supportEmail: brand.email.support,
