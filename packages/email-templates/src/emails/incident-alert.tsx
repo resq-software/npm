@@ -59,10 +59,7 @@ export function IncidentAlertEmail({
 				{meta}
 			</Email.Text>
 			<Email.CTA href={dashboardUrl}>Open incident dashboard</Email.CTA>
-			<Email.LegalFooter
-				category="transactional"
-				reason="You are receiving this alert because you are on-call for ResQ Systems disaster response."
-			/>
+			<Email.LegalFooter reason="You are receiving this alert because you are on-call for ResQ Systems disaster response." />
 		</Email.Shell>
 	);
 }

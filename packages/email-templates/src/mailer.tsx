@@ -103,7 +103,7 @@ interface AnyTemplateDef {
 	readonly Component: (data: never) => ReactElement;
 }
 
-/** The `{ name, to, data, category?, unsubscribeUrl? }` payload for a single template def. */
+/** The shared payload fields for a single template definition. */
 type PayloadFor<Def> =
 	Def extends EmailTemplateDef<infer Name, infer DataSchema>
 		? {
@@ -112,14 +112,16 @@ type PayloadFor<Def> =
 				readonly data: DataSchema["Type"];
 				/** Compliance class for this send; defaults to `transactional`. */
 				readonly category?: "transactional" | "marketing";
-				/** Unsubscribe/preferences URL, surfaced in the legal footer for `marketing`. */
+				/** Required opt-out destination for marketing sends. */
 				readonly unsubscribeUrl?: string;
+				/** Optional preference-management destination for marketing sends. */
+				readonly preferencesUrl?: string;
 			}
 		: never;
 
 /**
  * The discriminated payload union for a tuple of template defs — one
- * `{ name, to, data, category?, unsubscribeUrl? }` variant per def, discriminated
+ * `{ name, to, data, category?, unsubscribeUrl?, preferencesUrl? }` variant per def, discriminated
  * by the literal `name` field. Narrow a value with `payload.name` to recover the
  * matching `data` type.
  *
@@ -275,6 +277,7 @@ export function createMailer<const Defs extends readonly AnyTemplateDef[]>(
 				data: def.data,
 				category: Schema.optional(emailCategory),
 				unsubscribeUrl: Schema.optional(HttpUrl),
+				preferencesUrl: Schema.optional(HttpUrl),
 			}),
 		),
 	) as unknown as Schema.Codec<Payload, unknown, never>;
@@ -303,7 +306,11 @@ export function createMailer<const Defs extends readonly AnyTemplateDef[]>(
 				squashed instanceof Error ? squashed.message : String(squashed),
 			);
 		}
-		return result.value;
+		const payload = result.value;
+		if (payload.category === "marketing" && payload.unsubscribeUrl === undefined) {
+			throw new EmailValidationError("marketing email requires unsubscribeUrl");
+		}
+		return payload;
 	}
 
 	async function renderEmail(input: unknown, options?: RenderEmailOptions): Promise<RenderedEmail> {
@@ -312,6 +319,7 @@ export function createMailer<const Defs extends readonly AnyTemplateDef[]>(
 		const message: EmailMessage = {
 			category: payload.category ?? "transactional",
 			unsubscribeUrl: payload.unsubscribeUrl,
+			preferencesUrl: payload.preferencesUrl,
 		};
 		const element = withEmailMessage(
 			withEmailTheme(entry.render(payload.data), options?.theme),

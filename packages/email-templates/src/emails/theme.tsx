@@ -277,15 +277,17 @@ export function withEmailTheme(element: ReactElement, override?: EmailThemeOverr
 /**
  * Per-send message policy carried through context to the legal footer.
  *
- * The unsubscribe affordance renders only when {@link EmailMessage.category} is
- * `"marketing"` **and** {@link EmailMessage.unsubscribeUrl} is set; a marketing
- * send with no `unsubscribeUrl` simply omits it (there is no homepage fallback).
+ * Legal controls render only for `"marketing"` messages. The mailer boundary
+ * requires {@link EmailMessage.unsubscribeUrl}; preference management remains a
+ * separate optional destination. Neither URL ever falls back to the homepage.
  */
 export interface EmailMessage {
 	/** Compliance class; defaults to `transactional`. */
 	category: EmailCategory;
-	/** Absolute unsubscribe/preferences URL; only consulted for `marketing` sends. */
+	/** Absolute unsubscribe URL; required by the mailer boundary for marketing sends. */
 	unsubscribeUrl?: string;
+	/** Separate optional preference-management URL for marketing sends. */
+	preferencesUrl?: string;
 }
 
 /** Context carrying the active message policy; defaults to a transactional send. */

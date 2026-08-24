@@ -68,10 +68,7 @@ export function MissionApprovalEmail({
 					This approval request expires in {expiresInMinutes} minutes.
 				</Email.Paragraph>
 			) : null}
-			<Email.LegalFooter
-				category="transactional"
-				reason="You are receiving this email because you are an approver for ResQ Systems mission operations."
-			/>
+			<Email.LegalFooter reason="You are receiving this email because you are an approver for ResQ Systems mission operations." />
 		</Email.Shell>
 	);
 }

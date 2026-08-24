@@ -26,12 +26,45 @@ import { Schema as S } from "effect";
 
 //#region Validation primitives
 
+const HTTP_AUTHORITY_PREFIX = /^https?:\/\/[^/?#]+(?:[/?#]|$)/i;
+
+function hasAsciiControlOrWhitespace(value: string): boolean {
+	for (let index = 0; index < value.length; index += 1) {
+		const code = value.charCodeAt(index);
+		if (code <= 0x20 || code === 0x7f) return true;
+	}
+	return false;
+}
+
 /**
- * A non-empty, absolute http(s) URL. Validated with a pattern check (blocks
- * `javascript:`/relative hrefs) but decoded as a plain `string`, so template
- * props stay ergonomic. Exported for consumers building their own templates.
+ * A real absolute http(s) URL decoded as a plain string. Literal ASCII controls
+ * and whitespace, hostless/repaired authorities, and credential-bearing URLs
+ * are rejected before the value can reach an email href.
  */
-export const HttpUrl = S.String.check(S.isPattern(/^https?:\/\/\S+$/i));
+export const HttpUrl = S.String.check(
+	S.makeFilter(
+		(value: string) => {
+			if (hasAsciiControlOrWhitespace(value) || !HTTP_AUTHORITY_PREFIX.test(value)) {
+				return false;
+			}
+			try {
+				const parsed = new URL(value);
+				return (
+					(parsed.protocol === "http:" || parsed.protocol === "https:") &&
+					parsed.hostname.length > 0 &&
+					parsed.username === "" &&
+					parsed.password === ""
+				);
+			} catch {
+				return false;
+			}
+		},
+		{
+			message:
+				"Expected an absolute http(s) URL without credentials, ASCII controls, or whitespace",
+		},
+	),
+);
 
 /**
  * A single, syntactically-valid recipient email address (branded).

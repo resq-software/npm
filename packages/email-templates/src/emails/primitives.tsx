@@ -39,7 +39,6 @@ import {
 } from "@react-email/components";
 import { type ReactNode, useContext } from "react";
 import { emailDesignContract } from "../email-design-contract.js";
-import type { EmailCategory } from "../schemas.js";
 import {
 	EmailMessageContext,
 	EmailThemeContext,
@@ -244,18 +243,17 @@ function Footer({ children }: { children: ReactNode }) {
 
 /**
  * Compliance footer: legal entity + registered postal address, Terms/Privacy
- * links, and — for `marketing` sends only — an unsubscribe affordance. The
- * effective category is the `category` prop, falling back to the active
+ * links, and — for `marketing` sends only — unsubscribe and optional preference
+ * controls. The effective category comes from the validated
  * {@link EmailMessageContext}. All copy is small and muted.
  */
-function LegalFooter({ reason, category }: { reason?: ReactNode; category?: EmailCategory }) {
+function LegalFooter({ reason }: { reason?: ReactNode }) {
 	const { org } = useContext(EmailThemeContext);
 	const message = useContext(EmailMessageContext);
-	const effectiveCategory = category ?? message.category;
-	// CAN-SPAM/GDPR: the homepage is not a valid opt-out, so never fall back to
-	// `org.websiteUrl`. Marketing sends without a real `unsubscribeUrl` simply
-	// omit the affordance (and are effectively transactional).
+	// CAN-SPAM/GDPR: the homepage is not a valid opt-out, so neither legal control
+	// ever falls back to `org.websiteUrl`.
 	const unsubscribeHref = message.unsubscribeUrl;
+	const preferencesHref = message.preferencesUrl;
 	return (
 		<Section className="resq-email-footer">
 			<Signature />
@@ -288,14 +286,22 @@ function LegalFooter({ reason, category }: { reason?: ReactNode; category?: Emai
 					Privacy
 				</Link>
 			</Text>
-			{effectiveCategory === "marketing" && unsubscribeHref ? (
+			{message.category === "marketing" && unsubscribeHref ? (
 				<Text
 					className="resq-email-muted font-sans text-xs text-muted"
 					style={{ lineHeight: `${emailDesignContract.presentation.footer.lineHeightPx}px` }}
 				>
 					<Link href={unsubscribeHref} className="resq-email-muted text-muted underline">
-						Unsubscribe or manage preferences
+						Unsubscribe
 					</Link>
+					{preferencesHref ? (
+						<>
+							{" · "}
+							<Link href={preferencesHref} className="resq-email-muted text-muted underline">
+								Manage preferences
+							</Link>
+						</>
+					) : null}
 				</Text>
 			) : null}
 		</Section>
