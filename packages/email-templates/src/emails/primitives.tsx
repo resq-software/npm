@@ -30,6 +30,7 @@ import {
 	Heading,
 	Hr,
 	Html,
+	Img,
 	Link,
 	Preview,
 	Row,
@@ -96,20 +97,47 @@ function Shell({ preview, theme, children }: ShellProps) {
 	);
 }
 
-/** Text-first company lockup rendered at the top of the card. */
+/** Company lockup rendered at the top of the card. */
 function Header() {
 	const { org } = useContext(EmailThemeContext);
+	const { logoSizePx, logoGapPx, brandRulePx } = emailDesignContract.presentation.header;
 	return (
 		<Section className="resq-email-header mb-8">
-			<Text className="resq-email-foreground m-0 font-display text-xl font-bold tracking-tight text-foreground">
-				{org.brandName}
-			</Text>
-			<Text className="resq-email-muted mb-0 mt-1 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted">
-				{org.descriptor.toUpperCase()}
-			</Text>
+			<Row className="resq-email-logo-row" role="presentation" align="left">
+				<Column
+					className="resq-email-logo-cell"
+					width={String(logoSizePx)}
+					style={{ width: `${logoSizePx}px`, verticalAlign: "middle" }}
+				>
+					<Img
+						className="resq-email-logo"
+						src={emailDesignContract.identity.logoUrl}
+						alt=""
+						width={logoSizePx}
+						height={logoSizePx}
+						style={{ border: 0, display: "block" }}
+					/>
+				</Column>
+				<Column
+					className="resq-email-logo-spacer"
+					data-skip-in-text="true"
+					width={String(logoGapPx)}
+					style={{ fontSize: 0, lineHeight: "0", width: `${logoGapPx}px` }}
+				>
+					{"\u00a0"}
+				</Column>
+				<Column className="resq-email-identity" style={{ verticalAlign: "middle" }}>
+					<Text className="resq-email-foreground m-0 font-display text-xl font-bold tracking-tight text-foreground">
+						{org.brandName}
+					</Text>{" "}
+					<Text className="resq-email-muted mb-0 mt-1 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted">
+						{org.descriptor.toUpperCase()}
+					</Text>
+				</Column>
+			</Row>
 			<Hr
 				className="resq-email-brand-rule mb-0 mt-4 border-0 bg-primary"
-				style={{ height: `${emailDesignContract.presentation.header.brandRulePx}px` }}
+				style={{ height: `${brandRulePx}px` }}
 			/>
 		</Section>
 	);

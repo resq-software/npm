@@ -54,8 +54,12 @@ import {
 	emailDesignContractIntegrity,
 } from "@resq-systems/email-templates/email-contract";
 
-emailDesignContract.schemaVersion; // 1
+emailDesignContract.schemaVersion; // 2
 emailDesignContract.identity.descriptor; // "Autonomous Disaster Response"
+emailDesignContract.identity.logoUrl; // "https://resq.software/logo.png"
+emailDesignContract.identity.logoSha256; // pinned SHA-256 of the public logo bytes
+emailDesignContract.presentation.header.logoSizePx; // 40
+emailDesignContract.presentation.header.logoGapPx; // 12
 emailDesignContract.integrity.digest === emailDesignContractIntegrity; // true
 canonicalizeEmailContract(emailDesignContract); // stable JSON without the top-level integrity field
 ```
@@ -63,6 +67,10 @@ canonicalizeEmailContract(emailDesignContract); // stable JSON without the top-l
 The `./email-contract` import graph has no React, Effect, or Resend dependency.
 Its lowercase SHA-256 digest covers the canonicalized contract values and lets
 another renderer verify that it consumes the same versioned data.
+
+The public logo URL and its SHA-256 digest are part of this versioned contract.
+Changing the bytes served at that URL requires a new package release, even if the
+URL itself does not change.
 
 `emailColors` takes all six light shell roles from
 `emailDesignContract.modes.light`. The contract defines the email-specific light
