@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- [#290](https://github.com/resq-software/npm/pull/290) [`b8af3d4`](https://github.com/resq-software/npm/commit/b8af3d477e7574ddce49ce01a43b461292dc95b9) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add versioned ResQ Systems email design contract, adaptive shell, and marketing unsubscribe validation
+
+### Patch Changes
+
+- Updated dependencies [[`b8af3d4`](https://github.com/resq-software/npm/commit/b8af3d477e7574ddce49ce01a43b461292dc95b9)]:
+  - @resq-systems/constants@0.6.0
+
 <!--
   Copyright 2026 ResQ
 
@@ -17,6 +28,7 @@
 -->
 
 ## 0.6.2
+
 ### Patch Changes
 
 - [#212](https://github.com/resq-software/npm/pull/212) [`80ae136`](https://github.com/resq-software/npm/commit/80ae136c449c8fa0e5f24f5116e282bf30a09f71) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add security, research, and engineer addresses to brand.email and repoint support to the real contact@ mailbox
@@ -25,12 +37,14 @@
   - @resq-systems/constants@0.5.0
 
 ## 0.6.1
+
 ### Patch Changes
 
 - Updated dependencies [[`848e667`](https://github.com/resq-software/npm/commit/848e667e0467e4663a6684fad00244070b11b01c), [`2860be7`](https://github.com/resq-software/npm/commit/2860be7c0f4a16c3f61952668450553b2e959998)]:
   - @resq-systems/constants@0.4.0
 
 ## 0.6.0
+
 ### Minor Changes
 
 - [#187](https://github.com/resq-software/npm/pull/187) [`e6c5ac8`](https://github.com/resq-software/npm/commit/e6c5ac81648a5d681961d13e7faa01982b08d478) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Validate and brand the recipient address at the mailer boundary
@@ -40,11 +54,13 @@
   BREAKING: a `to` that is not a syntactically valid email now fails validation instead of passing through; `RenderedEmail["to"]` and the decoded payload `to` narrow from `string` to the branded `EmailAddress`.
 
 ## 0.5.1
+
 ### Patch Changes
 
 - [#179](https://github.com/resq-software/npm/pull/179) [`4a8cf9a`](https://github.com/resq-software/npm/commit/4a8cf9a1d0b8d76e9c380067c446a209117032a2) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Replace `workspace:*` internal dependency ranges with concrete semver so published packages install cleanly outside the monorepo
 
 ## 0.5.0
+
 ### Minor Changes
 
 - [#175](https://github.com/resq-software/npm/pull/175) [`abc88da`](https://github.com/resq-software/npm/commit/abc88da66987f0cce47303d09108d4f1fc3b4520) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Validate and brand the recipient address at the mailer boundary
@@ -54,6 +70,7 @@
   BREAKING: a `to` that is not a syntactically valid email now fails validation instead of passing through; `RenderedEmail["to"]` and the decoded payload `to` narrow from `string` to the branded `EmailAddress`.
 
 ## 0.4.0
+
 ### Minor Changes
 
 - [#174](https://github.com/resq-software/npm/pull/174) [`59d6d6d`](https://github.com/resq-software/npm/commit/59d6d6d053e755acb28bd655a9faa44362bb680d) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Validate and brand the recipient address at the mailer boundary
@@ -75,10 +92,12 @@
   `@resq-systems/rate-limiting` additionally re-adds a `@deprecated`
   `RateLimitCheckResult` type alias for the renamed `RateLimitDecision`, restoring
   backward compatibility for consumers written before the rename.
+
 - Updated dependencies [[`1f28d41`](https://github.com/resq-software/npm/commit/1f28d4141dbaf389f0096cb93fde02e2a553e3ca)]:
   - @resq-systems/constants@0.3.1
 
 ## 0.3.0
+
 ### Minor Changes
 
 - [#167](https://github.com/resq-software/npm/pull/167) [`c80c8b8`](https://github.com/resq-software/npm/commit/c80c8b8f0eecd3e12af3e74cdd26aac98337675b) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Rebrand to ResQ Systems: rename npm scope `@resq-sw/*` → `@resq-systems/*`
@@ -97,6 +116,7 @@
   - @resq-systems/constants@0.3.0
 
 ## 0.2.0
+
 ### Minor Changes
 
 - [#164](https://github.com/resq-software/npm/pull/164) [`d324afe`](https://github.com/resq-software/npm/commit/d324afe582374c9573142edf2b03ce5fa890fdaf) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add password-changed, new-device-login, mission-approval, and org-invitation templates plus Email.SupportLine
@@ -116,6 +136,7 @@
   - @resq-sw/constants@0.2.0
 
 ## 0.1.1
+
 ### Patch Changes
 
 - [#156](https://github.com/resq-software/npm/pull/156) [`52a18eb`](https://github.com/resq-software/npm/commit/52a18eba2e89d17aa6056c802b16fff53bdbfde1) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Correct the `effect` peer ranges to the versions these packages are actually built and tested against.
