@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- [`e9cbf29`](https://github.com/resq-software/npm/commit/e9cbf290984dd9a8cc5a76fc470d743ee6bd3851) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add the integrity-pinned ResQ Systems logo to the shared company email lockup
+
 ## 1.0.0
 
 ### Major Changes
