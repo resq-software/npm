@@ -40,6 +40,8 @@
 	"scripts": {
 		"build": "tsdown",
 		"contract:generate": "bun run ./scripts/generate-email-contract-integrity.ts",
+		"logo:verify": "bun run ./scripts/verify-email-logo-asset.ts",
+		"prepublishOnly": "bun run logo:verify",
 		"test": "vitest run",
 		"tsc": "tsc --noEmit",
 		"email:dev": "email dev --dir ./emails --port 3000",
