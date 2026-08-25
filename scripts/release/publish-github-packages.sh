@@ -42,6 +42,11 @@ failed_packages=()
 
 publish_one() {
 	local pkg_dir="$1"
+	local package_name
+	package_name="$(node -e "process.stdout.write(require('./$pkg_dir/package.json').name)")" || return 1
+	if [ "$package_name" = "@resq-systems/email-templates" ]; then
+		(cd "$pkg_dir" && bun run logo:verify) || return 1
+	fi
 
 	# Every step is guarded with `|| return 1`: bash `set -e` does not apply
 	# inside a function invoked in a conditional (`if ! publish_one ...`), so a
@@ -58,7 +63,7 @@ publish_one() {
 	[ -n "$pack_filename" ] || { echo "  npm pack produced no tarball for $pkg_dir" >&2; return 1; }
 
 	local pkg_slug
-	pkg_slug="$(node -e "process.stdout.write(require('./$pkg_dir/package.json').name.replace('@resq-systems/', ''))")" || return 1
+	pkg_slug="${package_name#@resq-systems/}"
 
 	local staging_dir="${RUNNER_TEMP:-/tmp}/resq-${pkg_slug}-github-package"
 	rm -rf "$staging_dir"
