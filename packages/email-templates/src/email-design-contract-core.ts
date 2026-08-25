@@ -36,7 +36,7 @@ export interface EmailModeColors {
 
 /** Stable, unhashed values shared by email renderers across frameworks. */
 export interface EmailDesignContractCore {
-	readonly schemaVersion: 1;
+	readonly schemaVersion: 2;
 	readonly identity: {
 		readonly brandName: string;
 		readonly productName: string;
@@ -47,6 +47,8 @@ export interface EmailDesignContractCore {
 		readonly termsUrl: string;
 		readonly privacyUrl: string;
 		readonly supportEmail: string;
+		readonly logoUrl: string;
+		readonly logoSha256: string;
 	};
 	readonly modes: {
 		readonly light: EmailModeColors;
@@ -81,6 +83,8 @@ export interface EmailDesignContractCore {
 			readonly descriptorFontPx: number;
 			readonly descriptorTrackingEm: number;
 			readonly brandRulePx: number;
+			readonly logoSizePx: number;
+			readonly logoGapPx: number;
 		};
 		readonly cta: {
 			readonly fullWidth: true;
@@ -192,7 +196,7 @@ export function canonicalizeEmailContract(value: unknown): string {
 
 /** Internal unhashed contract values consumed by the generator and public module. */
 export const emailDesignContractCore = {
-	schemaVersion: 1,
+	schemaVersion: 2,
 	identity: {
 		brandName: brand.name,
 		productName: brand.productName,
@@ -203,6 +207,8 @@ export const emailDesignContractCore = {
 		termsUrl: brand.legal.termsUrl,
 		privacyUrl: brand.legal.privacyUrl,
 		supportEmail: brand.email.support,
+		logoUrl: brand.logo,
+		logoSha256: "f04e4334bf81acaebbfb9e57f8ee43edcfee2f8939344b11bab59f0d6093708f",
 	},
 	modes: {
 		light: {
@@ -251,6 +257,8 @@ export const emailDesignContractCore = {
 			descriptorFontPx: 10,
 			descriptorTrackingEm: 0.16,
 			brandRulePx: 2,
+			logoSizePx: 40,
+			logoGapPx: 12,
 		},
 		cta: {
 			fullWidth: true,

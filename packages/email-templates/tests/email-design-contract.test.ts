@@ -26,7 +26,7 @@ import {
 describe("email design contract", () => {
 	it("publishes the approved company-first identity and modes", () => {
 		expect(emailDesignContract).toEqual({
-			schemaVersion: 1,
+			schemaVersion: 2,
 			identity: {
 				brandName: "ResQ Systems",
 				productName: "ResQ Tactical OS",
@@ -38,6 +38,8 @@ describe("email design contract", () => {
 				termsUrl: "https://resq.software/legal/terms",
 				privacyUrl: "https://resq.software/legal/privacy",
 				supportEmail: "contact@resq.software",
+				logoUrl: "https://resq.software/logo.png",
+				logoSha256: "f04e4334bf81acaebbfb9e57f8ee43edcfee2f8939344b11bab59f0d6093708f",
 			},
 			modes: {
 				light: {
@@ -95,6 +97,8 @@ describe("email design contract", () => {
 					descriptorFontPx: 10,
 					descriptorTrackingEm: 0.16,
 					brandRulePx: 2,
+					logoSizePx: 40,
+					logoGapPx: 12,
 				},
 				cta: {
 					fullWidth: true,
@@ -107,6 +111,12 @@ describe("email design contract", () => {
 			},
 			integrity: { algorithm: "sha256", digest: emailDesignContractIntegrity },
 		});
+	});
+
+	it("pins the schema-2 logo contract integrity digest", () => {
+		expect(emailDesignContractIntegrity).toBe(
+			"239feb95c270deee4b118af21785395b051e508f1a0436324930ce5ac6064c70",
+		);
 	});
 
 	it("uses stable deep-key JSON and a non-self-referential SHA-256 digest", () => {
