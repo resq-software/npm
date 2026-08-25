@@ -57,9 +57,11 @@ export function MissionApprovalEmail({
 				</Email.Text>
 			) : null}
 			<Email.Title>{title}</Email.Title>
-			<Email.Paragraph>A mission needs your sign-off before it can execute.</Email.Paragraph>
+			<Email.Paragraph>
+				A ResQ Tactical OS mission needs your sign-off before it can execute.
+			</Email.Paragraph>
 			{summary ? <Email.Paragraph>{summary}</Email.Paragraph> : null}
-			<Email.Text className="mb-2 font-mono text-xs uppercase tracking-wide text-muted">
+			<Email.Text className="resq-email-muted mb-2 font-mono text-xs uppercase tracking-wide text-muted">
 				{meta}
 			</Email.Text>
 			<Email.CTA href={approveUrl}>Review &amp; approve</Email.CTA>
@@ -68,10 +70,7 @@ export function MissionApprovalEmail({
 					This approval request expires in {expiresInMinutes} minutes.
 				</Email.Paragraph>
 			) : null}
-			<Email.LegalFooter
-				category="transactional"
-				reason="You are receiving this email because you are an approver for ResQ Systems mission operations."
-			/>
+			<Email.LegalFooter reason="You are receiving this email because you are an approver for ResQ Systems mission operations." />
 		</Email.Shell>
 	);
 }

@@ -54,15 +54,15 @@ export function IncidentAlertEmail({
 				{severity} incident
 			</Email.Text>
 			<Email.Title>{title}</Email.Title>
+			<Email.Paragraph>
+				Review this incident in ResQ Tactical OS and coordinate the next response action.
+			</Email.Paragraph>
 			<Email.Paragraph>{summary}</Email.Paragraph>
-			<Email.Text className="mb-2 font-mono text-xs uppercase tracking-wide text-muted">
+			<Email.Text className="resq-email-muted mb-2 font-mono text-xs uppercase tracking-wide text-muted">
 				{meta}
 			</Email.Text>
 			<Email.CTA href={dashboardUrl}>Open incident dashboard</Email.CTA>
-			<Email.LegalFooter
-				category="transactional"
-				reason="You are receiving this alert because you are on-call for ResQ Systems disaster response."
-			/>
+			<Email.LegalFooter reason="You are receiving this alert because you are on-call for ResQ Systems disaster response." />
 		</Email.Shell>
 	);
 }

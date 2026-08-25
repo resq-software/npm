@@ -53,6 +53,7 @@ export type EmailTemplateData<N extends EmailName> = Extract<EmailPayload, { nam
  * @param input - Untrusted value to validate against the built-in contract.
  * @returns The validated, branded {@link EmailPayload}.
  * @throws {EmailValidationError} If `input` matches no built-in template variant —
- *   unknown `name`, malformed/header-injecting `to`, or `data` failing its schema.
+ *   unknown `name`, malformed/header-injecting `to`, missing marketing
+ *   `unsubscribeUrl`, or `data` failing its schema.
  */
 export const decodeEmailPayload = resqMailer.decode;

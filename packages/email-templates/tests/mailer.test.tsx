@@ -17,7 +17,7 @@
 import { Schema as S } from "effect";
 import { describe, expect, it } from "vitest";
 import { Email } from "../src/emails/primitives";
-import { createMailer, defineEmailTemplate } from "../src/mailer";
+import { createMailer, defineEmailTemplate, EmailValidationError } from "../src/mailer";
 import { resqEmailTemplates } from "../src/templates";
 
 const pingTemplate = defineEmailTemplate({
@@ -33,6 +33,16 @@ const pingTemplate = defineEmailTemplate({
 });
 
 const mailer = createMailer([...resqEmailTemplates, pingTemplate]);
+
+const malformedHttpUrls = [
+	"https://?",
+	"https://#",
+	"https:///path-only",
+	"https://user:secret@example.com/path",
+	"https://example.com/has space",
+	"https://example.com/\u0000blocked",
+	"https://example.com/\u001fblocked",
+] as const;
 
 describe("createMailer", () => {
 	it("renders a custom template composed with the ResQ Systems set", async () => {
@@ -65,4 +75,70 @@ describe("createMailer", () => {
 		expect(mailer.names).toContain("ping");
 		expect(mailer.names).toContain("incident-alert");
 	});
+
+	it("rejects marketing payloads without an unsubscribe URL", async () => {
+		await expect(
+			mailer.renderEmail({
+				name: "notification",
+				to: "ops@example.com",
+				category: "marketing",
+				data: { title: "Update", body: "Details", severity: "info" },
+			}),
+		).rejects.toMatchObject({ name: "EmailValidationError" });
+	});
+
+	it("rejects marketing payloads without an unsubscribe URL at decode", () => {
+		expect(() =>
+			mailer.decode({
+				name: "notification",
+				to: "ops@example.com",
+				category: "marketing",
+				preferencesUrl: "https://app.resq.software/preferences?token=abc123",
+				data: { title: "Update", body: "Details", severity: "info" },
+			}),
+		).toThrow(EmailValidationError);
+	});
+
+	it("rejects marketing payloads without an unsubscribe URL through the public schema", () => {
+		const decodeSchema = S.decodeUnknownSync(mailer.schema);
+
+		expect(() =>
+			decodeSchema({
+				name: "notification",
+				to: "ops@example.com",
+				category: "marketing",
+				preferencesUrl: "https://app.resq.software/preferences?token=abc123",
+				data: { title: "Update", body: "Details", severity: "info" },
+			}),
+		).toThrow();
+	});
+
+	it("decodes separate unsubscribe and preference URLs", () => {
+		const payload = mailer.decode({
+			name: "ping",
+			to: "a@b.com",
+			category: "marketing",
+			unsubscribeUrl: "https://app.resq.software/unsubscribe?token=abc123",
+			preferencesUrl: "https://app.resq.software/preferences?token=abc123",
+			data: { message: "hello world" },
+		});
+
+		expect(payload.unsubscribeUrl).toBe("https://app.resq.software/unsubscribe?token=abc123");
+		expect(payload.preferencesUrl).toBe("https://app.resq.software/preferences?token=abc123");
+	});
+
+	for (const field of ["unsubscribeUrl", "preferencesUrl"] as const) {
+		it.each(malformedHttpUrls)(`rejects malformed ${field}: %s`, (value) => {
+			expect(() =>
+				mailer.decode({
+					name: "notification",
+					to: "ops@example.com",
+					category: "marketing",
+					unsubscribeUrl: "https://app.resq.software/unsubscribe?token=valid",
+					[field]: value,
+					data: { title: "Update", body: "Details", severity: "info" },
+				}),
+			).toThrow(EmailValidationError);
+		});
+	}
 });

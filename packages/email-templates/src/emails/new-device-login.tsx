@@ -44,7 +44,7 @@ export function NewDeviceLoginEmail({
 			{firstName ? <Email.Paragraph>Hi {firstName},</Email.Paragraph> : null}
 			<Email.Paragraph>We noticed a new sign-in to your ResQ Systems account.</Email.Paragraph>
 			{meta ? (
-				<Email.Text className="mb-4 font-mono text-xs uppercase tracking-wide text-muted">
+				<Email.Text className="resq-email-muted mb-4 font-mono text-xs uppercase tracking-wide text-muted">
 					{meta}
 				</Email.Text>
 			) : null}
@@ -56,10 +56,7 @@ export function NewDeviceLoginEmail({
 			</Email.Paragraph>
 			{secureAccountUrl ? <Email.CTA href={secureAccountUrl}>Secure your account</Email.CTA> : null}
 			<Email.SupportLine>Don't recognize this sign-in?</Email.SupportLine>
-			<Email.LegalFooter
-				category="transactional"
-				reason="You are receiving this email because a new sign-in to your ResQ Systems account was detected."
-			/>
+			<Email.LegalFooter reason="You are receiving this email because a new sign-in to your ResQ Systems account was detected." />
 		</Email.Shell>
 	);
 }

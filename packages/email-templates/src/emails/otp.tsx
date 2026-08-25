@@ -42,10 +42,7 @@ export function OtpEmail({ code = "123456", firstName, expiresInMinutes = 10 }: 
 				<Email.Paragraph>This code expires in {expiresInMinutes} minutes.</Email.Paragraph>
 			) : null}
 			<Email.Paragraph>If you didn't request this code, ignore this email.</Email.Paragraph>
-			<Email.LegalFooter
-				category="transactional"
-				reason="You received this email because a verification code was requested for your account."
-			/>
+			<Email.LegalFooter reason="You received this email because a verification code was requested for your account." />
 		</Email.Shell>
 	);
 }

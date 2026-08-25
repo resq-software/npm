@@ -31,7 +31,7 @@ import {
 	withEmailMessage,
 	withEmailTheme,
 } from "./emails/theme.js";
-import { EmailAddress, HttpUrl, emailCategory } from "./schemas.js";
+import { EmailAddress, HttpUrl } from "./schemas.js";
 
 //#region Constants
 
@@ -103,23 +103,37 @@ interface AnyTemplateDef {
 	readonly Component: (data: never) => ReactElement;
 }
 
-/** The `{ name, to, data, category?, unsubscribeUrl? }` payload for a single template def. */
+/** The shared payload fields for a single template definition. */
+type EmailDelivery =
+	| {
+			/** Compliance class for this send; defaults to `transactional`. */
+			readonly category?: "transactional";
+			/** Optional opt-out destination for transactional sends. */
+			readonly unsubscribeUrl?: string;
+			/** Optional preference-management destination for transactional sends. */
+			readonly preferencesUrl?: string;
+	  }
+	| {
+			/** Marketing sends must declare their compliance class explicitly. */
+			readonly category: "marketing";
+			/** Required opt-out destination for marketing sends. */
+			readonly unsubscribeUrl: string;
+			/** Optional preference-management destination for marketing sends. */
+			readonly preferencesUrl?: string;
+	  };
+
 type PayloadFor<Def> =
 	Def extends EmailTemplateDef<infer Name, infer DataSchema>
-		? {
+		? EmailDelivery & {
 				readonly name: Name;
 				readonly to: EmailAddress;
 				readonly data: DataSchema["Type"];
-				/** Compliance class for this send; defaults to `transactional`. */
-				readonly category?: "transactional" | "marketing";
-				/** Unsubscribe/preferences URL, surfaced in the legal footer for `marketing`. */
-				readonly unsubscribeUrl?: string;
 			}
 		: never;
 
 /**
  * The discriminated payload union for a tuple of template defs — one
- * `{ name, to, data, category?, unsubscribeUrl? }` variant per def, discriminated
+ * `{ name, to, data, category?, unsubscribeUrl?, preferencesUrl? }` variant per def, discriminated
  * by the literal `name` field. Narrow a value with `payload.name` to recover the
  * matching `data` type.
  *
@@ -194,7 +208,7 @@ export interface Mailer<
 	Payload extends { readonly name: string; readonly to: string; readonly data: unknown },
 > {
 	/** The Effect Schema union describing every `{ name, to, data }` payload. */
-	readonly schema: Schema.Top;
+	readonly schema: Schema.Codec<Payload, unknown, never>;
 	/** name → { subject, render } for every template. */
 	readonly registry: Record<Payload["name"], EmailRegistryEntry>;
 	/** Every registered template name, in def order. */
@@ -206,7 +220,8 @@ export interface Mailer<
 	 * @param input - Untrusted `{ name, to, data }` value from the boundary.
 	 * @returns The validated, branded payload.
 	 * @throws {EmailValidationError} If `input` matches no template variant — bad
-	 *   `name`, a malformed/header-injecting `to`, or `data` failing its schema.
+	 *   `name`, a malformed/header-injecting `to`, missing marketing
+	 *   `unsubscribeUrl`, or `data` failing its schema.
 	 */
 	decode(input: unknown): Payload;
 	/**
@@ -268,15 +283,28 @@ export function createMailer<const Defs extends readonly AnyTemplateDef[]>(
 	// `Codec<Payload, unknown>` (every field schema decodes without services — cf.
 	// `@resq-systems/http`'s `SyncSchema`); `decode` returns the narrowed value.
 	const schema = Schema.Union(
-		defs.map((def) =>
-			Schema.Struct({
+		defs.map((def) => {
+			const fields = {
 				name: Schema.Literal(def.name),
 				to: Recipient,
 				data: def.data,
-				category: Schema.optional(emailCategory),
-				unsubscribeUrl: Schema.optional(HttpUrl),
-			}),
-		),
+			} as const;
+
+			return Schema.Union([
+				Schema.Struct({
+					...fields,
+					category: Schema.optional(Schema.Literal("transactional")),
+					unsubscribeUrl: Schema.optional(HttpUrl),
+					preferencesUrl: Schema.optional(HttpUrl),
+				}),
+				Schema.Struct({
+					...fields,
+					category: Schema.Literal("marketing"),
+					unsubscribeUrl: HttpUrl,
+					preferencesUrl: Schema.optional(HttpUrl),
+				}),
+			]);
+		}),
 	) as unknown as Schema.Codec<Payload, unknown, never>;
 
 	// Entries are stored with `unknown` params; the def's data type is enforced at
@@ -312,6 +340,7 @@ export function createMailer<const Defs extends readonly AnyTemplateDef[]>(
 		const message: EmailMessage = {
 			category: payload.category ?? "transactional",
 			unsubscribeUrl: payload.unsubscribeUrl,
+			preferencesUrl: payload.preferencesUrl,
 		};
 		const element = withEmailMessage(
 			withEmailTheme(entry.render(payload.data), options?.theme),

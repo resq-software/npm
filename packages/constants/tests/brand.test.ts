@@ -20,6 +20,7 @@ import { brand } from "../src/brand";
 describe("brand", () => {
 	it("exposes identity, domains, and email addresses", () => {
 		expect(brand.name).toBe("ResQ Systems");
+		expect(brand.emailDescriptor).toBe("Autonomous Disaster Response");
 		expect(brand.domains.app).toMatch(/^https:\/\//);
 		expect(brand.domains.marketing).toMatch(/^https:\/\//);
 		expect(brand.domains.docs).toMatch(/^https:\/\//);

@@ -18,6 +18,11 @@
 			"import": "./lib/emails/index.js",
 			"default": "./lib/emails/index.js"
 		},
+		"./email-contract": {
+			"types": "./lib/email-design-contract.d.ts",
+			"import": "./lib/email-design-contract.js",
+			"default": "./lib/email-design-contract.js"
+		},
 		"./send": {
 			"types": "./lib/send/index.d.ts",
 			"import": "./lib/send/index.js",
@@ -34,6 +39,7 @@
 	],
 	"scripts": {
 		"build": "tsdown",
+		"contract:generate": "bun run ./scripts/generate-email-contract-integrity.ts",
 		"test": "vitest run",
 		"tsc": "tsc --noEmit",
 		"email:dev": "email dev --dir ./emails --port 3000",
@@ -42,7 +48,7 @@
 	"dependencies": {
 		"@react-email/components": "^1.0.12",
 		"@react-email/render": "^2.1.0",
-		"@resq-systems/constants": "^0.5.0"
+		"@resq-systems/constants": "0.5.0"
 	},
 	"peerDependencies": {
 		"effect": ">=4.0.0-beta.78",
@@ -63,6 +69,7 @@
 		"@types/react-dom": "^19.2.4",
 		"@vitest/coverage-v8": "4.1.10",
 		"effect": "4.0.0-rc.110",
+		"parse5": "^8.0.1",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
 		"react-email": "6.9.2",
