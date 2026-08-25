@@ -47,10 +47,7 @@ export function PasswordResetEmail({
 				If you didn't request this, your password is unchanged and you can ignore this email. If
 				you're concerned about unauthorized access, reset your password to secure your account.
 			</Email.Paragraph>
-			<Email.LegalFooter
-				category="transactional"
-				reason="You're receiving this email because a password reset was requested for your account."
-			/>
+			<Email.LegalFooter reason="You're receiving this email because a password reset was requested for your account." />
 		</Email.Shell>
 	);
 }

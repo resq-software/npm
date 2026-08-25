@@ -35,6 +35,8 @@ export const brand = {
 	name: "ResQ Systems",
 	/** Product name (marketing / app title). */
 	productName: "ResQ Tactical OS",
+	/** Descriptor used by the shared company-first email lockup. */
+	emailDescriptor: "Autonomous Disaster Response",
 	/** Registered legal entity. */
 	legalName: "ResQ Systems, Inc.",
 	/** One-line positioning tagline. */

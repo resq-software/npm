@@ -103,6 +103,26 @@ describe("sendEmail", () => {
 		expect(send).not.toHaveBeenCalled();
 	});
 
+	it("returns a validation failure without calling the sender for marketing without unsubscribeUrl", async () => {
+		const send = vi.fn(async () => ({ ok: true, id: "msg_x" }) as const);
+		const result = await sendEmail(
+			{ send },
+			{
+				name: "notification",
+				to: "ops@example.com",
+				category: "marketing",
+				data: { title: "Update", body: "Details", severity: "info" },
+			},
+			{ from: "ResQ Systems <a@b.com>" },
+		);
+
+		expect(result).toMatchObject({
+			ok: false,
+			error: { name: "EmailValidationError" },
+		});
+		expect(send).not.toHaveBeenCalled();
+	});
+
 	it("normalizes a throwing sender into a SendResult failure", async () => {
 		const throwingSender: EmailSender = {
 			send: async () => {
