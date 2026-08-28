@@ -46,11 +46,11 @@
 		"@types/lodash.isequalwith": "^4.4.9",
 		"@types/lodash.throttle": "^4.1.9",
 		"@types/lodash.uniq": "^4.5.9",
-		"@types/node": "^26.2.0",
+		"@types/node": "^26.3.0",
 		"jsdom": "^30.0.1",
 		"tsdown": "^0.22.14",
 		"typescript": "7.0.2",
-		"vitest": "4.1.10"
+		"vitest": "4.1.11"
 	},
 	"publishConfig": {
 		"access": "public",
