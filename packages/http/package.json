@@ -39,10 +39,10 @@
 		}
 	},
 	"devDependencies": {
-		"@effect/platform-bun": "4.0.0-rc.111",
+		"@effect/platform-bun": "4.0.0-rc.112",
 		"@total-typescript/ts-reset": "^0.6.1",
 		"@types/node": "^26.2.0",
-		"effect": "4.0.0-rc.110",
+		"effect": "4.0.0-rc.112",
 		"tsdown": "^0.22.14",
 		"typescript": "7.0.2",
 		"vitest": "4.1.10"
