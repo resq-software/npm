@@ -64,21 +64,21 @@
 		}
 	},
 	"devDependencies": {
-		"@react-email/ui": "6.9.2",
+		"@react-email/ui": "6.9.3",
 		"@total-typescript/ts-reset": "^0.6.1",
-		"@types/node": "^26.2.0",
+		"@types/node": "^26.4.0",
 		"@types/react": "^19.2.18",
-		"@types/react-dom": "^19.2.4",
-		"@vitest/coverage-v8": "4.1.10",
+		"@types/react-dom": "^19.2.5",
+		"@vitest/coverage-v8": "4.1.11",
 		"effect": "4.0.0-rc.112",
 		"parse5": "^8.0.1",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
-		"react-email": "6.9.2",
-		"resend": "6.20.0",
+		"react-email": "6.9.3",
+		"resend": "6.24.0",
 		"tsdown": "^0.22.14",
 		"typescript": "7.0.2",
-		"vitest": "4.1.8"
+		"vitest": "4.1.11"
 	},
 	"publishConfig": {
 		"access": "public",

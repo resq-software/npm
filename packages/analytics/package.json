@@ -53,14 +53,14 @@
 	},
 	"devDependencies": {
 		"@total-typescript/ts-reset": "^0.6.1",
-		"@types/node": "^26.2.0",
+		"@types/node": "^26.4.0",
 		"@types/react": "^19.2.18",
-		"posthog-js": "^1.417.4",
+		"posthog-js": "^1.422.1",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
 		"tsdown": "^0.22.14",
 		"typescript": "7.0.2",
-		"vitest": "4.1.10"
+		"vitest": "4.1.11"
 	},
 	"publishConfig": {
 		"access": "public",

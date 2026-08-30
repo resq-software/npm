@@ -44,11 +44,11 @@
 	"devDependencies": {
 		"@total-typescript/ts-reset": "^0.6.1",
 		"@upstash/ratelimit": "^2.0.5",
-		"@upstash/redis": "^1.38.2",
+		"@upstash/redis": "^1.38.3",
 		"effect": "4.0.0-rc.112",
 		"tsdown": "^0.22.14",
 		"typescript": "7.0.2",
-		"vitest": "4.1.10"
+		"vitest": "4.1.11"
 	},
 	"publishConfig": {
 		"access": "public",
