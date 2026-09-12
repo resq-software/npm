@@ -22,28 +22,22 @@
  * @module @resq-systems/helpers/utils/object
  */
 
+import { hasOwnProperty } from "@resq-systems/types/guards";
 import isEqualWith from "lodash.isequalwith";
 
 /**
- * Safely checks if an object has a specific property as its own property (not inherited).
- * Uses Object.prototype.hasOwnProperty.call to avoid issues with objects that have null prototype
- * or have overridden the hasOwnProperty method.
+ * `hasOwnProperty` now lives in `@resq-systems/types/guards` and is re-exported
+ * here unchanged — same name, same non-narrowing
+ * `(obj: object, key: string) => boolean` signature, same `Object.hasOwn`
+ * delegation, so objects with a null prototype or a shadowed `hasOwnProperty`
+ * method still answer correctly.
  *
- * @param obj - The object to check
- * @param key - The property key to check for
- * @returns True if the object has the property as its own property, false otherwise
- * @example
- * ```ts
- * const obj = { name: 'Alice', age: 30 }
- * hasOwnProperty(obj, 'name') // true
- * hasOwnProperty(obj, 'toString') // false (inherited)
- * hasOwnProperty(obj, 'unknown') // false
- * ```
+ * It is imported rather than re-exported blind because this module calls it
+ * internally from {@link getOwnProperty} and the deep-equality path.
+ *
  * @internal
  */
-export function hasOwnProperty(obj: object, key: string): boolean {
-	return Object.hasOwn(obj, key);
-}
+export { hasOwnProperty };
 
 /**
  * Safely gets an object's own property value (not inherited). Returns undefined if the property
@@ -270,14 +264,30 @@ export function mapObjectMapValues<Key extends string, ValueBefore, ValueAfter>(
  * areObjectsShallowEqual(a, c) // false
  * areObjectsShallowEqual(a, a) // true (same reference)
  * ```
+ *
+ * @see {@link https://www.npmjs.com/package/@resq-systems/types | `@resq-systems/types/equivalence`}
+ *   — this is an `Equivalence<T>` instance, not a function that takes one. Its
+ *   per-key relation is `Object.is`, which is `eqSameValue()` in that module's
+ *   vocabulary and the reason it ships `eqSameValue` alongside `eqStrict`:
+ *   `NaN` values compare equal and `0` / `-0` compare unequal. The key set it
+ *   compares is the own **enumerable** keys, exactly what `Object.keys` returns,
+ *   so a non-enumerable own property is invisible to both operands and the
+ *   relation stays symmetric. `structOf` is the typed counterpart when the key
+ *   set is known ahead of time; `recordOf` when it is not. Kept here as a plain
+ *   `export function` so the emitted declaration form does not change.
  * @internal
  */
 export function areObjectsShallowEqual<T extends object>(obj1: T, obj2: T): boolean {
 	if (obj1 === obj2) return true;
 	const keys1 = Object.keys(obj1);
-	if (keys1.length !== Object.keys(obj2).length) return false;
+	// Membership must use the same notion of "key" as the count — own
+	// *enumerable*. Testing with `hasOwnProperty` while counting with
+	// `Object.keys` made the relation asymmetric, because a non-enumerable own
+	// key satisfies the former without ever being counted by the latter.
+	const keys2 = new Set(Object.keys(obj2));
+	if (keys1.length !== keys2.size) return false;
 	for (const key of keys1) {
-		if (!hasOwnProperty(obj2, key)) return false;
+		if (!keys2.has(key)) return false;
 		if (
 			!Object.is(
 				(obj1 as Record<PropertyKey, unknown>)[key],
@@ -400,6 +410,14 @@ export function getChangedKeys<T extends object>(obj1: T, obj2: T): (keyof T)[] 
  * const d = { coords: [1.0000002, 2.0000002] }
  * isEqualAllowingForFloatingPointErrors(c, d) // true
  * ```
+ *
+ * @see {@link https://www.npmjs.com/package/@resq-systems/types | `@resq-systems/types/equivalence`}
+ *   — with `threshold` applied this is an `Equivalence<object>`, but it stays in
+ *   this package permanently: it is built on `lodash.isequalwith`, a **runtime**
+ *   dependency, and `@resq-systems/types` is zero-runtime-dep. Note also that
+ *   approximate numeric equality is not transitive, so this relation does not
+ *   satisfy the `Equivalence` laws for values near the threshold and must not be
+ *   fed to `combine` / `arrayOf` / `structOf` as if it did.
  * @internal
  */
 export function isEqualAllowingForFloatingPointErrors(

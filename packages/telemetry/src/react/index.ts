@@ -27,4 +27,9 @@ export {
 	TelemetryProvider,
 	type TelemetryProviderProps,
 } from "./telemetry-provider.js";
+export {
+	type CoalescedChannel,
+	type CoalescedChannelOptions,
+	useCoalescedChannel,
+} from "./use-coalesced-channel.js";
 export { type TelemetryChannel, useTelemetry, useTelemetryChannel } from "./use-telemetry.js";

@@ -195,3 +195,25 @@
 		@apply bg-background text-foreground font-sans antialiased;
 	}
 }
+
+/*
+ * Staleness must not compound. Deliberately OUTSIDE any cascade layer.
+ *
+ * A stale PanelFrame dims its body and a stale instrument inside it dims itself,
+ * both by 45%. CSS multiplies: 0.2025, which measures 1.84:1 against the card in
+ * the dark theme and 1.56:1 in the light one — during a comms dropout, the exact
+ * moment an operator needs the last known value.
+ *
+ * This lived in `@layer base` first, which did nothing at all: Tailwind emits
+ * `opacity-45` into `@layer utilities`, and a later layer beats an earlier one
+ * regardless of selector specificity. Unlayered rules outrank every layered one,
+ * so this has to sit outside the layers to take effect. Verified against the
+ * built stylesheet, not just the source.
+ *
+ * The outermost element declaring staleness owns the treatment; anything nested
+ * inside it renders at full opacity and lets the ancestor's dim carry. Both
+ * still emit `data-stale`, so badges and assistive text are unaffected.
+ */
+[data-stale] [data-stale] {
+	opacity: 1;
+}

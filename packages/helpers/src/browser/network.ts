@@ -15,9 +15,13 @@
  */
 
 /**
- * @fileoverview Thin `window.fetch` / `Image` wrappers that pin `referrerPolicy`
- * to `strict-origin-when-cross-origin`, so cross-origin requests never leak the
+ * @fileoverview Thin `window.fetch` / `Image` wrappers that default `referrerPolicy`
+ * to `strict-origin-when-cross-origin`, so a cross-origin request does not leak the
  * full referrer URL.
+ *
+ * A *default*, not a lock: `fetch` honours an explicitly supplied `referrerPolicy`,
+ * because a caller who names one means it. Passing `referrerPolicy: undefined` keeps
+ * the default rather than clearing it — see the note on the destructure below.
  *
  * @module @resq-systems/helpers/browser/network
  */
@@ -37,12 +41,16 @@
  * @internal
  */
 export async function fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+	// Destructured rather than spread over a default. `{ default, ...init }` copies the
+	// key even when its value is `undefined`, so `fetch(url, { method: "POST",
+	// referrerPolicy: undefined })` silently deleted the pin: against undici the
+	// resulting request policy is `""` — indistinguishable from never pinning it — and
+	// an empty request policy falls back to the document's own. A caller who passes a
+	// policy explicitly still overrides the default, which is intended.
+	const { referrerPolicy = "strict-origin-when-cross-origin", ...rest } = init ?? {};
+
 	// eslint-disable-next-line tldraw/no-restricted-properties
-	return window.fetch(input, {
-		// We want to make sure that the referrer is not sent to other domains.
-		referrerPolicy: "strict-origin-when-cross-origin",
-		...init,
-	});
+	return window.fetch(input, { ...rest, referrerPolicy });
 }
 
 /**

@@ -27,7 +27,9 @@ import { getRequestId, shouldRedirectToHttps } from "@resq-systems/http";
 import { Logger } from "@resq-systems/logger";
 import { MemoryRateLimitStore } from "@resq-systems/rate-limiting";
 import { generateSecureToken, sanitizeForLogging } from "@resq-systems/security";
-import { type PositiveInt, toPositiveInt } from "@resq-systems/types";
+import { isPositiveInt } from "@resq-systems/types";
+import { isPlainObject } from "@resq-systems/types/guards";
+import { tryNarrow } from "@resq-systems/types/narrow";
 
 const log = new Logger("api-server");
 const rateLimiter = new MemoryRateLimitStore();
@@ -99,21 +101,19 @@ const server = Bun.serve({
 		}
 
 		// GET /api/token[?bytes=N] — generate a secure random token.
-		// @resq-systems/types: validate the optional length into a branded
-		// `PositiveInt` at the boundary so `generateSecureToken` can only ever be
-		// called with a proven-positive integer.
+		// @resq-systems/types: `tryNarrow` runs the `isPositiveInt` guard and hands
+		// back the branded value or `undefined`, so the check and the proof are one
+		// step. Worth noting what the guard rejects that a hand-rolled `n > 0` does
+		// not: `?bytes=abc` and `?bytes=` both make `Number()` produce NaN, and every
+		// comparison against NaN is false — so `n <= 0` would wave them through.
 		if (url.pathname === "/api/token" && req.method === "GET") {
 			const bytesParam = url.searchParams.get("bytes");
-			let length: PositiveInt | undefined;
-			if (bytesParam !== null) {
-				const n = Number(bytesParam);
-				if (!Number.isInteger(n) || n <= 0) {
-					return Response.json(
-						{ error: "bytes must be a positive integer" },
-						{ status: 400, headers: { "x-request-id": requestId } },
-					);
-				}
-				length = toPositiveInt(n);
+			const length = bytesParam === null ? undefined : tryNarrow(Number(bytesParam), isPositiveInt);
+			if (bytesParam !== null && length === undefined) {
+				return Response.json(
+					{ error: "bytes must be a positive integer" },
+					{ status: 400, headers: { "x-request-id": requestId } },
+				);
 			}
 			const token = length ? generateSecureToken(length) : generateSecureToken();
 			log.info("Token generated", { requestId });
@@ -128,8 +128,22 @@ const server = Bun.serve({
 		// POST /api/echo — echo back sanitized input
 		if (url.pathname === "/api/echo" && req.method === "POST") {
 			try {
-				const body = await req.json();
-				const sanitized = sanitizeForLogging(body as Record<string, unknown>);
+				// `req.json()` is typed `any`, so `body as Record<string, unknown>` used to
+				// compile while being false for most of what a client can actually post:
+				// `[1,2,3]`, `"hello"`, `42` and `null` all satisfy the cast and none of them
+				// is a record. @resq-systems/types: `isPlainObject` proves it instead of
+				// asserting it — rejecting arrays, primitives and class instances, while
+				// still accepting an `Object.create(null)` dictionary, which is what a
+				// JSON body deserialises to under some parsers and is a record in every
+				// sense that matters here.
+				const body: unknown = await req.json();
+				if (!isPlainObject(body)) {
+					return Response.json(
+						{ error: "Body must be a JSON object" },
+						{ status: 400, headers: { "x-request-id": requestId } },
+					);
+				}
+				const sanitized = sanitizeForLogging(body);
 				log.info("Echo request (sanitized)", { requestId, data: sanitized });
 				return Response.json({ requestId, sanitized }, { headers: { "x-request-id": requestId } });
 			} catch {

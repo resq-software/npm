@@ -42,7 +42,12 @@
 
 import type * as React from "react";
 
-import { INSTRUMENT_VIEW, safePositive, toFinite } from "../../lib/instrument-dial.js";
+import {
+	INSTRUMENT_VIEW,
+	safePositive,
+	toFinite,
+	withStaleness,
+} from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
 //#region Geometry constants
@@ -299,6 +304,15 @@ export interface OccupancyGridProps extends React.ComponentProps<"div"> {
 	path?: readonly GridPoint[];
 	/** Occupancy value at or above which a cell counts as occupied. Defaults to 65. */
 	occupiedThreshold?: number;
+	/**
+	 * Marks the reading as no longer trustworthy: dims the figure, shows a STALE
+	 * badge, sets `data-stale`, and leads the accessible label with "Stale".
+	 *
+	 * A boolean rather than a timestamp — this component holds no timer and
+	 * could not notice itself going stale. Compute it with `isStale` from
+	 * `@resq-systems/ui/adapters`, driven by your own render loop.
+	 */
+	stale?: boolean;
 	/** Overrides the auto-generated `aria-label`. */
 	label?: string;
 }
@@ -327,6 +341,7 @@ function OccupancyGrid({
 	pose,
 	path,
 	occupiedThreshold,
+	stale,
 	label,
 	className,
 	...props
@@ -347,8 +362,10 @@ function OccupancyGrid({
 		y: toFinite(origin?.y),
 	};
 	const waypoints = path ?? [];
-	const ariaLabel =
-		label ?? formatGridLabel(raster, cols, rows, metresPerCell, pose, waypoints.length);
+	const ariaLabel = withStaleness(
+		label ?? formatGridLabel(raster, cols, rows, metresPerCell, pose, waypoints.length),
+		stale,
+	);
 
 	const polyline =
 		fit === null || waypoints.length < 2
@@ -369,9 +386,15 @@ function OccupancyGrid({
 			aria-label={ariaLabel}
 			className={cn("relative inline-block size-48 select-none", className)}
 			data-slot="occupancy-grid"
+			data-stale={stale === true ? "" : undefined}
 			role="img"
 		>
-			<div className="absolute inset-0 overflow-hidden rounded-[6px] border border-border bg-card">
+			<div
+				className={cn(
+					"absolute inset-0 overflow-hidden rounded-[6px] border border-border bg-card",
+					stale === true && "opacity-45",
+				)}
+			>
 				<svg
 					aria-hidden="true"
 					className="block"
@@ -452,6 +475,11 @@ function OccupancyGrid({
 					</text>
 				</svg>
 			</div>
+			{stale === true ? (
+				<span className="absolute top-1 right-1 rounded-[3px] bg-destructive px-1 py-px font-mono text-[9px] uppercase leading-none text-destructive-foreground">
+					Stale
+				</span>
+			) : null}
 		</div>
 	);
 }

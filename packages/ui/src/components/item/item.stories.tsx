@@ -35,39 +35,57 @@ const meta: Meta<typeof Item> = {
 export default meta;
 type Story = StoryObj<typeof Item>;
 
+/**
+ * One row, and still inside an `ItemGroup` — because a lone `Item` is not a
+ * lighter version of this story, it is a broken one. `Item` is this family's
+ * `<li>`: it carries `role="listitem"`, which assistive tech only exposes when
+ * a `role="list"` ancestor owns it, so an orphaned row can be dropped from the
+ * accessibility tree with nothing visibly wrong. A group of one is the honest
+ * shape for a single row, exactly as a one-item `<ul>` is.
+ */
 export const Default: Story = {
 	render: () => (
-		<Item className="w-80">
-			<ItemMedia variant="icon">
-				<FileTextIcon />
-			</ItemMedia>
-			<ItemContent>
-				<ItemTitle>Incident report #4821.pdf</ItemTitle>
-				<ItemDescription>Modified 2 hours ago · 184 KB</ItemDescription>
-			</ItemContent>
-			<ItemActions>
-				<Button aria-label="More options" size="icon-sm" variant="ghost">
-					<DotsThreeIcon />
-				</Button>
-			</ItemActions>
-		</Item>
+		<ItemGroup className="w-80">
+			<Item>
+				<ItemMedia variant="icon">
+					<FileTextIcon />
+				</ItemMedia>
+				<ItemContent>
+					<ItemTitle>Incident report #4821.pdf</ItemTitle>
+					<ItemDescription>Modified 2 hours ago · 184 KB</ItemDescription>
+				</ItemContent>
+				<ItemActions>
+					<Button aria-label="More options" size="icon-sm" variant="ghost">
+						<DotsThreeIcon />
+					</Button>
+				</ItemActions>
+			</Item>
+		</ItemGroup>
 	),
 };
 
+/**
+ * The outline variant drops the surface fill so the row reads as a boundary
+ * rather than a raised card — the treatment to reach for when rows already sit
+ * on a panel and a second fill would flatten the depth order. Grouped for the
+ * same reason as `Default`.
+ */
 export const Outline: Story = {
 	render: () => (
-		<Item className="w-80" variant="outline">
-			<ItemMedia variant="icon">
-				<MapPinIcon />
-			</ItemMedia>
-			<ItemContent>
-				<ItemTitle>Zone 4B — Southern valley</ItemTitle>
-				<ItemDescription>2.4 km² · Active</ItemDescription>
-			</ItemContent>
-			<ItemActions>
-				<Badge variant="default">Active</Badge>
-			</ItemActions>
-		</Item>
+		<ItemGroup className="w-80">
+			<Item variant="outline">
+				<ItemMedia variant="icon">
+					<MapPinIcon />
+				</ItemMedia>
+				<ItemContent>
+					<ItemTitle>Zone 4B — Southern valley</ItemTitle>
+					<ItemDescription>2.4 km² · Active</ItemDescription>
+				</ItemContent>
+				<ItemActions>
+					<Badge variant="default">Active</Badge>
+				</ItemActions>
+			</Item>
+		</ItemGroup>
 	),
 };
 

@@ -18,8 +18,18 @@
  * @fileoverview Immutable array helpers — rotate, dedupe, compact, partition,
  * min/max-by, shallow equality, and default-merging over plain arrays.
  *
+ * `dedupe` and `partition` name their callback parameters with the shared
+ * vocabulary from `@resq-systems/types` — `Equivalence<T>` and `Predicate<T>`
+ * respectively — so the combinator algebras in
+ * `@resq-systems/types/equivalence` and `@resq-systems/types/predicate` compose
+ * straight into them. Both imports are type-only: the emitted JavaScript is
+ * unchanged and this module still has no runtime dependency on that package.
+ *
  * @module @resq-systems/helpers/utils/array
  */
+
+import type { Equivalence } from "@resq-systems/types/equivalence";
+import type { Predicate } from "@resq-systems/types/predicate";
 
 /**
  * Rotate the contents of an array by a specified offset.
@@ -61,6 +71,14 @@ export function rotateArray<T>(arr: T[], offset: number): T[] {
  * for large arrays with cheap identity semantics prefer a `Set`. `equals` is
  * invoked as `equals(candidate, kept)`.
  *
+ * `equals` is typed as an `Equivalence<T>` — structurally just
+ * `(self: T, that: T) => boolean`, so any existing callback still fits — which
+ * makes the instances and combinators in `@resq-systems/types/equivalence`
+ * directly usable here: `dedupe(xs, eqSameValue())`,
+ * `dedupe(xs, structOf({ id: eqString }))`, `dedupe(xs, mapInput(eqString, f))`.
+ * Note that the default is `===` rather than `eqSameValue()`, so `NaN` values
+ * are **not** deduped unless you pass an equivalence that handles them.
+ *
  * @param input - The array to deduplicate
  * @param equals - Optional custom equality function to compare items (defaults to strict equality)
  * @returns A new array with duplicate items removed
@@ -74,9 +92,13 @@ export function rotateArray<T>(arr: T[], offset: number): T[] {
  * const objects = [{id: 1}, {id: 2}, {id: 1}]
  * dedupe(objects, (a, b) => a.id === b.id) // [{id: 1}, {id: 2}]
  * ```
+ *
+ * @see {@link https://www.npmjs.com/package/@resq-systems/types | `@resq-systems/types/equivalence`}
+ *   for `Equivalence`, its lawful instances, and the `combine` / `mapInput` /
+ *   `structOf` combinators over them.
  * @public
  */
-export function dedupe<T>(input: T[], equals?: (a: T, b: T) => boolean): T[] {
+export function dedupe<T>(input: T[], equals?: Equivalence<T>): T[] {
 	const result: T[] = [];
 	mainLoop: for (const item of input) {
 		for (const existing of result) {
@@ -216,6 +238,14 @@ export function maxBy<T>(arr: readonly T[], fn: (item: T) => number): T | undefi
  * Partitions an array into two arrays: one containing items that satisfy
  * the predicate, and another containing items that do not. The original array order is preserved.
  *
+ * `predicate` is typed as a `Predicate<T>` — structurally just
+ * `(value: T) => boolean`, so any existing callback still fits — which makes
+ * this the workspace's partition over the guard algebra in
+ * `@resq-systems/types/predicate`: `partition(xs, allOf(isA, isB))`,
+ * `partition(xs, not(isBlank))`, `partition(xs, someOf(rules))` all compose
+ * without an adapter. The predicate is applied to the element only; unlike
+ * `Array.prototype.filter` it never receives an index.
+ *
  * @param arr - The array to partition
  * @param predicate - The predicate function to test each item
  * @returns A tuple of two arrays: [satisfying items, non-satisfying items]
@@ -231,9 +261,13 @@ export function maxBy<T>(arr: readonly T[], fn: (item: T) => number): T | undefi
  * )
  * // adults: [{name: 'Alice', age: 30}], minors: [{name: 'Bob', age: 17}]
  * ```
+ *
+ * @see {@link https://www.npmjs.com/package/@resq-systems/types | `@resq-systems/types/predicate`}
+ *   for `Predicate` and the `allOf` / `anyOf` / `noneOf` / `and` / `or`
+ *   combinators that feed it.
  * @internal
  */
-export function partition<T>(arr: T[], predicate: (item: T) => boolean): [T[], T[]] {
+export function partition<T>(arr: T[], predicate: Predicate<T>): [T[], T[]] {
 	const satisfies: T[] = [];
 	const doesNotSatisfy: T[] = [];
 	for (const item of arr) {
@@ -268,6 +302,14 @@ export function partition<T>(arr: T[], predicate: (item: T) => boolean): [T[], T
  * areArraysShallowEqual([obj], [obj]) // true (same reference)
  * areArraysShallowEqual([{x: 1}], [{x: 1}]) // false (different objects)
  * ```
+ *
+ * @see {@link https://www.npmjs.com/package/@resq-systems/types | `@resq-systems/types/equivalence`}
+ *   — this function is exactly `arrayOf(eqSameValue())` from that module, with a
+ *   reference-identity fast path in front. Because it compares with `Object.is`
+ *   rather than `===`, `eqSameValue` (not `eqStrict`) is its element relation:
+ *   `NaN` elements compare equal and `0` / `-0` compare unequal. Kept here as a
+ *   plain `export function` so the emitted declaration form does not change; a
+ *   future consolidation onto `arrayOf(eqSameValue())` is mechanical.
  * @internal
  */
 export function areArraysShallowEqual<T>(arr1: readonly T[], arr2: readonly T[]): boolean {

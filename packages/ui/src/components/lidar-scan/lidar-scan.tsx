@@ -47,6 +47,7 @@ import {
 	polar,
 	safePositive,
 	toFinite,
+	withStaleness,
 } from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
@@ -307,6 +308,15 @@ export interface LidarScanProps extends React.ComponentProps<"div"> {
 	rangeMax?: number;
 	/** Returns at or inside this range are drawn as a hazard. Defaults to 1. */
 	warnRange?: number;
+	/**
+	 * Marks the reading as no longer trustworthy: dims the figure, shows a STALE
+	 * badge, sets `data-stale`, and leads the accessible label with "Stale".
+	 *
+	 * A boolean rather than a timestamp — this component holds no timer and
+	 * could not notice itself going stale. Compute it with `isStale` from
+	 * `@resq-systems/ui/adapters`, driven by your own render loop.
+	 */
+	stale?: boolean;
 	/** Overrides the auto-generated `aria-label`. */
 	label?: string;
 }
@@ -326,6 +336,7 @@ function LidarScan({
 	rangeMin,
 	rangeMax,
 	warnRange,
+	stale,
 	label,
 	className,
 	...props
@@ -344,7 +355,7 @@ function LidarScan({
 	const beams = downsample(beamsIn, start, increment, min, max);
 	const nearestHazard = summary.returns > 0 && summary.nearestRange <= warn;
 
-	const ariaLabel = label ?? formatScanLabel(summary, warn);
+	const ariaLabel = withStaleness(label ?? formatScanLabel(summary, warn), stale);
 	const nearestPoint = beamPoint(summary.nearestAngle, summary.nearestRange, max);
 
 	return (
@@ -353,9 +364,15 @@ function LidarScan({
 			aria-label={ariaLabel}
 			className={cn("relative inline-block size-48 select-none", className)}
 			data-slot="lidar-scan"
+			data-stale={stale === true ? "" : undefined}
 			role="img"
 		>
-			<div className="absolute inset-0 overflow-hidden rounded-[6px] border border-border bg-card">
+			<div
+				className={cn(
+					"absolute inset-0 overflow-hidden rounded-[6px] border border-border bg-card",
+					stale === true && "opacity-45",
+				)}
+			>
 				<svg
 					aria-hidden="true"
 					className="block"
@@ -419,6 +436,11 @@ function LidarScan({
 					</text>
 				</svg>
 			</div>
+			{stale === true ? (
+				<span className="absolute top-1 right-1 rounded-[3px] bg-destructive px-1 py-px font-mono text-[9px] uppercase leading-none text-destructive-foreground">
+					Stale
+				</span>
+			) : null}
 		</div>
 	);
 }

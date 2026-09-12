@@ -23,76 +23,17 @@
  */
 
 /**
- * Get whether a value is not undefined.
+ * The three nullability guards now live in `@resq-systems/types/guards` and are
+ * re-exported here unchanged, so this module's public surface is untouched.
  *
- * @param value - The value to check.
- * @returns True if the value is not undefined, with proper type narrowing.
- * @example
- * ```ts
- * const maybeString: string | undefined = getValue()
+ * Each keeps its `Exclude<T, …>` return predicate rather than `NonNullable<T>`.
+ * That is not a stylistic detail: the two differ for `T = unknown`, where
+ * `NonNullable<unknown>` collapses to `{}` and would silently change what
+ * survives a `.filter(isNonNullish)` at the type level.
  *
- * if (isDefined(maybeString)) {
- *   // TypeScript knows maybeString is string, not undefined
- *   console.log(maybeString.toUpperCase())
- * }
- *
- * // Filter undefined values from arrays
- * const values = [1, undefined, 2, undefined, 3]
- * const definedValues = values.filter(isDefined) // [1, 2, 3]
- * ```
  * @public
  */
-export function isDefined<T>(value: T): value is Exclude<T, undefined> {
-	return value !== undefined;
-}
-
-/**
- * Get whether a value is not null.
- *
- * @param value - The value to check.
- * @returns True if the value is not null, with proper type narrowing.
- * @example
- * ```ts
- * const maybeString: string | null = getValue()
- *
- * if (isNonNull(maybeString)) {
- *   // TypeScript knows maybeString is string, not null
- *   console.log(maybeString.length)
- * }
- *
- * // Filter null values from arrays
- * const values = ["a", null, "b", null, "c"]
- * const nonNullValues = values.filter(isNonNull) // ["a", "b", "c"]
- * ```
- * @public
- */
-export function isNonNull<T>(value: T): value is Exclude<T, null> {
-	return value !== null;
-}
-
-/**
- * Get whether a value is not nullish (not null and not undefined).
- *
- * @param value - The value to check.
- * @returns True if the value is neither null nor undefined, with proper type narrowing.
- * @example
- * ```ts
- * const maybeString: string | null | undefined = getValue()
- *
- * if (isNonNullish(maybeString)) {
- *   // TypeScript knows maybeString is string, not null or undefined
- *   console.log(maybeString.charAt(0))
- * }
- *
- * // Filter nullish values from arrays
- * const values = ["hello", null, "world", undefined, "!"]
- * const cleanValues = values.filter(isNonNullish) // ["hello", "world", "!"]
- * ```
- * @public
- */
-export function isNonNullish<T>(value: T): value is Exclude<T, null | undefined> {
-	return value !== null && value !== undefined;
-}
+export { isDefined, isNonNull, isNonNullish } from "@resq-systems/types/guards";
 
 type MaybeStructuredClone = { structuredClone?: <T>(value: T) => T };
 

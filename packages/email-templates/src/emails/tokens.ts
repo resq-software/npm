@@ -63,5 +63,5 @@ export const emailOrg = {
 	websiteUrl: brand.domains.marketing,
 	termsUrl: brand.legal.termsUrl,
 	privacyUrl: brand.legal.privacyUrl,
-	logoUrl: brand.logo,
+	logoUrl: emailDesignContract.identity.logoUrl,
 } as const;

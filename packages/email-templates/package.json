@@ -1,6 +1,6 @@
 {
 	"name": "@resq-systems/email-templates",
-	"version": "0.6.2",
+	"version": "1.1.0",
 	"description": "Type-safe transactional email templates: an Effect Schema contract, React Email components, headless render-to-html/text, and an optional Resend sender",
 	"license": "Apache-2.0",
 	"author": {
@@ -40,6 +40,8 @@
 	"scripts": {
 		"build": "tsdown",
 		"contract:generate": "bun run ./scripts/generate-email-contract-integrity.ts",
+		"logo:verify": "bun run ./scripts/verify-email-logo-asset.ts",
+		"prepublishOnly": "bun run logo:verify",
 		"test": "vitest run",
 		"tsc": "tsc --noEmit",
 		"email:dev": "email dev --dir ./emails --port 3000",
@@ -48,7 +50,7 @@
 	"dependencies": {
 		"@react-email/components": "^1.0.12",
 		"@react-email/render": "^2.1.0",
-		"@resq-systems/constants": "0.5.0"
+		"@resq-systems/constants": "0.6.0"
 	},
 	"peerDependencies": {
 		"effect": ">=4.0.0-beta.78",
@@ -62,21 +64,21 @@
 		}
 	},
 	"devDependencies": {
-		"@react-email/ui": "6.9.1",
+		"@react-email/ui": "6.9.3",
 		"@total-typescript/ts-reset": "^0.6.1",
-		"@types/node": "^26.1.2",
-		"@types/react": "^19.2.16",
-		"@types/react-dom": "^19.2.3",
-		"@vitest/coverage-v8": "4.1.10",
-		"effect": "4.0.0-beta.102",
+		"@types/node": "^26.4.0",
+		"@types/react": "^19.2.18",
+		"@types/react-dom": "^19.2.5",
+		"@vitest/coverage-v8": "4.1.11",
+		"effect": "4.0.0-rc.112",
 		"parse5": "^8.0.1",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
-		"react-email": "6.9.1",
-		"resend": "6.18.0",
+		"react-email": "6.9.3",
+		"resend": "6.24.0",
 		"tsdown": "^0.22.14",
 		"typescript": "7.0.2",
-		"vitest": "4.1.8"
+		"vitest": "4.1.11"
 	},
 	"publishConfig": {
 		"access": "public",

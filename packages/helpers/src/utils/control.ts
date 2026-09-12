@@ -23,7 +23,6 @@
  */
 
 import { assertNever } from "@resq-systems/types";
-import { omitFromStackTrace } from "./function";
 
 //#region Types
 /**
@@ -213,65 +212,31 @@ export function exhaustiveSwitchError(value: never, property?: string): never {
 }
 
 /**
- * Assert that a value is truthy, throwing an error if it's not.
+ * `assert` and `assertExists` now live in `@resq-systems/types/narrow` and are
+ * re-exported here unchanged. Both were ported byte-for-byte, quirks included,
+ * so that this is a pure move rather than a behavior change:
  *
- * TypeScript assertion function that throws an error if the provided value is falsy.
- * After this function executes successfully, TypeScript narrows the type to exclude falsy values.
- * Stack trace is omitted from the error for cleaner debugging.
+ * - `assert` throws a plain `Error` — deliberately **not** the package's
+ *   `NarrowError` subclass, which would change `err.name` and break any
+ *   existing `instanceof` or name check. Its message is
+ *   `message || "Assertion Error"`, so an empty-string message still falls back,
+ *   and its test is falsy rather than nullish.
+ * - `assertExists` keeps the loose `value == null` check (so `0`, `""`, and
+ *   `false` pass), the `message ?? "value must be defined"` default, a plain
+ *   `Error`, and a `NonNullable<T>` return.
  *
- * @param value - The value to assert as truthy
- * @param message - Optional custom error message
- * @throws {Error} If `value` is falsy. The message is `message` when supplied,
- *   otherwise `Assertion Error`. The wrapper's own frame is stripped from the
- *   stack (V8 only), so the trace points at the call site.
+ * Both still strip their own frame from the stack on V8. Declaring `assert` as a
+ * function rather than an annotated const also makes its `asserts` narrowing
+ * robust in consumer code, and `assertExists` is now a real generic instead of
+ * one collapsed by the old `omitFromStackTrace` wrapper — neither is observable
+ * as a break.
  *
- * @example
- * ```ts
- * const user = getUser() // User | null
- * assert(user, 'User must be logged in')
- * // TypeScript now knows user is non-null
- * console.log(user.name) // Safe to access properties
- * ```
+ * New code should prefer `invariant` and `ensureDefined` from
+ * `@resq-systems/types`, which throw a structured `NarrowError`.
+ *
  * @internal
  */
-export const assert: (value: unknown, message?: string) => asserts value = omitFromStackTrace(
-	(value, message) => {
-		if (!value) {
-			throw new Error(message || "Assertion Error");
-		}
-	},
-);
-
-/**
- * Assert that a value is not null or undefined.
- *
- * Throws an error if the value is null or undefined, otherwise returns the value
- * with a refined type that excludes null and undefined. Stack trace is omitted for cleaner debugging.
- *
- * @param value - The value to check for null/undefined
- * @param message - Optional custom error message
- * @returns The value with null and undefined excluded from the type
- * @throws {Error} If `value` is `null` or `undefined` (loose `== null` check, so
- *   `0`, `''`, and `false` pass). The message is `message` when supplied,
- *   otherwise `value must be defined`. The wrapper's own frame is stripped from
- *   the stack (V8 only).
- *
- * @example
- * ```ts
- * const element = document.getElementById('my-id') // HTMLElement | null
- * const safeElement = assertExists(element, 'Element not found')
- * // TypeScript now knows safeElement is HTMLElement (not null)
- * safeElement.addEventListener('click', handler) // Safe to call methods
- * ```
- * @internal
- */
-export const assertExists = omitFromStackTrace(<T>(value: T, message?: string): NonNullable<T> => {
-	// note that value == null is equivalent to value === null || value === undefined
-	if (value == null) {
-		throw new Error(message ?? "value must be defined");
-	}
-	return value as NonNullable<T>;
-});
+export { assert, assertExists } from "@resq-systems/types/narrow";
 
 /**
  * Create a Promise with externally accessible resolve and reject functions.

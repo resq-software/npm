@@ -129,8 +129,7 @@ export function getElementComputedStyle(
 	element: Element,
 	pseudo?: string,
 ): CSSStyleDeclaration | undefined {
-	const cache =
-		pseudo === "::before" ? cacheStyleBefore : pseudo === "::after" ? cacheStyleAfter : cacheStyle;
+	const cache = styleCacheFor(pseudo);
 	if (cache?.has(element)) return cache.get(element);
 	const style = element.ownerDocument?.defaultView?.getComputedStyle(element, pseudo) ?? undefined;
 	cache?.set(element, style);
@@ -143,7 +142,9 @@ export function isElementStyleVisibilityVisible(
 	style?: CSSStyleDeclaration,
 ): boolean {
 	const computed = style ?? getElementComputedStyle(element);
-	if (!computed) return true;
+	// See the note in `computeBox`: no computed style means the document has no
+	// browsing context and is never rendered, so the honest answer is "not visible".
+	if (!computed) return false;
 	// Element.checkVisibility checks for content-visibility and also looks at
 	// styles up the flat tree including user-agent ShadowRoots (e.g. details).
 	// All browsers implement it, but WebKit has a bug that prevents use:
@@ -176,7 +177,12 @@ export function computeBox(element: Element): {
 } {
 	// Note: this logic should mirror waitForDisplayedAtStablePosition() to avoid surprises.
 	const style = getElementComputedStyle(element);
-	if (!style) return { visible: true, inline: false };
+	// No computed style means no browsing context — the element lives in a document
+	// produced by `DOMParser`, `createHTMLDocument`, or `<template>.content`, none of
+	// which is ever rendered. Reporting `visible: true` there was unconditionally wrong
+	// for the whole class, and returning `false` adds no false negatives: an element
+	// inside an attached iframe has a non-null `defaultView` and never reaches here.
+	if (!style) return { visible: false, inline: false };
 	const cursor = style.cursor;
 	if (style.display === "contents") {
 		// display:contents is not rendered itself, but its child nodes are.
@@ -231,28 +237,65 @@ export function elementSafeTagName(element: Element): string {
 
 //#region Style Caching
 
-let cacheStyle: WeakMap<Element, CSSStyleDeclaration | undefined> | undefined;
-let cacheStyleBefore: WeakMap<Element, CSSStyleDeclaration | undefined> | undefined;
-let cacheStyleAfter: WeakMap<Element, CSSStyleDeclaration | undefined> | undefined;
+/**
+ * Computed-style caches, keyed by pseudo-element selector.
+ *
+ * Previously three fixed buckets — no-pseudo, `::before`, `::after` — so a lookup for
+ * any *other* pseudo (`::marker`, `::placeholder`, `::selection`, `::first-line`) fell
+ * through to the **no-pseudo** bucket and stored the pseudo's style under the element
+ * itself. One such call inside a caching scope then corrupted `isElementVisible` and
+ * `computeBox` for that element, in either direction depending on call order.
+ *
+ * Keying by selector removes the collision without narrowing the public signature:
+ * `getComputedStyle` accepts any pseudo, and restricting the parameter would be a
+ * breaking change for a defect that is ours rather than the caller's.
+ */
+let styleCaches: Map<string, WeakMap<Element, CSSStyleDeclaration | undefined>> | undefined;
 let cachesCounter = 0;
 
 /**
+ * Bucket ceiling. `pseudo` is an arbitrary caller string, so an unbounded map grows
+ * once per distinct value for as long as the scope stays open — including values
+ * `getComputedStyle` goes on to reject, which leave behind a bucket that never sees a
+ * second lookup. CSS defines fewer than a dozen pseudo-elements, so real call sites stay
+ * well under this; a scope that exceeds it is generating selectors rather than reusing
+ * them, and gains nothing from memoization anyway.
+ */
+const MAX_STYLE_CACHE_BUCKETS = 16;
+
+/**
+ * Cache bucket for one pseudo selector, created on demand while a scope is open.
+ * Returns `undefined` for a new selector once the ceiling is reached, which costs the
+ * caller memoization for that selector but never correctness.
+ */
+function styleCacheFor(
+	pseudo: string | undefined,
+): WeakMap<Element, CSSStyleDeclaration | undefined> | undefined {
+	if (!styleCaches) return undefined;
+
+	const key = pseudo ?? "";
+	const cache = styleCaches.get(key);
+	if (cache) return cache;
+	if (styleCaches.size >= MAX_STYLE_CACHE_BUCKETS) return undefined;
+
+	const created = new WeakMap<Element, CSSStyleDeclaration | undefined>();
+	styleCaches.set(key, created);
+	return created;
+}
+
+/**
  * Begin a computed-style caching scope. Nestable — pair with {@link endDOMCaches}.
- * While active, {@link getElementComputedStyle} memoizes results per element.
+ * While active, {@link getElementComputedStyle} memoizes results per element and pseudo.
  */
 export function beginDOMCaches(): void {
 	++cachesCounter;
-	cacheStyle ??= new WeakMap();
-	cacheStyleBefore ??= new WeakMap();
-	cacheStyleAfter ??= new WeakMap();
+	styleCaches ??= new Map();
 }
 
 /** End a computed-style caching scope opened with {@link beginDOMCaches}. */
 export function endDOMCaches(): void {
 	if (!--cachesCounter) {
-		cacheStyle = undefined;
-		cacheStyleBefore = undefined;
-		cacheStyleAfter = undefined;
+		styleCaches = undefined;
 	}
 }
 

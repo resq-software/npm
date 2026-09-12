@@ -88,6 +88,51 @@ preferences — they fail CI:
 - Stateless and hook-free wherever possible, so instruments server-render. `TeleopPad` is
   the single deliberate exception — it is an input device.
 
+## 3a. Freshness
+
+Every reading instrument — all fifteen, air as well as ground and sea — takes
+`stale?: boolean`. When set it dims the figure, shows a STALE badge, sets
+`data-stale` for consumer styling, and **leads** the
+accessible label with `Stale,` — before the numbers, so an operator knows to
+distrust them rather than learning so afterwards. It applies even to a
+caller-supplied `label`, because a custom name does not make a frozen reading
+fresh.
+
+The instruments exist to prevent a specific failure, and it is not a wrong
+number: it is a **frozen** one that still looks live. A confident `12.4 m` that
+stopped updating forty seconds ago is worse than a blank, because it invites a
+decision.
+
+`stale` is a boolean and not a `timestamp` + `maxAge` pair. That looks like the
+richer API, but these components are pure and hold no timer, so one given a
+timestamp could not notice itself ageing — it would only re-evaluate when some
+*other* prop changed, which is precisely when the reading is still moving. The
+clock belongs to the application's render loop, which is also the thing that can
+get a change onto the screen. `@resq-systems/ui/adapters` supplies `isStale`
+and `readingAge` so there is one obvious way to compute it:
+
+```tsx
+<DepthGauge {...depth} stale={isStale(frame.receivedAt, now)} />
+```
+
+`isStale` treats an unknown timestamp as stale rather than fresh — an unknown
+age is not a young one. Future timestamps are bounded in the same spirit:
+modest skew is tolerated, but beyond `DEFAULT_MAX_SKEW_MS` the timestamp is
+disbelieved, because an unbounded allowance would let a badly-set vehicle clock
+keep frozen data looking fresh indefinitely.
+`latestTimestamp` extracts the observation time from a Signal K delta, so §4's
+rule that the adapters never fold a timestamp into a prop no longer leaves the
+caller without a supported way to read one.
+
+`TeleopPad` has no `stale` prop: it produces commands rather than displaying a
+reading, so it has nothing that can go stale.
+
+The contract is asserted for all fifteen instruments at once in
+`src/lib/instrument-staleness.test.tsx`, rather than once per component, so the
+next instrument that forgets it fails rather than shipping quietly. The first
+revision of that suite asserted nine and quietly omitted the six aviation
+instruments — which is precisely the failure mode the suite exists to catch.
+
 ## 4. Data-shape contracts
 
 Props are normalized SI-ish scalars. This table is the mapping an adapter must implement;
@@ -132,8 +177,12 @@ exposes topic filters rather than one undifferentiated frame stream.
 ### Marine data (Signal K)
 
 Signal K deltas are SI throughout — radians, m/s, metres — so every adapter here is path
-lookup plus unit conversion. Deltas carry an ISO-8601 `timestamp`; the adapters ignore it
-and leave staleness policy to the caller.
+lookup plus unit conversion. Delta updates *may* carry an ISO-8601 `timestamp`. It is
+never folded
+into a prop — unit conversion stays the adapters' job and staleness policy stays the
+caller's — but `latestTimestamp` exposes it, so the caller can drive `stale` (§3a)
+rather than having no supported way to read it at all. It returns `undefined` when no
+update carries a usable one, which §3a treats as stale rather than as fresh.
 
 | Component | Signal K path | Prop mapping |
 |-----------|---------------|--------------|
@@ -170,7 +219,7 @@ measures clockwise from 12 o'clock.
 | Sea | `DepthGauge` | `./depth-gauge` | vertical tape |
 | Sea | `CompassRose` | `./compass-rose` | marine rose |
 | Sea | `ThrusterRing` | `./thruster-ring` | radial mix |
-| Sea | `ContactScope` | `./contact-scope` | PPI scope |
+| Sea | `ContactScope` | `./contact-scope` | PPI scope (cap ranks by CPA risk, not range) |
 
 Deliberate shape diversity: an operator console that is ten identical round dials is
 unreadable under stress. Round dials are reserved for continuously-varying scalars with a
@@ -234,10 +283,27 @@ data into React state.
 
 ## 9. Follow-on work
 
-1. `AisLayer` in `@resq-systems/map` — the geographic half of `ContactScope`.
-2. A `<VehicleConsole>` composite (telemetry provider + instrument grid) once the ground
+These are known gaps, recorded rather than quietly carried:
+
+1. **Announcement rate.** Each instrument packs its whole state into one
+   `aria-label`. At a 10 Hz feed a screen reader would re-read the entire
+   sentence every frame, which is unusable. Wants a throttled `aria-live`
+   summary region, or `role="meter"` where the shape fits.
+2. **Colour is the only severity channel** on the tilt dot, wheel bars,
+   thruster bars and cell bars. That fails colour-blind operators and bright
+   sunlight — both ordinary field-robotics conditions. Severity reaches the
+   accessible label, but a sighted colour-blind operator gets nothing.
+3. **No damping.** Values jump discretely, so a raw feed will jitter the lidar
+   outline and the tilt dot. Real instruments damp needle motion.
+4. **Fixed 200×200 viewBox.** Labels are illegible below roughly `size-32` and
+   undersized above `size-64`; there is no compact/detailed variant.
+5. **No visual verification.** Chromatic has never run against these
+   components, so all sixty-nine stories are unbaselined. Confidence currently
+   rests on unit tests that assert strings and element counts, not appearance.
+6. `AisLayer` in `@resq-systems/map` — the geographic half of `ContactScope`.
+7. A `<VehicleConsole>` composite (telemetry provider + instrument grid) once the ground
    and sea sets have been exercised by a real consumer.
-3. VDA5050 `Order` / `InstantActions` **publishing** helpers. The adapters currently read
+8. VDA5050 `Order` / `InstantActions` **publishing** helpers. The adapters currently read
    `State` only; commanding a fleet is a bigger safety surface and wants its own design.
-4. Recorded-frame fixtures (rosbag, VRX, AIS-catcher captures) to replace the synthetic
+9. Recorded-frame fixtures (rosbag, VRX, AIS-catcher captures) to replace the synthetic
    messages the adapter tests use today.

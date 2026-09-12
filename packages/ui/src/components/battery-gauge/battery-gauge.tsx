@@ -43,7 +43,13 @@
 
 import type * as React from "react";
 
-import { clamp, INSTRUMENT_VIEW, isReading, safePositive } from "../../lib/instrument-dial.js";
+import {
+	clamp,
+	INSTRUMENT_VIEW,
+	isReading,
+	safePositive,
+	withStaleness,
+} from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
 //#region Geometry constants
@@ -204,6 +210,15 @@ export interface BatteryGaugeProps extends React.ComponentProps<"div"> {
 	cellDeltaWarning?: number;
 	/** Cell deviation in volts at which a cell turns red. Defaults to 0.12. */
 	cellDeltaAlert?: number;
+	/**
+	 * Marks the reading as no longer trustworthy: dims the figure, shows a STALE
+	 * badge, sets `data-stale`, and leads the accessible label with "Stale".
+	 *
+	 * A boolean rather than a timestamp — this component holds no timer and
+	 * could not notice itself going stale. Compute it with `isStale` from
+	 * `@resq-systems/ui/adapters`, driven by your own render loop.
+	 */
+	stale?: boolean;
 	/** Overrides the auto-generated `aria-label`. */
 	label?: string;
 }
@@ -232,6 +247,7 @@ function BatteryGauge({
 	alertPercentage,
 	cellDeltaWarning,
 	cellDeltaAlert,
+	stale,
 	label,
 	className,
 	...props
@@ -247,7 +263,10 @@ function BatteryGauge({
 
 	const charge = isReading(percentage) ? clamp(percentage, 0, FULL_PERCENT) : null;
 	const cells = summarizeCells(cellVoltages);
-	const ariaLabel = label ?? formatBatteryLabel(percentage, voltage, current, temperature, cells);
+	const ariaLabel = withStaleness(
+		label ?? formatBatteryLabel(percentage, voltage, current, temperature, cells),
+		stale,
+	);
 
 	const chargeFill = charge === null ? 0 : (charge / FULL_PERCENT) * BAR_W;
 	const chargeToken = charge === null ? TRACK : chargeColor(charge, warn, alert);
@@ -266,9 +285,15 @@ function BatteryGauge({
 			aria-label={ariaLabel}
 			className={cn("relative inline-block size-48 select-none", className)}
 			data-slot="battery-gauge"
+			data-stale={stale === true ? "" : undefined}
 			role="img"
 		>
-			<div className="absolute inset-0 overflow-hidden rounded-[6px] border border-border bg-card">
+			<div
+				className={cn(
+					"absolute inset-0 overflow-hidden rounded-[6px] border border-border bg-card",
+					stale === true && "opacity-45",
+				)}
+			>
 				<svg
 					aria-hidden="true"
 					className="block"
@@ -381,6 +406,11 @@ function BatteryGauge({
 					</text>
 				</svg>
 			</div>
+			{stale === true ? (
+				<span className="absolute top-1 right-1 rounded-[3px] bg-destructive px-1 py-px font-mono text-[9px] uppercase leading-none text-destructive-foreground">
+					Stale
+				</span>
+			) : null}
 		</div>
 	);
 }

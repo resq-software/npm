@@ -99,6 +99,20 @@ describe("createMailer", () => {
 		).toThrow(EmailValidationError);
 	});
 
+	it("rejects marketing payloads without an unsubscribe URL through the public schema", () => {
+		const decodeSchema = S.decodeUnknownSync(mailer.schema);
+
+		expect(() =>
+			decodeSchema({
+				name: "notification",
+				to: "ops@example.com",
+				category: "marketing",
+				preferencesUrl: "https://app.resq.software/preferences?token=abc123",
+				data: { title: "Update", body: "Details", severity: "info" },
+			}),
+		).toThrow();
+	});
+
 	it("decodes separate unsubscribe and preference URLs", () => {
 		const payload = mailer.decode({
 			name: "ping",

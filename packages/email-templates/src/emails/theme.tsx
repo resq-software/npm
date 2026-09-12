@@ -70,7 +70,12 @@ export interface EmailOrgIdentity {
 	termsUrl: string;
 	/** Absolute URL of the Privacy page. */
 	privacyUrl: string;
-	/** Absolute URL of the header logo image. */
+	/**
+	 * Absolute URL of the header logo image. Its default mirrors the versioned
+	 * email design contract, but {@link Email.Header} deliberately renders the
+	 * integrity-pinned contract URL, so overriding this value does not change the
+	 * built-in header lockup.
+	 */
 	logoUrl: string;
 }
 

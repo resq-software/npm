@@ -30,6 +30,8 @@
  *   bun ws typecheck         # type-check all packages
  *   bun ws typecheck dsa     # type-check @resq-systems/dsa
  *   bun ws list              # list all packages
+ *   bun ws deps              # dependency graph: direct vs transitive
+ *   bun ws deps --why lodash # every chain that introduced a package
  */
 
 import { $ } from "bun";
@@ -51,6 +53,7 @@ const ALIASES: Record<string, string> = {
 	l: "lint",
 	d: "dev",
 	i: "install",
+	dep: "deps",
 };
 
 const [command, ...targets] = process.argv.slice(2);
@@ -67,6 +70,7 @@ if (!resolved || resolved === "help") {
     typecheck, tc    Type-check with tsc --noEmit
     lint, l          Lint with Biome
     dev, d           Start Storybook (UI)
+    deps, dep        Dependency graph: direct vs transitive (--help for flags)
     list             Show all packages
 
   Packages:
@@ -80,6 +84,8 @@ if (!resolved || resolved === "help") {
     bun ws dev
     bun ws install
     bun ws i
+    bun ws deps --direct --production
+    bun ws deps --why lodash
 `);
 	process.exit(0);
 }
@@ -100,6 +106,12 @@ if (resolved === "install") {
 if (resolved === "dev") {
 	await $`bun --filter @resq-systems/ui storybook`.cwd(ROOT);
 	process.exit(0);
+}
+
+if (resolved === "deps") {
+	// Exit codes are propagated so `--why <missing>` stays usable as a CI gate.
+	const result = await $`bun scripts/dependencies.ts ${targets}`.cwd(ROOT).nothrow();
+	process.exit(result.exitCode);
 }
 
 const pkgs = targets.length > 0 ? targets : allPackages;

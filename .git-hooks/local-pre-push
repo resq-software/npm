@@ -3,6 +3,17 @@
 # Fails fast if bunx isn't available so the lint gate can't be silently skipped.
 set -euo pipefail
 
+# This is a developer gate, and it has no business running inside a workflow.
+# `bun install` points core.hooksPath at .git-hooks, so every `git push` made from a
+# job runs it too — including the one the Release workflow makes to raise
+# `changeset-release/master`. On 2026-08-16 that push failed here and took the whole
+# release with it, over a formatting violation in a generated file that no human
+# wrote. CI runs Biome as its own Lint job, so nothing is lost by standing down here.
+if [ -n "${CI:-}" ]; then
+    echo "  TS/JS: skipping Biome gate (CI runs it as a separate job)"
+    exit 0
+fi
+
 if ! command -v bunx >/dev/null 2>&1; then
     echo "❌ bunx not found; cannot run required Biome lint gate." >&2
     echo "   Install bun: https://bun.sh" >&2

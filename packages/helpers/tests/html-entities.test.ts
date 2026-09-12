@@ -143,4 +143,103 @@ describe("obfuscateLink", () => {
 			expect(result.encodedText).toBe("&#53;");
 		});
 	});
+
+	// The `scheme: "mailto" | "tel"` union guards the ordinary case at compile time
+	// but not the ones that matter: `obfuscateLink({ ...JSON.parse(config) })` type-
+	// checks clean because `JSON.parse` returns `any`, and this package is published,
+	// so plain-JS consumers get no enforcement at all. Every documented usage puts
+	// the returned `href` straight into an anchor.
+	describe("input validation", () => {
+		const call = (opts: unknown) => () =>
+			obfuscateLink(opts as Parameters<typeof obfuscateLink>[0]);
+
+		test.each(["javascript", "data", "vbscript", "file", "http", "JAVASCRIPT", ""])(
+			"rejects the %o scheme",
+			(scheme) => {
+				expect(call({ scheme, address: "alert(1)" })).toThrow(TypeError);
+			},
+		);
+
+		test.each([null, undefined, 0, {}])("rejects a %o scheme", (scheme) => {
+			expect(call({ scheme, address: "a@b.c" })).toThrow(TypeError);
+		});
+
+		test.each([
+			["a double quote, which closes the href attribute", 'x@y.com" onmouseover="alert(1)'],
+			["a single quote, which closes a single-quoted href", "x@y.com' onfocus='alert(1)"],
+			["an angle bracket, which opens a tag", "x@y.com<script>"],
+			["a carriage return, which injects a mailto header", "x@y.com\r\nBcc: victim@example.com"],
+			["a bare newline", "x@y.com\nSubject: spam"],
+			["a NUL byte", "x@y.com\0evil"],
+			["a backslash", "x@y.com\\"],
+			["a semicolon", "x@y.com;evil"],
+		])("rejects an address containing %s", (_label, address) => {
+			expect(call({ scheme: "mailto", address })).toThrow(TypeError);
+		});
+
+		test.each([null, undefined, 42, {}, ["a@b.c"]])(
+			"rejects a non-string address (%o)",
+			(address) => {
+				expect(call({ scheme: "mailto", address })).toThrow(TypeError);
+			},
+		);
+
+		test("rejects an address beyond the 320-character ceiling", () => {
+			const local = "a".repeat(310);
+			expect(call({ scheme: "mailto", address: `${local}@example.com` })).toThrow(TypeError);
+		});
+
+		test.each([
+			["a plain mailbox", "mailto", "jane.doe@example.com"],
+			["a tagged mailbox", "mailto", "jane+tag@example.co.uk"],
+			["an internationalized mailbox", "mailto", "josé@münchen.example"],
+			["a formatted phone number", "tel", "+1 (555) 010-4477"],
+			["a bare extension", "tel", "4477"],
+		])("still accepts %s", (_label, scheme, address) => {
+			expect(call({ scheme, address })).not.toThrow();
+		});
+	});
+
+	// `?`, `#`, `%` and `&` are atext, so RFC 5322 makes them legal in a local part and
+	// the address allowlist admits them. They are also the delimiters RFC 6068 uses to
+	// separate a `mailto:` address from its header fields, so an address carrying one
+	// reaches the compose window as caller-controlled `bcc`/`subject` unless it is
+	// percent-encoded on the way into the URI.
+	describe("URI delimiters in the address", () => {
+		test("does not emit caller-controlled header fields from a '?' in the address", () => {
+			const result = obfuscateLink({
+				scheme: "mailto",
+				address: "victim@example.com?bcc=attacker@example.com",
+			});
+			expect(result.href).toBe("mailto:victim@example.com%3Fbcc=attacker@example.com");
+			expect(result.href).not.toContain("?");
+		});
+
+		test.each([
+			["a question mark", "a?b@example.com", "mailto:a%3Fb@example.com"],
+			["an ampersand", "a&b@example.com", "mailto:a%26b@example.com"],
+			["a hash", "a#b@example.com", "mailto:a%23b@example.com"],
+			["a percent sign", "a%b@example.com", "mailto:a%25b@example.com"],
+			// Encoded in one pass, so an address that already looks encoded is escaped
+			// rather than left to decode into a delimiter downstream.
+			["a literal percent-escape", "a%3Fb@example.com", "mailto:a%253Fb@example.com"],
+		])("percent-encodes %s", (_label, address, expected) => {
+			expect(obfuscateLink({ scheme: "mailto", address }).href).toBe(expected);
+		});
+
+		test("leaves an address without delimiters untouched", () => {
+			expect(obfuscateLink({ scheme: "tel", address: "+1 (555) 010-4477" }).href).toBe(
+				"tel:+1 (555) 010-4477",
+			);
+		});
+
+		test("keeps the params separator distinguishable from an encoded address", () => {
+			const result = obfuscateLink({
+				scheme: "mailto",
+				address: "a?b@example.com",
+				params: { subject: "hi" },
+			});
+			expect(result.href).toBe("mailto:a%3Fb@example.com?subject=hi");
+		});
+	});
 });

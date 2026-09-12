@@ -32,6 +32,29 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
+/**
+ * Determinate progress bar.
+ *
+ * The Radix root applies `role="progressbar"`, and that role carries **no**
+ * implicit accessible name — unlike a native form control, there is no
+ * labelable element for `<label for>` to attach to, so nothing names the bar
+ * unless the caller does. Supply either `aria-label` or `aria-labelledby`;
+ * both pass straight through to the root along with the rest of `props`.
+ *
+ * Without one, assistive technology announces a bare "progress bar" plus a
+ * percentage with no subject — the value becomes unattributable, several bars
+ * on a page become indistinguishable, and axe-core fails the story under
+ * `aria-progressbar-name`.
+ *
+ * Prefer `aria-labelledby` pointing at the visible caption over duplicating
+ * that copy into `aria-label`, so the seen and the announced name cannot drift.
+ *
+ * @example
+ * ```tsx
+ * <span id="zone-coverage">Zone coverage</span>
+ * <Progress aria-labelledby="zone-coverage" value={68} />
+ * ```
+ */
 function Progress({
 	className,
 	value,

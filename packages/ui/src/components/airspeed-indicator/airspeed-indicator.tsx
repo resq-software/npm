@@ -43,6 +43,7 @@ import {
 	polar,
 	toFinite,
 	valueToAngle,
+	withStaleness,
 } from "../../lib/instrument-dial.js";
 import { cn } from "../../lib/utils.js";
 
@@ -179,6 +180,15 @@ export interface AirspeedIndicatorProps extends React.ComponentProps<"div"> {
 	bands?: SpeedBand[];
 	/** Never-exceed marker, in scale units. */
 	redline?: number;
+	/**
+	 * Marks the reading as no longer trustworthy: dims the figure, shows a STALE
+	 * badge, sets `data-stale`, and leads the accessible label with "Stale".
+	 *
+	 * A boolean rather than a timestamp — this component holds no timer and
+	 * could not notice itself going stale. Compute it with `isStale` from
+	 * `@resq-systems/ui/adapters`, driven by your own render loop.
+	 */
+	stale?: boolean;
 	/** Overrides the auto-generated `aria-label`. */
 	label?: string;
 }
@@ -202,13 +212,17 @@ function AirspeedIndicator({
 	unit = "kt",
 	bands,
 	redline,
+	stale,
 	label,
 	className,
 	...props
 }: Readonly<AirspeedIndicatorProps>) {
 	const max = toFinite(maxSpeed, DEFAULT_MAX) > 0 ? toFinite(maxSpeed, DEFAULT_MAX) : DEFAULT_MAX;
 	const value = clamp(toFinite(speed), 0, max);
-	const ariaLabel = label ?? `Airspeed indicator, ${Math.round(value)} ${unit}`;
+	const ariaLabel = withStaleness(
+		label ?? `Airspeed indicator, ${Math.round(value)} ${unit}`,
+		stale,
+	);
 
 	const validBands = (bands ?? []).filter((band) => band.to > band.from);
 	const redlineValue = redline == null ? null : clamp(toFinite(redline), 0, max);
@@ -223,9 +237,15 @@ function AirspeedIndicator({
 			aria-label={ariaLabel}
 			className={cn("relative inline-block size-48 select-none", className)}
 			data-slot="airspeed-indicator"
+			data-stale={stale === true ? "" : undefined}
 			role="img"
 		>
-			<div className="absolute inset-0 overflow-hidden rounded-full border border-border bg-card">
+			<div
+				className={cn(
+					"absolute inset-0 overflow-hidden rounded-full border border-border bg-card",
+					stale === true && "opacity-45",
+				)}
+			>
 				<svg
 					aria-hidden="true"
 					className="block"
@@ -302,6 +322,11 @@ function AirspeedIndicator({
 					<circle cx={CENTER} cy={CENTER} fill={HUB} r={HUB_RADIUS} />
 				</svg>
 			</div>
+			{stale === true ? (
+				<span className="absolute top-1 right-1 rounded-[3px] bg-destructive px-1 py-px font-mono text-[9px] uppercase leading-none text-destructive-foreground">
+					Stale
+				</span>
+			) : null}
 		</div>
 	);
 }

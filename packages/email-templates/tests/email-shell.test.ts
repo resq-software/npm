@@ -144,6 +144,11 @@ function elements(node: Node): Element[] {
 	return descendants(node).filter(isElement);
 }
 
+function directElementChildren(node: Node): Element[] {
+	if (!("childNodes" in node)) return [];
+	return node.childNodes.filter(isElement);
+}
+
 function attribute(element: Element, name: string): string | undefined {
 	return element.attrs.find((candidate) => candidate.name === name)?.value;
 }
@@ -199,7 +204,7 @@ function hexToRgb(hex: `#${string}`): string {
 describe("shared email shell", () => {
 	for (const fixture of fixtures) {
 		it(`renders the adaptive company-first shell for ${fixture.name}`, async () => {
-			const { html } = await renderEmail(fixture);
+			const { html, text } = await renderEmail(fixture);
 			const document = parse(html);
 			const allElements = elements(document);
 			const meta = (name: string) =>
@@ -243,10 +248,52 @@ describe("shared email shell", () => {
 			const mutedRoles = byClass(card[0]!, "resq-email-muted");
 			const neutralDivider = byClass(card[0]!, "resq-email-neutral-divider");
 			const brandRule = byClass(header[0]!, "resq-email-brand-rule");
+			const logoRow = byClass(header[0]!, "resq-email-logo-row");
+			const logo = byClass(header[0]!, "resq-email-logo");
+			const logoCell = byClass(header[0]!, "resq-email-logo-cell");
+			const spacer = byClass(header[0]!, "resq-email-logo-spacer");
+			const identity = byClass(header[0]!, "resq-email-identity");
 			expect(foregroundRoles.length).toBeGreaterThan(0);
 			expect(mutedRoles.length).toBeGreaterThan(0);
 			expect(neutralDivider).toHaveLength(1);
 			expect(brandRule).toHaveLength(1);
+			expect(logoRow).toHaveLength(1);
+			expect(logo).toHaveLength(1);
+			expect(logoCell).toHaveLength(1);
+			expect(spacer).toHaveLength(1);
+			expect(identity).toHaveLength(1);
+			expect(logoRow[0]!.tagName).toBe("table");
+			expect(attribute(logoRow[0]!, "role")).toBe("presentation");
+			expect(attribute(logoRow[0]!, "align")).toBe("left");
+			const tableChildren = directElementChildren(logoRow[0]!);
+			expect(tableChildren).toHaveLength(1);
+			expect(tableChildren[0]!.tagName).toBe("tbody");
+			const bodyRows = directElementChildren(tableChildren[0]!);
+			expect(bodyRows).toHaveLength(1);
+			expect(bodyRows[0]!.tagName).toBe("tr");
+			const directCells = directElementChildren(bodyRows[0]!);
+			expect(directCells).toEqual([logoCell[0]!, spacer[0]!, identity[0]!]);
+			expect(directCells.map((cell) => cell.tagName)).toEqual(["td", "td", "td"]);
+			expect(attribute(logoCell[0]!, "width")).toBe("40");
+			expect(attribute(spacer[0]!, "width")).toBe("12");
+			expect(logo[0]!.tagName).toBe("img");
+			expect(attribute(logo[0]!, "src")).toBe(emailDesignContract.identity.logoUrl);
+			expect(attribute(logo[0]!, "alt")).toBe("");
+			expect(attribute(logo[0]!, "width")).toBe("40");
+			expect(attribute(logo[0]!, "height")).toBe("40");
+			expectStyle(logoCell[0]!, "width:40px");
+			expectStyle(spacer[0]!, "width:12px");
+			expectStyle(logoCell[0]!, "vertical-align:middle");
+			expectStyle(identity[0]!, "vertical-align:middle");
+			expect(elements(header[0]!).filter((element) => element.tagName === "a")).toHaveLength(0);
+			expect(normalizedText(identity[0]!)).toBe(
+				`${emailDesignContract.identity.brandName} ${emailDesignContract.identity.descriptor.toUpperCase()}`,
+			);
+			expect(
+				text.startsWith(
+					`${emailDesignContract.identity.brandName}\n\n${emailDesignContract.identity.descriptor.toUpperCase()}`,
+				),
+			).toBe(true);
 			expect(
 				foregroundRoles.some((element) =>
 					styleOf(element).includes(
@@ -280,7 +327,7 @@ describe("shared email shell", () => {
 			expect(headerElements.indexOf(headerBrand!)).toBeLessThan(
 				headerElements.indexOf(headerDescriptor!),
 			);
-			expect(headerElements.filter((element) => element.tagName === "img")).toHaveLength(0);
+			expect(headerElements.filter((element) => element.tagName === "img")).toHaveLength(1);
 
 			const styleText = allElements
 				.filter((element) => element.tagName === "style")
@@ -406,6 +453,16 @@ describe("shared email shell", () => {
 			expect(html).not.toMatch(/<v:|xmlns:v=|<!--[[]if\s+(?:mso|gte\s+mso)/iu);
 		});
 	}
+
+	it("keeps the header logo pinned to the contract when a theme supplies another URL", async () => {
+		const { html } = await renderEmail(fixtures[0]!, {
+			theme: { org: { logoUrl: "https://example.com/unreviewed.png" } },
+		});
+		const document = parse(html);
+		const logo = byClass(document, "resq-email-logo");
+		expect(logo).toHaveLength(1);
+		expect(attribute(logo[0]!, "src")).toBe(emailDesignContract.identity.logoUrl);
+	});
 
 	it("keeps every marketing legal link reachable by the dark muted role", async () => {
 		const unsubscribeUrl = "https://resq.software/unsubscribe?shell=dark";

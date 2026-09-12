@@ -16,6 +16,7 @@
 
 import { describe, expect, it } from "vitest";
 import { emailDesignContract } from "../src/email-design-contract";
+import { emailOrg } from "../src/emails/tokens";
 import {
 	buildDarkModeCss,
 	defaultEmailTheme,
@@ -37,6 +38,10 @@ describe("adaptive email theme", () => {
 	it("uses the contract dark roles and approved descriptor", () => {
 		expect(defaultEmailTheme.darkColors).toEqual(emailDesignContract.modes.dark);
 		expect(defaultEmailTheme.org.descriptor).toBe("Autonomous Disaster Response");
+	});
+
+	it("sources the organization logo from the email design contract", () => {
+		expect(emailOrg.logoUrl).toBe(emailDesignContract.identity.logoUrl);
 	});
 
 	it("shallow-merges light and dark modes independently without mutating the base", () => {

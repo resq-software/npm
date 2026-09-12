@@ -22,7 +22,9 @@
  *
  * Keyboard: arrow keys adjust by `step`, Home / End jump to bounds.
  * Each thumb rolls up `aria-valuenow` for screen-reader
- * announcements.
+ * announcements, and is named through `thumbAriaLabels` /
+ * `thumbAriaLabelledBy` because `role="slider"` carries no
+ * implicit accessible name.
  *
  * @module @resq-systems/ui/components/slider/slider
  */
@@ -34,14 +36,72 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils.js";
 
+/**
+ * Naming attributes for the thumb at `index`, emitting only the ones actually
+ * supplied.
+ *
+ * Radix computes its own fallback (`props["aria-label"] || label`) and then
+ * spreads the caller's props over the result, so passing an explicit
+ * `aria-label={undefined}` would overwrite that fallback with `undefined` and
+ * strip the "Minimum" / "Maximum" names off every multi-thumb slider. Omitting
+ * the key entirely leaves the fallback intact.
+ */
+function thumbNameProps(
+	index: number,
+	labels?: readonly string[],
+	labelledBy?: readonly string[],
+): Readonly<{ "aria-label"?: string; "aria-labelledby"?: string }> {
+	const label = labels?.[index];
+	const labelledById = labelledBy?.[index];
+
+	return {
+		...(label === undefined ? {} : { "aria-label": label }),
+		...(labelledById === undefined ? {} : { "aria-labelledby": labelledById }),
+	};
+}
+
+/**
+ * Single- or multi-thumb range slider.
+ *
+ * Radix puts `role="slider"` on each **thumb**, not on the root, and that role
+ * carries no implicit accessible name. A thumb is a `span`, so it is not a
+ * labelable element and `<Label htmlFor>` cannot name it — only `aria-label` or
+ * `aria-labelledby` on the thumb itself will. The thumbs are rendered inside
+ * this component, so name them through `thumbAriaLabels` /
+ * `thumbAriaLabelledBy`; both are indexed by thumb.
+ *
+ * Radix supplies a fallback name only once there are two or more thumbs
+ * ("Minimum" / "Maximum", then "Value n of m"). A single-thumb slider is
+ * nameless unless the caller names it — assistive technology announces a bare
+ * "slider, 50", a number with no subject, and axe-core fails it under
+ * `aria-input-field-name`.
+ *
+ * Prefer `thumbAriaLabelledBy` pointing at the visible caption over duplicating
+ * that copy into `thumbAriaLabels`, so the seen and the announced name cannot
+ * drift. Give each thumb of a range an end-specific name: the same name on both
+ * says nothing about which bound is moving.
+ *
+ * @example
+ * ```tsx
+ * <span id="altitude-limit">Drone altitude limit</span>
+ * <Slider max={12} thumbAriaLabelledBy={["altitude-limit"]} value={value} />
+ * ```
+ */
 function Slider({
 	className,
 	defaultValue,
 	max = 100,
 	min = 0,
+	thumbAriaLabelledBy,
+	thumbAriaLabels,
 	value,
 	...props
-}: Readonly<React.ComponentProps<typeof SliderPrimitive.Root>>) {
+}: Readonly<
+	React.ComponentProps<typeof SliderPrimitive.Root> & {
+		thumbAriaLabelledBy?: readonly string[];
+		thumbAriaLabels?: readonly string[];
+	}
+>) {
 	const _values = React.useMemo(() => {
 		if (Array.isArray(value)) return value;
 		if (Array.isArray(defaultValue)) return defaultValue;
@@ -75,6 +135,7 @@ function Slider({
 					className="border-ring ring-ring/50 relative size-3 rounded-full border bg-white transition-[color,box-shadow] after:absolute after:-inset-2 hover:ring-[3px] focus-visible:ring-[3px] focus-visible:outline-hidden active:ring-[3px] block shrink-0 select-none disabled:pointer-events-none disabled:opacity-50"
 					data-slot="slider-thumb"
 					key={index}
+					{...thumbNameProps(index, thumbAriaLabels, thumbAriaLabelledBy)}
 				/>
 			))}
 		</SliderPrimitive.Root>

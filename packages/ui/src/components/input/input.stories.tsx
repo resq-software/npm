@@ -64,8 +64,18 @@ export const Invalid: Story = {
 	},
 };
 
+/**
+ * A file input renders no placeholder and its button text is fixed by the browser,
+ * so without an associated label there is nothing to tell anyone — sighted or using
+ * a screen reader — which file is being asked for.
+ */
 export const WithFile: Story = {
-	args: { type: "file" },
+	render: () => (
+		<div className="grid gap-1.5 w-72">
+			<Label htmlFor="flight-log">Flight log</Label>
+			<Input id="flight-log" type="file" />
+		</div>
+	),
 };
 
 export const WithLabel: Story = {
@@ -77,7 +87,17 @@ export const WithLabel: Story = {
 	),
 };
 
+/**
+ * The interaction story typed into a field with no name, which is precisely the
+ * case a screen-reader user cannot complete.
+ */
 export const Typing: Story = {
+	render: (args) => (
+		<div className="flex flex-col gap-2">
+			<Label htmlFor="typing-callsign">Vehicle callsign</Label>
+			<Input {...args} id="typing-callsign" />
+		</div>
+	),
 	play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
 		const canvas = within(canvasElement);
 		const input = canvas.getByRole("textbox");

@@ -39,6 +39,14 @@ export {
 	type ReconnectTimer,
 } from "./backoff.js";
 export {
+	type CoalescedSnapshot,
+	type Coalescer,
+	type CoalescerOptions,
+	createCoalescer,
+	defaultScheduler,
+	type FlushScheduler,
+} from "./coalesce.js";
+export {
 	type MqttClientFactory,
 	type MqttClientLike,
 	type MqttPayload,

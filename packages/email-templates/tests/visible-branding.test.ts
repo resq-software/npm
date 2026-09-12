@@ -17,6 +17,7 @@
 import { parse, type DefaultTreeAdapterTypes } from "parse5";
 import { describe, expect, it } from "vitest";
 import type { EmailPayload } from "../src/contract";
+import { emailDesignContract } from "../src/email-design-contract";
 import { defaultEmailTheme } from "../src/emails/theme";
 import { renderEmail } from "../src/render";
 
@@ -295,7 +296,7 @@ function visibleHtmlCopy(
 
 function renderedPreheader(document: Node): string {
 	const previewElements = elements(document).filter(
-		(element) => attribute(element, "data-skip-in-text") === "true",
+		(element) => element.tagName === "div" && attribute(element, "data-skip-in-text") === "true",
 	);
 	if (previewElements.length !== 1) {
 		throw new Error(`expected one rendered Preview element, received ${previewElements.length}`);
@@ -478,6 +479,10 @@ describe("built-in visible identity matrix", () => {
 
 			expect(card).toHaveLength(1);
 			expect(header).toHaveLength(1);
+			const logo = byClass(header[0]!, "resq-email-logo");
+			expect(logo).toHaveLength(1);
+			expect(attribute(logo[0]!, "alt")).toBe("");
+			expect(attribute(logo[0]!, "src")).toBe(emailDesignContract.identity.logoUrl);
 			expect(normalizedVisibleCopy(header[0]!)).toBe(
 				`${org.brandName} ${org.descriptor.toUpperCase()}`,
 			);

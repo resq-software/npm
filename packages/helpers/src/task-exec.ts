@@ -44,6 +44,13 @@ import type { TimedTask } from "./task-exec.types.js";
  * sched.exec(() => log("now"), 0);     // runs immediately
  * sched.exec(() => report(), 60_000);  // run in ~60s
  * ```
+ *
+ * @see {@link https://www.npmjs.com/package/@resq-systems/types | `@resq-systems/types/order`}
+ *   — the heap's `compareFn` is a loose `(a, b) => number` subtraction
+ *   comparator, which is what `@resq-systems/dsa`'s `CompareFn<T>` asks for and
+ *   is deliberately left as is. If it ever needs to become a typed `Order<T>`,
+ *   `fromCompare` is the sanctioned normalizer — it clamps any numeric result to
+ *   `-1 | 0 | 1` and maps `NaN` to `0`.
  */
 export class TaskExec {
 	private readonly tasks = new PriorityQueue<TimedTask>({

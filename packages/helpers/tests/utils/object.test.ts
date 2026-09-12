@@ -165,6 +165,18 @@ describe("areObjectsShallowEqual", () => {
 		expect(areObjectsShallowEqual({ x: NaN }, { x: NaN })).toBe(true);
 		expect(areObjectsShallowEqual({ x: -0 }, { x: +0 })).toBe(false);
 	});
+
+	it("should stay symmetric when an own key is non-enumerable", () => {
+		// A non-enumerable own key satisfies `Object.hasOwn` but is never
+		// returned by `Object.keys`. Testing membership with the first while
+		// counting with the second made the relation asymmetric.
+		const right = { b: 2 } as Record<string, number>;
+		Object.defineProperty(right, "a", { value: 1 });
+		expect(Object.hasOwn(right, "a")).toBe(true);
+		expect(Object.keys(right)).toStrictEqual(["b"]);
+		expect(areObjectsShallowEqual<Record<string, number>>({ a: 1 }, right)).toBe(false);
+		expect(areObjectsShallowEqual<Record<string, number>>(right, { a: 1 })).toBe(false);
+	});
 });
 
 describe("groupBy", () => {

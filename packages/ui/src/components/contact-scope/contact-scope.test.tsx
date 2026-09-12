@@ -138,6 +138,35 @@ describe("ContactScope", () => {
 		expect(element.props["aria-label"]).not.toContain("-3");
 	});
 
+	it("keeps a distant high-risk contact over nearer harmless ones when the cap bites", () => {
+		// Forty-eight close but unranked contacts, plus one far contact on a
+		// collision course. Ranking by range alone would drop exactly the contact
+		// the operator needs.
+		const crowd = Array.from({ length: 48 }, (_unused, index) => ({
+			bearing: index * 7,
+			id: `NEAR-${index}`,
+			range: 1 + index / 100,
+		}));
+		const element = ContactScope({
+			contacts: [...crowd, { bearing: 200, cpa: 0.2, id: "CLOSING", range: 5.5, tcpa: 6 }],
+		});
+
+		expect(element.props["aria-label"]).toContain("closest point of approach 0.2 NM");
+		expect(element.props["aria-label"]).toContain("for CLOSING");
+		expect(element.props["aria-label"]).toContain("collision risk");
+	});
+
+	it("still reports the nearest drawn contact, not the highest-risk one", () => {
+		const element = ContactScope({
+			contacts: [
+				{ bearing: 200, cpa: 0.2, id: "CLOSING", range: 5.5 },
+				{ bearing: 10, id: "NEAR", range: 1.1 },
+			],
+		});
+
+		expect(element.props["aria-label"]).toContain("nearest NEAR at 1.1 NM");
+	});
+
 	it("merges a consumer className over the base size", () => {
 		const element = ContactScope({ className: "size-64", contacts: TRAFFIC });
 

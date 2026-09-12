@@ -1,6 +1,6 @@
 {
 	"name": "@resq-systems/security",
-	"version": "1.0.5",
+	"version": "2.1.0",
 	"description": "Security utilities: encryption, input validation, schemas, and PII sanitization",
 	"license": "Apache-2.0",
 	"type": "module",
@@ -24,6 +24,26 @@
 			"types": "./lib/crypto.d.mts",
 			"import": "./lib/crypto.mjs",
 			"default": "./lib/crypto.mjs"
+		},
+		"./controls": {
+			"types": "./lib/controls/index.d.mts",
+			"import": "./lib/controls/index.mjs",
+			"default": "./lib/controls/index.mjs"
+		},
+		"./threats": {
+			"types": "./lib/threats/index.d.mts",
+			"import": "./lib/threats/index.mjs",
+			"default": "./lib/threats/index.mjs"
+		},
+		"./unicode": {
+			"types": "./lib/unicode/index.d.mts",
+			"import": "./lib/unicode/index.mjs",
+			"default": "./lib/unicode/index.mjs"
+		},
+		"./paths": {
+			"types": "./lib/paths.d.mts",
+			"import": "./lib/paths.mjs",
+			"default": "./lib/paths.mjs"
 		},
 		"./package.json": "./package.json"
 	},
@@ -51,12 +71,12 @@
 	},
 	"devDependencies": {
 		"@total-typescript/ts-reset": "^0.6.1",
-		"@types/node": "^26.1.2",
-		"effect": "4.0.0-beta.102",
-		"jsdom": "^30.0.0",
+		"@types/node": "^26.4.0",
+		"effect": "4.0.0-rc.112",
+		"jsdom": "^30.0.1",
 		"tsdown": "^0.22.14",
 		"typescript": "7.0.2",
-		"vitest": "4.1.10"
+		"vitest": "4.1.11"
 	},
 	"publishConfig": {
 		"access": "public",
@@ -74,13 +94,20 @@
 		"validation",
 		"sanitize",
 		"xss",
-		"pii"
+		"pii",
+		"threat-detection",
+		"owasp",
+		"cwe",
+		"unicode-security",
+		"uts39",
+		"homoglyph",
+		"path-traversal"
 	],
 	"engines": {
 		"node": ">=20.19.0"
 	},
 	"dependencies": {
-		"@resq-systems/types": "^0.1.0",
-		"dompurify": "^3.4.12"
+		"@resq-systems/types": "^0.2.0",
+		"dompurify": "^3.4.14"
 	}
 }

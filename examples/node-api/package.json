@@ -4,7 +4,8 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "bun run src/server.ts"
+		"dev": "bun run src/server.ts",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@resq-systems/decorators": "workspace:*",
@@ -13,6 +14,6 @@
 		"@resq-systems/rate-limiting": "workspace:*",
 		"@resq-systems/security": "workspace:*",
 		"@resq-systems/types": "workspace:*",
-		"@types/bun": "^1.3.14"
+		"@types/bun": "^1.4.0"
 	}
 }

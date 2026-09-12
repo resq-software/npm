@@ -15,7 +15,8 @@
 -->
 
 ---
-"@resq-systems/telemetry": minor
+"@resq-systems/constants": minor
+"@resq-systems/email-templates": minor
 ---
 
-Add MqttTelemetrySource, a topic-addressed transport for MQTT fleets, plus the topicMatches filter matcher
+Publish the marketing social profile URLs as the email contract's `identity.socials` and add the YouTube profile to `brand.socials`
