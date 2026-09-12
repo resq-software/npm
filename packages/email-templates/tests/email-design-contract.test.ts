@@ -38,6 +38,11 @@ describe("email design contract", () => {
 				termsUrl: "https://resq.software/legal/terms",
 				privacyUrl: "https://resq.software/legal/privacy",
 				supportEmail: "contact@resq.software",
+				socials: {
+					x: "https://x.com/resqsystems_inc",
+					linkedin: "https://www.linkedin.com/company/resq-systems-inc",
+					youtube: "https://www.youtube.com/@resq_systems",
+				},
 			},
 			modes: {
 				light: {

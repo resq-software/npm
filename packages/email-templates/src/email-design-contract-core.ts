@@ -47,6 +47,17 @@ export interface EmailDesignContractCore {
 		readonly termsUrl: string;
 		readonly privacyUrl: string;
 		readonly supportEmail: string;
+		/**
+		 * Public profile URLs an email footer may link to. Deliberately only the
+		 * marketing-facing profiles: `xHandle` is meta-tag syntax rather than a
+		 * URL, and `github` is a developer surface that does not belong in a
+		 * marketing footer.
+		 */
+		readonly socials: {
+			readonly x: string;
+			readonly linkedin: string;
+			readonly youtube: string;
+		};
 	};
 	readonly modes: {
 		readonly light: EmailModeColors;
@@ -203,6 +214,11 @@ export const emailDesignContractCore = {
 		termsUrl: brand.legal.termsUrl,
 		privacyUrl: brand.legal.privacyUrl,
 		supportEmail: brand.email.support,
+		socials: {
+			x: brand.socials.x,
+			linkedin: brand.socials.linkedin,
+			youtube: brand.socials.youtube,
+		},
 	},
 	modes: {
 		light: {
