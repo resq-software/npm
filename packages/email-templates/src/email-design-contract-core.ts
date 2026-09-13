@@ -36,7 +36,7 @@ export interface EmailModeColors {
 
 /** Stable, unhashed values shared by email renderers across frameworks. */
 export interface EmailDesignContractCore {
-	readonly schemaVersion: 2;
+	readonly schemaVersion: 3;
 	readonly identity: {
 		readonly brandName: string;
 		readonly productName: string;
@@ -47,6 +47,17 @@ export interface EmailDesignContractCore {
 		readonly termsUrl: string;
 		readonly privacyUrl: string;
 		readonly supportEmail: string;
+		/**
+		 * Public profile URLs an email footer may link to. Deliberately only the
+		 * marketing-facing profiles: `xHandle` is meta-tag syntax rather than a
+		 * URL, and `github` is a developer surface that does not belong in a
+		 * marketing footer.
+		 */
+		readonly socials: {
+			readonly x: string;
+			readonly linkedin: string;
+			readonly youtube: string;
+		};
 		readonly logoUrl: string;
 		readonly logoSha256: string;
 	};
@@ -196,7 +207,7 @@ export function canonicalizeEmailContract(value: unknown): string {
 
 /** Internal unhashed contract values consumed by the generator and public module. */
 export const emailDesignContractCore = {
-	schemaVersion: 2,
+	schemaVersion: 3,
 	identity: {
 		brandName: brand.name,
 		productName: brand.productName,
@@ -207,6 +218,11 @@ export const emailDesignContractCore = {
 		termsUrl: brand.legal.termsUrl,
 		privacyUrl: brand.legal.privacyUrl,
 		supportEmail: brand.email.support,
+		socials: {
+			x: brand.socials.x,
+			linkedin: brand.socials.linkedin,
+			youtube: brand.socials.youtube,
+		},
 		logoUrl: brand.logo,
 		logoSha256: "f04e4334bf81acaebbfb9e57f8ee43edcfee2f8939344b11bab59f0d6093708f",
 	},
