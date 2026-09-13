@@ -136,3 +136,15 @@ reason = "dev-only: linkify-it via markdown-it -> markdownlint-cli (@resq-system
 [[IgnoredVulns]]
 id = "GHSA-jxxr-4gwj-5jf2"
 reason = "dev-only: brace-expansion via markdownlint-cli + @storybook/nextjs-vite tooling; not a runtime dep of any published package"
+
+# --- image-size: Storybook (@storybook/nextjs-vite) build tooling; not shipped ---
+# No fixed release exists — 2.0.2 is still the latest published version, so this
+# cannot be cleared by an override. Reachable only through @storybook/nextjs-vite,
+# a devDependency of @resq-systems/ui; `image-size` is not in the `dependencies`
+# block of any published package. Prune both IDs once a fixed release ships.
+[[IgnoredVulns]]
+id = "GHSA-5p2g-fcmc-qvqq"
+reason = "dev-only: image-size via @storybook/nextjs-vite; no fixed release published; not a runtime dep of any published package"
+[[IgnoredVulns]]
+id = "GHSA-w3rx-r6r6-pgpr"
+reason = "dev-only: image-size via @storybook/nextjs-vite; no fixed release published; not a runtime dep of any published package"

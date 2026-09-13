@@ -54,8 +54,9 @@ import {
 	emailDesignContractIntegrity,
 } from "@resq-systems/email-templates/email-contract";
 
-emailDesignContract.schemaVersion; // 2
+emailDesignContract.schemaVersion; // 3
 emailDesignContract.identity.descriptor; // "Autonomous Disaster Response"
+emailDesignContract.identity.socials; // marketing profile URLs: x, linkedin, youtube
 emailDesignContract.identity.logoUrl; // "https://resq.software/logo.png"
 emailDesignContract.identity.logoSha256; // pinned SHA-256 of the public logo bytes
 emailDesignContract.presentation.header.logoSizePx; // 40

@@ -86,6 +86,7 @@ export const brand = {
 		/** The `@handle` form for `twitter:creator`/`site` meta (matches the `x` profile). */
 		xHandle: "@resqsystems_inc",
 		linkedin: "https://www.linkedin.com/company/resq-systems-inc",
+		youtube: "https://www.youtube.com/@resq_systems",
 		github: "https://github.com/resq-software",
 	},
 	company: {
