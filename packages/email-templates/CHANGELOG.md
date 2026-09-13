@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.0
+
+### Minor Changes
+
+- [`e9cbf29`](https://github.com/resq-software/npm/commit/e9cbf290984dd9a8cc5a76fc470d743ee6bd3851) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Publish the marketing social profile URLs as the email contract's `identity.socials` and add the YouTube profile to `brand.socials`
+
+### Patch Changes
+
+- Updated dependencies [[`e9cbf29`](https://github.com/resq-software/npm/commit/e9cbf290984dd9a8cc5a76fc470d743ee6bd3851)]:
+  - @resq-systems/constants@0.7.0
+
 <!--
   Copyright 2026 ResQ
 
@@ -32,6 +43,7 @@
 
 - Updated dependencies [[`b8af3d4`](https://github.com/resq-software/npm/commit/b8af3d477e7574ddce49ce01a43b461292dc95b9)]:
   - @resq-systems/constants@0.6.0
+
 ## 0.6.2
 
 ### Patch Changes
