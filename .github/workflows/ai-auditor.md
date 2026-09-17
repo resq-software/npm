@@ -18,6 +18,15 @@ permissions:
 model: gemini-2.5-pro
 engine:
   id: gemini
+  # Pinned. The compiler picks the CLI version when this is left off, and the
+  # bump to v0.88.2 (forced by gh-aw blocklisting v0.82.8-v0.85.3) would
+  # otherwise have taken Gemini CLI 0.39.1 -> 0.55.1. 0.55.1 rejects the auth
+  # this workflow supplies and the agent job dies before doing any work:
+  #     Invalid auth method selected.
+  #     [gemini-harness] attempt 1: process exit event exitCode=41
+  # GEMINI_API_KEY is wired identically in both compilations, so the break is
+  # inside the CLI. Unpin only together with whatever auth change 0.5x wants.
+  version: "0.39.1"
 # Network access
 network: defaults
 
