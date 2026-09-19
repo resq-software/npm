@@ -16,7 +16,8 @@
 
 /**
  * @fileoverview AssetMarker — places an {@link Asset} on the map. By default it
- * renders a self-contained heading arrow (rotated to the asset's heading); pass
+ * renders a self-contained heading arrow when the asset reports a heading and a plain
+ * non-directional mark when it does not; pass
  * `children` (e.g. `<HeadingIndicator heading={asset.heading} />` from
  * `@resq-systems/ui`) to swap in a richer marker.
  *
@@ -72,6 +73,27 @@ function HeadingArrow({ heading, size, color }: { heading: number; size: number;
 }
 
 /**
+ * A plain mark for an asset whose orientation is unknown.
+ *
+ * Deliberately not an arrow. An arrow has to point somewhere, and every direction it
+ * could point is a claim the telemetry never made — which is why {@link Asset.heading}
+ * is optional rather than defaulted to north.
+ */
+function PositionDot({ size, color }: { size: number; color: string }) {
+	return (
+		<svg
+			aria-hidden="true"
+			height={size}
+			style={{ display: "block" }}
+			viewBox="0 0 24 24"
+			width={size}
+		>
+			<circle cx={12} cy={12} fill={color} r={7} stroke={OUTLINE} strokeWidth={1} />
+		</svg>
+	);
+}
+
+/**
  * Place an asset on the map.
  *
  * @example
@@ -94,7 +116,12 @@ export function AssetMarker({
 			longitude={asset.longitude}
 			onClick={() => onSelect?.(asset)}
 		>
-			{children ?? <HeadingArrow color={color} heading={asset.heading} size={size} />}
+			{children ??
+				(typeof asset.heading === "number" ? (
+					<HeadingArrow color={color} heading={asset.heading} size={size} />
+				) : (
+					<PositionDot color={color} size={size} />
+				))}
 		</Marker>
 	);
 }

@@ -338,9 +338,10 @@ and moving `nav`'s into `dsa` puts marine geometry in a data-structures library.
 two great-circle implementations documented is the least-bad option until someone has a
 reason to force it.
 
-*`Asset.heading` still defaults to `0` when a frame omits it.* That is a fabricated
-reading of the kind §6 argues against, but the field is typed as required and documented
-as "0 when unknown" on a published 3.x package, so changing it is a deliberate breaking
-change rather than a defect fix. The heading is now normalised when present, which was the
-actual bug. Making the field optional — and having the marker draw a non-directional dot
-when it is absent — is the right follow-up, in its own major.
+*`Asset.heading` defaulted to `0` when a frame omitted it.* That was a fabricated reading
+of the kind §6 argues against, but the field was typed as required and documented as
+"0 when unknown" on a published 3.x package, so it needed a deliberate major rather than
+being slipped in as a defect fix. **Closed in `@resq-systems/map` 4.0.0:** the field is
+optional, `parseAssetFrame` omits the key entirely rather than inventing a bearing, and
+`AssetMarker` draws a non-directional mark when the orientation is unknown instead of an
+arrow pointing due north.
