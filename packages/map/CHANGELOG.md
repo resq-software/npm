@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.0.0
+
+### Major Changes
+
+- [`e9cbf29`](https://github.com/resq-software/npm/commit/e9cbf290984dd9a8cc5a76fc470d743ee6bd3851) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Make `Asset.heading` optional so an asset that reports no heading is drawn with a non-directional mark instead of an arrow pointing due north
+
 ## 3.1.0
 
 ### Minor Changes
