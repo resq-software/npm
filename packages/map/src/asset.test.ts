@@ -33,7 +33,6 @@ describe("parseAssetFrame", () => {
 
 		expect(asset?.latitude).toBe(1.5);
 		expect(asset?.longitude).toBe(-2.5);
-		expect(asset?.heading).toBe(0);
 	});
 
 	it("returns null without an id", () => {
@@ -63,6 +62,25 @@ describe("position validation", () => {
 	it("accepts the extremes of the valid range", () => {
 		expect(parseAssetFrame({ id: "a", lat: 90, lon: 180 })).not.toBeNull();
 		expect(parseAssetFrame({ id: "a", lat: -90, lon: -180 })).not.toBeNull();
+	});
+});
+
+describe("absent heading", () => {
+	it("omits the key entirely rather than defaulting to due north", () => {
+		const asset = parseAssetFrame({ drone_id: "A4", lat: 1, lon: 2 });
+
+		expect(asset).toEqual({ id: "A4", latitude: 1, longitude: 2 });
+		// Not just undefined — the key must not be there, so a consumer spreading the
+		// asset cannot pick up a heading of 0 from it.
+		expect(asset !== null && "heading" in asset).toBe(false);
+	});
+
+	it("still reports a heading of zero when the frame actually says zero", () => {
+		// 0 is a real bearing. Only an absent reading is absent.
+		const asset = parseAssetFrame({ drone_id: "A5", heading_deg: 0, lat: 1, lon: 2 });
+
+		expect(asset?.heading).toBe(0);
+		expect(asset !== null && "heading" in asset).toBe(true);
 	});
 });
 

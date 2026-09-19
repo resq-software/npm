@@ -20,7 +20,8 @@
  * Field aliases match the ResQ fleet telemetry shape (`drone_id`/`lat`/`lon`/
  * `heading_deg`/…), so frames from the shared `/fleet/ws` socket map directly to
  * markers. Frames without an id, or with a position that is not a real point on Earth,
- * are dropped (returns null) rather than plotted somewhere plausible.
+ * are dropped (returns null) rather than plotted somewhere plausible. A frame that
+ * reports no heading yields an asset with no heading, not one pointing north.
  *
  * @module @resq-systems/map/asset
  */
@@ -35,8 +36,14 @@ export interface Asset {
 	longitude: number;
 	/** Latitude in degrees. */
 	latitude: number;
-	/** Heading in degrees, clockwise from north (0 when unknown). */
-	heading: number;
+	/**
+	 * Heading in degrees clockwise from north, normalised to `[0, 360)`.
+	 *
+	 * Absent when the frame did not report one. It is deliberately not defaulted to `0`:
+	 * that is a real bearing — due north — and a marker drawn from it points confidently
+	 * in a direction nothing ever measured.
+	 */
+	heading?: number;
 	/** Altitude, when present. */
 	altitude?: number;
 	/** Battery percentage, when present. */
@@ -107,13 +114,10 @@ export function parseAssetFrame(raw: string | Frame): Asset | null {
 	// near-miss to be clamped, it is a frame to refuse.
 	if (!isPosition({ latitude, longitude })) return null;
 
+	const asset: Asset = { id, latitude, longitude };
+
 	const reportedHeading = readNumber(frame, ["heading_deg", "heading"]);
-	const asset: Asset = {
-		heading: reportedHeading === undefined ? 0 : normalizeBearing(reportedHeading),
-		id,
-		latitude,
-		longitude,
-	};
+	if (reportedHeading !== undefined) asset.heading = normalizeBearing(reportedHeading);
 
 	const altitude = readNumber(frame, ["alt", "altitude"]);
 	if (altitude !== undefined) asset.altitude = altitude;

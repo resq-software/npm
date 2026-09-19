@@ -13,7 +13,7 @@ bun --filter @resq-systems/map test
 ## What's here
 
 - `src/telemetry-map.tsx` — `TelemetryMap`: react-map-gl/MapLibre shell + token-free style.
-- `src/asset-marker.tsx` — `AssetMarker`: heading-arrow (or `children`) at an asset position.
+- `src/asset-marker.tsx` — `AssetMarker`: heading arrow when `Asset.heading` is present, non-directional mark when it is absent, or `children`.
 - `src/track-layer.tsx` — `TrackLayer`: GeoJSON breadcrumb trail.
 - `src/use-asset-positions.ts` — `useAssetPositions`: telemetry frames → live positions.
 - `src/asset.ts` / `src/track.ts` / `src/map-style.ts` — pure helpers (parse frames, build GeoJSON, resolve style).
