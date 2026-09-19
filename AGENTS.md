@@ -19,7 +19,7 @@ Each package has its own `AGENTS.md` (and synced `CLAUDE.md`) with package-speci
 
 | Package | Purpose | Deps |
 |---------|---------|------|
-| `@resq-systems/ui` | shadcn-based design system (Radix + base-ui + Tailwind v4) | radix-ui, base-ui, recharts; react, tailwindcss (peers) |
+| `@resq-systems/ui` | shadcn-based design system (Radix + base-ui + Tailwind v4) | @resq-systems/nav, @resq-systems/types, radix-ui, base-ui, recharts; react, tailwindcss (peers) |
 | `@resq-systems/analytics` | Unified PostHog + GA4 client — cross-subdomain, lazy-loaded, typed events | @resq-systems/types; posthog-js, react (peers) |
 | `@resq-systems/dsa` | Data structures and algorithms (graph, heap, trie, bloom, LRU, count-min, etc.) | **zero deps** (effect peer for `./schemas`) |
 | `@resq-systems/helpers` | Utilities, type guards, result types, formatting, async tasks | @resq-systems/logger, @resq-systems/types, tinyqueue |
@@ -31,11 +31,15 @@ Each package has its own `AGENTS.md` (and synced `CLAUDE.md`) with package-speci
 | `@resq-systems/constants` | Design tokens (oklch + email-safe hex), brand identity, cross-app values | **zero deps** |
 | `@resq-systems/email-templates` | Type-safe transactional emails (Effect Schema + React Email + optional Resend) | @resq-systems/constants, @react-email/*; effect, react, resend (peers) |
 | `@resq-systems/types` | Advanced TypeScript type toolkit (nominal brands, runtime guards + guard algebra, narrowing/assertions, tagged-union dispatch, type-level logic, deep utils, type-test kit) | **zero deps** |
+| `@resq-systems/nav` | Earth and vehicle geometry, CPA/TCPA, derived navigation quantities | **zero deps** |
+| `@resq-systems/map` | MapLibre + react-map-gl telemetry map primitives — map shell, asset markers, track layers | @resq-systems/nav; @resq-systems/telemetry, maplibre-gl, react-map-gl (peers) |
+| `@resq-systems/math` | Type-safe mathematical expression engine — Pratt parser, sort-based dispatch, static validation | **zero deps** |
+| `@resq-systems/telemetry` | Real-time telemetry client — single-owner WebSocket, channel multiplexing, MQTT transport | **zero deps** (react peer for `./react`) |
 
 ## Key Rules
 
 - `@resq-systems/dsa` must have **zero runtime deps**. Effect is a peer dep for optional schemas only.
-- Zero-runtime-dep packages: `dsa`, `logger`, `decorators`, `constants`, `types`. Don't add dependencies to these.
+- Zero-runtime-dep packages: `dsa`, `logger`, `decorators`, `constants`, `types`, `nav`. Don't add dependencies to these.
 - `@resq-systems/ui` uses **dark-first oklch color system** with WCAG AA contrast.
 - All packages must be **tree-shakeable** with subpath exports.
 - **Zero `any`** — strict TypeScript throughout.

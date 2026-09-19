@@ -34,6 +34,7 @@
 [![@resq-systems/email-templates](https://img.shields.io/npm/v/%40resq-systems%2Femail-templates?style=flat-square&label=%40resq-systems%2Femail-templates)](https://www.npmjs.com/package/@resq-systems/email-templates)
 [![@resq-systems/telemetry](https://img.shields.io/npm/v/%40resq-systems%2Ftelemetry?style=flat-square&label=%40resq-systems%2Ftelemetry)](https://www.npmjs.com/package/@resq-systems/telemetry)
 [![@resq-systems/map](https://img.shields.io/npm/v/%40resq-systems%2Fmap?style=flat-square&label=%40resq-systems%2Fmap)](https://www.npmjs.com/package/@resq-systems/map)
+[![@resq-systems/nav](https://img.shields.io/npm/v/%40resq-systems%2Fnav?style=flat-square&label=%40resq-systems%2Fnav)](https://www.npmjs.com/package/@resq-systems/nav)
 
 Registry workspace for all ResQ Systems npm packages published under the `@resq-systems` scope. Provides the shared UI component library, zero-dependency data structures, and standalone server/client utilities for the ResQ Systems autonomous disaster response platform.
 
@@ -68,12 +69,15 @@ graph TB
             analytics["@resq-systems/analytics<br/><small>PostHog + GA4 · cross-subdomain</small>"]
             wsclient["@resq-systems/telemetry<br/><small>reconnecting WebSocket · fan-out</small>"]
             geomap["@resq-systems/map<br/><small>MapLibre + react-map-gl</small>"]
+            nav["@resq-systems/nav<br/><small>geometry · CPA/TCPA · derived quantities</small>"]
         end
     end
 
     constants --> ui
     constants --> email
     wsclient --> geomap
+    nav --> geomap
+    nav --> ui
     foundation --> apps["Consumer Apps"]
     frontend --> apps
     algorithms --> apps
@@ -108,6 +112,7 @@ graph TB
 | [`@resq-systems/analytics`](packages/analytics/) | Unified PostHog + GA4 client — cross-subdomain identity, lazy-loaded, typed events, Next.js + React adapters | posthog-js (peer) | [README](packages/analytics/README.md) |
 | [`@resq-systems/telemetry`](packages/telemetry/) | Framework-agnostic reconnecting WebSocket client — single-owner socket, exponential backoff, many-consumer fan-out, open-replay; optional React bindings | **zero deps** · react (peer) | [README](packages/telemetry/README.md) |
 | [`@resq-systems/map`](packages/map/) | MapLibre + react-map-gl telemetry primitives — themeable map shell, asset markers, GeoJSON tracks, live position binding to `@resq-systems/telemetry` | maplibre-gl, react-map-gl (peers) | [README](packages/map/README.md) |
+| [`@resq-systems/nav`](packages/nav/) | Earth and vehicle geometry, CPA/TCPA, and derived navigation quantities — crab angle, set and drift, slip ratio, cross-track error; display and situational awareness only | **zero deps** | [README](packages/nav/README.md) |
 | [`@resq-systems/email-templates`](packages/email-templates/) | Type-safe transactional emails — Effect Schema contract, React Email components, headless render, optional Resend sender | react, effect, @react-email | [README](packages/email-templates/README.md) |
 
 ## Examples

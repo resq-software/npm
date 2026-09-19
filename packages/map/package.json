@@ -1,7 +1,7 @@
 {
 	"name": "@resq-systems/map",
 	"version": "3.0.0",
-	"description": "MapLibre + react-map-gl telemetry map primitives — a themeable map shell, asset markers, and track layers that bind to @resq-systems/telemetry",
+	"description": "MapLibre + react-map-gl telemetry map primitives \u2014 a themeable map shell, asset markers, and track layers that bind to @resq-systems/telemetry",
 	"license": "Apache-2.0",
 	"type": "module",
 	"sideEffects": false,
@@ -70,5 +70,8 @@
 	],
 	"engines": {
 		"node": ">=20.19.0"
+	},
+	"dependencies": {
+		"@resq-systems/nav": "^0.1.0"
 	}
 }

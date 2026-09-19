@@ -35,7 +35,7 @@
 import type { BatteryGaugeProps } from "../components/battery-gauge/index.js";
 import type { CompassRoseProps } from "../components/compass-rose/index.js";
 import type { TiltIndicatorProps } from "../components/tilt-indicator/index.js";
-import { optional } from "./numeric.js";
+import { optional } from "@resq-systems/nav/numeric";
 
 //#region Constants
 

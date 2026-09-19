@@ -74,6 +74,10 @@
   - changed-files:
     - any-glob-to-any-file: packages/telemetry/**/*
 
+"pkg:nav":
+  - changed-files:
+    - any-glob-to-any-file: packages/nav/**/*
+
 # ── Area labels ─────────────────────────────────────────────────────────
 
 "A-CI":

@@ -139,6 +139,10 @@
   color: "c5def5"
   description: "Changes to @resq-systems/math"
 
+- name: "pkg:nav"
+  color: "c5def5"
+  description: "Changes to @resq-systems/nav"
+
 - name: "pkg:rate-limiting"
   color: "c5def5"
   description: "Changes to @resq-systems/rate-limiting"

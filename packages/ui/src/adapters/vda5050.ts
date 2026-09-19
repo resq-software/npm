@@ -40,7 +40,7 @@
 import type { BatteryGaugeProps } from "../components/battery-gauge/index.js";
 import type { GridPose } from "../components/occupancy-grid/index.js";
 import type { TeleopVector } from "../components/teleop-pad/index.js";
-import { clamp, optional } from "./numeric.js";
+import { clamp, optional } from "@resq-systems/nav/numeric";
 
 //#region Constants
 

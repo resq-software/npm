@@ -43,6 +43,15 @@
 import type * as React from "react";
 
 import {
+	compareByRisk,
+	formatBearing,
+	isUsableCpa,
+	nearestByRange,
+	worstApproach,
+} from "@resq-systems/nav/arpa";
+import { normalizeBearing } from "@resq-systems/nav/geo";
+
+import {
 	clamp,
 	INSTRUMENT_CENTER,
 	INSTRUMENT_VIEW,
@@ -82,8 +91,6 @@ const DEFAULT_RANGE_MAX = 6;
 const DEFAULT_CPA_WARNING = 1;
 const DEFAULT_CPA_ALERT = 0.5;
 
-const FULL_TURN = 360;
-
 /** Color tokens (raw theme vars so they resolve in both light and dark). */
 const MARK = "var(--foreground)";
 const HINT = "var(--hint)";
@@ -119,16 +126,6 @@ export interface ScopeContact {
 
 //#region Helpers
 
-/** Wrap a bearing into [0, 360). */
-function normalizeBearing(value: number): number {
-	return ((value % FULL_TURN) + FULL_TURN) % FULL_TURN;
-}
-
-/** Three-digit marine bearing, so 7° reads as `007`. */
-function formatBearing(value: number): string {
-	return String(Math.round(normalizeBearing(value)) % FULL_TURN).padStart(3, "0");
-}
-
 /** A contact is plottable only with a finite bearing and an in-scope range. */
 function isPlottable(contact: ScopeContact, rangeMax: number): boolean {
 	return (
@@ -139,53 +136,12 @@ function isPlottable(contact: ScopeContact, rangeMax: number): boolean {
 	);
 }
 
-/**
- * Whether a CPA is usable. A negative closest-approach distance is not a
- * shorter one — it is nonsense, and treating it as such would paint the nearest
- * possible risk and hijack the summary line.
- */
-function isUsableCpa(cpa: number | undefined): cpa is number {
-	return isReading(cpa) && cpa >= 0;
-}
-
 /** Token for a contact's closest-point-of-approach risk. */
 function riskColor(cpa: number | undefined, warning: number, alert: number): string {
 	if (!isUsableCpa(cpa)) return NOMINAL;
 	if (cpa <= alert) return DANGER;
 	if (cpa <= warning) return CAUTION;
 	return NOMINAL;
-}
-
-/**
- * Order contacts by how much they matter: a usable CPA first and smallest
- * first, then by range. Contacts with no CPA are not assumed safe — they are
- * simply unranked on that axis, and fall back to proximity.
- */
-function compareByRisk(left: ScopeContact, right: ScopeContact): number {
-	const leftCpa = isUsableCpa(left.cpa) ? left.cpa : Number.POSITIVE_INFINITY;
-	const rightCpa = isUsableCpa(right.cpa) ? right.cpa : Number.POSITIVE_INFINITY;
-	if (leftCpa !== rightCpa) return leftCpa - rightCpa;
-	return left.range - right.range;
-}
-
-/** The closest contact by range. The label reports what is drawn, so this
- * searches the shown set rather than assuming a range-sorted array. */
-function nearestByRange(contacts: readonly ScopeContact[]): ScopeContact | null {
-	let nearest: ScopeContact | null = null;
-	for (const contact of contacts) {
-		if (nearest === null || contact.range < nearest.range) nearest = contact;
-	}
-	return nearest;
-}
-
-/** The contact with the smallest reported CPA, if any reports one. */
-function worstApproach(contacts: readonly ScopeContact[]): ScopeContact | null {
-	let worst: ScopeContact | null = null;
-	for (const contact of contacts) {
-		if (!isUsableCpa(contact.cpa)) continue;
-		if (worst === null || contact.cpa < (worst.cpa as number)) worst = contact;
-	}
-	return worst;
 }
 
 /** Build a screen-reader sentence describing the traffic picture. */
