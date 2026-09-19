@@ -219,7 +219,9 @@ the code already knows survive the type boundary. `opening` in particular is inf
 `computeApproach` computes and then discards — today a past CPA is flattened to
 `{ cpa: range, tcpa: 0 }`, indistinguishable from "closest approach is right now".
 
-## 7. API sketch
+## 7. Public API
+
+*Updated 2026-09-19 to match what shipped.*
 
 ```ts
 // @resq-systems/nav — zero runtime dependencies
@@ -236,34 +238,51 @@ export function normalizeBearing(value: number): number;
 export function isPosition(value: LatLon | undefined): value is LatLon;
 
 // Collision geometry, decoupled from AIS message shape
-export interface Approach {
+export interface ApproachGeometry {
   readonly cpa: number;            // nautical miles
   readonly tcpa: number;           // minutes
-  readonly opening: boolean;       // closest approach already passed
+  readonly opening: boolean;       // closest approach already PASSED, not merely reached
   readonly model: "constant-velocity";
-  readonly source: "ais" | "radar" | "fused";
-  readonly observedAt: number;     // epoch ms of the target report
+}
+export interface Approach extends ApproachGeometry {
+  readonly source?: "ais" | "radar" | "fused";
+  readonly observedAt?: number;    // epoch ms of the contact report
 }
 export function closestApproach(
   offset: LocalOffset,
   relativeVelocity: LocalOffset,
-): Omit<Approach, "source" | "observedAt"> | null;
+): ApproachGeometry | null;
 
 // ARPA policy, promoted out of contact-scope.tsx
+export interface RankableContact { range: number; cpa?: number | undefined }
+export function isUsableCpa(cpa: number | undefined): cpa is number;
 export function compareByRisk(left: RankableContact, right: RankableContact): number;
-export function worstApproach(contacts: readonly RankableContact[]): RankableContact | null;
+export function nearestByRange<T extends RankableContact>(contacts: readonly T[]): T | null;
+export function worstApproach<T extends RankableContact>(contacts: readonly T[]): T | null;
+export function formatBearing(value: number): string;
 
 // Derived quantities — each returns undefined rather than guessing
-export function crabAngleDeg(headingTrue?: number, courseOverGround?: number): number | undefined;
-export function setAndDrift(ground: LocalOffset, water: LocalOffset): LocalOffset | undefined;
-export function slipRatio(groundSpeed?: number, wheelSpeed?: number): number | undefined;
-export function stoppingDistanceM(input: {
-  speedMs: number; latencyS: number; brakingMs2: number; marginM: number;
-}): number;
+export interface Current {
+  readonly setDeg?: number;        // absent when drift is zero: no vector, no direction
+  readonly drift: number;          // input speed unit; deliberately not named for one
+}
+export function crabAngleDeg(headingTrueDeg?: number, courseOverGroundDeg?: number): number | undefined;
+export function observedCurrent(ground: LocalOffset, water: LocalOffset): Current | undefined;
+export function slipRatio(groundSpeedMs?: number, wheelSpeedMs?: number): number | undefined;
+export function stoppingDistanceM(input: StoppingDistanceInput): number | undefined;
+export function enduranceHours(usableWh?: number, averageW?: number): number | undefined;
+export function turnRadiusM(speedMs?: number, rateOfTurnDegPerSec?: number): number | undefined;
+export function rateOfTurnDegPerSec(from?: number, to?: number, elapsedS?: number): number | undefined;
+export function crossTrackNm(legStart: LatLon, legEnd: LatLon, position: LatLon): number | undefined;
+export function differentialDriveMotion(
+  leftRadPerSec?: number, rightRadPerSec?: number,
+  wheelRadiusM?: number, trackWidthM?: number,
+): DifferentialDriveMotion | undefined;
 
 // Units — the only group with zero embedded judgment
-export const knotsToMs: (knots: number) => number;
-export const msToKnots: (ms: number) => number;
+export function knotsToMs(knots: number): number;
+export function msToKnots(ms: number): number;
+// plus nautical miles, feet, fathoms, degrees/radians and NATO mils, both directions
 ```
 
 `ui` keeps everything presentational: `instrument-dial.ts` sweep geometry, colour ramps,

@@ -54,11 +54,14 @@ describe("antimeridian", () => {
 			{ latitude: 10, longitude: -178 },
 		]);
 		expect(collection.features).toHaveLength(2);
+		// Each side runs all the way to the dateline rather than stopping short of it.
 		expect(collection.features[0]?.geometry.coordinates).toEqual([
 			[178, 10],
 			[179.5, 10],
+			[180, 10],
 		]);
 		expect(collection.features[1]?.geometry.coordinates).toEqual([
+			[-180, 10],
 			[-179.5, 10],
 			[-178, 10],
 		]);
@@ -74,13 +77,52 @@ describe("antimeridian", () => {
 		expect(collection.features[0]?.geometry.coordinates).toHaveLength(3);
 	});
 
-	it("drops a one-point remainder rather than emitting a degenerate line", () => {
+	it("keeps a single-fix far side alive via the boundary point", () => {
+		// Only one fix past the dateline. Without the interpolated boundary point that
+		// side would be a one-point segment and get dropped.
 		const collection = toTrackGeoJSON([
 			{ latitude: 10, longitude: 178 },
 			{ latitude: 10, longitude: 179.5 },
 			{ latitude: 10, longitude: -179.5 },
 		]);
-		expect(collection.features).toHaveLength(1);
+		expect(collection.features).toHaveLength(2);
+		expect(collection.features[1]?.geometry.coordinates).toEqual([
+			[-180, 10],
+			[-179.5, 10],
+		]);
+	});
+
+	it("draws a two-fix crossing as two lines rather than nothing", () => {
+		// Regression: splitting without boundary points left two single-point segments,
+		// both discarded, so two perfectly good fixes rendered as no track at all.
+		const collection = toTrackGeoJSON([
+			{ latitude: 10, longitude: 179 },
+			{ latitude: 20, longitude: -179 },
+		]);
+		expect(collection.features).toHaveLength(2);
+		expect(collection.features[0]?.geometry.coordinates).toEqual([
+			[179, 10],
+			[180, 15],
+		]);
+		expect(collection.features[1]?.geometry.coordinates).toEqual([
+			[-180, 15],
+			[-179, 20],
+		]);
+	});
+
+	it("interpolates the crossing latitude westbound too", () => {
+		const collection = toTrackGeoJSON([
+			{ latitude: 0, longitude: -179 },
+			{ latitude: 10, longitude: 179 },
+		]);
+		expect(collection.features[0]?.geometry.coordinates).toEqual([
+			[-179, 0],
+			[-180, 5],
+		]);
+		expect(collection.features[1]?.geometry.coordinates).toEqual([
+			[180, 5],
+			[179, 10],
+		]);
 	});
 });
 

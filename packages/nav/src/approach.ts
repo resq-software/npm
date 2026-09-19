@@ -114,9 +114,15 @@ export function closestApproach(
 		-(offset.east * relativeVelocity.east + offset.north * relativeVelocity.north) /
 		relativeSpeedSquared;
 
-	// Already past closest approach — the contact is opening.
+	// At or past closest approach. `opening` is strictly negative rather than `<= 0`,
+	// because at exactly zero the contact is AT its closest approach, not past it.
+	//
+	// Kept as an early return rather than letting zero fall through to the general case:
+	// a perpendicular relative velocity makes the dot product `-0`, and `-0 * 60` is
+	// `-0`, which would surface as a tcpa of "-0" in a readout. This also makes `cpa`
+	// exactly the present range instead of a float recomputation of it.
 	if (hoursToCpa <= 0) {
-		return { cpa: range, model: "constant-velocity", opening: true, tcpa: 0 };
+		return { cpa: range, model: "constant-velocity", opening: hoursToCpa < 0, tcpa: 0 };
 	}
 
 	return {

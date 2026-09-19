@@ -27,7 +27,7 @@
  */
 
 import type { LatLon, LocalOffset } from "./geo.js";
-import { toLocalNm } from "./geo.js";
+import { isPosition, toLocalNm } from "./geo.js";
 import { optional } from "./numeric.js";
 
 /** A current or set-and-drift solution. */
@@ -37,10 +37,18 @@ export interface Current {
 	 *
 	 * Note the asymmetry with wind, which is named for the direction it comes **from**.
 	 * Getting this backwards is the classic error, so it is stated on the type.
+	 *
+	 * Absent when {@link Current.drift} is zero: a zero vector has no direction, and
+	 * reporting `0` there would claim the current sets due north.
 	 */
-	setDeg: number;
-	/** Current magnitude, in the same speed unit as the inputs. */
-	driftKn: number;
+	setDeg?: number;
+	/**
+	 * Current magnitude, in whatever speed unit the inputs used.
+	 *
+	 * Deliberately not named for a unit — the solver is unit-neutral, so labelling it
+	 * `driftKn` would call a metres-per-second input knots.
+	 */
+	drift: number;
 }
 
 /** Forward kinematics of a differential-drive or skid-steer chassis. */
@@ -99,8 +107,9 @@ export function crabAngleDeg(
  *
  * @param ground Velocity over ground, east/north, any consistent speed unit.
  * @param water Velocity through the water, east/north, same unit.
- * @returns Set (degrees true, the direction the current flows toward) and drift (input
- *   speed unit). `undefined` if either velocity component is non-finite.
+ * @returns Drift in the input speed unit, and — only when the drift is non-zero — the set
+ *   in degrees true, the direction the current flows toward. `undefined` if either
+ *   velocity component is non-finite.
  */
 export function observedCurrent(
 	ground: Readonly<LocalOffset>,
@@ -110,11 +119,15 @@ export function observedCurrent(
 	const north = optional(ground.north - water.north);
 	if (east === undefined || north === undefined) return undefined;
 
-	const driftKn = Math.hypot(east, north);
+	const drift = Math.hypot(east, north);
+	// No current means no direction. Reporting a set of 0 here would be a fabricated
+	// reading of exactly the kind this package refuses elsewhere.
+	if (drift === 0) return { drift };
+
 	// atan2(east, north) rather than the usual (y, x): bearings are measured clockwise
 	// from north, not counter-clockwise from east.
 	const setDeg = ((Math.atan2(east, north) * 180) / Math.PI + 360) % 360;
-	return { setDeg, driftKn };
+	return { drift, setDeg };
 }
 
 /**
@@ -249,13 +262,20 @@ export function rateOfTurnDegPerSec(
  * @param legEnd Leg destination.
  * @param position Current position.
  * @returns Nautical miles, positive when the vehicle lies to **starboard** of the track.
- *   `undefined` if any position is invalid or the leg has zero length.
+ *   `undefined` if any of the three positions is outside the valid coordinate range or
+ *   the leg has zero length.
  */
 export function crossTrackNm(
 	legStart: Readonly<LatLon>,
 	legEnd: Readonly<LatLon>,
 	position: Readonly<LatLon>,
 ): number | undefined {
+	// toLocalNm projects whatever it is given, so an out-of-range latitude would yield a
+	// finite, plausible, wrong answer instead of an obvious one.
+	if (!isPosition(legStart) || !isPosition(legEnd) || !isPosition(position)) {
+		return undefined;
+	}
+
 	const leg = toLocalNm(legStart, legEnd);
 	const offset = toLocalNm(legStart, position);
 	const legLength = Math.hypot(leg.east, leg.north);

@@ -45,6 +45,24 @@ export interface LngLat {
  * Convert ordered positions into a GeoJSON `FeatureCollection` with a single
  * `LineString` feature, suitable for a react-map-gl `<Source type="geojson">`.
  */
+/**
+ * Where a leg crosses the antimeridian, and at what latitude.
+ *
+ * Returns the boundary the leg leaves through — `180` travelling east, `-180` travelling
+ * west — with the latitude linearly interpolated at that meridian. The far side is the
+ * same latitude at the negated longitude.
+ */
+function antimeridianCrossing(
+	from: readonly [number, number],
+	to: readonly [number, number],
+): { latitude: number; longitude: number } {
+	// Signed short-way longitude delta, in (-180, 180].
+	const delta = ((to[0] - from[0] + 540) % 360) - 180;
+	const longitude = delta > 0 ? ANTIMERIDIAN_JUMP_DEG : -ANTIMERIDIAN_JUMP_DEG;
+	const fraction = delta === 0 ? 0 : (longitude - from[0]) / delta;
+	return { latitude: from[1] + (to[1] - from[1]) * fraction, longitude };
+}
+
 export function toTrackGeoJSON(points: readonly LngLat[]): FeatureCollection<LineString> {
 	const coordinates: [number, number][] = [];
 	for (const point of points) {
@@ -57,8 +75,14 @@ export function toTrackGeoJSON(points: readonly LngLat[]): FeatureCollection<Lin
 	for (const [index, coordinate] of coordinates.entries()) {
 		const previous = coordinates[index - 1];
 		if (previous !== undefined && Math.abs(coordinate[0] - previous[0]) > ANTIMERIDIAN_JUMP_DEG) {
-			if (current.length >= 2) segments.push(current);
-			current = [];
+			// Close this run ON the dateline and reopen it on the far side. Splitting
+			// without the boundary points would leave a two-fix crossing as two
+			// single-point segments, and a line needs two — the track would vanish
+			// entirely, which is worse than the globe-spanning line this replaced.
+			const crossing = antimeridianCrossing(previous, coordinate);
+			current.push([crossing.longitude, crossing.latitude]);
+			segments.push(current);
+			current = [[-crossing.longitude, crossing.latitude]];
 		}
 		current.push(coordinate);
 	}

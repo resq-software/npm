@@ -51,18 +51,21 @@ describe("observedCurrent", () => {
 		// Ground track is 1 kn further east than the water track: current sets east.
 		const current = observedCurrent({ east: 1, north: 0 }, { east: 0, north: 0 });
 		expect(current?.setDeg).toBeCloseTo(90, 9);
-		expect(current?.driftKn).toBeCloseTo(1, 9);
+		expect(current?.drift).toBeCloseTo(1, 9);
 	});
 
 	it("reports a northward set as 000, not 180", () => {
 		const current = observedCurrent({ east: 0, north: 2 }, { east: 0, north: 0 });
 		expect(current?.setDeg).toBeCloseTo(0, 9);
-		expect(current?.driftKn).toBeCloseTo(2, 9);
+		expect(current?.drift).toBeCloseTo(2, 9);
 	});
 
-	it("reports no current when ground and water motion agree", () => {
+	it("reports zero drift, and no direction at all, when ground and water agree", () => {
 		const current = observedCurrent({ east: 3, north: 4 }, { east: 3, north: 4 });
-		expect(current?.driftKn).toBeCloseTo(0, 12);
+		expect(current?.drift).toBe(0);
+		// A zero vector has no direction; claiming it sets north would be a fabrication.
+		expect(current?.setDeg).toBeUndefined();
+		expect(current !== undefined && "setDeg" in current).toBe(false);
 	});
 
 	it("refuses on a non-finite component", () => {
@@ -189,6 +192,16 @@ describe("crossTrackNm", () => {
 
 	it("refuses a zero-length leg", () => {
 		expect(crossTrackNm(start, start, { latitude: 0.5, longitude: 0.1 })).toBeUndefined();
+	});
+
+	it("refuses an out-of-range position instead of projecting it to a plausible zero", () => {
+		expect(crossTrackNm(start, northLeg, { latitude: 91, longitude: 0 })).toBeUndefined();
+		expect(crossTrackNm(start, northLeg, { latitude: 0.5, longitude: 181 })).toBeUndefined();
+	});
+
+	it("refuses an out-of-range leg endpoint", () => {
+		expect(crossTrackNm({ latitude: 91, longitude: 0 }, northLeg, start)).toBeUndefined();
+		expect(crossTrackNm(start, { latitude: 0, longitude: 400 }, start)).toBeUndefined();
 	});
 });
 

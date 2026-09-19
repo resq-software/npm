@@ -56,6 +56,15 @@ describe("closestApproach", () => {
 		expect(solution?.cpa).toBeCloseTo(5, 9);
 	});
 
+	it("does not call the exact closest-approach instant opening", () => {
+		// Relative velocity perpendicular to the offset: tcpa is exactly 0, and the
+		// contact is AT its closest approach rather than past it.
+		const solution = closestApproach({ east: 0, north: 1 }, { east: 5, north: 0 });
+		expect(solution?.tcpa).toBe(0);
+		expect(solution?.opening).toBe(false);
+		expect(solution?.cpa).toBeCloseTo(1, 9);
+	});
+
 	it("always states the model it assumed", () => {
 		expect(closestApproach({ east: 0, north: 1 }, { east: 0, north: -10 })?.model).toBe(
 			"constant-velocity",
