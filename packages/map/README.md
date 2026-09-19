@@ -68,8 +68,11 @@ export function App() {
 
 ### Richer markers
 
-`AssetMarker` renders a self-contained heading arrow by default. Drop in the
-`HeadingIndicator` from `@resq-systems/ui` for a full compass rose:
+`AssetMarker` renders a self-contained heading arrow when the asset reports a
+heading, and a plain non-directional mark when it does not — an arrow has to
+point somewhere, and every direction it could point is a claim the telemetry
+never made. Drop in the `HeadingIndicator` from `@resq-systems/ui` for a full
+compass rose:
 
 ```tsx
 import { HeadingIndicator } from "@resq-systems/ui/heading-indicator";
@@ -83,7 +86,7 @@ import { HeadingIndicator } from "@resq-systems/ui/heading-indicator";
 
 - **`TelemetryMap`** — react-map-gl/MapLibre shell. `mapStyle` overrides the
   token-free dark default (or set it from your `NEXT_PUBLIC_MAP_STYLE_URL`).
-- **`AssetMarker`** — places an `Asset`; default heading arrow or `children`.
+- **`AssetMarker`** — places an `Asset`; heading arrow when the heading is known, plain mark when it is not, or `children`.
 - **`TrackLayer`** — breadcrumb trail from an ordered `LngLat[]`.
 - **`useAssetPositions()`** — live `Asset[]` from the shared telemetry socket.
 - **`parseAssetFrame`**, **`toTrackGeoJSON`**, **`resolveMapStyle`** — the pure
