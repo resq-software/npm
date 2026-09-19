@@ -54,20 +54,18 @@ export const measurePerformance = async (
 ): Promise<Record<string, PerformanceResult>> => {
 	const algorithmArray = Array.isArray(algorithms) ? algorithms : [algorithms];
 	const results = await perf(algorithmArray);
-	return Object.entries(results).reduce(
-		(acc, [name, data]) => {
-			const d = data as AveragedTestResultPerSize;
-			return {
-				...acc,
-				[name]: {
-					duration: d.duration,
-					complexity: d.complexity,
-					estimatedDomains: d.estimatedDomains,
-				},
-			};
-		},
-		{} as Record<string, PerformanceResult>,
-	);
+	// Built by assignment rather than by spreading into an accumulator: spreading in a
+	// reduce is quadratic, which biome's noAccumulatingSpread rule flags.
+	const measured: Record<string, PerformanceResult> = {};
+	for (const [name, data] of Object.entries(results)) {
+		const d = data as AveragedTestResultPerSize;
+		measured[name] = {
+			duration: d.duration,
+			complexity: d.complexity,
+			estimatedDomains: d.estimatedDomains,
+		};
+	}
+	return measured;
 };
 
 /**

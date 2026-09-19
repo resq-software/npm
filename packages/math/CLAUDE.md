@@ -1,4 +1,4 @@
-# CLAUDE.md — @resq-systems/math
+# AGENTS.md — @resq-systems/math
 
 Type-safe mathematical expression engine with sort-based dispatch, Pratt parser, and static validation. Part of the [ResQ Systems npm workspace](../../AGENTS.md).
 

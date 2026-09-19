@@ -1,0 +1,88 @@
+{
+	"name": "@resq-systems/nav",
+	"version": "0.1.0",
+	"description": "Earth and vehicle geometry, collision geometry and derived navigation quantities for telemetry consoles \u2014 zero dependencies, situational awareness only",
+	"license": "Apache-2.0",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./lib/index.d.ts",
+			"import": "./lib/index.js",
+			"default": "./lib/index.js"
+		},
+		"./geo": {
+			"types": "./lib/geo.d.ts",
+			"import": "./lib/geo.js",
+			"default": "./lib/geo.js"
+		},
+		"./numeric": {
+			"types": "./lib/numeric.d.ts",
+			"import": "./lib/numeric.js",
+			"default": "./lib/numeric.js"
+		},
+		"./staleness": {
+			"types": "./lib/staleness.d.ts",
+			"import": "./lib/staleness.js",
+			"default": "./lib/staleness.js"
+		},
+		"./approach": {
+			"types": "./lib/approach.d.ts",
+			"import": "./lib/approach.js",
+			"default": "./lib/approach.js"
+		},
+		"./arpa": {
+			"types": "./lib/arpa.d.ts",
+			"import": "./lib/arpa.js",
+			"default": "./lib/arpa.js"
+		},
+		"./derived": {
+			"types": "./lib/derived.d.ts",
+			"import": "./lib/derived.js",
+			"default": "./lib/derived.js"
+		},
+		"./units": {
+			"types": "./lib/units.d.ts",
+			"import": "./lib/units.js",
+			"default": "./lib/units.js"
+		}
+	},
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"files": [
+		"lib",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsdown",
+		"test": "vitest run"
+	},
+	"devDependencies": {
+		"@total-typescript/ts-reset": "^0.6.1",
+		"tsdown": "^0.22.14",
+		"typescript": "7.0.2",
+		"vitest": "4.1.11"
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true,
+		"registry": "https://registry.npmjs.org/"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/resq-software/npm.git",
+		"directory": "packages/nav"
+	},
+	"keywords": [
+		"navigation",
+		"geodesy",
+		"cpa",
+		"tcpa",
+		"telemetry",
+		"usv",
+		"ugv",
+		"uav"
+	],
+	"engines": {
+		"node": ">=20.19.0"
+	}
+}

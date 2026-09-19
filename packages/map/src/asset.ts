@@ -19,10 +19,13 @@
  *
  * Field aliases match the ResQ fleet telemetry shape (`drone_id`/`lat`/`lon`/
  * `heading_deg`/…), so frames from the shared `/fleet/ws` socket map directly to
- * markers. Frames without an id or a finite position are dropped (returns null).
+ * markers. Frames without an id, or with a position that is not a real point on Earth,
+ * are dropped (returns null) rather than plotted somewhere plausible.
  *
  * @module @resq-systems/map/asset
  */
+
+import { isPosition, normalizeBearing } from "@resq-systems/nav/geo";
 
 /** A positional entity to place on the map. */
 export interface Asset {
@@ -100,9 +103,13 @@ export function parseAssetFrame(raw: string | Frame): Asset | null {
 	const longitude = readNumber(frame, ["lon", "lng", "longitude"]);
 	const latitude = readNumber(frame, ["lat", "latitude"]);
 	if (longitude === undefined || latitude === undefined) return null;
+	// Out of range is as unusable as absent: an asset reporting latitude 800 is not a
+	// near-miss to be clamped, it is a frame to refuse.
+	if (!isPosition({ latitude, longitude })) return null;
 
+	const reportedHeading = readNumber(frame, ["heading_deg", "heading"]);
 	const asset: Asset = {
-		heading: readNumber(frame, ["heading_deg", "heading"]) ?? 0,
+		heading: reportedHeading === undefined ? 0 : normalizeBearing(reportedHeading),
 		id,
 		latitude,
 		longitude,

@@ -33,8 +33,7 @@
  * @module @resq-systems/ui/adapters/ais
  */
 
-import type { ScopeContact } from "../components/contact-scope/index.js";
-import { optional } from "./numeric.js";
+import { type Approach, closestApproach } from "@resq-systems/nav/approach";
 import {
 	bearingDeg,
 	courseToVelocity,
@@ -42,14 +41,11 @@ import {
 	isPosition,
 	type LatLon,
 	toLocalNm,
-} from "./geo.js";
+} from "@resq-systems/nav/geo";
+import { optional } from "@resq-systems/nav/numeric";
+import type { ScopeContact } from "../components/contact-scope/index.js";
 
-//#region Constants
-
-/** Minutes in one hour — TCPA is reported in minutes. */
-const MINUTES_PER_HOUR = 60;
-
-//#endregion
+export type { Approach };
 
 //#region Types
 
@@ -63,6 +59,8 @@ export interface AisPositionReport extends LatLon {
 	sog?: number;
 	/** Vessel name, preferred over the MMSI as a display id. */
 	name?: string;
+	/** Epoch milliseconds the report was received, carried into {@link Approach}. */
+	observedAt?: number;
 }
 
 /** Own vessel's position and motion, needed to make reports relative. */
@@ -71,14 +69,6 @@ export interface OwnShip extends LatLon {
 	course?: number;
 	/** Own speed over ground in knots. */
 	speed?: number;
-}
-
-/** A closest-point-of-approach solution. */
-export interface Approach {
-	/** Closest approach distance in nautical miles. */
-	cpa: number;
-	/** Minutes until closest approach; 0 when it has already passed. */
-	tcpa: number;
 }
 
 //#endregion
@@ -129,31 +119,18 @@ export function computeApproach(
 		return null;
 	}
 
-	const offset = toLocalNm(own, target);
 	const ownVelocity = courseToVelocity(ownCourse, ownSpeed);
 	const targetVelocity = courseToVelocity(targetCourse, targetSpeed);
-	const relativeEast = targetVelocity.east - ownVelocity.east;
-	const relativeNorth = targetVelocity.north - ownVelocity.north;
+	const geometry = closestApproach(toLocalNm(own, target), {
+		east: targetVelocity.east - ownVelocity.east,
+		north: targetVelocity.north - ownVelocity.north,
+	});
+	if (geometry === null) return null;
 
-	const range = Math.hypot(offset.east, offset.north);
-	const relativeSpeedSquared = relativeEast ** 2 + relativeNorth ** 2;
-
-	// Identical velocities: the range never changes, so now is as close as it gets.
-	if (relativeSpeedSquared === 0) return { cpa: range, tcpa: 0 };
-
-	const hoursToCpa =
-		-(offset.east * relativeEast + offset.north * relativeNorth) / relativeSpeedSquared;
-
-	// Already past closest approach — the contact is opening.
-	if (hoursToCpa <= 0) return { cpa: range, tcpa: 0 };
-
-	return {
-		cpa: Math.hypot(
-			offset.east + relativeEast * hoursToCpa,
-			offset.north + relativeNorth * hoursToCpa,
-		),
-		tcpa: hoursToCpa * MINUTES_PER_HOUR,
-	};
+	const observedAt = optional(target.observedAt);
+	return observedAt === undefined
+		? { ...geometry, source: "ais" }
+		: { ...geometry, observedAt, source: "ais" };
 }
 
 /**

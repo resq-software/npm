@@ -55,7 +55,7 @@ export {
 	type LocalOffset,
 	normalizeBearing,
 	toLocalNm,
-} from "./geo.js";
+} from "@resq-systems/nav/geo";
 export {
 	attitudeToHeading,
 	attitudeToTilt,
@@ -99,7 +99,7 @@ export {
 	type SignalKUpdate,
 	type SignalKValue,
 } from "./signalk.js";
-export { DEFAULT_MAX_AGE_MS, isStale, readingAge } from "./staleness.js";
+export { DEFAULT_MAX_AGE_MS, isStale, readingAge } from "@resq-systems/nav/staleness";
 export {
 	parseTopic,
 	stateToBattery,

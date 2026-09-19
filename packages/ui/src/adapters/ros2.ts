@@ -33,7 +33,7 @@ import type { LidarScanProps } from "../components/lidar-scan/index.js";
 import type { GridPose, OccupancyGridProps } from "../components/occupancy-grid/index.js";
 import type { TeleopVector } from "../components/teleop-pad/index.js";
 import type { TiltIndicatorProps } from "../components/tilt-indicator/index.js";
-import { clamp, optional } from "./numeric.js";
+import { clamp, optional } from "@resq-systems/nav/numeric";
 
 //#region Constants
 

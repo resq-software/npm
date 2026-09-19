@@ -78,6 +78,27 @@ or quietly erode them.
 | `telemetry` | `useCoalescedChannel` (render-rate decoupling), per-vehicle multiplexing |
 | `map` | `AisLayer`, `GeofenceLayer`, `MissionPathLayer`, `CostmapLayer` |
 | `ui/adapters` | `mavlinkHealth`, `ros2Diagnostics`, `missionProgress`, `armState` mappers |
+| `nav` *(new)* | Earth and vehicle geometry, CPA/TCPA, derived quantities — see below |
+
+### 3.1 Reachability, the second split criterion
+
+*Amended 2026-09-19.*
+
+Statefulness alone turned out not to decide every split. Pure, stateless geometry passes
+the `ui` test above and still ended up in the wrong place: CPA/TCPA, great-circle distance
+and the local ENU frame sat in `ui/adapters`, which meant `map` could not reach them
+without a MapLibre package taking a runtime dependency on Radix and Tailwind — and the
+`AisLayer`, `GeofenceLayer` and `MissionPathLayer` rows in the table above all need
+exactly that geometry.
+
+> **Second criterion: reachability.** Code that `ui`, `map`, a worker and a server all
+> need belongs in a zero-dependency leaf, even when it would pass the stateless test.
+> That leaf is [`@resq-systems/nav`](../packages/nav/README.md).
+
+This does not loosen the first criterion. A stateful shell still cannot live in `ui`; this
+says only that passing the stateless test is not by itself sufficient to *stay* there.
+The full argument, including the formulas deliberately refused, is in
+[Derived Navigation Math](VEHICLE_NAVIGATION_MATH.md).
 
 ## 4. The shared shell
 

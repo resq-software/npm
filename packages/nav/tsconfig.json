@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"outDir": "lib",
+		"rootDir": "src",
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"types": []
+	},
+	"include": ["reset.d.ts", "src"],
+	"exclude": ["node_modules", "lib", "src/**/*.test.ts"]
+}

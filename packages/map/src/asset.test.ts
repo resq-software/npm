@@ -50,3 +50,32 @@ describe("parseAssetFrame", () => {
 		expect(parseAssetFrame("42")).toBeNull();
 	});
 });
+
+describe("position validation", () => {
+	it("refuses a frame whose latitude is out of range", () => {
+		expect(parseAssetFrame({ heading_deg: 0, id: "a", lat: 800, lon: 0 })).toBeNull();
+	});
+
+	it("refuses a frame whose longitude is out of range", () => {
+		expect(parseAssetFrame({ heading_deg: 0, id: "a", lat: 0, lon: 400 })).toBeNull();
+	});
+
+	it("accepts the extremes of the valid range", () => {
+		expect(parseAssetFrame({ id: "a", lat: 90, lon: 180 })).not.toBeNull();
+		expect(parseAssetFrame({ id: "a", lat: -90, lon: -180 })).not.toBeNull();
+	});
+});
+
+describe("heading normalisation", () => {
+	it("wraps a heading past a full turn", () => {
+		expect(parseAssetFrame({ heading_deg: 450, id: "a", lat: 0, lon: 0 })?.heading).toBe(90);
+	});
+
+	it("wraps a negative heading", () => {
+		expect(parseAssetFrame({ heading_deg: -90, id: "a", lat: 0, lon: 0 })?.heading).toBe(270);
+	});
+
+	it("leaves an in-range heading alone", () => {
+		expect(parseAssetFrame({ heading_deg: 123, id: "a", lat: 0, lon: 0 })?.heading).toBe(123);
+	});
+});
