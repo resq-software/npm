@@ -33,6 +33,7 @@ bun --filter @resq-systems/nav test
 - No React, no DOM, no transport, no protocol decoding. Protocol adapters stay in `@resq-systems/ui/adapters`.
 - Document units in JSDoc on every numeric parameter and return. Units errors are the failure mode here.
 - `@resq-systems/ui` and `@resq-systems/map` depend on this package; keep the public surface stable.
+- **`distanceNm` overlaps `@resq-systems/dsa`'s `Distance` on purpose** — see that package's AGENTS.md for why the two great-circle implementations were left separate. Use this one for vehicle telemetry; it is the one the instruments and map layers are built on.
 
 ## Changesets
 

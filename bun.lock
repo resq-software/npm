@@ -253,7 +253,7 @@
     },
     "packages/map": {
       "name": "@resq-systems/map",
-      "version": "3.0.0",
+      "version": "3.1.0",
       "dependencies": {
         "@resq-systems/nav": "^0.1.0",
       },
@@ -295,7 +295,7 @@
     },
     "packages/nav": {
       "name": "@resq-systems/nav",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "devDependencies": {
         "@total-typescript/ts-reset": "^0.6.1",
         "tsdown": "^0.22.14",
@@ -386,7 +386,7 @@
     },
     "packages/ui": {
       "name": "@resq-systems/ui",
-      "version": "0.41.1",
+      "version": "0.42.0",
       "dependencies": {
         "@base-ui/react": "^1.7.0",
         "@phosphor-icons/react": "^2.1.10",

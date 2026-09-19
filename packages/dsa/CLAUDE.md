@@ -27,6 +27,7 @@ bun --filter @resq-systems/dsa test
 - `effect` is a **peer** consumed only by the optional `./schemas` entry; the core (`.`) must never import it.
 - Every structure must be tree-shakeable — one export path per module.
 - `@resq-systems/rate-limiting` builds on this package; keep the public API stable.
+- **`Distance` overlaps `@resq-systems/nav` on purpose.** Both ship great-circle math: `Distance.haversine` here over `{lat, lng}` in kilometres, `distanceNm` there over `{latitude, longitude}` in nautical miles. They were not merged because every route is worse than the overlap — delegating would give this zero-runtime-dep package a runtime dependency, deprecating breaks external consumers of a published 2.x, and moving nav's in would put marine navigation in a data-structures library. Reach for `Distance` for general metric work and for `nav` for vehicle telemetry; if you change one, consider whether the other needs the same fix.
 
 ## Changesets
 
