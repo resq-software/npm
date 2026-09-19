@@ -1,6 +1,6 @@
 {
 	"name": "@resq-systems/nav",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Earth and vehicle geometry, collision geometry and derived navigation quantities for telemetry consoles \u2014 zero dependencies, situational awareness only",
 	"license": "Apache-2.0",
 	"type": "module",

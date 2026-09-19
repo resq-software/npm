@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.1.0
+
+### Minor Changes
+
+- [`e9cbf29`](https://github.com/resq-software/npm/commit/e9cbf290984dd9a8cc5a76fc470d743ee6bd3851) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add @resq-systems/nav with Earth and vehicle geometry, CPA/TCPA and derived navigation quantities, move the headless geometry out of @resq-systems/ui/adapters behind unchanged re-exports, and fix antimeridian splitting, heading normalisation and position validation in @resq-systems/map
+
+### Patch Changes
+
+- Updated dependencies [[`e9cbf29`](https://github.com/resq-software/npm/commit/e9cbf290984dd9a8cc5a76fc470d743ee6bd3851)]:
+  - @resq-systems/nav@0.2.0
+
 <!--
   Copyright 2026 ResQ Systems, Inc.
 
@@ -17,24 +28,24 @@
 -->
 
 ## 3.0.0
+
 ### Patch Changes
 
 - Updated dependencies [[`dea7787`](https://github.com/resq-software/npm/commit/dea7787279a9725ebb53fa2a9c15cee6e0cabc5c)]:
   - @resq-systems/telemetry@0.4.0
 
 ## 2.0.0
+
 ### Patch Changes
 
 - Updated dependencies [[`e20c6ba`](https://github.com/resq-software/npm/commit/e20c6bab1904bb8bf22dc988de8f2a836c58094c)]:
   - @resq-systems/telemetry@0.3.0
 
 ## 1.0.0
+
 ### Minor Changes
 
-
-
 - [#225](https://github.com/resq-software/npm/pull/225) [`13e2e2f`](https://github.com/resq-software/npm/commit/13e2e2fceb6547529d428d1656f01cb618a972f9) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add @resq-systems/map — MapLibre + react-map-gl telemetry primitives: TelemetryMap (token-free themeable shell), AssetMarker (heading arrow or custom children), TrackLayer (GeoJSON breadcrumb), and useAssetPositions binding @resq-systems/telemetry frames to live positions
-
 
 ### Patch Changes
 
@@ -42,12 +53,14 @@
   - @resq-systems/telemetry@0.2.0
 
 ## 2.0.0
+
 ### Patch Changes
 
 - Updated dependencies [[`e20c6ba`](https://github.com/resq-software/npm/commit/e20c6bab1904bb8bf22dc988de8f2a836c58094c)]:
   - @resq-systems/telemetry@0.3.0
 
 ## 1.0.0
+
 ### Minor Changes
 
 - [#225](https://github.com/resq-software/npm/pull/225) [`13e2e2f`](https://github.com/resq-software/npm/commit/13e2e2fceb6547529d428d1656f01cb618a972f9) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Add @resq-systems/map — MapLibre + react-map-gl telemetry primitives: TelemetryMap (token-free themeable shell), AssetMarker (heading arrow or custom children), TrackLayer (GeoJSON breadcrumb), and useAssetPositions binding @resq-systems/telemetry frames to live positions
