@@ -31,7 +31,7 @@ jobs:
         working-directory: packages/ui
       - name: Run Chromatic
         if: github.actor != 'dependabot[bot]'
-        uses: chromaui/action@259eda5f0e44c0c1eab38b672f1c4c967cc969b7 # v15
+        uses: chromaui/action@bb3b582719a93c1828c5e520e62992b2937d7889 # v15
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           storybookBuildDir: packages/ui/storybook-static
