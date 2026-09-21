@@ -127,15 +127,15 @@ Working examples showing the packages in action:
 
 ## Design Assets
 
-Brand assets live in [`design/`](design/) — logos, icons, PWA assets, and the engineering style guide.
+[`design/`](design/) holds the engineering style guide and the logo system PDF. The asset files are published in [`resq-software/docs`](https://github.com/resq-software/docs) — SVG masters and PWA PNGs only; the gradient mark and the raster (png, webp) variants are not published.
 
 | Asset | Variants | Formats |
 | :--- | :--- | :--- |
-| [Drone coordination mark](design/assets/icons/) | `resq-mark-color`, `resq-mark-mono-black`, `resq-mark-mono-white` | svg, png, webp |
-| [Logo lockups](design/assets/logos/) | horizontal, stacked, tagline, mono (dark + light) | svg, png, webp |
-| [Gradient mark](design/assets/logos/) | `resq-mark-gradient` — full-bleed mark on dark | svg, png, webp |
-| [OG banner](design/assets/logos/) | Social sharing card | svg, png, webp |
-| [PWA icons](design/assets/pwa/) | Android, iOS, Windows 11 | png, webp |
+| [Drone coordination mark](https://github.com/resq-software/docs/tree/main/assets/icons) | `resq-mark-color`, `resq-mark-mono-black`, `resq-mark-mono-white` | svg |
+| [Logo lockups](https://github.com/resq-software/docs/tree/main/assets/logos) | horizontal, stacked, tagline, mono (dark + light) | svg |
+| Gradient mark | `resq-mark-gradient` — full-bleed mark on dark | svg, png, webp |
+| [OG banner](https://github.com/resq-software/docs/tree/main/assets/logos) | Social sharing card | svg |
+| [PWA icons](https://github.com/resq-software/docs/tree/main/pwa) | Android, iOS, Windows 11 | png |
 | [Style guide](design/STYLE_GUIDE.md) | oklch color tokens, typography, spacing, component rules | — |
 | [Logo system](design/resq-logo-system.pdf) | Lockup specs, icon sizing, usage guidelines | pdf |
 
@@ -190,6 +190,6 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org/) (`fe
 
 ## License
 
-Apache-2.0 — see [LICENSE.md](./LICENSE.md).
+Apache-2.0 — see [LICENSE](LICENSE).
 
 Copyright 2026 ResQ Systems, Inc.
