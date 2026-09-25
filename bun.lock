@@ -253,7 +253,7 @@
     },
     "packages/map": {
       "name": "@resq-systems/map",
-      "version": "3.1.0",
+      "version": "4.0.0",
       "dependencies": {
         "@resq-systems/nav": "^0.2.0",
       },
