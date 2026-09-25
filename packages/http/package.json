@@ -41,7 +41,7 @@
 	"devDependencies": {
 		"@effect/platform-bun": "4.0.0-rc.112",
 		"@total-typescript/ts-reset": "^0.6.1",
-		"@types/node": "^26.6.1",
+		"@types/node": "^26.6.2",
 		"effect": "4.0.0-rc.112",
 		"tsdown": "^0.23.0",
 		"typescript": "7.0.2",
