@@ -17,7 +17,7 @@
 		"@resq-systems/security": "workspace:*",
 		"@resq-systems/types": "workspace:*",
 		"@resq-systems/ui": "workspace:*",
-		"effect": "4.0.0-rc.112",
+		"effect": "4.0.0-rc.117",
 		"react": "^19.3.0",
 		"react-dom": "^19.3.0",
 		"tailwindcss": "^4.1.0"
