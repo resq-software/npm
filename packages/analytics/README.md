@@ -17,7 +17,7 @@
 # @resq-systems/analytics
 
 [![npm](https://img.shields.io/npm/v/%40resq-systems%2Fanalytics?style=flat-square)](https://www.npmjs.com/package/@resq-systems/analytics)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE)
 
 Unified PostHog + GA4 analytics client for the ResQ Systems platform. Built for cross-subdomain identity (`resq.software` ↔ `research.resq.software` ↔ `viz.resq.software`), lazy-loaded so it never sits on the LCP critical path, and typed events you can extend per-app.
 

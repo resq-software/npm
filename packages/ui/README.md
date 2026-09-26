@@ -17,7 +17,7 @@
 # @resq-systems/ui
 
 [![npm](https://img.shields.io/npm/v/%40resq-systems%2Fui?style=flat-square)](https://www.npmjs.com/package/@resq-systems/ui)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE)
 [![Storybook](https://img.shields.io/badge/storybook-design.resq.software-FF4785?style=flat-square)](https://design.resq.software)
 
 ResQ Systems's shared React component library — **63 components** built on Radix UI primitives and Tailwind CSS v4 with a dark-first oklch color system, including a set of clean-room SVG **flight instruments** for fleet telemetry. Tree-shakeable subpath exports, WCAG AA contrast, full keyboard support.
@@ -177,4 +177,4 @@ bun --filter @resq-systems/ui test
 
 ## License
 
-Apache-2.0 — see [LICENSE.md](../../LICENSE.md).
+Apache-2.0 — see [LICENSE](../../LICENSE).

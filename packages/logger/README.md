@@ -17,7 +17,7 @@
 # @resq-systems/logger
 
 [![npm](https://img.shields.io/npm/v/%40resq-systems%2Flogger?style=flat-square)](https://www.npmjs.com/package/@resq-systems/logger)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE)
 [![deps](https://img.shields.io/badge/runtime%20deps-0-25c68a?style=flat-square)](./package.json)
 
 > Structured logging with log levels, decorators, and singleton management for Node.js and Bun.

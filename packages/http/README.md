@@ -17,7 +17,7 @@
 # @resq-systems/http
 
 [![npm](https://img.shields.io/npm/v/%40resq-systems%2Fhttp?style=flat-square)](https://www.npmjs.com/package/@resq-systems/http)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE)
 
 > Effect-based HTTP client with retry, timeout, schema validation, and security middleware.
 
