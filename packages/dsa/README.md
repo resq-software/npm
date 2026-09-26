@@ -17,7 +17,7 @@
 # @resq-systems/dsa
 
 [![npm](https://img.shields.io/npm/v/%40resq-systems%2Fdsa?style=flat-square)](https://www.npmjs.com/package/@resq-systems/dsa)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE)
 [![deps](https://img.shields.io/badge/runtime%20deps-0-25c68a?style=flat-square)](./package.json)
 
 Production-grade data structures and algorithms for the ResQ Systems platform — graph traversal, heaps, tries, bloom filters, sketches, distance math, queues, and string search. **Zero runtime dependencies.** `effect` is an optional peer dependency that unlocks runtime schema validation and nominal branded types (`VertexId`, `Probability`, `Latitude`, `Longitude`) for hot-path inputs.
@@ -203,4 +203,4 @@ bun --filter @resq-systems/dsa test
 
 ## License
 
-Apache-2.0 — see [LICENSE.md](../../LICENSE.md).
+Apache-2.0 — see [LICENSE](../../LICENSE).

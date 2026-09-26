@@ -17,7 +17,7 @@
 # @resq-systems/helpers
 
 [![npm](https://img.shields.io/npm/v/%40resq-systems%2Fhelpers?style=flat-square)](https://www.npmjs.com/package/@resq-systems/helpers)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE)
 
 > Functional utilities, type guards, result types, formatting, browser detection, and async task execution.
 

@@ -17,7 +17,7 @@
 # @resq-systems/security
 
 [![npm](https://img.shields.io/npm/v/%40resq-systems%2Fsecurity?style=flat-square)](https://www.npmjs.com/package/@resq-systems/security)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE.md)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](../../LICENSE)
 
 > Encryption, threat detection, input validation, PII sanitization, and Effect Schema validators.
 
