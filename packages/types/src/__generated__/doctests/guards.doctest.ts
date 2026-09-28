@@ -86,7 +86,7 @@ import {
 } from "../../guards.js";
 
 describe("packages/types/src/guards.ts", () => {
-	// packages/types/src/guards.ts:50
+	// packages/types/src/guards.ts:51
 	it("Module — Parse boundaries stop lying to you", () => {
 		expect.hasAssertions();
 		const latitudeOf = (raw: string): number => {
@@ -100,7 +100,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(latitudeOf('{"lat":51.5,"at":"2026-01-01T00:00:00.000Z"}')).toStrictEqual(51.5);
 	});
 
-	// packages/types/src/guards.ts:164
+	// packages/types/src/guards.ts:165
 	it("isString — Guarding a header lookup", () => {
 		expect.hasAssertions();
 		const headers: Record<string, unknown> = { "x-request-id": "abc" };
@@ -110,7 +110,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(id).toStrictEqual("ABC");
 	});
 
-	// packages/types/src/guards.ts:206
+	// packages/types/src/guards.ts:207
 	it("isNumber — The `NaN` answer, in full", () => {
 		expect.hasAssertions();
 		expect(isNumber(42)).toStrictEqual(true);
@@ -118,7 +118,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isNumber("42")).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:238
+	// packages/types/src/guards.ts:239
 	it("isFiniteNumber — Rejecting the two non-numbers that are `number`s", () => {
 		expect.hasAssertions();
 		expect(isFiniteNumber(0)).toStrictEqual(true);
@@ -126,7 +126,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isFiniteNumber(Number.POSITIVE_INFINITY)).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:270
+	// packages/types/src/guards.ts:271
 	it("isInteger — Integrality, not sign or magnitude", () => {
 		expect.hasAssertions();
 		expect(isInteger(-7)).toStrictEqual(true);
@@ -134,14 +134,14 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isInteger(2.0)).toStrictEqual(true);
 	});
 
-	// packages/types/src/guards.ts:305
+	// packages/types/src/guards.ts:306
 	it("isSafeInteger — Where the doubles run out", () => {
 		expect.hasAssertions();
 		expect(isSafeInteger(2 ** 53 - 1)).toStrictEqual(true);
 		expect(isSafeInteger(2 ** 53)).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:341
+	// packages/types/src/guards.ts:342
 	it("isInRange — A reusable percentage check", () => {
 		expect.hasAssertions();
 		const isPercent = isInRange(0, 100);
@@ -152,7 +152,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isPercent(Number.NaN)).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:379
+	// packages/types/src/guards.ts:380
 	it("isBoolean — Falsy is not boolean", () => {
 		expect.hasAssertions();
 		expect(isBoolean(false)).toStrictEqual(true);
@@ -160,35 +160,35 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isBoolean("true")).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:411
+	// packages/types/src/guards.ts:412
 	it("isBigInt — Distinguishing a bigint from a number", () => {
 		expect.hasAssertions();
 		expect(isBigInt(1n)).toStrictEqual(true);
 		expect(isBigInt(1)).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:442
+	// packages/types/src/guards.ts:443
 	it("isSymbol — Well-known symbols pass, their names do not", () => {
 		expect.hasAssertions();
 		expect(isSymbol(Symbol.iterator)).toStrictEqual(true);
 		expect(isSymbol("iterator")).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:468
+	// packages/types/src/guards.ts:469
 	it("isUndefined — The two absences are not the same", () => {
 		expect.hasAssertions();
 		expect(isUndefined(undefined)).toStrictEqual(true);
 		expect(isUndefined(null)).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:500
+	// packages/types/src/guards.ts:501
 	it("isNull — Null is not undefined", () => {
 		expect.hasAssertions();
 		expect(isNull(null)).toStrictEqual(true);
 		expect(isNull(undefined)).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:533
+	// packages/types/src/guards.ts:534
 	it("isPropertyKey — From an unknown key to a safe read", () => {
 		expect.hasAssertions();
 		const payload: unknown = { id: "abc" };
@@ -198,7 +198,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(found).toStrictEqual("abc");
 	});
 
-	// packages/types/src/guards.ts:568
+	// packages/types/src/guards.ts:569
 	it("isPrimitive — Collecting the leaves of an object graph", () => {
 		expect.hasAssertions();
 		const leaves: unknown[] = [];
@@ -215,7 +215,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(leaves).toStrictEqual([1, "x"]);
 	});
 
-	// packages/types/src/guards.ts:617
+	// packages/types/src/guards.ts:618
 	it("isNullish — The else branch keeps the useful half", () => {
 		expect.hasAssertions();
 		const trimmed = (maybe: string | null): string => (isNullish(maybe) ? "" : maybe.trim());
@@ -224,7 +224,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(trimmed(null)).toStrictEqual("");
 	});
 
-	// packages/types/src/guards.ts:653
+	// packages/types/src/guards.ts:654
 	it("isDefined — Filtering out only the undefined", () => {
 		expect.hasAssertions();
 		const xs: (number | undefined | null)[] = [1, undefined, null];
@@ -232,7 +232,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(xs.filter(isDefined)).toStrictEqual([1, null]);
 	});
 
-	// packages/types/src/guards.ts:685
+	// packages/types/src/guards.ts:686
 	it("isNonNull — Filtering out only the nulls", () => {
 		expect.hasAssertions();
 		const xs: (string | null | undefined)[] = ["a", null, undefined];
@@ -240,7 +240,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(xs.filter(isNonNull)).toStrictEqual(["a", undefined]);
 	});
 
-	// packages/types/src/guards.ts:722
+	// packages/types/src/guards.ts:723
 	it("isNonNullish — Compacting a projection", () => {
 		expect.hasAssertions();
 		const rows: { id: string | null }[] = [{ id: "a" }, { id: null }, { id: "b" }];
@@ -248,7 +248,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(rows.map((row) => row.id).filter(isNonNullish)).toStrictEqual(["a", "b"]);
 	});
 
-	// packages/types/src/guards.ts:765
+	// packages/types/src/guards.ts:766
 	it("NonEmptyString — A bare string is not proof", () => {
 		expect.hasAssertions();
 		const setDisplayName = (name: NonEmptyString): string => `Hello, ${name}`;
@@ -259,7 +259,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(greeting).toStrictEqual("Hello, Ada");
 	});
 
-	// packages/types/src/guards.ts:798
+	// packages/types/src/guards.ts:799
 	it("isNonEmptyString — Length, not truthiness", () => {
 		expect.hasAssertions();
 		expect(isNonEmptyString("0")).toStrictEqual(true);
@@ -267,7 +267,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isNonEmptyString("")).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:832
+	// packages/types/src/guards.ts:833
 	it("isBlankString — Whitespace counts as blank", () => {
 		expect.hasAssertions();
 		expect(isBlankString("")).toStrictEqual(true);
@@ -276,7 +276,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isBlankString(null)).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:870
+	// packages/types/src/guards.ts:871
 	it("isNumericString — Strictly decimal", () => {
 		expect.hasAssertions();
 		expect(isNumericString("42")).toStrictEqual(true);
@@ -285,7 +285,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isNumericString("0x10")).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:914
+	// packages/types/src/guards.ts:915
 	it("isObject — Duck-typing a response body", () => {
 		expect.hasAssertions();
 		const body: unknown = JSON.parse('{"token":"abc"}');
@@ -294,7 +294,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(token).toStrictEqual("abc");
 	});
 
-	// packages/types/src/guards.ts:950
+	// packages/types/src/guards.ts:951
 	it("isObjectLike — Reaching an own-property check", () => {
 		expect.hasAssertions();
 		const target: unknown = { id: 7 };
@@ -303,7 +303,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(id).toStrictEqual(7);
 	});
 
-	// packages/types/src/guards.ts:990
+	// packages/types/src/guards.ts:991
 	it("isPlainObject — Dictionaries only", () => {
 		expect.hasAssertions();
 		expect(isPlainObject({ a: 1 })).toStrictEqual(true);
@@ -313,7 +313,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isPlainObject(new (class {})())).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:1038
+	// packages/types/src/guards.ts:1039
 	it("isArray — Iterating a parsed payload", () => {
 		expect.hasAssertions();
 		const parsed: unknown = JSON.parse("[1,2,3]");
@@ -323,7 +323,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(seen).toStrictEqual([1, 2, 3]);
 	});
 
-	// packages/types/src/guards.ts:1075
+	// packages/types/src/guards.ts:1076
 	it("isNonEmptyArray — Index access without an assertion", () => {
 		expect.hasAssertions();
 		const first = (xs: readonly string[]): string => {
@@ -334,7 +334,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(first(["a", "b"])).toStrictEqual("a");
 	});
 
-	// packages/types/src/guards.ts:1112
+	// packages/types/src/guards.ts:1113
 	it("isArrayLike — Indexing anything array-shaped", () => {
 		expect.hasAssertions();
 		const collect = (input: unknown): unknown[] => {
@@ -347,7 +347,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(collect("abc")).toStrictEqual(["a", "b", "c"]);
 	});
 
-	// packages/types/src/guards.ts:1159
+	// packages/types/src/guards.ts:1160
 	it("isIterable — Normalizing one-or-many", () => {
 		expect.hasAssertions();
 		const toArray = (input: unknown): unknown[] => (isIterable(input) ? [...input] : [input]);
@@ -356,7 +356,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(toArray(7)).toStrictEqual([7]);
 	});
 
-	// packages/types/src/guards.ts:1199
+	// packages/types/src/guards.ts:1200
 	it("isAsyncIterable — Telling a stream from a collection", () => {
 		expect.hasAssertions();
 		async function* frames(): AsyncGenerator<number> {
@@ -367,14 +367,14 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isAsyncIterable([1, 2])).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:1247
+	// packages/types/src/guards.ts:1248
 	it("isMap — Tag plus internal slot", () => {
 		expect.hasAssertions();
 		expect(isMap(new Map([["a", 1]]))).toStrictEqual(true);
 		expect(isMap({ [Symbol.toStringTag]: "Map" })).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:1283
+	// packages/types/src/guards.ts:1284
 	it("isSet — An allow-list check that survives a realm hop", () => {
 		expect.hasAssertions();
 		const allowed: unknown = new Set(["https://example.com"]);
@@ -382,7 +382,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isSet(allowed) && allowed.has("https://example.com")).toStrictEqual(true);
 	});
 
-	// packages/types/src/guards.ts:1323
+	// packages/types/src/guards.ts:1324
 	it("isFunction — Arbitrary arguments still allowed", () => {
 		expect.hasAssertions();
 		const handler: unknown = (a: number, b: number) => a + b;
@@ -391,7 +391,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(result).toStrictEqual(5);
 	});
 
-	// packages/types/src/guards.ts:1366
+	// packages/types/src/guards.ts:1367
 	it("isConstructor — Arrows have no `[[Construct]]`", () => {
 		expect.hasAssertions();
 		class Service {}
@@ -400,7 +400,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isConstructor(() => {})).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:1412
+	// packages/types/src/guards.ts:1413
 	it("isPromise — Thenables count, plain objects do not", () => {
 		expect.hasAssertions();
 		expect(isPromise(Promise.resolve(1))).toStrictEqual(true);
@@ -408,7 +408,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isPromise({})).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:1449
+	// packages/types/src/guards.ts:1450
 	it("isThenable — Branching on awaitability", () => {
 		expect.hasAssertions();
 		const kindOf = (x: unknown): unknown => (isThenable(x) ? "awaitable" : x);
@@ -417,7 +417,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(kindOf(7)).toStrictEqual(7);
 	});
 
-	// packages/types/src/guards.ts:1492
+	// packages/types/src/guards.ts:1493
 	it("isDate — A `Date` is a `Date` even when it is nonsense", () => {
 		expect.hasAssertions();
 		expect(isDate(new Date())).toStrictEqual(true);
@@ -426,7 +426,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isDate({ [Symbol.toStringTag]: "Date" })).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:1539
+	// packages/types/src/guards.ts:1540
 	it("isValidDate — `toISOString` cannot throw after this", () => {
 		expect.hasAssertions();
 		const stamp = (input: string): string => {
@@ -439,7 +439,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isValidDate(new Date("nope"))).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:1587
+	// packages/types/src/guards.ts:1588
 	it("isRegExp — Only a real pattern has a real `source`", () => {
 		expect.hasAssertions();
 		const pattern: unknown = /^a+$/u;
@@ -448,7 +448,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isRegExp({ source: "^a+$" })).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:1628
+	// packages/types/src/guards.ts:1629
 	it("isError — Logging a cause without losing it", () => {
 		expect.hasAssertions();
 		const describeCause = (cause: unknown): string =>
@@ -458,7 +458,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(describeCause("boom")).toStrictEqual("boom");
 	});
 
-	// packages/types/src/guards.ts:1667
+	// packages/types/src/guards.ts:1668
 	it("isURL — Enforcing a scheme", () => {
 		expect.hasAssertions();
 		const target: unknown = new URL("https://example.com/path");
@@ -467,7 +467,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isURL({ href: "https://example.com/" })).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:1713
+	// packages/types/src/guards.ts:1714
 	it("isArrayBufferView — Both halves of the family pass", () => {
 		expect.hasAssertions();
 		expect(isArrayBufferView(new Uint8Array(1))).toStrictEqual(true);
@@ -475,7 +475,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isArrayBufferView(new ArrayBuffer(8))).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:1751
+	// packages/types/src/guards.ts:1752
 	it("isTypedArray — The one `ArrayBufferView` that is excluded", () => {
 		expect.hasAssertions();
 		expect(isTypedArray(new Uint8Array(1))).toStrictEqual(true);
@@ -483,14 +483,14 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isTypedArray(new ArrayBuffer(8))).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:1785
+	// packages/types/src/guards.ts:1786
 	it("isUint8Array — Rejecting the wrong element width", () => {
 		expect.hasAssertions();
 		expect(isUint8Array(new Uint8Array([1, 2]))).toStrictEqual(true);
 		expect(isUint8Array(new Uint16Array([1, 2]))).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:1818
+	// packages/types/src/guards.ts:1819
 	it("isArrayBuffer — Normalizing a chunk to bytes", () => {
 		expect.hasAssertions();
 		const chunk: unknown = new ArrayBuffer(2);
@@ -500,7 +500,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isArrayBuffer(new Uint8Array(2))).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:1858
+	// packages/types/src/guards.ts:1859
 	it("hasKey — Reading a message off an unknown cause", () => {
 		expect.hasAssertions();
 		const messageOf = (cause: unknown): string =>
@@ -510,7 +510,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(messageOf(42)).toStrictEqual("42");
 	});
 
-	// packages/types/src/guards.ts:1902
+	// packages/types/src/guards.ts:1903
 	it("hasKeys — All-or-nothing field presence", () => {
 		expect.hasAssertions();
 		const frame: unknown = { lat: 51.5, lon: -0.12, at: 0 };
@@ -520,7 +520,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(hasKeys(frame, "lat", "alt")).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:1947
+	// packages/types/src/guards.ts:1948
 	it("hasOwn — Inherited does not count", () => {
 		expect.hasAssertions();
 		const config: object = { retries: 3 };
@@ -529,14 +529,14 @@ describe("packages/types/src/guards.ts", () => {
 		expect(hasOwn({}, "toString")).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:1994
+	// packages/types/src/guards.ts:1995
 	it("hasOwnProperty — True, but proving nothing to the compiler", () => {
 		expect.hasAssertions();
 		expect(hasOwnProperty({ a: 1 }, "a")).toStrictEqual(true);
 		expect(hasOwnProperty({}, "toString")).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:2051
+	// packages/types/src/guards.ts:2052
 	it("isKeyOf — A config string becomes a safe index", () => {
 		expect.hasAssertions();
 		const palette = { primary: 1, accent: 2 } as const;
@@ -547,7 +547,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isKeyOf(palette, "toString")).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:2096
+	// packages/types/src/guards.ts:2097
 	it("isOneOf — Parsing a log level with a fallback", () => {
 		expect.hasAssertions();
 		const isLevel = isOneOf("debug", "info", "warn", "error");
@@ -558,7 +558,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isLevel("trace")).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:2142
+	// packages/types/src/guards.ts:2143
 	it("isInstanceOf — Filtering a mixed array down to errors", () => {
 		expect.hasAssertions();
 		const results: unknown[] = [new Error("a"), "b", new TypeError("c")];
@@ -566,14 +566,14 @@ describe("packages/types/src/guards.ts", () => {
 		expect(results.filter(isInstanceOf(Error)).map((error) => error.message)).toStrictEqual(["a", "c"]);
 	});
 
-	// packages/types/src/guards.ts:2187
+	// packages/types/src/guards.ts:2188
 	it("isJsonPrimitive — `bigint` is the notable exclusion", () => {
 		expect.hasAssertions();
 		expect(isJsonPrimitive(null)).toStrictEqual(true);
 		expect(isJsonPrimitive(1n)).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:2228
+	// packages/types/src/guards.ts:2229
 	it("isJsonArray — Holes do not round-trip", () => {
 		expect.hasAssertions();
 		expect(isJsonArray([1, "a", null, { b: [] }])).toStrictEqual(true);
@@ -581,7 +581,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isJsonArray(new Array(2))).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:2282
+	// packages/types/src/guards.ts:2283
 	it("isJsonObject — A non-enumerable member is still inspected", () => {
 		expect.hasAssertions();
 		expect(isJsonObject({ a: 1, b: undefined })).toStrictEqual(true);
@@ -593,7 +593,7 @@ describe("packages/types/src/guards.ts", () => {
 		expect(isJsonObject(hidden)).toStrictEqual(false);
 	});
 
-	// packages/types/src/guards.ts:2340
+	// packages/types/src/guards.ts:2341
 	it("isJsonValue — Proving a payload is cacheable", () => {
 		expect.hasAssertions();
 		const body: unknown = JSON.parse('{"a":[1,null]}');

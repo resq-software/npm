@@ -32,7 +32,7 @@ import { type Brand, type BrandRefiner } from "../../brand.js";
 import { isNarrowError } from "../../narrow.js";
 
 describe("packages/types/src/brand-parse.ts", () => {
-	// packages/types/src/brand-parse.ts:102
+	// packages/types/src/brand-parse.ts:103
 	it("BrandError — Reading the violated rules off a rejected value", () => {
 		expect.hasAssertions();
 		const Even = brandParser<number, "Even">([["even", (n) => n % 2 === 0]], "Even");
@@ -56,7 +56,7 @@ describe("packages/types/src/brand-parse.ts", () => {
 		expect(leaksTheValue).toStrictEqual(false);
 	});
 
-	// packages/types/src/brand-parse.ts:197
+	// packages/types/src/brand-parse.ts:198
 	it("BrandParser — Accepting the narrow contract, supplying the wide one", () => {
 		expect.hasAssertions();
 		type Slug = Brand<string, "Slug">;
@@ -79,7 +79,7 @@ describe("packages/types/src/brand-parse.ts", () => {
 		expect(broken).toStrictEqual(["lowercase", "no spaces"]);
 	});
 
-	// packages/types/src/brand-parse.ts:294
+	// packages/types/src/brand-parse.ts:295
 	it("brandParser — An IPv4 brand that range-checks, and says which half failed", () => {
 		expect.hasAssertions();
 		type IPv4 = Brand<string, "IPv4">;
@@ -100,7 +100,7 @@ describe("packages/types/src/brand-parse.ts", () => {
 		expect(notAnAddress).toStrictEqual(["dotted quad", "octet range"]);
 	});
 
-	// packages/types/src/brand-parse.ts:315
+	// packages/types/src/brand-parse.ts:316
 	it("brandParser — Branching on `parse` instead of catching", () => {
 		expect.hasAssertions();
 		const Password = brandParser<string, "Password">(

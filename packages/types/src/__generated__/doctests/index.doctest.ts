@@ -30,7 +30,7 @@ import { describe, expect, it } from "vitest";
 import { ensure, isNonEmptyString, matchTag } from "../../index.js";
 
 describe("packages/types/src/index.ts", () => {
-	// packages/types/src/index.ts:93
+	// packages/types/src/index.ts:94
 	it("Module — Reaching every module through the one barrel specifier", () => {
 		expect.hasAssertions();
 		const raw: unknown = "ada";

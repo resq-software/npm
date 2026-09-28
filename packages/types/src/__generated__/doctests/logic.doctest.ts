@@ -59,7 +59,7 @@ import {
 } from "../../logic.js";
 
 describe("packages/types/src/logic.ts", () => {
-	// packages/types/src/logic.ts:50
+	// packages/types/src/logic.ts:51
 	it("Module — Guarding a generic on a computed condition", () => {
 		type IsReadonlyTuple<T> = And<Extends<T, readonly unknown[]>, Not<Extends<T, unknown[]>>>;
 
@@ -67,7 +67,7 @@ describe("packages/types/src/logic.ts", () => {
 		const mutable: IsReadonlyTuple<[1, 2]> = false;
 	});
 
-	// packages/types/src/logic.ts:138
+	// packages/types/src/logic.ts:139
 	it("If — Choosing a branch on a proven condition", () => {
 		const chosen: If<true, string, number> = "value";
 		const otherwise: If<false, string, number> = 42;
@@ -75,13 +75,13 @@ describe("packages/types/src/logic.ts", () => {
 		const unproven: If<boolean, string, number> = 42;
 	});
 
-	// packages/types/src/logic.ts:178
+	// packages/types/src/logic.ts:179
 	it("Not — Inverting a condition", () => {
 		const negated: Not<true> = false;
 		const restored: Not<false> = true;
 	});
 
-	// packages/types/src/logic.ts:211
+	// packages/types/src/logic.ts:212
 	it("And — Requiring both conditions", () => {
 		const both: And<true, true> = true;
 		const missingOne: And<true, false> = false;
@@ -89,38 +89,38 @@ describe("packages/types/src/logic.ts", () => {
 		const unproven: And<true, boolean> = false;
 	});
 
-	// packages/types/src/logic.ts:245
+	// packages/types/src/logic.ts:246
 	it("Or — Accepting either condition", () => {
 		const either: Or<false, true> = true;
 		const neither: Or<false, false> = false;
 	});
 
-	// packages/types/src/logic.ts:280
+	// packages/types/src/logic.ts:281
 	it("BoolXor — Requiring exactly one of two flags", () => {
 		const differ: BoolXor<true, false> = true;
 		const agree: BoolXor<true, true> = false;
 	});
 
-	// packages/types/src/logic.ts:311
+	// packages/types/src/logic.ts:312
 	it("Nand — Forbidding the both-true case", () => {
 		const bothTrue: Nand<true, true> = false;
 		const notBoth: Nand<true, false> = true;
 	});
 
-	// packages/types/src/logic.ts:342
+	// packages/types/src/logic.ts:343
 	it("Nor — Asserting that both conditions fail", () => {
 		const neither: Nor<false, false> = true;
 		const oneHolds: Nor<true, false> = false;
 	});
 
-	// packages/types/src/logic.ts:382
+	// packages/types/src/logic.ts:383
 	it("BoolEqv — Requiring two conditions to agree", () => {
 		const bothTrue: BoolEqv<true, true> = true;
 		const bothFalse: BoolEqv<false, false> = true;
 		const disagree: BoolEqv<true, false> = false;
 	});
 
-	// packages/types/src/logic.ts:417
+	// packages/types/src/logic.ts:418
 	it("Implies — Encoding a conditional requirement", () => {
 		const holds: Implies<true, true> = true;
 		// The only falsifying case.
@@ -129,7 +129,7 @@ describe("packages/types/src/logic.ts", () => {
 		const vacuous: Implies<false, false> = true;
 	});
 
-	// packages/types/src/logic.ts:455
+	// packages/types/src/logic.ts:456
 	it("AllTrue — Folding several probes into one condition", () => {
 		const allHold: AllTrue<[true, true, true]> = true;
 		const oneFails: AllTrue<[true, false, true]> = false;
@@ -137,14 +137,14 @@ describe("packages/types/src/logic.ts", () => {
 		const empty: AllTrue<[]> = true;
 	});
 
-	// packages/types/src/logic.ts:491
+	// packages/types/src/logic.ts:492
 	it("AnyTrue — Asking whether any probe holds", () => {
 		const someHold: AnyTrue<[false, true]> = true;
 		const noneHold: AnyTrue<[false, false]> = false;
 		const empty: AnyTrue<[]> = false;
 	});
 
-	// packages/types/src/logic.ts:529
+	// packages/types/src/logic.ts:530
 	it("Extends — Testing a union as a whole", () => {
 		const wholeUnionIsString: Extends<"a" | "b", string> = true;
 		const widenedIsNotLiteral: Extends<string, "a"> = false;
@@ -152,7 +152,7 @@ describe("packages/types/src/logic.ts", () => {
 		const mixedUnion: Extends<"a" | 1, string> = false;
 	});
 
-	// packages/types/src/logic.ts:573
+	// packages/types/src/logic.ts:574
 	it("ExtendsDistributive — Contrasting the two readings", () => {
 		const everyMemberIsString: ExtendsDistributive<"a" | "b", string> = true;
 		// A mixed union honestly reports "some do, some do not" — i.e. `boolean`.
@@ -161,34 +161,34 @@ describe("packages/types/src/logic.ts", () => {
 		const asAWhole: Extends<"a" | 1, string> = false;
 	});
 
-	// packages/types/src/logic.ts:618
+	// packages/types/src/logic.ts:619
 	it("IsEqual — Detecting a modifier difference", () => {
 		const same: IsEqual<{ a: 1 }, { a: 1 }> = true;
 		// `readonly` is invisible to assignability but not to identity.
 		const modifierDiffers: IsEqual<{ a: 1 }, { readonly a: 1 }> = false;
 	});
 
-	// packages/types/src/logic.ts:651
+	// packages/types/src/logic.ts:652
 	it("IsSubtypeOf — Proving a refinement narrowed", () => {
 		const narrowed: IsSubtypeOf<"a", string> = true;
 		// Equal is not *proper*.
 		const noop: IsSubtypeOf<string, string> = false;
 	});
 
-	// packages/types/src/logic.ts:678
+	// packages/types/src/logic.ts:679
 	it("IsSupertypeOf — Locking a widening assertion", () => {
 		const widened: IsSupertypeOf<string, "a"> = true;
 		const unchanged: IsSupertypeOf<string, string> = false;
 	});
 
-	// packages/types/src/logic.ts:709
+	// packages/types/src/logic.ts:710
 	it("IsMutuallyAssignable — Compatibility versus identity", () => {
 		const swappable: IsMutuallyAssignable<{ a: 1 }, { readonly a: 1 }> = true;
 		// Contrast: identity sees the modifier.
 		const identical: IsEqual<{ a: 1 }, { readonly a: 1 }> = false;
 	});
 
-	// packages/types/src/logic.ts:755
+	// packages/types/src/logic.ts:756
 	it("IsStringLiteral — Telling a literal from a pattern", () => {
 		const literal: IsStringLiteral<"a"> = true;
 		const unionOfLiterals: IsStringLiteral<"a" | "b"> = true;
@@ -197,14 +197,14 @@ describe("packages/types/src/logic.ts", () => {
 		const pattern: IsStringLiteral<`on${string}`> = false;
 	});
 
-	// packages/types/src/logic.ts:799
+	// packages/types/src/logic.ts:800
 	it("IsNumericLiteral — Rejecting a widened number", () => {
 		const literal: IsNumericLiteral<1> = true;
 		const bigLiteral: IsNumericLiteral<1n> = true;
 		const widened: IsNumericLiteral<number> = false;
 	});
 
-	// packages/types/src/logic.ts:837
+	// packages/types/src/logic.ts:838
 	it("IsBooleanLiteral — Catching an unresolved condition", () => {
 		const resolvedTrue: IsBooleanLiteral<true> = true;
 		const resolvedFalse: IsBooleanLiteral<false> = true;
@@ -212,7 +212,7 @@ describe("packages/types/src/logic.ts", () => {
 		const unresolved: IsBooleanLiteral<boolean> = false;
 	});
 
-	// packages/types/src/logic.ts:872
+	// packages/types/src/logic.ts:873
 	it("IsLiteral — Detecting a widened inference", () => {
 		const stringLiteral: IsLiteral<"a"> = true;
 		const numberLiteral: IsLiteral<42> = true;
@@ -220,7 +220,7 @@ describe("packages/types/src/logic.ts", () => {
 		const widened: IsLiteral<string> = false;
 	});
 
-	// packages/types/src/logic.ts:909
+	// packages/types/src/logic.ts:910
 	it("IsTuple — Choosing a variadic policy", () => {
 		const fixed: IsTuple<[1, 2]> = true;
 		const unbounded: IsTuple<number[]> = false;
@@ -229,7 +229,7 @@ describe("packages/types/src/logic.ts", () => {
 		const variadicLoose: IsTuple<[1, ...number[]], false> = true;
 	});
 
-	// packages/types/src/logic.ts:956
+	// packages/types/src/logic.ts:957
 	it("IsPlainObject — Guarding a recursive traversal", () => {
 		const record: IsPlainObject<{ a: 1 }> = true;
 		const array: IsPlainObject<number[]> = false;
@@ -238,20 +238,20 @@ describe("packages/types/src/logic.ts", () => {
 		const instance: IsPlainObject<Date> = true;
 	});
 
-	// packages/types/src/logic.ts:995
+	// packages/types/src/logic.ts:996
 	it("IsNullable — Distinguishing null from undefined", () => {
 		const nullable: IsNullable<string | null> = true;
 		// Not nullable by this definition — see IsUndefinable.
 		const undefinable: IsNullable<string | undefined> = false;
 	});
 
-	// packages/types/src/logic.ts:1029
+	// packages/types/src/logic.ts:1030
 	it("IsUndefinable — Asking about the value, not the key", () => {
 		const undefinable: IsUndefinable<string | undefined> = true;
 		const nullable: IsUndefinable<string | null> = false;
 	});
 
-	// packages/types/src/logic.ts:1066
+	// packages/types/src/logic.ts:1067
 	it("IsOptionalKey — Optional key versus undefined value", () => {
 		interface Config {
 			readonly retries?: number;
@@ -263,7 +263,7 @@ describe("packages/types/src/logic.ts", () => {
 		const required: IsOptionalKey<Config, "timeout"> = false;
 	});
 
-	// packages/types/src/logic.ts:1111
+	// packages/types/src/logic.ts:1112
 	it("IsReadonlyKey — Detecting a preserved modifier", () => {
 		const frozen: IsReadonlyKey<{ readonly a: 1 }, "a"> = true;
 		const mutable: IsReadonlyKey<{ a: 1 }, "a"> = false;
@@ -271,7 +271,7 @@ describe("packages/types/src/logic.ts", () => {
 		const mixed: IsReadonlyKey<{ readonly a: 1; b: 2 }, "a" | "b"> = false;
 	});
 
-	// packages/types/src/logic.ts:1155
+	// packages/types/src/logic.ts:1156
 	it("IsEmptyObject — Detecting a filtered-to-nothing shape", () => {
 		const empty: IsEmptyObject<Record<never, never>> = true;
 		const populated: IsEmptyObject<{ a: 1 }> = false;

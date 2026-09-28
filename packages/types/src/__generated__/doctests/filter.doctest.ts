@@ -44,7 +44,7 @@ import { isNumber, isString } from "../../guards.js";
 import { NarrowError, type NarrowResult, tryNarrow } from "../../narrow.js";
 
 describe("packages/types/src/filter.ts", () => {
-	// packages/types/src/filter.ts:51
+	// packages/types/src/filter.ts:52
 	it("Module — Building a case split once, then pointing it at two consumers", () => {
 		expect.hasAssertions();
 		const asPort = compose(
@@ -69,7 +69,7 @@ describe("packages/types/src/filter.ts", () => {
 		expect(reason).toStrictEqual("Expected a port");
 	});
 
-	// packages/types/src/filter.ts:144
+	// packages/types/src/filter.ts:145
 	it("Filter — Both branches, both typed", () => {
 		expect.hasAssertions();
 		const keepString: Filter<unknown, string, unknown> = fromPredicate(isString);
@@ -80,7 +80,7 @@ describe("packages/types/src/filter.ts", () => {
 		expect(failed).toStrictEqual({ ok: false, error: 42 });
 	});
 
-	// packages/types/src/filter.ts:190
+	// packages/types/src/filter.ts:191
 	it("make — A case split that computes both branches", () => {
 		expect.hasAssertions();
 		const evenLength = make(
@@ -94,7 +94,7 @@ describe("packages/types/src/filter.ts", () => {
 		expect(odd).toStrictEqual({ ok: false, error: "abc" });
 	});
 
-	// packages/types/src/filter.ts:249
+	// packages/types/src/filter.ts:250
 	it("fromPredicate — A guard's rejection branch arrives pre-narrowed", () => {
 		expect.hasAssertions();
 		const asString = fromPredicate(isString);
@@ -112,7 +112,7 @@ describe("packages/types/src/filter.ts", () => {
 		expect(long).toStrictEqual({ ok: false, error: "abcd" });
 	});
 
-	// packages/types/src/filter.ts:322
+	// packages/types/src/filter.ts:323
 	it("fromMaybe — Adapting a lenient parser", () => {
 		expect.hasAssertions();
 		const parsePort = fromMaybe((raw: string) => {
@@ -126,7 +126,7 @@ describe("packages/types/src/filter.ts", () => {
 		expect(bad).toStrictEqual({ ok: false, error: "nope" });
 	});
 
-	// packages/types/src/filter.ts:380
+	// packages/types/src/filter.ts:381
 	it("fromThrowing — Making `JSON.parse` total", () => {
 		expect.hasAssertions();
 		const parseJson = fromThrowing((raw: string): unknown => JSON.parse(raw));
@@ -137,7 +137,7 @@ describe("packages/types/src/filter.ts", () => {
 		expect(bad).toStrictEqual({ ok: false, error: "not json" });
 	});
 
-	// packages/types/src/filter.ts:442
+	// packages/types/src/filter.ts:443
 	it("mapPass — Reshaping what survives", () => {
 		expect.hasAssertions();
 		const shout = mapPass(fromPredicate(isString), (value) => value.toUpperCase());
@@ -148,7 +148,7 @@ describe("packages/types/src/filter.ts", () => {
 		expect(untouched).toStrictEqual({ ok: false, error: 42 });
 	});
 
-	// packages/types/src/filter.ts:504
+	// packages/types/src/filter.ts:505
 	it("mapFail — Rejection payload to structured error", () => {
 		expect.hasAssertions();
 		const asString = mapFail(
@@ -163,7 +163,7 @@ describe("packages/types/src/filter.ts", () => {
 		expect(offending).toStrictEqual(42);
 	});
 
-	// packages/types/src/filter.ts:565
+	// packages/types/src/filter.ts:566
 	it("or — Accepting either of two shapes", () => {
 		expect.hasAssertions();
 		const stringOrNumber = or(fromPredicate(isString), fromPredicate(isNumber));
@@ -176,7 +176,7 @@ describe("packages/types/src/filter.ts", () => {
 		expect(neither).toStrictEqual({ ok: false, error: true });
 	});
 
-	// packages/types/src/filter.ts:629
+	// packages/types/src/filter.ts:630
 	it("compose — Prove a string, then parse it", () => {
 		expect.hasAssertions();
 		const asInteger = compose(
@@ -195,7 +195,7 @@ describe("packages/types/src/filter.ts", () => {
 		expect(notString).toStrictEqual({ ok: false, error: 42 });
 	});
 
-	// packages/types/src/filter.ts:701
+	// packages/types/src/filter.ts:702
 	it("toPredicate — Feeding the decision to a builtin", () => {
 		expect.hasAssertions();
 		const isKept = toPredicate(fromPredicate(isString));
@@ -205,7 +205,7 @@ describe("packages/types/src/filter.ts", () => {
 		expect(count).toStrictEqual(2);
 	});
 
-	// packages/types/src/filter.ts:752
+	// packages/types/src/filter.ts:753
 	it("toUndefined — Defaulting off a rejection", () => {
 		expect.hasAssertions();
 		const asString = toUndefined(fromPredicate(isString));

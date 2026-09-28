@@ -37,7 +37,7 @@ import {
 } from "../../brand.js";
 
 describe("packages/types/src/brand.ts", () => {
-	// packages/types/src/brand.ts:118
+	// packages/types/src/brand.ts:119
 	it("BrandsOf — Reading the brand set off a nominal type", () => {
 		expect.hasAssertions();
 		type Email = Brand<string, "Email">;
@@ -55,7 +55,7 @@ describe("packages/types/src/brand.ts", () => {
 		expect(count).toStrictEqual(0);
 	});
 
-	// packages/types/src/brand.ts:198
+	// packages/types/src/brand.ts:199
 	it("Unbrand — Widening back to the carrier without a cast", () => {
 		expect.hasAssertions();
 		type Email = Brand<string, "Email">;
@@ -67,7 +67,7 @@ describe("packages/types/src/brand.ts", () => {
 		expect(shouted).toStrictEqual("A@B.COM");
 	});
 
-	// packages/types/src/brand.ts:238
+	// packages/types/src/brand.ts:239
 	it("HasBrand — Asserting a brand survived a composition", () => {
 		expect.hasAssertions();
 		type Email = Brand<string, "Email">;
@@ -81,7 +81,7 @@ describe("packages/types/src/brand.ts", () => {
 		expect(notAUserId).toStrictEqual(false);
 	});
 
-	// packages/types/src/brand.ts:412
+	// packages/types/src/brand.ts:413
 	it("refineAll — One constructor, two independent proofs", () => {
 		expect.hasAssertions();
 		type NonEmpty = Brand<string, "NonEmpty">;

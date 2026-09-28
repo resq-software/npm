@@ -58,7 +58,7 @@ import {
 import { type Predicate } from "../../predicate.js";
 
 describe("packages/types/src/order.ts", () => {
-	// packages/types/src/order.ts:76
+	// packages/types/src/order.ts:77
 	it("Module — Sorting by one field, then another", () => {
 		expect.hasAssertions();
 		type Row = { readonly name: string; readonly age: number };
@@ -77,7 +77,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(sorted).toStrictEqual(["c", "a", "b"]);
 	});
 
-	// packages/types/src/order.ts:127
+	// packages/types/src/order.ts:128
 	it("Ordering — The narrow type rejects a subtraction comparator", () => {
 		expect.hasAssertions();
 		const result: Ordering = orderNumber(1, 2);
@@ -87,7 +87,7 @@ describe("packages/types/src/order.ts", () => {
 		const bad: Order<number> = (a, b) => a - b;
 	});
 
-	// packages/types/src/order.ts:192
+	// packages/types/src/order.ts:193
 	it("Order — An order is already a `sort` comparator", () => {
 		expect.hasAssertions();
 		const compare: (a: number, b: number) => number = orderNumber;
@@ -95,7 +95,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(sorted).toStrictEqual([1, 2, 3]);
 	});
 
-	// packages/types/src/order.ts:273
+	// packages/types/src/order.ts:274
 	it("make — Ordering by length", () => {
 		expect.hasAssertions();
 		const byLength = make<string>((self, that) => (self.length < that.length ? -1 : self.length > that.length ? 1 : 0));
@@ -106,7 +106,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(byLength("same", "same")).toStrictEqual(0);
 	});
 
-	// packages/types/src/order.ts:325
+	// packages/types/src/order.ts:326
 	it("fromCompare — Locale-aware string ordering, done safely", () => {
 		expect.hasAssertions();
 		const byLocale = fromCompare<string>((self, that) => self.localeCompare(that));
@@ -123,7 +123,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(broken(1, 2)).toStrictEqual(0);
 	});
 
-	// packages/types/src/order.ts:379
+	// packages/types/src/order.ts:380
 	it("alwaysEqual — The empty fold", () => {
 		expect.hasAssertions();
 		const nothing = alwaysEqual<string>();
@@ -132,7 +132,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(combineAll<string>([])("a", "b")).toStrictEqual(0);
 	});
 
-	// packages/types/src/order.ts:423
+	// packages/types/src/order.ts:424
 	it("reverse — Descending", () => {
 		expect.hasAssertions();
 		const descending = reverse(orderNumber);
@@ -142,7 +142,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(sorted).toStrictEqual([3, 2, 1]);
 	});
 
-	// packages/types/src/order.ts:462
+	// packages/types/src/order.ts:463
 	it("combine — Rank, then name", () => {
 		expect.hasAssertions();
 		type Row = { readonly rank: number; readonly name: string };
@@ -155,7 +155,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(byRankThenName({ rank: 2, name: "a" }, { rank: 1, name: "b" })).toStrictEqual(1);
 	});
 
-	// packages/types/src/order.ts:511
+	// packages/types/src/order.ts:512
 	it("combineAll — Explicit precedence, in the order you wrote it", () => {
 		expect.hasAssertions();
 		type Row = { readonly rank: number; readonly name: string };
@@ -169,7 +169,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(precedence({ rank: 0, name: "z" }, { rank: 1, name: "a" })).toStrictEqual(-1);
 	});
 
-	// packages/types/src/order.ts:583
+	// packages/types/src/order.ts:584
 	it("mapInput — Sorting records by a field", () => {
 		expect.hasAssertions();
 		type Row = { readonly age: number };
@@ -180,7 +180,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(byAge({ age: 30 }, { age: 30 })).toStrictEqual(0);
 	});
 
-	// packages/types/src/order.ts:633
+	// packages/types/src/order.ts:634
 	it("orderString — Machine ordering is case-sensitive", () => {
 		expect.hasAssertions();
 		expect(orderString("a", "b")).toStrictEqual(-1);
@@ -189,7 +189,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(sorted).toStrictEqual(["A", "a", "b"]);
 	});
 
-	// packages/types/src/order.ts:677
+	// packages/types/src/order.ts:678
 	it("orderNumber — `NaN` sorts first and compares equal to itself", () => {
 		expect.hasAssertions();
 		expect(orderNumber(1, 2)).toStrictEqual(-1);
@@ -200,7 +200,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(sorted).toStrictEqual([NaN, 1, 3]);
 	});
 
-	// packages/types/src/order.ts:717
+	// packages/types/src/order.ts:718
 	it("orderBoolean — Falsey first", () => {
 		expect.hasAssertions();
 		expect(orderBoolean(false, true)).toStrictEqual(-1);
@@ -209,7 +209,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(sorted).toStrictEqual([false, true, true]);
 	});
 
-	// packages/types/src/order.ts:746
+	// packages/types/src/order.ts:747
 	it("orderBigInt — Beyond safe-integer range", () => {
 		expect.hasAssertions();
 		expect(orderBigInt(1n, 2n)).toStrictEqual(-1);
@@ -217,7 +217,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(orderBigInt(9007199254740993n, 9007199254740993n)).toStrictEqual(0);
 	});
 
-	// packages/types/src/order.ts:781
+	// packages/types/src/order.ts:782
 	it("orderDate — Invalid Dates sort first and compare equal", () => {
 		expect.hasAssertions();
 		const early = new Date("2020-01-01T00:00:00.000Z");
@@ -230,7 +230,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(orderDate(invalid, new Date("also nope"))).toStrictEqual(0);
 	});
 
-	// packages/types/src/order.ts:831
+	// packages/types/src/order.ts:832
 	it("tupleOf — Surname, then age", () => {
 		expect.hasAssertions();
 		const byPair = tupleOf([orderString, orderNumber]);
@@ -240,7 +240,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(byPair(["a", 1], ["a", 1])).toStrictEqual(0);
 	});
 
-	// packages/types/src/order.ts:892
+	// packages/types/src/order.ts:893
 	it("arrayOf — Shorter prefixes sort first", () => {
 		expect.hasAssertions();
 		const byNumbers = arrayOf(orderNumber);
@@ -251,7 +251,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(byNumbers([], [])).toStrictEqual(0);
 	});
 
-	// packages/types/src/order.ts:959
+	// packages/types/src/order.ts:960
 	it("structOf — Rank, then name", () => {
 		expect.hasAssertions();
 		const byRankThenName = structOf({ rank: orderNumber, name: orderString });
@@ -261,7 +261,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(byRankThenName({ rank: 1, name: "a" }, { rank: 1, name: "a" })).toStrictEqual(0);
 	});
 
-	// packages/types/src/order.ts:971
+	// packages/types/src/order.ts:972
 	it("structOf — An integer-like key jumps the queue", () => {
 		expect.hasAssertions();
 		// Written name-first, but `Object.keys` yields ["2", "name"].
@@ -271,7 +271,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(surprising({ name: "a", 2: 9 }, { name: "b", 2: 1 })).toStrictEqual(1);
 	});
 
-	// packages/types/src/order.ts:1054
+	// packages/types/src/order.ts:1055
 	it("isLessThan — Composing with the guard algebra", () => {
 		expect.hasAssertions();
 		const under10: Predicate<number> = isLessThan(orderNumber)(10);
@@ -282,7 +282,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(kept).toStrictEqual([5]);
 	});
 
-	// packages/types/src/order.ts:1094
+	// packages/types/src/order.ts:1095
 	it("isGreaterThan — Filtering above a threshold", () => {
 		expect.hasAssertions();
 		const over10 = isGreaterThan(orderNumber)(10);
@@ -293,7 +293,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(kept).toStrictEqual([15]);
 	});
 
-	// packages/types/src/order.ts:1130
+	// packages/types/src/order.ts:1131
 	it("isLessThanOrEqualTo — An inclusive cap", () => {
 		expect.hasAssertions();
 		const atMost10 = isLessThanOrEqualTo(orderNumber)(10);
@@ -302,7 +302,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(atMost10(11)).toStrictEqual(false);
 	});
 
-	// packages/types/src/order.ts:1165
+	// packages/types/src/order.ts:1166
 	it("isGreaterThanOrEqualTo — An inclusive floor", () => {
 		expect.hasAssertions();
 		const atLeast18 = isGreaterThanOrEqualTo(orderNumber)(18);
@@ -311,7 +311,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(atLeast18(17)).toStrictEqual(false);
 	});
 
-	// packages/types/src/order.ts:1220
+	// packages/types/src/order.ts:1221
 	it("isBetween — An inclusive band", () => {
 		expect.hasAssertions();
 		const inRange = isBetween(orderNumber)({ minimum: 1, maximum: 10 });
@@ -325,7 +325,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(isBetween(orderNumber)({ minimum: 10, maximum: 1 })(5)).toStrictEqual(false);
 	});
 
-	// packages/types/src/order.ts:1277
+	// packages/types/src/order.ts:1278
 	it("min — Capping from above", () => {
 		expect.hasAssertions();
 		const atMost10 = min(orderNumber)(10);
@@ -334,7 +334,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(atMost10(42)).toStrictEqual(10);
 	});
 
-	// packages/types/src/order.ts:1315
+	// packages/types/src/order.ts:1316
 	it("max — Flooring from below", () => {
 		expect.hasAssertions();
 		const atLeast0 = max(orderNumber)(0);
@@ -343,7 +343,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(atLeast0(-7)).toStrictEqual(0);
 	});
 
-	// packages/types/src/order.ts:1367
+	// packages/types/src/order.ts:1368
 	it("clamp — Pinning to a unit interval", () => {
 		expect.hasAssertions();
 		const toUnit = clamp(orderNumber)({ minimum: 0, maximum: 1 });
@@ -356,7 +356,7 @@ describe("packages/types/src/order.ts", () => {
 		expect(clamp(orderNumber)({ minimum: 10, maximum: 0 })(5)).toStrictEqual(0);
 	});
 
-	// packages/types/src/order.ts:1429
+	// packages/types/src/order.ts:1430
 	it("toEquivalence — The kernel of a numeric order", () => {
 		expect.hasAssertions();
 		const sameNumber = toEquivalence(orderNumber);
