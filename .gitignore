@@ -3,6 +3,8 @@
 !**/src/lib/
 storybook-static/
 .next/
+# Vite output of the example apps (a stale bundle was once committed by accident)
+examples/*/dist/
 # `email export --outDir ./out` render output (email-templates)
 **/out/
 

@@ -12,7 +12,7 @@ import { Meta } from "@storybook/addon-docs/blocks";
 ## Design principles
 
 - **Dark-first** — dark theme is the default; light mode is an explicit opt-in via the `.light` class
-- **Accessible by default** — every component meets WCAG 2.1 AA standards via Radix UI primitives
+- **Built for accessibility** — interactive components build on Radix UI primitives, and the test suite runs axe-core over every story. The target is WCAG 2.2 AA; the library has not been formally audited
 - **Composable** — components accept `asChild` and spread all HTML props for maximum flexibility
 - **Themeable** — design tokens as CSS custom properties using the `oklch` color space for perceptually uniform, vibrant colors
 - **Type-safe** — full TypeScript with exported variant types and `VariantProps` helpers

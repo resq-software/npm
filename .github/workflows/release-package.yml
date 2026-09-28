@@ -14,14 +14,19 @@ concurrency:
   group: release-package-${{ github.ref_name }}
   cancel-in-progress: false
 
-permissions:
-  contents: write
-  id-token: write
-  packages: write
+# Each job declares its own scopes, so the attest job below does not inherit
+# the publish job's write access to packages.
+permissions: {}
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    outputs:
+      packages: ${{ steps.resolve.outputs.packages }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -50,6 +55,9 @@ jobs:
 
           FULL_NAME=$(node -e "process.stdout.write(require('./$PKG_DIR/package.json').name)")
           echo "dir=$PKG_DIR" >> "$GITHUB_OUTPUT"
+          # {name, version} list for the attest job, in changesets' publishedPackages shape.
+          PACKAGES=$(node -e "const p=require('./$PKG_DIR/package.json'); process.stdout.write(JSON.stringify([{name:p.name,version:p.version}]))")
+          echo "packages=$PACKAGES" >> "$GITHUB_OUTPUT"
           echo "Releasing $FULL_NAME from $PKG_DIR"
 
       - name: Build
@@ -70,3 +78,15 @@ jobs:
         with:
           package-dir: ${{ steps.resolve.outputs.dir }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  # SBOM + signed build provenance for the tarball just published. A separate
+  # job so only it holds `attestations: write`.
+  attest:
+    needs: publish
+    permissions:
+      contents: write # attach the SBOM to the package's GitHub release, if one exists
+      id-token: write # Sigstore signing for the provenance attestation
+      attestations: write # store the attestation
+    uses: ./.github/workflows/attest-published.yml
+    with:
+      packages: ${{ needs.publish.outputs.packages }}

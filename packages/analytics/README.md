@@ -21,6 +21,8 @@
 
 Unified PostHog + GA4 analytics client for the ResQ Systems platform. Built for cross-subdomain identity (`resq.software` ↔ `research.resq.software` ↔ `viz.resq.software`), lazy-loaded so it never sits on the LCP critical path, and typed events you can extend per-app.
 
+**Analytics is opt-in.** Nothing loads — no gtag.js script, no `posthog-js` import, no request — until the visitor accepts. See [Consent](#consent).
+
 ## Install
 
 ```sh
@@ -48,6 +50,7 @@ export default withAnalyticsRewrites({
 
 import { AnalyticsProvider } from "@resq-systems/analytics/react";
 import { inferCookieDomain, sanitizeGa4Id, type AnalyticsConfig } from "@resq-systems/analytics";
+import { ConsentBanner } from "./consent-banner"; // your banner — see Consent below
 
 // GA4 ids and cookie domains are branded — mint them through their validators
 // so a raw env string can never reach a gtag / cookie sink unchecked.
@@ -65,9 +68,14 @@ const config: AnalyticsConfig = {
 };
 
 export const Providers = ({ children }: { children: React.ReactNode }) => (
-  <AnalyticsProvider config={config}>{children}</AnalyticsProvider>
+  <AnalyticsProvider config={config}>
+    {children}
+    <ConsentBanner />
+  </AnalyticsProvider>
 );
 ```
+
+`AnalyticsProvider` only records the config. The providers boot when the visitor accepts in your consent banner (below), or straight away on later visits once an acceptance is stored.
 
 ```tsx
 "use client";
@@ -83,6 +91,49 @@ export const RequestBriefingButton = () => {
   );
 };
 ```
+
+## Consent
+
+Every provider is gated on the visitor's decision:
+
+| State | What happens |
+|---|---|
+| `"unset"` (no decision yet) | `init()` records the config and loads nothing. `track` / `identify` / `pageview` are no-ops. |
+| `"granted"` | Providers boot: `posthog-js` is imported and initialised, gtag.js is injected with Consent Mode's ad signals denied. |
+| `"denied"` | Nothing loads. If providers had already loaded on this page, PostHog is opted out (clearing its identifiers), GA4 is disabled for the stream and its `_ga` cookies are deleted. |
+
+The decision is stored in `localStorage` under `resq-analytics-consent` (`"granted"` / `"denied"`). Pass `new Analytics({ consentStore })` to keep it elsewhere.
+
+The React adapter is headless, so the banner uses your own components. Give Accept and Decline equal prominence, link your privacy notice, and keep a visible way to reopen the choice:
+
+```tsx
+"use client";
+
+import { openPrivacySettings, useConsentBanner } from "@resq-systems/analytics/react";
+
+export const ConsentBanner = () => {
+  const { open, accept, decline } = useConsentBanner();
+  if (!open) return null;
+  return (
+    <section aria-labelledby="consent-title">
+      <h2 id="consent-title">Analytics</h2>
+      <p>
+        May we use Google Analytics 4 and PostHog to see how the site is used? Nothing loads
+        unless you accept. <a href="/privacy">Privacy notice</a>
+      </p>
+      <button onClick={decline}>Decline</button>
+      <button onClick={accept}>Accept</button>
+    </section>
+  );
+};
+
+// In your footer or settings:
+<button onClick={openPrivacySettings}>Privacy settings</button>;
+```
+
+Without React, call `grantConsent()` / `denyConsent()` from your own banner and read `getConsent()`.
+
+Your site needs a privacy notice that names these processors. [PRIVACY.md](../../PRIVACY.md#resq-systemsanalytics) lists what the package sends when a visitor accepts.
 
 ## Typed events
 
@@ -106,7 +157,12 @@ After this, `track("briefing_requested", { tier: "civilian" })` type-checks; `tr
 
 | Export | Purpose |
 |---|---|
-| `initAnalytics(config)` | Boot the singleton. Idempotent. |
+| `initAnalytics(config)` | Record the config; boots providers only once the visitor has accepted. Idempotent. |
+| `grantConsent()` | The visitor accepted: store it and boot the providers. |
+| `denyConsent()` | The visitor declined or withdrew: store it and switch providers off. |
+| `getConsent()` | `"granted"`, `"denied"`, or `"unset"`. |
+| `onConsentChange(listener)` | Subscribe to decisions; returns an unsubscribe function. |
+| `CONSENT_STORAGE_KEY` / `localStorageConsentStore` | Where the default store keeps the decision. |
 | `track(event, props?)` | Fan out to PostHog + GA4. |
 | `identify(userId, traits?)` | Bind an identity to the current session. |
 | `pageview(url?)` | Manual SPA pageview. |
@@ -125,6 +181,7 @@ After this, `track("briefing_requested", { tier: "civilian" })` type-checks; `tr
 | Type | Purpose |
 |---|---|
 | `AnalyticsConfig` | Root config: `posthog`, `ga4`, `cookieDomain`, `disabled`, `debug`. |
+| `ConsentState` / `ConsentDecision` / `ConsentStore` | The visitor's decision and where it is kept. |
 | `AnalyticsEvents` | Augmentable event registry (see [Typed events](#typed-events)). |
 | `EventName` / `TrackArgs<E>` | Derived from `AnalyticsEvents` to type `track()` names and payload arity. |
 | `PostHogProviderConfig` / `GA4ProviderConfig` | Per-provider config shapes. |
@@ -138,8 +195,11 @@ After this, `track("briefing_requested", { tier: "civilian" })` type-checks; `tr
 
 | Export | Purpose |
 |---|---|
-| `<AnalyticsProvider config deferUntilIdle?>` | Initialises the singleton on mount. `deferUntilIdle` (default `true`) waits for `requestIdleCallback`. |
+| `<AnalyticsProvider config deferUntilIdle?>` | Records the config on mount; providers boot after consent. `deferUntilIdle` (default `true`) waits for `requestIdleCallback`. |
 | `useAnalytics()` | Returns `{ track, identify, reset, pageview, analytics }`. |
+| `useConsent()` | Returns `{ consent, accept, decline }`, kept in sync with the singleton. |
+| `useConsentBanner()` | Headless banner state: `{ open, consent, accept, decline, close }`. `open` is true until the visitor chooses, or after `openPrivacySettings()`. |
+| `openPrivacySettings()` | Reopen the banner so the visitor can change their choice. |
 
 ### Next (`@resq-systems/analytics/next`)
 
@@ -159,7 +219,7 @@ For ResQ Systems's three surfaces to share a single `distinct_id`:
 
 ## Performance posture
 
-- The only runtime dependency is `@resq-systems/types` (tiny brand helpers); `posthog-js` is loaded via dynamic `import()` inside `init()`.
+- The only runtime dependency is `@resq-systems/types` (tiny brand helpers); `posthog-js` is loaded via dynamic `import()` only after the visitor accepts.
 - `<AnalyticsProvider deferUntilIdle>` waits for `requestIdleCallback` before booting.
 - `person_profiles: "identified_only"` is set by default, so anonymous traffic doesn't burn PostHog units.
 

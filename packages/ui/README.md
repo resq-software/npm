@@ -172,7 +172,7 @@ bun --filter @resq-systems/ui test
 
 ## Troubleshooting
 
-- **Contrast Failures**: The package utilizes dark-first oklch colors. If custom background utilities fail accessibility tests, verify they meet the minimum WCAG AA contrast thresholds using the built-in audit utility.
+- **Contrast Failures**: The package uses dark-first oklch colors. If a custom background utility fails an accessibility check, compare it against the WCAG 2.2 AA contrast minimums: 4.5:1 for normal text, 3:1 for large text and UI components. The package's own contrast audit (`src/lib/contrast-audit.test.ts`) checks only the shipped design tokens and is not exported.
 
 
 ## License

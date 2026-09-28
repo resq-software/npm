@@ -1,6 +1,7 @@
 /**
  *
  * Copyright 2026 ResQ Systems, Inc.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -259,6 +260,7 @@ describe("Analytics class", () => {
 		};
 		const a = new Analytics();
 		await a.init({ ga4: { measurementId: gid("G-X") } });
+		await a.grantConsent();
 		a.track("cta_clicked", {
 			id: "hero",
 			section: "landing",
@@ -278,6 +280,7 @@ describe("Analytics class", () => {
 		};
 		const a = new Analytics();
 		await a.init({ ga4: { measurementId: gid("G-X") } });
+		await a.grantConsent();
 		a.identify("user-1");
 		a.reset();
 		const resetConfig = captured.findLast(

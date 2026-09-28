@@ -9,15 +9,21 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
-permissions:
-  contents: write
-  id-token: write
-  packages: write
-  pull-requests: write
+# Each job declares its own scopes, so the attest job below does not inherit
+# the release job's write access to packages and pull requests.
+permissions: {}
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+      pull-requests: write
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+      published-packages: ${{ steps.changesets.outputs.publishedPackages }}
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -62,3 +68,17 @@ jobs:
           echo "@resq-software:registry=https://npm.pkg.github.com" >> ~/.npmrc
           echo "//npm.pkg.github.com/:_authToken=$GH_PKG_TOKEN" >> ~/.npmrc
           bash scripts/release/publish-github-packages.sh
+
+  # SBOM + signed build provenance for exactly what was just published. A
+  # separate job so only it holds `attestations: write`; it runs only when
+  # Changesets actually published.
+  attest:
+    needs: release
+    if: needs.release.outputs.published == 'true'
+    permissions:
+      contents: write # attach the SBOM to each package's GitHub release
+      id-token: write # Sigstore signing for the provenance attestation
+      attestations: write # store the attestation
+    uses: ./.github/workflows/attest-published.yml
+    with:
+      packages: ${{ needs.release.outputs.published-packages }}

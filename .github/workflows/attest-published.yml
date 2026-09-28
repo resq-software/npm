@@ -1,0 +1,104 @@
+# Copyright 2026 ResQ Systems, Inc.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Supply-chain evidence for packages a release workflow has just published to
+# npm. Called by release.yml and release-package.yml once their publish step has
+# succeeded; it never publishes anything itself.
+#
+#   SBOM        — SPDX JSON of the repository at the released commit (Anchore
+#                 syft via anchore/sbom-action), kept as a workflow artifact and
+#                 attached to each published package's GitHub release.
+#   Provenance  — a signed SLSA build-provenance attestation for each tarball,
+#                 fetched back from the npm registry so the attested digest is
+#                 the digest of the bytes users install.
+#
+# Verify a download with:
+#   gh attestation verify <package>-<version>.tgz --repo resq-software/npm
+
+name: Attest published packages
+
+on:
+  workflow_call:
+    inputs:
+      packages:
+        description: JSON array of the published packages, each {"name", "version"} (changesets' publishedPackages shape).
+        type: string
+        required: true
+
+permissions: {}
+
+jobs:
+  attest:
+    name: SBOM and provenance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write # attach the SBOM to each package's GitHub release
+      id-token: write # Sigstore signing for the provenance attestation
+      attestations: write # store the attestation
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Fetch the published tarballs from npm
+        env:
+          PACKAGES: ${{ inputs.packages }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/published"
+          # The `${...}` inside the single-quoted script is JS, not shell.
+          # shellcheck disable=SC2016
+          node -e '
+            const list = JSON.parse(process.env.PACKAGES);
+            if (!Array.isArray(list) || list.length === 0) throw new Error("no published packages given");
+            for (const { name, version } of list) {
+              if (!/^@resq-systems\/[a-z0-9-]+$/.test(name) || !/^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/.test(version)) {
+                throw new Error(`unexpected package spec: ${name}@${version}`);
+              }
+              console.log(`${name}@${version}`);
+            }
+          ' > "$RUNNER_TEMP/specs.txt"
+          while IFS= read -r spec; do
+            npm pack "$spec" --pack-destination "$RUNNER_TEMP/published" --silent
+          done < "$RUNNER_TEMP/specs.txt"
+          ls -l "$RUNNER_TEMP/published"
+
+      - name: Generate SBOM (SPDX JSON)
+        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+        with:
+          path: .
+          format: spdx-json
+          output-file: ${{ runner.temp }}/sbom.spdx.json
+          artifact-name: sbom.spdx.json
+          upload-artifact: true
+          # The caller is a push or tag run, not a `release` event, so the
+          # action cannot find the releases itself; the next step attaches it.
+          upload-release-assets: false
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: ${{ runner.temp }}/published/*.tgz
+
+      - name: Attach the SBOM to each package's GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r spec; do
+            name="${spec%@*}"
+            version="${spec##*@}"
+            attached=false
+            # changesets tags `<name>@<version>`; release-package.yml's tags carry a `v`.
+            for tag in "${name}@${version}" "${name}@v${version}"; do
+              if gh release view "$tag" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+                gh release upload "$tag" "$RUNNER_TEMP/sbom.spdx.json" --repo "$GITHUB_REPOSITORY" --clobber
+                attached=true
+                break
+              fi
+            done
+            if [ "$attached" = false ]; then
+              echo "::notice::No GitHub release for ${spec}; its SBOM is kept as the workflow artifact."
+            fi
+          done < "$RUNNER_TEMP/specs.txt"

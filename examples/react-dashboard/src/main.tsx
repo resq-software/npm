@@ -1,5 +1,6 @@
 /**
  * Copyright 2026 ResQ Systems, Inc.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +15,18 @@
  * limitations under the License.
  */
 
+import { AnalyticsProvider } from "@resq-systems/analytics/react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { analyticsConfig, analyticsEnabled } from "./analytics";
 import { App } from "./App";
+import { ConsentBanner } from "./ConsentBanner";
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
-		<App />
+		<AnalyticsProvider config={analyticsConfig}>
+			<App />
+			{analyticsEnabled && <ConsentBanner />}
+		</AnalyticsProvider>
 	</StrictMode>,
 );

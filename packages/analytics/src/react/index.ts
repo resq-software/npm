@@ -1,6 +1,7 @@
 /**
  *
  * Copyright 2026 ResQ Systems, Inc.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +26,28 @@
  * provider-bound functions so consumers don't import the singleton
  * directly.
  *
+ * Consent is headless here: {@link useConsent} exposes the visitor's decision
+ * and {@link useConsentBanner} tells the app when to show its Accept/Decline
+ * banner, and {@link openPrivacySettings} reopens it. The app owns the markup,
+ * so the banner matches its design system. Nothing loads until the visitor
+ * accepts.
+ *
  * @module @resq-systems/analytics/react
  */
 
-import { type ReactNode, useEffect, useRef } from "react";
+import {
+	type ReactNode,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+	useSyncExternalStore,
+} from "react";
 import {
 	type Analytics,
 	type AnalyticsConfig,
 	analytics,
+	type ConsentState,
 	identify,
 	pageview,
 	reset,
@@ -82,7 +97,9 @@ const requestIdle = (cb: () => void): void => {
 };
 
 /**
- * Boot the analytics singleton once on mount and render `children`.
+ * Record the analytics config once on mount and render `children`. Providers
+ * boot only once the visitor has accepted analytics — either earlier (a stored
+ * decision) or later through {@link useConsent} / {@link useConsentBanner}.
  *
  * Idempotent — repeat mounts (e.g. fast-refresh, tree-rebuild) are
  * detected via a ref guard and do not re-initialise PostHog / GA4.
@@ -129,6 +146,120 @@ export const AnalyticsProvider = ({
 	}, [deferUntilIdle]);
 
 	return children;
+};
+
+//#endregion
+
+//#region Consent
+
+/** Return type of {@link useConsent}. */
+export interface UseConsentReturn {
+	/** The visitor's decision, or `"unset"` before they choose (and during SSR). */
+	consent: ConsentState;
+	/** The visitor accepted: store it and boot the configured providers. */
+	accept: () => void;
+	/** The visitor declined or withdrew: store it and switch analytics off. */
+	decline: () => void;
+}
+
+const subscribeConsent = (onChange: () => void): (() => void) =>
+	analytics.onConsentChange(onChange);
+const readConsent = (): ConsentState => analytics.consent;
+// The server cannot see the visitor's stored choice.
+const readServerConsent = (): ConsentState => "unset";
+
+/**
+ * The visitor's analytics consent, kept in sync with the singleton.
+ *
+ * @example
+ * ```tsx
+ * const { consent, decline } = useConsent();
+ * if (consent === "granted") return <button onClick={decline}>Stop analytics</button>;
+ * ```
+ */
+export const useConsent = (): UseConsentReturn => {
+	const consent = useSyncExternalStore(subscribeConsent, readConsent, readServerConsent);
+	const accept = useCallback((): void => {
+		void analytics.grantConsent();
+	}, []);
+	const decline = useCallback((): void => {
+		analytics.denyConsent();
+	}, []);
+	return { consent, accept, decline };
+};
+
+let settingsOpen = false;
+const settingsListeners = new Set<() => void>();
+const setSettingsOpen = (open: boolean): void => {
+	settingsOpen = open;
+	for (const listener of settingsListeners) listener();
+};
+const subscribeSettings = (onChange: () => void): (() => void) => {
+	settingsListeners.add(onChange);
+	return () => {
+		settingsListeners.delete(onChange);
+	};
+};
+const readSettings = (): boolean => settingsOpen;
+const readServerSettings = (): boolean => false;
+
+/**
+ * Reopen the consent banner so the visitor can change their choice. Wire it to
+ * a visible "Privacy settings" link or button.
+ */
+export const openPrivacySettings = (): void => setSettingsOpen(true);
+
+/** Return type of {@link useConsentBanner}. */
+export interface UseConsentBannerReturn extends UseConsentReturn {
+	/**
+	 * Whether to render the banner: the visitor has not chosen yet, or asked to
+	 * change their choice via {@link openPrivacySettings}. Always `false` during
+	 * server rendering and the first client render, so hydration matches.
+	 */
+	open: boolean;
+	/** Hide a reopened banner without changing the stored choice. */
+	close: () => void;
+}
+
+/**
+ * Headless state for an Accept/Decline consent banner. Render the banner when
+ * `open` is true, give Accept and Decline equal prominence, and link the
+ * site's privacy notice from it. Choosing either option closes it.
+ *
+ * @example
+ * ```tsx
+ * const { open, accept, decline } = useConsentBanner();
+ * if (!open) return null;
+ * return (
+ *   <section aria-label="Analytics consent">
+ *     <p>May we use analytics? <a href="/privacy">Privacy notice</a></p>
+ *     <button onClick={decline}>Decline</button>
+ *     <button onClick={accept}>Accept</button>
+ *   </section>
+ * );
+ * ```
+ */
+export const useConsentBanner = (): UseConsentBannerReturn => {
+	const { consent, accept, decline } = useConsent();
+	const reopened = useSyncExternalStore(subscribeSettings, readSettings, readServerSettings);
+	const [hydrated, setHydrated] = useState(false);
+	useEffect(() => setHydrated(true), []);
+	const close = useCallback((): void => setSettingsOpen(false), []);
+	const acceptAndClose = useCallback((): void => {
+		accept();
+		setSettingsOpen(false);
+	}, [accept]);
+	const declineAndClose = useCallback((): void => {
+		decline();
+		setSettingsOpen(false);
+	}, [decline]);
+	return {
+		consent,
+		open: hydrated && (consent === "unset" || reopened),
+		accept: acceptAndClose,
+		decline: declineAndClose,
+		close,
+	};
 };
 
 //#endregion

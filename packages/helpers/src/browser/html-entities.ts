@@ -1,5 +1,6 @@
 /**
  * Copyright 2026 ResQ Systems, Inc.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +130,6 @@ export interface ObfuscatedLink {
  * @returns An object containing the RAW `href` and entity-encoded `encodedText`.
  * @throws {TypeError} If required fields are missing or invalid.
  * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#security_and_privacy
- * @see https://github.com/resq-software/resQ
  * @example
  * ```ts
  * const { href, encodedText } = obfuscateLink({
