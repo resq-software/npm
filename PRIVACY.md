@@ -19,7 +19,7 @@ If you accept, the site loads:
 
 | Processor | What it receives |
 |---|---|
-| **Google Analytics 4** (Google) | Pages you view and events the site defines, plus scrolls, outbound clicks, site searches and file downloads if the site has GA4's enhanced measurement switched on; browser, device and screen details; the referring page; an approximate location derived from your IP address. Google Analytics 4 does not log or store IP addresses. Identifiers are kept in first-party `_ga` cookies. Advertising signals stay off: the package sets Google Consent Mode's `ad_storage`, `ad_user_data` and `ad_personalization` to `denied`. |
+| **Google Analytics 4** (Google) | Pages you view and events the site defines, plus scrolls, outbound clicks, site searches and file downloads if the site has GA4's enhanced measurement switched on; browser, device and screen details; the referring page; an approximate location derived from your IP address. Google Analytics 4 does not log or store IP addresses. Identifiers are kept in first-party `_ga` cookies. |
 | **PostHog** (PostHog, Inc.) | Pages you view, including in-app navigation; clicks and other interactions PostHog captures automatically; events the site defines; browser and device details; the referring page; an approximate location derived from your IP address. A random identifier is kept in a first-party cookie and `localStorage`. Optional PostHog features, such as session recording, run only if the site has switched them on for its project. |
 
 A site that signs you in may link these events to your account with `identify`.
