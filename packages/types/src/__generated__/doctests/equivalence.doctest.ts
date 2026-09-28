@@ -1,5 +1,6 @@
 /**
  * Copyright 2026 ResQ Systems, Inc.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +48,7 @@ import {
 } from "../../equivalence.js";
 
 describe("packages/types/src/equivalence.ts", () => {
-	// packages/types/src/equivalence.ts:124
+	// packages/types/src/equivalence.ts:125
 	it("Equivalence — Comparing by length rather than by content", () => {
 		expect.hasAssertions();
 		const sameLength: Equivalence<string> = (self, that) => self.length === that.length;
@@ -56,7 +57,7 @@ describe("packages/types/src/equivalence.ts", () => {
 		expect(sameLength("abc", "wxyz")).toStrictEqual(false);
 	});
 
-	// packages/types/src/equivalence.ts:176
+	// packages/types/src/equivalence.ts:177
 	it("make — Same user, regardless of the rest of the record", () => {
 		expect.hasAssertions();
 		type User = { readonly id: string; readonly name: string };
@@ -67,7 +68,7 @@ describe("packages/types/src/equivalence.ts", () => {
 		expect(sameUser({ id: "u1", name: "Ada" }, { id: "u2", name: "Ada" })).toStrictEqual(false);
 	});
 
-	// packages/types/src/equivalence.ts:189
+	// packages/types/src/equivalence.ts:190
 	it("make — Reflexivity survives a deliberately broken comparison", () => {
 		expect.hasAssertions();
 		const broken = make<string>(() => false);
@@ -76,7 +77,7 @@ describe("packages/types/src/equivalence.ts", () => {
 		expect(broken("a", "b")).toStrictEqual(false);
 	});
 
-	// packages/types/src/equivalence.ts:263
+	// packages/types/src/equivalence.ts:264
 	it("eqStrict — Identity, and the reflexivity hole", () => {
 		expect.hasAssertions();
 		const strict = eqStrict<number>();
@@ -86,7 +87,7 @@ describe("packages/types/src/equivalence.ts", () => {
 		expect(strict(Number.NaN, Number.NaN)).toStrictEqual(false);
 	});
 
-	// packages/types/src/equivalence.ts:316
+	// packages/types/src/equivalence.ts:317
 	it("eqSameValue — Reflexive at `NaN`, and it splits the zeroes", () => {
 		expect.hasAssertions();
 		const sameValue = eqSameValue<number>();
@@ -96,7 +97,7 @@ describe("packages/types/src/equivalence.ts", () => {
 		expect(sameValue(0, -0)).toStrictEqual(false);
 	});
 
-	// packages/types/src/equivalence.ts:366
+	// packages/types/src/equivalence.ts:367
 	it("combine — Same person by name and by age", () => {
 		expect.hasAssertions();
 		type Person = { readonly name: string; readonly age: number };
@@ -109,7 +110,7 @@ describe("packages/types/src/equivalence.ts", () => {
 		expect(samePerson({ name: "Ada", age: 36 }, { name: "Ada", age: 41 })).toStrictEqual(false);
 	});
 
-	// packages/types/src/equivalence.ts:421
+	// packages/types/src/equivalence.ts:422
 	it("combineAll — One relation per field", () => {
 		expect.hasAssertions();
 		type Row = { readonly id: string; readonly rev: number };
@@ -123,7 +124,7 @@ describe("packages/types/src/equivalence.ts", () => {
 		expect(sameRow({ id: "a", rev: 1 }, { id: "a", rev: 2 })).toStrictEqual(false);
 	});
 
-	// packages/types/src/equivalence.ts:437
+	// packages/types/src/equivalence.ts:438
 	it("combineAll — The empty fold is the total relation", () => {
 		expect.hasAssertions();
 		const everythingIsTheSame = combineAll<string>([]);
@@ -131,7 +132,7 @@ describe("packages/types/src/equivalence.ts", () => {
 		expect(everythingIsTheSame("a", "b")).toStrictEqual(true);
 	});
 
-	// packages/types/src/equivalence.ts:505
+	// packages/types/src/equivalence.ts:506
 	it("mapInput — Case-insensitive string equivalence", () => {
 		expect.hasAssertions();
 		const caseInsensitive = mapInput(eqString, (value: string) => value.toLowerCase());
@@ -140,14 +141,14 @@ describe("packages/types/src/equivalence.ts", () => {
 		expect(caseInsensitive("Hello", "World")).toStrictEqual(false);
 	});
 
-	// packages/types/src/equivalence.ts:553
+	// packages/types/src/equivalence.ts:554
 	it("eqString — Exact string equality", () => {
 		expect.hasAssertions();
 		expect(eqString("abc", "abc")).toStrictEqual(true);
 		expect(eqString("abc", "ABC")).toStrictEqual(false);
 	});
 
-	// packages/types/src/equivalence.ts:593
+	// packages/types/src/equivalence.ts:594
 	it("eqNumber — `NaN` is reflexive, the zeroes are one value", () => {
 		expect.hasAssertions();
 		expect(eqNumber(1, 1)).toStrictEqual(true);
@@ -156,21 +157,21 @@ describe("packages/types/src/equivalence.ts", () => {
 		expect(eqNumber(0, -0)).toStrictEqual(true);
 	});
 
-	// packages/types/src/equivalence.ts:626
+	// packages/types/src/equivalence.ts:627
 	it("eqBoolean — Boolean equality", () => {
 		expect.hasAssertions();
 		expect(eqBoolean(true, true)).toStrictEqual(true);
 		expect(eqBoolean(true, false)).toStrictEqual(false);
 	});
 
-	// packages/types/src/equivalence.ts:661
+	// packages/types/src/equivalence.ts:662
 	it("eqBigInt — BigInt equality", () => {
 		expect.hasAssertions();
 		expect(eqBigInt(1n, 1n)).toStrictEqual(true);
 		expect(eqBigInt(1n, 2n)).toStrictEqual(false);
 	});
 
-	// packages/types/src/equivalence.ts:697
+	// packages/types/src/equivalence.ts:698
 	it("eqDate — Same instant, and Invalid Dates agree", () => {
 		expect.hasAssertions();
 		expect(eqDate(new Date(0), new Date(0))).toStrictEqual(true);
@@ -178,7 +179,7 @@ describe("packages/types/src/equivalence.ts", () => {
 		expect(eqDate(new Date("nope"), new Date("also nope"))).toStrictEqual(true);
 	});
 
-	// packages/types/src/equivalence.ts:776
+	// packages/types/src/equivalence.ts:777
 	it("tupleOf — A `[name, age]` pair", () => {
 		expect.hasAssertions();
 		const samePair = tupleOf([eqString, eqNumber]);
@@ -187,7 +188,7 @@ describe("packages/types/src/equivalence.ts", () => {
 		expect(samePair(["Ada", 36], ["Ada", 41])).toStrictEqual(false);
 	});
 
-	// packages/types/src/equivalence.ts:851
+	// packages/types/src/equivalence.ts:852
 	it("arrayOf — Element-wise, order-sensitive, empty-safe", () => {
 		expect.hasAssertions();
 		const sameStrings = arrayOf(eqString);
@@ -198,7 +199,7 @@ describe("packages/types/src/equivalence.ts", () => {
 		expect(sameStrings(["a"], ["a", "b"])).toStrictEqual(false);
 	});
 
-	// packages/types/src/equivalence.ts:918
+	// packages/types/src/equivalence.ts:919
 	it("structOf — Compare two fields", () => {
 		expect.hasAssertions();
 		const sameUser = structOf({ name: eqString, age: eqNumber });
@@ -207,7 +208,7 @@ describe("packages/types/src/equivalence.ts", () => {
 		expect(sameUser({ name: "Ada", age: 36 }, { name: "Bob", age: 36 })).toStrictEqual(false);
 	});
 
-	// packages/types/src/equivalence.ts:929
+	// packages/types/src/equivalence.ts:930
 	it("structOf — Unlisted fields are ignored", () => {
 		expect.hasAssertions();
 		const sameName = structOf({ name: eqString });
@@ -217,7 +218,7 @@ describe("packages/types/src/equivalence.ts", () => {
 		expect(sameName(left, right)).toStrictEqual(true);
 	});
 
-	// packages/types/src/equivalence.ts:997
+	// packages/types/src/equivalence.ts:998
 	it("recordOf — Same keys, same values, any order", () => {
 		expect.hasAssertions();
 		const sameScores = recordOf(eqNumber);

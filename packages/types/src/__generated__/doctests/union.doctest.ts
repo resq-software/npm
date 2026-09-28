@@ -1,5 +1,6 @@
 /**
  * Copyright 2026 ResQ Systems, Inc.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +51,7 @@ import {
 } from "../../union.js";
 
 describe("packages/types/src/union.ts", () => {
-	// packages/types/src/union.ts:47
+	// packages/types/src/union.ts:48
 	it("Module — Routing on a tag without a fall-through hole", () => {
 		expect.hasAssertions();
 		type Shape =
@@ -69,7 +70,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(area({ kind: "square", side: 3 })).toStrictEqual(9);
 	});
 
-	// packages/types/src/union.ts:99
+	// packages/types/src/union.ts:100
 	it("DiscriminantKeys — Selecting the shared tag key", () => {
 		expect.hasAssertions();
 		type Shape =
@@ -82,7 +83,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(witness).toStrictEqual("kind");
 	});
 
-	// packages/types/src/union.ts:142
+	// packages/types/src/union.ts:143
 	it("TagValueOf — Listing every tag a union can carry", () => {
 		expect.hasAssertions();
 		type Shape =
@@ -96,7 +97,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(witness).toStrictEqual("circle");
 	});
 
-	// packages/types/src/union.ts:184
+	// packages/types/src/union.ts:185
 	it("MemberByTag — Naming one variant", () => {
 		expect.hasAssertions();
 		type Shape =
@@ -110,7 +111,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(witness.radius).toStrictEqual(2);
 	});
 
-	// packages/types/src/union.ts:235
+	// packages/types/src/union.ts:236
 	it("MemberByTagOr — Keeping a guard's proof off the `never` floor", () => {
 		expect.hasAssertions();
 		type Shape =
@@ -126,7 +127,7 @@ describe("packages/types/src/union.ts", () => {
 		expect([closed.kind, open.kind]).toStrictEqual(["circle", "circle"]);
 	});
 
-	// packages/types/src/union.ts:292
+	// packages/types/src/union.ts:293
 	it("MembersWithoutTag — Naming the residual", () => {
 		expect.hasAssertions();
 		type Shape =
@@ -145,7 +146,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(rest.map((member) => member.kind)).toStrictEqual(["square", "rect"]);
 	});
 
-	// packages/types/src/union.ts:313
+	// packages/types/src/union.ts:314
 	it("MembersWithoutTag — Handing the un-handled arms onward", () => {
 		expect.hasAssertions();
 		type Event =
@@ -165,7 +166,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(route({ kind: "scroll", dy: 9 })).toStrictEqual("scroll");
 	});
 
-	// packages/types/src/union.ts:364
+	// packages/types/src/union.ts:365
 	it("ExhaustiveHandlers — A table that cannot silently lose a variant", () => {
 		expect.hasAssertions();
 		type Shape =
@@ -183,7 +184,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(handlers.rect({ kind: "rect", w: 4, h: 5 })).toStrictEqual(20);
 	});
 
-	// packages/types/src/union.ts:414
+	// packages/types/src/union.ts:415
 	it("PartialHandlers — Handling the variants you know about", () => {
 		expect.hasAssertions();
 		type WireEvent =
@@ -198,7 +199,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(handlers.key?.({ type: "key", code: "Escape" })).toStrictEqual("Escape");
 	});
 
-	// packages/types/src/union.ts:457
+	// packages/types/src/union.ts:458
 	it("TagMapOf — Indexing variants by tag", () => {
 		expect.hasAssertions();
 		type Shape =
@@ -212,7 +213,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(circle.radius).toStrictEqual(2);
 	});
 
-	// packages/types/src/union.ts:501
+	// packages/types/src/union.ts:502
 	it("TaggedUnionOf — Declaring a union from its payloads", () => {
 		expect.hasAssertions();
 		// { type: "click"; x: number; y: number } | { type: "key"; code: string }
@@ -226,7 +227,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(witness.type).toStrictEqual("click");
 	});
 
-	// packages/types/src/union.ts:555
+	// packages/types/src/union.ts:556
 	it("hasTag — Entering from `unknown`", () => {
 		expect.hasAssertions();
 		const raw: unknown = JSON.parse(`{"kind":"circle","radius":2}`);
@@ -239,7 +240,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(hasTag(null, "kind")).toStrictEqual(false);
 	});
 
-	// packages/types/src/union.ts:623
+	// packages/types/src/union.ts:624
 	it("TaggedMember — Member with payload, versus the bare shape from `unknown`", () => {
 		expect.hasAssertions();
 		type TimeoutError = { readonly _tag: "TimeoutError"; readonly ms: number };
@@ -255,7 +256,7 @@ describe("packages/types/src/union.ts", () => {
 		expect([member.ms, shape._tag]).toStrictEqual([30, "TimeoutError"]);
 	});
 
-	// packages/types/src/union.ts:677
+	// packages/types/src/union.ts:678
 	it("TaggedGuard — Naming a stored guard without losing the narrowing", () => {
 		expect.hasAssertions();
 		type TimeoutError = { readonly _tag: "TimeoutError"; readonly ms: number };
@@ -273,7 +274,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(waits).toStrictEqual([30]);
 	});
 
-	// packages/types/src/union.ts:728
+	// packages/types/src/union.ts:729
 	it("isTagged — Filtering one error variant out of a union", () => {
 		expect.hasAssertions();
 		type TimeoutError = { readonly _tag: "TimeoutError"; readonly ms: number };
@@ -290,7 +291,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(waits).toStrictEqual([30]);
 	});
 
-	// packages/types/src/union.ts:783
+	// packages/types/src/union.ts:784
 	it("isTaggedWith — Minting a variant guard for an arbitrary discriminant", () => {
 		expect.hasAssertions();
 		type Shape =
@@ -309,7 +310,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(radii).toStrictEqual([2]);
 	});
 
-	// packages/types/src/union.ts:841
+	// packages/types/src/union.ts:842
 	it("byTag — One key, many variant guards", () => {
 		expect.hasAssertions();
 		type Shape =
@@ -329,7 +330,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(areas).toStrictEqual([20]);
 	});
 
-	// packages/types/src/union.ts:904
+	// packages/types/src/union.ts:905
 	it("UnhandledTagError — Reporting a variant this consumer predates", () => {
 		expect.hasAssertions();
 		type Shape =
@@ -352,7 +353,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(reported).toStrictEqual("triangle");
 	});
 
-	// packages/types/src/union.ts:984
+	// packages/types/src/union.ts:985
 	it("isUnhandledTagError — Separating tag drift from ordinary failures", () => {
 		expect.hasAssertions();
 		const caught: unknown = new UnhandledTagError("triangle", "kind");
@@ -363,7 +364,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(isUnhandledTagError(new Error("boom"))).toStrictEqual(false);
 	});
 
-	// packages/types/src/union.ts:1090
+	// packages/types/src/union.ts:1091
 	it("matchTag — Dispatching to an honest union of arm results", () => {
 		expect.hasAssertions();
 		type Shape =
@@ -383,7 +384,7 @@ describe("packages/types/src/union.ts", () => {
 		expect(label({ kind: "rect", w: 4, h: 5 })).toStrictEqual(null);
 	});
 
-	// packages/types/src/union.ts:1162
+	// packages/types/src/union.ts:1163
 	it("matchTagPartial — Handling the known tags, routing the rest", () => {
 		expect.hasAssertions();
 		type Shape =

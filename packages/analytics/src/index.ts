@@ -1,6 +1,7 @@
 /**
  *
  * Copyright 2026 ResQ Systems, Inc.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +22,22 @@
  * client: the typed event registry, the lazy-loading {@link Analytics}
  * singleton, and the standalone `track`/`identify`/`reset`/`pageview` helpers.
  *
+ * Analytics is opt-in. No provider script, SDK import or tracker request
+ * happens until the visitor accepts ({@link grantConsent}); a declined or
+ * missing decision keeps every provider unloaded. See `./consent`.
+ *
  * @module @resq-systems/analytics
  */
 
 import type { LiteralUnion } from "@resq-systems/types";
 import type { PostHog, PostHogConfig } from "posthog-js";
+import {
+	type ConsentDecision,
+	type ConsentState,
+	type ConsentStore,
+	clearGa4Cookies,
+	localStorageConsentStore,
+} from "./consent";
 import {
 	type CookieDomain,
 	type Ga4MeasurementId,
@@ -186,7 +198,18 @@ export type GtagCommand =
 interface GtagWindow {
 	gtag?: (...args: GtagCommand) => void;
 	dataLayer?: GtagCommand[];
+	/** Google's documented per-stream opt-out flag, `ga-disable-<measurement id>`. */
+	[optOutFlag: `ga-disable-${string}`]: boolean | undefined;
 }
+
+/** Options for constructing an {@link Analytics} instance. */
+export interface AnalyticsOptions {
+	/** Where the visitor's consent decision is kept. Defaults to `localStorage`. */
+	consentStore?: ConsentStore;
+}
+
+/** Called with the new state whenever the visitor's consent decision changes. */
+export type ConsentListener = (state: ConsentState) => void;
 
 //#endregion
 
@@ -220,6 +243,12 @@ const loadGa4Script = (measurementId: string): void => {
 	document.head.appendChild(script);
 };
 
+/** Set or clear Google's per-stream opt-out flag, which stops gtag.js sending for that stream. */
+const setGa4OptOut = (measurementId: string, optedOut: boolean): void => {
+	if (!isBrowser()) return;
+	(window as unknown as GtagWindow)[`ga-disable-${measurementId}`] = optedOut;
+};
+
 /**
  * GA4 only accepts flat objects with primitive values for event params and
  * user properties. Filter out anything else so a stray nested object can't
@@ -245,16 +274,22 @@ const primitivesOnly = (
 /**
  * Unified analytics facade over PostHog and GA4. A single shared instance
  * ({@link analytics}) is initialised once via {@link Analytics.init}; every
- * method is a no-op until then and while `disabled`, so call sites never need
- * their own guards.
+ * method is a no-op until then, while `disabled`, and until the visitor has
+ * accepted analytics, so call sites never need their own guards.
  *
- * PostHog is imported lazily on init so non-analytics page loads pay nothing,
+ * Consent comes first. `init` only records the configuration; the providers
+ * boot when the visitor accepts ({@link Analytics.grantConsent}) or when an
+ * earlier acceptance is already stored. Before that no script is injected,
+ * `posthog-js` is not imported and nothing is sent.
+ *
+ * PostHog is imported lazily on boot so non-analytics page loads pay nothing,
  * and every event fans out to whichever providers are configured.
  *
  * @example
  * ```ts
  * const a = new Analytics();
- * await a.init({ posthog: { key: "phc_…" } });
+ * await a.init({ posthog: { key: "phc_…" } }); // loads nothing yet
+ * await a.grantConsent(); // the visitor clicked "Accept"
  * a.track("cta_clicked", { id: "hero" });
  * ```
  */
@@ -262,6 +297,16 @@ export class Analytics {
 	#config: AnalyticsConfig | null = null;
 	#posthog: PostHog | null = null;
 	#initPromise: Promise<void> | null = null;
+	#bootPromise: Promise<void> | null = null;
+	#ga4Started = false;
+	#consent: ConsentState | null = null;
+	readonly #store: ConsentStore;
+	readonly #listeners = new Set<ConsentListener>();
+
+	/** @param options - Where to keep the consent decision; defaults to `localStorage`. */
+	constructor(options: AnalyticsOptions = {}) {
+		this.#store = options.consentStore ?? localStorageConsentStore;
+	}
 
 	/** The active configuration, or `null` before init / after {@link reset}. */
 	get config(): Readonly<AnalyticsConfig> | null {
@@ -278,35 +323,133 @@ export class Analytics {
 	}
 
 	/**
-	 * Initialise the client and lazily boot the configured providers.
+	 * The visitor's consent state: `"granted"`, `"denied"`, or `"unset"` when
+	 * they have not chosen yet. Read from the consent store on first access.
+	 */
+	get consent(): ConsentState {
+		this.#consent ??= this.#store.read();
+		return this.#consent;
+	}
+
+	/**
+	 * Record the configuration and, if the visitor has already accepted
+	 * analytics, boot the configured providers.
 	 *
 	 * Idempotent and not cancellable: the first call wins and every later call
 	 * returns the *same* cached promise — the second call's `config` is ignored,
 	 * so a double-mount never re-inits PostHog / GA4. Concurrent calls are safe
 	 * for this reason; there is no `AbortSignal`.
 	 *
-	 * Effects (browser only, when not `disabled`): dynamically imports
-	 * `posthog-js`, calls `posthog.init`, injects the gtag.js `<script>` into
-	 * `document.head`, pushes commands onto `window.dataLayer`, and stores the
-	 * config and PostHog client on this instance. On the server or when
+	 * Without stored consent it only records the config and resolves with no
+	 * effects: no script, no SDK import, no request. {@link grantConsent} boots
+	 * the providers later.
+	 *
+	 * Boot effects (browser only, when not `disabled`, after consent):
+	 * dynamically imports `posthog-js`, calls `posthog.init`, injects the gtag.js
+	 * `<script>` into `document.head`, pushes commands onto `window.dataLayer`,
+	 * and stores the PostHog client on this instance. On the server or when
 	 * `config.disabled` is set it resolves immediately with no effects.
 	 *
 	 * @param config - PostHog/GA4 credentials plus cross-subdomain and debug flags.
-	 * @returns A promise that resolves once provider bootstrapping has settled.
-	 *   It **rejects** if the `posthog-js` dynamic import fails (e.g. a chunk
-	 *   load error) or `posthog.init` throws; because the promise is cached, a
-	 *   failed init is never retried — every later call re-returns the rejection.
+	 * @returns A promise that resolves once provider bootstrapping (if any) has
+	 *   settled. It **rejects** if the `posthog-js` dynamic import fails (e.g. a
+	 *   chunk load error) or `posthog.init` throws; because the promise is
+	 *   cached, a failed init is never retried — every later call re-returns the
+	 *   rejection.
 	 */
 	init(config: AnalyticsConfig): Promise<void> {
 		if (this.#initPromise) return this.#initPromise;
 		this.#config = config;
-		this.#initPromise = this.#bootstrap(config);
+		this.#initPromise = this.consent === "granted" ? this.#boot() : Promise.resolve();
 		return this.#initPromise;
+	}
+
+	/**
+	 * The visitor accepted analytics: store the decision and boot the configured
+	 * providers (or re-enable them after an earlier withdrawal on this page).
+	 * Before {@link init} it only stores the decision; `init` then boots.
+	 *
+	 * @returns The boot promise, with the same rejection conditions as {@link init}.
+	 */
+	grantConsent(): Promise<void> {
+		this.#setConsent("granted");
+		if (!this.#config) return Promise.resolve();
+		if (this.#bootPromise) {
+			this.#resume();
+			return this.#bootPromise;
+		}
+		return this.#boot();
+	}
+
+	/**
+	 * The visitor declined or withdrew consent: store the decision and stop
+	 * collection. Providers that never loaded stay unloaded. Providers that did
+	 * load are switched off for the rest of the page — PostHog is opted out
+	 * (which also clears its stored identifiers) and GA4 is disabled with its
+	 * `_ga` cookies deleted.
+	 */
+	denyConsent(): void {
+		this.#setConsent("denied");
+		this.#posthog?.opt_out_capturing();
+		const ga4 = this.#config?.ga4;
+		if (ga4 && this.#ga4Started) {
+			gtag("consent", "update", { analytics_storage: "denied" });
+			setGa4OptOut(ga4.measurementId, true);
+			clearGa4Cookies(this.#config?.cookieDomain);
+		}
+	}
+
+	/**
+	 * Subscribe to consent changes (e.g. to hide a banner once the visitor has
+	 * chosen).
+	 *
+	 * @param listener - Called with the new state after every decision.
+	 * @returns A function that removes the listener.
+	 */
+	onConsentChange(listener: ConsentListener): () => void {
+		this.#listeners.add(listener);
+		return () => {
+			this.#listeners.delete(listener);
+		};
+	}
+
+	#setConsent(decision: ConsentDecision): void {
+		this.#consent = decision;
+		this.#store.write(decision);
+		for (const listener of this.#listeners) listener(decision);
+	}
+
+	#boot(): Promise<void> {
+		const config = this.#config;
+		if (!config) return Promise.resolve();
+		this.#bootPromise ??= this.#bootstrap(config);
+		return this.#bootPromise;
+	}
+
+	/** Re-enable providers that were loaded, then switched off by {@link denyConsent}. */
+	#resume(): void {
+		this.#posthog?.opt_in_capturing();
+		const ga4 = this.#config?.ga4;
+		if (ga4 && this.#ga4Started) {
+			setGa4OptOut(ga4.measurementId, false);
+			gtag("consent", "update", { analytics_storage: "granted" });
+		}
+	}
+
+	/** Whether events may be dispatched: initialised, enabled, and consented. */
+	#canSend(): boolean {
+		return Boolean(this.#config && !this.#config.disabled && this.consent === "granted");
 	}
 
 	async #bootstrap(config: AnalyticsConfig): Promise<void> {
 		if (config.disabled || !isBrowser()) return;
 		if (config.posthog) await this.#initPostHog(config);
+		if (this.consent !== "granted") {
+			// Declined while `posthog-js` was still loading. Nothing was started,
+			// so forget this boot and let a later acceptance run a fresh one.
+			this.#bootPromise = null;
+			return;
+		}
 		if (config.ga4) this.#initGa4(config.ga4);
 	}
 
@@ -314,6 +457,8 @@ export class Analytics {
 		const provider = config.posthog;
 		if (!provider) return;
 		const mod = await import("posthog-js");
+		// Declined during the import: never initialise, so nothing is captured.
+		if (this.consent !== "granted") return;
 		const posthog = (mod as { default?: PostHog }).default ?? (mod as unknown as PostHog);
 		const baseOptions: Partial<PostHogConfig> = {
 			api_host: provider.host ?? "https://us.i.posthog.com",
@@ -330,6 +475,16 @@ export class Analytics {
 	}
 
 	#initGa4(provider: GA4ProviderConfig): void {
+		// Runs only after the visitor accepted analytics. That consent covers
+		// measurement, not advertising, so Consent Mode keeps the ad signals off.
+		gtag("consent", "default", {
+			ad_storage: "denied",
+			ad_user_data: "denied",
+			ad_personalization: "denied",
+			analytics_storage: "granted",
+		});
+		setGa4OptOut(provider.measurementId, false);
+		this.#ga4Started = true;
 		loadGa4Script(provider.measurementId);
 		gtag("js", new Date());
 		const params: GtagConfigParams = provider.domains?.length
@@ -344,9 +499,10 @@ export class Analytics {
 	 * payload; ad-hoc names accept an optional free-form bag. GA4 params are
 	 * flattened to primitives by {@link primitivesOnly} before dispatch.
 	 *
-	 * Effectful, never throws: a no-op before {@link init} and while `disabled`
-	 * (a `debug` log still fires first). Otherwise forwards to `posthog.capture`
-	 * and pushes a gtag `event` command onto `window.dataLayer`.
+	 * Effectful, never throws: a no-op before {@link init}, while `disabled` and
+	 * without the visitor's consent (a `debug` log still fires first). Otherwise
+	 * forwards to `posthog.capture` and pushes a gtag `event` command onto
+	 * `window.dataLayer`.
 	 *
 	 * @template E - The event name, narrowed to a registered key when one exists.
 	 * @param event - The event name.
@@ -362,7 +518,7 @@ export class Analytics {
 		if (this.#config.debug) {
 			console.debug("[analytics] track", event, properties);
 		}
-		if (this.#config.disabled) return;
+		if (!this.#canSend()) return;
 		this.#posthog?.capture(event, properties);
 		if (this.#config.ga4) {
 			gtag("event", event, primitivesOnly(properties));
@@ -374,9 +530,10 @@ export class Analytics {
 	 * on sign-in; GA4 traits are flattened to primitives and the `user_id` is set
 	 * on the measurement config.
 	 *
-	 * Effectful, never throws: a no-op before {@link init} and while `disabled`
-	 * (a `debug` log still fires first). Otherwise calls `posthog.identify` and
-	 * emits gtag `set`/`config` commands on `window.dataLayer`.
+	 * Effectful, never throws: a no-op before {@link init}, while `disabled` and
+	 * without the visitor's consent (a `debug` log still fires first). Otherwise
+	 * calls `posthog.identify` and emits gtag `set`/`config` commands on
+	 * `window.dataLayer`.
 	 *
 	 * @param userId - The stable user identifier.
 	 * @param traits - Optional user properties / person profile fields.
@@ -386,7 +543,7 @@ export class Analytics {
 		if (this.#config.debug) {
 			console.debug("[analytics] identify", userId, traits);
 		}
-		if (this.#config.disabled) return;
+		if (!this.#canSend()) return;
 		this.#posthog?.identify(userId, traits);
 		if (this.#config.ga4) {
 			gtag("set", "user_properties", primitivesOnly(traits));
@@ -401,17 +558,20 @@ export class Analytics {
 	 *
 	 * Effectful, never throws, and idempotent: it runs regardless of the
 	 * `disabled` flag, and mutates instance state (`config`, `posthog`, and the
-	 * cached init promise all reset to `null`). Calling it on an uninitialised
-	 * instance is a harmless no-op.
+	 * cached init and boot promises all reset to `null`). Calling it on an
+	 * uninitialised instance is a harmless no-op. The visitor's consent decision
+	 * is kept: signing out is not a privacy choice.
 	 */
 	reset(): void {
-		if (this.#config?.ga4) {
+		if (this.#config?.ga4 && this.#ga4Started) {
 			gtag("config", this.#config.ga4.measurementId, { user_id: null });
 		}
 		this.#posthog?.reset();
 		this.#config = null;
 		this.#posthog = null;
 		this.#initPromise = null;
+		this.#bootPromise = null;
+		this.#ga4Started = false;
 	}
 
 	/**
@@ -421,16 +581,17 @@ export class Analytics {
 	 * for gtag.js. Only call manually if you've disabled both auto-captures, or
 	 * for first-paint pageviews before init has resolved.
 	 *
-	 * Effectful, never throws: a no-op before {@link init} and while `disabled`
-	 * (no `debug` log here, unlike `track`/`identify`). Otherwise emits a PostHog
-	 * `$pageview` and a gtag `page_view` event.
+	 * Effectful, never throws: a no-op before {@link init}, while `disabled` and
+	 * without the visitor's consent (no `debug` log here, unlike
+	 * `track`/`identify`). Otherwise emits a PostHog `$pageview` and a gtag
+	 * `page_view` event.
 	 *
 	 * @param url - Explicit page URL; defaults to the current location.
 	 */
 	pageview(url?: string): void {
-		if (!this.#config || this.#config.disabled) return;
+		if (!this.#canSend()) return;
 		this.#posthog?.capture("$pageview", url ? { $current_url: url } : undefined);
-		if (this.#config.ga4) {
+		if (this.#config?.ga4) {
 			gtag("event", "page_view", url ? { page_location: url } : {});
 		}
 	}
@@ -485,6 +646,44 @@ export const reset = (): void => analytics.reset();
  * @param url - Explicit page URL; defaults to the current location.
  */
 export const pageview = (url?: string): void => analytics.pageview(url);
+
+/**
+ * The visitor accepted analytics. Convenience wrapper over
+ * {@link Analytics.grantConsent} on the shared {@link analytics} singleton.
+ *
+ * @returns The provider boot promise.
+ */
+export const grantConsent = (): Promise<void> => analytics.grantConsent();
+
+/**
+ * The visitor declined or withdrew analytics. Convenience wrapper over
+ * {@link Analytics.denyConsent} on the shared {@link analytics} singleton.
+ */
+export const denyConsent = (): void => analytics.denyConsent();
+
+/**
+ * The visitor's current consent state on the shared {@link analytics} singleton.
+ *
+ * @returns `"granted"`, `"denied"`, or `"unset"` before the visitor has chosen.
+ */
+export const getConsent = (): ConsentState => analytics.consent;
+
+/**
+ * Subscribe to consent changes on the shared {@link analytics} singleton.
+ *
+ * @param listener - Called with the new state after every decision.
+ * @returns A function that removes the listener.
+ */
+export const onConsentChange = (listener: ConsentListener): (() => void) =>
+	analytics.onConsentChange(listener);
+
+export {
+	CONSENT_STORAGE_KEY,
+	type ConsentDecision,
+	type ConsentState,
+	type ConsentStore,
+	localStorageConsentStore,
+} from "./consent";
 
 // ResQ-specific helpers are re-exported here so consumers get one import
 // surface: adding a fourth subdomain or tightening the GA4-ID regex is one

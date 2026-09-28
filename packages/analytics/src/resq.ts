@@ -1,6 +1,7 @@
 /**
  *
  * Copyright 2026 ResQ Systems, Inc.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +20,8 @@
 /**
  * @fileoverview ResQ-specific analytics primitives — branded {@link CookieDomain}
  * and {@link Ga4MeasurementId} types with their validating smart constructors,
- * plus the cross-subdomain allow-list. Centralised so the three consumers
- * (`resq-software/landing`, `resq-software/research`, `resq-software/viz`) share
- * one source of truth for subdomains and the GA4 ID format.
+ * plus the cross-subdomain allow-list. Centralised so the org's web front-ends
+ * share one source of truth for subdomains and the GA4 ID format.
  *
  * @module @resq-systems/analytics/resq
  */

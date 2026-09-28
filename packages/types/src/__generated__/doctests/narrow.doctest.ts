@@ -1,5 +1,6 @@
 /**
  * Copyright 2026 ResQ Systems, Inc.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +50,7 @@ import {
 } from "../../narrow.js";
 
 describe("packages/types/src/narrow.ts", () => {
-	// packages/types/src/narrow.ts:36
+	// packages/types/src/narrow.ts:37
 	it("Module — The recommended shape", () => {
 		expect.hasAssertions();
 		const payload: { readonly name: unknown } = { name: "ada" };
@@ -65,7 +66,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(rendered).toStrictEqual("ada");
 	});
 
-	// packages/types/src/narrow.ts:129
+	// packages/types/src/narrow.ts:130
 	it("NarrowError — Reading the structured fields off a caught failure", () => {
 		expect.hasAssertions();
 		const input: unknown = "";
@@ -85,7 +86,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(value).toStrictEqual("");
 	});
 
-	// packages/types/src/narrow.ts:227
+	// packages/types/src/narrow.ts:228
 	it("isNarrowError — Handling ours, rethrowing theirs", () => {
 		expect.hasAssertions();
 		function readBody(body: unknown): string {
@@ -104,7 +105,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(bad).toStrictEqual("body must be an object");
 	});
 
-	// packages/types/src/narrow.ts:300
+	// packages/types/src/narrow.ts:301
 	it("Assertion — Annotating the const so narrowing survives", () => {
 		expect.hasAssertions();
 		const assertString: Assertion<unknown, string> = assertGuard(isString);
@@ -115,7 +116,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(shouted).toStrictEqual("HELLO");
 	});
 
-	// packages/types/src/narrow.ts:359
+	// packages/types/src/narrow.ts:360
 	it("NarrowResult — Defaulting off the discriminant", () => {
 		expect.hasAssertions();
 		const input: unknown = 42;
@@ -125,7 +126,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(value).toStrictEqual("fallback");
 	});
 
-	// packages/types/src/narrow.ts:371
+	// packages/types/src/narrow.ts:372
 	it("NarrowResult — A failure branch that is not an error", () => {
 		expect.hasAssertions();
 		// The failure arm carries the rejected input, which is what `./filter` produces.
@@ -141,7 +142,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(droppedLabel).toStrictEqual("rejected 7");
 	});
 
-	// packages/types/src/narrow.ts:467
+	// packages/types/src/narrow.ts:468
 	it("ensure — Validating an environment variable at the boundary", () => {
 		expect.hasAssertions();
 		const raw: unknown = "8080";
@@ -151,7 +152,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(parsed).toStrictEqual(8080);
 	});
 
-	// packages/types/src/narrow.ts:530
+	// packages/types/src/narrow.ts:531
 	it("ensureDefined — Replacing a non-null assertion after a cache read", () => {
 		expect.hasAssertions();
 		const cache = new Map<string, { readonly name: string }>([["u1", { name: "ada" }]]);
@@ -162,7 +163,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(name).toStrictEqual("ada");
 	});
 
-	// packages/types/src/narrow.ts:608
+	// packages/types/src/narrow.ts:609
 	it("parse — Answering a bad webhook body instead of throwing", () => {
 		expect.hasAssertions();
 		const body: unknown = { event: "ping" };
@@ -176,7 +177,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(reason).toStrictEqual("Expected WebhookPayload");
 	});
 
-	// packages/types/src/narrow.ts:680
+	// packages/types/src/narrow.ts:681
 	it("tryNarrow — Falling back when stored input no longer matches the union", () => {
 		expect.hasAssertions();
 		type Theme = "light" | "dark";
@@ -188,7 +189,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(theme).toStrictEqual("dark");
 	});
 
-	// packages/types/src/narrow.ts:731
+	// packages/types/src/narrow.ts:732
 	it("narrowAll — Accepting a JSON array only if it is homogeneous", () => {
 		expect.hasAssertions();
 		const raw: readonly unknown[] = ["a", "b", "c"];
@@ -198,7 +199,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(joined).toStrictEqual("a,b,c");
 	});
 
-	// packages/types/src/narrow.ts:788
+	// packages/types/src/narrow.ts:789
 	it("unsafeNarrow — Trusting a driver that already guarantees the row shape", () => {
 		expect.hasAssertions();
 		interface UserRow {
@@ -210,7 +211,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(first).toStrictEqual("u1");
 	});
 
-	// packages/types/src/narrow.ts:834
+	// packages/types/src/narrow.ts:835
 	it("assertBy — Narrowing a config object in statement position", () => {
 		expect.hasAssertions();
 		const config: unknown = { port: 8080 };
@@ -220,7 +221,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(port).toStrictEqual(8080);
 	});
 
-	// packages/types/src/narrow.ts:886
+	// packages/types/src/narrow.ts:887
 	it("assertDefined — Popping a queue that must not be empty", () => {
 		expect.hasAssertions();
 		const queue: readonly string[] = ["build", "test"];
@@ -231,7 +232,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(stage).toStrictEqual("BUILD");
 	});
 
-	// packages/types/src/narrow.ts:933
+	// packages/types/src/narrow.ts:934
 	it("assertNonNullish — Asserting a lookup succeeded", () => {
 		expect.hasAssertions();
 		const lookup = new Map<string, string>([["#root", "<main>"]]);
@@ -242,7 +243,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(markup).toStrictEqual("<main></main>");
 	});
 
-	// packages/types/src/narrow.ts:991
+	// packages/types/src/narrow.ts:992
 	it("invariant — Guarding an index and its lookup in one function", () => {
 		expect.hasAssertions();
 		function at(items: readonly string[], index: number): string {
@@ -256,7 +257,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(second).toStrictEqual("b");
 	});
 
-	// packages/types/src/narrow.ts:1048
+	// packages/types/src/narrow.ts:1049
 	it("assertGuard — The annotation that makes it work", () => {
 		expect.hasAssertions();
 		const assertString: Assertion<unknown, string> = assertGuard(isString);
@@ -267,7 +268,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(length).toStrictEqual(5);
 	});
 
-	// packages/types/src/narrow.ts:1061
+	// packages/types/src/narrow.ts:1062
 	it("assertGuard — The mistake this doc exists to prevent", () => {
 		expect.hasAssertions();
 		const broken = assertGuard(isString); // ✗ un-annotated const
@@ -282,7 +283,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(kind).toStrictEqual("string");
 	});
 
-	// packages/types/src/narrow.ts:1132
+	// packages/types/src/narrow.ts:1133
 	it("assert — Migrating a truthiness check", () => {
 		expect.hasAssertions();
 		const session: { readonly userId: string } | undefined = { userId: "u1" };
@@ -292,7 +293,7 @@ describe("packages/types/src/narrow.ts", () => {
 		expect(userId).toStrictEqual("u1");
 	});
 
-	// packages/types/src/narrow.ts:1197
+	// packages/types/src/narrow.ts:1198
 	it("assertExists — Reading a config value, and the falsy-but-present case", () => {
 		expect.hasAssertions();
 		const config: { readonly port?: number; readonly retries?: number } = {

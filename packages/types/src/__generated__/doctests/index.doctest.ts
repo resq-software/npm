@@ -1,5 +1,6 @@
 /**
  * Copyright 2026 ResQ Systems, Inc.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +31,7 @@ import { describe, expect, it } from "vitest";
 import { ensure, isNonEmptyString, matchTag } from "../../index.js";
 
 describe("packages/types/src/index.ts", () => {
-	// packages/types/src/index.ts:93
+	// packages/types/src/index.ts:94
 	it("Module — Reaching every module through the one barrel specifier", () => {
 		expect.hasAssertions();
 		const raw: unknown = "ada";

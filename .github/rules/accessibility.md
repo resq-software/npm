@@ -5,9 +5,9 @@ description: Accessibility rules for components in the @resq-systems/ui library.
 
 # Accessibility Rules
 
-## WCAG AA Compliance
+## WCAG 2.2 AA target
 
-All components must meet [WCAG 2.2 Level AA](https://www.w3.org/TR/WCAG22/). These are the most common requirements:
+Components target [WCAG 2.2 Level AA](https://www.w3.org/TR/WCAG22/). The library has not been formally audited against it (see [ACCESSIBILITY.md](../../ACCESSIBILITY.md)), so check every change against these common requirements:
 
 - **Colour contrast:** Text ≥ 4.5:1 against background (normal text), ≥ 3:1 (large text / UI components).
 - **Focus visible:** All interactive elements have a visible focus indicator. Do not use `outline: none` without a custom focus style.

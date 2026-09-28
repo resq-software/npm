@@ -1,5 +1,6 @@
 /**
  * Copyright 2026 ResQ Systems, Inc.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +62,9 @@ import { escapeHtml } from "@resq-systems/security/sanitize";
 import { getRequestId } from "@resq-systems/http/security";
 
 // ── @resq-systems/analytics — Typed product analytics ───────────────
-import { initAnalytics, pageview, track } from "@resq-systems/analytics";
+import { pageview, track } from "@resq-systems/analytics";
+import { openPrivacySettings } from "@resq-systems/analytics/react";
+import { analyticsEnabled } from "./analytics";
 
 // ── @resq-systems/constants — Shared oklch design tokens ────────────
 import { colors, radii } from "@resq-systems/constants";
@@ -80,9 +83,10 @@ declare module "@resq-systems/analytics" {
 	}
 }
 
-// Disabled in the example (no PostHog/GA4 keys), so every `track()` / `pageview()`
-// below is a safe no-op. Set `disabled: false` + pass a provider config to send.
-void initAnalytics({ disabled: true });
+// `AnalyticsProvider` in main.tsx records the config. Without PostHog/GA4 keys
+// (the default here) analytics is disabled, and with keys nothing loads until the
+// visitor accepts in the consent banner, so every `track()` / `pageview()` below
+// is a safe no-op until then.
 
 // ── Logger instance ────────────────────────────────────────────
 const logger = Logger.getLogger("[Dashboard]");
@@ -168,7 +172,7 @@ export function App() {
 	const [tab, setTab] = useState("overview");
 	const [refreshCount, setRefreshCount] = useState(0);
 
-	// @resq-systems/analytics — record a page view on mount (no-op while disabled).
+	// @resq-systems/analytics — record a page view on mount (no-op while disabled or before consent).
 	useEffect(() => {
 		pageview();
 	}, []);
@@ -265,6 +269,11 @@ export function App() {
 					<Button variant="outline" size="sm" onClick={handleRefresh}>
 						Refresh
 					</Button>
+					{analyticsEnabled && (
+						<Button variant="link" size="sm" onClick={openPrivacySettings}>
+							Privacy settings
+						</Button>
+					)}
 				</div>
 			</div>
 

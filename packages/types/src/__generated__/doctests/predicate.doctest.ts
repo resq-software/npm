@@ -1,5 +1,6 @@
 /**
  * Copyright 2026 ResQ Systems, Inc.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +61,7 @@ import {
 } from "../../predicate.js";
 
 describe("packages/types/src/predicate.ts", () => {
-	// packages/types/src/predicate.ts:143
+	// packages/types/src/predicate.ts:144
 	it("Predicate — Reusing an `unknown` predicate at a narrower input type", () => {
 		expect.hasAssertions();
 		const isShort: Predicate<string> = (value) => value.length < 10;
@@ -70,7 +71,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(anything("hello")).toStrictEqual(true);
 	});
 
-	// packages/types/src/predicate.ts:190
+	// packages/types/src/predicate.ts:191
 	it("Predicate.Any — Holding predicates over unrelated domains", () => {
 		const isShort: Predicate<string> = (value) => value.length < 10;
 		const isEven: Predicate<number> = (value) => value % 2 === 0;
@@ -78,14 +79,14 @@ describe("packages/types/src/predicate.ts", () => {
 		const witness: readonly Predicate.Any[] = [isShort, isEven];
 	});
 
-	// packages/types/src/predicate.ts:224
+	// packages/types/src/predicate.ts:225
 	it("Predicate.In — Reading a predicate's domain back out", () => {
 		type A = Predicate.In<Predicate<string>>;
 
 		const witness: A = "value";
 	});
 
-	// packages/types/src/predicate.ts:270
+	// packages/types/src/predicate.ts:271
 	it("Refinement — Two guards over different domains", () => {
 		expect.hasAssertions();
 		const isNonEmpty: Refinement<string, string> = (value): value is string =>
@@ -98,12 +99,12 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isCat("cat")).toStrictEqual(true);
 	});
 
-	// packages/types/src/predicate.ts:331
+	// packages/types/src/predicate.ts:332
 	it("Refinement.Any — Holding guards over unrelated domains", () => {
 		const witness: readonly Refinement.Any[] = [isString, isNumber];
 	});
 
-	// packages/types/src/predicate.ts:361
+	// packages/types/src/predicate.ts:362
 	it("Refinement.In — Reading a guard's domain back out", () => {
 		type Animal = "cat" | "dog";
 		const isCat: Refinement<Animal, "cat"> = (value): value is "cat" => value === "cat";
@@ -115,7 +116,7 @@ describe("packages/types/src/predicate.ts", () => {
 		const anything: U = 1;
 	});
 
-	// packages/types/src/predicate.ts:408
+	// packages/types/src/predicate.ts:409
 	it("Refinement.Out — Computing a result type from a guard", () => {
 		type S = Refinement.Out<typeof isString>;
 		type U = Refinement.Out<Refinement<unknown, 1 | 2>>;
@@ -124,7 +125,7 @@ describe("packages/types/src/predicate.ts", () => {
 		const narrowed: U = 2;
 	});
 
-	// packages/types/src/predicate.ts:448
+	// packages/types/src/predicate.ts:449
 	it("Refinement.OutUnion — The union two guards prove", () => {
 		type T = Refinement.OutUnion<[typeof isString, typeof isNumber]>;
 
@@ -132,7 +133,7 @@ describe("packages/types/src/predicate.ts", () => {
 		const alsoWitness: T = 1;
 	});
 
-	// packages/types/src/predicate.ts:485
+	// packages/types/src/predicate.ts:486
 	it("Refinement.OutIntersection — The intersection two guards prove", () => {
 		type T = Refinement.OutIntersection<
 		  [TypeGuard<{ id: string }>, TypeGuard<{ n: number }>]
@@ -141,7 +142,7 @@ describe("packages/types/src/predicate.ts", () => {
 		const witness: T = { id: "a", n: 1 };
 	});
 
-	// packages/types/src/predicate.ts:524
+	// packages/types/src/predicate.ts:525
 	it("TypeGuard — A hand-written boundary guard", () => {
 		expect.hasAssertions();
 		const isPort: TypeGuard<number> = (value): value is number =>
@@ -151,7 +152,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isPort("8080")).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:694
+	// packages/types/src/predicate.ts:695
 	it("and — Requiring two conditions of one value", () => {
 		expect.hasAssertions();
 		const isPositive = (value: unknown): value is number =>
@@ -164,7 +165,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isPositiveNumber("1")).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:710
+	// packages/types/src/predicate.ts:711
 	it("and — The data-last form", () => {
 		expect.hasAssertions();
 		const isPositive = (value: unknown): value is number =>
@@ -176,7 +177,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isPositiveNumber(2)).toStrictEqual(true);
 	});
 
-	// packages/types/src/predicate.ts:725
+	// packages/types/src/predicate.ts:726
 	it("and — Adding a plain rule without losing the proof", () => {
 		expect.hasAssertions();
 		const isNonEmptyString = and(isString, (text: string) => text.length > 0);
@@ -190,7 +191,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(mixed.filter(isNonEmptyString)).toStrictEqual(["ada"]);
 	});
 
-	// packages/types/src/predicate.ts:831
+	// packages/types/src/predicate.ts:832
 	it("or — Naming a union guard", () => {
 		expect.hasAssertions();
 		const isScalar = or(isString, isNumber);
@@ -200,7 +201,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isScalar(true)).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:898
+	// packages/types/src/predicate.ts:899
 	it("not — Subtracting from a union domain", () => {
 		expect.hasAssertions();
 		type Animal = "cat" | "dog" | "fish";
@@ -213,7 +214,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(notString(1)).toStrictEqual(true);
 	});
 
-	// packages/types/src/predicate.ts:965
+	// packages/types/src/predicate.ts:966
 	it("nand — Two mutually exclusive options", () => {
 		expect.hasAssertions();
 		type Creds = { readonly token?: string; readonly keyFile?: string };
@@ -227,7 +228,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(notBoth({ token: "t", keyFile: "k" })).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:1032
+	// packages/types/src/predicate.ts:1033
 	it("eqv — Two fields that must be set together", () => {
 		expect.hasAssertions();
 		type Window = { readonly start?: string; readonly end?: string };
@@ -242,7 +243,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(bothOrNeither({ start: "a" })).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:1101
+	// packages/types/src/predicate.ts:1102
 	it("implies — A conditional configuration rule", () => {
 		expect.hasAssertions();
 		type Conn = { readonly kind: string; readonly port?: number };
@@ -257,7 +258,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(portRequiredForTcp({ kind: "unix" })).toStrictEqual(true);
 	});
 
-	// packages/types/src/predicate.ts:1155
+	// packages/types/src/predicate.ts:1156
 	it("allOf — Requiring two shapes at once", () => {
 		expect.hasAssertions();
 		const isConfig = allOf(structOf({ host: isString }), structOf({ port: isNumber }));
@@ -266,7 +267,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isConfig({ host: "localhost" })).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:1203
+	// packages/types/src/predicate.ts:1204
 	it("anyOf — A JSON scalar guard", () => {
 		expect.hasAssertions();
 		const isJsonScalar = anyOf(isString, isNumber, isBoolean, isNull);
@@ -276,7 +277,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isJsonScalar({})).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:1257
+	// packages/types/src/predicate.ts:1258
 	it("noneOf — Rejecting a set of members of a union", () => {
 		expect.hasAssertions();
 		type Animal = "cat" | "dog" | "fish";
@@ -289,7 +290,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isFish("cat")).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:1319
+	// packages/types/src/predicate.ts:1320
 	it("exactlyOne — Exactly one credential source", () => {
 		expect.hasAssertions();
 		type Creds = {
@@ -309,7 +310,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(hasOneCredential({})).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:1380
+	// packages/types/src/predicate.ts:1381
 	it("everyOf — Folding a runtime-built rule set", () => {
 		expect.hasAssertions();
 		const minLengths = [1, 3, 5];
@@ -323,7 +324,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isLongEnough("abcd")).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:1431
+	// packages/types/src/predicate.ts:1432
 	it("someOf — Any of a runtime-built allow list", () => {
 		expect.hasAssertions();
 		const allowed = ["admin", "owner"];
@@ -337,7 +338,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isAllowed("guest")).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:1507
+	// packages/types/src/predicate.ts:1508
 	it("compose — Proving a string, then refining it", () => {
 		expect.hasAssertions();
 		const isDigits = (value: string): value is `${number}` => /^\d+$/.test(value);
@@ -348,7 +349,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isNumericString(123)).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:1565
+	// packages/types/src/predicate.ts:1566
 	it("mapInput — Validating a field through a projection", () => {
 		expect.hasAssertions();
 		type User = { readonly email: string };
@@ -360,7 +361,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(hasValidEmail({ email: "nope" })).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:1614
+	// packages/types/src/predicate.ts:1615
 	it("refineOn — Proving a discriminant field", () => {
 		expect.hasAssertions();
 		const kindIsString = refineOn("kind")(isString);
@@ -372,7 +373,7 @@ describe("packages/types/src/predicate.ts", () => {
 		}
 	});
 
-	// packages/types/src/predicate.ts:1665
+	// packages/types/src/predicate.ts:1666
 	it("lazy — A recursive tree guard", () => {
 		expect.hasAssertions();
 		type Tree = { value: number; children: readonly Tree[] };
@@ -385,7 +386,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isTree({ value: 1, children: [{ value: 2, children: [] }] })).toStrictEqual(true);
 	});
 
-	// packages/types/src/predicate.ts:1708
+	// packages/types/src/predicate.ts:1709
 	it("alwaysTrue — Defaulting an optional filter", () => {
 		expect.hasAssertions();
 		const options: { readonly filter?: Predicate<string> } = {};
@@ -394,7 +395,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(filter("anything")).toStrictEqual(true);
 	});
 
-	// packages/types/src/predicate.ts:1739
+	// packages/types/src/predicate.ts:1740
 	it("alwaysFalse — An explicit deny-all", () => {
 		expect.hasAssertions();
 		const denyAll: Predicate<string> = alwaysFalse;
@@ -402,7 +403,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(denyAll("anything")).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:1783
+	// packages/types/src/predicate.ts:1784
 	it("arrayOf — An array of strings, and a sparse array that must not pass", () => {
 		expect.hasAssertions();
 		const isStrings = arrayOf(isString);
@@ -412,7 +413,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isStrings(new Array(2))).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:1853
+	// packages/types/src/predicate.ts:1854
 	it("recordOf — A header map, and a hidden key that must not slip through", () => {
 		expect.hasAssertions();
 		const isHeaders = recordOf(isString);
@@ -425,7 +426,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isHeaders(smuggled)).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:1921
+	// packages/types/src/predicate.ts:1922
 	it("structOf — Validating a user payload", () => {
 		expect.hasAssertions();
 		const isUser = structOf({
@@ -438,7 +439,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isUser({ id: "a", tags: ["x"], meta: "no" })).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:1987
+	// packages/types/src/predicate.ts:1988
 	it("tupleOf — A name/count pair", () => {
 		expect.hasAssertions();
 		const isPair = tupleOf(isString, isNumber);
@@ -448,7 +449,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isPair(["a", 1, true])).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:2032
+	// packages/types/src/predicate.ts:2033
 	it("optionalOf — An optional numeric field", () => {
 		expect.hasAssertions();
 		const isMaybePort = optionalOf(isNumber);
@@ -457,7 +458,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isMaybePort(null)).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:2070
+	// packages/types/src/predicate.ts:2071
 	it("nullableOf — A nullable name field", () => {
 		expect.hasAssertions();
 		const isNullableName = nullableOf(isString);
@@ -466,7 +467,7 @@ describe("packages/types/src/predicate.ts", () => {
 		expect(isNullableName(undefined)).toStrictEqual(false);
 	});
 
-	// packages/types/src/predicate.ts:2109
+	// packages/types/src/predicate.ts:2110
 	it("nullishOf — Accepting both absent and null", () => {
 		expect.hasAssertions();
 		const isMaybeName = nullishOf(isString);
