@@ -14,10 +14,10 @@
 		"effect": "4.0.0-rc.112",
 		"react": "^19.3.0",
 		"react-dom": "^19.3.0",
-		"resend": "6.28.1"
+		"resend": "6.29.0"
 	},
 	"devDependencies": {
-		"@types/node": "^26.6.1",
+		"@types/node": "^26.6.2",
 		"typescript": "7.0.2"
 	}
 }
