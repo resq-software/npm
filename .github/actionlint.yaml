@@ -7,3 +7,17 @@ paths:
   "**/agentics-maintenance.yml":
     ignore:
       - ".*"
+
+  # ── One narrow suppression, for a FALSE POSITIVE rather than a finding ──────────
+  #
+  # GitHub's "self-repository" syntax (`uses: $/...`, July 2026) is the form zizmor's
+  # self-repository audit asks for: treated as a kind of pinning, and unable to resolve to
+  # something a previous step cloned into the workspace at runtime. actionlint v1.7.12 has not
+  # learned it and reports it as malformed. resq-software/viz carries the same entry and runs a
+  # `$/` reusable-workflow call in CI.
+  #
+  # The pattern matches only a `uses:` value STARTING WITH `$/`, so a genuinely malformed
+  # reusable-workflow call still fails the lint. Remove it once actionlint supports the syntax.
+  ".github/workflows/**/*.{yml,yaml}":
+    ignore:
+      - 'reusable workflow call "\$/[^"]*" at "uses" is not following the format'

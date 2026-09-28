@@ -79,6 +79,6 @@ jobs:
       contents: write # attach the SBOM to each package's GitHub release
       id-token: write # Sigstore signing for the provenance attestation
       attestations: write # store the attestation
-    uses: ./.github/workflows/attest-published.yml
+    uses: $/.github/workflows/attest-published.yml
     with:
       packages: ${{ needs.release.outputs.published-packages }}
