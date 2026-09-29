@@ -37,7 +37,7 @@ permissions:
 jobs:
   octoguide:
     if: ${{ !endsWith(github.actor, '[bot]') && (github.event_name != 'pull_request_target' || github.event.pull_request.head.repo.full_name == github.repository) }}
-    runs-on: ${{ vars.USE_SELF_HOSTED == 'true' && fromJSON('["self-hosted","linux","x64","zima"]') || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
       - uses: JoshuaKGoldberg/octoguide@b0e0d2ea16691da32a27a57b6281c99303399328 # 0.23.0
         with:
