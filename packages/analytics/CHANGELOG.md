@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.0
+
+### Minor Changes
+
+- [#336](https://github.com/resq-software/npm/pull/336) [`2795c94`](https://github.com/resq-software/npm/commit/2795c944ca8aec0365add165d26ef365e2a1b52b) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Fix GA4 collecting nothing by queuing gtag commands as `arguments` objects through a documented `window.gtag`, and add `configParams` to the GA4 provider config
+
 ## 3.0.0
 
 ### Major Changes
