@@ -26,7 +26,7 @@
 
 import { unsafeBrand } from "@resq-systems/types";
 import { assertType, test } from "vitest";
-import type { CookieDomain, GtagCommand } from "../src/index";
+import type { CookieDomain, GA4ProviderConfig, GtagCommand } from "../src/index";
 
 /** A branded GA4 id, minted without going through the regex boundary. */
 const gid = unsafeBrand<"Ga4MeasurementId", string>("G-TYPED12");
@@ -59,4 +59,16 @@ test("CookieDomain is nominal — a bare string is not assignable", () => {
 
 	// @ts-expect-error a plain string is not a normalized CookieDomain
 	assertType<CookieDomain>(".resq.software");
+});
+
+test("GA4 config params are an optional, flat field on the provider config", () => {
+	// Backwards compatible: a provider config without the field still compiles.
+	assertType<GA4ProviderConfig>({ measurementId: gid, domains: ["resq.software"] });
+	assertType<GA4ProviderConfig>({
+		measurementId: gid,
+		configParams: { allow_google_signals: false, allow_ad_personalization_signals: false },
+	});
+
+	// @ts-expect-error GA4 config values are flat — an arbitrary nested object is rejected
+	assertType<GA4ProviderConfig>({ measurementId: gid, configParams: { custom: { no: "go" } } });
 });

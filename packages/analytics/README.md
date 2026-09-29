@@ -99,7 +99,7 @@ Every provider is gated on the visitor's decision:
 | State | What happens |
 |---|---|
 | `"unset"` (no decision yet) | `init()` records the config and loads nothing. `track` / `identify` / `pageview` are no-ops. |
-| `"granted"` | Providers boot: `posthog-js` is imported and initialised, gtag.js is injected with Consent Mode's ad signals denied. |
+| `"granted"` | Providers boot: `posthog-js` is imported and initialised, gtag.js is injected with Consent Mode's ad signals denied, and `window.gtag` is defined as in Google's snippet unless the page already has one. |
 | `"denied"` | Nothing loads. If providers had already loaded on this page, PostHog is opted out (clearing its identifiers), GA4 is disabled for the stream and its `_ga` cookies are deleted. |
 
 The decision is stored in `localStorage` under `resq-analytics-consent` (`"granted"` / `"denied"`). Pass `new Analytics({ consentStore })` to keep it elsewhere.
@@ -184,7 +184,7 @@ After this, `track("briefing_requested", { tier: "civilian" })` type-checks; `tr
 | `ConsentState` / `ConsentDecision` / `ConsentStore` | The visitor's decision and where it is kept. |
 | `AnalyticsEvents` | Augmentable event registry (see [Typed events](#typed-events)). |
 | `EventName` / `TrackArgs<E>` | Derived from `AnalyticsEvents` to type `track()` names and payload arity. |
-| `PostHogProviderConfig` / `GA4ProviderConfig` | Per-provider config shapes. |
+| `PostHogProviderConfig` / `GA4ProviderConfig` | Per-provider config shapes. `GA4ProviderConfig.configParams` adds GA4 fields to every `gtag("config", …)` command, e.g. `{ allow_google_signals: false, allow_ad_personalization_signals: false }`. |
 | `CookieDomain` | Branded leading-dot cookie domain (e.g. `.resq.software`). Mint via `toCookieDomain` / `inferCookieDomain` / `resolveResqCookieDomain`. |
 | `Ga4MeasurementId` | Branded, validated GA4 Measurement ID — minted only by `sanitizeGa4Id`. |
 | `ResqSubdomain` | Union of `RESQ_SUBDOMAIN_ALLOWLIST` members. |
@@ -232,6 +232,14 @@ For ResQ Systems's three surfaces to share a single `distinct_id`:
 
 - **PostHog Integration**: Requires `NEXT_PUBLIC_POSTHOG_KEY` and host rewrites using `withAnalyticsRewrites`.
 - **GA4 Linker**: Cross-subdomain linker domains config option (`domains`).
+- **GA4 config fields**: `configParams` on the GA4 provider config, sent with every `gtag("config", …)` command after consent:
+
+  ```ts
+  ga4: {
+    measurementId: ga4Id,
+    configParams: { allow_google_signals: false, allow_ad_personalization_signals: false },
+  }
+  ```
 
 ## Testing
 

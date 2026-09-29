@@ -171,8 +171,11 @@ describe("analytics consent", () => {
 				src: "https://www.googletagmanager.com/gtag/js?id=G-TEST1234",
 			}),
 		]);
-		// Consent Mode defaults are queued before gtag.js configures the stream.
-		expect(browser.window.dataLayer?.[0]).toEqual([
+		// Consent Mode defaults are queued before gtag.js configures the stream, as
+		// an `arguments` object: gtag.js ignores a plain array.
+		const first = browser.window.dataLayer?.[0];
+		expect(Object.prototype.toString.call(first)).toBe("[object Arguments]");
+		expect(Array.from(first as ArrayLike<unknown>)).toEqual([
 			"consent",
 			"default",
 			{
