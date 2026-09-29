@@ -95,6 +95,16 @@ export interface GA4ProviderConfig {
 	measurementId: Ga4MeasurementId;
 	/** Cross-subdomain linker allow-list for gtag's `linker.domains`; absence or `[]` skips linker setup entirely. */
 	domains?: LiteralUnion<ResqSubdomain>[];
+	/**
+	 * Extra GA4 fields for the stream, sent on every `gtag("config", …)` command
+	 * this package issues: at boot, and again with `user_id` from
+	 * {@link Analytics.identify} / {@link Analytics.reset}. Merged over the
+	 * `linker` built from `domains`, so a key set here wins. Absence sends only
+	 * the package-built params.
+	 *
+	 * @example `{ allow_google_signals: false, allow_ad_personalization_signals: false }`
+	 */
+	configParams?: GtagConfigParams;
 }
 
 /**
@@ -197,7 +207,8 @@ export type GtagCommand =
 
 interface GtagWindow {
 	gtag?: (...args: GtagCommand) => void;
-	dataLayer?: GtagCommand[];
+	/** gtag.js's command queue. It holds `arguments` objects, never plain arrays. */
+	dataLayer?: unknown[];
 	/** Google's documented per-stream opt-out flag, `ga-disable-<measurement id>`. */
 	[optOutFlag: `ga-disable-${string}`]: boolean | undefined;
 }
@@ -217,15 +228,28 @@ export type ConsentListener = (state: ConsentState) => void;
 
 const isBrowser = (): boolean => typeof window !== "undefined";
 
+/**
+ * Google's documented gtag function, `function gtag(){dataLayer.push(arguments);}`.
+ * gtag.js runs only commands queued as `arguments` objects and ignores a plain
+ * array pushed onto `dataLayer`, so this must push `arguments` itself.
+ */
+function documentedGtag(..._command: GtagCommand): void {
+	const w = window as unknown as GtagWindow;
+	w.dataLayer = w.dataLayer ?? [];
+	// biome-ignore lint/complexity/noArguments: gtag.js runs only commands queued as `arguments` objects
+	w.dataLayer.push(arguments);
+}
+
+/**
+ * Queue a gtag command. Uses the page's own `window.gtag` when it has one, and
+ * otherwise defines it as {@link documentedGtag}, as Google's snippet does.
+ */
 const gtag = (...args: GtagCommand): void => {
 	if (!isBrowser()) return;
 	const w = window as unknown as GtagWindow;
 	w.dataLayer = w.dataLayer ?? [];
-	if (typeof w.gtag === "function") {
-		w.gtag(...args);
-	} else {
-		w.dataLayer.push(args);
-	}
+	if (typeof w.gtag !== "function") w.gtag = documentedGtag;
+	w.gtag(...args);
 };
 
 /**
@@ -242,6 +266,15 @@ const loadGa4Script = (measurementId: string): void => {
 	script.dataset.resqGa4 = measurementId;
 	document.head.appendChild(script);
 };
+
+/**
+ * The params every `gtag("config", …)` command for the stream carries: the
+ * linker built from `domains`, with the consumer's `configParams` merged over it.
+ */
+const ga4ConfigParams = (provider: GA4ProviderConfig): GtagConfigParams => ({
+	...(provider.domains?.length ? { linker: { domains: provider.domains } } : {}),
+	...provider.configParams,
+});
 
 /** Set or clear Google's per-stream opt-out flag, which stops gtag.js sending for that stream. */
 const setGa4OptOut = (measurementId: string, optedOut: boolean): void => {
@@ -346,9 +379,11 @@ export class Analytics {
 	 *
 	 * Boot effects (browser only, when not `disabled`, after consent):
 	 * dynamically imports `posthog-js`, calls `posthog.init`, injects the gtag.js
-	 * `<script>` into `document.head`, pushes commands onto `window.dataLayer`,
-	 * and stores the PostHog client on this instance. On the server or when
-	 * `config.disabled` is set it resolves immediately with no effects.
+	 * `<script>` into `document.head`, defines `window.gtag` as Google's snippet
+	 * does (unless the page already has one) and queues commands through it onto
+	 * `window.dataLayer`, and stores the PostHog client on this instance. On the
+	 * server or when `config.disabled` is set it resolves immediately with no
+	 * effects.
 	 *
 	 * @param config - PostHog/GA4 credentials plus cross-subdomain and debug flags.
 	 * @returns A promise that resolves once provider bootstrapping (if any) has
@@ -487,10 +522,7 @@ export class Analytics {
 		this.#ga4Started = true;
 		loadGa4Script(provider.measurementId);
 		gtag("js", new Date());
-		const params: GtagConfigParams = provider.domains?.length
-			? { linker: { domains: provider.domains } }
-			: {};
-		gtag("config", provider.measurementId, params);
+		gtag("config", provider.measurementId, ga4ConfigParams(provider));
 	}
 
 	/**
@@ -545,9 +577,10 @@ export class Analytics {
 		}
 		if (!this.#canSend()) return;
 		this.#posthog?.identify(userId, traits);
-		if (this.#config.ga4) {
+		const ga4 = this.#config.ga4;
+		if (ga4) {
 			gtag("set", "user_properties", primitivesOnly(traits));
-			gtag("config", this.#config.ga4.measurementId, { user_id: userId });
+			gtag("config", ga4.measurementId, { ...ga4ConfigParams(ga4), user_id: userId });
 		}
 	}
 
@@ -563,8 +596,9 @@ export class Analytics {
 	 * is kept: signing out is not a privacy choice.
 	 */
 	reset(): void {
-		if (this.#config?.ga4 && this.#ga4Started) {
-			gtag("config", this.#config.ga4.measurementId, { user_id: null });
+		const ga4 = this.#config?.ga4;
+		if (ga4 && this.#ga4Started) {
+			gtag("config", ga4.measurementId, { ...ga4ConfigParams(ga4), user_id: null });
 		}
 		this.#posthog?.reset();
 		this.#config = null;
