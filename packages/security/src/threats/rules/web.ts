@@ -434,8 +434,9 @@ export const FORMULA_INJECTION_RULES: readonly ThreatRule[] = [
 		cwe: 1236,
 		primaryControl: FORMULA_CONTROL,
 		// Unbounded, like `escapeCsvField`: a reader that strips the leading run strips all
-		// of it. One anchored character class under `*` backtracks linearly.
-		pattern: /^[\s'"]*[=+\-@\t\r]/,
+		// of it. One anchored character class under `*` backtracks linearly. The triggers
+		// are the OWASP list, LF and the full-width `=` `+` `-` `@` included.
+		pattern: /^[\s'"]*[=+\-@\t\r\n\uff1d\uff0b\uff0d\uff20]/,
 	},
 	{
 		id: "CSV-DDE-001",

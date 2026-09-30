@@ -665,7 +665,7 @@ describe("output encoders", () => {
 		])("neutralises the formula trigger in %o", (payload) => {
 			const encoded = escapeCsvField(payload);
 			const inner = encoded.startsWith('"') ? encoded.slice(1) : encoded;
-			expect(inner).not.toMatch(/^[=+\-@\t\r]/);
+			expect(inner).not.toMatch(/^[=+\-@\t\r\n\uff1d\uff0b\uff0d\uff20]/);
 		});
 
 		// A reader that strips leading whitespace and quotes strips all of them, so the
@@ -676,11 +676,39 @@ describe("output encoders", () => {
 			["mixed quotes and spaces", `${`' "`.repeat(4)}=1+1`],
 			["a TAB behind leading spaces", `${" ".repeat(9)}\tSUM(1)`],
 			["a CR behind leading spaces", `${" ".repeat(9)}\rSUM(1)`],
-			["Unicode whitespace", `${" 　﻿".repeat(4)}=1+1`],
+			["Unicode whitespace", `${"\u00a0\u3000\ufeff".repeat(4)}=1+1`],
 		])("neutralises a trigger behind %s", (_label, payload) => {
 			const decoded = parseCsvRow(escapeCsvField(payload))[0];
 
 			expect(decoded).toBe(`'${payload}`);
+		});
+
+		// The OWASP CSV Injection list names LF and the full-width forms as triggers too.
+		const LF_AND_FULL_WIDTH_TRIGGERS = [
+			["a leading LF", "\nSUM(1)"],
+			["LF behind leading spaces", `${" ".repeat(9)}\nSUM(1)`],
+			["a full-width equals sign", '\uff1dHYPERLINK("https://evil.example")'],
+			["a full-width plus sign", "\uff0b1+1"],
+			["a full-width minus sign", "\uff0d1+1"],
+			["a full-width at sign", "\uff20SUM(1)"],
+			["a full-width trigger behind leading spaces", `${" ".repeat(9)}\uff1d1+1`],
+		] as const;
+
+		it.each(LF_AND_FULL_WIDTH_TRIGGERS)("neutralises %s", (_label, payload) => {
+			const decoded = parseCsvRow(escapeCsvField(payload))[0];
+
+			expect(decoded).toBe(`'${payload}`);
+		});
+
+		// NFKC folding already exposes a full-width trigger to the scan, but only on the
+		// `nfkc` variant. The rule should match the value as written, as the encoder does.
+		it.each(LF_AND_FULL_WIDTH_TRIGGERS)("detects %s in the raw value", (_label, payload) => {
+			const result = scanForThreats(payload, { contexts: ["spreadsheet"] });
+			const rawRuleIds = result.findings
+				.filter((finding) => finding.variant === "raw")
+				.map((finding) => finding.ruleId);
+
+			expect(rawRuleIds).toContain("CSV-FORMULA-LEAD-001");
 		});
 
 		// An array stringifies to its elements joined by commas, so its first element
@@ -746,9 +774,36 @@ describe("output encoders", () => {
 			expect(escapeCsvField("-1234")).toBe("'-1234");
 		});
 
-		it("quotes on the configured delimiter, not on a comma", () => {
+		it("quotes on the configured delimiter", () => {
 			expect(toCsvRow(["a;b"], { delimiter: ";" })).toBe('"a;b"');
-			expect(toCsvRow(["a,b"], { delimiter: ";" })).toBe("a,b");
+		});
+
+		// A reader may split on a different separator than the writer used, and an unquoted
+		// separator would then start a cell whose leading trigger was never checked.
+		it.each([
+			[",", ";"],
+			[";", ","],
+			["\t", ","],
+		])("keeps %o inside one cell when the delimiter is %o", (separator, delimiter) => {
+			const value = `x${separator}=cmd|' /C calc'!A0`;
+			const encoded = escapeCsvField(value, { delimiter });
+
+			expect(parseCsvRow(encoded, separator)).toEqual([value]);
+		});
+
+		// A reader that splits on one character of a multi-character delimiter can split the
+		// row there, so a field containing any of its characters is quoted.
+		it.each([
+			["its first character", "x|=1+1"],
+			["its last character", "x~=1+1"],
+		])("quotes a field containing %s of a multi-character delimiter", (_label, value) => {
+			expect(escapeCsvField(value, { delimiter: "|~" })).toBe(`"${value}"`);
+		});
+
+		it("keeps a cell whole for a reader that splits on the delimiter's last character", () => {
+			const row = toCsvRow(["a", "x~=1+1"], { delimiter: "|~" });
+
+			expect(parseCsvRow(row, "~")).toEqual(["a|", "x~=1+1"]);
 		});
 
 		it("removes NUL, which no CSV reader accepts", () => {

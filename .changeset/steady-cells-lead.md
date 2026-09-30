@@ -18,4 +18,4 @@
 "@resq-systems/security": patch
 ---
 
-`escapeCsvField` now neutralises formulas behind any run of leading whitespace or quotes, and treats array and object cells as text; only numbers, booleans and bigints skip the prefix. `CSV-FORMULA-LEAD-001` matches the same unbounded leading run.
+`escapeCsvField` now neutralises formulas behind any run of leading whitespace or quotes, treats LF and the full-width `=` `+` `-` `@` (U+FF1D, U+FF0B, U+FF0D, U+FF20) as formula triggers, and treats array and object cells as text; only numbers, booleans and bigints skip the prefix. It also quotes a field that contains a comma, semicolon or TAB whatever the delimiter, or any character of a multi-character delimiter; quoting changes no values. `CSV-FORMULA-LEAD-001` matches the same leading run and triggers.

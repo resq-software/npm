@@ -527,11 +527,23 @@ export function encodeLogValue(
  * The leading run is unbounded because a reader that strips it strips all of it, so any
  * cap only moves the bypass one character past the cap. One anchored character class
  * under `*` backtracks linearly, so the unbounded run carries no ReDoS cost.
+ *
+ * The trigger class is the OWASP CSV Injection list: `=`, `+`, `-`, `@`, TAB, CR and LF,
+ * plus the full-width `=` `+` `-` `@` (U+FF1D, U+FF0B, U+FF0D, U+FF20), which some
+ * locales read as formulas too.
  */
-const CSV_FORMULA_LEAD = /^[\s'"]*[=+\-@\t\r]/;
+const CSV_FORMULA_LEAD = /^[\s'"]*[=+\-@\t\r\n\uff1d\uff0b\uff0d\uff20]/;
 
-/** Fields containing any of these must be quoted per RFC 4180 sections 2.6 and 2.7. */
-const CSV_QUOTE_REQUIRED = /["\r\n]/;
+/**
+ * Fields containing any of these are quoted.
+ *
+ * `"`, CR and LF because RFC 4180 sections 2.6 and 2.7 require it. Comma, semicolon and
+ * TAB whatever the configured delimiter, because the reader may split on a different
+ * separator than the writer used (Excel follows the locale's list separator), and an
+ * unquoted separator there starts a new cell whose leading characters were never checked.
+ * Quoting is always valid under RFC 4180 and changes no value.
+ */
+const CSV_QUOTE_REQUIRED = /[",;\t\r\n]/;
 
 /**
  * Escape one cell for CSV export.
@@ -539,7 +551,8 @@ const CSV_QUOTE_REQUIRED = /["\r\n]/;
  * This is the control named by the formula-injection rules. A CSV file is not inert: a
  * cell beginning `=`, `+`, `-`, `@`, tab or CR is evaluated as a formula by Excel,
  * Sheets and LibreOffice when the recipient opens it, so the payload executes on *their*
- * machine, outside the exporting application entirely (CWE-1236).
+ * machine, outside the exporting application entirely (CWE-1236). LF and the full-width
+ * `=` `+` `-` `@` are treated as triggers too, following the OWASP CSV Injection list.
  *
  * Two separate jobs, in order: neutralise the formula trigger with a leading apostrophe,
  * then apply RFC 4180 quoting so the field cannot break the row.
@@ -550,9 +563,16 @@ const CSV_QUOTE_REQUIRED = /["\r\n]/;
  * the sheet becomes a string. Every other value is treated as text, including an array or
  * object, whose string form repeats contents the caller may not control.
  *
- * Three things worth knowing before relying on it:
+ * Worth knowing before relying on it:
  * - The leading apostrophe is an Excel convention, **not** an RFC 4180 construct. Readers
  *   that do not implement it surface it as a literal character in the data.
+ * - A field containing a comma, semicolon or TAB is quoted whatever the delimiter, so a
+ *   reader that splits on a different separator still sees one cell. Quoting is the only
+ *   protection there, so **a reader that ignores quotes cannot be protected**: it can
+ *   start a new cell in the middle of a field, and no encoding of that field prevents it.
+ * - A field containing any character of a multi-character delimiter is quoted too. That
+ *   helps only a reader for which the quote still opens the field, so prefer a
+ *   single-character delimiter.
  * - NUL is removed rather than escaped, so it does not round-trip.
  * - Scanning the output with `scanForThreats` still reports a finding, by design:
  *   `CSV-FORMULA-LEAD-001` sees through the apostrophe and `CSV-DDE-001` is
@@ -589,7 +609,10 @@ export function escapeCsvField(
 
 	const neutralised = isUntrustedText && CSV_FORMULA_LEAD.test(cleaned) ? `'${cleaned}` : cleaned;
 
-	const mustQuote = CSV_QUOTE_REQUIRED.test(neutralised) || neutralised.includes(delimiter);
+	// Any one character of a multi-character delimiter can split the row for a reader that
+	// splits on that character alone.
+	const containsDelimiter = [...delimiter].some((character) => neutralised.includes(character));
+	const mustQuote = CSV_QUOTE_REQUIRED.test(neutralised) || containsDelimiter;
 	return mustQuote ? `"${neutralised.replaceAll('"', '""')}"` : neutralised;
 }
 
