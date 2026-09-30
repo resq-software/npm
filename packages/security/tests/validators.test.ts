@@ -711,6 +711,26 @@ describe("output encoders", () => {
 			expect(rawRuleIds).toContain("CSV-FORMULA-LEAD-001");
 		});
 
+		// NFKC folds these onto a trigger or onto the leading run, and `CSV-FORMULA-LEAD-001`
+		// matches the scan's `nfkc` variant, so the encoder has to agree with the rule. The
+		// file keeps the value as written, so the apostrophe is the only change.
+		it.each([
+			["a small equals sign", '\ufe66HYPERLINK("https://evil.example")'],
+			["a small plus sign", "\ufe621+1"],
+			["a small hyphen-minus", "\ufe631+1"],
+			["a small commercial at", "\ufe6bSUM(1)"],
+			["a full-width quotation mark before a trigger", "\uff02=1+1"],
+			["a full-width apostrophe before a trigger", "\uff07=1+1"],
+			["a superscript plus sign", "\u207a1+1"],
+		])("neutralises %s, which the rule detects after NFKC", (_label, payload) => {
+			const ruleIds = scanForThreats(payload, { contexts: ["spreadsheet"] }).findings.map(
+				(finding) => finding.ruleId,
+			);
+
+			expect(ruleIds).toContain("CSV-FORMULA-LEAD-001");
+			expect(parseCsvRow(escapeCsvField(payload))[0]).toBe(`'${payload}`);
+		});
+
 		// An array stringifies to its elements joined by commas, so its first element
 		// becomes the cell's leading text. Only the application's own scalars skip the prefix.
 		it.each([
@@ -779,16 +799,49 @@ describe("output encoders", () => {
 		});
 
 		// A reader may split on a different separator than the writer used, and an unquoted
-		// separator would then start a cell whose leading trigger was never checked.
+		// separator would then start a cell whose leading trigger was never checked. Quoting
+		// keeps the separator inside a first-column cell, where the quote starts the line.
 		it.each([
 			[",", ";"],
 			[";", ","],
 			["\t", ","],
-		])("keeps %o inside one cell when the delimiter is %o", (separator, delimiter) => {
+		])("keeps %o inside a first-column cell when the delimiter is %o", (separator, delimiter) => {
 			const value = `x${separator}=cmd|' /C calc'!A0`;
 			const encoded = escapeCsvField(value, { delimiter });
 
 			expect(parseCsvRow(encoded, separator)).toEqual([value]);
+		});
+
+		// The documented limit, pinned. A quote opens a field only at the start of a field as
+		// the reader sees it. A reader splitting on another separator starts the first field
+		// where the writer did, but not the second, so there it takes the quote literally and
+		// the separator inside the value starts a live cell.
+		it.each([
+			[",", ";"],
+			[";", ","],
+			[",", "\t"],
+		])(
+			"protects only the first column when the delimiter is %o and the reader splits on %o",
+			(delimiter, separator) => {
+				const value = `x${separator}=cmd|' /C calc'!A0${separator}y`;
+
+				expect(parseCsvRow(toCsvRow([value, "a"], { delimiter }), separator)).toEqual([
+					`${value}${delimiter}a`,
+				]);
+				expect(parseCsvRow(toCsvRow(["a", value], { delimiter }), separator)).toEqual([
+					`a${delimiter}"x`,
+					"=cmd|' /C calc'!A0",
+					'y"',
+				]);
+			},
+		);
+
+		// The same limit for a line break: that reader never opens the quote, so the LF ends
+		// its record and the text after it starts the next record's first cell.
+		it("leaves a line break in a later column to a reader that splits on another separator", () => {
+			const row = toCsvRow(["a", "x\n=1+1"]);
+
+			expect(row.split("\n").map((line) => parseCsvRow(line, ";"))).toEqual([['a,"x'], ['=1+1"']]);
 		});
 
 		// A reader that splits on one character of a multi-character delimiter can split the
@@ -804,6 +857,14 @@ describe("output encoders", () => {
 			const row = toCsvRow(["a", "x~=1+1"], { delimiter: "|~" });
 
 			expect(parseCsvRow(row, "~")).toEqual(["a|", "x~=1+1"]);
+		});
+
+		// A reader that splits on the delimiter's first character does not see a field start
+		// at the quote, so in a later column it splits the value there.
+		it("leaves a later column to a reader that splits on the delimiter's first character", () => {
+			const row = toCsvRow(["a", "x|=1+1"], { delimiter: "|~" });
+
+			expect(parseCsvRow(row, "|")).toEqual(["a", '~"x', '=1+1"']);
 		});
 
 		it("removes NUL, which no CSV reader accepts", () => {
