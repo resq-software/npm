@@ -839,6 +839,7 @@ describe("output encoders", () => {
 			["the delimiter", "a,b"],
 			["a line feed", "line1\nline2"],
 			["a carriage return", "line1\rline2"],
+			["separators before plain text", "a, b; c\td"],
 		])("quotes and recovers a field containing %s", (_label, value) => {
 			expect(parseCsvRow(escapeCsvField(value))[0]).toBe(value);
 		});
@@ -857,7 +858,8 @@ describe("output encoders", () => {
 		// A reader may split on a different separator than the writer used, and an unquoted
 		// separator would then start a cell whose leading trigger was never checked. Quoting
 		// keeps the separator inside a first-column cell, while the reader is in step with the
-		// writer and so sees the quote open the field.
+		// writer and so sees the quote open the field. The apostrophe after the separator is
+		// the one value change.
 		it.each([
 			[",", ";"],
 			[";", ","],
@@ -866,63 +868,255 @@ describe("output encoders", () => {
 			const value = `x${separator}=cmd|' /C calc'!A0`;
 			const encoded = escapeCsvField(value, { delimiter });
 
-			expect(parseCsvRow(encoded, separator)).toEqual([value]);
+			expect(parseCsvRow(encoded, separator)).toEqual([`x${separator}'=cmd|' /C calc'!A0`]);
 		});
 
-		// The documented limit, pinned. A quote opens a field only at the start of a field as
-		// the reader sees it. A reader splitting on another separator starts the first field
-		// where the writer did, but not the second, so there it takes the quote literally and
-		// the separator inside the value starts a live cell.
+		/**
+		 * A formula character that a reader reaches by trimming whitespace and double quotes,
+		 * with no apostrophe in front of it. TAB, CR and LF count as whitespace here: a field
+		 * that starts at the end of a value runs on into the file's own line break or
+		 * delimiter, and then the next cell, which is neutralised in its own right.
+		 */
+		// biome-ignore lint/suspicious/noControlCharactersInRegex: U+001C to U+001F are whitespace to the readers that trim them
+		const LIVE_FORMULA = /^[\s\x1c-\x1f\x85"]*[=+\-@\uff1d\uff0b\uff0d\uff20]/;
+
+		// A quote opens a field only at the start of a field as the reader sees it, so a reader
+		// that splits on another separator takes the quote literally in a later column. The
+		// apostrophe after the separator neutralises the cell it starts there instead.
 		it.each([
 			[",", ";"],
 			[";", ","],
 			[",", "\t"],
 		])(
-			"protects only the first column when the delimiter is %o and the reader splits on %o",
+			"neutralises every column when the delimiter is %o and the reader splits on %o",
 			(delimiter, separator) => {
 				const value = `x${separator}=cmd|' /C calc'!A0${separator}y`;
+				const neutralised = `x${separator}'=cmd|' /C calc'!A0${separator}y`;
 
 				expect(parseCsvRow(toCsvRow([value, "a"], { delimiter }), separator)).toEqual([
-					`${value}${delimiter}a`,
+					`${neutralised}${delimiter}a`,
 				]);
 				expect(parseCsvRow(toCsvRow(["a", value], { delimiter }), separator)).toEqual([
 					`a${delimiter}"x`,
-					"=cmd|' /C calc'!A0",
+					"'=cmd|' /C calc'!A0",
 					'y"',
 				]);
 			},
 		);
 
-		// The same limit for a line break, read by a reader that ends a record only at a line
-		// break outside quotes. In the first column it opens the writer's quote, so the LF
-		// stays in the cell. In a later column it takes the quote literally, so the LF ends
-		// the record and the text after it starts the next record's first cell, unchecked.
-		it("leaves a line break in a later column to a reader that splits on another separator", () => {
-			expect(parseCsv(toCsvRow(["x\n=1+1", "a"]), ";")).toEqual([["x\n=1+1,a"]]);
-			expect(parseCsv(toCsvRow(["a", "x\n=1+1"]), ";")).toEqual([['a,"x'], ['=1+1"']]);
+		// The same for a line break, read by a reader that ends a record only at a line break
+		// outside quotes. In a later column it takes the quote literally, so the LF ends the
+		// record, and the next record's first cell starts with the apostrophe.
+		it("neutralises a line break in a later column for a reader that splits on another separator", () => {
+			expect(parseCsv(toCsvRow(["x\n=1+1", "a"]), ";")).toEqual([["x\n'=1+1,a"]]);
+			expect(parseCsv(toCsvRow(["a", "x\n=1+1"]), ";")).toEqual([['a,"x'], ["'=1+1\""]]);
 		});
 
-		// A reader that splits on one character of a multi-character delimiter can split the
-		// row there, so a field containing any of its characters is quoted.
-		it.each([
-			["its first character", "x|=1+1"],
-			["its last character", "x~=1+1"],
-		])("quotes a field containing %s of a multi-character delimiter", (_label, value) => {
-			expect(escapeCsvField(value, { delimiter: "|~" })).toBe(`"${value}"`);
+		it.each([",", ";", "\t", "\n", "\r"])(
+			"leaves no live field for a reader that ignores quotes and splits on %o",
+			(separator) => {
+				const value = `x${separator}=1${separator} @2${separator}"=3${separator}-4`;
+				const fields = toCsvRow(["a", value, "b"]).split(separator);
+
+				expect(fields.length).toBeGreaterThan(4);
+				expect(fields.filter((field) => LIVE_FORMULA.test(field))).toEqual([]);
+			},
+		);
+
+		// A value holding the reader's separator and then `"` leaves that reader inside a
+		// quoted field across the row's line break, so from there it starts fields where the
+		// writer did not. Each of those starts behind a boundary, where the apostrophe is.
+		it("neutralises the fields a reader thrown out of step by a quote sees", () => {
+			const file = [
+				["a", 'x;"'],
+				["b", "y;=1+1"],
+				["c", "z\n@SUM(1)"],
+			]
+				.map((cells) => toCsvRow(cells))
+				.join("\r\n");
+			const fields = parseCsv(file, ";").flat();
+
+			expect(fields).toContain("'=1+1\"");
+			expect(fields.filter((field) => LIVE_FORMULA.test(field))).toEqual([]);
 		});
+
+		// The apostrophe goes right after the boundary, in front of the leading run, as it
+		// does at the start of the value. TAB, CR and LF are triggers themselves.
+		it.each([
+			["an LF", "x\n=1+1", "x\n'=1+1"],
+			["a CR", "x\r+1+1", "x\r'+1+1"],
+			["a CRLF", "x\r\n=1+1", "x\r'\n'=1+1"],
+			['", "', "x, =1+1", "x,' =1+1"],
+			["a semicolon", "x;@SUM(1)", "x;'@SUM(1)"],
+			["a TAB", "x\t-1+1", "x\t'-1+1"],
+			["a comma before a TAB", "x,\tSUM(1)", "x,'\tSUM(1)"],
+			["a comma before a quote", 'x,"=1+1', `x,'"=1+1`],
+			["a long leading run", `x,${" ".repeat(20)}=1+1`, `x,'${" ".repeat(20)}=1+1`],
+			["every separator", "=1,+2;-3\t@4\n=5", "'=1,'+2;'-3\t'@4\n'=5"],
+		])("neutralises a formula after %s inside the value", (_label, value, expected) => {
+			expect(parseCsvRow(escapeCsvField(value))[0]).toBe(expected);
+		});
+
+		// Each character of a multi-character delimiter is a boundary, so a reader that splits
+		// on one character alone finds the cell it starts neutralised.
+		it("neutralises a formula after each character of a multi-character delimiter", () => {
+			expect(escapeCsvField("x|=1~+2", { delimiter: "|~" })).toBe(`"x|'=1~'+2"`);
+		});
+
+		it.each([
+			["its first character", "x|=1+1", "x|'=1+1"],
+			["its last character", "x~=1+1", "x~'=1+1"],
+		])(
+			"quotes and neutralises a field containing %s of a multi-character delimiter",
+			(_label, value, expected) => {
+				expect(escapeCsvField(value, { delimiter: "|~" })).toBe(`"${expected}"`);
+			},
+		);
 
 		it("keeps a cell whole for a reader that splits on the delimiter's last character", () => {
 			const row = toCsvRow(["a", "x~=1+1"], { delimiter: "|~" });
 
-			expect(parseCsvRow(row, "~")).toEqual(["a|", "x~=1+1"]);
+			expect(parseCsvRow(row, "~")).toEqual(["a|", "x~'=1+1"]);
 		});
 
 		// A reader that splits on the delimiter's first character does not see a field start
-		// at the quote, so in a later column it splits the value there.
-		it("leaves a later column to a reader that splits on the delimiter's first character", () => {
+		// at the quote, so in a later column it splits the value there, behind the apostrophe.
+		it("neutralises a later column for a reader that splits on the delimiter's first character", () => {
 			const row = toCsvRow(["a", "x|=1+1"], { delimiter: "|~" });
 
-			expect(parseCsvRow(row, "|")).toEqual(["a", '~"x', '=1+1"']);
+			expect(parseCsvRow(row, "|")).toEqual(["a", '~"x', "'=1+1\""]);
+		});
+
+		// The NFKC check applies after a boundary as it does at the start of the value.
+		it.each([
+			["a small equals sign", "x,\ufe66HYPERLINK(1)", "x,'\ufe66HYPERLINK(1)"],
+			["a full-width quotation mark before a trigger", "x;\uff02=1+1", "x;'\uff02=1+1"],
+			["a superscript plus sign", "x\n\u207a1+1", "x\n'\u207a1+1"],
+			[
+				"a run of full-width quotation marks around an LF",
+				"\uff02\n\uff02=1",
+				"'\uff02\n'\uff02=1",
+			],
+		])(
+			"neutralises %s after a boundary, which NFKC folds onto a formula lead",
+			(_label, value, expected) => {
+				expect(parseCsvRow(escapeCsvField(value))[0]).toBe(expected);
+			},
+		);
+
+		// Numbers, booleans and bigints come from the application's own types, so they gain no
+		// apostrophe, even where the delimiter makes part of their text a field start. An
+		// array is text, so its later elements are neutralised too.
+		it("inserts no apostrophe into a number, boolean or bigint", () => {
+			expect(escapeCsvField(1e-7, { delimiter: "e" })).toBe('"1e-7"');
+			expect(escapeCsvField(-5n, { delimiter: "-" })).toBe('"-5"');
+			expect(escapeCsvField(true, { delimiter: "r" })).toBe('"true"');
+			expect(escapeCsvField("1e-7", { delimiter: "e" })).toBe(`"1e'-7"`);
+			expect(escapeCsvField([1, -2])).toBe(`"1,'-2"`);
+		});
+
+		// The remaining limit. A reader that splits on a character that is not a boundary gets
+		// no apostrophe there, and a quote protects it only where it opens a field.
+		it("still leaves a live cell to a reader that splits on a pipe", () => {
+			expect(parseCsvRow(toCsvRow(["a", "x,=1|=2"]), "|")).toEqual([`a,"x,'=1`, '=2"']);
+			expect(parseCsvRow(toCsvRow(["x|=1"]), "|")).toEqual(["x", "=1"]);
+		});
+
+		it("still leaves a live cell to a reader that splits on a space", () => {
+			expect(parseCsvRow(toCsvRow(["a", "x, =1"]), " ")).toEqual([`a,"x,'`, '=1"']);
+		});
+
+		/**
+		 * The definition the linear pass implements: the pattern, or the pattern on the NFKC
+		 * form of the head, tested afresh at the start of the value and after each boundary.
+		 * Quadratic, so only for short values.
+		 */
+		const referenceLeadStarts = (value: string, delimiter: string): number[] => {
+			const boundaries = new Set([",", ";", "\t", "\r", "\n", ...delimiter]);
+			// biome-ignore lint/suspicious/noControlCharactersInRegex: U+001C to U+001F are whitespace to the readers that trim them
+			const lead = /^[\s\x1c-\x1f\x85'"]*[=+\-@\t\r\n\uff1d\uff0b\uff0d\uff20]/;
+			// biome-ignore lint/suspicious/noControlCharactersInRegex: U+001C to U+001F are whitespace to the readers that trim them
+			const nfkcRun = /^[\s\x1c-\x1f\x85'"\uff02\uff07]*/;
+			const leads = (from: number): boolean => {
+				const rest = value.slice(from);
+				const run = nfkcRun.exec(rest)?.[0].length ?? 0;
+				return lead.test(rest) || lead.test(rest.slice(0, run + 16).normalize("NFKC"));
+			};
+			const starts = leads(0) ? [0] : [];
+			let index = 0;
+			for (const character of value) {
+				index += character.length;
+				if (boundaries.has(character) && leads(index)) starts.push(index);
+			}
+			return starts;
+		};
+
+		it("agrees with testing the pattern afresh at every field start", () => {
+			const alphabet = [
+				..."ab1 '\"=+-@,;|\t\r\n",
+				"\u00a0",
+				"\u3000",
+				"\x1c",
+				"\x85",
+				"\uff02",
+				"\uff07",
+				"\uff1d",
+				"\ufe66",
+				"\u207a",
+				"\u0301",
+				"\u0338",
+				"\ufdfa",
+				"\u{1f600}",
+			];
+			const delimiters = [",", ";", "\t", "|~", " ", "\u{1f600}"];
+			let seed = 1;
+			const random = (bound: number): number => {
+				seed = (seed * 1_103_515_245 + 12_345) % 2_147_483_648;
+				return seed % bound;
+			};
+			const mismatches: string[] = [];
+			for (let round = 0; round < 5_000; round++) {
+				const length = random(24);
+				const value = Array.from({ length }, () => alphabet[random(alphabet.length)]).join("");
+				const delimiter = delimiters[random(delimiters.length)] ?? ",";
+				const expected = referenceLeadStarts(value, delimiter).reduceRight(
+					(text, start) => `${text.slice(0, start)}'${text.slice(start)}`,
+					value,
+				);
+				// The field is quoted whenever it holds a comma, so one comma-split record is it.
+				const decoded = parseCsvRow(escapeCsvField(value, { delimiter }))[0];
+				if (decoded !== expected) mismatches.push(JSON.stringify([value, delimiter]));
+			}
+
+			expect(mismatches).toEqual([]);
+		});
+
+		// Testing the pattern at each boundary would rescan the leading run behind it, which is
+		// quadratic in these. Compared as booleans, so a failure never prints the value.
+		it.each([
+			["a million LFs", "\n".repeat(1_000_000), `"${"'\n".repeat(1_000_000)}"`],
+			['a million ", "', `${", ".repeat(1_000_000)}=1`, `"${", ".repeat(999_999)},' =1"`],
+			["a million TABs and '='", `${"\t".repeat(1_000_000)}=`, `"${"'\t".repeat(1_000_000)}'="`],
+			[
+				"a million U+FDFA behind commas",
+				`${",\ufdfa".repeat(1_000_000)},=1`,
+				`"${",\ufdfa".repeat(1_000_000)},'=1"`,
+			],
+		])("encodes %s in well under a second", (_label, value, expected) => {
+			const started = performance.now();
+			const encoded = escapeCsvField(value);
+			const elapsed = performance.now() - started;
+
+			expect(encoded === expected).toBe(true);
+			expect(elapsed).toBeLessThan(1_000);
+		});
+
+		// After a boundary too, only a short head is normalized. Normalizing the rest of this
+		// value would need a string longer than V8 allows.
+		it("normalizes only a short head after a boundary in a large value", () => {
+			const tail = "\ufdfa".repeat(30_000_000);
+
+			expect(escapeCsvField(`x,\ufe66=1,${tail}`) === `"x,'\ufe66=1,${tail}"`).toBe(true);
 		});
 
 		it("removes NUL, which no CSV reader accepts", () => {
