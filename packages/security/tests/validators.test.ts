@@ -611,17 +611,21 @@ describe("output encoders", () => {
 	});
 
 	describe("escapeCsvField", () => {
-		/** RFC 4180 reader, so these assert a round trip rather than a golden string. */
-		const parseCsvRow = (row: string, delimiter = ","): string[] => {
-			const out: string[] = [];
+		/**
+		 * RFC 4180 reader, so these assert a round trip rather than a golden string. A CR,
+		 * LF or CRLF outside quotes ends a record, as it does for a spreadsheet.
+		 */
+		const parseCsv = (text: string, delimiter = ","): string[][] => {
+			const records: string[][] = [];
+			let record: string[] = [];
 			let field = "";
 			let index = 0;
 			let quoted = false;
-			while (index < row.length) {
-				const char = row[index];
+			while (index < text.length) {
+				const char = text[index];
 				if (quoted) {
 					if (char === '"') {
-						if (row[index + 1] === '"') {
+						if (text[index + 1] === '"') {
 							field += '"';
 							index += 2;
 							continue;
@@ -640,16 +644,30 @@ describe("output encoders", () => {
 					continue;
 				}
 				if (char === delimiter) {
-					out.push(field);
+					record.push(field);
 					field = "";
 					index++;
+					continue;
+				}
+				if (char === "\r" || char === "\n") {
+					records.push([...record, field]);
+					record = [];
+					field = "";
+					index += char === "\r" && text[index + 1] === "\n" ? 2 : 1;
 					continue;
 				}
 				field += char;
 				index++;
 			}
-			out.push(field);
-			return out;
+			records.push([...record, field]);
+			return records;
+		};
+
+		/** One encoded row, which must read back as exactly one record. */
+		const parseCsvRow = (row: string, delimiter = ","): string[] => {
+			const records = parseCsv(row, delimiter);
+			if (records.length !== 1) throw new Error(`expected one record, read ${records.length}`);
+			return records[0];
 		};
 
 		it.each([
@@ -681,6 +699,27 @@ describe("output encoders", () => {
 			const decoded = parseCsvRow(escapeCsvField(payload))[0];
 
 			expect(decoded).toBe(`'${payload}`);
+		});
+
+		// JavaScript's `\s` omits U+001C to U+001F and U+0085, but Python's `strip()` removes
+		// all five, .NET's `Trim()` removes U+0085 and Java's `trim()` U+001C to U+001F.
+		const WHITESPACE_OUTSIDE_JS_S = [
+			["U+001C", "\x1c=1+1"],
+			["U+001F", "\x1f=1+1"],
+			["U+0085", "\x85=1+1"],
+			["all five behind spaces", `  \x1c\x1d\x1e\x1f\x85=HYPERLINK("https://evil.example")`],
+		] as const;
+
+		it.each(WHITESPACE_OUTSIDE_JS_S)("neutralises a trigger behind %s", (_label, payload) => {
+			expect(parseCsvRow(escapeCsvField(payload))[0]).toBe(`'${payload}`);
+		});
+
+		it.each(WHITESPACE_OUTSIDE_JS_S)("detects a trigger behind %s", (_label, payload) => {
+			const ruleIds = scanForThreats(payload, { contexts: ["spreadsheet"] }).findings.map(
+				(finding) => finding.ruleId,
+			);
+
+			expect(ruleIds).toContain("CSV-FORMULA-LEAD-001");
 		});
 
 		// The OWASP CSV Injection list names LF and the full-width forms as triggers too.
@@ -729,6 +768,23 @@ describe("output encoders", () => {
 
 			expect(ruleIds).toContain("CSV-FORMULA-LEAD-001");
 			expect(parseCsvRow(escapeCsvField(payload))[0]).toBe(`'${payload}`);
+		});
+
+		// NFKC expands U+FDFA to 18 code units. Normalizing the whole of this value would need
+		// a string longer than V8 allows, so one large cell would abort the export. Compared
+		// as a boolean, so a failure never prints the 30M-character value.
+		it("encodes a value whose NFKC form is too long for a string", () => {
+			const value = `x${"ﷺ".repeat(30_000_000)}`;
+
+			expect(escapeCsvField(value) === value).toBe(true);
+		});
+
+		// Only the head is normalized, so the head has to cover the whole leading run, which
+		// includes the full-width quotation mark because NFKC folds it onto `"`.
+		it("neutralises a small equals sign behind a long full-width quotation mark run", () => {
+			const payload = `${"＂".repeat(1_000_000)}﹦1+1`;
+
+			expect(escapeCsvField(payload) === `'${payload}`).toBe(true);
 		});
 
 		// An array stringifies to its elements joined by commas, so its first element
@@ -800,7 +856,8 @@ describe("output encoders", () => {
 
 		// A reader may split on a different separator than the writer used, and an unquoted
 		// separator would then start a cell whose leading trigger was never checked. Quoting
-		// keeps the separator inside a first-column cell, where the quote starts the line.
+		// keeps the separator inside a first-column cell, while the reader is in step with the
+		// writer and so sees the quote open the field.
 		it.each([
 			[",", ";"],
 			[";", ","],
@@ -836,12 +893,13 @@ describe("output encoders", () => {
 			},
 		);
 
-		// The same limit for a line break: that reader never opens the quote, so the LF ends
-		// its record and the text after it starts the next record's first cell.
+		// The same limit for a line break, read by a reader that ends a record only at a line
+		// break outside quotes. In the first column it opens the writer's quote, so the LF
+		// stays in the cell. In a later column it takes the quote literally, so the LF ends
+		// the record and the text after it starts the next record's first cell, unchecked.
 		it("leaves a line break in a later column to a reader that splits on another separator", () => {
-			const row = toCsvRow(["a", "x\n=1+1"]);
-
-			expect(row.split("\n").map((line) => parseCsvRow(line, ";"))).toEqual([['a,"x'], ['=1+1"']]);
+			expect(parseCsv(toCsvRow(["x\n=1+1", "a"]), ";")).toEqual([["x\n=1+1,a"]]);
+			expect(parseCsv(toCsvRow(["a", "x\n=1+1"]), ";")).toEqual([['a,"x'], ['=1+1"']]);
 		});
 
 		// A reader that splits on one character of a multi-character delimiter can split the

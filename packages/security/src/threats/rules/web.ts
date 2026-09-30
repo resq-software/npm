@@ -434,9 +434,12 @@ export const FORMULA_INJECTION_RULES: readonly ThreatRule[] = [
 		cwe: 1236,
 		primaryControl: FORMULA_CONTROL,
 		// Unbounded, like `escapeCsvField`: a reader that strips the leading run strips all
-		// of it. One anchored character class under `*` backtracks linearly. The triggers
-		// are the OWASP list, LF and the full-width `=` `+` `-` `@` included.
-		pattern: /^[\s'"]*[=+\-@\t\r\n\uff1d\uff0b\uff0d\uff20]/,
+		// of it. One anchored character class under `*` backtracks linearly. The run adds
+		// U+001C to U+001F and U+0085 to `\s`, since Python's `strip()`, .NET's `Trim()` and
+		// Java's `trim()` remove some or all of them. The triggers are the OWASP list, LF and
+		// the full-width `=` `+` `-` `@` included.
+		// biome-ignore lint/suspicious/noControlCharactersInRegex: U+001C to U+001F are whitespace to the readers that trim them
+		pattern: /^[\s\x1c-\x1f\x85'"]*[=+\-@\t\r\n\uff1d\uff0b\uff0d\uff20]/,
 	},
 	{
 		id: "CSV-DDE-001",

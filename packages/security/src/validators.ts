@@ -528,17 +528,49 @@ export function encodeLogValue(
  * cap only moves the bypass one character past the cap. One anchored character class
  * under `*` backtracks linearly, so the unbounded run carries no ReDoS cost.
  *
+ * The run is `'`, `"` and whitespace: JavaScript's `\s`, plus U+001C to U+001F and U+0085,
+ * which `\s` omits but other runtimes trim. Python's `strip()` removes all five, .NET's
+ * `Trim()` removes U+0085 and Java's `trim()` removes U+001C to U+001F.
+ *
  * The trigger class is the OWASP CSV Injection list: `=`, `+`, `-`, `@`, TAB, CR and LF,
  * plus the full-width `=` `+` `-` `@` (U+FF1D, U+FF0B, U+FF0D, U+FF20), which some
  * locales read as formulas too.
  *
- * `escapeCsvField` also tests the value's NFKC form, because the rule matches the scan's
- * `nfkc` variant: NFKC folds the small `=` `+` `-` `@` (U+FE66, U+FE62, U+FE63, U+FE6B)
- * onto triggers and the full-width `"` and `'` (U+FF02, U+FF07) onto the leading run.
- * The rule's percent- and HTML-decoded variants have no counterpart here, since no
+ * `escapeCsvField` also tests the NFKC form of the value's head, because the rule matches
+ * the scan's `nfkc` variant: NFKC folds the small `=` `+` `-` `@` (U+FE66, U+FE62, U+FE63,
+ * U+FE6B) onto triggers and the full-width `"` and `'` (U+FF02, U+FF07) onto the leading
+ * run. The rule's percent- and HTML-decoded variants have no counterpart here, since no
  * spreadsheet decodes a cell that way.
  */
-const CSV_FORMULA_LEAD = /^[\s'"]*[=+\-@\t\r\n\uff1d\uff0b\uff0d\uff20]/;
+// biome-ignore lint/suspicious/noControlCharactersInRegex: U+001C to U+001F are whitespace to the readers that trim them
+const CSV_FORMULA_LEAD = /^[\s\x1c-\x1f\x85'"]*[=+\-@\t\r\n\uff1d\uff0b\uff0d\uff20]/;
+
+/**
+ * The raw leading run of {@link CSV_FORMULA_LEAD}, plus U+FF02 and U+FF07, the only
+ * characters outside that run whose NFKC form falls inside it.
+ */
+// biome-ignore lint/suspicious/noControlCharactersInRegex: U+001C to U+001F are whitespace to the readers that trim them
+const CSV_NFKC_LEADING_RUN = /^[\s\x1c-\x1f\x85'"\uff02\uff07]*/;
+
+/**
+ * Characters normalized after the leading run: enough for the character that follows
+ * the run to decompose, and for most of its combining marks.
+ */
+const CSV_NFKC_TAIL = 16;
+
+/**
+ * The NFKC form of a value's leading run and the {@link CSV_NFKC_TAIL} characters after
+ * it, which is as far as {@link CSV_FORMULA_LEAD} can match.
+ *
+ * Each character of the run normalizes to one code unit, so the result outgrows the
+ * slice by at most 18 units per tail character, whatever the value's length. A cut can
+ * part a character from a later combining mark, which can only leave a trigger that
+ * composition would have absorbed, so the check errs towards the prefix.
+ */
+function normalizedHead(value: string): string {
+	const run = CSV_NFKC_LEADING_RUN.exec(value)?.[0].length ?? 0;
+	return value.slice(0, run + CSV_NFKC_TAIL).normalize("NFKC");
+}
 
 /**
  * Fields containing any of these are quoted.
@@ -549,12 +581,15 @@ const CSV_FORMULA_LEAD = /^[\s'"]*[=+\-@\t\r\n\uff1d\uff0b\uff0d\uff20]/;
  * unquoted separator there starts a new cell whose leading characters were never checked.
  * Quoting is always valid under RFC 4180 and changes no value.
  *
- * For a reader using another separator, that protects the first column only. A quote
- * opens a field only at the start of a field as the reader sees it. A row's first field
- * starts at the start of the line, where every reader starts one, but a later field
- * starts after the writer's delimiter, which that reader does not split on. It takes the
- * quote literally, so a separator or line break inside the value still starts a cell, or
- * a row, whose leading characters were never checked.
+ * Quoting does not reliably protect any column from a reader that uses another separator.
+ * A quote opens a field only at the start of a field as the reader sees it. A later field
+ * starts after the writer's delimiter, which that reader does not split on, so it takes
+ * the quote literally, and a separator or line break inside the value still starts a
+ * cell, or a row, whose leading characters were never checked. The first column is safe
+ * only when that reader splits on comma, semicolon or TAB and no earlier cell has thrown
+ * it out of step: a later value holding its separator followed by `"` leaves it inside a
+ * quoted field across the line break. Read the file with the delimiter it was written
+ * with.
  */
 const CSV_QUOTE_REQUIRED = /[",;\t\r\n]/;
 
@@ -582,14 +617,17 @@ const CSV_QUOTE_REQUIRED = /[",;\t\r\n]/;
  * - The leading apostrophe is an Excel convention, **not** an RFC 4180 construct. Readers
  *   that do not implement it surface it as a literal character in the data.
  * - A field containing a comma, semicolon or TAB is quoted whatever the delimiter, but
- *   **that protects only the first column from a reader that splits on a different
- *   separator**. A quote opens a field only at the start of a field as the reader sees
- *   it, and in later columns that reader does not see a field start where the writer put
- *   the quote. It takes the quote literally, so a separator inside the value starts a new
- *   cell, and a line break a new row, whose leading characters were never checked. Only
- *   the trigger at the start of the whole value is neutralised. The same holds for a
- *   reader that ignores quotes, in every column. Make sure the reader splits on the
- *   delimiter the file was written with.
+ *   **quoting does not reliably protect any column from a reader that splits on a
+ *   different separator**. A quote opens a field only at the start of a field as the
+ *   reader sees it, and in later columns that reader does not see a field start where
+ *   the writer put the quote. It takes the quote literally, so a separator inside the
+ *   value starts a new cell, and a line break a new row, whose leading characters were
+ *   never checked. The first column is safe only when that reader splits on comma,
+ *   semicolon or TAB and no earlier cell has thrown it out of step: a later value holding
+ *   its separator followed by `"` leaves it inside a quoted field across the line break.
+ *   Only the trigger at the start of the whole value is neutralised. The same holds for a
+ *   reader that ignores quotes, in every column. Read the file with the delimiter it was
+ *   written with.
  * - A field containing any character of a multi-character delimiter is quoted too. That
  *   helps only a reader for which the quote still opens the field, which in later
  *   columns means one splitting on the whole delimiter or on its last character, so
@@ -629,10 +667,13 @@ export function escapeCsvField(
 	const cleaned = text.replace(/\u0000/g, "");
 
 	// The NFKC form is only tested, never written: the rule matches the scan's `nfkc`
-	// variant, and the file keeps the value as the caller wrote it.
+	// variant, and the file keeps the value as the caller wrote it. Only the head is
+	// normalized. NFKC can expand one character to 18 (U+FDFA), so normalizing a large
+	// value could throw a RangeError and abort the export, and a match depends only on
+	// the leading run and the character after it.
 	const needsPrefix =
 		isUntrustedText &&
-		(CSV_FORMULA_LEAD.test(cleaned) || CSV_FORMULA_LEAD.test(cleaned.normalize("NFKC")));
+		(CSV_FORMULA_LEAD.test(cleaned) || CSV_FORMULA_LEAD.test(normalizedHead(cleaned)));
 	const neutralised = needsPrefix ? `'${cleaned}` : cleaned;
 
 	// Any one character of a multi-character delimiter can split the row for a reader that
