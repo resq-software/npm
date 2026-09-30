@@ -433,7 +433,9 @@ export const FORMULA_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Cell value begins with a formula-trigger character",
 		cwe: 1236,
 		primaryControl: FORMULA_CONTROL,
-		pattern: /^[\s'"]{0,8}[=+\-@\t\r]/,
+		// Unbounded, like `escapeCsvField`: a reader that strips the leading run strips all
+		// of it. One anchored character class under `*` backtracks linearly.
+		pattern: /^[\s'"]*[=+\-@\t\r]/,
 	},
 	{
 		id: "CSV-DDE-001",

@@ -668,6 +668,41 @@ describe("output encoders", () => {
 			expect(inner).not.toMatch(/^[=+\-@\t\r]/);
 		});
 
+		// A reader that strips leading whitespace and quotes strips all of them, so the
+		// encoder has to see through a run of any length, not only a short one.
+		it.each([
+			["9 leading spaces", `${" ".repeat(9)}=1+1`],
+			["20 leading spaces", `${" ".repeat(20)}=HYPERLINK("https://evil.example")`],
+			["mixed quotes and spaces", `${`' "`.repeat(4)}=1+1`],
+			["a TAB behind leading spaces", `${" ".repeat(9)}\tSUM(1)`],
+			["a CR behind leading spaces", `${" ".repeat(9)}\rSUM(1)`],
+			["Unicode whitespace", `${" 　﻿".repeat(4)}=1+1`],
+		])("neutralises a trigger behind %s", (_label, payload) => {
+			const decoded = parseCsvRow(escapeCsvField(payload))[0];
+
+			expect(decoded).toBe(`'${payload}`);
+		});
+
+		// An array stringifies to its elements joined by commas, so its first element
+		// becomes the cell's leading text. Only the application's own scalars skip the prefix.
+		it.each([
+			["an array", ['=HYPERLINK("https://evil.example")', "x"]],
+			["an object with its own toString", { toString: () => "=1+1" }],
+		])("neutralises a trigger in %s", (_label, value) => {
+			const decoded = parseCsvRow(escapeCsvField(value))[0];
+
+			expect(decoded).toBe(`'${String(value)}`);
+		});
+
+		it.each([
+			["plain text", "hello"],
+			["plain text behind leading spaces", `${" ".repeat(20)}hello`],
+			["a negative number", -1234],
+			["a negative bigint", -5n],
+		])("leaves %s unprefixed", (_label, value) => {
+			expect(escapeCsvField(value)).toBe(String(value));
+		});
+
 		// A leading apostrophe and a position-independent DDE rule mean the encoded value
 		// still scans dirty. That is correct: the rules describe the value, the encoder
 		// protects the file. Asserting a clean scan would force both rules to be weakened.
@@ -675,6 +710,12 @@ describe("output encoders", () => {
 			const encoded = escapeCsvField("=SUM(1)");
 			const result = scanForThreats(encoded, { contexts: ["spreadsheet"] });
 			expect(result.findings.length).toBeGreaterThan(0);
+		});
+
+		it("detects a trigger behind a long leading run, as the encoder does", () => {
+			const result = scanForThreats(`${" ".repeat(20)}=1+1`, { contexts: ["spreadsheet"] });
+
+			expect(result.findings.map((finding) => finding.ruleId)).toContain("CSV-FORMULA-LEAD-001");
 		});
 
 		it("round-trips one encode through one decode", () => {

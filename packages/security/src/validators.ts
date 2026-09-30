@@ -523,8 +523,12 @@ export function encodeLogValue(
  * Mirrors `CSV-FORMULA-LEAD-001`, deliberately: the rule sees through leading quotes and
  * spaces because spreadsheet importers do, so an encoder that only looked at index 0
  * would leave ` =cmd|'/c calc'!A1` live.
+ *
+ * The leading run is unbounded because a reader that strips it strips all of it, so any
+ * cap only moves the bypass one character past the cap. One anchored character class
+ * under `*` backtracks linearly, so the unbounded run carries no ReDoS cost.
  */
-const CSV_FORMULA_LEAD = /^[\s'"]{0,8}[=+\-@\t\r]/;
+const CSV_FORMULA_LEAD = /^[\s'"]*[=+\-@\t\r]/;
 
 /** Fields containing any of these must be quoted per RFC 4180 sections 2.6 and 2.7. */
 const CSV_QUOTE_REQUIRED = /["\r\n]/;
@@ -540,10 +544,11 @@ const CSV_QUOTE_REQUIRED = /["\r\n]/;
  * Two separate jobs, in order: neutralise the formula trigger with a leading apostrophe,
  * then apply RFC 4180 quoting so the field cannot break the row.
  *
- * **Only strings are prefixed.** A `number` or `boolean` came from the application's own
- * types and cannot carry a formula, so `-1234` exports as a negative number while
+ * **Numbers, booleans and bigints are never prefixed.** They came from the application's
+ * own types and cannot carry a formula, so `-1234` exports as a negative number while
  * `"-1234"` exports as text. Pass numeric columns as numbers, or every negative value in
- * the sheet becomes a string.
+ * the sheet becomes a string. Every other value is treated as text, including an array or
+ * object, whose string form repeats contents the caller may not control.
  *
  * Three things worth knowing before relying on it:
  * - The leading apostrophe is an Excel convention, **not** an RFC 4180 construct. Readers
@@ -573,8 +578,10 @@ export function escapeCsvField(
 	if (value === null || value === undefined) return "";
 
 	const delimiter = options.delimiter ?? ",";
-	const isUntrustedText = typeof value === "string";
-	const text = isUntrustedText ? value : String(value);
+	const isTrustedScalar =
+		typeof value === "number" || typeof value === "boolean" || typeof value === "bigint";
+	const isUntrustedText = !isTrustedScalar;
+	const text = typeof value === "string" ? value : String(value);
 
 	// NUL cannot be represented in a CSV field and breaks several readers outright.
 	// biome-ignore lint/suspicious/noControlCharactersInRegex: NUL is a control character by definition
