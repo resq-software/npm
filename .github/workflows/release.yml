@@ -23,7 +23,7 @@ jobs:
       pull-requests: write
     outputs:
       published: ${{ steps.changesets.outputs.published }}
-      published-packages: ${{ steps.changesets.outputs.publishedPackages }}
+      published-packages: ${{ steps.published.outputs.packages }}
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -45,6 +45,26 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
 
+      # The registry state before publishing. Diffed against the manifests
+      # afterwards to work out what actually went out — see the `published` step
+      # below for why the action's own output cannot be used.
+      - name: Record pre-publish registry versions
+        run: |
+          set -euo pipefail
+          : > "$RUNNER_TEMP/pre-publish.tsv"
+          for dir in packages/*/; do
+            manifest="$dir/package.json"
+            [ -f "$manifest" ] || continue
+            name=$(node -p "require('./$manifest').name")
+            private=$(node -p "require('./$manifest').private === true")
+            [ "$private" = "true" ] && continue
+            # A package that has never been published has no version; record the
+            # empty string so the diff below treats its first release as new.
+            before=$(npm view "$name" version 2>/dev/null || true)
+            printf '%s\t%s\n' "$name" "$before" >> "$RUNNER_TEMP/pre-publish.tsv"
+          done
+          cat "$RUNNER_TEMP/pre-publish.tsv"
+
       - name: Run Changesets
         id: changesets
         uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
@@ -55,6 +75,46 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # What actually got published, computed rather than parsed.
+      #
+      # `changesets/action` derives its own `publishedPackages` output by scanning
+      # the publish script's stdout for `New tag:` lines. Changeset CLI v3 prints
+      # `Successfully published:` in a different format, so that scan finds nothing
+      # and the output comes back empty — while `published` stays `true`, because it
+      # is a boolean rather than a parse result. The attest job downstream then
+      # received an empty list and the release went out with no SBOM and no
+      # provenance. Diffing the registry against the manifests does not depend on
+      # any CLI's output format.
+      - name: Determine published packages
+        id: published
+        run: |
+          set -euo pipefail
+          # The `${...}` inside the single-quoted `node -e` script is JS, not shell,
+          # so it is meant to stay literal — SC2016 is a false positive.
+          # shellcheck disable=SC2016
+          node -e '
+            const fs = require("node:fs");
+            const before = new Map(
+              fs.readFileSync(process.env.RUNNER_TEMP + "/pre-publish.tsv", "utf8")
+                .split("\n").filter(Boolean)
+                .map((line) => line.split("\t"))
+                .map(([name, version]) => [name, version ?? ""]),
+            );
+            const published = [];
+            for (const dir of fs.readdirSync("packages")) {
+              const manifest = `packages/${dir}/package.json`;
+              if (!fs.existsSync(manifest)) continue;
+              const pkg = JSON.parse(fs.readFileSync(manifest, "utf8"));
+              if (pkg.private === true) continue;
+              if (!before.has(pkg.name)) continue;
+              if (before.get(pkg.name) !== pkg.version) {
+                published.push({ name: pkg.name, version: pkg.version });
+              }
+            }
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `packages=${JSON.stringify(published)}\n`);
+            console.log(`published ${published.length} package(s):`, JSON.stringify(published));
+          '
 
       # Mirror every published package to GitHub Packages. Runs only when
       # Changesets actually published (so the workspace was built by

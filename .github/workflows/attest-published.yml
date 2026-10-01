@@ -50,8 +50,24 @@ jobs:
           # The `${...}` inside the single-quoted script is JS, not shell.
           # shellcheck disable=SC2016
           node -e '
-            const list = JSON.parse(process.env.PACKAGES);
-            if (!Array.isArray(list) || list.length === 0) throw new Error("no published packages given");
+            const raw = (process.env.PACKAGES ?? "").trim();
+            // Checked before parsing. An empty input is the expected shape of the
+            // upstream failure (the release job emitting nothing), and JSON.parse("")
+            // reports it as "Unexpected end of JSON input" — a parser error that reads
+            // like a malformed list rather than an absent one, which is what sent the
+            // last investigation down the wrong path.
+            if (raw === "") {
+              throw new Error(
+                "no published packages given: the release job produced an empty list. " +
+                "The release went out WITHOUT an SBOM or provenance attestation.",
+              );
+            }
+            const list = JSON.parse(raw);
+            if (!Array.isArray(list) || list.length === 0) {
+              throw new Error(
+                "no published packages given: expected a non-empty JSON array, got " + raw,
+              );
+            }
             for (const { name, version } of list) {
               if (!/^@resq-systems\/[a-z0-9-]+$/.test(name) || !/^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/.test(version)) {
                 throw new Error(`unexpected package spec: ${name}@${version}`);
