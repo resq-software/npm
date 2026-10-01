@@ -22,6 +22,7 @@
 
 [![@resq-systems/ui](https://img.shields.io/npm/v/%40resq-systems%2Fui?style=flat-square&label=%40resq-systems%2Fui)](https://www.npmjs.com/package/@resq-systems/ui)
 [![@resq-systems/dsa](https://img.shields.io/npm/v/%40resq-systems%2Fdsa?style=flat-square&label=%40resq-systems%2Fdsa)](https://www.npmjs.com/package/@resq-systems/dsa)
+[![@resq-systems/math](https://img.shields.io/npm/v/%40resq-systems%2Fmath?style=flat-square&label=%40resq-systems%2Fmath)](https://www.npmjs.com/package/@resq-systems/math)
 [![@resq-systems/helpers](https://img.shields.io/npm/v/%40resq-systems%2Fhelpers?style=flat-square&label=%40resq-systems%2Fhelpers)](https://www.npmjs.com/package/@resq-systems/helpers)
 [![@resq-systems/http](https://img.shields.io/npm/v/%40resq-systems%2Fhttp?style=flat-square&label=%40resq-systems%2Fhttp)](https://www.npmjs.com/package/@resq-systems/http)
 [![@resq-systems/logger](https://img.shields.io/npm/v/%40resq-systems%2Flogger?style=flat-square&label=%40resq-systems%2Flogger)](https://www.npmjs.com/package/@resq-systems/logger)
@@ -53,6 +54,7 @@ graph TB
         end
         subgraph algorithms["Algorithms"]
             dsa["@resq-systems/dsa<br/><small>11 modules · zero deps</small>"]
+            math["@resq-systems/math<br/><small>expression engine · Pratt parser · zero deps</small>"]
         end
         subgraph infra["Infrastructure"]
             http["@resq-systems/http"]
@@ -103,6 +105,7 @@ graph TB
 | [`@resq-systems/types`](packages/types/) | Nominal/branded type toolkit — `Brand`, `Opaque`, `NumberRange`, numeric brands, `assertNever`, and type-level test helpers | **zero deps** | [README](packages/types/README.md) |
 | [`@resq-systems/ui`](packages/ui/) | React component library — dark-first oklch color system, WCAG AA, subpath exports; 63 components incl. the basic-six flight instruments | radix-ui, tailwindcss | [README](packages/ui/README.md) · [Storybook](https://design.resq.software) |
 | [`@resq-systems/dsa`](packages/dsa/) | Data structures & algorithms — graph, heap, trie, bloom filter, distance, LRU cache, queue | **zero deps** | [README](packages/dsa/README.md) |
+| [`@resq-systems/math`](packages/math/) | Type-safe mathematical expression engine — sort-based dispatch, Pratt parser, static validation, bounded evaluation | **zero deps** | [README](packages/math/README.md) |
 | [`@resq-systems/http`](packages/http/) | Effect-based HTTP client with retry, timeout, and schema validation | effect | [README](packages/http/README.md) |
 | [`@resq-systems/logger`](packages/logger/) | Structured logging with 7 levels, context, timing, and logging decorators | **zero deps** | [README](packages/logger/README.md) |
 | [`@resq-systems/security`](packages/security/) | AES-256-GCM encryption, threat detection, PII sanitization, input validation | effect (peer) | [README](packages/security/README.md) |
@@ -124,6 +127,10 @@ Working examples showing the packages in action:
 | [`react-dashboard`](examples/react-dashboard/) | Mission Control UI using all packages — cards, tables, badges, distance calculations, priority queues, throttled actions, sanitized logs | `bun --filter example-react-dashboard dev` |
 | [`node-api`](examples/node-api/) | Bun.serve() HTTP server with structured logging, rate limiting, PII sanitization, request tracking | `bun --filter example-node-api dev` |
 | [`dsa-pathfinding`](examples/dsa-pathfinding/) | Earthquake drone response — Graph pathfinding, PriorityQueue triage, BloomFilter survey tracking, Trie dispatch lookup | `bun --filter example-dsa-pathfinding start` |
+| [`fleet-telemetry`](examples/fleet-telemetry/) | Socket frames to map-ready geometry — injected transports, reconnect ladder, 50 Hz coalescing, MQTT topic addressing, asset parsing, antimeridian-safe GeoJSON tracks | `bun --filter example-fleet-telemetry start` |
+| [`nav-contacts`](examples/nav-contacts/) | Contact assessment for a USV — CPA/TCPA, risk ranking, crab angle, set and drift, staleness, and the four shapes of a refusal | `bun --filter example-nav-contacts start` |
+| [`math-sketch`](examples/math-sketch/) | Branded types and the expression engine — parse, check, compile, evaluate, plus how parse/sort/domain/step-limit failures surface | `bun --filter @resq-systems/example-math-sketch start` |
+| [`email-pipeline`](examples/email-pipeline/) | Transactional email — Effect Schema payload contract, headless render to HTML and text, optional Resend send | `bun --filter example-email-pipeline start` |
 
 ## Design Assets
 
