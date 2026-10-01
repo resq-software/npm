@@ -234,7 +234,7 @@
       },
       "peerDependencies": {
         "@effect/platform-bun": ">=4.0.0-beta.78",
-        "effect": ">=4.0.0-beta.78",
+        "effect": ">=4.0.0-rc.117",
       },
       "optionalPeers": [
         "@effect/platform-bun",

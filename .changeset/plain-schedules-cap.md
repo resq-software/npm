@@ -15,7 +15,7 @@
 -->
 
 ---
-"@resq-systems/http": patch
+"@resq-systems/http": minor
 ---
 
-Replace the `Schedule.both` retry cap removed in effect 4.0.0-rc.117 with `Schedule.upTo`, preserving exponential backoff and the retries + 1 attempt budget
+Replace the `Schedule.both` retry cap removed in effect 4.0.0-rc.117 with `Schedule.upTo` and raise the effect peer range to `>=4.0.0-rc.117`, since `Schedule.upTo` does not exist below it
