@@ -308,7 +308,12 @@ export const PROMPT_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Line beginning with a conversational role label",
 		cwe: 1427,
 		primaryControl: PROMPT_CONTROL,
-		pattern: /^\s{0,8}(?:system|assistant|developer|tool)\s{0,8}:/im,
+		// The leading run is unbounded, because a reader that strips indentation strips all
+		// of it, and horizontal. Under `/m`, `^` matches after every line terminator, so a
+		// run that could cross one would rescan the rest of the input from each line start
+		// and go quadratic. `\s` holds all four terminators (LF, CR, U+2028, U+2029), so the
+		// class removes each; the run then never leaves its line and the scan stays linear.
+		pattern: /^[^\S\r\n\u2028\u2029]*(?:system|assistant|developer|tool)\s{0,8}:/im,
 	},
 	{
 		id: "PROMPT-EXFIL-001",

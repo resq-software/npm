@@ -33,7 +33,7 @@
 import { describe, expect, it } from "vitest";
 import { scanForThreats } from "../src/threats/engine.js";
 import { THREAT_RULES } from "../src/threats/rules/index.js";
-import { ALL_THREAT_CONTEXTS } from "../src/threats/types.js";
+import { ALL_THREAT_CONTEXTS, type ThreatRule } from "../src/threats/types.js";
 import { PERFORMANCE } from "./fixtures/corpora.js";
 
 /**
@@ -73,6 +73,7 @@ const ADVERSARIAL_SEEDS = [
 	"&",
 	";",
 	":",
+	"\t",
 ] as const;
 
 /** Adversarial inputs reused across every rule. Built once. */
@@ -84,6 +85,58 @@ const ADVERSARIAL_INPUTS: readonly string[] = [
 	`${"$(".repeat(ADVERSARIAL_LENGTH / 2)}x`,
 	`${"{{".repeat(ADVERSARIAL_LENGTH / 2)}x`,
 ];
+
+/**
+ * Runs of each JavaScript line terminator, for the rules compiled with `/m`.
+ *
+ * Under `/m`, `^` matches after every terminator, so a leading run that can cross one
+ * rescans the rest of the input from each line start and goes quadratic. Without `/m`,
+ * `^` matches at index 0 alone and a terminator is one more character, which the
+ * shared inputs already cover.
+ */
+const LINE_TERMINATOR_INPUTS: readonly string[] = [
+	"\n".repeat(ADVERSARIAL_LENGTH),
+	"\r".repeat(ADVERSARIAL_LENGTH),
+	"\u2028".repeat(ADVERSARIAL_LENGTH),
+	"\u2029".repeat(ADVERSARIAL_LENGTH),
+	"\r\n".repeat(ADVERSARIAL_LENGTH / 2),
+	"\n ".repeat(ADVERSARIAL_LENGTH / 2),
+	"\n\t".repeat(ADVERSARIAL_LENGTH / 2),
+];
+
+/**
+ * Time one rule against each input and keep the slowest.
+ *
+ * @param rule - The rule under test.
+ * @param inputs - Adversarial inputs to try in turn.
+ * @returns The slowest time in milliseconds, and the first characters of that input.
+ */
+const worstCase = (
+	rule: ThreatRule,
+	inputs: readonly string[],
+): { readonly ms: number; readonly head: string } => {
+	let ms = 0;
+	let head = "";
+
+	for (const input of inputs) {
+		const started = performance.now();
+		rule.pattern.test(input);
+		const elapsed = performance.now() - started;
+		if (elapsed > ms) {
+			ms = elapsed;
+			// Escape everything outside printable ASCII so a run of whitespace or line
+			// terminators is legible in the failure message.
+			head = input
+				.slice(0, 8)
+				.replace(
+					/[^\x21-\x7e]/g,
+					(char) => `\\u${char.charCodeAt(0).toString(16).padStart(4, "0")}`,
+				);
+		}
+	}
+
+	return { ms, head };
+};
 
 // ============================================
 // Structural checks
@@ -132,23 +185,28 @@ describe("rule pattern cost", () => {
 	it.each(THREAT_RULES.map((rule) => [rule.id, rule] as const))(
 		"%s stays within its time budget on adversarial input",
 		(id, rule) => {
-			let worstMs = 0;
-			let worstInput = "";
+			const { ms, head } = worstCase(rule, ADVERSARIAL_INPUTS);
+			expect(ms, `${id} took ${ms.toFixed(1)}ms on input starting "${head}"`).toBeLessThan(
+				RULE_BUDGET_MS,
+			);
+		},
+	);
+});
 
-			for (const input of ADVERSARIAL_INPUTS) {
-				const started = performance.now();
-				rule.pattern.test(input);
-				const elapsed = performance.now() - started;
-				if (elapsed > worstMs) {
-					worstMs = elapsed;
-					worstInput = input.slice(0, 8);
-				}
-			}
+describe("multiline rule cost", () => {
+	const multiline = THREAT_RULES.filter((rule) => rule.pattern.multiline);
 
-			expect(
-				worstMs,
-				`${id} took ${worstMs.toFixed(1)}ms on input starting "${worstInput}"`,
-			).toBeLessThan(RULE_BUDGET_MS);
+	it("has at least one multiline rule to measure", () => {
+		expect(multiline.length).toBeGreaterThan(0);
+	});
+
+	it.each(multiline.map((rule) => [rule.id, rule] as const))(
+		"%s stays within its time budget on runs of line terminators",
+		(id, rule) => {
+			const { ms, head } = worstCase(rule, LINE_TERMINATOR_INPUTS);
+			expect(ms, `${id} took ${ms.toFixed(1)}ms on input starting "${head}"`).toBeLessThan(
+				RULE_BUDGET_MS,
+			);
 		},
 	);
 });
