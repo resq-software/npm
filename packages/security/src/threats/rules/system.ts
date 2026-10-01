@@ -358,8 +358,11 @@ export const FILE_INCLUSION_RULES: readonly ThreatRule[] = [
 		description: "Remote scheme where a local path was expected",
 		cwe: 98,
 		primaryControl: RFI_CONTROL,
+		// The leading run is unbounded, because a reader that strips leading whitespace
+		// strips all of it. Without `/m`, `^` matches only at index 0, so the run is entered
+		// once and backtracks at most its own length: linear.
 		pattern:
-			/(?:^\s{0,8}|[/\\=])(?:https?|ftps?|smb|cifs|nfs|webdav|ssh2|rar|zlib|compress\.(?:zlib|bzip2)):\/\//i,
+			/(?:^\s*|[/\\=])(?:https?|ftps?|smb|cifs|nfs|webdav|ssh2|rar|zlib|compress\.(?:zlib|bzip2)):\/\//i,
 	},
 	{
 		id: "RFI-DATA-URI-001",
@@ -371,9 +374,10 @@ export const FILE_INCLUSION_RULES: readonly ThreatRule[] = [
 		cwe: 98,
 		primaryControl: RFI_CONTROL,
 		// The class is ordered `[a-z0-9+.-]` deliberately: writing `[a-z0-9.+-]` embeds
-		// the literal substring `.+`, which the ReDoS structural test rejects.
+		// the literal substring `.+`, which the ReDoS structural test rejects. The leading
+		// run is unbounded and linear, as in RFI-REMOTE-SCHEME-001.
 		pattern:
-			/(?:^\s{0,8}|[/\\=])data:(?:\/\/)?(?:[a-z][a-z0-9+.-]{0,32}\/[a-z0-9+.-]{1,32}[a-z0-9;=+.-]{0,32}|;base64|),/i,
+			/(?:^\s*|[/\\=])data:(?:\/\/)?(?:[a-z][a-z0-9+.-]{0,32}\/[a-z0-9+.-]{1,32}[a-z0-9;=+.-]{0,32}|;base64|),/i,
 	},
 	{
 		id: "RFI-REMOTE-HOST-PATH-001",
@@ -385,8 +389,9 @@ export const FILE_INCLUSION_RULES: readonly ThreatRule[] = [
 		cwe: 98,
 		primaryControl: RFI_CONTROL,
 		// Re-grades rather than newly detects: PATH-ABSOLUTE-001 already matches these
-		// at low confidence, contributing 1.0 — not enough to leave the allow band.
-		pattern: /^\s{0,8}(?:\/\/|\\\\)[a-z0-9][a-z0-9-]{0,62}(?:\.[a-z0-9-]{1,63}){1,4}[/\\]/i,
+		// at low confidence, contributing 1.0 — not enough to leave the allow band. The
+		// leading run is unbounded and linear, as in RFI-REMOTE-SCHEME-001.
+		pattern: /^\s*(?:\/\/|\\\\)[a-z0-9][a-z0-9-]{0,62}(?:\.[a-z0-9-]{1,63}){1,4}[/\\]/i,
 	},
 ];
 
@@ -471,7 +476,9 @@ export const SSRF_RULES: readonly ThreatRule[] = [
 		description: "Non-HTTP scheme in a fetchable URL",
 		cwe: 918,
 		primaryControl: SSRF_CONTROL,
-		pattern: /^\s{0,8}(?:file|gopher|dict|tftp|ldaps?|jar|netdoc|sftp):/i,
+		// The leading run is unbounded, because a URL parser strips all of it, not eight.
+		// Without `/m`, `^` matches only at index 0, so the run is entered once: linear.
+		pattern: /^\s*(?:file|gopher|dict|tftp|ldaps?|jar|netdoc|sftp):/i,
 	},
 	{
 		id: "SSRF-USERINFO-INTERNAL-HOST-001",

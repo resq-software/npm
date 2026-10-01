@@ -1,0 +1,21 @@
+{
+	"name": "example-fleet-telemetry",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"description": "Socket frames to map-ready geometry with @resq-systems/telemetry and @resq-systems/map",
+	"scripts": {
+		"start": "bun run src/main.ts",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@resq-systems/map": "workspace:*",
+		"@resq-systems/telemetry": "workspace:*"
+	},
+	"devDependencies": {
+		"maplibre-gl": "6.11.2",
+		"react": "^19.3.0",
+		"react-dom": "^19.3.0",
+		"react-map-gl": "^8.1.3"
+	}
+}

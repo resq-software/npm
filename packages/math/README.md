@@ -27,32 +27,32 @@ bun add @resq-systems/math
 ## Quick Start
 
 ```ts
-import { N, S, add, mul, sum, v, evaluate, showValue } from "@resq-systems/math";
+import { N, S, add, compile, mul, sum, v, evaluate, showValue } from "@resq-systems/math";
 
 // (2 + 3) × 4 = 20
 const expr = mul(add(N(2), N(3)), N(4));
-console.log(showValue(evaluate(expr))); // "20"
+console.log(showValue(evaluate(compile(expr)))); // "20"
 
 // ∑_{i ∈ {1,2,3}} i × i = 14
 const sigma = sum("i", S(1, 2, 3), mul(v("i"), v("i")));
-console.log(showValue(evaluate(sigma))); // "14"
+console.log(showValue(evaluate(compile(sigma)))); // "14"
 ```
 
 ### Parse from String
 
 ```ts
-import { parse, evaluate, showValue } from "@resq-systems/math";
+import { compile, parse, evaluate, showValue } from "@resq-systems/math";
 
 const expr = parse("(2 + 3) * 4");
-console.log(showValue(evaluate(expr))); // "20"
+console.log(showValue(evaluate(compile(expr)))); // "20"
 
 // Unicode operators work too
 const sets = parse("{1, 2, 3} ∪ {3, 4}");
-console.log(showValue(evaluate(sets))); // "{1, 2, 3, 4}"
+console.log(showValue(evaluate(compile(sets)))); // "{1, 2, 3, 4}"
 
 // Binders
 const sigma = parse("sum(i in {1, 2, 3}, i * i)");
-console.log(showValue(evaluate(sigma))); // "14"
+console.log(showValue(evaluate(compile(sigma)))); // "14"
 ```
 
 ### Static Validation
