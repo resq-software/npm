@@ -449,7 +449,12 @@ const isFetcherValidationError = (error: unknown): error is FetcherValidationErr
 const createRetrySchedule = (retries: number, retryDelay: number) =>
 	pipe(
 		Schedule.exponential(Duration.millis(retryDelay)),
-		Schedule.both(Schedule.recurs(retries)),
+		// `Schedule.upTo` replaces the `Schedule.both(Schedule.recurs(n))` removed in
+		// effect rc.117. It caps the schedule at `retries` outputs while preserving the
+		// exponential delays, giving `retries` retries (retries + 1 total attempts).
+		// Do NOT swap in `Schedule.min`: it is union semantics, so it drops the cap
+		// entirely and zeroes the first delays.
+		Schedule.upTo({ times: retries }),
 		Schedule.while((metadata) => {
 			const error: unknown = metadata.input;
 			// Don't retry validation errors or client errors (except 429)
