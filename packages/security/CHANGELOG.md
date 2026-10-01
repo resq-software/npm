@@ -16,6 +16,12 @@
   limitations under the License.
 -->
 
+## 2.1.2
+
+### Patch Changes
+
+- [#351](https://github.com/resq-software/npm/pull/351) [`729663a`](https://github.com/resq-software/npm/commit/729663a1b99c3797a482aec61b604465caf303ae) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Detection rules now match after any leading whitespace. `PROMPT-ROLE-SPOOF-001`, `RFI-REMOTE-SCHEME-001`, `RFI-DATA-URI-001`, `RFI-REMOTE-HOST-PATH-001` and `SSRF-NON-HTTP-SCHEME-001` previously looked past at most eight leading whitespace characters. `PROMPT-ROLE-SPOOF-001` reads the run within a single line, and all five run in time linear in the input's length.
+
 ## 2.1.1
 
 ### Patch Changes
