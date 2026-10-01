@@ -24,6 +24,18 @@ on:
         description: JSON array of the published packages, each {"name", "version"} (changesets' publishedPackages shape).
         type: string
         required: true
+  # A release whose attest job exhausted its wait budget leaves real tarballs on
+  # npm with no SBOM and no provenance, and re-running the release job cannot fix
+  # it: `changeset publish` is a no-op once the versions exist, so the computed
+  # list comes back empty and the attest job is skipped. This is the way back —
+  # dispatch it with the same JSON the failed run printed, once npm has finished
+  # holding the versions.
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: 'JSON array to attest, e.g. [{"name":"@resq-systems/http","version":"2.1.0"}]'
+        type: string
+        required: true
 
 permissions: {}
 
@@ -31,7 +43,7 @@ jobs:
   attest:
     name: SBOM and provenance
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45 # must exceed WAIT_BUDGET_SECONDS below, or the timeout truncates the wait
     permissions:
       contents: write # attach the SBOM to each package's GitHub release
       id-token: write # Sigstore signing for the provenance attestation
@@ -41,12 +53,43 @@ jobs:
         with:
           persist-credentials: false
 
+      # Why this step waits rather than simply fetching: npm's publish pipeline
+      # returns 2xx to the CLI *before* the new version is readable, because new
+      # releases are held for a publish-time malware scan. `changeset publish`
+      # printing "Successfully published" is an acceptance receipt, not a promise
+      # the version can be read back. On 2026-10-01 this job started 39 seconds
+      # after that line and every `npm pack` failed with ETARGET; the two versions
+      # did not appear in the registry metadata for ~10 and ~12 minutes. GitHub
+      # documents the hold as "typically around five minutes ... up to 15 minutes
+      # or more" and states it is not a service guarantee, so waiting is the only
+      # correct response.
+      #
+      # Note what that rules out. A step that merely *verified* the published
+      # versions once would have found nothing here and fetched nothing — and a
+      # short tarball set is not rejected by `actions/attest`, which takes no
+      # expected-count input. It would have reported success while attesting less
+      # than it claimed. Waiting, and failing loudly when the wait runs out, is
+      # the point; the completeness assertion at the end of this step is what
+      # makes a partial set impossible.
       - name: Fetch the published tarballs from npm
         env:
           PACKAGES: ${{ inputs.packages }}
+          # Headroom over the worst delay measured on a real release (~12 min to
+          # metadata, ~14 to npm's own publish attestation), plus the packument's
+          # five-minute CDN max-age, which can stack on top of it. The job's
+          # timeout-minutes must stay comfortably above this or the timeout
+          # truncates the wait instead of the wait completing.
+          WAIT_BUDGET_SECONDS: "1800"
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/published"
+
+          dest="$RUNNER_TEMP/published"
+          mkdir -p "$dest"
+          # Deliberately no `-type f`: that predicate skips symlinks, while the
+          # glob `actions/attest` signs (`$RUNNER_TEMP/published/*.tgz`) follows
+          # them — so a leftover link from an earlier job on a reused runner would
+          # be attested as though this release had produced it.
+          find "$dest" -maxdepth 1 -name '*.tgz' -delete
           # The `${...}` inside the single-quoted script is JS, not shell.
           # shellcheck disable=SC2016
           node -e '
@@ -69,16 +112,133 @@ jobs:
               );
             }
             for (const { name, version } of list) {
-              if (!/^@resq-systems\/[a-z0-9-]+$/.test(name) || !/^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/.test(version)) {
+              // The name class is deliberately narrow: this value reaches a shell
+              // command and a registry URL below. The version allows a semver
+              // prerelease AND build metadata — an earlier form rejected
+              // `1.2.3+build.1`, which npm permits, and would have failed an
+              // entire release over one legal version string.
+              const NAME = /^@resq-systems\/[a-z0-9-]+$/;
+              const VERSION = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
+              if (!NAME.test(name) || !VERSION.test(version)) {
                 throw new Error(`unexpected package spec: ${name}@${version}`);
               }
               console.log(`${name}@${version}`);
             }
-          ' > "$RUNNER_TEMP/specs.txt"
+          ' | tee "$RUNNER_TEMP/specs.txt"
+
+          # `npm pack` is the gate, retried — not a metadata probe. It resolves the
+          # version, downloads the tarball and checks it against the integrity hash
+          # the registry advertises, so one success means the exact bytes about to
+          # be attested are the bytes an installer receives. Registry metadata can
+          # lead its own tarballs, so a metadata check alone would pass too early.
+          #
+          # `--loglevel error`, never `--silent`: `--silent` is `--loglevel silent`
+          # and suppresses npm's errors too, which is what reduced the 2026-10-01
+          # failure to a five-second, zero-output exit 1. Never `--offline` or
+          # `--prefer-offline` either — those can serve a cached ETARGET without a
+          # network request, so the loop could never recover.
+          #
+          # `--fetch-retries=0 --fetch-timeout` plus `timeout` bound a SINGLE
+          # attempt. npm's defaults (fetch-timeout 5m, fetch-retries 2) let one
+          # stalled attempt run ~17 minutes and consume the whole budget without
+          # ever being retried by this loop.
+          pack_attempt() {
+            timeout 150 npm pack "$1" \
+              --pack-destination "$dest" \
+              --loglevel error \
+              --fetch-retries=0 \
+              --fetch-timeout=60000
+          }
+
+          # One wall-clock deadline for the whole set, not one per package: the
+          # registry finalizes this run's versions concurrently, so time spent
+          # waiting on the first is time the rest have also had.
+          deadline=$(( $(date +%s) + WAIT_BUDGET_SECONDS ))
+          unresolved=''
           while IFS= read -r spec; do
-            npm pack "$spec" --pack-destination "$RUNNER_TEMP/published" --silent
+            [ -n "$spec" ] || continue
+            delay=10
+            while true; do
+              if pack_attempt "$spec" 2>"$RUNNER_TEMP/pack.err"; then
+                cat "$RUNNER_TEMP/pack.err" >&2
+                break
+              fi
+              cat "$RUNNER_TEMP/pack.err" >&2
+              # Waiting cannot fix an authentication or permission failure, and
+              # sitting on one for the full budget would hold `id-token: write`
+              # and `attestations: write` for half an hour to no purpose.
+              if grep -qE 'code E(401|403|AUTH|PERM)' "$RUNNER_TEMP/pack.err"; then
+                echo "::error::$spec failed for a non-transient reason (see the npm error above); not retrying."
+                unresolved="${unresolved}${spec} "
+                break
+              fi
+              remaining=$(( deadline - $(date +%s) ))
+              if [ "$remaining" -le 0 ]; then
+                unresolved="${unresolved}${spec} "
+                break
+              fi
+              [ "$delay" -gt "$remaining" ] && delay="$remaining"
+              echo "not fetchable yet: $spec — retrying in ${delay}s (${remaining}s of budget left)"
+              sleep "$delay"
+              delay=$(( delay * 2 ))
+              [ "$delay" -gt 60 ] && delay=60
+            done
           done < "$RUNNER_TEMP/specs.txt"
-          ls -l "$RUNNER_TEMP/published"
+
+          # One final attempt per unresolved spec. Without this, a version that
+          # becomes readable a second after the deadline is reported as
+          # permanently missing while the very next diagnostic shows it present —
+          # a self-contradicting failure that wastes the next investigation.
+          if [ -n "$unresolved" ]; then
+            still=''
+            for spec in $unresolved; do
+              if pack_attempt "$spec"; then
+                echo "::notice::$spec resolved just past the deadline."
+              else
+                still="${still}${spec} "
+              fi
+            done
+            unresolved="$still"
+          fi
+
+          for spec in $unresolved; do
+            name="${spec%@*}"
+            version="${spec##*@}"
+            enc=$(node -p 'encodeURIComponent(process.argv[1])' "$name")
+            pkg_code=$(curl -sS -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/$enc" || echo 000)
+            ver_code=$(curl -sS -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/$enc/$version" || echo 000)
+            # Both documents, because one alone cannot tell these apart. A missing
+            # VERSION is ambiguous by nature: npm holds new versions for a
+            # publish-time malware scan ("typically around five minutes ... up to
+            # 15 minutes or more", and explicitly not a service guarantee), so a
+            # 404 here means "not yet OR never" and nothing outside npm can
+            # separate them. A missing PACKAGE is not ambiguous.
+            if [ "$pkg_code" = "404" ]; then
+              echo "::error::$spec — the package itself is absent from the registry (HTTP 404). The publish did not land; check the release job."
+            elif [ "$ver_code" = "404" ]; then
+              echo "::error::$spec — the package exists but this version is still unreadable (HTTP 404). Either npm's publish-time scan is still holding it, or it was never published. Re-run this job; if it persists, check the release job."
+            else
+              # Deliberately does not quote the budget: this branch is also reached
+              # by a fast non-transient failure that never waited at all.
+              echo "::error::$spec — could not be fetched (package HTTP $pkg_code, version HTTP $ver_code). See the npm error above."
+            fi
+          done
+
+          # Counted over the SAME glob the provenance step signs, not a stricter
+          # find(1) expression. `subject-path` is a shell glob and follows
+          # symlinks, so a count taken with `-type f` can disagree with what
+          # actually gets attested.
+          shopt -s nullglob
+          set -- "$dest"/*.tgz
+          actual=$#
+          expected=$(grep -c . "$RUNNER_TEMP/specs.txt")
+
+          if [ -n "$unresolved" ] || [ "$actual" -ne "$expected" ]; then
+            echo "::error::Fetched $actual of $expected published tarball(s). Refusing to attest a partial set — this release is UNATTESTED."
+            exit 1
+          fi
+          echo "all $actual published tarball(s) fetched and integrity-checked"
+          ls -l "$dest"
 
       - name: Generate SBOM (SPDX JSON)
         uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
