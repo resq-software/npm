@@ -45,25 +45,32 @@ function createStorageMock() {
 }
 
 describe("storage", () => {
-	// Store original implementations
-	const originalLocalStorage = global.localStorage;
-	const originalSessionStorage = global.sessionStorage;
-
 	let localStorageMock: ReturnType<typeof createStorageMock>;
 	let sessionStorageMock: ReturnType<typeof createStorageMock>;
 
 	beforeEach(() => {
+		// `vi.stubGlobal` rather than `global.localStorage = …`. Vitest 5 made a
+		// global assignment in a DOM environment write through to the backing jsdom
+		// `Window` (vitest-dev/vitest#10373), and jsdom exposes `localStorage` and
+		// `sessionStorage` as getter-only accessors — so the plain assignment throws
+		// `TypeError: Cannot set property localStorage of [object Window] which has
+		// only a getter`, in `beforeEach`, taking every test in the file with it.
+		// `stubGlobal` redefines the property instead, so no setter runs.
 		localStorageMock = createStorageMock();
-		global.localStorage = localStorageMock;
+		vi.stubGlobal("localStorage", localStorageMock);
 
 		sessionStorageMock = createStorageMock();
-		global.sessionStorage = sessionStorageMock;
+		vi.stubGlobal("sessionStorage", sessionStorageMock);
+
+		// The stub is load-bearing: real jsdom storage does not throw, so these
+		// tests would pass vacuously if it ever silently stopped applying.
+		expect(globalThis.localStorage).toBe(localStorageMock);
+		expect(globalThis.sessionStorage).toBe(sessionStorageMock);
 	});
 
 	afterEach(() => {
-		// Restore original implementations
-		global.localStorage = originalLocalStorage;
-		global.sessionStorage = originalSessionStorage;
+		// Restores the descriptors captured at stub time — jsdom's real Storage.
+		vi.unstubAllGlobals();
 		vi.clearAllMocks();
 	});
 
