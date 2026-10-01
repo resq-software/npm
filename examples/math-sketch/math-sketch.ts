@@ -30,9 +30,14 @@
  *      it once per element in an extended environment. Binders are not functions
  *      of already-evaluated operands — this is why ∑/∫/∀ can't be table entries.
  *
+ * The second half of the file runs the same demos through @resq-systems/math,
+ * which is this design shipped: same sorts, same sort-keyed dispatch, same
+ * binders, plus a parser, a static sort pass and a compile step.
+ *
  * Run:  bun run examples/math-sketch/math-sketch.ts
  */
 
+import * as math from "@resq-systems/math";
 import { matchTag } from "@resq-systems/types/union";
 
 // ---------- Values: the two domains ("sorts") + booleans for relations ----------
@@ -209,3 +214,143 @@ const demos: ReadonlyArray<readonly [string, Expr]> = [
 for (const [label, expr] of demos) {
 	console.log(`${label.padEnd(38)} = ${show(evaluate(expr))}`);
 }
+
+// ---------- The same architecture, shipped: @resq-systems/math ----------
+// Everything above is a sketch of a design. @resq-systems/math is that design
+// hardened — it is sorted values, dispatch keyed on (symbol, operand sorts),
+// relations in their own table, and binders as a node kind holding an
+// unevaluated body. The five claims in the header comment are its structure.
+//
+// What a sketch skips and the package does not:
+//
+//   parse      a Pratt parser, so an expression can arrive as text
+//   checkExpr  a STATIC sort pass that RETURNS its errors rather than throwing,
+//              so you can learn the result sort without having run anything
+//   compile    bound variables resolved to De Bruijn indices, so `evaluate`
+//              indexes a stack instead of allocating the `new Map(env).set(…)`
+//              that `bigSum` above pays once per element of the domain
+//
+// The order is load-bearing: `evaluate` takes a CompiledExpr, so the call is
+// always `evaluate(compile(expr))` — `evaluate(expr)` does not typecheck.
+//
+// Imported as a namespace on purpose. The package exports `num`, `bool`, `lit`,
+// `v`, `card`, `sum`, `setEq`, `evaluate`, `N`, `S` and the types `Value`,
+// `Sort`, `Expr`, `Env` — every one of which this file has already bound above.
+// `math.` keeps the sketch and the shipped engine visible side by side instead
+// of making either one shadow the other.
+
+// A CheckResult is a discriminated union, not a thrown error: `ok` carries the
+// inferred sort, and the failure case carries ALL the sort errors, not just the
+// first one the walker tripped over.
+const describe = (result: math.CheckResult): string =>
+	result.ok ? result.sort : result.errors.map((e) => e.message).join("; ");
+
+// Only MathError is ours. Anything else is a bug in this file and must keep
+// propagating — a catch-all here would hide it.
+const caught = (thunk: () => string): string => {
+	try {
+		return thunk();
+	} catch (error) {
+		if (error instanceof math.MathError) return `${error.code} — ${error.message}`;
+		throw error;
+	}
+};
+
+// ---------- The demos above, as source text, through the real pipeline ----------
+// Note what `print` does on the way back out: ASCII `*` renders as `×`, and the
+// parser's `sum(i in …, …)` renders as `∑(i ∈ …) …` — the notation the sketch
+// could only put in a hand-written label. Unicode operators parse on input too,
+// so `∪`, `∩`, `∈` and `⊆` below are read, not just written.
+const sources: readonly string[] = [
+	"(2 + 3) * 4", //                     ASCII in, mathematical notation out
+	"{1,2,3} ∪ {3,4}", //                 same engine, set domain
+	"{1,2} + {2,3}", //                   `+` really is overloaded onto sets here
+	"#({1,2,3} ∩ {2,3,4})", //            set -> num via #
+	"2 ∈ {1,2,3}", //                     relation -> bool
+	"{1} ⊆ {1,2}",
+	"sum(i in {1,2,3}, i * i)", //        binder
+];
+
+console.log("\n@resq-systems/math — parse → check → compile → evaluate\n");
+
+for (const source of sources) {
+	const expr = math.parse(source);
+	const checked = math.checkExpr(expr);
+	// The check GATES the run. Nothing is evaluated for an expression whose sorts
+	// did not line up, which is the entire reason the stage exists.
+	const value = checked.ok ? math.showValue(math.evaluate(math.compile(expr))) : "(not evaluated)";
+	console.log(`${math.print(expr).padEnd(26)} = ${value.padEnd(14)} : ${describe(checked)}`);
+}
+
+// ---------- Free variables: two maps, at two different stages ----------
+// The sketch has one environment. The package has two, because the static pass
+// and the evaluator want different things about the same free variable:
+//
+//   SortContext  ReadonlyMap<string, Sort>   checkExpr needs its DOMAIN, to infer
+//                                            a result sort without running it
+//   Env          ReadonlyMap<string, Value>  evaluate needs its VALUE
+//
+// Omitting the SortContext is not "no opinion about x" — the check reports it as
+// unbound, because an expression with an unknown free variable has no inferable
+// sort to report. Omitting the Env is the matching failure one stage later.
+const open = math.parse("x * 2");
+const context: math.SortContext = new Map([["x", "num"]]);
+const env: math.Env = new Map([["x", math.num(21)]]);
+
+console.log(`\n${math.print(open)}`);
+console.log(`  checked, no context  : ${describe(math.checkExpr(open))}`);
+console.log(`  checked, x : num     : ${describe(math.checkExpr(open, context))}`);
+console.log(
+	`  evaluated, no env    : ${caught(() => math.showValue(math.evaluate(math.compile(open))))}`,
+);
+console.log(`  evaluated, x = 21    : ${math.showValue(math.evaluate(math.compile(open), env))}`);
+
+// ---------- Three ways this engine says no ----------
+// Which channel a failure arrives on is a decision, not an accident:
+//
+//   parse      THROWS ParseError. The text is not an expression, so there is no
+//              Expr to hand back and nothing downstream to attempt.
+//   checkExpr  RETURNS { ok: false, errors }. A sort mismatch is a RESULT about a
+//              well-formed expression, and a caller usually wants every one of them.
+//   evaluate   THROWS a MathError subclass. The expression was well sorted, so the
+//              failure is about the actual values and belongs at the point that
+//              produced it.
+//
+// All of them carry a stable `.code`, so `instanceof MathError` plus a switch on
+// `.code` is the handler — never a match on message text.
+console.log("\nHow failure surfaces\n");
+
+console.log(`parse("2 +")             : ${caught(() => math.print(math.parse("2 +")))}`);
+
+// `.code` is what you branch on, but the subclass behind it carries structured
+// fields — ParseError knows where it stopped, DomainError knows which operator
+// refused, ExecutionLimitError knows the budget it hit. None of that has to be
+// recovered by scraping the message.
+try {
+	math.parse("2 +");
+} catch (error) {
+	if (!(error instanceof math.ParseError)) throw error;
+	console.log(
+		`  …and where it stopped  : position ${error.position}, found ${JSON.stringify(error.found)}`,
+	);
+}
+
+console.log(
+	`check 1 + true           : ${describe(math.checkExpr(math.add(math.N(1), math.B(true))))}`,
+);
+console.log(`check #3                 : ${describe(math.checkExpr(math.card(math.N(3))))}`);
+console.log(
+	`evaluate 1 / 0           : ${caught(() => math.showValue(math.evaluate(math.compile(math.parse("1 / 0")))))}`,
+);
+
+// A step budget, for evaluating an expression you did not write yourself. The
+// engine stops at the limit rather than running as long as the input asks it to.
+console.log(
+	`evaluate under 3 steps   : ${caught(() =>
+		math.showValue(
+			math.evaluate(math.compile(math.parse("sum(i in {1,2,3}, i * i)")), undefined, undefined, {
+				maxSteps: 3,
+			}),
+		),
+	)}`,
+);

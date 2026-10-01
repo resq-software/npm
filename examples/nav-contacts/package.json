@@ -1,0 +1,14 @@
+{
+	"name": "example-nav-contacts",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"description": "Contact assessment with @resq-systems/nav — what a navigation library refuses to tell you",
+	"scripts": {
+		"start": "bun run src/main.ts",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@resq-systems/nav": "workspace:*"
+	}
+}
