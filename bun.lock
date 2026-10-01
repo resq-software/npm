@@ -39,14 +39,36 @@
         "typescript": "7.0.2",
       },
     },
+    "examples/fleet-telemetry": {
+      "name": "example-fleet-telemetry",
+      "version": "0.0.0",
+      "dependencies": {
+        "@resq-systems/map": "workspace:*",
+        "@resq-systems/telemetry": "workspace:*",
+      },
+      "devDependencies": {
+        "maplibre-gl": "6.11.2",
+        "react": "^19.3.0",
+        "react-dom": "^19.3.0",
+        "react-map-gl": "^8.1.3",
+      },
+    },
     "examples/math-sketch": {
       "name": "@resq-systems/example-math-sketch",
       "version": "0.0.0",
       "dependencies": {
+        "@resq-systems/math": "workspace:*",
         "@resq-systems/types": "workspace:*",
       },
       "devDependencies": {
         "typescript": "^7.0.2",
+      },
+    },
+    "examples/nav-contacts": {
+      "name": "example-nav-contacts",
+      "version": "0.0.0",
+      "dependencies": {
+        "@resq-systems/nav": "workspace:*",
       },
     },
     "examples/node-api": {
@@ -1912,6 +1934,10 @@
     "example-dsa-pathfinding": ["example-dsa-pathfinding@workspace:examples/dsa-pathfinding"],
 
     "example-email-pipeline": ["example-email-pipeline@workspace:examples/email-pipeline"],
+
+    "example-fleet-telemetry": ["example-fleet-telemetry@workspace:examples/fleet-telemetry"],
+
+    "example-nav-contacts": ["example-nav-contacts@workspace:examples/nav-contacts"],
 
     "example-node-api": ["example-node-api@workspace:examples/node-api"],
 
