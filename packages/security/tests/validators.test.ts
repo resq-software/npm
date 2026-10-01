@@ -611,17 +611,21 @@ describe("output encoders", () => {
 	});
 
 	describe("escapeCsvField", () => {
-		/** RFC 4180 reader, so these assert a round trip rather than a golden string. */
-		const parseCsvRow = (row: string, delimiter = ","): string[] => {
-			const out: string[] = [];
+		/**
+		 * RFC 4180 reader, so these assert a round trip rather than a golden string. A CR,
+		 * LF or CRLF outside quotes ends a record, as it does for a spreadsheet.
+		 */
+		const parseCsv = (text: string, delimiter = ","): string[][] => {
+			const records: string[][] = [];
+			let record: string[] = [];
 			let field = "";
 			let index = 0;
 			let quoted = false;
-			while (index < row.length) {
-				const char = row[index];
+			while (index < text.length) {
+				const char = text[index];
 				if (quoted) {
 					if (char === '"') {
-						if (row[index + 1] === '"') {
+						if (text[index + 1] === '"') {
 							field += '"';
 							index += 2;
 							continue;
@@ -640,16 +644,30 @@ describe("output encoders", () => {
 					continue;
 				}
 				if (char === delimiter) {
-					out.push(field);
+					record.push(field);
 					field = "";
 					index++;
+					continue;
+				}
+				if (char === "\r" || char === "\n") {
+					records.push([...record, field]);
+					record = [];
+					field = "";
+					index += char === "\r" && text[index + 1] === "\n" ? 2 : 1;
 					continue;
 				}
 				field += char;
 				index++;
 			}
-			out.push(field);
-			return out;
+			records.push([...record, field]);
+			return records;
+		};
+
+		/** One encoded row, which must read back as exactly one record. */
+		const parseCsvRow = (row: string, delimiter = ","): string[] => {
+			const records = parseCsv(row, delimiter);
+			if (records.length !== 1) throw new Error(`expected one record, read ${records.length}`);
+			return records[0];
 		};
 
 		it.each([
@@ -665,7 +683,137 @@ describe("output encoders", () => {
 		])("neutralises the formula trigger in %o", (payload) => {
 			const encoded = escapeCsvField(payload);
 			const inner = encoded.startsWith('"') ? encoded.slice(1) : encoded;
-			expect(inner).not.toMatch(/^[=+\-@\t\r]/);
+			expect(inner).not.toMatch(/^[=+\-@\t\r\n\uff1d\uff0b\uff0d\uff20]/);
+		});
+
+		// A reader that strips leading whitespace and quotes strips all of them, so the
+		// encoder has to see through a run of any length, not only a short one.
+		it.each([
+			["9 leading spaces", `${" ".repeat(9)}=1+1`],
+			["20 leading spaces", `${" ".repeat(20)}=HYPERLINK("https://evil.example")`],
+			["mixed quotes and spaces", `${`' "`.repeat(4)}=1+1`],
+			["a TAB behind leading spaces", `${" ".repeat(9)}\tSUM(1)`],
+			["a CR behind leading spaces", `${" ".repeat(9)}\rSUM(1)`],
+			["Unicode whitespace", `${"\u00a0\u3000\ufeff".repeat(4)}=1+1`],
+		])("neutralises a trigger behind %s", (_label, payload) => {
+			const decoded = parseCsvRow(escapeCsvField(payload))[0];
+
+			expect(decoded).toBe(`'${payload}`);
+		});
+
+		// JavaScript's `\s` omits U+001C to U+001F and U+0085, but Python's `strip()` removes
+		// all five, .NET's `Trim()` removes U+0085 and Java's `trim()` U+001C to U+001F.
+		// Python's `str.splitlines()` also ends a line at each of them but U+001F, so a
+		// trigger behind one gains an apostrophe after it as well as at the start.
+		const WHITESPACE_OUTSIDE_JS_S = [
+			["U+001C", "\x1c=1+1", "'\x1c'=1+1"],
+			["U+001F", "\x1f=1+1", "'\x1f=1+1"],
+			["U+0085", "\x85=1+1", "'\x85'=1+1"],
+			[
+				"all five behind spaces",
+				`  \x1c\x1d\x1e\x1f\x85=HYPERLINK("https://evil.example")`,
+				`'  \x1c'\x1d'\x1e'\x1f\x85'=HYPERLINK("https://evil.example")`,
+			],
+		] as const;
+
+		it.each(WHITESPACE_OUTSIDE_JS_S)(
+			"neutralises a trigger behind %s",
+			(_label, payload, expected) => {
+				expect(parseCsvRow(escapeCsvField(payload))[0]).toBe(expected);
+			},
+		);
+
+		it.each(WHITESPACE_OUTSIDE_JS_S)("detects a trigger behind %s", (_label, payload) => {
+			const ruleIds = scanForThreats(payload, { contexts: ["spreadsheet"] }).findings.map(
+				(finding) => finding.ruleId,
+			);
+
+			expect(ruleIds).toContain("CSV-FORMULA-LEAD-001");
+		});
+
+		// The OWASP CSV Injection list names LF and the full-width forms as triggers too.
+		const LF_AND_FULL_WIDTH_TRIGGERS = [
+			["a leading LF", "\nSUM(1)"],
+			["LF behind leading spaces", `${" ".repeat(9)}\nSUM(1)`],
+			["a full-width equals sign", '\uff1dHYPERLINK("https://evil.example")'],
+			["a full-width plus sign", "\uff0b1+1"],
+			["a full-width minus sign", "\uff0d1+1"],
+			["a full-width at sign", "\uff20SUM(1)"],
+			["a full-width trigger behind leading spaces", `${" ".repeat(9)}\uff1d1+1`],
+		] as const;
+
+		it.each(LF_AND_FULL_WIDTH_TRIGGERS)("neutralises %s", (_label, payload) => {
+			const decoded = parseCsvRow(escapeCsvField(payload))[0];
+
+			expect(decoded).toBe(`'${payload}`);
+		});
+
+		// NFKC folding already exposes a full-width trigger to the scan, but only on the
+		// `nfkc` variant. The rule should match the value as written, as the encoder does.
+		it.each(LF_AND_FULL_WIDTH_TRIGGERS)("detects %s in the raw value", (_label, payload) => {
+			const result = scanForThreats(payload, { contexts: ["spreadsheet"] });
+			const rawRuleIds = result.findings
+				.filter((finding) => finding.variant === "raw")
+				.map((finding) => finding.ruleId);
+
+			expect(rawRuleIds).toContain("CSV-FORMULA-LEAD-001");
+		});
+
+		// NFKC folds these onto a trigger or onto the leading run, and `CSV-FORMULA-LEAD-001`
+		// matches the scan's `nfkc` variant, so the encoder has to agree with the rule. The
+		// file keeps the value as written, so the apostrophe is the only change.
+		it.each([
+			["a small equals sign", '\ufe66HYPERLINK("https://evil.example")'],
+			["a small plus sign", "\ufe621+1"],
+			["a small hyphen-minus", "\ufe631+1"],
+			["a small commercial at", "\ufe6bSUM(1)"],
+			["a full-width quotation mark before a trigger", "\uff02=1+1"],
+			["a full-width apostrophe before a trigger", "\uff07=1+1"],
+			["a superscript plus sign", "\u207a1+1"],
+		])("neutralises %s, which the rule detects after NFKC", (_label, payload) => {
+			const ruleIds = scanForThreats(payload, { contexts: ["spreadsheet"] }).findings.map(
+				(finding) => finding.ruleId,
+			);
+
+			expect(ruleIds).toContain("CSV-FORMULA-LEAD-001");
+			expect(parseCsvRow(escapeCsvField(payload))[0]).toBe(`'${payload}`);
+		});
+
+		// NFKC expands U+FDFA to 18 code units. Normalizing the whole of this value would need
+		// a string longer than V8 allows, so one large cell would abort the export. Compared
+		// as a boolean, so a failure never prints the 30M-character value.
+		it("encodes a value whose NFKC form is too long for a string", () => {
+			const value = `x${"ﷺ".repeat(30_000_000)}`;
+
+			expect(escapeCsvField(value) === value).toBe(true);
+		});
+
+		// Only the head is normalized, so the head has to cover the whole leading run, which
+		// includes the full-width quotation mark because NFKC folds it onto `"`.
+		it("neutralises a small equals sign behind a long full-width quotation mark run", () => {
+			const payload = `${"＂".repeat(1_000_000)}﹦1+1`;
+
+			expect(escapeCsvField(payload) === `'${payload}`).toBe(true);
+		});
+
+		// An array stringifies to its elements joined by commas, so its first element
+		// becomes the cell's leading text. Only the application's own scalars skip the prefix.
+		it.each([
+			["an array", ['=HYPERLINK("https://evil.example")', "x"]],
+			["an object with its own toString", { toString: () => "=1+1" }],
+		])("neutralises a trigger in %s", (_label, value) => {
+			const decoded = parseCsvRow(escapeCsvField(value))[0];
+
+			expect(decoded).toBe(`'${String(value)}`);
+		});
+
+		it.each([
+			["plain text", "hello"],
+			["plain text behind leading spaces", `${" ".repeat(20)}hello`],
+			["a negative number", -1234],
+			["a negative bigint", -5n],
+		])("leaves %s unprefixed", (_label, value) => {
+			expect(escapeCsvField(value)).toBe(String(value));
 		});
 
 		// A leading apostrophe and a position-independent DDE rule mean the encoded value
@@ -675,6 +823,12 @@ describe("output encoders", () => {
 			const encoded = escapeCsvField("=SUM(1)");
 			const result = scanForThreats(encoded, { contexts: ["spreadsheet"] });
 			expect(result.findings.length).toBeGreaterThan(0);
+		});
+
+		it("detects a trigger behind a long leading run, as the encoder does", () => {
+			const result = scanForThreats(`${" ".repeat(20)}=1+1`, { contexts: ["spreadsheet"] });
+
+			expect(result.findings.map((finding) => finding.ruleId)).toContain("CSV-FORMULA-LEAD-001");
 		});
 
 		it("round-trips one encode through one decode", () => {
@@ -694,6 +848,7 @@ describe("output encoders", () => {
 			["the delimiter", "a,b"],
 			["a line feed", "line1\nline2"],
 			["a carriage return", "line1\rline2"],
+			["separators before plain text", "a, b; c\td"],
 		])("quotes and recovers a field containing %s", (_label, value) => {
 			expect(parseCsvRow(escapeCsvField(value))[0]).toBe(value);
 		});
@@ -705,9 +860,391 @@ describe("output encoders", () => {
 			expect(escapeCsvField("-1234")).toBe("'-1234");
 		});
 
-		it("quotes on the configured delimiter, not on a comma", () => {
+		it("quotes on the configured delimiter", () => {
 			expect(toCsvRow(["a;b"], { delimiter: ";" })).toBe('"a;b"');
-			expect(toCsvRow(["a,b"], { delimiter: ";" })).toBe("a,b");
+		});
+
+		// A reader may split on a different separator than the writer used, and an unquoted
+		// separator would then start a cell whose leading trigger was never checked. Quoting
+		// keeps the separator inside a first-column cell, while the reader is in step with the
+		// writer and so sees the quote open the field. The apostrophe after the separator is
+		// the one value change.
+		it.each([
+			[",", ";"],
+			[";", ","],
+			["\t", ","],
+		])("keeps %o inside a first-column cell when the delimiter is %o", (separator, delimiter) => {
+			const value = `x${separator}=cmd|' /C calc'!A0`;
+			const encoded = escapeCsvField(value, { delimiter });
+
+			expect(parseCsvRow(encoded, separator)).toEqual([`x${separator}'=cmd|' /C calc'!A0`]);
+		});
+
+		/**
+		 * A formula character that a reader reaches by trimming whitespace and double quotes,
+		 * with no apostrophe in front of it. TAB, CR and LF count as whitespace here, as they
+		 * do after a boundary: a field that starts at the end of a value runs on into the
+		 * file's own line break or delimiter, and then the next cell, which is neutralised in
+		 * its own right.
+		 */
+		// biome-ignore lint/suspicious/noControlCharactersInRegex: U+001C to U+001F are whitespace to the readers that trim them
+		const LIVE_FORMULA = /^[\s\x1c-\x1f\x85"]*[=+\-@\uff1d\uff0b\uff0d\uff20]/;
+
+		// A quote opens a field only at the start of a field as the reader sees it, so a reader
+		// that splits on another separator takes the quote literally in a later column. The
+		// apostrophe after the separator neutralises the cell it starts there instead.
+		it.each([
+			[",", ";"],
+			[";", ","],
+			[",", "\t"],
+		])(
+			"neutralises every column when the delimiter is %o and the reader splits on %o",
+			(delimiter, separator) => {
+				const value = `x${separator}=cmd|' /C calc'!A0${separator}y`;
+				const neutralised = `x${separator}'=cmd|' /C calc'!A0${separator}y`;
+
+				expect(parseCsvRow(toCsvRow([value, "a"], { delimiter }), separator)).toEqual([
+					`${neutralised}${delimiter}a`,
+				]);
+				expect(parseCsvRow(toCsvRow(["a", value], { delimiter }), separator)).toEqual([
+					`a${delimiter}"x`,
+					"'=cmd|' /C calc'!A0",
+					'y"',
+				]);
+			},
+		);
+
+		// The same for a line break, read by a reader that ends a record only at a line break
+		// outside quotes. In a later column it takes the quote literally, so the LF ends the
+		// record, and the next record's first cell starts with the apostrophe.
+		it("neutralises a line break in a later column for a reader that splits on another separator", () => {
+			expect(parseCsv(toCsvRow(["x\n=1+1", "a"]), ";")).toEqual([["x\n'=1+1,a"]]);
+			expect(parseCsv(toCsvRow(["a", "x\n=1+1"]), ";")).toEqual([['a,"x'], ["'=1+1\""]]);
+		});
+
+		it.each([",", ";", "\t", "\n", "\r"])(
+			"leaves no live field for a reader that ignores quotes and splits on %o",
+			(separator) => {
+				const value = `x${separator}=1${separator} @2${separator}"=3${separator}-4`;
+				const fields = toCsvRow(["a", value, "b"]).split(separator);
+
+				expect(fields.length).toBeGreaterThan(4);
+				expect(fields.filter((field) => LIVE_FORMULA.test(field))).toEqual([]);
+			},
+		);
+
+		// A value holding the reader's separator and then `"` leaves that reader inside a
+		// quoted field across the row's line break, so from there it starts fields where the
+		// writer did not. Each of those starts behind a boundary, where the apostrophe is.
+		it("neutralises the fields a reader thrown out of step by a quote sees", () => {
+			const file = [
+				["a", 'x;"'],
+				["b", "y;=1+1"],
+				["c", "z\n@SUM(1)"],
+			]
+				.map((cells) => toCsvRow(cells))
+				.join("\r\n");
+			const fields = parseCsv(file, ";").flat();
+
+			expect(fields).toContain("'=1+1\"");
+			expect(fields.filter((field) => LIVE_FORMULA.test(field))).toEqual([]);
+		});
+
+		// The apostrophe goes right after the boundary, in front of the leading run, as it
+		// does at the start of the value. TAB, CR and LF are in that run, and are boundaries
+		// themselves, so a CRLF before a trigger gains an apostrophe after the CR and the LF.
+		it.each([
+			["an LF", "x\n=1+1", "x\n'=1+1"],
+			["a CR", "x\r+1+1", "x\r'+1+1"],
+			["a CRLF", "x\r\n=1+1", "x\r'\n'=1+1"],
+			['", "', "x, =1+1", "x,' =1+1"],
+			["a semicolon", "x;@SUM(1)", "x;'@SUM(1)"],
+			["a TAB", "x\t-1+1", "x\t'-1+1"],
+			["a comma and a TAB", "x,\t=SUM(1)", "x,'\t'=SUM(1)"],
+			["a comma before a quote", 'x,"=1+1', `x,'"=1+1`],
+			["a long leading run", `x,${" ".repeat(20)}=1+1`, `x,'${" ".repeat(20)}=1+1`],
+			["every separator", "=1,+2;-3\t@4\n=5", "'=1,'+2;'-3\t'@4\n'=5"],
+		])("neutralises a formula after %s inside the value", (_label, value, expected) => {
+			expect(parseCsvRow(escapeCsvField(value))[0]).toBe(expected);
+		});
+
+		// After a boundary, TAB, CR and LF lead no formula on their own, so text with line
+		// breaks or TABs and no formula reads back unchanged. Only quoting is added.
+		it.each([
+			["a CRLF", "line1\r\nline2"],
+			["a blank line", "a\n\nb"],
+			["a comma and a TAB", "x,\ty"],
+			["two CRLFs", "a\r\n\r\nb"],
+			["two TABs", "x\t\ty"],
+			["a table of text", "Name:\tAda\r\nRole:\tEngineer\r\n"],
+		])("leaves text with %s unchanged apart from quoting", (_label, value) => {
+			expect(escapeCsvField(value)).toBe(`"${value}"`);
+		});
+
+		// At the start of the value, TAB, CR and LF are still triggers, as OWASP lists them.
+		it.each([
+			["a TAB", "\tSUM(1)", "'\tSUM(1)"],
+			["a CR", "\rSUM(1)", "'\rSUM(1)"],
+			["an LF", "\nSUM(1)", "'\nSUM(1)"],
+			["a CRLF", "\r\nSUM(1)", "'\r\nSUM(1)"],
+			["a TAB behind a space", " \tSUM(1)", "' \tSUM(1)"],
+		])("still prefixes a value that starts with %s", (_label, value, expected) => {
+			expect(parseCsvRow(escapeCsvField(value))[0]).toBe(expected);
+		});
+
+		// After a boundary, a run of TAB, CR and LF is seen through to a real trigger,
+		// including one that only NFKC folds onto a trigger or the leading run.
+		it.each([
+			["a TAB before '='", "x,\t=1", "x,'\t'=1"],
+			["a CRLF and spaces before a full-width plus sign", "x\r\n  \uff0b1", "x\r'\n'  \uff0b1"],
+			["an LF and a TAB before a small equals sign", "x;\n\t\ufe66=1", "x;'\n'\t'\ufe66=1"],
+			["a TAB and a full-width quotation mark before '@'", "x;\t\uff02@1", "x;'\t'\uff02@1"],
+		])("neutralises a boundary followed by %s", (_label, value, expected) => {
+			expect(parseCsvRow(escapeCsvField(value))[0]).toBe(expected);
+		});
+
+		// Python's `str.splitlines()` also ends a line at these, so a reader that splits the
+		// file into lines that way starts a field after each. U+037E is `;` once NFC or NFKC
+		// has run. None needs quoting, so the field is written as is.
+		it.each(["\v", "\f", "\x1c", "\x1d", "\x1e", "\x85", "\u2028", "\u2029", "\u037e"])(
+			"neutralises a formula after %o, and leaves plain text after it alone",
+			(separator) => {
+				expect(escapeCsvField(`x${separator}=1`)).toBe(`x${separator}'=1`);
+				expect(escapeCsvField(`x${separator} @1`)).toBe(`x${separator}' @1`);
+				expect(escapeCsvField(`x${separator}y`)).toBe(`x${separator}y`);
+			},
+		);
+
+		it("leaves no live field for a reader that splits lines as str.splitlines() does", () => {
+			const file = toCsvRow(["a", "x\u2028=1\v@2\x85-3", "b"]);
+			const fields = file
+				// biome-ignore lint/suspicious/noControlCharactersInRegex: these are the line separators str.splitlines() uses
+				.split(/\r\n|[\n\r\v\f\x1c-\x1e\x85\u2028\u2029]/)
+				.flatMap((line) => line.split(","));
+
+			expect(fields).toHaveLength(6);
+			expect(fields.filter((field) => LIVE_FORMULA.test(field))).toEqual([]);
+		});
+
+		// Each character of a multi-character delimiter is a boundary, so a reader that splits
+		// on one character alone finds the cell it starts neutralised.
+		it("neutralises a formula after each character of a multi-character delimiter", () => {
+			expect(escapeCsvField("x|=1~+2", { delimiter: "|~" })).toBe(`"x|'=1~'+2"`);
+		});
+
+		// A delimiter outside the BMP is one character but two code units, so the boundary is
+		// the whole surrogate pair and the apostrophe goes after it, not between its halves.
+		it("neutralises a formula after a delimiter outside the BMP", () => {
+			expect(escapeCsvField("x\u{1f600}=1", { delimiter: "\u{1f600}" })).toBe(`"x\u{1f600}'=1"`);
+		});
+
+		it.each([
+			["its first character", "x|=1+1", "x|'=1+1"],
+			["its last character", "x~=1+1", "x~'=1+1"],
+		])(
+			"quotes and neutralises a field containing %s of a multi-character delimiter",
+			(_label, value, expected) => {
+				expect(escapeCsvField(value, { delimiter: "|~" })).toBe(`"${expected}"`);
+			},
+		);
+
+		it("keeps a cell whole for a reader that splits on the delimiter's last character", () => {
+			const row = toCsvRow(["a", "x~=1+1"], { delimiter: "|~" });
+
+			expect(parseCsvRow(row, "~")).toEqual(["a|", "x~'=1+1"]);
+		});
+
+		// A reader that splits on the delimiter's first character does not see a field start
+		// at the quote, so in a later column it splits the value there, behind the apostrophe.
+		it("neutralises a later column for a reader that splits on the delimiter's first character", () => {
+			const row = toCsvRow(["a", "x|=1+1"], { delimiter: "|~" });
+
+			expect(parseCsvRow(row, "|")).toEqual(["a", '~"x', "'=1+1\""]);
+		});
+
+		// The NFKC check applies after a boundary as it does at the start of the value.
+		it.each([
+			["a small equals sign", "x,\ufe66HYPERLINK(1)", "x,'\ufe66HYPERLINK(1)"],
+			["a full-width quotation mark before a trigger", "x;\uff02=1+1", "x;'\uff02=1+1"],
+			["a superscript plus sign", "x\n\u207a1+1", "x\n'\u207a1+1"],
+			[
+				"a run of full-width quotation marks around an LF",
+				"\uff02\n\uff02=1",
+				"'\uff02\n'\uff02=1",
+			],
+		])(
+			"neutralises %s after a boundary, which NFKC folds onto a formula lead",
+			(_label, value, expected) => {
+				expect(parseCsvRow(escapeCsvField(value))[0]).toBe(expected);
+			},
+		);
+
+		// Numbers, booleans and bigints come from the application's own types, so they gain no
+		// apostrophe, even where the delimiter makes part of their text a field start. An
+		// array is text, so its later elements are neutralised too.
+		it("inserts no apostrophe into a number, boolean or bigint", () => {
+			expect(escapeCsvField(1e-7, { delimiter: "e" })).toBe('"1e-7"');
+			expect(escapeCsvField(-5n, { delimiter: "-" })).toBe('"-5"');
+			expect(escapeCsvField(true, { delimiter: "r" })).toBe('"true"');
+			expect(escapeCsvField("1e-7", { delimiter: "e" })).toBe(`"1e'-7"`);
+			expect(escapeCsvField([1, -2])).toBe(`"1,'-2"`);
+		});
+
+		// The remaining limit. A reader that splits on a character that is not a boundary gets
+		// no apostrophe there, and a quote protects it only where it opens a field.
+		it("still leaves a live cell to a reader that splits on a pipe", () => {
+			expect(parseCsvRow(toCsvRow(["a", "x,=1|=2"]), "|")).toEqual([`a,"x,'=1`, '=2"']);
+			expect(parseCsvRow(toCsvRow(["x|=1"]), "|")).toEqual(["x", "=1"]);
+		});
+
+		it("still leaves a live cell to a reader that splits on a space", () => {
+			expect(parseCsvRow(toCsvRow(["a", "x, =1"]), " ")).toEqual([`a,"x,'`, '=1"']);
+		});
+
+		// The documented delimiter limit. `escapeCsvField` accepts any delimiter, but the
+		// delimiter is written between cells, where no apostrophe can go.
+		it("leaves a trigger at a field start when the delimiter holds one", () => {
+			expect(toCsvRow(["", "1+1"], { delimiter: "=" })).toBe("=1+1");
+			expect(toCsvRow(["", "1+1"], { delimiter: "\ufe66" })).toBe("\ufe661+1");
+
+			const row = toCsvRow(["x,", "1+1"], { delimiter: "@" });
+
+			expect(row.split(",").filter((field) => LIVE_FORMULA.test(field))).toEqual(['"@1+1']);
+		});
+
+		it("lets a reader that splits on an apostrophe delimiter cut the apostrophe off", () => {
+			const row = toCsvRow(["x,=1"], { delimiter: "'" });
+
+			expect(row).toBe(`"x,'=1"`);
+			expect(row.split("'").filter((field) => LIVE_FORMULA.test(field))).toEqual(['=1"']);
+		});
+
+		it("breaks RFC 4180 framing, but not the apostrophes, when the delimiter holds a quote, CR or LF", () => {
+			expect(parseCsv(toCsvRow(["", "b"], { delimiter: '"' }), '"')).toEqual([["b"]]);
+			expect(parseCsv(toCsvRow(["a", "b"], { delimiter: "\r" }))).toEqual([["a"], ["b"]]);
+			expect(parseCsv(toCsvRow(["a", "x,=1"], { delimiter: "\n" }))).toEqual([["a"], ["x,'=1"]]);
+		});
+
+		/**
+		 * The definition the linear pass implements, tested afresh at the start of the value
+		 * and after each boundary: the pattern, or the pattern on the NFKC form of the head.
+		 * TAB, CR and LF are triggers at the start and leading-run characters only after a
+		 * boundary. Quadratic, so only for short values.
+		 */
+		const referenceLeadStarts = (value: string, delimiter: string): number[] => {
+			const boundaries = new Set([
+				...",;\t\r\n\v\f\x1c\x1d\x1e\x85\u2028\u2029\u037e",
+				...delimiter,
+			]);
+			// biome-ignore lint/suspicious/noControlCharactersInRegex: U+001C to U+001F are whitespace to the readers that trim them
+			const startLead = /^[\s\x1c-\x1f\x85'"]*[=+\-@\t\r\n\uff1d\uff0b\uff0d\uff20]/;
+			// biome-ignore lint/suspicious/noControlCharactersInRegex: U+001C to U+001F are whitespace to the readers that trim them
+			const fieldLead = /^[\s\x1c-\x1f\x85'"]*[=+\-@\uff1d\uff0b\uff0d\uff20]/;
+			// biome-ignore lint/suspicious/noControlCharactersInRegex: U+001C to U+001F are whitespace to the readers that trim them
+			const nfkcRun = /^[\s\x1c-\x1f\x85'"\uff02\uff07]*/;
+			const leads = (from: number): boolean => {
+				const lead = from === 0 ? startLead : fieldLead;
+				const rest = value.slice(from);
+				const run = nfkcRun.exec(rest)?.[0].length ?? 0;
+				return lead.test(rest) || lead.test(rest.slice(0, run + 16).normalize("NFKC"));
+			};
+			const starts = leads(0) ? [0] : [];
+			let index = 0;
+			for (const character of value) {
+				index += character.length;
+				if (boundaries.has(character) && leads(index)) starts.push(index);
+			}
+			return starts;
+		};
+
+		/** Mulberry32: a 32-bit PRNG whose state and output stay integers, via Math.imul. */
+		const mulberry32 = (seed: number): (() => number) => {
+			let state = seed | 0;
+			return () => {
+				state = (state + 0x6d2b79f5) | 0;
+				let mixed = Math.imul(state ^ (state >>> 15), 1 | state);
+				mixed = (mixed + Math.imul(mixed ^ (mixed >>> 7), 61 | mixed)) ^ mixed;
+				return ((mixed ^ (mixed >>> 14)) >>> 0) / 4_294_967_296;
+			};
+		};
+
+		it("agrees with testing the pattern afresh at every field start", () => {
+			const alphabet = [
+				..."ab1 '\"=+-@,;|\t\r\n",
+				"\v",
+				"\u00a0",
+				"\u3000",
+				"\x1c",
+				"\x85",
+				"\u2028",
+				"\u037e",
+				"\uff02",
+				"\uff07",
+				"\uff1d",
+				"\uff0b",
+				"\ufe66",
+				"\u207a",
+				"\u0301",
+				"\u0338",
+				"\ufdfa",
+				"\u{1f600}",
+			];
+			const delimiters = [",", ";", "\t", "|~", " ", "\u{1f600}"];
+			const next = mulberry32(0x5eed_c5f);
+			const random = (bound: number): number => Math.floor(next() * bound);
+			const rounds = 6_000;
+			const inputs = new Set<string>();
+			const mismatches: string[] = [];
+			for (let round = 0; round < rounds; round++) {
+				const length = random(24);
+				const value = Array.from({ length }, () => alphabet[random(alphabet.length)]).join("");
+				const delimiter = delimiters[random(delimiters.length)] ?? ",";
+				inputs.add(JSON.stringify([value, delimiter]));
+				const expected = referenceLeadStarts(value, delimiter).reduceRight(
+					(text, start) => `${text.slice(0, start)}'${text.slice(start)}`,
+					value,
+				);
+				// The field is quoted whenever it holds a comma, so one comma-split record is it.
+				const decoded = parseCsvRow(escapeCsvField(value, { delimiter }))[0];
+				if (decoded !== expected) mismatches.push(JSON.stringify([value, delimiter]));
+			}
+
+			// A generator that cycles early would pass while testing a few hundred cases.
+			expect(inputs.size).toBeGreaterThanOrEqual(rounds * 0.9);
+			expect(mismatches).toEqual([]);
+		});
+
+		// Testing the pattern at each boundary would rescan the leading run behind it, which is
+		// quadratic in these. Compared as booleans, so a failure never prints the value.
+		it.each([
+			["a million LFs", "\n".repeat(1_000_000), `"'${"\n".repeat(1_000_000)}"`],
+			['a million ", "', `${", ".repeat(1_000_000)}=1`, `"${", ".repeat(999_999)},' =1"`],
+			["a million TABs and '='", `${"\t".repeat(1_000_000)}=`, `"${"'\t".repeat(1_000_000)}'="`],
+			[
+				"a million U+2028 and '='",
+				`${"\u2028".repeat(1_000_000)}=`,
+				`${"'\u2028".repeat(1_000_000)}'=`,
+			],
+			[
+				"a million U+FDFA behind commas",
+				`${",\ufdfa".repeat(1_000_000)},=1`,
+				`"${",\ufdfa".repeat(1_000_000)},'=1"`,
+			],
+		])("encodes %s in well under a second", (_label, value, expected) => {
+			const started = performance.now();
+			const encoded = escapeCsvField(value);
+			const elapsed = performance.now() - started;
+
+			expect(encoded === expected).toBe(true);
+			expect(elapsed).toBeLessThan(1_000);
+		});
+
+		// After a boundary too, only a short head is normalized. Normalizing the rest of this
+		// value would need a string longer than V8 allows.
+		it("normalizes only a short head after a boundary in a large value", () => {
+			const tail = "\ufdfa".repeat(30_000_000);
+
+			expect(escapeCsvField(`x,\ufe66=1,${tail}`) === `"x,'\ufe66=1,${tail}"`).toBe(true);
 		});
 
 		it("removes NUL, which no CSV reader accepts", () => {
