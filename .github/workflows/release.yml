@@ -45,10 +45,18 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
 
-      # The registry state before publishing. Diffed against the manifests
-      # afterwards to work out what actually went out — see the `published` step
-      # below for why the action's own output cannot be used.
+      # The set of versions each public package already has on the registry.
+      # Diffed against the manifests afterwards to work out what this run actually
+      # published — see the `published` step below for why the action's own output
+      # cannot be used.
+      #
+      # The VERSION SET, not `latest`: `npm view <name> version` answers "what is
+      # latest", which is a different question from "does this version exist". A
+      # package whose manifest trails latest would otherwise look newly published on
+      # every run.
       - name: Record pre-publish registry versions
+        env:
+          NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
         run: |
           set -euo pipefail
           : > "$RUNNER_TEMP/pre-publish.tsv"
@@ -58,10 +66,30 @@ jobs:
             name=$(node -p "require('./$manifest').name")
             private=$(node -p "require('./$manifest').private === true")
             [ "$private" = "true" ] && continue
-            # A package that has never been published has no version; record the
-            # empty string so the diff below treats its first release as new.
-            before=$(npm view "$name" version 2>/dev/null || true)
-            printf '%s\t%s\n' "$name" "$before" >> "$RUNNER_TEMP/pre-publish.tsv"
+
+            versions=""
+            for attempt in 1 2 3; do
+              if out=$(npm view "$name" versions --json 2>&1); then
+                versions="$out"
+                break
+              fi
+              # A package that has never been published is a legitimate empty set.
+              # Anything else — auth, network, a registry 5xx — must NOT be silently
+              # read as "unpublished", or a transient blip would mark an untouched
+              # package as newly released and send a stale tarball to attestation.
+              if printf '%s' "$out" | grep -q 'E404'; then
+                versions="[]"
+                break
+              fi
+              if [ "$attempt" = "3" ]; then
+                echo "::error::registry lookup failed for $name after 3 attempts"
+                printf '%s\n' "$out" >&2
+                exit 1
+              fi
+              sleep $((attempt * 5))
+            done
+
+            printf '%s\t%s\n' "$name" "$(printf '%s' "$versions" | tr -d '\n')" >> "$RUNNER_TEMP/pre-publish.tsv"
           done
           cat "$RUNNER_TEMP/pre-publish.tsv"
 
@@ -84,8 +112,7 @@ jobs:
       # and the output comes back empty — while `published` stays `true`, because it
       # is a boolean rather than a parse result. The attest job downstream then
       # received an empty list and the release went out with no SBOM and no
-      # provenance. Diffing the registry against the manifests does not depend on
-      # any CLI's output format.
+      # provenance. Comparing version sets does not depend on any CLI's output.
       - name: Determine published packages
         id: published
         run: |
@@ -95,22 +122,26 @@ jobs:
           # shellcheck disable=SC2016
           node -e '
             const fs = require("node:fs");
-            const before = new Map(
-              fs.readFileSync(process.env.RUNNER_TEMP + "/pre-publish.tsv", "utf8")
-                .split("\n").filter(Boolean)
-                .map((line) => line.split("\t"))
-                .map(([name, version]) => [name, version ?? ""]),
-            );
+            const before = new Map();
+            for (const line of fs.readFileSync(process.env.RUNNER_TEMP + "/pre-publish.tsv", "utf8").split("\n")) {
+              if (!line) continue;
+              const tab = line.indexOf("\t");
+              const name = line.slice(0, tab);
+              const parsed = JSON.parse(line.slice(tab + 1));
+              // `npm view … versions --json` yields a bare string when a package has
+              // exactly one published version.
+              before.set(name, new Set(Array.isArray(parsed) ? parsed : [parsed]));
+            }
             const published = [];
             for (const dir of fs.readdirSync("packages")) {
               const manifest = `packages/${dir}/package.json`;
               if (!fs.existsSync(manifest)) continue;
               const pkg = JSON.parse(fs.readFileSync(manifest, "utf8"));
               if (pkg.private === true) continue;
-              if (!before.has(pkg.name)) continue;
-              if (before.get(pkg.name) !== pkg.version) {
-                published.push({ name: pkg.name, version: pkg.version });
-              }
+              const had = before.get(pkg.name);
+              if (had === undefined) continue;
+              // Newly published iff this exact version was absent beforehand.
+              if (!had.has(pkg.version)) published.push({ name: pkg.name, version: pkg.version });
             }
             fs.appendFileSync(process.env.GITHUB_OUTPUT, `packages=${JSON.stringify(published)}\n`);
             console.log(`published ${published.length} package(s):`, JSON.stringify(published));
