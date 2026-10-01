@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.0
+
+### Minor Changes
+
+- [#347](https://github.com/resq-software/npm/pull/347) [`7b48c29`](https://github.com/resq-software/npm/commit/7b48c29093410e0e3e0af5e4bb3d5b614d657166) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Replace the `Schedule.both` retry cap removed in effect 4.0.0-rc.117 with `Schedule.upTo` and raise the effect peer range to `>=4.0.0-rc.117`, since `Schedule.upTo` does not exist below it
+
 ## 2.0.2
 
 ### Patch Changes
