@@ -34,7 +34,7 @@ Peer dependency: `effect`.
 ```ts
 import { get, post } from "@resq-systems/http";
 import { Effect } from "effect";
-import { HttpClient } from "effect/unstable/http";
+import { HttpClient } from "effect/http";
 
 const program = Effect.gen(function* () {
   const users = yield* get<User[]>("/api/users");
@@ -193,7 +193,7 @@ The `RequestId` type is exported for annotating values threaded through logs, re
 ## Prerequisites
 
 - **Runtime**: Bun 1.1+ or Node.js 20+
-- **Peer Dependencies**: `effect` (v4.0.0-beta.93+)
+- **Peer Dependencies**: `effect` (^4.0.0), optional `@effect/platform-bun` (^4.0.0)
 
 ## Configuration
 
@@ -207,7 +207,7 @@ bun --filter @resq-systems/http test
 
 ## Troubleshooting
 
-- **Effect Version Mismatch**: Ensure your root project resolves to `effect: 4.0.0-beta.93` using overrides to prevent duplicate effect typings.
+- **Effect Version Mismatch**: Ensure your root project resolves to `effect: ^4.0.0` using overrides to prevent duplicate effect typings.
 
 
 ## License

@@ -490,7 +490,7 @@ Exported types: `ThreatDetectionResult`, `ThreatFinding`, `ThreatType`, `ThreatD
 ## Prerequisites
 
 - **Runtime**: Bun 1.1+ or Node.js 20+
-- **Peer Dependencies**: `effect` (v4.0.0-beta.93+)
+- **Peer Dependencies**: `effect` (^4.0.0), optional `jsdom` (>=22.0.0)
 
 ## Configuration
 
