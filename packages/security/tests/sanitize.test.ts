@@ -238,7 +238,11 @@ describe("sanitizeJson prototype-pollution depth", () => {
 		// whether or not sanitizeJson stripped the key, so the test would prove nothing.
 		// The assertion below is what makes it safe — if the key survived sanitization,
 		// this merge sets Object.prototype.isAdmin and the test fails.
-		// codeql[js/prototype-polluting-function]
+		// The rule this fixture trips is js/prototype-pollution-utility. An earlier
+		// suppression here named js/prototype-polluting-function, which does not exist,
+		// so it never applied and the alert stayed open until it was dismissed through
+		// the API as used-in-tests.
+		// codeql[js/prototype-pollution-utility]
 		const merge = (target: Record<string, unknown>, source: Record<string, unknown>) => {
 			for (const key of Object.keys(source)) {
 				const value = source[key];
