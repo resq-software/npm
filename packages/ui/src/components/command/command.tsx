@@ -193,11 +193,19 @@ function CommandSeparator({
 	...props
 }: Readonly<React.ComponentProps<typeof CommandPrimitive.Separator>>) {
 	return (
+		// `aria-hidden` alone, deliberately: cmdk spreads incoming props and THEN
+		// sets `role="separator"` (dist: `{...u, "cmdk-separator":"", role:"separator"}`),
+		// so a `role` passed here is silently overridden and does nothing. Verified by
+		// running the axe audit three ways — aria-hidden alone clears the violation,
+		// role alone does not. Without this, the separator's `separator` role sits
+		// inside CommandList's `listbox`, which ARIA permits to contain only
+		// `option`/`group`, so axe reports `aria-required-children`. The divider is
+		// 1px of decoration carrying no semantics, so hiding it is correct rather
+		// than a workaround.
 		<CommandPrimitive.Separator
 			aria-hidden="true"
 			className={cn("bg-border -mx-1 h-px", className)}
 			data-slot="command-separator"
-			role="presentation"
 			{...props}
 		/>
 	);
