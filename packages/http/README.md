@@ -34,7 +34,7 @@ Peer dependency: `effect`.
 ```ts
 import { get, post } from "@resq-systems/http";
 import { Effect } from "effect";
-import { HttpClient } from "effect/http";
+import { FetchHttpClient } from "effect/http";
 
 const program = Effect.gen(function* () {
   const users = yield* get<User[]>("/api/users");
@@ -43,7 +43,7 @@ const program = Effect.gen(function* () {
 });
 
 // Run with the default HTTP client
-Effect.runPromise(program.pipe(Effect.provide(HttpClient.layer)));
+Effect.runPromise(program.pipe(Effect.provide(FetchHttpClient.layer)));
 ```
 
 ## API Reference
