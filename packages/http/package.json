@@ -1,6 +1,6 @@
 {
 	"name": "@resq-systems/http",
-	"version": "2.1.0",
+	"version": "3.0.0",
 	"description": "Effect-based HTTP client with retry, timeout, and schema validation",
 	"license": "Apache-2.0",
 	"type": "module",
