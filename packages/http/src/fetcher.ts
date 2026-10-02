@@ -32,7 +32,7 @@ import {
 	type HttpClientError,
 	HttpClientRequest,
 	type HttpClientResponse,
-} from "effect/unstable/http";
+} from "effect/http";
 
 //#region Types
 
