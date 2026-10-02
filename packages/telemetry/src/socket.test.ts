@@ -143,6 +143,46 @@ describe("TelemetrySocket", () => {
 		expect(FakeWebSocket.instances).toHaveLength(1);
 	});
 
+	it("delivers to every subscriber even when one throws", () => {
+		const socket = makeSocket();
+		const later = vi.fn();
+		socket.subscribe({
+			onMessage: () => {
+				throw new Error("subscriber is broken");
+			},
+		});
+		socket.subscribe({ onMessage: later });
+		socket.connect();
+		FakeWebSocket.instances[0].triggerOpen();
+
+		// A Set is iterated in insertion order, so the throwing subscriber above
+		// runs first. Without per-subscriber isolation its throw escapes the loop
+		// and every consumer registered after it silently stops receiving frames.
+		expect(() => FakeWebSocket.instances[0].triggerMessage("frame")).not.toThrow();
+		expect(later).toHaveBeenCalledWith("frame");
+	});
+
+	it("still reconnects when a subscriber throws from onClose", () => {
+		const socket = makeSocket();
+		socket.subscribe({
+			onClose: () => {
+				throw new Error("subscriber is broken");
+			},
+		});
+		socket.connect();
+		FakeWebSocket.instances[0].triggerOpen();
+
+		// The reconnect is scheduled AFTER the onClose fan-out, so an unguarded
+		// throw there does not merely skip later subscribers — it skips
+		// `#setState("reconnecting")` and `timer.schedule()`, permanently
+		// disabling reconnection for the life of the socket.
+		expect(() => FakeWebSocket.instances[0].triggerClose()).not.toThrow();
+		expect(socket.state).toBe("reconnecting");
+
+		vi.advanceTimersByTime(1000);
+		expect(FakeWebSocket.instances).toHaveLength(2);
+	});
+
 	it("stops delivering to an unsubscribed consumer", () => {
 		const socket = makeSocket();
 		const onMessage = vi.fn();
