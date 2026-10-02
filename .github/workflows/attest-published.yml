@@ -312,11 +312,33 @@ jobs:
             attached=false
             # changesets tags `<name>@<version>`; release-package.yml's tags carry a `v`.
             for tag in "${name}@${version}" "${name}@v${version}"; do
-              if gh release view "$tag" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
-                gh release upload "$tag" "$RUNNER_TEMP/sbom.spdx.json" --repo "$GITHUB_REPOSITORY" --clobber
+              # `2>&1` only on the lookup would hide a real API failure behind
+              # "no release", so the error text is kept and inspected instead.
+              if ! gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>"$RUNNER_TEMP/view.err"; then
+                if grep -qiE 'release not found|not found' "$RUNNER_TEMP/view.err"; then
+                  continue
+                fi
+                cat "$RUNNER_TEMP/view.err" >&2
+                echo "::error::could not determine whether a release exists for ${tag} (see above). Refusing to report success."
+                exit 1
+              fi
+
+              if gh release upload "$tag" "$RUNNER_TEMP/sbom.spdx.json" --repo "$GITHUB_REPOSITORY" --clobber 2>"$RUNNER_TEMP/upload.err"; then
                 attached=true
                 break
               fi
+              cat "$RUNNER_TEMP/upload.err" >&2
+              # An immutable release rejects new assets with HTTP 422, forever. That
+              # is a property of the release, not a failure of this run, and the SBOM
+              # is already retained as the workflow artifact — so it must not fail the
+              # job, or provenance would look broken on every release from here on.
+              if grep -qi 'immutable release' "$RUNNER_TEMP/upload.err"; then
+                echo "::notice::${tag} is an immutable release, so its SBOM cannot be attached; it remains available as the workflow artifact."
+                attached=true
+                break
+              fi
+              echo "::error::failed to attach the SBOM to ${tag} (see above)."
+              exit 1
             done
             if [ "$attached" = false ]; then
               echo "::notice::No GitHub release for ${spec}; its SBOM is kept as the workflow artifact."
