@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.0
+
+### Major Changes
+
+- [#359](https://github.com/resq-software/npm/pull/359) [`e3b7444`](https://github.com/resq-software/npm/commit/e3b7444f09d9fa14b48edbaf00ecee3b4bec9273) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Require effect ^4.0.0 stable and import the HTTP client from the flattened `effect/http` path
+
 ## 2.2.0
 
 ### Minor Changes

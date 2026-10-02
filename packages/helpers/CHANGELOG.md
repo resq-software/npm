@@ -16,6 +16,13 @@
   limitations under the License.
 -->
 
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies [[`e3b7444`](https://github.com/resq-software/npm/commit/e3b7444f09d9fa14b48edbaf00ecee3b4bec9273)]:
+  - @resq-systems/dsa@3.0.0
+
 ## 0.6.0
 
 ### Minor Changes
@@ -154,7 +161,6 @@
 
 - Updated dependencies [[`b43014e`](https://github.com/resq-software/npm/commit/b43014e16296172959680150ad1a31d6cf346b04)]:
   - @resq-systems/types@0.2.0
-
 
 ## 0.5.0
 
