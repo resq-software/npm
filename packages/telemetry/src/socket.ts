@@ -155,6 +155,28 @@ export class TelemetrySocket {
 		}
 	}
 
+	/**
+	 * Invoke one subscriber callback in isolation.
+	 *
+	 * A consumer that throws must not affect any other consumer, and must not
+	 * affect this socket's own control flow. The `onClose` fan-out is the case
+	 * that matters: the reconnect is scheduled *after* it, so an unguarded throw
+	 * there skipped `#setState("reconnecting")` and `#timer.schedule()` and
+	 * permanently disabled reconnection for the life of the socket — one broken
+	 * consumer silently took the transport down for every other consumer.
+	 *
+	 * Reported to `console.error` rather than swallowed: a throwing subscriber is
+	 * a bug in that subscriber, and it should stay visible even though it can no
+	 * longer propagate.
+	 */
+	#notify(sub: TelemetrySubscription, deliver: (sub: TelemetrySubscription) => void): void {
+		try {
+			deliver(sub);
+		} catch (error) {
+			console.error("[telemetry] subscriber callback threw; continuing delivery", error);
+		}
+	}
+
 	#open(reconnecting: boolean): void {
 		this.#setState(reconnecting ? "reconnecting" : "connecting");
 		const ws = this.#factory(this.#url);
@@ -163,15 +185,15 @@ export class TelemetrySocket {
 		ws.onopen = () => {
 			this.#timer.reset();
 			this.#setState("open");
-			for (const sub of this.#subscribers) sub.onOpen?.();
+			for (const sub of this.#subscribers) this.#notify(sub, (s) => s.onOpen?.());
 		};
 		ws.onmessage = (event) => {
 			const data = typeof event.data === "string" ? event.data : String(event.data);
-			for (const sub of this.#subscribers) sub.onMessage?.(data);
+			for (const sub of this.#subscribers) this.#notify(sub, (s) => s.onMessage?.(data));
 		};
 		ws.onclose = () => {
 			this.#ws = null;
-			for (const sub of this.#subscribers) sub.onClose?.();
+			for (const sub of this.#subscribers) this.#notify(sub, (s) => s.onClose?.());
 			if (this.#closedByUser) {
 				this.#setState("closed");
 				return;
@@ -187,6 +209,6 @@ export class TelemetrySocket {
 	#setState(next: ConnectionState): void {
 		if (next === this.#state) return;
 		this.#state = next;
-		for (const sub of this.#subscribers) sub.onStateChange?.(next);
+		for (const sub of this.#subscribers) this.#notify(sub, (s) => s.onStateChange?.(next));
 	}
 }
