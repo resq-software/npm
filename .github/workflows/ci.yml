@@ -152,7 +152,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
       # Repo-wide, not packages/ui. Scoped to one package this missed every root file
       # and every other package, which is what let a formatting violation in
       # .github/aw/actions-lock.json reach the Release job's push and block a release.
@@ -177,7 +177,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
       - name: Build workspace
         run: bun run build
       - name: Verify package build
@@ -205,7 +205,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
       - name: Build workspace dependencies
         run: bun run build
       - name: Run tests
@@ -230,7 +230,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
       - name: Build workspace dependencies
         run: bun run build
       - name: Type check
@@ -254,7 +254,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
       - name: Build workspace dependencies
         run: bun run build
       - name: Type check examples
@@ -271,7 +271,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
       - name: Check for changeset
         env:
           PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
@@ -297,7 +297,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
       - run: bun run build-storybook
         working-directory: packages/ui
 
@@ -310,7 +310,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
       - run: bun run lint:knip
         working-directory: packages/ui
 
@@ -333,7 +333,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
       - name: Block on critical advisories
         run: bun audit --audit-level=critical
       - name: Report high advisories
@@ -393,7 +393,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
       - run: bun lint:md
         working-directory: packages/ui
 
@@ -409,7 +409,7 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
       - run: bun lint:spelling
         working-directory: packages/ui
 

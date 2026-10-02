@@ -38,7 +38,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
 
       - name: Set up npm auth
         env:
