@@ -29,7 +29,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@resq-systems/email-templates": "workspace:*",
-        "effect": "4.0.0-rc.117",
+        "effect": "4.0.0",
         "react": "^19.3.0",
         "react-dom": "^19.3.0",
         "resend": "6.30.0",
@@ -97,7 +97,7 @@
         "@resq-systems/security": "workspace:*",
         "@resq-systems/types": "workspace:*",
         "@resq-systems/ui": "workspace:*",
-        "effect": "4.0.0-rc.117",
+        "effect": "4.0.0",
         "react": "^19.3.0",
         "react-dom": "^19.3.0",
         "tailwindcss": "^4.1.0",
@@ -167,13 +167,13 @@
       "devDependencies": {
         "@jsheaven/perf": "^1.1.1",
         "@total-typescript/ts-reset": "^0.6.1",
-        "effect": "4.0.0-rc.117",
+        "effect": "4.0.0",
         "tsdown": "^0.23.0",
         "typescript": "7.0.2",
         "vitest": "5.0.2",
       },
       "peerDependencies": {
-        "effect": ">=4.0.0-beta.78",
+        "effect": "^4.0.0",
       },
       "optionalPeers": [
         "effect",
@@ -194,7 +194,7 @@
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
         "@vitest/coverage-v8": "4.1.11",
-        "effect": "4.0.0-rc.117",
+        "effect": "4.0.0",
         "parse5": "^8.0.1",
         "react": "^19.3.0",
         "react-dom": "^19.3.0",
@@ -205,7 +205,7 @@
         "vitest": "5.0.2",
       },
       "peerDependencies": {
-        "effect": ">=4.0.0-beta.78",
+        "effect": "^4.0.0",
         "react": ">=19",
         "react-dom": ">=19",
         "resend": ">=6",
@@ -241,22 +241,22 @@
     },
     "packages/http": {
       "name": "@resq-systems/http",
-      "version": "2.0.2",
+      "version": "2.1.0",
       "dependencies": {
         "@resq-systems/types": "^0.2.0",
       },
       "devDependencies": {
-        "@effect/platform-bun": "4.0.0-rc.117",
+        "@effect/platform-bun": "4.0.0",
         "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "^26.6.3",
-        "effect": "4.0.0-rc.117",
+        "effect": "4.0.0",
         "tsdown": "^0.23.0",
         "typescript": "7.0.2",
         "vitest": "5.0.2",
       },
       "peerDependencies": {
-        "@effect/platform-bun": ">=4.0.0-beta.78",
-        "effect": ">=4.0.0-rc.117",
+        "@effect/platform-bun": "^4.0.0",
+        "effect": "^4.0.0",
       },
       "optionalPeers": [
         "@effect/platform-bun",
@@ -336,7 +336,7 @@
         "@total-typescript/ts-reset": "^0.6.1",
         "@upstash/ratelimit": "^2.2.0",
         "@upstash/redis": "^1.39.0",
-        "effect": "4.0.0-rc.117",
+        "effect": "4.0.0",
         "tsdown": "^0.23.0",
         "typescript": "7.0.2",
         "vitest": "5.0.2",
@@ -344,7 +344,7 @@
       "peerDependencies": {
         "@upstash/ratelimit": ">=2.0.0",
         "@upstash/redis": ">=1.0.0",
-        "effect": ">=4.0.0-beta.78",
+        "effect": "^4.0.0",
       },
       "optionalPeers": [
         "@upstash/ratelimit",
@@ -354,7 +354,7 @@
     },
     "packages/security": {
       "name": "@resq-systems/security",
-      "version": "2.1.1",
+      "version": "2.1.2",
       "dependencies": {
         "@resq-systems/types": "^0.2.0",
         "dompurify": "^3.4.16",
@@ -362,14 +362,14 @@
       "devDependencies": {
         "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "^26.6.3",
-        "effect": "4.0.0-rc.117",
+        "effect": "4.0.0",
         "jsdom": "^30.1.1",
         "tsdown": "^0.23.0",
         "typescript": "7.0.2",
         "vitest": "5.0.2",
       },
       "peerDependencies": {
-        "effect": ">=4.0.0-beta.78",
+        "effect": "^4.0.0",
         "jsdom": ">=22.0.0",
       },
       "optionalPeers": [
@@ -479,7 +479,7 @@
     "browserslist": "^4.28.7",
     "defu": ">=6.1.5",
     "dompurify": ">=3.4.16",
-    "effect": "4.0.0-rc.117",
+    "effect": "^4.0.0",
     "engine.io": "^6.6.10",
     "esbuild": "0.28.1",
     "fast-uri": "^3.1.8",
@@ -781,9 +781,9 @@
 
     "@date-fns/tz": ["@date-fns/tz@1.4.1", "", {}, "sha512-P5LUNhtbj6YfI3iJjw5EL9eUAG6OitD0W3fWQcpQjDRc/QIsL0tRNuO1PcDvPccWL1fSTXXdE1ds+l95DV/OFA=="],
 
-    "@effect/platform-bun": ["@effect/platform-bun@4.0.0-rc.117", "", { "dependencies": { "@effect/platform-node-shared": "^4.0.0-rc.117" }, "peerDependencies": { "effect": "^4.0.0-rc.117" } }, "sha512-jyvoxPjT9562z5Tc2gib9GB16jcgh43jhpsuNQxs9B8WJ7RB2doPBQdrYLSSWRodGPLJBKJGzToRRbJiaGblsw=="],
+    "@effect/platform-bun": ["@effect/platform-bun@4.0.0", "", { "dependencies": { "@effect/platform-node-shared": "^4.0.0" }, "peerDependencies": { "effect": "^4.0.0" } }, "sha512-g9O41Sub/+JKfLjvBNEoqR1Pg6wtc2bbYzv7Kw8YsMihbt/ypCn7ZoydEXaHvTTUvbVrXOQbVFlfplyo84Clug=="],
 
-    "@effect/platform-node-shared": ["@effect/platform-node-shared@4.0.0-rc.118", "", { "dependencies": { "@types/ws": "^8.18.1", "ws": "^8.22.0" }, "peerDependencies": { "effect": "^4.0.0-rc.118" } }, "sha512-pNbmIlxbAUxAthUNsp2xm1NLG9kxoYecsPkoYl9mNF2oxPcKDxAvkOar7tYnLSUpXJeATm4pxYVipdZjQfqO4Q=="],
+    "@effect/platform-node-shared": ["@effect/platform-node-shared@4.0.0", "", { "dependencies": { "@types/ws": "^8.18.1", "ws": "^8.22.0" }, "peerDependencies": { "effect": "^4.0.0" } }, "sha512-VBXHJU9UXVZPdQGGDRjGXpo+TpOzRwZuMrdKAtIxi1qwcRftmacZ1zTgIrzBa0Z2RA2KVkoOecQUsTlt/nJZhw=="],
 
     "@emnapi/core": ["@emnapi/core@1.11.2", "", { "dependencies": { "@emnapi/wasi-threads": "1.2.2", "tslib": "^2.4.0" } }, "sha512-TC8MkTuZUtcTSiFeuC0ksCh9QIJ5+F21MvZ4Wn4ORfYaFJ/0dsiudv5tVkejgwZlwQ39jL9WWDe2lz8x0WglOA=="],
 
@@ -1881,7 +1881,7 @@
 
     "earcut": ["earcut@3.2.3", "", {}, "sha512-vnS4AVwp1KHAF13i1vp1/2D5evWy3k5u/iW/B81QVsUZtV8cv2tU0b2VNFlqvh4kYwrFMDdjPCfAmfyJW9y14Q=="],
 
-    "effect": ["effect@4.0.0-rc.117", "", {}, "sha512-UUyi9QiOW4nySFIBM3KnYbNMd9EZliOdKfBcyLD0mPMPheO2fkuXS5y0opjWc9oqzlJxPQICEGm8gGw3kh9j/w=="],
+    "effect": ["effect@4.0.0", "", {}, "sha512-ooc1TG5t+FfzgYnFz2ff6BBKyZ7EwBRVXC7c4RhQUAD6/TZ2gTXXMeb4WX7a19ozQo4J73/QW+S00YAIresoMQ=="],
 
     "electron-to-chromium": ["electron-to-chromium@1.5.427", "", {}, "sha512-n14zb3FdsChZ2BNobqNHAJMcP3ifFv4paox2LvCrfVAQcqGiSURgbJl+PfMpHVCNFkStnNc+RRVtPBTVW5PDgw=="],
 

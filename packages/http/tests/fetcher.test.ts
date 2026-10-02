@@ -17,7 +17,7 @@
 
 import { describe, expect, it } from "vitest";
 import { Duration, Effect, Layer, Schema } from "effect";
-import { HttpClient, type HttpClientRequest, HttpClientResponse } from "effect/unstable/http";
+import { HttpClient, type HttpClientRequest, HttpClientResponse } from "effect/http";
 import {
 	createApiResponseSchema,
 	createPaginatedSchema,
