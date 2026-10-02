@@ -79,7 +79,15 @@ jobs:
           # five-minute CDN max-age, which can stack on top of it. The job's
           # timeout-minutes must stay comfortably above this or the timeout
           # truncates the wait instead of the wait completing.
-          WAIT_BUDGET_SECONDS: "1800"
+          WAIT_BUDGET_SECONDS: "1500"
+          # A hard ceiling on this step, so its duration cannot grow with the
+          # number of packages. The job's timeout-minutes must stay above this
+          # plus the diagnostics, SBOM, signing and release-upload that follow —
+          # if the job timeout fires first, the diagnostics never print and a
+          # precise failure becomes an opaque one. Worst case, 16 packages:
+          # 30m ceiling + 16x2 curls at --max-time 10 (~5m) ~= 35m, inside the
+          # 45m job timeout with room for SBOM generation and Sigstore signing.
+          STEP_CEILING_SECONDS: "1800"
         run: |
           set -euo pipefail
 
@@ -142,24 +150,51 @@ jobs:
           # attempt. npm's defaults (fetch-timeout 5m, fetch-retries 2) let one
           # stalled attempt run ~17 minutes and consume the whole budget without
           # ever being retried by this loop.
+          # Two clocks, and the difference matters.
+          #
+          #   wait_deadline — when to stop waiting for npm to make versions
+          #                   readable. One deadline for the whole set, not one per
+          #                   package: the registry finalizes this run's versions
+          #                   concurrently, so time spent waiting on the first is
+          #                   time the rest have also had.
+          #   step_ceiling  — a hard stop. Nothing new starts after it.
+          #
+          # The ceiling exists because the step's duration must not scale with the
+          # number of packages. Without it, every spec read after the deadline
+          # still got one full attempt, and the final pass added another per spec:
+          # a 16-package release could run ~107 minutes against a 45-minute job
+          # timeout, and the timeout kills the step BEFORE the diagnostics and the
+          # UNATTESTED error print — turning a precise failure into an opaque one.
+          now=$(date +%s)
+          wait_deadline=$(( now + WAIT_BUDGET_SECONDS ))
+          step_ceiling=$(( now + STEP_CEILING_SECONDS ))
+
+          # Clamped so a single attempt can never overrun the ceiling.
           pack_attempt() {
-            timeout 150 npm pack "$1" \
+            local cap="$2" left
+            left=$(( step_ceiling - $(date +%s) ))
+            [ "$left" -le 0 ] && return 1
+            [ "$cap" -gt "$left" ] && cap="$left"
+            timeout "$cap" npm pack "$1" \
               --pack-destination "$dest" \
               --loglevel error \
               --fetch-retries=0 \
               --fetch-timeout=60000
           }
 
-          # One wall-clock deadline for the whole set, not one per package: the
-          # registry finalizes this run's versions concurrently, so time spent
-          # waiting on the first is time the rest have also had.
-          deadline=$(( $(date +%s) + WAIT_BUDGET_SECONDS ))
           unresolved=''
+          nontransient=''
           while IFS= read -r spec; do
             [ -n "$spec" ] || continue
+            # Checked BEFORE the first attempt, not only after a failure. A spec
+            # reached after the deadline must not buy another full attempt.
+            if [ "$(date +%s)" -ge "$wait_deadline" ]; then
+              unresolved="${unresolved}${spec} "
+              continue
+            fi
             delay=10
             while true; do
-              if pack_attempt "$spec" 2>"$RUNNER_TEMP/pack.err"; then
+              if pack_attempt "$spec" 150 2>"$RUNNER_TEMP/pack.err"; then
                 cat "$RUNNER_TEMP/pack.err" >&2
                 break
               fi
@@ -170,9 +205,10 @@ jobs:
               if grep -qE 'code E(401|403|AUTH|PERM)' "$RUNNER_TEMP/pack.err"; then
                 echo "::error::$spec failed for a non-transient reason (see the npm error above); not retrying."
                 unresolved="${unresolved}${spec} "
+                nontransient="${nontransient}${spec} "
                 break
               fi
-              remaining=$(( deadline - $(date +%s) ))
+              remaining=$(( wait_deadline - $(date +%s) ))
               if [ "$remaining" -le 0 ]; then
                 unresolved="${unresolved}${spec} "
                 break
@@ -185,14 +221,22 @@ jobs:
             done
           done < "$RUNNER_TEMP/specs.txt"
 
-          # One final attempt per unresolved spec. Without this, a version that
-          # becomes readable a second after the deadline is reported as
+          # One short final attempt per unresolved spec. Without it, a version
+          # that becomes readable a second after the deadline is reported as
           # permanently missing while the very next diagnostic shows it present —
           # a self-contradicting failure that wastes the next investigation.
+          #
+          # Short, because this only asks "did it land in the meantime"; the
+          # waiting already happened. And never for a spec that failed
+          # non-transiently: retrying one here would contradict the "not retrying"
+          # the loop above already printed.
           if [ -n "$unresolved" ]; then
             still=''
             for spec in $unresolved; do
-              if pack_attempt "$spec"; then
+              case " $nontransient " in
+                *" $spec "*) still="${still}${spec} "; continue ;;
+              esac
+              if pack_attempt "$spec" 45; then
                 echo "::notice::$spec resolved just past the deadline."
               else
                 still="${still}${spec} "
@@ -205,8 +249,8 @@ jobs:
             name="${spec%@*}"
             version="${spec##*@}"
             enc=$(node -p 'encodeURIComponent(process.argv[1])' "$name")
-            pkg_code=$(curl -sS -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/$enc" || echo 000)
-            ver_code=$(curl -sS -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/$enc/$version" || echo 000)
+            pkg_code=$(curl -sS --max-time 10 -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/$enc" || echo 000)
+            ver_code=$(curl -sS --max-time 10 -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/$enc/$version" || echo 000)
             # Both documents, because one alone cannot tell these apart. A missing
             # VERSION is ambiguous by nature: npm holds new versions for a
             # publish-time malware scan ("typically around five minutes ... up to
