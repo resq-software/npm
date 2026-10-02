@@ -194,8 +194,10 @@ function CommandSeparator({
 }: Readonly<React.ComponentProps<typeof CommandPrimitive.Separator>>) {
 	return (
 		<CommandPrimitive.Separator
+			aria-hidden="true"
 			className={cn("bg-border -mx-1 h-px", className)}
 			data-slot="command-separator"
+			role="presentation"
 			{...props}
 		/>
 	);

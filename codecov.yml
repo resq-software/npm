@@ -1,0 +1,30 @@
+# Copyright 2026 ResQ Systems, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+# Codecov applies its own defaults the moment real reports start arriving, and they are
+# stricter than anything here asked for: a project status at threshold 0% reds on any
+# movement at all. None of these statuses sit in the org ruleset's required contexts -
+# `required` is the only one - so they cannot block a merge either way. This file is about
+# the signal staying readable rather than becoming noise everyone learns to ignore.
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        # 0% means a single timing-dependent branch reds the check. 1% still catches real
+        # regressions, and being relative to the base commit it cannot go stale the way a
+        # hardcoded number in vitest.config.ts would.
+        threshold: 1%
+    patch:
+      default:
+        # New lines are not held to a bar yet. Function coverage is 64.83%; raising that
+        # should be a deliberate decision, not a side effect of switching coverage on.
+        informational: true
+
+flags:
+  ui:
+    # packages/ui is the only uploader, and its matrix leg runs only when `detect` selects
+    # ui, so without carryforward every PR elsewhere looks like ui's coverage vanished.
+    carryforward: true
+    paths:
+      - packages/ui

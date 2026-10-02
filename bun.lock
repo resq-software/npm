@@ -163,7 +163,7 @@
     },
     "packages/dsa": {
       "name": "@resq-systems/dsa",
-      "version": "2.2.0",
+      "version": "3.0.0",
       "devDependencies": {
         "@jsheaven/perf": "^1.1.1",
         "@total-typescript/ts-reset": "^0.6.1",
@@ -181,7 +181,7 @@
     },
     "packages/email-templates": {
       "name": "@resq-systems/email-templates",
-      "version": "1.2.0",
+      "version": "2.0.0",
       "dependencies": {
         "@react-email/components": "^1.0.12",
         "@react-email/render": "^2.1.0",
@@ -216,7 +216,7 @@
     },
     "packages/helpers": {
       "name": "@resq-systems/helpers",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "dependencies": {
         "@resq-systems/dsa": "^2.1.0",
         "@resq-systems/logger": "^0.3.0",
@@ -241,7 +241,7 @@
     },
     "packages/http": {
       "name": "@resq-systems/http",
-      "version": "2.1.0",
+      "version": "3.0.0",
       "dependencies": {
         "@resq-systems/types": "^0.2.0",
       },
@@ -327,7 +327,7 @@
     },
     "packages/rate-limiting": {
       "name": "@resq-systems/rate-limiting",
-      "version": "0.4.3",
+      "version": "1.0.0",
       "dependencies": {
         "@resq-systems/dsa": "^2.1.0",
         "@resq-systems/types": "^0.2.0",
@@ -354,7 +354,7 @@
     },
     "packages/security": {
       "name": "@resq-systems/security",
-      "version": "2.1.2",
+      "version": "3.0.0",
       "dependencies": {
         "@resq-systems/types": "^0.2.0",
         "dompurify": "^3.4.16",
@@ -445,7 +445,7 @@
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
         "@vitest/coverage-v8": "5.0.2",
-        "axe-core": "^4.13.0",
+        "axe-core": "4.13.0",
         "chromatic": "^18.10.1",
         "console-fail-test": "0.9.0",
         "cspell": "10.3.6",
