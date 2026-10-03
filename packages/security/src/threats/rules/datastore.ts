@@ -97,7 +97,7 @@ export const SQL_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Statement separator followed by a new statement",
 		cwe: 89,
 		primaryControl: SQL_CONTROL,
-		pattern: /;\s{0,8}(?:SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|GRANT|EXEC|UNION)\b/i,
+		pattern: /;\s*(?:SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|GRANT|EXEC|UNION)\b/i,
 	},
 	{
 		id: "SQL-TAUTOLOGY-QUOTED-001",
@@ -108,7 +108,7 @@ export const SQL_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Quote-escaped always-true comparison",
 		cwe: 89,
 		primaryControl: SQL_CONTROL,
-		pattern: /['"]\s{0,8}(?:OR|AND)\s+['"]?\w{1,20}['"]?\s{0,8}=\s{0,8}['"]?\w{1,20}/i,
+		pattern: /['"]\s*(?:OR|AND)\s+['"]?\w{1,20}['"]?\s*=\s*['"]?\w{1,20}/i,
 	},
 	{
 		id: "SQL-TAUTOLOGY-NUMERIC-001",
@@ -121,7 +121,7 @@ export const SQL_INJECTION_RULES: readonly ThreatRule[] = [
 		primaryControl: SQL_CONTROL,
 		// Requires the escape character. A bare `1=1` is ordinary arithmetic and is
 		// deliberately *not* matched — that was the old catalog's worst false positive.
-		pattern: /['")]\s{0,8}(?:OR|AND)\s+\d{1,10}\s{0,8}=\s{0,8}\d{1,10}/i,
+		pattern: /['")]\s*(?:OR|AND)\s+\d{1,10}\s*=\s*\d{1,10}/i,
 	},
 	{
 		id: "SQL-COMMENT-TERMINATOR-001",
@@ -135,7 +135,7 @@ export const SQL_INJECTION_RULES: readonly ThreatRule[] = [
 		// The comment must follow a quote, paren, or digit — the position it occupies
 		// when it truncates an injected statement. A bare `(?:--|#)…$` fires on CSS
 		// colours (`#ff00aa`), issue references (`#123`), and em-dash-style prose.
-		pattern: /['")\d]\s{0,8}(?:--|#)[^\r\n]{0,64}$/,
+		pattern: /['")\d]\s*(?:--|#)[^\r\n]{0,64}$/,
 	},
 	{
 		// sqlmap ships this as its `versionedkeywords` tamper: MySQL executes the body of
@@ -178,7 +178,7 @@ export const SQL_INJECTION_RULES: readonly ThreatRule[] = [
 		// *between two keywords* has no benign explanation in a bound value, so this is
 		// graded high/high where the bare-comment rule stays low/low.
 		pattern:
-			/\b(?:UNION|SELECT|INSERT|UPDATE|DELETE|DROP|FROM|WHERE|ORDER|GROUP|HAVING|AND|OR)\s{0,8}\/\*[^*]{0,64}\*\/\s{0,8}(?:UNION|SELECT|ALL|DISTINCT|FROM|WHERE|INTO|TABLE|BY|\d|['"])/i,
+			/\b(?:UNION|SELECT|INSERT|UPDATE|DELETE|DROP|FROM|WHERE|ORDER|GROUP|HAVING|AND|OR)\s*\/\*[^*]{0,64}\*\/\s*(?:UNION|SELECT|ALL|DISTINCT|FROM|WHERE|INTO|TABLE|BY|\d|['"])/i,
 	},
 	{
 		id: "SQL-TIME-BLIND-001",
@@ -189,7 +189,7 @@ export const SQL_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Time-delay function used for blind injection",
 		cwe: 89,
 		primaryControl: SQL_CONTROL,
-		pattern: /\b(?:SLEEP|PG_SLEEP|BENCHMARK)\s{0,8}\(|\bWAITFOR\s+DELAY\b/i,
+		pattern: /\b(?:SLEEP|PG_SLEEP|BENCHMARK)\s*\(|\bWAITFOR\s+DELAY\b/i,
 	},
 	{
 		id: "SQL-METADATA-001",
@@ -223,8 +223,7 @@ export const SQL_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "SQL file read/write primitive",
 		cwe: 89,
 		primaryControl: SQL_CONTROL,
-		pattern:
-			/\bINTO\s+(?:OUT|DUMP)FILE\b|\bLOAD_FILE\s{0,8}\(|\bCOPY\s+\w{1,64}\s+FROM\s+PROGRAM\b/i,
+		pattern: /\bINTO\s+(?:OUT|DUMP)FILE\b|\bLOAD_FILE\s*\(|\bCOPY\s+\w{1,64}\s+FROM\s+PROGRAM\b/i,
 	},
 	{
 		id: "SQL-ENGINE-FILE-IO-001",
@@ -240,7 +239,7 @@ export const SQL_INJECTION_RULES: readonly ThreatRule[] = [
 		// SQL-STACKED-001 caught it incidentally — remove the semicolon and each was
 		// 0/allow.
 		pattern:
-			/\bpg_(?:read_file|read_binary_file|ls_dir|stat_file)\s{0,8}\(|\blo_(?:import|export)\s{0,8}\(|\bOPENROWSET\s{0,8}\(|\bOPENDATASOURCE\s{0,8}\(|\bATTACH\s+DATABASE\b|\bUTL_FILE\s{0,8}\./i,
+			/\bpg_(?:read_file|read_binary_file|ls_dir|stat_file)\s*\(|\blo_(?:import|export)\s*\(|\bOPENROWSET\s*\(|\bOPENDATASOURCE\s*\(|\bATTACH\s+DATABASE\b|\bUTL_FILE\s*\./i,
 	},
 	{
 		id: "SQL-OUT-OF-BAND-001",
@@ -255,7 +254,7 @@ export const SQL_INJECTION_RULES: readonly ThreatRule[] = [
 		// channels for blind injection: they make the database itself perform the
 		// exfiltration, so no data need come back through the response.
 		pattern:
-			/\bUTL_HTTP\s{0,8}\.|\bUTL_INADDR\s{0,8}\.|\bUTL_SMTP\s{0,8}\.|\bUTL_TCP\s{0,8}\.|\bDBMS_LDAP\s{0,8}\.|\bDBMS_PIPE\s{0,8}\.\s{0,8}RECEIVE_MESSAGE\b|\bdblink(?:_connect|_exec)?\s{0,8}\(/i,
+			/\bUTL_HTTP\s*\.|\bUTL_INADDR\s*\.|\bUTL_SMTP\s*\.|\bUTL_TCP\s*\.|\bDBMS_LDAP\s*\.|\bDBMS_PIPE\s*\.\s*RECEIVE_MESSAGE\b|\bdblink(?:_connect|_exec)?\s*\(/i,
 	},
 	{
 		id: "SQL-HEX-LITERAL-001",
@@ -292,7 +291,7 @@ export const NOSQL_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Object literal whose first key is a query operator",
 		cwe: 943,
 		primaryControl: NOSQL_CONTROL,
-		pattern: /\{\s{0,8}["']?\$[a-z]{2,20}["']?\s{0,8}:/i,
+		pattern: /\{\s*["']?\$[a-z]{2,20}["']?\s*:/i,
 	},
 	{
 		id: "NOSQL-JS-EXECUTION-001",
@@ -303,7 +302,7 @@ export const NOSQL_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Server-side JavaScript execution operator",
 		cwe: 943,
 		primaryControl: NOSQL_CONTROL,
-		pattern: /\$(?:where|function|accumulator)\s{0,8}["']?\s{0,8}:/i,
+		pattern: /\$(?:where|function|accumulator)\s*["']?\s*:/i,
 	},
 	{
 		id: "NOSQL-OPERATOR-001",
@@ -326,7 +325,7 @@ export const NOSQL_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Array subscript naming a query operator",
 		cwe: 943,
 		primaryControl: NOSQL_CONTROL,
-		pattern: /\[\s{0,8}["']?\$[a-z]{2,20}["']?\s{0,8}\]/i,
+		pattern: /\[\s*["']?\$[a-z]{2,20}["']?\s*\]/i,
 	},
 ];
 
@@ -349,7 +348,7 @@ export const LDAP_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Injected filter clause matching any value",
 		cwe: 90,
 		primaryControl: LDAP_CONTROL,
-		pattern: /[()&|!]\s{0,8}\(\s{0,8}[a-z0-9;.-]{1,64}\s{0,8}=\s{0,8}\*/i,
+		pattern: /[()&|!]\s*\(\s*[a-z0-9;.-]{1,64}\s*=\s*\*/i,
 	},
 	{
 		id: "LDAP-FILTER-CLOSE-001",
@@ -360,7 +359,7 @@ export const LDAP_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Filter-terminating parenthesis followed by a boolean operator",
 		cwe: 90,
 		primaryControl: LDAP_CONTROL,
-		pattern: /\)\s{0,8}[&|]\s{0,8}\(/,
+		pattern: /\)\s*[&|]\s*\(/,
 	},
 	{
 		id: "LDAP-METACHAR-001",
@@ -389,7 +388,7 @@ export const LDAP_INJECTION_RULES: readonly ThreatRule[] = [
 		// entry. All three DN forms scanned 0/allow before this rule.
 		// Confidence is medium because a common name can legitimately contain a comma
 		// ("Smith, John") — which is exactly why it must be escaped, not rejected.
-		pattern: /[,+]\s{0,8}(?:cn|ou|dc|o|uid|sn|givenname|mail|member|objectclass)\s{0,8}=/i,
+		pattern: /[,+]\s*(?:cn|ou|dc|o|uid|sn|givenname|mail|member|objectclass)\s*=/i,
 	},
 	{
 		id: "LDAP-DN-METACHAR-001",
@@ -426,7 +425,7 @@ export const XPATH_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Quote-escaped always-true predicate",
 		cwe: 643,
 		primaryControl: XPATH_CONTROL,
-		pattern: /['"]\s{0,8}(?:or|and)\s+['"]?\w{1,20}['"]?\s{0,8}=\s{0,8}['"]?\w{1,20}/i,
+		pattern: /['"]\s*(?:or|and)\s+['"]?\w{1,20}['"]?\s*=\s*['"]?\w{1,20}/i,
 	},
 	{
 		id: "XPATH-NODE-ESCAPE-001",
@@ -437,7 +436,7 @@ export const XPATH_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Predicate closed then unioned with a new node path",
 		cwe: 643,
 		primaryControl: XPATH_CONTROL,
-		pattern: /\]\s{0,8}\|\s{0,8}\/{1,2}/,
+		pattern: /\]\s*\|\s*\/{1,2}/,
 	},
 	{
 		id: "XPATH-AXIS-001",
@@ -448,8 +447,7 @@ export const XPATH_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Explicit XPath axis, used to walk outside the intended subtree",
 		cwe: 643,
 		primaryControl: XPATH_CONTROL,
-		pattern:
-			/\b(?:ancestor|descendant|following|preceding|parent|child|self)(?:-or-self)?\s{0,8}::/i,
+		pattern: /\b(?:ancestor|descendant|following|preceding|parent|child|self)(?:-or-self)?\s*::/i,
 	},
 	{
 		id: "XPATH-FUNCTION-001",
@@ -460,7 +458,7 @@ export const XPATH_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "XPath function call in a value position",
 		cwe: 643,
 		primaryControl: XPATH_CONTROL,
-		pattern: /\b(?:count|name|local-name|namespace-uri|string-length|substring|position)\s{0,8}\(/i,
+		pattern: /\b(?:count|name|local-name|namespace-uri|string-length|substring|position)\s*\(/i,
 	},
 ];
 

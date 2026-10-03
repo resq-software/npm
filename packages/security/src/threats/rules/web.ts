@@ -59,7 +59,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		description: "Inline event handler attribute inside a tag",
 		cwe: 79,
 		primaryControl: XSS_CONTROL,
-		pattern: /<[a-z][^>]{0,300}\bon[a-z]{3,20}\s{0,8}=/i,
+		pattern: /<[a-z][^>]{0,300}\bon[a-z]{3,20}\s*=/i,
 	},
 	{
 		id: "XSS-EVENT-HANDLER-002",
@@ -71,7 +71,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		cwe: 79,
 		primaryControl: XSS_CONTROL,
 		pattern:
-			/\bon(?:error|load|click|focus|blur|submit|change|toggle|mouse[a-z]{2,12}|key[a-z]{2,6}|animation[a-z]{3,10}|pointer[a-z]{2,12})\s{0,8}=\s{0,8}["'`]/i,
+			/\bon(?:error|load|click|focus|blur|submit|change|toggle|mouse[a-z]{2,12}|key[a-z]{2,6}|animation[a-z]{3,10}|pointer[a-z]{2,12})\s*=\s*["'`]/i,
 	},
 	{
 		id: "XSS-URI-SCHEME-001",
@@ -82,7 +82,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		description: "Script-bearing URI scheme",
 		cwe: 79,
 		primaryControl: "Allowlist the URL scheme before rendering or navigating",
-		pattern: /\b(?:javascript|vbscript|livescript|mocha)\s{0,8}:/i,
+		pattern: /\b(?:javascript|vbscript|livescript|mocha)\s*:/i,
 	},
 	{
 		id: "XSS-DATA-URI-001",
@@ -94,7 +94,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		cwe: 79,
 		primaryControl: "Allowlist the URL scheme before rendering or navigating",
 		pattern:
-			/\bdata\s{0,8}:\s{0,8}(?:text\/html|image\/svg\+xml|application\/(?:javascript|xhtml\+xml|ecmascript))/i,
+			/\bdata\s*:\s*(?:text\/html|image\/svg\+xml|application\/(?:javascript|xhtml\+xml|ecmascript))/i,
 	},
 	{
 		id: "XSS-DANGEROUS-TAG-001",
@@ -109,7 +109,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		description: "Tag that can load or reframe active content",
 		cwe: 79,
 		primaryControl: XSS_CONTROL,
-		pattern: /<\s{0,8}(?:iframe|object|embed|applet|base|meta|link|svg|math|portal|frameset)\b/i,
+		pattern: /<\s*(?:iframe|object|embed|applet|base|meta|link|svg|math|portal|frameset)\b/i,
 	},
 	{
 		id: "XSS-STYLE-EXPRESSION-001",
@@ -120,7 +120,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		description: "CSS expression() — legacy IE script execution vector",
 		cwe: 79,
 		primaryControl: XSS_CONTROL,
-		pattern: /\bexpression\s{0,8}\(/i,
+		pattern: /\bexpression\s*\(/i,
 	},
 	{
 		id: "XSS-DOM-SINK-001",
@@ -131,8 +131,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		description: "Reference to a credential- or navigation-bearing DOM property",
 		cwe: 79,
 		primaryControl: XSS_CONTROL,
-		pattern:
-			/\b(?:document|window)\s{0,8}\.\s{0,8}(?:cookie|domain|write|writeln|location|open)\b/i,
+		pattern: /\b(?:document|window)\s*\.\s*(?:cookie|domain|write|writeln|location|open)\b/i,
 	},
 	{
 		id: "XSS-DOM-SINK-002",
@@ -143,7 +142,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		description: "Assignment to a raw-markup DOM sink",
 		cwe: 79,
 		primaryControl: "Assign via textContent, or sanitize with DOMPurify first",
-		pattern: /\b(?:innerHTML|outerHTML|srcdoc)\s{0,8}=|\binsertAdjacentHTML\s{0,8}\(/i,
+		pattern: /\b(?:innerHTML|outerHTML|srcdoc)\s*=|\binsertAdjacentHTML\s*\(/i,
 	},
 	{
 		id: "XSS-DYNAMIC-EVAL-001",
@@ -154,7 +153,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		description: "Dynamic code evaluation (eval / Function constructor)",
 		cwe: 95,
 		primaryControl: "Never evaluate strings; a CSP without 'unsafe-eval' blocks this",
-		pattern: /\beval\s{0,8}\(|\bnew\s+Function\s{0,8}\(/i,
+		pattern: /\beval\s*\(|\bnew\s+Function\s*\(/i,
 	},
 	{
 		id: "XSS-URI-SCHEME-002",
@@ -186,8 +185,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		description: "String-argument timer or Function call — an implicit eval sink",
 		cwe: 95,
 		primaryControl: "Never evaluate strings; a CSP without 'unsafe-eval' blocks this",
-		pattern:
-			/\b(?:setTimeout|setInterval|setImmediate|Function)\s{0,8}\(\s{0,8}["'`]|\bexecScript\s{0,8}\(/i,
+		pattern: /\b(?:setTimeout|setInterval|setImmediate|Function)\s*\(\s*["'`]|\bexecScript\s*\(/i,
 	},
 	{
 		id: "XSS-DYNAMIC-EVAL-003",
@@ -198,7 +196,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		description: "constructor.constructor chain used to reach the Function constructor",
 		cwe: 95,
 		primaryControl: "Never evaluate strings; a CSP without 'unsafe-eval' blocks this",
-		pattern: /\bconstructor\s{0,8}(?:\.\s{0,8}constructor|\[\s{0,8}["'`]constructor)/i,
+		pattern: /\bconstructor\s*(?:\.\s*constructor|\[\s*["'`]constructor)/i,
 	},
 	{
 		id: "XSS-EVENT-HANDLER-003",
@@ -216,7 +214,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		// Handler names are an explicit allowlist rather than `on[a-z]{3,20}`, so
 		// `"onboarding="` and `"onlineStatus="` cannot trip it.
 		pattern:
-			/["'`]\s{0,8}on(?:error|load|click|focus|blur|submit|change|toggle|wheel|scroll|input|select|paste|copy|cut|contextmenu|auxclick|mouse[a-z]{2,12}|key[a-z]{2,6}|animation[a-z]{3,10}|pointer[a-z]{2,12}|drag[a-z]{0,10}|touch[a-z]{2,10})\s{0,8}=/i,
+			/["'`]\s*on(?:error|load|click|focus|blur|submit|change|toggle|wheel|scroll|input|select|paste|copy|cut|contextmenu|auxclick|mouse[a-z]{2,12}|key[a-z]{2,6}|animation[a-z]{3,10}|pointer[a-z]{2,12}|drag[a-z]{0,10}|touch[a-z]{2,10})\s*=/i,
 	},
 	{
 		id: "XSS-EVENT-HANDLER-004",
@@ -235,7 +233,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		// Whitespace before `=` is forbidden, which kills prose false positives such as
 		// "onload = init()" at the cost of missing spaced payloads into unquoted sinks.
 		pattern:
-			/(?:^|[^.\w-])on(?:error|load|click|focus|blur|submit|change|toggle|wheel|scroll|input|select|paste|copy|cut|contextmenu|auxclick|mouse[a-z]{2,12}|key[a-z]{2,6}|animation[a-z]{3,10}|pointer[a-z]{2,12}|drag[a-z]{0,10}|touch[a-z]{2,10})=\s{0,8}[\w$.[\]]{1,40}\s{0,8}[(`]/i,
+			/(?:^|[^.\w-])on(?:error|load|click|focus|blur|submit|change|toggle|wheel|scroll|input|select|paste|copy|cut|contextmenu|auxclick|mouse[a-z]{2,12}|key[a-z]{2,6}|animation[a-z]{3,10}|pointer[a-z]{2,12}|drag[a-z]{0,10}|touch[a-z]{2,10})=\s*[\w$.[\]]{1,40}\s*[(`]/i,
 	},
 	{
 		id: "XSS-FORM-TAG-001",
@@ -251,7 +249,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		// entity-encoded form tag is already neutralized — the encoding *is* the
 		// control. Percent-encoded evasion stays covered.
 		variants: ["raw", "nfc", "nfkc", "percent_decoded"],
-		pattern: /<\s{0,8}(?:form|input|textarea|button|select|keygen|isindex)\b/i,
+		pattern: /<\s*(?:form|input|textarea|button|select|keygen|isindex)\b/i,
 	},
 	{
 		id: "XSS-STYLE-TAG-001",
@@ -263,7 +261,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		cwe: 79,
 		primaryControl: XSS_CONTROL,
 		variants: ["raw", "nfc", "nfkc", "percent_decoded"],
-		pattern: /<\s{0,8}style\b/i,
+		pattern: /<\s*style\b/i,
 	},
 	{
 		id: "XSS-DANGLING-MARKUP-001",
@@ -274,8 +272,7 @@ export const XSS_RULES: readonly ThreatRule[] = [
 		description: "Unterminated resource attribute — exfiltrates the following markup",
 		cwe: 79,
 		primaryControl: XSS_CONTROL,
-		pattern:
-			/\b(?:src|href|action|formaction|poster|background)\s{0,8}=\s{0,8}["'][^"'<>]{0,300}$/i,
+		pattern: /\b(?:src|href|action|formaction|poster|background)\s*=\s*["'][^"'<>]{0,300}$/i,
 	},
 ];
 
@@ -335,7 +332,7 @@ export const PROTOTYPE_POLLUTION_RULES: readonly ThreatRule[] = [
 		// `constructor["prototype"]`) and the nested-object form that arrives through
 		// a JSON body or query-string expansion (`"constructor":{"prototype":…}`).
 		pattern:
-			/\bconstructor\s{0,8}(?:\.|\[)\s{0,8}["']?prototype\b|["']constructor["']\s{0,8}:\s{0,8}\{\s{0,8}["']prototype["']/i,
+			/\bconstructor\s*(?:\.|\[)\s*["']?prototype\b|["']constructor["']\s*:\s*\{\s*["']prototype["']/i,
 	},
 ];
 
@@ -381,6 +378,14 @@ export const HEADER_INJECTION_RULES: readonly ThreatRule[] = [
 		cwe: 113,
 		primaryControl: HEADER_CONTROL,
 		pattern:
+			// Keeps the {0,8} bound where the rest of the catalogue widened to `\s*`.
+			// The header-name alternative is REQUIRED, so the two quantifiers cannot split a
+			// run between them — that is a different shape from the Smarty rule. The cost
+			// here is re-scanning: widen the first quantifier and every `[\r\n]` in the
+			// input rescans all the whitespace that follows it before the header name fails,
+			// which is quadratic in the number of line breaks. Measured widened against
+			// alternating space/newline: 5.4ms at 4k, 22ms at 8k, 3626ms at 100k. Bounded it
+			// is 12ms at 100k.
 			/[\r\n]\s{0,8}(?:set-cookie|location|content-length|transfer-encoding|host|authorization|bcc|cc|to)\s{0,8}:/i,
 	},
 	{
@@ -451,7 +456,7 @@ export const FORMULA_INJECTION_RULES: readonly ThreatRule[] = [
 		cwe: 1236,
 		primaryControl: FORMULA_CONTROL,
 		pattern:
-			/\b(?:DDE|DDEAUTO|WEBSERVICE|HYPERLINK|IMPORTXML|IMPORTDATA|IMPORTFEED|IMPORTHTML|IMPORTRANGE|RTD)\s{0,8}\(/i,
+			/\b(?:DDE|DDEAUTO|WEBSERVICE|HYPERLINK|IMPORTXML|IMPORTDATA|IMPORTFEED|IMPORTHTML|IMPORTRANGE|RTD)\s*\(/i,
 	},
 ];
 
@@ -485,7 +490,20 @@ export const LOG_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Line break followed by a forged log-level marker",
 		cwe: 117,
 		primaryControl: LOG_CONTROL,
-		pattern: /[\r\n]\s{0,8}[[{(]?\s{0,8}(?:INFO|WARN|WARNING|ERROR|DEBUG|FATAL|TRACE|CRITICAL)\b/i,
+		// Two changes here, for two different reasons.
+		//
+		// `(?:[[{(]\s{0,8})?` rather than `[[{(]?\s{0,8}`: the optional bracket sat between
+		// two whitespace runs, so a prefixed near-match could split the run between them.
+		// That cost 39.2ms on a CI runner — over the 30ms budget — and is what the
+		// prefix-aware timing test caught. Giving the bracket its own run puts a mandatory
+		// character between the two, and the same input drops to 2.8ms at 100k.
+		//
+		// The {0,8} bounds then STAY, unlike the rest of the catalogue. Restructuring fixes
+		// the splitting, but widening would still let every `[\r\n]` rescan the whitespace
+		// after it before the level alternative fails: measured 176ms at 20k and 4464ms at
+		// 100k widened, against 1.5ms bounded. Detection past eight spaces is not worth that.
+		pattern:
+			/[\r\n]\s{0,8}(?:[[{(]\s{0,8})?(?:INFO|WARN|WARNING|ERROR|DEBUG|FATAL|TRACE|CRITICAL)\b/i,
 	},
 	{
 		id: "LOG-ANSI-ESCAPE-001",
