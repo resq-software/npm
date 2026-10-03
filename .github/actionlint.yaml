@@ -21,3 +21,9 @@ paths:
   ".github/workflows/**/*.{yml,yaml}":
     ignore:
       - 'reusable workflow call "\$/[^"]*" at "uses" is not following the format'
+      # The step-level form of the same false positive: actionlint reports a `$/`
+      # ACTION with a different message than a `$/` reusable-workflow call, so the
+      # entry above does not cover it. Same scope discipline - anchored to a value
+      # starting with `$/`, so `uses: totally/bogus-no-ref` still fails the lint,
+      # verified with that exact negative control.
+      - 'specifying action "\$/[^"]*" in invalid format because ref is missing'
