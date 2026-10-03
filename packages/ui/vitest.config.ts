@@ -24,7 +24,12 @@ export default defineConfig({
 		clearMocks: true,
 		coverage: {
 			all: true,
-			include: ["src"],
+			// `include: ["src"]` counted 80 *.stories.tsx, globals.css and a .snap as
+			// production source - 82 of 257 files, all at or near zero - and reported 76.90%
+			// lines where the real figure is 80.82%. Codecov baselines on the first report it
+			// receives, so the honest scope has to arrive with --coverage, not after it.
+			exclude: ["src/**/*.stories.tsx"],
+			include: ["src/**/*.{ts,tsx}"],
 			reporter: ["html", "lcov", "text"],
 		},
 		environment: "jsdom",
