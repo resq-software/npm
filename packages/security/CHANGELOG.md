@@ -16,6 +16,12 @@
   limitations under the License.
 -->
 
+## 3.0.2
+
+### Patch Changes
+
+- [#371](https://github.com/resq-software/npm/pull/371) [`6f6c2b9`](https://github.com/resq-software/npm/commit/6f6c2b92b137666a68906332e9c71baa0e126fe2) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Detect injection patterns separated by more than eight whitespace characters
+
 ## 3.0.1
 
 ### Patch Changes
