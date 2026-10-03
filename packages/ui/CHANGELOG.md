@@ -16,6 +16,12 @@
   limitations under the License.
 -->
 
+## 0.42.1
+
+### Patch Changes
+
+- [#366](https://github.com/resq-software/npm/pull/366) [`a544448`](https://github.com/resq-software/npm/commit/a544448c066a7876ff60106ecd4e3c66fb0d2e9f) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Fix CommandSeparator placing a `separator` role inside CommandList's `listbox`, which axe reports as a critical `aria-required-children` violation
+
 ## 0.42.0
 
 ### Minor Changes
@@ -33,7 +39,6 @@
 
 - Updated dependencies [[`b43014e`](https://github.com/resq-software/npm/commit/b43014e16296172959680150ad1a31d6cf346b04)]:
   - @resq-systems/types@0.2.0
-
 
 ## 0.41.0
 
