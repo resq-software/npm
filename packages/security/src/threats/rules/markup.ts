@@ -81,7 +81,7 @@ export const XML_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "XInclude directive — an entity-free route to the same file read",
 		cwe: 611,
 		primaryControl: XML_CONTROL,
-		pattern: /<\s{0,8}xi:include\b|www\.w3\.org\/2001\/XInclude/i,
+		pattern: /<\s*xi:include\b|www\.w3\.org\/2001\/XInclude/i,
 	},
 	{
 		id: "XML-CDATA-001",
@@ -126,7 +126,7 @@ export const TEMPLATE_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "OGNL/EL expression reaching a runtime execution class",
 		cwe: 917,
 		primaryControl: SSTI_CONTROL,
-		pattern: /_memberAccess|\bRuntime\s{0,8}\.\s{0,8}getRuntime|\bProcessBuilder\b|@java\.lang\b/i,
+		pattern: /_memberAccess|\bRuntime\s*\.\s*getRuntime|\bProcessBuilder\b|@java\.lang\b/i,
 	},
 	{
 		id: "SSTI-MUSTACHE-DELIMITER-001",
@@ -177,7 +177,7 @@ export const TEMPLATE_INJECTION_RULES: readonly ThreatRule[] = [
 		cwe: 97,
 		primaryControl:
 			"Disable server-side includes, or serve untrusted content from a path with SSI turned off",
-		pattern: /<!--#\s{0,8}(?:exec|include|echo|config|fsize|flastmod|printenv|set)\b/i,
+		pattern: /<!--#\s*(?:exec|include|echo|config|fsize|flastmod|printenv|set)\b/i,
 	},
 	{
 		id: "SSTI-SCRIPTLET-DELIMITER-001",
@@ -204,7 +204,7 @@ export const TEMPLATE_INJECTION_RULES: readonly ThreatRule[] = [
 		cwe: 1336,
 		primaryControl: SSTI_CONTROL,
 		pattern:
-			/<#\s{0,8}(?:assign|list|if|else|import|include|macro|function|setting|attempt|global|local|nested|recurse|switch|visit|compress|noparse|outputformat)\b|<@[\w.$]{1,64}\s{0,8}\(/i,
+			/<#\s*(?:assign|list|if|else|import|include|macro|function|setting|attempt|global|local|nested|recurse|switch|visit|compress|noparse|outputformat)\b|<@[\w.$]{1,64}\s*\(/i,
 	},
 	{
 		id: "SSTI-VELOCITY-DIRECTIVE-001",
@@ -215,7 +215,7 @@ export const TEMPLATE_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Velocity directive",
 		cwe: 1336,
 		primaryControl: SSTI_CONTROL,
-		pattern: /#(?:set|parse|evaluate|macro|foreach|include)\s{0,8}\(/i,
+		pattern: /#(?:set|parse|evaluate|macro|foreach|include)\s*\(/i,
 	},
 	{
 		id: "SSTI-DOTNET-REFLECTION-001",
@@ -232,7 +232,7 @@ export const TEMPLATE_INJECTION_RULES: readonly ThreatRule[] = [
 		// `Process\.Start` is required literally — the spaced form matched the sentence
 		// "Our deployment process. Start(ing) Monday".
 		pattern:
-			/\bSystem\.Diagnostics\.Process|\bProcess\.Start\s{0,8}\(|\bActivator\.CreateInstance\s{0,8}\(|\bAssembly\.Load\s{0,8}\(/i,
+			/\bSystem\.Diagnostics\.Process|\bProcess\.Start\s*\(|\bActivator\.CreateInstance\s*\(|\bAssembly\.Load\s*\(/i,
 	},
 	{
 		id: "SSTI-NODE-REQUIRE-001",
@@ -244,7 +244,7 @@ export const TEMPLATE_INJECTION_RULES: readonly ThreatRule[] = [
 		cwe: 1336,
 		primaryControl: SSTI_CONTROL,
 		pattern:
-			/\bprocess\s{0,8}\.\s{0,8}(?:mainModule|binding|constructor)\b|\brequire\s{0,8}\(\s{0,8}["'](?:node:)?(?:child_process|fs|vm|os)["']/i,
+			/\bprocess\s*\.\s*(?:mainModule|binding|constructor)\b|\brequire\s*\(\s*["'](?:node:)?(?:child_process|fs|vm|os)["']/i,
 	},
 	{
 		id: "SSTI-SMARTY-PHP-001",
@@ -255,7 +255,13 @@ export const TEMPLATE_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Smarty {php} tag",
 		cwe: 94,
 		primaryControl: "Disable the {php} tag; it was removed entirely in Smarty 4",
-		pattern: /\{\s{0,8}\/?\s{0,8}php\s{0,8}\}/i,
+		// `(?:\/\s*)?` rather than `\/?\s*`: the optional slash sat between two
+		// whitespace runs, so on `{` + a long whitespace run + a non-match the engine
+		// tried every way of splitting that run between them. Measured 3.2ms at 2k,
+		// 15ms at 4k, 51ms at 8k — quadratic, and the default scan limit is 100 000.
+		// Folding the slash and its trailing space into one optional group leaves a
+		// single run per path: 0.01ms at 8k, and the matched set is unchanged.
+		pattern: /\{\s*(?:\/\s*)?php\s*\}/i,
 	},
 ];
 
@@ -313,7 +319,7 @@ export const PROMPT_INJECTION_RULES: readonly ThreatRule[] = [
 		// run that could cross one would rescan the rest of the input from each line start
 		// and go quadratic. `\s` holds all four terminators (LF, CR, U+2028, U+2029), so the
 		// class removes each; the run then never leaves its line and the scan stays linear.
-		pattern: /^[^\S\r\n\u2028\u2029]*(?:system|assistant|developer|tool)\s{0,8}:/im,
+		pattern: /^[^\S\r\n\u2028\u2029]*(?:system|assistant|developer|tool)\s*:/im,
 	},
 	{
 		id: "PROMPT-EXFIL-001",
