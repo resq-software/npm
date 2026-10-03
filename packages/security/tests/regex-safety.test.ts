@@ -51,6 +51,14 @@ const SCAN_BUDGET_MS = 750;
 /** Length of the adversarial strings built for the per-rule benchmark. */
 const ADVERSARIAL_LENGTH = 100_000;
 
+/**
+ * Runs per input in the timing benchmarks, of which the fastest is taken.
+ *
+ * Three is enough for the minimum to shrug off a scheduler hiccup without making
+ * the suite meaningfully slower, since each run is a single `RegExp.test`.
+ */
+const TIMING_ATTEMPTS = 3;
+
 /** Single characters an attacker can repeat to provoke backtracking. */
 const ADVERSARIAL_SEEDS = [
 	"a",
@@ -119,9 +127,22 @@ const worstCase = (
 	let head = "";
 
 	for (const input of inputs) {
-		const started = performance.now();
-		rule.pattern.test(input);
-		const elapsed = performance.now() - started;
+		// The MINIMUM of several runs, not a single sample. This is a wall-clock
+		// assertion, and scheduler noise only ever ADDS time — so the fastest run is
+		// the closest estimate of the pattern's real cost, and the one least able to
+		// fail for reasons unrelated to the pattern. A single sample made this flaky
+		// under parallel load: rules measured at ~25 ms here were reported at 31-37 ms
+		// on a workstation sitting at a load average near 48.
+		//
+		// This does not weaken the tripwire. Catastrophic backtracking takes seconds on
+		// EVERY run, so the minimum crosses a 30 ms budget just as unmistakably as the
+		// maximum does; what it drops is only the noise.
+		let elapsed = Number.POSITIVE_INFINITY;
+		for (let attempt = 0; attempt < TIMING_ATTEMPTS; attempt++) {
+			const started = performance.now();
+			rule.pattern.test(input);
+			elapsed = Math.min(elapsed, performance.now() - started);
+		}
 		if (elapsed > ms) {
 			ms = elapsed;
 			// Escape everything outside printable ASCII so a run of whitespace or line

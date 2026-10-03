@@ -478,7 +478,17 @@ export const SSRF_RULES: readonly ThreatRule[] = [
 		primaryControl: SSRF_CONTROL,
 		// The leading run is unbounded, because a URL parser strips all of it, not eight.
 		// Without `/m`, `^` matches only at index 0, so the run is entered once: linear.
-		pattern: /^\s*(?:file|gopher|dict|tftp|ldaps?|jar|netdoc|sftp):/i,
+		//
+		// `[\x00-\x20]` rather than `\s` alone: the WHATWG URL parser strips leading C0
+		// controls as well as spaces, so `\x01file:///etc/passwd` resolves to the file:
+		// scheme while `\s` (which starts at \x09) never matched it. That input was still
+		// caught by CONTROL-CHAR-001, so it was never invisible — but it was reported as a
+		// control-character finding rather than SSRF, which a consumer filtering on this
+		// rule or on type "ssrf" would miss. `\s` is kept alongside for the Unicode
+		// whitespace it adds; those over-match slightly, since WHATWG rejects them, which
+		// is the harmless direction.
+		// biome-ignore lint/suspicious/noControlCharactersInRegex: matching C0 controls is the purpose — the URL parser strips them, so the rule must see them
+		pattern: /^[\x00-\x20\s]*(?:file|gopher|dict|tftp|ldaps?|jar|netdoc|sftp):/i,
 	},
 	{
 		id: "SSRF-USERINFO-INTERNAL-HOST-001",

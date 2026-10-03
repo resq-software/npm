@@ -61,6 +61,26 @@ export const MAX_SCAN_LENGTH = 100_000;
 const MAX_MATCH_EXCERPT = 50;
 
 /**
+ * The reportable slice of a match.
+ *
+ * Rules with an unbounded leading whitespace run can match far more padding than
+ * payload, and a flat `slice(0, MAX_MATCH_EXCERPT)` then reports pure whitespace —
+ * technically the matched text, and useless to whoever has to read the finding.
+ * Skipping to the first non-whitespace character keeps the excerpt about the thing
+ * that was actually detected. `start`/`end` still carry the true match bounds.
+ */
+function excerptOf(matched: string): string {
+	// The same class the widened leading runs match, not just `\S`: C0 controls are
+	// non-whitespace, so skipping only `\s` left a run of them reported verbatim -
+	// exactly the failure this function exists to prevent, for the characters
+	// SSRF-NON-HTTP-SCHEME-001 was just taught to match.
+	// biome-ignore lint/suspicious/noControlCharactersInRegex: skipping C0 controls is the purpose
+	const firstMeaningful = matched.search(/[^\x00-\x20\s]/);
+	const from = firstMeaningful === -1 ? 0 : firstMeaningful;
+	return matched.slice(from, from + MAX_MATCH_EXCERPT);
+}
+
+/**
  * Run length at which a repeated single character is reported as resource abuse.
  * Set well above anything that occurs in prose or formatted text.
  */
@@ -254,7 +274,7 @@ export function scanForThreats(input: string, options: ThreatScanOptions = {}): 
 				...(rule.cwe === undefined ? {} : { cwe: rule.cwe }),
 				primaryControl: rule.primaryControl,
 				variant: variant.kind,
-				matchedPattern: match[0].slice(0, MAX_MATCH_EXCERPT),
+				matchedPattern: excerptOf(match[0]),
 				start: match.index,
 				end: match.index + match[0].length,
 			});
