@@ -16,6 +16,12 @@
   limitations under the License.
 -->
 
+## 3.0.1
+
+### Patch Changes
+
+- [#370](https://github.com/resq-software/npm/pull/370) [`87a0207`](https://github.com/resq-software/npm/commit/87a02078464ce11722a5fedde969b120781cac2c) Thanks [@WomB0ComB0](https://github.com/WomB0ComB0)! - Flag non-HTTP schemes behind a leading C0 control, and keep the payload in the match excerpt
+
 ## 3.0.0
 
 ### Major Changes
