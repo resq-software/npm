@@ -379,10 +379,13 @@ export const HEADER_INJECTION_RULES: readonly ThreatRule[] = [
 		primaryControl: HEADER_CONTROL,
 		pattern:
 			// Keeps the {0,8} bound where the rest of the catalogue widened to `\s*`.
-			// Two whitespace runs in one sequential path: on all-whitespace input the engine
-			// must try every way of splitting the run between them, which is quadratic.
-			// Measured widened against alternating space/newline: 5.4ms at 4k, 22ms at 8k,
-			// 3626ms at 100k. Bounded it is 12ms at 100k.
+			// The header-name alternative is REQUIRED, so the two quantifiers cannot split a
+			// run between them — that is a different shape from the Smarty rule. The cost
+			// here is re-scanning: widen the first quantifier and every `[\r\n]` in the
+			// input rescans all the whitespace that follows it before the header name fails,
+			// which is quadratic in the number of line breaks. Measured widened against
+			// alternating space/newline: 5.4ms at 4k, 22ms at 8k, 3626ms at 100k. Bounded it
+			// is 12ms at 100k.
 			/[\r\n]\s{0,8}(?:set-cookie|location|content-length|transfer-encoding|host|authorization|bcc|cc|to)\s{0,8}:/i,
 	},
 	{
@@ -487,12 +490,20 @@ export const LOG_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Line break followed by a forged log-level marker",
 		cwe: 117,
 		primaryControl: LOG_CONTROL,
-		// Keeps the {0,8} bound where the rest of the catalogue widened to `\s*`.
-		// Two whitespace runs in one sequential path: on all-whitespace input the engine
-		// must try every way of splitting the run between them, which is quadratic.
-		// Measured widened against alternating space/newline: 6.7s at 4k, 54s at 8k.
-		// Bounded it is under 1ms. Do not widen either for consistency.
-		pattern: /[\r\n]\s{0,8}[[{(]?\s{0,8}(?:INFO|WARN|WARNING|ERROR|DEBUG|FATAL|TRACE|CRITICAL)\b/i,
+		// Two changes here, for two different reasons.
+		//
+		// `(?:[[{(]\s{0,8})?` rather than `[[{(]?\s{0,8}`: the optional bracket sat between
+		// two whitespace runs, so a prefixed near-match could split the run between them.
+		// That cost 39.2ms on a CI runner — over the 30ms budget — and is what the
+		// prefix-aware timing test caught. Giving the bracket its own run puts a mandatory
+		// character between the two, and the same input drops to 2.8ms at 100k.
+		//
+		// The {0,8} bounds then STAY, unlike the rest of the catalogue. Restructuring fixes
+		// the splitting, but widening would still let every `[\r\n]` rescan the whitespace
+		// after it before the level alternative fails: measured 176ms at 20k and 4464ms at
+		// 100k widened, against 1.5ms bounded. Detection past eight spaces is not worth that.
+		pattern:
+			/[\r\n]\s{0,8}(?:[[{(]\s{0,8})?(?:INFO|WARN|WARNING|ERROR|DEBUG|FATAL|TRACE|CRITICAL)\b/i,
 	},
 	{
 		id: "LOG-ANSI-ESCAPE-001",
