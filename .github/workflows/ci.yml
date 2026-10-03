@@ -387,7 +387,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
       # contact-scope.tsx imports @resq-systems/nav/arpa at runtime, so without a
       # build the suite fails to collect — it does not run with a silent gap, but
       # the failure reads as unrelated.
