@@ -259,7 +259,7 @@ export const JWT_RULES: readonly ThreatRule[] = [
 		primaryControl: JWT_CONTROL,
 		// Covers what the structural rule cannot: `alg:none` carrying a non-empty
 		// signature, which naive verifiers still accept.
-		pattern: /"alg"\s{0,8}:\s{0,8}"\s{0,8}none\s{0,8}"/i,
+		pattern: /"alg"\s*:\s*"\s*none\s*"/i,
 	},
 ];
 

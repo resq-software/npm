@@ -79,7 +79,7 @@ export const COMMAND_INJECTION_RULES: readonly ThreatRule[] = [
 		cwe: 78,
 		primaryControl: CMD_CONTROL,
 		pattern:
-			/[;&|]{1,2}\s{0,8}(?:rm|del|cat|type|wget|curl|nc|ncat|bash|sh|zsh|powershell|pwsh|python[23]?|perl|ruby|chmod|chown|kill|shutdown|reboot|mkfifo|base64|openssl)\b/i,
+			/[;&|]{1,2}\s*(?:rm|del|cat|type|wget|curl|nc|ncat|bash|sh|zsh|powershell|pwsh|python[23]?|perl|ruby|chmod|chown|kill|shutdown|reboot|mkfifo|base64|openssl)\b/i,
 	},
 	{
 		id: "CMD-PIPE-SHELL-001",
@@ -90,7 +90,7 @@ export const COMMAND_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Output piped into a shell interpreter",
 		cwe: 78,
 		primaryControl: CMD_CONTROL,
-		pattern: /\|\s{0,8}(?:sh|bash|zsh|dash|cmd|powershell|pwsh)\b/i,
+		pattern: /\|\s*(?:sh|bash|zsh|dash|cmd|powershell|pwsh)\b/i,
 	},
 	{
 		id: "CMD-REDIRECT-SYSTEM-001",
@@ -101,7 +101,7 @@ export const COMMAND_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Redirection into a system directory",
 		cwe: 78,
 		primaryControl: CMD_CONTROL,
-		pattern: />\s{0,8}\/(?:etc|dev|proc|sys|boot)\//,
+		pattern: />\s*\/(?:etc|dev|proc|sys|boot)\//,
 	},
 	{
 		// Commix documents both as filter bypasses against defences that block spaces:
