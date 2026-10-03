@@ -259,3 +259,34 @@ describe("full-scan cost", () => {
 		expect(elapsed).toBeLessThan(SCAN_BUDGET_MS);
 	});
 });
+
+describe("patterns entered by their own prefix", () => {
+	/**
+	 * The shared corpus is runs of a single character, so a rule anchored on a literal
+	 * bails at index 0 and is never actually exercised. SSTI-SMARTY-PHP-001 was
+	 * quadratic behind a leading `{` while measuring 0.08ms against 100 000 characters
+	 * of pure whitespace, because the `{` was never there to enter it.
+	 *
+	 * These inputs carry each rule's own opening literal, then a long whitespace run,
+	 * then a character that cannot complete the match — the shape that forces the
+	 * engine to try every split of the run.
+	 */
+	it.each([
+		["SSTI-SMARTY-PHP-001", "{", "phx"],
+		["HEADER-SMUGGLED-NAME-001", "\n", "zzz"],
+		["LOG-FORGED-ENTRY-001", "\n", "zzz"],
+	])("%s stays within budget on a near-match behind its own prefix", (id, prefix, tail) => {
+		const rule = THREAT_RULES.find((candidate) => candidate.id === id);
+		expect(rule, `${id} not found in THREAT_RULES`).toBeDefined();
+		const input = `${prefix}${" \n".repeat(ADVERSARIAL_LENGTH / 2)}${tail}`;
+		let ms = Number.POSITIVE_INFINITY;
+		for (let attempt = 0; attempt < TIMING_ATTEMPTS; attempt++) {
+			const started = performance.now();
+			rule?.pattern.test(input);
+			ms = Math.min(ms, performance.now() - started);
+		}
+		expect(ms, `${id} took ${ms.toFixed(1)}ms on a prefixed near-match`).toBeLessThan(
+			RULE_BUDGET_MS,
+		);
+	});
+});

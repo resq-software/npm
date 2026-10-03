@@ -255,7 +255,13 @@ export const TEMPLATE_INJECTION_RULES: readonly ThreatRule[] = [
 		description: "Smarty {php} tag",
 		cwe: 94,
 		primaryControl: "Disable the {php} tag; it was removed entirely in Smarty 4",
-		pattern: /\{\s*\/?\s*php\s*\}/i,
+		// `(?:\/\s*)?` rather than `\/?\s*`: the optional slash sat between two
+		// whitespace runs, so on `{` + a long whitespace run + a non-match the engine
+		// tried every way of splitting that run between them. Measured 3.2ms at 2k,
+		// 15ms at 4k, 51ms at 8k — quadratic, and the default scan limit is 100 000.
+		// Folding the slash and its trailing space into one optional group leaves a
+		// single run per path: 0.01ms at 8k, and the matched set is unchanged.
+		pattern: /\{\s*(?:\/\s*)?php\s*\}/i,
 	},
 ];
 
