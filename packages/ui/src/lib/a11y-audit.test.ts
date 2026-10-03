@@ -70,9 +70,16 @@ interface Finding {
 }
 
 /**
- * jsdom ships neither of these, and without them Sidebar, Sonner, Command and
- * Slider threw before axe ever saw them — twenty stories silently unaudited,
+ * jsdom ships none of these, and without them Sidebar, Sonner, Command, Slider
+ * and Carousel threw before axe ever saw them — stories silently unaudited,
  * which is worse than a failing check because it looks like a pass.
+ *
+ * Each entry was added only after a story was observed throwing, and the last
+ * two were found by asserting `renderErrors` is empty rather than by reading the
+ * report: `IntersectionObserver` for embla (Carousel) and `scrollIntoView` for
+ * cmdk (Command), whose three and two stories respectively had been failing
+ * silently — and the Command pair was concealing a critical
+ * `aria-required-children` violation.
  */
 function polyfillJsdom(): void {
 	if (typeof globalThis.matchMedia !== "function") {
@@ -100,6 +107,29 @@ function polyfillJsdom(): void {
 				observe() {}
 				unobserve() {}
 			},
+			writable: true,
+		});
+	}
+
+	if (typeof globalThis.IntersectionObserver !== "function") {
+		Object.defineProperty(globalThis, "IntersectionObserver", {
+			configurable: true,
+			value: class {
+				disconnect() {}
+				observe() {}
+				takeRecords() {
+					return [];
+				}
+				unobserve() {}
+			},
+			writable: true,
+		});
+	}
+
+	if (typeof Element.prototype.scrollIntoView !== "function") {
+		Object.defineProperty(Element.prototype, "scrollIntoView", {
+			configurable: true,
+			value: () => undefined,
 			writable: true,
 		});
 	}
@@ -241,7 +271,22 @@ describe.runIf(process.env.A11Y_AUDIT === "1")("Accessibility audit", () => {
 		// did exactly that — one skipped every no-args story, one let twenty stories
 		// throw before axe saw them — and between them hid 11 of 38 real findings.
 		expect(cases.length).toBeGreaterThan(300);
-		expect(audited.length).toBeGreaterThan(360);
+
+		// Every collected story must actually reach axe, and the earlier
+		// `audited.length > 360` did not require that: it tolerated thirteen
+		// unaudited stories, and five were real — three Carousel stories threw on
+		// a missing `IntersectionObserver` and two Command stories on
+		// `scrollIntoView`. A story that throws before `axe.run` is counted in
+		// `renderErrors` but bounded by nothing, so it reports as a pass. One of
+		// those five was hiding a critical `aria-required-children` violation,
+		// which is the fourth time this file has reported clean by measuring less
+		// than it appeared to. Bound both exclusion paths exactly.
+		expect(skipped, `stories collected but not renderable:\n${skipped.join("\n")}`).toEqual([]);
+		expect(
+			renderErrors,
+			`stories threw before axe could audit them:\n${JSON.stringify(renderErrors, null, 2)}`,
+		).toEqual([]);
+		expect(audited.length).toBe(cases.length);
 
 		// Then the gate itself.
 		const summary = findings

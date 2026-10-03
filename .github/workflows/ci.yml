@@ -211,9 +211,80 @@ jobs:
       - name: Run tests
         run: bun run test
         working-directory: packages/${{ matrix.package }}
-      - if: always() && matrix.package == 'ui'
+      # The upload below had never had a file to send: packages/ui's test script carried
+      # no --coverage, and codecov-action leaves `fail_ci_if_error` false by default, so
+      # its CLI printed "no coverage reports found" and the step still succeeded. Assert
+      # the artefact here instead - this fails offline, names the likely cause, and does
+      # not depend on codecov.io being reachable.
+      #
+      # Deliberately not `always()`: an `if:` with no status function implies `success()`,
+      # so a genuine test failure skips this and leaves one red step instead of two.
+      - if: matrix.package == 'ui'
+        name: Assert coverage report was written
+        run: |
+          set -eu
+          LCOV=packages/ui/coverage/lcov.info
+          if [ ! -s "$LCOV" ]; then
+            echo "::error::$LCOV is missing or empty - did packages/ui lose --coverage?"
+            exit 1
+          fi
+          # grep -c prints 0 and exits 1 on no match, so the count is taken on its own and
+          # validated as a number: the first draft of this guard appended a second 0, which
+          # made `[` fail, which under `set -e` inside an `if` condition passed silently -
+          # the exact shape of bug this step exists to catch.
+          FILES=$(grep -c '^SF:' "$LCOV" || true)
+          case $FILES in
+            '' | *[!0-9]*)
+              echo "::error::could not count SF: records in $LCOV"
+              exit 1
+              ;;
+          esac
+          # A smoke floor, not a second coverage threshold: it catches a reporter that
+          # emitted a stub, which would upload as near-0%, without churning as files are
+          # added. The real count is ~175.
+          if [ "$FILES" -lt 100 ]; then
+            echo "::error::$LCOV covers only $FILES files - expected the whole src tree"
+            exit 1
+          fi
+          # File count alone cannot catch a coverage COLLAPSE: `coverage.all: true`
+          # lists every source file whether or not a test ever touched it, so a run
+          # that collected no tests still emits ~175 SF: records and would pass the
+          # check above while uploading near-0%. Gate on executed lines too.
+          HITS=$(awk -F, '/^DA:/ && $2 > 0 { n++ } END { print n+0 }' "$LCOV" || true)
+          case $HITS in
+            '' | *[!0-9]*)
+              echo "::error::could not count executed lines in $LCOV"
+              exit 1
+              ;;
+          esac
+          # Floor set from measurement, not guesswork: a healthy report records 1926
+          # executed lines. 1000 leaves room for the suite to shrink legitimately
+          # while still catching a collapse, which lands near zero.
+          if [ "$HITS" -lt 1000 ]; then
+            echo "::error::$LCOV records only $HITS executed lines - the suite likely collected no tests"
+            exit 1
+          fi
+          echo "$LCOV: $FILES files, $(wc -c <"$LCOV") bytes"
+      # `always()` dropped here too. Vitest's `reportOnFailure` is off, so a failed run
+      # writes no lcov at all and uploading on red could only ever add a second failing
+      # step to an already-red job.
+      #
+      # `fail_ci_if_error` is left at its default and written out so it reads as a choice:
+      # there is no CODECOV_TOKEN, uploads are tokenless and rate-limited, and a fork PR
+      # cannot be given one, so making codecov.io availability fatal would be flake rather
+      # than signal. The step above is the gate for a missing report. Flip this to true
+      # once the secret exists.
+      - if: matrix.package == 'ui'
         name: Upload coverage to Codecov
-        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v5
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          # `files` is additive on its own; disable_search is what turns a relocated report
+          # into an error rather than a silent upload of whatever else was found.
+          disable_search: true
+          fail_ci_if_error: false
+          files: packages/ui/coverage/lcov.info
+          flags: ui
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   # ── Type-check all changed packages ───────────────────────────────────
 
@@ -300,6 +371,48 @@ jobs:
       - uses: $/.github/actions/prepare
       - run: bun run build-storybook
         working-directory: packages/ui
+
+  # Renders all 374 stories through axe-core. Opt-in behind A11Y_AUDIT in the test
+  # file because it costs ~30s against a 14s unit suite; see a11y-audit.test.ts.
+  #
+  # Its own job rather than a step in `test (ui)`: the audit needs the workspace
+  # built, so folding it in would serialise it behind the unit suite and leave one
+  # red check meaning either. A separate context names which one broke.
+  a11y:
+    name: Accessibility audit
+    needs: detect
+    if: needs.detect.outputs.ui == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/prepare
+      # contact-scope.tsx imports @resq-systems/nav/arpa at runtime, so without a
+      # build the suite fails to collect — it does not run with a silent gap, but
+      # the failure reads as unrelated.
+      - name: Build workspace dependencies
+        run: bun run build
+      - name: Run axe over every story
+        run: bun run a11y
+        working-directory: packages/ui
+      # The assertion message truncates each finding to 200 characters, and
+      # renderErrors plus the captured console noise appear only in the report.
+      # `always()` because a failing run is exactly when it gets read.
+      #
+      # `if-no-files-found: error` rather than `warn` on purpose: the report is
+      # written before the assertions, so the case it catches is a *passing* run
+      # that produced no report — a broken A11Y_REPORT_PATH, which would quietly
+      # turn the artefact into nothing. It costs a second red step when the suite
+      # fails to collect and never reaches the write, but that run is already red
+      # at the step above.
+      - if: always()
+        name: Upload a11y report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          if-no-files-found: error
+          name: a11y-report
+          path: packages/ui/a11y-report.json
 
   knip:
     name: Unused exports
@@ -417,7 +530,8 @@ jobs:
   # Single status-check context consumed by the org ruleset
   # `default-branch-baseline` (id 15191038). Passes iff every real job
   # succeeded or was legitimately skipped (detect-based filtering or the
-  # changeset PR-only gate). Needs all 10 upstream jobs.
+  # changeset PR-only gate). Every job below must be listed in `needs` — a job
+  # missing from it is ungated, which is how the security scan went unenforced.
 
   required:
     name: required
@@ -430,6 +544,7 @@ jobs:
       - examples
       - changeset
       - storybook
+      - a11y
       - knip
       - sca
       - security-scan
