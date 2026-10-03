@@ -653,3 +653,42 @@ describe("input variants", () => {
 		expect(decodeHtmlEntities("&amp;#60;")).toBe("&#60;");
 	});
 });
+
+describe("leading-run normalisation", () => {
+	// The WHATWG URL parser strips leading C0 controls as well as spaces, so these all
+	// resolve to the file: scheme. `\s` starts at \x09 and never matched them, which
+	// meant a file:// attempt was reported as a control-character finding rather than
+	// SSRF — detected, but misclassified for anyone filtering on the rule or the type.
+	it.each([
+		["\u0000", "NUL"],
+		["\u0001", "SOH"],
+		["\u001f", "US"],
+		["\u0009", "tab"],
+		["\u0020", "space"],
+	])("flags a non-HTTP scheme behind a leading %s (%s)", (prefix) => {
+		expect(new URL(`${prefix}file:///etc/passwd`).protocol).toBe("file:");
+		const ids = scanForThreats(`${prefix}file:///etc/passwd`, { contexts: ["url"] }).findings.map(
+			(finding) => finding.ruleId,
+		);
+		expect(ids).toContain("SSRF-NON-HTTP-SCHEME-001");
+	});
+
+	it("keeps the payload in the excerpt when the leading run is longer than the excerpt", () => {
+		const finding = scanForThreats(`${" ".repeat(60)}file:///etc/passwd`, {
+			contexts: ["url"],
+		}).findings.find((candidate) => candidate.ruleId === "SSRF-NON-HTTP-SCHEME-001");
+		// The run is deliberately longer than MAX_MATCH_EXCERPT (50): a flat slice from
+		// index 0 reported fifty spaces and lost the thing that was detected.
+		expect(finding?.matchedPattern).toContain("file:");
+		expect(finding?.matchedPattern.trim()).not.toBe("");
+	});
+
+	it("still reports the true match bounds, not the excerpt's", () => {
+		const padding = " ".repeat(60);
+		const finding = scanForThreats(`${padding}file:///etc/passwd`, {
+			contexts: ["url"],
+		}).findings.find((candidate) => candidate.ruleId === "SSRF-NON-HTTP-SCHEME-001");
+		expect(finding?.start).toBe(0);
+		expect(finding?.end).toBeGreaterThan(padding.length);
+	});
+});
