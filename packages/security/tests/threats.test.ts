@@ -673,14 +673,20 @@ describe("leading-run normalisation", () => {
 		expect(ids).toContain("SSRF-NON-HTTP-SCHEME-001");
 	});
 
-	it("keeps the payload in the excerpt when the leading run is longer than the excerpt", () => {
-		const finding = scanForThreats(`${" ".repeat(60)}file:///etc/passwd`, {
+	// Each run is deliberately longer than MAX_MATCH_EXCERPT (50): a flat slice from
+	// index 0 reported fifty padding characters and lost the thing that was detected.
+	// The control-character cases matter because C0 controls are NOT whitespace, so a
+	// fix that skipped only `\s` still reported them verbatim.
+	it.each([
+		[" ", "spaces"],
+		["\u0000", "NUL bytes"],
+		["\u0001", "SOH bytes"],
+		["\u001f", "US bytes"],
+	])("keeps the payload in the excerpt behind 60 leading %s (%s)", (pad) => {
+		const finding = scanForThreats(`${pad.repeat(60)}file:///etc/passwd`, {
 			contexts: ["url"],
 		}).findings.find((candidate) => candidate.ruleId === "SSRF-NON-HTTP-SCHEME-001");
-		// The run is deliberately longer than MAX_MATCH_EXCERPT (50): a flat slice from
-		// index 0 reported fifty spaces and lost the thing that was detected.
 		expect(finding?.matchedPattern).toContain("file:");
-		expect(finding?.matchedPattern.trim()).not.toBe("");
 	});
 
 	it("still reports the true match bounds, not the excerpt's", () => {

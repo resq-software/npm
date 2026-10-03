@@ -70,7 +70,12 @@ const MAX_MATCH_EXCERPT = 50;
  * that was actually detected. `start`/`end` still carry the true match bounds.
  */
 function excerptOf(matched: string): string {
-	const firstMeaningful = matched.search(/\S/);
+	// The same class the widened leading runs match, not just `\S`: C0 controls are
+	// non-whitespace, so skipping only `\s` left a run of them reported verbatim -
+	// exactly the failure this function exists to prevent, for the characters
+	// SSRF-NON-HTTP-SCHEME-001 was just taught to match.
+	// biome-ignore lint/suspicious/noControlCharactersInRegex: skipping C0 controls is the purpose
+	const firstMeaningful = matched.search(/[^\x00-\x20\s]/);
 	const from = firstMeaningful === -1 ? 0 : firstMeaningful;
 	return matched.slice(from, from + MAX_MATCH_EXCERPT);
 }
