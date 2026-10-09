@@ -11,13 +11,13 @@
 	},
 	"dependencies": {
 		"@resq-systems/email-templates": "workspace:*",
-		"effect": "4.0.0",
+		"effect": "4.0.1",
 		"react": "^19.3.0",
 		"react-dom": "^19.3.0",
-		"resend": "6.30.0"
+		"resend": "6.32.0"
 	},
 	"devDependencies": {
-		"@types/node": "^26.6.3",
+		"@types/node": "^26.6.4",
 		"typescript": "7.0.2"
 	}
 }
