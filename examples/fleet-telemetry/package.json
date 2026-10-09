@@ -13,7 +13,7 @@
 		"@resq-systems/telemetry": "workspace:*"
 	},
 	"devDependencies": {
-		"maplibre-gl": "6.11.2",
+		"maplibre-gl": "6.12.0",
 		"react": "^19.3.0",
 		"react-dom": "^19.3.0",
 		"react-map-gl": "^8.1.3"
