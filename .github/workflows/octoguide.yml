@@ -39,7 +39,7 @@ jobs:
     if: ${{ !endsWith(github.actor, '[bot]') && (github.event_name != 'pull_request_target' || github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: JoshuaKGoldberg/octoguide@7fb7583381525bcdd9aabbfab291e21bae8de81e # 0.26.0
+      - uses: JoshuaKGoldberg/octoguide@eb010e70cf0630b514ae390ecbdc74716e43ab87 # 0.26.6
         with:
           config: strict
           github-token: ${{ secrets.GITHUB_TOKEN }}
