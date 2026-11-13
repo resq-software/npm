@@ -17,17 +17,17 @@
 		"@resq-systems/security": "workspace:*",
 		"@resq-systems/types": "workspace:*",
 		"@resq-systems/ui": "workspace:*",
-		"effect": "4.0.0",
-		"react": "^19.3.0",
-		"react-dom": "^19.3.0",
+		"effect": "4.1.3",
+		"react": "^19.3.1",
+		"react-dom": "^19.3.1",
 		"tailwindcss": "^4.1.0"
 	},
 	"devDependencies": {
-		"@tailwindcss/vite": "^4.3.3",
+		"@tailwindcss/vite": "^4.3.5",
 		"@types/react": "^19.3.0",
 		"@types/react-dom": "^19.3.0",
 		"@vitejs/plugin-react-swc": "^4.3.3",
 		"typescript": "7.0.2",
-		"vite": "^8.3.1"
+		"vite": "^8.3.7"
 	}
 }
